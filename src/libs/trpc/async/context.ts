@@ -42,17 +42,14 @@ export const createAsyncRouteContext = async (request: NextRequest): Promise<Asy
   log('Authorization header present: %s', !!authorization);
   log('LobeChat auth header present: %s', !!lobeChatAuthorization);
 
-  if (!authorization) {
-    log('No authorization header found');
-    throw new Error('No authorization header found');
+  if (!authorization || !lobeChatAuthorization) {
+    // Allow public procedures (e.g., healthcheck) to run without auth headers.
+    // Protected procedures still enforce authorization via asyncAuth middleware.
+    log('Missing Authorization/LOBE_CHAT_AUTH_HEADER; returning empty context for public routes');
+    return createAsyncContextInner({});
   }
 
-  if (!lobeChatAuthorization) {
-    log('No LobeChat authorization header found');
-    throw new Error('No LobeChat authorization header found');
-  }
-
-  const secret = authorization?.split(' ')[1];
+  const secret = authorization.split(' ')[1];
   log('Secret extracted from authorization header: %s', !!secret);
 
   try {
