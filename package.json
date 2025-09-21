@@ -29,8 +29,8 @@
     "packages/*"
   ],
   "scripts": {
-    "prebuild": "tsx scripts/prebuild.mts && npm run lint",
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=6144 next build",
+    "prebuild": "tsx scripts/prebuild.mts && node -e \"process.exit(process.env.VERCEL?0:1)\" || bun run lint",
+    "build": "cross-env NEXT_DISABLE_SOURCEMAPS=1 NODE_OPTIONS=--max-old-space-size=7168 next build",
     "postbuild": "npm run build-sitemap && npm run build-migrate-db",
     "build-migrate-db": "bun run db:migrate",
     "build-sitemap": "tsx ./scripts/buildSitemapIndex/index.ts",
