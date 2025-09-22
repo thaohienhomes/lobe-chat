@@ -320,9 +320,14 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true' ? analyzer() : noWrapp
 const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
-        register: false,
-        swDest: 'public/sw.js',
-        swSrc: 'src/app/sw.ts',
+        // Allow precaching of large PGLite assets for offline functionality
+maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        
+register: false,
+        
+swDest: 'public/sw.js',
+        
+        swSrc: 'src/app/sw.ts', // 10MB
       })
     : noWrapper;
 
