@@ -117,3 +117,16 @@ CLAUDE.local.md
 
 prd
 GEMINI.md
+
+
+# Next.js 15 dev cache
+.next-dev-*/
+
+# Local analysis / scratch artifacts
+# If you wish to version any of these, remove the corresponding line.
+tmp_*.json
+performance-*.json
+performance-monitoring-setup.js
+Build Logs on Vercel*.csv
+docs/logs_result.json
+vietnam-market-testing-config.json
