@@ -47,6 +47,7 @@ jobs:
         run: bun run db:migrate
 
       - name: Vercel Pull (Production)
+        if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -54,11 +55,13 @@ jobs:
         run: bunx vercel@latest pull --yes --environment=production
 
       - name: Vercel Build
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: bunx vercel@latest build --prod
 
       - name: Vercel Deploy (Production)
+        if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
