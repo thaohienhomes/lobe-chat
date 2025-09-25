@@ -1,0 +1,67 @@
+name: Deploy to Vercel (Prod)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      NODE_OPTIONS: --max-old-space-size=7168
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install deps (pnpm workspace via bun)
+        run: bun install --frozen-lockfile
+
+      - name: Type check
+        run: bun run type-check
+
+      - name: Tests (web)
+        run: bunx vitest run --silent='passed-only' 'src/**/*.test.ts'
+
+      - name: Tests (packages)
+        run: bunx vitest run --silent='passed-only' 'packages/**/?(*.)+(spec|test).[jt]s?(x)'
+
+      - name: Migrate database (Prod)
+        if: ${{ secrets.DATABASE_URL != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          KEY_VAULTS_SECRET: ${{ secrets.KEY_VAULTS_SECRET }}
+          MIGRATION_DB: '1'
+        run: bun run db:migrate
+
+      - name: Vercel Pull (Production)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: bunx vercel@latest pull --yes --environment=production
+
+      - name: Vercel Build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel@latest build --prod
+
+      - name: Vercel Deploy (Production)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: bunx vercel@latest deploy --prebuilt --prod
+
