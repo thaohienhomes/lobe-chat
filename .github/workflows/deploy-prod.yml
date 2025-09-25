@@ -2,7 +2,7 @@ name: Deploy to Vercel (Prod)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -19,6 +19,7 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      MIGRATE_ON_BUILD: ${{ secrets.MIGRATE_ON_BUILD }}
 
     steps:
       - name: Checkout
@@ -44,11 +45,11 @@ jobs:
         run: bunx vitest run --passWithNoTests --silent='passed-only' 'packages/**/?(*.)+(spec|test).[jt]s?(x)'
 
       - name: Migrate database (Prod)
-        if: ${{ env.DATABASE_URL != '' }}
+        if: ${{ env.MIGRATE_ON_BUILD == '1' && env.DATABASE_URL != '' }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           KEY_VAULTS_SECRET: ${{ secrets.KEY_VAULTS_SECRET }}
-          MIGRATION_DB: '1'
+          MIGRATION_DB: "1"
         run: bun run db:migrate
 
       - name: Vercel Pull (Production)
@@ -72,4 +73,3 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: bunx vercel@latest deploy --prebuilt --prod
-
