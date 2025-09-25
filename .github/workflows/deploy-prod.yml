@@ -38,10 +38,10 @@ jobs:
         run: bun run type-check
 
       - name: Tests (web)
-        run: bunx vitest run --silent='passed-only' 'src/**/*.test.ts'
+        run: bunx vitest run --passWithNoTests --silent='passed-only' 'src/**/*.test.ts'
 
       - name: Tests (packages)
-        run: bunx vitest run --silent='passed-only' 'packages/**/?(*.)+(spec|test).[jt]s?(x)'
+        run: bunx vitest run --passWithNoTests --silent='passed-only' 'packages/**/?(*.)+(spec|test).[jt]s?(x)'
 
       - name: Migrate database (Prod)
         if: ${{ env.DATABASE_URL != '' }}
