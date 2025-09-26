@@ -70,8 +70,8 @@ jobs:
           if [ -n "$VERCEL_ORG_ID" ]; then SCOPE_FLAG="--scope=$VERCEL_ORG_ID"; fi
           echo "Running: vercel pull with scope flag: ${SCOPE_FLAG:-<none>}"
           if ! bunx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" $SCOPE_FLAG --project="$VERCEL_PROJECT_ID"; then
-            echo "Vercel Pull failed with scope flag; retrying without --scope..."
-            bunx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
+            echo "Vercel Pull failed with scope flag; retrying without --scope or project..."
+            bunx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
           fi
 
       - name: Vercel Build
