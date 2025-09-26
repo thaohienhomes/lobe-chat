@@ -68,8 +68,11 @@ jobs:
         run: |
           echo "Linking to Vercel project: $VERCEL_PROJECT_ID"
           if [ -n "$VERCEL_ORG_ID" ]; then
-            echo "Using team scope: $VERCEL_ORG_ID"
-            bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID"
+            echo "Attempting to link with team scope: $VERCEL_ORG_ID"
+            if ! bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID"; then
+              echo "Team scope failed, retrying with personal scope..."
+              bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
+            fi
           else
             echo "Using personal scope"
             bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
