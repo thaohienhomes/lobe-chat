@@ -63,20 +63,11 @@ jobs:
         if: ${{ env.VERCEL_TOKEN != '' && env.VERCEL_PROJECT_ID != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           echo "Linking to Vercel project: $VERCEL_PROJECT_ID"
-          if [ -n "$VERCEL_ORG_ID" ]; then
-            echo "Attempting to link with team scope: $VERCEL_ORG_ID"
-            if ! bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID"; then
-              echo "Team scope failed, retrying with personal scope..."
-              bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
-            fi
-          else
-            echo "Using personal scope"
-            bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
-          fi
+          echo "Using personal scope (team scope removed for compatibility)"
+          bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
 
       - name: Vercel Pull (Production)
         if: ${{ env.VERCEL_TOKEN != '' }}
