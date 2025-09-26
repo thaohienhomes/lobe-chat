@@ -59,20 +59,29 @@ jobs:
           MIGRATION_DB: "1"
         run: bun run db:migrate
 
-      - name: Vercel Pull (Production)
+      - name: Vercel Link (Production)
         if: ${{ env.VERCEL_TOKEN != '' && env.VERCEL_PROJECT_ID != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          SCOPE_FLAG=""
-          if [ -n "$VERCEL_ORG_ID" ]; then SCOPE_FLAG="--scope=$VERCEL_ORG_ID"; fi
-          echo "Running: vercel pull with scope flag: ${SCOPE_FLAG:-<none>}"
-          if ! bunx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" $SCOPE_FLAG --project="$VERCEL_PROJECT_ID"; then
-            echo "Vercel Pull failed with scope flag; retrying without --scope or project..."
-            bunx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+          echo "Linking to Vercel project: $VERCEL_PROJECT_ID"
+          if [ -n "$VERCEL_ORG_ID" ]; then
+            echo "Using team scope: $VERCEL_ORG_ID"
+            bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" --project="$VERCEL_PROJECT_ID"
+          else
+            echo "Using personal scope"
+            bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
           fi
+
+      - name: Vercel Pull (Production)
+        if: ${{ env.VERCEL_TOKEN != '' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          echo "Pulling Vercel project configuration..."
+          bunx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Vercel Build
         if: ${{ env.VERCEL_TOKEN != '' }}
@@ -81,16 +90,9 @@ jobs:
         run: bunx vercel@latest build --prod --token=$VERCEL_TOKEN
 
       - name: Vercel Deploy (Production)
-        if: ${{ env.VERCEL_TOKEN != '' && env.VERCEL_PROJECT_ID != '' }}
+        if: ${{ env.VERCEL_TOKEN != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          SCOPE_FLAG=""
-          if [ -n "$VERCEL_ORG_ID" ]; then SCOPE_FLAG="--scope=$VERCEL_ORG_ID"; fi
-          echo "Running: vercel deploy with scope flag: ${SCOPE_FLAG:-<none>}"
-          if ! bunx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN" $SCOPE_FLAG --project="$VERCEL_PROJECT_ID"; then
-            echo "Vercel Deploy failed with scope flag; retrying without --scope..."
-            bunx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
-          fi
+          echo "Deploying to Vercel production..."
+          bunx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
