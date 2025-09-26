@@ -50,6 +50,8 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           KEY_VAULTS_SECRET: ${{ secrets.KEY_VAULTS_SECRET }}
           MIGRATION_DB: "1"
+          NEXT_PUBLIC_SERVICE_MODE: server
+          DATABASE_DRIVER: node
         run: bun run db:migrate
 
       - name: Vercel Pull (Production)
