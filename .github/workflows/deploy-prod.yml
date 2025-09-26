@@ -44,6 +44,11 @@ jobs:
       - name: Tests (packages)
         run: bunx vitest run --passWithNoTests --silent='passed-only' 'packages/**/?(*.)+(spec|test).[jt]s?(x)'
 
+      - name: Debug migration env
+        run: |
+          echo "NEXT_PUBLIC_SERVICE_MODE=$NEXT_PUBLIC_SERVICE_MODE"
+          echo "DATABASE_DRIVER=$DATABASE_DRIVER"
+
       - name: Migrate database (Prod)
         if: ${{ env.MIGRATE_ON_BUILD == '1' && env.DATABASE_URL != '' }}
         env:
