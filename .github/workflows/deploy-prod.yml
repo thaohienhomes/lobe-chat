@@ -59,34 +59,11 @@ jobs:
           MIGRATION_DB: "1"
         run: bun run db:migrate
 
-      - name: Vercel Link (Production)
-        if: ${{ env.VERCEL_TOKEN != '' && env.VERCEL_PROJECT_ID != '' }}
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          echo "Linking to Vercel project: $VERCEL_PROJECT_ID"
-          echo "Using personal scope (team scope removed for compatibility)"
-          bunx vercel@latest link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
-
-      - name: Vercel Pull (Production)
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          echo "Pulling Vercel project configuration..."
-          bunx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
-
-      - name: Vercel Build
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: bunx vercel@latest build --prod --token=$VERCEL_TOKEN
-
       - name: Vercel Deploy (Production)
         if: ${{ env.VERCEL_TOKEN != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           echo "Deploying to Vercel production..."
-          bunx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          echo "Using direct deploy approach (skipping link/pull/build steps for compatibility)"
+          bunx vercel@latest --prod --token="$VERCEL_TOKEN" --yes
