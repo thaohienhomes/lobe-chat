@@ -36,6 +36,7 @@ export default {
     },
   },
   header: {
+    back: '返回',
     desc: '偏好与模型设置',
     global: '全局设置',
     session: '会话设置',
@@ -463,6 +464,15 @@ export default {
     unSaved: '未保存更改',
     unSavedWarning: '当前有未保存的更改',
   },
+  subscription: {
+    compare: {
+      title: '套餐对比',
+    },
+    plans: {
+      title: '套餐与定价',
+    },
+    title: '订阅管理',
+  },
   sync: {
     device: {
       deviceName: {
@@ -557,9 +567,11 @@ export default {
     'provider': 'AI 服务商',
     'proxy': '网络代理',
     'storage': '数据存储',
+    'subscription': '订阅管理',
     'sync': '云端同步',
     'system-agent': '系统助手',
     'tts': '语音服务',
+    'usage': '使用情况',
   },
   tools: {
     builtins: {
@@ -573,5 +585,17 @@ export default {
       store: '插件商店',
     },
     title: '扩展插件',
+  },
+  usage: {
+    billing: {
+      title: '账单信息',
+    },
+    history: {
+      title: '使用历史',
+    },
+    overview: {
+      title: '使用概览',
+    },
+    title: '使用情况',
   },
 };

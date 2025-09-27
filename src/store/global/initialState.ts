@@ -34,8 +34,11 @@ export enum SettingsTabs {
   Provider = 'provider',
   Proxy = 'proxy',
   Storage = 'storage',
+  // Subscription management tabs
+  Subscription = 'subscription',
   SystemAgent = 'system-agent',
   TTS = 'tts',
+  Usage = 'usage',
 }
 
 export enum ProfileTabs {

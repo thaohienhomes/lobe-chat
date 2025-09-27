@@ -33,6 +33,12 @@ const componentMap = {
   [SettingsTabs.Proxy]: dynamic(() => import('../proxy'), {
     loading: () => <Loading />,
   }),
+  [SettingsTabs.Subscription]: dynamic(() => import('../subscription'), {
+    loading: () => <Loading />,
+  }),
+  [SettingsTabs.Usage]: dynamic(() => import('../usage'), {
+    loading: () => <Loading />,
+  }),
   [SettingsTabs.Storage]: dynamic(() => import('../storage'), {
     loading: () => <Loading />,
   }),
@@ -61,7 +67,15 @@ const SettingsContent = ({ mobile, activeTab, showLLM = true }: SettingsContentP
     if (!Component) return null;
 
     const componentProps: { mobile?: boolean } = {};
-    if ([SettingsTabs.About, SettingsTabs.Agent, SettingsTabs.Provider].includes(tab as any)) {
+    if (
+      [
+        SettingsTabs.About,
+        SettingsTabs.Agent,
+        SettingsTabs.Provider,
+        SettingsTabs.Subscription,
+        SettingsTabs.Usage,
+      ].includes(tab as any)
+    ) {
       componentProps.mobile = mobile;
     }
 

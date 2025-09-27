@@ -1,7 +1,9 @@
 import { Icon } from '@lobehub/ui';
 import {
+  BarChart3,
   Bot,
   Brain,
+  CreditCard,
   Database,
   EthernetPort,
   Info,
@@ -67,6 +69,19 @@ export const useCategory = () => {
           icon: <Icon icon={Sparkles} />,
           key: SettingsTabs.SystemAgent,
           label: t('tab.system-agent'),
+        },
+        {
+          type: 'divider',
+        },
+        {
+          icon: <Icon icon={CreditCard} />,
+          key: SettingsTabs.Subscription,
+          label: t('tab.subscription'),
+        },
+        {
+          icon: <Icon icon={BarChart3} />,
+          key: SettingsTabs.Usage,
+          label: t('tab.usage'),
         },
         {
           type: 'divider',
