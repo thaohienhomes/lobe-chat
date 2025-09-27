@@ -30,32 +30,28 @@ const useStyles = createStyles(({ css, token }) => {
 const Follow = memo(() => {
   const { styles } = useStyles();
   const { t } = useTranslation('common');
+
+  // Only show social links that are defined
+  const socialLinks = [
+    { url: GITHUB, icon: SiGithub, name: 'GitHub' },
+    { url: SOCIAL_URL.x, icon: SiX, name: 'X' },
+    { url: SOCIAL_URL.discord, icon: SiDiscord, name: 'Discord' },
+    { url: SOCIAL_URL.medium, icon: SiMedium, name: 'Medium' },
+  ].filter(link => link.url);
+
+  if (socialLinks.length === 0) return null;
+
   return (
     <Flexbox gap={8} horizontal>
-      <Link href={GITHUB} rel="noreferrer" target={'_blank'}>
-        <ActionIcon
-          className={styles.icon}
-          icon={SiGithub as any}
-          title={t('follow', { name: 'GitHub' })}
-        />
-      </Link>
-      <Link href={SOCIAL_URL.x} rel="noreferrer" target={'_blank'}>
-        <ActionIcon className={styles.icon} icon={SiX as any} title={t('follow', { name: 'X' })} />
-      </Link>
-      <Link href={SOCIAL_URL.discord} rel="noreferrer" target={'_blank'}>
-        <ActionIcon
-          className={styles.icon}
-          icon={SiDiscord as any}
-          title={t('follow', { name: 'Discord' })}
-        />
-      </Link>
-      <Link href={SOCIAL_URL.medium} rel="noreferrer" target={'_blank'}>
-        <ActionIcon
-          className={styles.icon}
-          icon={SiMedium as any}
-          title={t('follow', { name: 'Medium' })}
-        />
-      </Link>
+      {socialLinks.map(({ url, icon, name }) => (
+        <Link key={name} href={url} rel="noreferrer" target={'_blank'}>
+          <ActionIcon
+            className={styles.icon}
+            icon={icon as any}
+            title={t('follow', { name })}
+          />
+        </Link>
+      ))}
     </Flexbox>
   );
 });

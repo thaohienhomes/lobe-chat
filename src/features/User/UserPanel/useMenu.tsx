@@ -165,7 +165,7 @@ export const useMenu = () => {
             </Link>
           ),
         },
-        {
+        ...(SOCIAL_URL.discord ? [{
           icon: <Icon icon={DiscordIcon} />,
           key: 'discord',
           label: (
@@ -173,7 +173,7 @@ export const useMenu = () => {
               {t('userPanel.discord')}
             </Link>
           ),
-        },
+        }] : []),
         {
           icon: <Icon icon={Mail} />,
           key: 'email',

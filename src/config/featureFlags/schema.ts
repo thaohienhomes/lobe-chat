@@ -81,8 +81,8 @@ export const DEFAULT_FEATURE_FLAGS: IFeatureFlags = {
 
   // the flags below can only be used with commercial license
   // if you want to use it in the commercial usage
-  // please contact us for more information: hello@lobehub.com
-  commercial_hide_github: false,
+  // please contact us for more information: hello@pho.chat
+  commercial_hide_github: true,
   commercial_hide_docs: false,
 };
 
