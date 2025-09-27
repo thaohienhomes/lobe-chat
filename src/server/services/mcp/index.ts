@@ -17,7 +17,7 @@ import { CheckMcpInstallResult } from '@/types/plugins';
 import { CustomPluginMetadata } from '@/types/tool/plugin';
 import { safeParseJSON } from '@/utils/safeParseJSON';
 
-const log = debug('lobe-mcp:service');
+const log = debug('pho-mcp:service');
 
 // Removed MCPConnection interface as it's no longer needed
 
@@ -329,10 +329,10 @@ class MCPService {
         description:
           metadata?.description ||
           `${identifier} MCP server has ` +
-            Object.entries(manifest)
-              .filter(([key]) => ['tools', 'prompts', 'resources'].includes(key))
-              .map(([key, item]) => `${(item as Array<any>)?.length} ${key}`)
-              .join(','),
+          Object.entries(manifest)
+            .filter(([key]) => ['tools', 'prompts', 'resources'].includes(key))
+            .map(([key, item]) => `${(item as Array<any>)?.length} ${key}`)
+            .join(','),
         title: metadata?.name || identifier,
       },
       ...manifest,
