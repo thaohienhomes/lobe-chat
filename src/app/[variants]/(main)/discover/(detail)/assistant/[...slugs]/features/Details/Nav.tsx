@@ -39,6 +39,8 @@ const Nav = memo<NavProps>(({ mobile, setActiveTab, activeTab = AssistantNavKey.
   const { pluginCount, knowledgeCount, identifier } = useDetailContext();
   const { styles } = useStyles();
 
+  const discordUrl = SOCIAL_URL.discord;
+
   const capabilitiesCount = Number(pluginCount) + Number(knowledgeCount);
 
   const nav = (
@@ -92,9 +94,11 @@ const Nav = memo<NavProps>(({ mobile, setActiveTab, activeTab = AssistantNavKey.
     <Flexbox align={'center'} className={styles.nav} horizontal justify={'space-between'}>
       {nav}
       <Flexbox gap={12} horizontal>
-        <Link className={styles.link} href={SOCIAL_URL.discord} target={'_blank'}>
-          {t('mcp.details.nav.needHelp')}
-        </Link>
+        {discordUrl && (
+          <Link className={styles.link} href={discordUrl} target={'_blank'}>
+            {t('mcp.details.nav.needHelp')}
+          </Link>
+        )}
         {identifier && (
           <Link
             className={styles.link}

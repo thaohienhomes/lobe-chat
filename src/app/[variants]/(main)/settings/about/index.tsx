@@ -14,6 +14,7 @@ import { BLOG, OFFICIAL_SITE, PRIVACY_URL, TERMS_URL, mailTo } from '@/const/url
 import AboutList from './features/AboutList';
 import Analytics from './features/Analytics';
 import ItemCard from './features/ItemCard';
+import type { ItemCardProps } from './features/ItemCard';
 import ItemLink from './features/ItemLink';
 import Version from './features/Version';
 
@@ -27,6 +28,22 @@ const useStyles = createStyles(({ css, token }) => ({
 
 const Page = memo<{ mobile?: boolean }>(({ mobile }) => {
   const { t } = useTranslation('common');
+  const infoItems: ItemCardProps[] = [
+    {
+      href: BLOG,
+      icon: SiRss,
+      label: t('blog'),
+      value: 'blog',
+    },
+  ];
+
+  const { github, discord, x, medium } = SOCIAL_URL;
+  if (github) infoItems.push({ href: github, icon: SiGithub, label: 'GitHub', value: 'feedback' });
+  if (discord)
+    infoItems.push({ href: discord, icon: SiDiscord, label: 'Discord', value: 'discord' });
+  if (x) infoItems.push({ href: x, icon: SiX as any, label: 'X / Twitter', value: 'x' });
+  if (medium) infoItems.push({ href: medium, icon: SiMedium, label: 'Medium', value: 'medium' });
+
   const { styles } = useStyles();
 
   return (
@@ -63,43 +80,7 @@ const Page = memo<{ mobile?: boolean }>(({ mobile }) => {
           />
           <Divider style={{ marginBlock: 0 }} />
           <div className={styles.title}>{t('information')}</div>
-          <AboutList
-            ItemRender={ItemCard}
-            grid
-            items={[
-              {
-                href: BLOG,
-                icon: SiRss,
-                label: t('blog'),
-                value: 'blog',
-              },
-              {
-                href: SOCIAL_URL.github,
-                icon: SiGithub,
-                label: 'GitHub',
-                value: 'feedback',
-              },
-              {
-                href: SOCIAL_URL.discord,
-                icon: SiDiscord,
-                label: 'Discord',
-                value: 'discord',
-              },
-              {
-                href: SOCIAL_URL.x,
-                icon: SiX as any,
-                label: 'X / Twitter',
-                value: 'x',
-              },
-
-              {
-                href: SOCIAL_URL.medium,
-                icon: SiMedium,
-                label: 'Medium',
-                value: 'medium',
-              },
-            ]}
-          />
+          <AboutList ItemRender={ItemCard} grid items={infoItems} />
           <Divider style={{ marginBlock: 0 }} />
           <div className={styles.title}>{t('legal')}</div>
           <AboutList

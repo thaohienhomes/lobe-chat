@@ -59,6 +59,7 @@ const Nav = memo<NavProps>(
       identifier,
     } = useDetailContext();
     const { styles } = useStyles();
+    const discordUrl = SOCIAL_URL.discord;
 
     // 检查插件是否已安装
     const installedPlugin = useToolStore(pluginSelectors.getInstalledPluginById(identifier));
@@ -169,9 +170,11 @@ const Nav = memo<NavProps>(
         {nav}
         {!inModal && (
           <Flexbox gap={12} horizontal>
-            <Link className={styles.link} href={SOCIAL_URL.discord} target={'_blank'}>
-              {t('mcp.details.nav.needHelp')}
-            </Link>
+            {discordUrl && (
+              <Link className={styles.link} href={discordUrl} target={'_blank'}>
+                {t('mcp.details.nav.needHelp')}
+              </Link>
+            )}
             {github?.url && (
               <>
                 <Link className={styles.link} href={github.url} target={'_blank'}>
