@@ -1,4 +1,3 @@
-import { DOMParser } from '@xmldom/xmldom';
 import concat from 'concat-stream';
 import { Buffer } from 'node:buffer';
 import yauzl from 'yauzl';
@@ -14,7 +13,9 @@ const ERRORMSG = {
  * @param {string} xml The xml string from the doc file
  * @returns {XMLDocument}
  */
-export const parseString = (xml: string) => {
+export const parseString = async (xml: string) => {
+  // Dynamic import to avoid build-time evaluation issues
+  const { DOMParser } = await import('@xmldom/xmldom');
   const parser = new DOMParser();
   return parser.parseFromString(xml, 'text/xml') as unknown as XMLDocument;
 };

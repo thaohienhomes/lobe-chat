@@ -129,7 +129,7 @@ const plans = [
 ];
 
 const handleUpgrade = (planId: string) => {
-  // Navigate to payment flow
+  // Navigate to checkout page for better UX
   window.location.href = `/subscription/checkout?plan=${planId}`;
 };
 

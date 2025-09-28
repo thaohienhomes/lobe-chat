@@ -269,7 +269,7 @@ const nextConfig: NextConfig = {
   ],
 
   // when external packages in dev mode with turbopack, this config will lead to bundle error
-  serverExternalPackages: isProd ? ['@electric-sql/pglite'] : undefined,
+  serverExternalPackages: isProd ? ['@electric-sql/pglite', '@xmldom/xmldom'] : ['@xmldom/xmldom'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
   typescript: {
@@ -320,15 +320,15 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true' ? analyzer() : noWrapp
 const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
-        // Allow precaching of large PGLite assets for offline functionality
-maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
-        
-register: false,
-        
-swDest: 'public/sw.js',
-        
-        swSrc: 'src/app/sw.ts', // 10MB
-      })
+      // Allow precaching of large PGLite assets for offline functionality
+      maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+
+      register: false,
+
+      swDest: 'public/sw.js',
+
+      swSrc: 'src/app/sw.ts', // 10MB
+    })
     : noWrapper;
 
 export default withBundleAnalyzer(withPWA(nextConfig as NextConfig));

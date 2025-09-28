@@ -64,58 +64,60 @@ export class PptxLoader implements FileLoaderInterface {
 
       // --- Page Creation Step ---
       log('Creating document pages from slide files');
-      const pages: DocumentPage[] = slideFiles
-        .map((slideFile, index) => {
-          try {
-            log(`Processing slide ${index + 1}/${slideFiles.length}, path: ${slideFile.path}`);
-            const xmlDoc = parseString(slideFile.content);
-            const paragraphNodes = xmlDoc.getElementsByTagName('a:p');
-            log(`Found ${paragraphNodes.length} paragraph nodes in slide ${index + 1}`);
+      const slidePromises = slideFiles.map(async (slideFile, index) => {
+        try {
+          log(`Processing slide ${index + 1}/${slideFiles.length}, path: ${slideFile.path}`);
+          const xmlDoc = await parseString(slideFile.content);
+          const paragraphNodes = xmlDoc.getElementsByTagName('a:p');
+          log(`Found ${paragraphNodes.length} paragraph nodes in slide ${index + 1}`);
 
-            const slideText = Array.from(paragraphNodes)
-              .map((pNode) => {
-                const textNodes = pNode.getElementsByTagName('a:t');
-                return Array.from(textNodes)
-                  .map((tNode) => (tNode.childNodes[0] ? tNode.childNodes[0].nodeValue : ''))
-                  .join(''); // Join text within a paragraph without spaces
-              })
-              .filter((text) => text.length > 0) // Filter out empty paragraphs
-              .join('\n'); // Join paragraphs with newline
+          const slideText = Array.from(paragraphNodes)
+            .map((pNode) => {
+              const textNodes = pNode.getElementsByTagName('a:t');
+              return Array.from(textNodes)
+                .map((tNode) => (tNode.childNodes[0] ? tNode.childNodes[0].nodeValue : ''))
+                .join(''); // Join text within a paragraph without spaces
+            })
+            .filter((text) => text.length > 0) // Filter out empty paragraphs
+            .join('\n'); // Join paragraphs with newline
 
-            const lines = slideText.split('\n');
-            const slideNumberMatch = slideFile.path.match(slideNumberRegex);
-            const slideNumber = slideNumberMatch ? parseInt(slideNumberMatch[1], 10) : index + 1; // Fallback to index if regex fails
-            log(
-              `Slide ${index + 1} text extracted, lines: ${lines.length}, characters: ${slideText.length}`,
-            );
+          const lines = slideText.split('\n');
+          const slideNumberMatch = slideFile.path.match(slideNumberRegex);
+          const slideNumber = slideNumberMatch ? parseInt(slideNumberMatch[1], 10) : index + 1; // Fallback to index if regex fails
+          log(
+            `Slide ${index + 1} text extracted, lines: ${lines.length}, characters: ${slideText.length}`,
+          );
 
-            const metadata = {
-              pageCount: slideFiles.length, // Total number of slides found
-              slideNumber: slideNumber,
-              sourceFileName,
-            };
+          const metadata = {
+            pageCount: slideFiles.length, // Total number of slides found
+            slideNumber: slideNumber,
+            sourceFileName,
+          };
 
-            return {
-              charCount: slideText.length,
-              lineCount: lines.length,
-              metadata: metadata,
-              pageContent: slideText.trim(), // Trim final content
-            };
-          } catch (parseError) {
-            log(`Error parsing slide ${slideFile.path}`);
-            console.error(
-              `Failed to parse XML for slide ${slideFile.path} in ${sourceFileName}: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
-            );
-            // Create a specific error page for this slide, or could return null and filter later
-            // Returning null might be better if one slide fails but others succeed.
-            // For now, let's keep it simple and create an error page for this slide.
-            return this.createErrorPage(
-              `Error parsing slide ${slideFile.path}: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
-              sourceFileName,
-              slideFile.path,
-            );
-          }
-        })
+          return {
+            charCount: slideText.length,
+            lineCount: lines.length,
+            metadata: metadata,
+            pageContent: slideText.trim(), // Trim final content
+          };
+        } catch (parseError) {
+          log(`Error parsing slide ${slideFile.path}`);
+          console.error(
+            `Failed to parse XML for slide ${slideFile.path} in ${sourceFileName}: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+          );
+          // Create a specific error page for this slide, or could return null and filter later
+          // Returning null might be better if one slide fails but others succeed.
+          // For now, let's keep it simple and create an error page for this slide.
+          return this.createErrorPage(
+            `Error parsing slide ${slideFile.path}: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+            sourceFileName,
+            slideFile.path,
+          );
+        }
+      });
+
+      const allPages = await Promise.all(slidePromises);
+      const pages: DocumentPage[] = allPages
         // Filter out any potential nulls if we change the error handling above
         .filter((page): page is DocumentPage => page !== null);
       log(`Created ${pages.length} document pages from slides`);

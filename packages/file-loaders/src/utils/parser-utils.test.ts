@@ -5,9 +5,9 @@ import { type ExtractedFile, extractFiles, parseString } from './parser-utils';
 
 describe('parser-utils', () => {
   describe('parseString', () => {
-    it('should parse valid XML string into XMLDocument', () => {
+    it('should parse valid XML string into XMLDocument', async () => {
       const xml = '<root><item id="1">hello</item></root>';
-      const doc = parseString(xml);
+      const doc = await parseString(xml);
 
       // The parsed document should contain the root and item node
       const root = (doc as any).getElementsByTagName('root')[0];
