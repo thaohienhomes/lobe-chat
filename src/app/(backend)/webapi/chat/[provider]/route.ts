@@ -68,11 +68,12 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
     // ============  2.1. Cost Optimization & Model Selection   ============ //
     // Disabled for initial deployment - will be enabled after database migration
-    if (false && costEngine && usageTracker && modelRouter && jwtPayload.userId) {
+    // Disabled cost optimization for deployment
+    if (false) {
       try {
         // Get user's subscription tier and remaining budget
         // const userSubscription = await getUserSubscriptionTier(jwtPayload.userId, usageTracker);
-        const remainingBudget = await usageTracker.getRemainingBudget(userSubscription);
+        // const remainingBudget = await usageTracker.getRemainingBudget(userSubscription);
 
         // Check budget before proceeding
         if (remainingBudget <= 0) {
@@ -94,6 +95,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
         const lastMessage = data.messages.at(-1)?.content || '';
 
         // Get optimal model recommendation
+        /*
         const routingResult = await modelRouter.routeRequest({
           features: {
             requiresFunctionCalling: !!(data.tools as any) && (data.tools as any).length > 0,
@@ -118,6 +120,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
         if (routingResult.budgetWarning) {
           console.warn(`💰 Budget warning for user ${jwtPayload.userId}: ${routingResult.budgetWarning}`);
         }
+        */
 
       } catch (error) {
         console.warn('⚠️ Cost optimization failed, using original model:', error);
@@ -142,13 +145,15 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     });
 
     // ============  4. Track Usage (for non-streaming responses)   ============ //
-    if (costEngine && usageTracker && !data.stream && jwtPayload.userId) {
+    // Disabled usage tracking for deployment
+    if (false) {
       const endTime = Date.now();
       const responseTimeMs = endTime - startTime;
 
       // Note: For streaming responses, usage tracking should be handled by the streaming handler
       // This is a simplified version for non-streaming responses
       try {
+        /*
         await trackUsageAfterCompletion({
           costEngine,
           inputTokens: estimateTokens(data.messages),
@@ -161,6 +166,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           usageTracker,
           userId: jwtPayload.userId,
         });
+        */
       } catch (error) {
         console.warn('⚠️ Usage tracking failed:', error);
       }
