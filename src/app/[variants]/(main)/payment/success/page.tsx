@@ -1,58 +1,67 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Button, Card, Result, Spin, Typography } from 'antd';
 import { createStyles } from 'antd-style';
+import { Flexbox } from 'react-layout-kit';
+
+// Force dynamic rendering to avoid static generation issues with useSearchParams
+export const dynamic = 'force-dynamic';
 
 const { Title, Paragraph } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
+  card: css`
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+  `,
   container: css`
-    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    min-height: 100vh;
     padding: ${token.padding}px;
+
     background: ${token.colorBgLayout};
-  `,
-  card: css`
-    max-width: 600px;
-    width: 100%;
-    text-align: center;
-  `,
-  icon: css`
-    font-size: 64px;
-    margin-bottom: ${token.marginLG}px;
-  `,
-  successIcon: css`
-    color: ${token.colorSuccess};
-  `,
-  pendingIcon: css`
-    color: ${token.colorWarning};
-  `,
-  errorIcon: css`
-    color: ${token.colorError};
-  `,
-  details: css`
-    background: ${token.colorFillAlter};
-    border-radius: ${token.borderRadius}px;
-    padding: ${token.padding}px;
-    margin: ${token.marginLG}px 0;
-    text-align: left;
   `,
   detailRow: css`
     display: flex;
     justify-content: space-between;
-    margin-bottom: ${token.marginSM}px;
+    margin-block-end: ${token.marginSM}px;
     
     &:last-child {
-      margin-bottom: 0;
+      margin-block-end: 0;
     }
+  `,
+  details: css`
+    margin-block: ${token.marginLG}px;
+    margin-inline: 0;
+    padding: ${token.padding}px;
+    border-radius: ${token.borderRadius}px;
+
+    text-align: start;
+
+    background: ${token.colorFillAlter};
+  `,
+  errorIcon: css`
+    color: ${token.colorError};
+  `,
+  icon: css`
+    margin-block-end: ${token.marginLG}px;
+    font-size: 64px;
   `,
   label: css`
     color: ${token.colorTextSecondary};
+  `,
+  pendingIcon: css`
+    color: ${token.colorWarning};
+  `,
+  successIcon: css`
+    color: ${token.colorSuccess};
   `,
   value: css`
     font-weight: 500;
@@ -60,20 +69,51 @@ const useStyles = createStyles(({ css, token }) => ({
 }));
 
 interface PaymentStatus {
-  status: 'success' | 'pending' | 'failed' | 'unknown';
-  orderId?: string;
-  transactionId?: string;
   amount?: number;
-  planName?: string;
   message?: string;
+  orderId?: string;
+  planName?: string;
+  status: 'success' | 'pending' | 'failed' | 'unknown';
+  transactionId?: string;
 }
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const { styles } = useStyles();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({ status: 'unknown' });
   const [loading, setLoading] = useState(true);
+
+  const queryPaymentStatus = useCallback(async (orderId: string) => {
+    try {
+      const response = await fetch(`/api/payment/sepay/create?orderId=${orderId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setPaymentStatus({
+          message: data.message,
+          orderId,
+          status: 'success',
+          transactionId: data.transactionId,
+        });
+      } else {
+        setPaymentStatus({
+          message: data.message,
+          orderId,
+          status: 'failed',
+        });
+      }
+    } catch (error) {
+      console.error('Error querying payment status:', error);
+      setPaymentStatus({
+        message: 'Unable to verify payment status',
+        orderId,
+        status: 'failed',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const orderId = searchParams.get('orderId');
@@ -88,46 +128,15 @@ export default function PaymentSuccessPage() {
     } else {
       // Use URL parameters if available
       setPaymentStatus({
-        status: (status as PaymentStatus['status']) || 'unknown',
-        orderId: orderId || undefined,
-        transactionId: transactionId || undefined,
         amount: amount ? parseInt(amount) : undefined,
+        orderId: orderId || undefined,
         planName: planName || undefined,
+        status: (status as PaymentStatus['status']) || 'unknown',
+        transactionId: transactionId || undefined,
       });
       setLoading(false);
     }
-  }, [searchParams]);
-
-  const queryPaymentStatus = async (orderId: string) => {
-    try {
-      const response = await fetch(`/api/payment/sepay/create?orderId=${orderId}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setPaymentStatus({
-          status: 'success',
-          orderId,
-          transactionId: data.transactionId,
-          message: data.message,
-        });
-      } else {
-        setPaymentStatus({
-          status: 'failed',
-          orderId,
-          message: data.message,
-        });
-      }
-    } catch (error) {
-      console.error('Error querying payment status:', error);
-      setPaymentStatus({
-        status: 'failed',
-        orderId,
-        message: 'Unable to verify payment status',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [searchParams, queryPaymentStatus]);
 
   const handleGoToDashboard = () => {
     router.push('/settings/subscription');
@@ -157,73 +166,77 @@ export default function PaymentSuccessPage() {
 
   const renderContent = () => {
     switch (paymentStatus.status) {
-      case 'success':
+      case 'success': {
         return (
           <Result
-            icon={<CheckCircle className={`${styles.icon} ${styles.successIcon}`} />}
-            status="success"
-            title="Payment Successful!"
-            subTitle="Your subscription has been activated successfully."
             extra={[
-              <Button type="primary" key="dashboard" onClick={handleGoToDashboard}>
+              <Button key="dashboard" onClick={handleGoToDashboard} type="primary">
                 Go to Dashboard
               </Button>,
               <Button key="home" onClick={handleGoHome}>
                 Back to Home
               </Button>,
             ]}
+            icon={<CheckCircle className={`${styles.icon} ${styles.successIcon}`} />}
+            status="success"
+            subTitle="Your subscription has been activated successfully."
+            title="Payment Successful!"
           />
         );
+      }
 
-      case 'pending':
+      case 'pending': {
         return (
           <Result
-            icon={<Clock className={`${styles.icon} ${styles.pendingIcon}`} />}
-            status="warning"
-            title="Payment Pending"
-            subTitle="Your payment is being processed. You will receive a confirmation email once completed."
             extra={[
-              <Button type="primary" key="dashboard" onClick={handleGoToDashboard}>
+              <Button key="dashboard" onClick={handleGoToDashboard} type="primary">
                 Check Status
               </Button>,
               <Button key="home" onClick={handleGoHome}>
                 Back to Home
               </Button>,
             ]}
+            icon={<Clock className={`${styles.icon} ${styles.pendingIcon}`} />}
+            status="warning"
+            subTitle="Your payment is being processed. You will receive a confirmation email once completed."
+            title="Payment Pending"
           />
         );
+      }
 
-      case 'failed':
+      case 'failed': {
         return (
           <Result
-            icon={<XCircle className={`${styles.icon} ${styles.errorIcon}`} />}
-            status="error"
-            title="Payment Failed"
-            subTitle={paymentStatus.message || 'Your payment could not be processed. Please try again.'}
             extra={[
-              <Button type="primary" key="retry" onClick={handleRetryPayment}>
+              <Button key="retry" onClick={handleRetryPayment} type="primary">
                 Try Again
               </Button>,
               <Button key="home" onClick={handleGoHome}>
                 Back to Home
               </Button>,
             ]}
+            icon={<XCircle className={`${styles.icon} ${styles.errorIcon}`} />}
+            status="error"
+            subTitle={paymentStatus.message || 'Your payment could not be processed. Please try again.'}
+            title="Payment Failed"
           />
         );
+      }
 
-      default:
+      default: {
         return (
           <Result
-            status="404"
-            title="Payment Status Unknown"
-            subTitle="We couldn't determine your payment status. Please contact support if you need assistance."
             extra={[
-              <Button type="primary" key="home" onClick={handleGoHome}>
+              <Button key="home" onClick={handleGoHome} type="primary">
                 Back to Home
               </Button>,
             ]}
+            status="404"
+            subTitle="We couldn't determine your payment status. Please contact support if you need assistance."
+            title="Payment Status Unknown"
           />
         );
+      }
     }
   };
 
@@ -252,8 +265,8 @@ export default function PaymentSuccessPage() {
                 <span className={styles.label}>Amount:</span>
                 <span className={styles.value}>
                   {new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
                     currency: 'VND',
+                    style: 'currency',
                   }).format(paymentStatus.amount)}
                 </span>
               </div>
@@ -268,5 +281,21 @@ export default function PaymentSuccessPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  const { styles } = useStyles();
+
+  return (
+    <Suspense fallback={
+      <div className={styles.container}>
+        <Flexbox align="center" justify="center" style={{ minHeight: '50vh' }}>
+          <Spin size="large" />
+        </Flexbox>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
