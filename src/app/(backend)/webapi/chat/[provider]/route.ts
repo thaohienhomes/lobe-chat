@@ -14,6 +14,7 @@ import { createTraceOptions, initModelRuntimeWithUserPayload } from '@/server/mo
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
 import { getTracePayload } from '@/utils/trace';
+
 // import { getServerDB } from '@lobechat/database/core/db-adaptor'; // Disabled for initial deployment
 
 export const maxDuration = 300;
@@ -31,8 +32,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // let costEngine: CostOptimizationEngine | undefined;
     // let usageTracker: UsageTracker | undefined;
     // let modelRouter: IntelligentModelRouter | undefined;
-    let originalModel: string | undefined;
-    let optimizedModel: string | undefined;
+    // let originalModel: string | undefined;
+    // let optimizedModel: string | undefined;
 
     if (costOptimizationEnabled && jwtPayload.userId) {
       try {
@@ -47,9 +48,14 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           // modelRouter = new IntelligentModelRouter(); // Disabled for initial deployment
         }
 
-        console.log(`🎯 Cost optimization enabled for user ${jwtPayload.userId} (routing: ${intelligentRoutingEnabled}, tracking: ${usageTrackingEnabled})`);
+        console.log(
+          `🎯 Cost optimization enabled for user ${jwtPayload.userId} (routing: ${intelligentRoutingEnabled}, tracking: ${usageTrackingEnabled})`,
+        );
       } catch (error) {
-        console.warn('⚠️ Cost optimization initialization failed, proceeding without optimization:', error);
+        console.warn(
+          '⚠️ Cost optimization initialization failed, proceeding without optimization:',
+          error,
+        );
       }
     }
 
@@ -64,68 +70,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // ============  2. create chat completion   ============ //
 
     const data = (await req.json()) as ChatStreamPayload;
-    originalModel = data.model;
-
-    // ============  2.1. Cost Optimization & Model Selection   ============ //
-    // Disabled for initial deployment - will be enabled after database migration
-    // Disabled cost optimization for deployment
-    if (false) {
-      try {
-        // Get user's subscription tier and remaining budget
-        // const userSubscription = await getUserSubscriptionTier(jwtPayload.userId, usageTracker);
-        // const remainingBudget = await usageTracker.getRemainingBudget(userSubscription);
-
-        // Check budget before proceeding
-        if (remainingBudget <= 0) {
-          return new Response(
-            JSON.stringify({
-              budgetExceeded: true,
-              error: 'Đã hết ngân sách tháng này. Vui lòng nâng cấp gói hoặc chờ chu kỳ mới.',
-              // errorType: ChatErrorType.InsufficientQuota,
-              remainingBudgetVND: remainingBudget,
-            }),
-            {
-              headers: { 'Content-Type': 'application/json' },
-              status: 402
-            }
-          );
-        }
-
-        // Get last user message for complexity analysis
-        const lastMessage = data.messages.at(-1)?.content || '';
-
-        // Get optimal model recommendation
-        /*
-        const routingResult = await modelRouter.routeRequest({
-          features: {
-            requiresFunctionCalling: !!(data.tools as any) && (data.tools as any).length > 0,
-            requiresStreaming: data.stream !== false,
-            requiresVision: data.messages.some(m => (m as any).files && (m as any).files.length > 0),
-          },
-          query: lastMessage,
-          remainingBudgetVND: remainingBudget,
-          sessionId: (data as any).sessionId || 'default',
-          subscriptionTier: userSubscription,
-          userId: jwtPayload.userId,
-        });
-
-        // Override model if cost optimization suggests a better option
-        if (routingResult.selectedModel !== originalModel) {
-          optimizedModel = routingResult.selectedModel;
-          (data as any).model = optimizedModel;
-          console.log(`🎯 Model optimized: ${originalModel} → ${optimizedModel} (${routingResult.reasoning})`);
-        }
-
-        // Log budget warning if applicable
-        if (routingResult.budgetWarning) {
-          console.warn(`💰 Budget warning for user ${jwtPayload.userId}: ${routingResult.budgetWarning}`);
-        }
-        */
-
-      } catch (error) {
-        console.warn('⚠️ Cost optimization failed, using original model:', error);
-      }
-    }
+    // originalModel = data.model;
 
     const tracePayload = getTracePayload(req);
 
@@ -136,7 +81,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     }
 
     // ============  3. Execute Chat Completion   ============ //
-    const startTime = Date.now();
+    // const startTime = Date.now();
 
     const response = await modelRuntime.chat(data, {
       user: jwtPayload.userId,
@@ -146,9 +91,10 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
     // ============  4. Track Usage (for non-streaming responses)   ============ //
     // Disabled usage tracking for deployment
+    // eslint-disable-next-line no-constant-condition
     if (false) {
-      const endTime = Date.now();
-      const responseTimeMs = endTime - startTime;
+      // const endTime = Date.now();
+      // const responseTimeMs = endTime - startTime;
 
       // Note: For streaming responses, usage tracking should be handled by the streaming handler
       // This is a simplified version for non-streaming responses
@@ -241,16 +187,16 @@ async function getUserSubscriptionTier(
 /**
  * Estimate token count from messages (simplified)
  */
-function estimateTokens(messages: any[]): number {
-  if (!messages || !Array.isArray(messages)) return 0;
+// function estimateTokens(messages: any[]): number {
+//   if (!messages || !Array.isArray(messages)) return 0;
 
-  const totalText = messages
-    .map(m => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content)))
-    .join(' ');
+//   const totalText = messages
+//     .map(m => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content)))
+//     .join(' ');
 
-  // Rough estimation: ~4 characters per token
-  return Math.ceil(totalText.length / 4);
-}
+//   // Rough estimation: ~4 characters per token
+//   return Math.ceil(totalText.length / 4);
+// }
 
 /**
  * Track usage after completion

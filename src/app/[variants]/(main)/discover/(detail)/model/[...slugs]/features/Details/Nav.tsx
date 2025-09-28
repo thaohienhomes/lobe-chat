@@ -36,6 +36,8 @@ const Nav = memo<NavProps>(({ mobile, setActiveTab, activeTab = ModelNavKey.Over
   const { t } = useTranslation('discover');
   const { styles } = useStyles();
 
+  const discordUrl = SOCIAL_URL.discord;
+
   const nav = (
     <Tabs
       activeKey={activeTab}
@@ -67,9 +69,11 @@ const Nav = memo<NavProps>(({ mobile, setActiveTab, activeTab = ModelNavKey.Over
     <Flexbox align={'center'} className={styles.nav} horizontal justify={'space-between'}>
       {nav}
       <Flexbox gap={12} horizontal>
-        <Link className={styles.link} href={SOCIAL_URL.discord} target={'_blank'}>
-          {t('mcp.details.nav.needHelp')}
-        </Link>
+        {discordUrl && (
+          <Link className={styles.link} href={discordUrl} target={'_blank'}>
+            {t('mcp.details.nav.needHelp')}
+          </Link>
+        )}
         <Link
           className={styles.link}
           href={'https://github.com/lobehub/lobe-chat/tree/main/src/config/aiModels'}

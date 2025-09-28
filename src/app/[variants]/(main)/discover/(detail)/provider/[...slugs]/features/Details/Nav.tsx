@@ -39,6 +39,7 @@ const Nav = memo<NavProps>(({ mobile, setActiveTab, activeTab = ProviderNavKey.O
   const { t } = useTranslation('discover');
   const { identifier } = useDetailContext();
   const { styles } = useStyles();
+  const discordUrl = SOCIAL_URL.discord;
 
   const nav = (
     <Tabs
@@ -71,9 +72,11 @@ const Nav = memo<NavProps>(({ mobile, setActiveTab, activeTab = ProviderNavKey.O
     <Flexbox align={'center'} className={styles.nav} horizontal justify={'space-between'}>
       {nav}
       <Flexbox gap={12} horizontal>
-        <Link className={styles.link} href={SOCIAL_URL.discord} target={'_blank'}>
-          {t('mcp.details.nav.needHelp')}
-        </Link>
+        {discordUrl && (
+          <Link className={styles.link} href={discordUrl} target={'_blank'}>
+            {t('mcp.details.nav.needHelp')}
+          </Link>
+        )}
         {identifier && (
           <Link
             className={styles.link}

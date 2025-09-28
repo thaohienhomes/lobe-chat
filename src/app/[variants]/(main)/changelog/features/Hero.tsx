@@ -16,6 +16,7 @@ const Hero = memo(() => {
   const { t } = useTranslation('changelog');
   const theme = useTheme();
   const { mobile } = useResponsive();
+  const xUrl = SOCIAL_URL.x;
   return (
     <GridLayout>
       <Flexbox gap={16} style={{ paddingTop: 32, zIndex: 1 }}>
@@ -27,10 +28,14 @@ const Hero = memo(() => {
           <Link href={urlJoin(OFFICIAL_SITE, '/changelog/versions')} target={'_blank'}>
             {t('actions.versions')}
           </Link>
-          <div style={{ color: theme.colorInfo }}>·</div>
-          <Link href={SOCIAL_URL.x} target={'_blank'}>
-            {t('actions.followOnX')}
-          </Link>
+          {xUrl && (
+            <>
+              <div style={{ color: theme.colorInfo }}>·</div>
+              <Link href={xUrl} target={'_blank'}>
+                {t('actions.followOnX')}
+              </Link>
+            </>
+          )}
         </Flexbox>
       </Flexbox>
     </GridLayout>
