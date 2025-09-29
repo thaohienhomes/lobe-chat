@@ -16,5 +16,4 @@ export * from './rbac';
 export * from './relations';
 export * from './session';
 export * from './topic';
-export * from './usage';
 export * from './user';
