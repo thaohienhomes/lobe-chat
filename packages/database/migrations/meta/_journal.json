@@ -252,13 +252,6 @@
       "when": 1759111930525,
       "tag": "0035_empty_human_torch",
       "breakpoints": true
-    },
-    {
-      "idx": 36,
-      "version": "7",
-      "when": 1759112021343,
-      "tag": "0036_broad_lady_bullseye",
-      "breakpoints": true
     }
   ],
   "version": "6"
