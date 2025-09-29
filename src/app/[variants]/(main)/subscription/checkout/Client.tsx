@@ -1,22 +1,60 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { Button, Card, Divider, Form, Input, Radio, Typography, message, Spin, Alert } from 'antd';
+import { Alert, Button, Card, Divider, Form, Input, Radio, Spin, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
 import { ArrowLeft, CreditCard, Shield } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
-  checkoutCard: css`margin-block-end:${token.marginLG}px;`,
-  container: css`min-height:100vh;padding:${token.paddingLG}px;background:${token.colorBgLayout};`,
-  content: css`max-width:800px;margin-block:0;margin-inline:auto;`,
-  planSummary: css`margin-block-end:${token.marginLG}px;padding:${token.padding}px;border-radius:${token.borderRadius}px;background:${token.colorFillAlter};`,
-  priceRow: css`display:flex;align-items:center;justify-content:space-between;margin-block-end:${token.marginSM}px;&:last-child{margin-block-end:0;padding-block-start:${token.marginSM}px;border-block-start:1px solid ${token.colorBorder};font-size:16px;font-weight:600;}`,
-  securityNote: css`display:flex;gap:${token.marginSM}px;align-items:center;margin-block-start:${token.marginLG}px;font-size:12px;color:${token.colorTextSecondary};`,
+  checkoutCard: css`
+    margin-block-end: ${token.marginLG}px;
+  `,
+  container: css`
+    min-height: 100vh;
+    padding: ${token.paddingLG}px;
+    background: ${token.colorBgLayout};
+  `,
+  content: css`
+    max-width: 800px;
+    margin-block: 0;
+    margin-inline: auto;
+  `,
+  planSummary: css`
+    margin-block-end: ${token.marginLG}px;
+    padding: ${token.padding}px;
+    border-radius: ${token.borderRadius}px;
+    background: ${token.colorFillAlter};
+  `,
+  priceRow: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: ${token.marginSM}px;
+
+    &:last-child {
+      margin-block-end: 0;
+      padding-block-start: ${token.marginSM}px;
+      border-block-start: 1px solid ${token.colorBorder};
+
+      font-size: 16px;
+      font-weight: 600;
+    }
+  `,
+  securityNote: css`
+    display: flex;
+    gap: ${token.marginSM}px;
+    align-items: center;
+
+    margin-block-start: ${token.marginLG}px;
+
+    font-size: 12px;
+    color: ${token.colorTextSecondary};
+  `,
 }));
 
 const plans = {
@@ -61,8 +99,6 @@ function CheckoutContent() {
       const vndAmount = Math.round(price * 25_000);
 
       const response = await fetch('/api/payment/sepay/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: vndAmount,
           billingCycle,
@@ -70,6 +106,8 @@ function CheckoutContent() {
           customerInfo: { email: values.email, name: values.name, phone: values.phone },
           planId,
         }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
       });
 
       const data = await response.json();
@@ -104,10 +142,14 @@ function CheckoutContent() {
       <div className={styles.container}>
         <div className={styles.content}>
           <Alert
-            type="error"
-            message="Invalid Plan"
+            action={
+              <Button onClick={() => router.push('/subscription/plans')} size="small">
+                View Plans
+              </Button>
+            }
             description="The selected plan is not valid. Please choose a plan from our pricing page."
-            action={<Button size="small" onClick={() => router.push('/subscription/plans')}>View Plans</Button>}
+            message="Invalid Plan"
+            type="error"
           />
         </div>
       </div>
@@ -123,9 +165,13 @@ function CheckoutContent() {
     <div className={styles.container}>
       <div className={styles.content}>
         <Flexbox gap={24}>
-          <Flexbox horizontal align="center" gap={16}>
-            <Button type="text" icon={<ArrowLeft />} onClick={() => router.back()}>Back</Button>
-            <Title level={2} style={{ margin: 0 }}>Complete Your Purchase</Title>
+          <Flexbox align="center" gap={16} horizontal>
+            <Button icon={<ArrowLeft />} onClick={() => router.back()} type="text">
+              Back
+            </Button>
+            <Title level={2} style={{ margin: 0 }}>
+              Complete Your Purchase
+            </Title>
           </Flexbox>
 
           <Card className={styles.checkoutCard}>
@@ -147,21 +193,31 @@ function CheckoutContent() {
               </div>
               <div className={styles.priceRow}>
                 <Text strong>Total (VND)</Text>
-                <Text strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(vndAmount)}</Text>
+                <Text strong>
+                  {new Intl.NumberFormat('vi-VN', { currency: 'VND', style: 'currency' }).format(
+                    vndAmount,
+                  )}
+                </Text>
               </div>
             </div>
 
-            <Form form={form} layout="vertical" size="large" onFinish={handleSubmit}>
+            <Form form={form} layout="vertical" onFinish={handleSubmit} size="large">
               <Title level={4}>Billing Cycle</Title>
               <Form.Item name="billingCycle">
-                <Radio.Group style={{ width: '100%' }} value={billingCycle} onChange={(e) => setBillingCycle(e.target.value)}>
-                  <Radio.Button style={{ width: '50%', textAlign: 'center' }} value="yearly">
+                <Radio.Group
+                  onChange={(e) => setBillingCycle(e.target.value)}
+                  style={{ width: '100%' }}
+                  value={billingCycle}
+                >
+                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="yearly">
                     <div>
                       <div>Yearly</div>
-                      <div style={{ color: '#666', fontSize: 12 }}>${monthlyEquivalent.toFixed(2)}/month</div>
+                      <div style={{ color: '#666', fontSize: 12 }}>
+                        ${monthlyEquivalent.toFixed(2)}/month
+                      </div>
                     </div>
                   </Radio.Button>
-                  <Radio.Button style={{ width: '50%', textAlign: 'center' }} value="monthly">
+                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="monthly">
                     <div>
                       <div>Monthly</div>
                       <div style={{ color: '#666', fontSize: 12 }}>${plan.monthlyPrice}/month</div>
@@ -174,11 +230,22 @@ function CheckoutContent() {
 
               <Title level={4}>Contact Information</Title>
 
-              <Form.Item label="Email Address" name="email" rules={[{ required: true, message: 'Please enter your email' }, { type: 'email', message: 'Please enter a valid email' }]}>
+              <Form.Item
+                label="Email Address"
+                name="email"
+                rules={[
+                  { message: 'Please enter your email', required: true },
+                  { message: 'Please enter a valid email', type: 'email' },
+                ]}
+              >
                 <Input placeholder="your@email.com" />
               </Form.Item>
 
-              <Form.Item label="Full Name" name="name" rules={[{ required: true, message: 'Please enter your full name' }]}>
+              <Form.Item
+                label="Full Name"
+                name="name"
+                rules={[{ message: 'Please enter your full name', required: true }]}
+              >
                 <Input placeholder="Your full name" />
               </Form.Item>
 
@@ -186,13 +253,24 @@ function CheckoutContent() {
                 <Input placeholder="+84 xxx xxx xxx" />
               </Form.Item>
 
-              <Button block type="primary" size="large" htmlType="submit" icon={<CreditCard />} loading={loading}>
-                {loading ? 'Processing...' : `Pay ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(vndAmount)}`}
+              <Button
+                block
+                htmlType="submit"
+                icon={<CreditCard />}
+                loading={loading}
+                size="large"
+                type="primary"
+              >
+                {loading
+                  ? 'Processing...'
+                  : `Pay ${new Intl.NumberFormat('vi-VN', { currency: 'VND', style: 'currency' }).format(vndAmount)}`}
               </Button>
 
               <div className={styles.securityNote}>
                 <Shield size={16} />
-                <Text>Secure payment powered by Sepay. Your payment information is encrypted and secure.</Text>
+                <Text>
+                  Secure payment powered by Sepay. Your payment information is encrypted and secure.
+                </Text>
               </div>
             </Form>
           </Card>
@@ -205,4 +283,3 @@ function CheckoutContent() {
 export default function CheckoutClient() {
   return <CheckoutContent />;
 }
-

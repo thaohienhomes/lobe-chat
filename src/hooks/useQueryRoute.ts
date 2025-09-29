@@ -36,11 +36,11 @@ export const useQueryRoute = () => {
   return useMemo(
     () => ({
       push: (url: string, options: QueryRouteOptions = {}) => {
-        const prevQuery = qs.parse(window.location.search);
+        const prevQuery = isOnServerSide ? {} : qs.parse(window.location.search);
         return router.push(genHref({ prevQuery, url, ...options }));
       },
       replace: (url: string, options: QueryRouteOptions = {}) => {
-        const prevQuery = qs.parse(window.location.search);
+        const prevQuery = isOnServerSide ? {} : qs.parse(window.location.search);
         return router.replace(genHref({ prevQuery, url, ...options }));
       },
     }),

@@ -4,6 +4,7 @@ import { LobeAnalyticsProviderWrapper } from '@/components/Analytics/LobeAnalyti
 import { getServerFeatureFlagsValue } from '@/config/featureFlags';
 import { appEnv } from '@/envs/app';
 import DevPanel from '@/features/DevPanel';
+import PWARegister from '@/features/PWARegister';
 import { getServerGlobalConfig } from '@/server/globalConfig';
 import { ServerConfigStoreProvider } from '@/store/serverConfig/Provider';
 import { getAntdLocale } from '@/utils/locale';
@@ -61,6 +62,7 @@ const GlobalLayout = async ({
               <LobeAnalyticsProviderWrapper>{children}</LobeAnalyticsProviderWrapper>
             </QueryProvider>
             <StoreInitialization />
+            <PWARegister />
             <Suspense>
               <ImportSettings />
               {process.env.NODE_ENV === 'development' && <DevPanel />}

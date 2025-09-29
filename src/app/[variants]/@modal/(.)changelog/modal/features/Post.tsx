@@ -22,7 +22,15 @@ const Post = async ({
 }: ChangelogIndexItem & { branch?: string; locale: Locales; mobile?: boolean }) => {
   const changelogService = new ChangelogService();
   const data = await changelogService.getPostById(id, { locale });
-  const url = urlJoin(OFFICIAL_SITE, 'changelog', id);
+
+  // Safely construct URL with fallback
+  let url: string;
+  try {
+    url = urlJoin(OFFICIAL_SITE || 'https://pho.chat', 'changelog', id || '');
+  } catch (error) {
+    console.warn('Failed to construct changelog URL:', error);
+    url = `https://pho.chat/changelog/${id || ''}`;
+  }
 
   if (!data) return null;
 

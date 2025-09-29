@@ -10,6 +10,7 @@ import { aiProviderRouter } from './aiProvider';
 import { apiKeyRouter } from './apiKey';
 import { chunkRouter } from './chunk';
 import { configRouter } from './config';
+import { costOptimizationRouter } from './costOptimization';
 import { documentRouter } from './document';
 import { exporterRouter } from './exporter';
 import { fileRouter } from './file';
@@ -37,6 +38,7 @@ export const lambdaRouter = router({
   apiKey: apiKeyRouter,
   chunk: chunkRouter,
   config: configRouter,
+  costOptimization: costOptimizationRouter,
   document: documentRouter,
   exporter: exporterRouter,
   file: fileRouter,

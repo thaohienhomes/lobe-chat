@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+
 import Client from './Client';
 
 export const dynamic = 'force-dynamic';
@@ -8,7 +9,15 @@ export default function Page() {
   return (
     <Suspense
       fallback={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', padding: 24 }}>
+        <div
+          style={{
+            alignItems: 'center',
+            display: 'flex',
+            justifyContent: 'center',
+            minHeight: '50vh',
+            padding: 24,
+          }}
+        >
           Loading checkout…
         </div>
       }

@@ -149,6 +149,7 @@ const isPublicRoute = createRouteMatcher([
   // backend api
   '/api/auth(.*)',
   '/api/webhooks(.*)',
+  '/api/healthcheck(.*)',
   '/webapi(.*)',
   '/trpc(.*)',
   // next auth

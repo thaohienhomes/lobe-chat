@@ -73,31 +73,46 @@ const Page = memo<{ mobile?: boolean }>(({ mobile }) => {
                 label: t('blog'),
                 value: 'blog',
               },
-              {
-                href: SOCIAL_URL.github,
-                icon: SiGithub,
-                label: 'GitHub',
-                value: 'feedback',
-              },
-              {
-                href: SOCIAL_URL.discord,
-                icon: SiDiscord,
-                label: 'Discord',
-                value: 'discord',
-              },
-              {
-                href: SOCIAL_URL.x,
-                icon: SiX as any,
-                label: 'X / Twitter',
-                value: 'x',
-              },
-
-              {
-                href: SOCIAL_URL.medium,
-                icon: SiMedium,
-                label: 'Medium',
-                value: 'medium',
-              },
+              ...(SOCIAL_URL.github
+                ? [
+                    {
+                      href: SOCIAL_URL.github as string,
+                      icon: SiGithub,
+                      label: 'GitHub',
+                      value: 'feedback',
+                    },
+                  ]
+                : []),
+              ...(SOCIAL_URL.discord
+                ? [
+                    {
+                      href: SOCIAL_URL.discord as string,
+                      icon: SiDiscord,
+                      label: 'Discord',
+                      value: 'discord',
+                    },
+                  ]
+                : []),
+              ...(SOCIAL_URL.x
+                ? [
+                    {
+                      href: SOCIAL_URL.x as string,
+                      icon: SiX as any,
+                      label: 'X / Twitter',
+                      value: 'x',
+                    },
+                  ]
+                : []),
+              ...(SOCIAL_URL.medium
+                ? [
+                    {
+                      href: SOCIAL_URL.medium as string,
+                      icon: SiMedium,
+                      label: 'Medium',
+                      value: 'medium',
+                    },
+                  ]
+                : []),
             ]}
           />
           <Divider style={{ marginBlock: 0 }} />

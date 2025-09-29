@@ -25,6 +25,15 @@ const Post = async ({
 
   if (!data || !data.title) return null;
 
+  // Safely construct URL with fallback
+  let changelogUrl: string;
+  try {
+    changelogUrl = urlJoin(OFFICIAL_SITE || 'https://pho.chat', '/changelog', id || '');
+  } catch (error) {
+    console.warn('Failed to construct changelog URL:', error);
+    changelogUrl = `https://pho.chat/changelog/${id || ''}`;
+  }
+
   return (
     <>
       <Divider />
@@ -39,12 +48,12 @@ const Post = async ({
         mobile={mobile}
       >
         <Typography headerMultiple={mobile ? 0.2 : 0.3}>
-          <Link href={urlJoin(OFFICIAL_SITE, '/changelog', id)} style={{ color: 'inherit' }}>
+          <Link href={changelogUrl} style={{ color: 'inherit' }}>
             <h1 id={id}>{data.rawTitle || data.title}</h1>
           </Link>
           <Image alt={data.title} src={data.image} />
           <CustomMDX source={data.content} />
-          <Link href={urlJoin(OFFICIAL_SITE, '/changelog', id)} style={{ color: 'inherit' }}>
+          <Link href={changelogUrl} style={{ color: 'inherit' }}>
             <VersionTag range={versionRange} />
           </Link>
         </Typography>

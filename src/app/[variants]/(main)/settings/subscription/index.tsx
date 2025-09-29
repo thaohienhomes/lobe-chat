@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import CompareSection from './features/CompareSection';
+import { CostOptimizationSection } from './features/CostOptimizationSection';
 import PlansSection from './features/PlansSection';
 
 interface SubscriptionPageProps {
@@ -22,6 +23,7 @@ const SubscriptionPage = memo<SubscriptionPageProps>(({ mobile }) => {
       variant={'borderless'}
     >
       <Flexbox gap={24} paddingBlock={20} width={'100%'}>
+        <CostOptimizationSection mobile={mobile} />
         <PlansSection mobile={mobile} />
         <CompareSection mobile={mobile} />
       </Flexbox>
