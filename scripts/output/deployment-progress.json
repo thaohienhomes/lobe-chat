@@ -1,0 +1,68 @@
+[
+  {
+    "notes": "Users table missing; tableCount=1; tables=payments",
+    "status": "SUCCESS",
+    "stepId": "STEP_1_1",
+    "timestamp": "2025-09-27T14:08:08.575Z"
+  },
+  {
+    "notes": "Base schema migrated; users/sessions/messages/agents present",
+    "status": "SUCCESS",
+    "stepId": "STEP_1_2",
+    "timestamp": "2025-09-27T14:09:00.000Z"
+  },
+  {
+    "notes": "Cost optimization tables created (usage_logs, monthly_usage_summary, user_cost_settings, provider_costs)",
+    "status": "SUCCESS",
+    "stepId": "STEP_1_3",
+    "timestamp": "2025-09-27T14:12:00.000Z"
+  },
+  {
+    "notes": "Printed safe commands to configure Vercel Preview with cost optimization enabled (no external changes executed)",
+    "status": "PENDING",
+    "stepId": "STEP_1_4",
+    "timestamp": "2025-09-27T14:14:00.000Z"
+  },
+  {
+    "notes": "Prod Neon: core tables present (users, sessions, messages, agents); tableCount=68",
+    "status": "SUCCESS",
+    "stepId": "STEP_1_1",
+    "timestamp": "2025-09-27T15:28:15.870Z"
+  },
+  {
+    "notes": "Base schema already present; no-op on production Neon",
+    "status": "SUCCESS",
+    "stepId": "STEP_1_2",
+    "timestamp": "2025-09-27T15:28:25.804Z"
+  },
+  {
+    "notes": "Cost opt tables already exist (usage_logs, monthly_usage_summary, user_cost_settings, provider_costs)",
+    "status": "SUCCESS",
+    "stepId": "STEP_1_3",
+    "timestamp": "2025-09-27T15:28:36.962Z"
+  },
+  {
+    "notes": "Preview env vars set; deployed to https://lobe-chat-3j9ge3765-thaohienhomes.vercel.app",
+    "status": "SUCCESS",
+    "stepId": "STEP_1_4",
+    "timestamp": "2025-09-27T16:04:12.506Z"
+  },
+  {
+    "notes": "Awaiting bypass token for Preview healthcheck and smoke tests",
+    "status": "PENDING",
+    "stepId": "STEP_2_1",
+    "timestamp": "2025-09-28T01:51:22.362Z"
+  },
+  {
+    "notes": "Preview healthcheck 200 OK at /api/healthcheck on https://lobe-chat-ajhv08hl8-thaohienhomes.vercel.app",
+    "status": "SUCCESS",
+    "stepId": "STEP_2_1",
+    "timestamp": "2025-09-28T11:14:51.8323831+07:00"
+  },
+  {
+    "notes": "Patched server router to return safe defaults on DB error and fixed client hooks; awaiting Preview redeploy to verify section renders with 29,000 VND.",
+    "status": "PENDING",
+    "stepId": "STEP_2_2",
+    "timestamp": "2025-09-28T12:25:00.000Z"
+  }
+]
