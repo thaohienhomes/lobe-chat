@@ -28,9 +28,11 @@ const Hero = memo(() => {
             {t('actions.versions')}
           </Link>
           <div style={{ color: theme.colorInfo }}>·</div>
-          <Link href={SOCIAL_URL.x} target={'_blank'}>
-            {t('actions.followOnX')}
-          </Link>
+          {SOCIAL_URL.x ? (
+            <Link href={SOCIAL_URL.x as string} target={'_blank'}>
+              {t('actions.followOnX')}
+            </Link>
+          ) : null}
         </Flexbox>
       </Flexbox>
     </GridLayout>

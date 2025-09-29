@@ -459,6 +459,44 @@
     "unSaved": "Thay đổi chưa được lưu",
     "unSavedWarning": "Hiện tại có thay đổi chưa được lưu"
   },
+  "subscription": {
+    "costOptimization": {
+      "title": "Tối ưu hóa Chi phí AI",
+      "budgetRemaining": "Ngân sách Còn lại",
+      "totalQueries": "Tổng Truy vấn",
+      "monthlyCost": "Chi phí Tháng này",
+      "budgetProgress": "Tiến độ Ngân sách",
+      "recentUsage": "Lịch sử Sử dụng Gần đây",
+      "settings": "Cài đặt",
+      "budgetWarning": "Cảnh báo Ngân sách",
+      "status": {
+        "normal": "Bình thường",
+        "attention": "Chú ý",
+        "warning": "Cảnh báo",
+        "danger": "Nguy hiểm"
+      },
+      "alerts": {
+        "budgetLow": "Bạn đã sử dụng {{percentage}}% ngân sách tháng này. Hãy cân nhắc tối ưu hóa việc sử dụng hoặc nâng cấp gói.",
+        "budgetCritical": "Bạn đã sử dụng {{percentage}}% ngân sách tháng này. Hãy nâng cấp gói hoặc chờ chu kỳ mới để tiếp tục sử dụng.",
+        "budgetExceeded": "Đã hết ngân sách tháng này. Vui lòng nâng cấp gói hoặc chờ chu kỳ mới."
+      },
+      "settingsModal": {
+        "title": "Cài đặt Tối ưu hóa Chi phí",
+        "monthlyBudget": "Ngân sách Hàng tháng (VND)",
+        "maxCostPerQuery": "Chi phí Tối đa mỗi Truy vấn (VND)",
+        "enableOptimization": "Bật Tối ưu hóa Chi phí",
+        "enableAlerts": "Bật Cảnh báo Ngân sách",
+        "alertThresholds": "Ngưỡng Cảnh báo (%)",
+        "warningThreshold": "Cảnh báo",
+        "criticalThreshold": "Nghiêm trọng",
+        "emergencyThreshold": "Khẩn cấp"
+      }
+    },
+    "plans": {
+      "title": "Gói Đăng Ký"
+    },
+    "title": "Đăng Ký"
+  },
   "sync": {
     "device": {
       "deviceName": {

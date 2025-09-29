@@ -459,6 +459,15 @@
     "unSaved": "Unsaved Changes",
     "unSavedWarning": "There are currently unsaved changes"
   },
+  "subscription": {
+    "compare": {
+      "title": "Plan Comparison"
+    },
+    "plans": {
+      "title": "Plans & Pricing"
+    },
+    "title": "Subscription Management"
+  },
   "sync": {
     "device": {
       "deviceName": {
@@ -555,7 +564,9 @@
     "storage": "Data Storage",
     "sync": "Cloud Sync",
     "system-agent": "System Assistant",
-    "tts": "Text-to-Speech"
+    "subscription": "Subscription",
+    "tts": "Text-to-Speech",
+    "usage": "Usage"
   },
   "tools": {
     "builtins": {
@@ -569,5 +580,17 @@
       "store": "Plugin Store"
     },
     "title": "Extension Tools"
+  },
+  "usage": {
+    "billing": {
+      "title": "Billing Information"
+    },
+    "history": {
+      "title": "Usage History"
+    },
+    "overview": {
+      "title": "Usage Overview"
+    },
+    "title": "Usage"
   }
 }

@@ -32,13 +32,19 @@ const useStyles = createStyles(({ css, token }) => ({
 const Pagination = memo(() => {
   const { t } = useTranslation('changelog');
   const { styles } = useStyles();
+
+  // Safely construct URL with fallback
+  let paginationUrl: string;
+  try {
+    paginationUrl = urlJoin(OFFICIAL_SITE || 'https://pho.chat', '/changelog/page/2');
+  } catch (error) {
+    console.warn('Failed to construct pagination URL:', error);
+    paginationUrl = 'https://pho.chat/changelog/page/2';
+  }
+
   return (
     <Flexbox gap={16} horizontal style={{ marginTop: 24 }} width={'100%'}>
-      <Link
-        href={urlJoin(OFFICIAL_SITE, '/changelog/page/2')}
-        style={{ color: 'inherit', flex: 1 }}
-        target={'_blank'}
-      >
+      <Link href={paginationUrl} style={{ color: 'inherit', flex: 1 }} target={'_blank'}>
         <Flexbox align={'flex-end'} className={styles.button} gap={4} padding={16}>
           <Flexbox align={'center'} className={styles.desc} gap={4} horizontal>
             {t('pagination.next')}

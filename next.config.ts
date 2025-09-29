@@ -45,6 +45,12 @@ const nextConfig: NextConfig = {
     serverMinification: false,
     webVitalsAttribution: ['CLS', 'LCP'],
     webpackMemoryOptimizations: true,
+    // Additional memory optimizations for Vercel builds
+    ...(process.env.VERCEL && {
+      turbo: {
+        memoryLimit: 6144,
+      },
+    }),
   },
   async headers() {
     const securityHeaders = [
@@ -321,13 +327,14 @@ const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
       // Allow precaching of large PGLite assets for offline functionality
-      maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+      // Reduced from 10MB to 8MB to optimize build memory usage
+      maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
 
       register: false,
 
       swDest: 'public/sw.js',
 
-      swSrc: 'src/app/sw.ts', // 10MB
+      swSrc: 'src/app/sw.ts', // 8MB
     })
     : noWrapper;
 

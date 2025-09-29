@@ -1,5 +1,6 @@
 {
   "plans": {
+    "title": "Gói Đăng Ký",
     "plan": {
       "enterprise": {
         "title": "Phiên bản doanh nghiệp"
@@ -20,5 +21,6 @@
         "title": "Phiên bản Chuyên nghiệp"
       }
     }
-  }
+  },
+  "title": "Đăng Ký"
 }

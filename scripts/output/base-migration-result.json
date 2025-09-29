@@ -1,0 +1,11 @@
+{
+  "executed": 58,
+  "total": 58,
+  "verifiedTables": [
+    "agents",
+    "messages",
+    "sessions",
+    "users"
+  ],
+  "success": true
+}

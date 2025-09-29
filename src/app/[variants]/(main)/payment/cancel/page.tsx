@@ -1,46 +1,80 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { XCircle, ArrowLeft, CreditCard } from 'lucide-react';
-import { Button, Card, Result, Typography } from 'antd';
+import { Button, Card, Result, Spin, Typography } from 'antd';
 import { createStyles } from 'antd-style';
+import { ArrowLeft, CreditCard, XCircle } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import { Flexbox } from 'react-layout-kit';
+
+// Force dynamic rendering to avoid static generation issues with useSearchParams
+export const dynamic = 'force-dynamic';
 
 const { Title, Paragraph } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
+  card: css`
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+  `,
   container: css`
-    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    min-height: 100vh;
     padding: ${token.padding}px;
+
     background: ${token.colorBgLayout};
-  `,
-  card: css`
-    max-width: 600px;
-    width: 100%;
-    text-align: center;
-  `,
-  icon: css`
-    font-size: 64px;
-    margin-bottom: ${token.marginLG}px;
-    color: ${token.colorWarning};
-  `,
-  details: css`
-    background: ${token.colorFillAlter};
-    border-radius: ${token.borderRadius}px;
-    padding: ${token.padding}px;
-    margin: ${token.marginLG}px 0;
-    text-align: left;
   `,
   detailRow: css`
     display: flex;
     justify-content: space-between;
-    margin-bottom: ${token.marginSM}px;
-    
+    margin-block-end: ${token.marginSM}px;
+
     &:last-child {
-      margin-bottom: 0;
+      margin-block-end: 0;
     }
+  `,
+  details: css`
+    margin-block: ${token.marginLG}px;
+    margin-inline: 0;
+    padding: ${token.padding}px;
+    border-radius: ${token.borderRadius}px;
+
+    text-align: start;
+
+    background: ${token.colorFillAlter};
+  `,
+  helpList: css`
+    margin: 0;
+    padding-inline-start: ${token.paddingLG}px;
+
+    li {
+      margin-block-end: ${token.marginXS}px;
+      color: ${token.colorTextSecondary};
+    }
+  `,
+  helpSection: css`
+    margin-block-start: ${token.marginLG}px;
+    padding: ${token.padding}px;
+    border: 1px solid ${token.colorInfoBorder};
+    border-radius: ${token.borderRadius}px;
+
+    text-align: start;
+
+    background: ${token.colorInfoBg};
+  `,
+  helpTitle: css`
+    margin-block-end: ${token.marginSM}px;
+    font-weight: 600;
+    color: ${token.colorInfo};
+  `,
+  icon: css`
+    margin-block-end: ${token.marginLG}px;
+    font-size: 64px;
+    color: ${token.colorWarning};
   `,
   label: css`
     color: ${token.colorTextSecondary};
@@ -48,31 +82,9 @@ const useStyles = createStyles(({ css, token }) => ({
   value: css`
     font-weight: 500;
   `,
-  helpSection: css`
-    background: ${token.colorInfoBg};
-    border: 1px solid ${token.colorInfoBorder};
-    border-radius: ${token.borderRadius}px;
-    padding: ${token.padding}px;
-    margin-top: ${token.marginLG}px;
-    text-align: left;
-  `,
-  helpTitle: css`
-    color: ${token.colorInfo};
-    font-weight: 600;
-    margin-bottom: ${token.marginSM}px;
-  `,
-  helpList: css`
-    margin: 0;
-    padding-left: ${token.paddingLG}px;
-    
-    li {
-      margin-bottom: ${token.marginXS}px;
-      color: ${token.colorTextSecondary};
-    }
-  `,
 }));
 
-export default function PaymentCancelPage() {
+function PaymentCancelContent() {
   const { styles } = useStyles();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,28 +107,29 @@ export default function PaymentCancelPage() {
 
   const handleContactSupport = () => {
     // Open support email or chat
-    window.location.href = 'mailto:hello@pho.chat?subject=Payment Issue - Order ' + (orderId || 'Unknown');
+    window.location.href =
+      'mailto:hello@pho.chat?subject=Payment Issue - Order ' + (orderId || 'Unknown');
   };
 
   return (
     <div className={styles.container}>
       <Card className={styles.card}>
         <Result
-          icon={<XCircle className={styles.icon} />}
-          status="warning"
-          title="Payment Cancelled"
-          subTitle="Your payment was cancelled. No charges have been made to your account."
           extra={[
-            <Button type="primary" key="retry" icon={<CreditCard />} onClick={handleRetryPayment}>
+            <Button icon={<CreditCard />} key="retry" onClick={handleRetryPayment} type="primary">
               Try Payment Again
             </Button>,
-            <Button key="back" icon={<ArrowLeft />} onClick={handleGoBack}>
+            <Button icon={<ArrowLeft />} key="back" onClick={handleGoBack}>
               Go Back
             </Button>,
             <Button key="home" onClick={handleGoHome}>
               Back to Home
             </Button>,
           ]}
+          icon={<XCircle className={styles.icon} />}
+          status="warning"
+          subTitle="Your payment was cancelled. No charges have been made to your account."
+          title="Payment Cancelled"
         />
 
         {(orderId || planName || amount) && (
@@ -139,8 +152,8 @@ export default function PaymentCancelPage() {
                 <span className={styles.label}>Amount:</span>
                 <span className={styles.value}>
                   {new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
                     currency: 'VND',
+                    style: 'currency',
                   }).format(parseInt(amount))}
                 </span>
               </div>
@@ -158,17 +171,17 @@ export default function PaymentCancelPage() {
             <li>Check your internet connection and try again</li>
             <li>Ensure your payment method has sufficient funds</li>
             <li>Try using a different payment method</li>
-            <li>Contact your bank if you're experiencing issues</li>
+            <li>Contact your bank if you&apos;re experiencing issues</li>
             <li>
-              <Button type="link" size="small" onClick={handleContactSupport}>
+              <Button onClick={handleContactSupport} size="small" type="link">
                 Contact our support team
-              </Button>
-              {' '}if the problem persists
+              </Button>{' '}
+              if the problem persists
             </li>
           </ul>
         </div>
 
-        <Paragraph style={{ marginTop: 24, color: '#666' }}>
+        <Paragraph style={{ color: '#666', marginTop: 24 }}>
           <strong>What happens next?</strong>
           <br />
           • No charges have been made to your account
@@ -176,10 +189,27 @@ export default function PaymentCancelPage() {
           • You can retry the payment at any time
           <br />
           • Your account remains on the current plan
-          <br />
-          • Contact support if you need assistance
+          <br />• Contact support if you need assistance
         </Paragraph>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentCancelPage() {
+  const { styles } = useStyles();
+
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.container}>
+          <Flexbox align="center" justify="center" style={{ minHeight: '50vh' }}>
+            <Spin size="large" />
+          </Flexbox>
+        </div>
+      }
+    >
+      <PaymentCancelContent />
+    </Suspense>
   );
 }

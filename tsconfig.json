@@ -31,6 +31,22 @@
       }
     ]
   },
-  "exclude": ["node_modules", "public/sw.js", "apps/desktop", "tmp", "temp", ".temp"],
+  "exclude": [
+    "node_modules",
+    "public/sw.js",
+    "apps/desktop",
+    "tmp",
+    "temp",
+    ".temp",
+    "scripts/create-database-backup.ts",
+    "scripts/deploy-cost-optimization.ts",
+    "scripts/manual-migration.ts",
+    "scripts/migrate-cost-optimization-only.ts",
+    "scripts/test-cost-optimization-system.ts",
+    "scripts/verify-cost-optimization-tables.ts",
+    "src/server/routers/lambda/costOptimization.ts",
+    "src/server/services/FeatureFlags/index.ts",
+    "src/server/services/PerformanceMonitoring/index.ts"
+  ],
   "include": ["**/*.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next-env.d.ts"]
 }

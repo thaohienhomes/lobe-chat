@@ -8,10 +8,10 @@ export default function CostMonitoringPage() {
     <Flexbox padding={24}>
       <Card>
         <Alert
-          message="Cost Monitoring Dashboard"
           description="This feature is temporarily disabled during deployment. It will be available soon."
-          type="info"
+          message="Cost Monitoring Dashboard"
           showIcon
+          type="info"
         />
       </Card>
     </Flexbox>

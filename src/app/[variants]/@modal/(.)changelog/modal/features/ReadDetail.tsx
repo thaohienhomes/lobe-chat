@@ -31,7 +31,16 @@ const ReadDetail = memo<{ desc: string; postId: string; title: string }>(
   ({ postId, title, desc }) => {
     const { t } = useTranslation('changelog');
     const { styles, theme } = useStyles();
-    const url = urlJoin(OFFICIAL_SITE, `/changelog/${postId}`);
+
+    // Safely construct URL with fallback
+    let url: string;
+    try {
+      url = urlJoin(OFFICIAL_SITE || 'https://pho.chat', `/changelog/${postId || ''}`);
+    } catch (error) {
+      console.warn('Failed to construct changelog URL:', error);
+      url = `https://pho.chat/changelog/${postId || ''}`;
+    }
+
     const { x, telegram, reddit, mastodon, whatsapp } = useShare({ desc, title, url });
 
     return (

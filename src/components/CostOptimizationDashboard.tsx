@@ -6,10 +6,10 @@ export const CostOptimizationDashboard = () => {
   return (
     <Card>
       <Alert
-        message="Cost Optimization Dashboard"
         description="This feature is temporarily disabled during deployment. It will be available soon."
-        type="info"
+        message="Cost Optimization Dashboard"
         showIcon
+        type="info"
       />
     </Card>
   );
