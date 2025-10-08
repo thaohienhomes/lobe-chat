@@ -86,7 +86,7 @@ function PaymentSuccessContent() {
 
   const queryPaymentStatus = useCallback(async (orderId: string) => {
     try {
-      const response = await fetch(`/api/payment/sepay/create?orderId=${orderId}`);
+      const response = await fetch(`/api/payment/sepay/status?orderId=${orderId}`);
       const data = await response.json();
 
       if (data.success) {

@@ -27,6 +27,9 @@ export interface SepayPaymentResponse {
   message: string;
   orderId: string;
   paymentUrl?: string;
+  qrCodeUrl?: string;
+  bankAccount?: string;
+  bankName?: string;
   success: boolean;
   transactionId?: string;
 }
@@ -40,6 +43,34 @@ export interface SepayWebhookData {
   status: 'success' | 'failed' | 'pending';
   timestamp: string;
   transactionId: string;
+}
+
+// Sepay Transaction API Response
+export interface SepayTransaction {
+  id: string;
+  transaction_date: string;
+  account_number: string;
+  sub_account?: string;
+  amount_in: string;
+  amount_out: string;
+  accumulated: string;
+  code?: string;
+  transaction_content: string;
+  reference_number: string;
+  bank_brand_name: string;
+  bank_account_id: string;
+}
+
+// Sepay API Response for transactions
+export interface SepayTransactionResponse {
+  status: number;
+  error: string | null;
+  messages: {
+    success: boolean;
+  };
+  transactions?: SepayTransaction[];
+  transaction?: SepayTransaction;
+  count_transactions?: number;
 }
 
 /**
@@ -78,57 +109,100 @@ export class SepayPaymentGateway {
   }
 
   /**
+   * Get bank account information for QR code generation
+   * Since Sepay API endpoints may not be available, use configured bank info
+   */
+  private getBankAccountInfo(): { accountNumber: string; bankName: string } | null {
+    // Use environment variables for bank account configuration
+    const accountNumber = process.env.SEPAY_BANK_ACCOUNT;
+    const bankName = process.env.SEPAY_BANK_NAME;
+
+    console.log('🏦 Environment Variables Check:');
+    console.log('SEPAY_BANK_ACCOUNT:', accountNumber);
+    console.log('SEPAY_BANK_NAME:', bankName);
+
+    if (accountNumber && bankName) {
+      return { accountNumber, bankName };
+    }
+
+    console.error('❌ Bank account information not configured. Please set SEPAY_BANK_ACCOUNT and SEPAY_BANK_NAME environment variables.');
+    return null;
+  }
+
+  /**
    * Create payment request
    */
   public async createPayment(request: SepayPaymentRequest): Promise<SepayPaymentResponse> {
     try {
-      const paymentData = {
-        amount: request.amount,
-        cancel_url: this.config.cancelUrl,
-        currency: request.currency,
-        customer_email: request.customerEmail || '',
-        customer_name: request.customerName || '',
-        customer_phone: request.customerPhone || '',
-        description: request.description,
-        merchant_id: this.config.merchantId,
-        notify_url: this.config.notifyUrl,
-        order_id: request.orderId,
-        return_url: this.config.returnUrl,
-        timestamp: Date.now().toString(),
-      };
 
-      // Generate signature
-      const signature = this.generateSignature(paymentData);
-      const requestPayload = { ...paymentData, signature };
 
-      // Make API request to Sepay
-      const response = await fetch(`${this.config.apiUrl}/create-payment`, {
-        body: JSON.stringify(requestPayload),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      });
 
-      const result = await response.json();
+      // Check if real Sepay API should be used
+      const useRealSepayAPI = process.env.SEPAY_SECRET_KEY && process.env.SEPAY_MERCHANT_ID;
 
-      if (response.ok && result.success) {
+      if (!useRealSepayAPI) {
+        console.log('🧪 MOCK SEPAY: Using mock implementation (missing SEPAY_SECRET_KEY or SEPAY_MERCHANT_ID)');
+
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Generate mock payment waiting URL with QR code
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
+        const mockQrCode = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+        const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCode=${mockQrCode}`;
+
         return {
-          message: 'Payment created successfully',
+          message: 'Payment created successfully (MOCK)',
           orderId: request.orderId,
-          paymentUrl: result.payment_url,
+          paymentUrl: mockPaymentUrl,
           success: true,
-          transactionId: result.transaction_id,
+          transactionId: `MOCK_TXN_${Date.now()}`,
         };
-      } else {
+      }
+
+      console.log('🏦 REAL SEPAY: Using real Sepay API integration');
+
+      // Get bank account information for QR code generation
+      const bankInfo = this.getBankAccountInfo();
+      if (!bankInfo) {
         return {
-          error: result.error,
-          message: result.message || 'Payment creation failed',
+          error: 'No bank account configured',
+          message: 'Unable to retrieve bank account information. Please configure SEPAY_BANK_ACCOUNT and SEPAY_BANK_NAME.',
           orderId: request.orderId,
           success: false,
         };
       }
+
+      // Generate QR code URL using Sepay's QR service
+      const qrParams = new URLSearchParams({
+        acc: bankInfo.accountNumber,
+        bank: bankInfo.bankName,
+        amount: request.amount.toString(),
+        des: `${request.description} - ${request.orderId}`,
+      });
+      const qrCodeUrl = `https://qr.sepay.vn/img?${qrParams.toString()}`;
+
+      // Generate payment waiting URL with real QR code
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
+      const paymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCodeUrl=${encodeURIComponent(qrCodeUrl)}&bankAccount=${bankInfo.accountNumber}&bankName=${encodeURIComponent(bankInfo.bankName)}`;
+
+      console.log('🏦 REAL SEPAY: Payment created with QR code');
+      console.log('Bank Account:', bankInfo.accountNumber);
+      console.log('Bank Name:', bankInfo.bankName);
+      console.log('QR Code URL:', qrCodeUrl);
+
+      return {
+        message: 'Payment created successfully',
+        orderId: request.orderId,
+        paymentUrl,
+        qrCodeUrl,
+        bankAccount: bankInfo.accountNumber,
+        bankName: bankInfo.bankName,
+        success: true,
+        transactionId: `SEPAY_${request.orderId}_${Date.now()}`,
+      };
+
+
     } catch (error) {
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -140,41 +214,98 @@ export class SepayPaymentGateway {
   }
 
   /**
-   * Query payment status
+   * Query payment status by checking recent transactions
    */
-  public async queryPaymentStatus(orderId: string): Promise<SepayPaymentResponse> {
+  public async queryPaymentStatus(orderId: string, expectedAmount?: number): Promise<SepayPaymentResponse> {
     try {
-      const queryData = {
-        merchant_id: this.config.merchantId,
-        order_id: orderId,
-        timestamp: Date.now().toString(),
-      };
+      // Check if real Sepay API should be used
+      const useRealSepayAPI = process.env.SEPAY_SECRET_KEY && process.env.SEPAY_MERCHANT_ID;
 
-      const signature = this.generateSignature(queryData);
-      const requestPayload = { ...queryData, signature };
+      if (!useRealSepayAPI) {
+        console.log('🧪 MOCK SEPAY: Simulating payment status query for orderId:', orderId);
 
-      const response = await fetch(`${this.config.apiUrl}/query-payment`, {
-        body: JSON.stringify(requestPayload),
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Mock successful payment status
+        return {
+          message: 'Payment completed successfully (MOCK)',
+          orderId,
+          success: true,
+          transactionId: `MOCK_TXN_${Date.now()}`,
+        };
+      }
+
+      console.log('🔍 REAL SEPAY: Checking payment status for orderId:', orderId);
+
+      // Get recent transactions from Sepay API
+      const response = await fetch(`https://my.sepay.vn/userapi/transactions/list?limit=50`, {
         headers: {
+          'Authorization': `Bearer ${this.config.secretKey}`,
           'Accept': 'application/json',
-          'Content-Type': 'application/json',
         },
-        method: 'POST',
+        method: 'GET',
       });
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(`Sepay API error: ${response.status}`);
+      }
+
+      const result: SepayTransactionResponse = await response.json();
+
+      if (result.status !== 200 || !result.messages.success || !result.transactions) {
+        return {
+          error: result.error || 'Failed to fetch transactions',
+          message: 'Unable to check payment status',
+          orderId,
+          success: false,
+        };
+      }
+
+      // Look for a transaction that matches our order ID in the transaction content
+      const matchingTransaction = result.transactions.find(transaction => {
+        const content = transaction.transaction_content.toLowerCase();
+        const orderIdLower = orderId.toLowerCase();
+
+        // Check if order ID is mentioned in transaction content
+        const hasOrderId = content.includes(orderIdLower);
+
+        // Check if amount matches (if provided)
+        const amountMatches = !expectedAmount ||
+          parseFloat(transaction.amount_in) === expectedAmount ||
+          parseFloat(transaction.amount_in) === expectedAmount / 100; // Handle different currency formats
+
+        return hasOrderId && amountMatches && parseFloat(transaction.amount_in) > 0;
+      });
+
+      if (matchingTransaction) {
+        console.log('✅ REAL SEPAY: Payment found!', {
+          transactionId: matchingTransaction.id,
+          amount: matchingTransaction.amount_in,
+          content: matchingTransaction.transaction_content,
+        });
+
+        return {
+          message: 'Payment completed successfully',
+          orderId,
+          success: true,
+          transactionId: matchingTransaction.id,
+        };
+      } else {
+        console.log('⏳ REAL SEPAY: Payment not found yet for orderId:', orderId);
+
+        return {
+          message: 'Payment not found yet',
+          orderId,
+          success: false,
+        };
+      }
+    } catch (error) {
+      console.error('❌ REAL SEPAY: Error checking payment status:', error);
 
       return {
-        error: result.error,
-        message: result.message || 'Query completed',
-        orderId,
-        success: result.success || false,
-        transactionId: result.transaction_id,
-      };
-    } catch (error) {
-      return {
         error: error instanceof Error ? error.message : 'Unknown error',
-        message: 'Query failed',
+        message: 'Failed to check payment status',
         orderId,
         success: false,
       };

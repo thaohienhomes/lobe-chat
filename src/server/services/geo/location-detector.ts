@@ -1,0 +1,256 @@
+/**
+ * GeoLocation Detection Service
+ * Detects user's country from IP address and headers
+ */
+
+import { geolocation } from '@vercel/functions';
+import type { NextRequest } from 'next/server';
+
+export interface UserLocation {
+  countryCode: string; // ISO 3166-1 alpha-2 (VN, US, IN, etc.)
+  countryName: string;
+  city?: string;
+  region?: string;
+  timezone?: string;
+  latitude?: number;
+  longitude?: number;
+  detectionMethod: 'vercel' | 'cloudflare' | 'zeabur' | 'netlify' | 'header' | 'fallback';
+}
+
+/**
+ * Country code to name mapping
+ */
+const COUNTRY_NAMES: Record<string, string> = {
+  VN: 'Vietnam',
+  US: 'United States',
+  IN: 'India',
+  CN: 'China',
+  JP: 'Japan',
+  KR: 'South Korea',
+  TH: 'Thailand',
+  ID: 'Indonesia',
+  PH: 'Philippines',
+  MY: 'Malaysia',
+  SG: 'Singapore',
+  GB: 'United Kingdom',
+  DE: 'Germany',
+  FR: 'France',
+  ES: 'Spain',
+  IT: 'Italy',
+  CA: 'Canada',
+  AU: 'Australia',
+  BR: 'Brazil',
+  MX: 'Mexico',
+  AR: 'Argentina',
+  PL: 'Poland',
+  RU: 'Russia',
+  TR: 'Turkey',
+  AE: 'United Arab Emirates',
+  SA: 'Saudi Arabia',
+  ZA: 'South Africa',
+  NG: 'Nigeria',
+  EG: 'Egypt',
+  NZ: 'New Zealand',
+  PK: 'Pakistan',
+  BD: 'Bangladesh',
+  NL: 'Netherlands',
+  BE: 'Belgium',
+  AT: 'Austria',
+  CH: 'Switzerland',
+  SE: 'Sweden',
+  NO: 'Norway',
+  DK: 'Denmark',
+  FI: 'Finland',
+  IE: 'Ireland',
+  PT: 'Portugal',
+  CZ: 'Czech Republic',
+  GR: 'Greece',
+  RO: 'Romania',
+  HU: 'Hungary',
+  IL: 'Israel',
+  HK: 'Hong Kong',
+  TW: 'Taiwan',
+};
+
+/**
+ * Detect user's location from request
+ */
+export function detectUserLocation(request: NextRequest): UserLocation {
+  // Try Vercel Edge geolocation first (most accurate)
+  try {
+    const geo = geolocation(request);
+    if (geo?.country) {
+      return {
+        countryCode: geo.country,
+        countryName: COUNTRY_NAMES[geo.country] || geo.country,
+        city: geo.city,
+        region: geo.region,
+        latitude: geo.latitude ? parseFloat(geo.latitude) : undefined,
+        longitude: geo.longitude ? parseFloat(geo.longitude) : undefined,
+        detectionMethod: 'vercel',
+      };
+    }
+  } catch (error) {
+    console.warn('Vercel geolocation failed:', error);
+  }
+
+  // Try various header sources
+  const countryCode =
+    request.headers.get('x-vercel-ip-country') || // Vercel
+    request.headers.get('cf-ipcountry') || // Cloudflare
+    request.headers.get('x-zeabur-ip-country') || // Zeabur
+    request.headers.get('x-country-code') || // Netlify
+    request.headers.get('cloudfront-viewer-country'); // AWS CloudFront
+
+  if (countryCode && countryCode !== 'XX') {
+    const method = request.headers.get('x-vercel-ip-country')
+      ? 'vercel'
+      : request.headers.get('cf-ipcountry')
+        ? 'cloudflare'
+        : request.headers.get('x-zeabur-ip-country')
+          ? 'zeabur'
+          : 'header';
+
+    return {
+      countryCode,
+      countryName: COUNTRY_NAMES[countryCode] || countryCode,
+      city: request.headers.get('x-vercel-ip-city') || undefined,
+      region: request.headers.get('x-vercel-ip-region') || undefined,
+      detectionMethod: method as UserLocation['detectionMethod'],
+    };
+  }
+
+  // Fallback to US if no country detected
+  console.warn('Could not detect country, falling back to US');
+  return {
+    countryCode: 'US',
+    countryName: 'United States',
+    detectionMethod: 'fallback',
+  };
+}
+
+/**
+ * Detect user's location from IP address (server-side)
+ * Uses free IP geolocation APIs
+ */
+export async function detectLocationFromIP(ipAddress: string): Promise<UserLocation> {
+  try {
+    // Try ipapi.co (free tier: 1000 requests/day)
+    const response = await fetch(`https://ipapi.co/${ipAddress}/json/`, {
+      headers: {
+        'User-Agent': 'pho.chat/1.0',
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.country_code && data.country_code !== 'XX') {
+        return {
+          countryCode: data.country_code,
+          countryName: data.country_name || COUNTRY_NAMES[data.country_code] || data.country_code,
+          city: data.city,
+          region: data.region,
+          timezone: data.timezone,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          detectionMethod: 'header',
+        };
+      }
+    }
+  } catch (error) {
+    console.error('IP geolocation API failed:', error);
+  }
+
+  // Fallback to US
+  return {
+    countryCode: 'US',
+    countryName: 'United States',
+    detectionMethod: 'fallback',
+  };
+}
+
+/**
+ * Get user's IP address from request
+ */
+export function getUserIP(request: NextRequest): string | null {
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('x-vercel-forwarded-for') ||
+    null
+  );
+}
+
+/**
+ * Validate country code format
+ */
+export function isValidCountryCode(code: string): boolean {
+  return /^[A-Z]{2}$/.test(code) && code !== 'XX';
+}
+
+/**
+ * Get country name from code
+ */
+export function getCountryName(countryCode: string): string {
+  return COUNTRY_NAMES[countryCode] || countryCode;
+}
+
+/**
+ * Detect location with caching support
+ */
+export class LocationDetector {
+  private cache: Map<string, { location: UserLocation; timestamp: number }> = new Map();
+  private readonly CACHE_TTL = 3600000; // 1 hour in milliseconds
+
+  /**
+   * Detect location with caching
+   */
+  async detect(request: NextRequest): Promise<UserLocation> {
+    const ip = getUserIP(request);
+    const cacheKey = ip || 'unknown';
+
+    // Check cache
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return cached.location;
+    }
+
+    // Detect location
+    const location = detectUserLocation(request);
+
+    // Cache result
+    this.cache.set(cacheKey, {
+      location,
+      timestamp: Date.now(),
+    });
+
+    // Clean old cache entries
+    this.cleanCache();
+
+    return location;
+  }
+
+  /**
+   * Clean expired cache entries
+   */
+  private cleanCache() {
+    const now = Date.now();
+    for (const [key, value] of this.cache.entries()) {
+      if (now - value.timestamp > this.CACHE_TTL) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  /**
+   * Clear all cache
+   */
+  clearCache() {
+    this.cache.clear();
+  }
+}
+
+// Export singleton instance
+export const locationDetector = new LocationDetector();
+

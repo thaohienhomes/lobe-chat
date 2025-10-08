@@ -470,6 +470,7 @@ export default {
     },
     plans: {
       title: '套餐与定价',
+      upgrade: '升级',
     },
     title: '订阅管理',
   },

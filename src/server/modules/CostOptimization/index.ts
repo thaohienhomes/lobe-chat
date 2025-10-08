@@ -37,39 +37,40 @@ export const MODEL_COSTS = {
 } as const;
 
 // Vietnamese market pricing strategy
+// Updated 2025-01-08: Price increase to cover operational costs and prepare for advanced features
 export const VND_PRICING_TIERS = {
   premium: {
+
+    // 15M tokens/month
+    dailyBudget: 500_000,
+
+    // ~$5.34 USD (updated from $4.00)
+    monthlyUSD: 5.34,
+
+    monthlyVND: 129_000, // Updated: +30.3% from 99,000 VND
+    tokenBudget: 15_000_000, // ~500K tokens/day
+  },
+  starter: {
 
     // 5M tokens/month
     dailyBudget: 166_667,
 
-    // ~$2.40 USD
-    monthlyUSD: 2.4,
+    // ~$1.61 USD (updated from $1.20)
+    monthlyUSD: 1.61,
 
-    monthlyVND: 58_000,
+    monthlyVND: 39_000, // Updated: +34.5% from 29,000 VND
     tokenBudget: 5_000_000, // ~167K tokens/day
-  },
-  starter: {
-
-    // 2M tokens/month
-    dailyBudget: 66_667,
-
-    // ~$1.20 USD
-    monthlyUSD: 1.2,
-
-    monthlyVND: 29_000,
-    tokenBudget: 2_000_000, // ~67K tokens/day
   },
   ultimate: {
 
-    // 12M tokens/month
-    dailyBudget: 400_000,
+    // 35M tokens/month
+    dailyBudget: 1_166_667,
 
-    // ~$4.80 USD
-    monthlyUSD: 4.8,
+    // ~$14.44 USD (updated from $11.60)
+    monthlyUSD: 14.44,
 
-    monthlyVND: 116_000,
-    tokenBudget: 12_000_000, // 400K tokens/day
+    monthlyVND: 349_000, // Updated: +20.8% from 289,000 VND
+    tokenBudget: 35_000_000, // ~1.17M tokens/day
   }
 } as const;
 
@@ -298,7 +299,7 @@ export class CostOptimizationEngine {
  * Usage tracking middleware for tRPC integration
  */
 export class UsageTracker {
-  constructor(private db: any, private userId: string) {}
+  constructor(private db: any, private userId: string) { }
 
   async trackUsage(request: {
     costUSD: number;

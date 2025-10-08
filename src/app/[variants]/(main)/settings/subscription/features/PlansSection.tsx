@@ -4,9 +4,12 @@ import { Button } from '@lobehub/ui';
 import { Badge, Card, Divider, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import { Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
+
+import { getTopModelsForPlan, generateFeatureText } from '@/utils/messageCalculator';
 
 const { Title, Text } = Typography;
 
@@ -47,22 +50,34 @@ const useStyles = createStyles(({ css, token }) => ({
 
     &.popular {
       border-color: ${token.colorPrimary};
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 12%);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 8%);
     }
   `,
 
   popularBadge: css`
     position: absolute;
-    z-index: 1;
-    inset-block-start: -12px;
-    inset-inline-start: 50%;
+    top: -12px;
+    left: 50%;
     transform: translateX(-50%);
+    background: ${token.colorPrimary};
+    color: white;
+    padding: 4px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
   `,
 
   price: css`
     font-size: 32px;
     font-weight: 700;
     color: ${token.colorText};
+    line-height: 1;
+  `,
+
+  priceUnit: css`
+    font-size: 16px;
+    font-weight: 400;
+    color: ${token.colorTextSecondary};
   `,
 }));
 
@@ -70,150 +85,193 @@ interface PlansSectionProps {
   mobile?: boolean;
 }
 
+// Generate dynamic plans with accurate message calculations
+const generatePlanFeatures = (planId: 'starter' | 'premium' | 'ultimate') => {
+  const { budgetModels, premiumModels } = getTopModelsForPlan(planId, 3, 3);
+  
+  const features = [
+    // Budget Models Section
+    '📱 Budget Models (High Volume):',
+    ...budgetModels.slice(0, 3).map(model => `• ${generateFeatureText(model)}`),
+    '',
+    // Premium Models Section  
+    '🚀 Premium Models (High Quality):',
+    ...premiumModels.slice(0, 3).map(model => `• ${generateFeatureText(model)}`),
+    '',
+    // Storage & Features
+    '💾 Storage & Features:',
+    planId === 'starter' ? '• File Storage - 1.0 GB' : 
+    planId === 'premium' ? '• File Storage - 2.0 GB' : '• File Storage - 4.0 GB',
+    planId === 'starter' ? '• Vector Storage - 5,000 entries' :
+    planId === 'premium' ? '• Vector Storage - 10,000 entries' : '• Vector Storage - 20,000 entries',
+    '• Knowledge Base & File Upload',
+    '• Mix & match models based on needs',
+  ];
+
+  return features;
+};
+
 const plans = [
   {
     computeCredits: '5,000,000 / Month',
-    description: 'Suitable for users who occasionally use AI features',
-    features: [
-      'GPT-4o mini - Approx 7,000 messages',
-      'DeepSeek R1 - Approx 1,900 messages',
-      'See more models in the plan comparison',
-      'Use file and knowledge base features in conversations',
-      'File Storage - 1.0 GB',
-      'Vector Storage - 5,000 entry ≈ 50MB',
-      'Global mainstream model custom API services',
-    ],
+    description: 'Perfect for occasional AI users and students',
+    features: generatePlanFeatures('starter'),
     id: 'starter',
-    monthlyPrice: 9.9,
+    monthlyPriceVND: 39_000,
     name: 'Starter',
-    yearlyDiscount: '23% off',
-    yearlyPrice: 118.8,
+    yearlyDiscount: '17% off',
+    yearlyPriceVND: 390_000,
+    highlight: 'Most Popular for Students',
   },
   {
     computeCredits: '15,000,000 / Month',
-    description: 'Designed for professional users who frequently use AI features',
-    features: [
-      'GPT-4o mini - Approx 21,100 messages',
-      'DeepSeek R1 - Approx 5,800 messages',
-      'See more models in the plan comparison',
-      'Use file and knowledge base features in conversations',
-      'File Storage - 2.0 GB',
-      'Vector Storage - 10,000 entry ≈ 100MB',
-      'Global mainstream model custom API services',
-    ],
+    description: 'Designed for professional users and content creators',
+    features: generatePlanFeatures('premium'),
     id: 'premium',
-    monthlyPrice: 19.9,
+    monthlyPriceVND: 129_000,
     name: 'Premium',
     popular: true,
-    yearlyDiscount: '20% off',
-    yearlyPrice: 238.8,
+    yearlyDiscount: '17% off',
+    yearlyPriceVND: 1_290_000,
+    highlight: 'Best Value for Professionals',
   },
   {
     computeCredits: '35,000,000 / Month',
-    description: 'For heavy users requiring extensive AI complex conversations',
-    features: [
-      'GPT-4o mini - Approx 49,100 messages',
-      'DeepSeek R1 - Approx 13,400 messages',
-      'See more models in the plan comparison',
-      'Use file and knowledge base features in conversations',
-      'File Storage - 4.0 GB',
-      'Vector Storage - 20,000 entry ≈ 200MB',
-      'Global mainstream model custom API services',
-    ],
+    description: 'For enterprises, developers, and AI researchers',
+    features: generatePlanFeatures('ultimate'),
     id: 'ultimate',
-    monthlyPrice: 39.9,
+    monthlyPriceVND: 349_000,
     name: 'Ultimate',
-    yearlyDiscount: '20% off',
-    yearlyPrice: 478.8,
+    yearlyDiscount: '17% off',
+    yearlyPriceVND: 3_490_000,
+    highlight: 'Maximum AI Power',
   },
 ];
-
-const handleUpgrade = (planId: string) => {
-  // Navigate to checkout page for better UX
-  window.location.href = `/subscription/checkout?plan=${planId}`;
-};
 
 const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
   const { t } = useTranslation('setting');
   const { styles } = useStyles();
+  const router = useRouter();
+
+  const handleUpgrade = (planId: string) => {
+    // Navigate to checkout page for better UX
+    router.push(`/subscription/checkout?plan=${planId}`);
+  };
 
   return (
-    <Flexbox gap={24}>
-      <Flexbox align="center" gap={16} horizontal justify="center">
+    <Flexbox gap={24} width="100%">
+      <Flexbox align="center" gap={8} horizontal>
         <Title level={3} style={{ margin: 0 }}>
-          {t('subscription.plans.title')}
+          {t('subscription.plans.title', { ns: 'setting' })}
         </Title>
-        <Badge color="green" text="Maximum discount of 37%" />
+        <Badge count="New Pricing" style={{ backgroundColor: '#52c41a' }} />
       </Flexbox>
 
-      <Flexbox
-        gap={24}
-        horizontal={!mobile}
+      <div
         style={{
-          flexWrap: mobile ? 'nowrap' : 'wrap',
-          justifyContent: 'center',
+          display: 'grid',
+          gap: mobile ? 16 : 24,
+          gridTemplateColumns: mobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
         }}
       >
         {plans.map((plan) => (
           <Card
-            className={`${styles.planCard} ${plan.popular ? 'popular' : ''}`}
             key={plan.id}
-            style={{
-              flex: mobile ? 'none' : '1',
-              maxWidth: mobile ? '280px' : '350px',
-              minWidth: mobile ? '280px' : '300px',
-            }}
+            className={`${styles.planCard} ${plan.popular ? 'popular' : ''}`}
+            style={{ padding: mobile ? 16 : 24 }}
           >
             {plan.popular && (
-              <Badge className={styles.popularBadge} color="gold" text="Most Popular" />
+              <div className={styles.popularBadge}>
+                Most Popular
+              </div>
             )}
 
-            <Flexbox gap={16} paddingBlock={plan.popular ? 24 : 16}>
+            <Flexbox gap={16}>
+              {/* Plan Header */}
               <Flexbox gap={8}>
                 <Title level={4} style={{ margin: 0 }}>
                   {plan.name}
                 </Title>
                 <Text type="secondary">{plan.description}</Text>
+                {plan.highlight && (
+                  <Badge count={plan.highlight} style={{ backgroundColor: '#1890ff' }} />
+                )}
               </Flexbox>
 
+              {/* Pricing */}
               <Flexbox gap={4}>
-                <Flexbox align="baseline" gap={8} horizontal>
-                  <span className={styles.price}>${plan.monthlyPrice}</span>
-                  <Text type="secondary">/ Month (Yearly)</Text>
-                </Flexbox>
-                <Flexbox align="center" gap={8} horizontal>
-                  <span className={styles.originalPrice}>${plan.yearlyPrice} / Year</span>
-                  <span className={styles.discount}>{plan.yearlyDiscount}</span>
-                </Flexbox>
+                <div>
+                  <span className={styles.price}>
+                    {plan.monthlyPriceVND.toLocaleString()}
+                  </span>
+                  <span className={styles.priceUnit}> VND/month</span>
+                </div>
+                <Text className={styles.discount}>
+                  {plan.yearlyDiscount} • {plan.yearlyPriceVND.toLocaleString()} VND/year
+                </Text>
               </Flexbox>
-
-              <Button
-                block
-                onClick={() => handleUpgrade(plan.id)}
-                size="large"
-                type={plan.popular ? 'primary' : 'default'}
-              >
-                Upgrade
-              </Button>
 
               <Divider style={{ margin: '8px 0' }} />
 
-              <Flexbox gap={8}>
-                <Text strong>Compute Credits</Text>
+              {/* Compute Credits */}
+              <Flexbox gap={4}>
+                <Text strong>Compute Credits:</Text>
                 <Text>{plan.computeCredits}</Text>
               </Flexbox>
 
+              {/* Features */}
               <Flexbox gap={8}>
-                {plan.features.map((feature, index) => (
-                  <div className={styles.feature} key={index}>
-                    <Check size={16} />
-                    <Text style={{ fontSize: '14px' }}>{feature}</Text>
-                  </div>
-                ))}
+                {plan.features.map((feature, index) => {
+                  // Handle section headers (without bullet points)
+                  if (feature.includes(':') && !feature.startsWith('•')) {
+                    return (
+                      <Text key={index} strong style={{ marginTop: index > 0 ? 8 : 0 }}>
+                        {feature}
+                      </Text>
+                    );
+                  }
+                  
+                  // Handle empty lines for spacing
+                  if (feature === '') {
+                    return <div key={index} style={{ height: 4 }} />;
+                  }
+
+                  // Handle feature items
+                  return (
+                    <div key={index} className={styles.feature}>
+                      <Check size={16} />
+                      <Text>{feature.replace('• ', '')}</Text>
+                    </div>
+                  );
+                })}
               </Flexbox>
+
+              {/* CTA Button */}
+              <Button
+                block
+                size="large"
+                type={plan.popular ? 'primary' : 'default'}
+                onClick={() => handleUpgrade(plan.id)}
+                style={{ marginTop: 16 }}
+              >
+                {plan.popular ? 'Choose Premium' : `Choose ${plan.name}`}
+              </Button>
             </Flexbox>
           </Card>
         ))}
+      </div>
+
+      {/* Additional Info */}
+      <Flexbox gap={8} style={{ marginTop: 16 }}>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          💡 <strong>Mix & match models:</strong> Use budget models for simple tasks, premium models for complex work.
+        </Text>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          🔄 <strong>Flexible usage:</strong> Switch between models anytime based on your needs.
+        </Text>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          💰 <strong>73% cheaper</strong> than ChatGPT Plus and Claude Pro.
+        </Text>
       </Flexbox>
     </Flexbox>
   );

@@ -58,9 +58,9 @@ const useStyles = createStyles(({ css, token }) => ({
 }));
 
 const plans = {
-  premium: { monthlyPrice: 19.9, name: 'Premium', yearlyPrice: 238.8 },
-  starter: { monthlyPrice: 9.9, name: 'Starter', yearlyPrice: 118.8 },
-  ultimate: { monthlyPrice: 39.9, name: 'Ultimate', yearlyPrice: 478.8 },
+  premium: { monthlyPriceVND: 99_000, name: 'Premium', yearlyPriceVND: 990_000 },
+  starter: { monthlyPriceVND: 29_000, name: 'Starter', yearlyPriceVND: 290_000 },
+  ultimate: { monthlyPriceVND: 289_000, name: 'Ultimate', yearlyPriceVND: 2_890_000 },
 };
 
 function CheckoutContent() {
@@ -95,8 +95,8 @@ function CheckoutContent() {
     if (!plan) return;
     setLoading(true);
     try {
-      const price = billingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice * 12;
-      const vndAmount = Math.round(price * 25_000);
+      // Use direct VND amounts based on plan pricing
+      const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
 
       const response = await fetch('/api/payment/sepay/create', {
         body: JSON.stringify({
@@ -156,10 +156,10 @@ function CheckoutContent() {
     );
   }
 
-  const currentPrice = billingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice * 12;
-  const monthlyEquivalent = billingCycle === 'yearly' ? plan.yearlyPrice / 12 : plan.monthlyPrice;
-  const savings = billingCycle === 'yearly' ? plan.monthlyPrice * 12 - plan.yearlyPrice : 0;
-  const vndAmount = Math.round(currentPrice * 25_000);
+  const currentPriceVND = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
+  const monthlyEquivalentVND = billingCycle === 'yearly' ? plan.yearlyPriceVND / 12 : plan.monthlyPriceVND;
+  const savingsVND = billingCycle === 'yearly' ? plan.monthlyPriceVND * 12 - plan.yearlyPriceVND : 0;
+  const vndAmount = currentPriceVND;
 
   return (
     <div className={styles.container}>
@@ -170,33 +170,46 @@ function CheckoutContent() {
               Back
             </Button>
             <Title level={2} style={{ margin: 0 }}>
-              Complete Your Purchase
+              Hoàn tất Thanh toán
             </Title>
           </Flexbox>
 
           <Card className={styles.checkoutCard}>
             <div className={styles.planSummary}>
-              <Title level={4}>Order Summary</Title>
+              <Title level={4}>Tóm tắt Đơn hàng</Title>
               <div className={styles.priceRow}>
                 <Text>{plan.name} Plan</Text>
-                <Text>${currentPrice.toFixed(2)}</Text>
+                <Text>
+                  {new Intl.NumberFormat('vi-VN', {
+                    currency: 'VND',
+                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 0,
+                    style: 'currency'
+                  }).format(currentPriceVND)}
+                </Text>
               </div>
-              {savings > 0 && (
+              {savingsVND > 0 && (
                 <div className={styles.priceRow}>
-                  <Text type="success">Yearly Discount</Text>
-                  <Text type="success">-${savings.toFixed(2)}</Text>
+                  <Text type="success">Giảm giá hàng năm</Text>
+                  <Text type="success">
+                    -{new Intl.NumberFormat('vi-VN', {
+                      currency: 'VND',
+                      maximumFractionDigits: 0,
+                      minimumFractionDigits: 0,
+                      style: 'currency'
+                    }).format(savingsVND)}
+                  </Text>
                 </div>
               )}
               <div className={styles.priceRow}>
-                <Text strong>Total (USD)</Text>
-                <Text strong>${currentPrice.toFixed(2)}</Text>
-              </div>
-              <div className={styles.priceRow}>
-                <Text strong>Total (VND)</Text>
+                <Text strong>Tổng cộng</Text>
                 <Text strong>
-                  {new Intl.NumberFormat('vi-VN', { currency: 'VND', style: 'currency' }).format(
-                    vndAmount,
-                  )}
+                  {new Intl.NumberFormat('vi-VN', {
+                    currency: 'VND',
+                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 0,
+                    style: 'currency'
+                  }).format(vndAmount)}
                 </Text>
               </div>
             </div>
@@ -211,16 +224,28 @@ function CheckoutContent() {
                 >
                   <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="yearly">
                     <div>
-                      <div>Yearly</div>
+                      <div>Hàng năm</div>
                       <div style={{ color: '#666', fontSize: 12 }}>
-                        ${monthlyEquivalent.toFixed(2)}/month
+                        {new Intl.NumberFormat('vi-VN', {
+                          currency: 'VND',
+                          maximumFractionDigits: 0,
+                          minimumFractionDigits: 0,
+                          style: 'currency'
+                        }).format(monthlyEquivalentVND)}/tháng
                       </div>
                     </div>
                   </Radio.Button>
                   <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="monthly">
                     <div>
-                      <div>Monthly</div>
-                      <div style={{ color: '#666', fontSize: 12 }}>${plan.monthlyPrice}/month</div>
+                      <div>Hàng tháng</div>
+                      <div style={{ color: '#666', fontSize: 12 }}>
+                        {new Intl.NumberFormat('vi-VN', {
+                          currency: 'VND',
+                          maximumFractionDigits: 0,
+                          minimumFractionDigits: 0,
+                          style: 'currency'
+                        }).format(plan.monthlyPriceVND)}/tháng
+                      </div>
                     </div>
                   </Radio.Button>
                 </Radio.Group>
@@ -262,14 +287,19 @@ function CheckoutContent() {
                 type="primary"
               >
                 {loading
-                  ? 'Processing...'
-                  : `Pay ${new Intl.NumberFormat('vi-VN', { currency: 'VND', style: 'currency' }).format(vndAmount)}`}
+                  ? 'Đang xử lý...'
+                  : `Thanh toán ${new Intl.NumberFormat('vi-VN', {
+                      currency: 'VND',
+                      maximumFractionDigits: 0,
+                      minimumFractionDigits: 0,
+                      style: 'currency'
+                    }).format(vndAmount)}`}
               </Button>
 
               <div className={styles.securityNote}>
                 <Shield size={16} />
                 <Text>
-                  Secure payment powered by Sepay. Your payment information is encrypted and secure.
+                  Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật.
                 </Text>
               </div>
             </Form>

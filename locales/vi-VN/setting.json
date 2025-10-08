@@ -493,7 +493,24 @@
       }
     },
     "plans": {
-      "title": "Gói Đăng Ký"
+      "title": "Gói Đăng Ký",
+      "monthly": "Hàng tháng",
+      "yearly": "Hàng năm",
+      "yearlyDiscount": "Giảm giá hàng năm",
+      "upgrade": "Nâng cấp",
+      "popular": "Phổ biến"
+    },
+    "compare": {
+      "title": "So sánh Gói"
+    },
+    "checkout": {
+      "title": "Hoàn tất Thanh toán",
+      "orderSummary": "Tóm tắt Đơn hàng",
+      "total": "Tổng cộng",
+      "yearlyDiscount": "Giảm giá hàng năm",
+      "processing": "Đang xử lý...",
+      "payButton": "Thanh toán {{amount}}",
+      "securityNote": "Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật."
     },
     "title": "Đăng Ký"
   },

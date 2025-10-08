@@ -124,6 +124,32 @@ export const formatPriceByCurrency = (price?: number, currency?: ModelPriceCurre
   return formatPrice(price);
 };
 
+/**
+ * Format VND currency with proper Vietnamese formatting
+ */
+export const formatVND = (amount: number): string => {
+  if (!amount && amount !== 0) return '--';
+
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+/**
+ * Format VND amount without currency symbol (just the number)
+ */
+export const formatVNDNumber = (amount: number): string => {
+  if (!amount && amount !== 0) return '--';
+
+  return new Intl.NumberFormat('vi-VN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
 export const formatDate = (date?: Date) => {
   if (!date) return '--';
 

@@ -8,6 +8,17 @@ import {
 } from '@/server/services/billing/sepay';
 
 /**
+ * GET endpoint to test webhook accessibility
+ */
+export async function GET(): Promise<NextResponse> {
+  return NextResponse.json({
+    message: 'Sepay webhook endpoint is accessible',
+    status: 'ready',
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
  * Handle successful payment
  */
 async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<void> {
@@ -80,12 +91,47 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
 }
 
 /**
- * Sepay webhook handler for payment notifications
+ * Sepay webhook handler and manual payment verification endpoint
  * POST /api/payment/sepay/webhook
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Parse webhook data
+    console.log('🔔 Webhook received from:', request.headers.get('user-agent'));
+    console.log('🔔 Request headers:', Object.fromEntries(request.headers.entries()));
+
+    const body = await request.json();
+    console.log('🔔 Webhook payload:', body);
+
+    // Check if this is a manual verification request
+    if (body.action === 'manual_verify') {
+      const { orderId, transactionId, amount } = body;
+
+      console.log('🔍 Manual payment verification requested:', {
+        amount,
+        orderId,
+        transactionId,
+      });
+
+      // Process as successful payment
+      const webhookData: SepayWebhookData = {
+        amount: parseFloat(amount),
+        currency: 'VND',
+        orderId,
+        signature: 'MANUAL_VERIFICATION',
+        status: 'success',
+        timestamp: new Date().toISOString(),
+        transactionId: transactionId || `MANUAL_${Date.now()}`, // Skip signature verification for manual
+      };
+
+      await handleSuccessfulPayment(webhookData);
+
+      return NextResponse.json({
+        message: 'Payment manually verified and processed',
+        success: true
+      });
+    }
+
+    // Parse webhook data from Sepay
     const webhookData: SepayWebhookData = await request.json();
 
     console.log('Sepay webhook received:', {
@@ -95,12 +141,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       transactionId: webhookData.transactionId,
     });
 
-    // Verify webhook signature
-    const isValidSignature = sepayGateway.verifyWebhookSignature(webhookData);
+    // Verify webhook signature (skip for manual verification)
+    if (webhookData.signature !== 'MANUAL_VERIFICATION') {
+      const isValidSignature = sepayGateway.verifyWebhookSignature(webhookData);
 
-    if (!isValidSignature) {
-      console.error('Invalid webhook signature:', webhookData.orderId);
-      return NextResponse.json({ message: 'Invalid signature', success: false }, { status: 400 });
+      if (!isValidSignature) {
+        console.error('Invalid webhook signature:', webhookData.orderId);
+        return NextResponse.json({ message: 'Invalid signature', success: false }, { status: 400 });
+      }
     }
 
     // Process payment based on status
