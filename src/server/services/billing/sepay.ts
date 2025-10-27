@@ -32,13 +32,14 @@ export async function createPaymentRecord(params: CreatePaymentRecordParams) {
 export async function updatePaymentStatus(
   orderId: string,
   status: 'success' | 'failed' | 'pending',
-  opts?: { rawWebhook?: any; transactionId?: string },
+  opts?: { rawWebhook?: any; transactionId?: string; maskedCardNumber?: string },
 ) {
   try {
     const db = await getServerDB();
     await db
       .update(sepayPayments)
       .set({
+        maskedCardNumber: opts?.maskedCardNumber,
         rawWebhook: opts?.rawWebhook,
         status,
         transactionId: opts?.transactionId,

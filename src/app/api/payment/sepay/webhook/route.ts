@@ -19,6 +19,17 @@ export async function GET(): Promise<NextResponse> {
 }
 
 /**
+ * Extract masked card number from webhook data
+ */
+function extractMaskedCardNumber(webhookData: SepayWebhookData): string | undefined {
+  // If payment method is credit card, extract masked card from webhook
+  if (webhookData.paymentMethod === 'credit_card' && webhookData.maskedCardNumber) {
+    return webhookData.maskedCardNumber;
+  }
+  return undefined;
+}
+
+/**
  * Handle successful payment
  */
 async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<void> {
@@ -27,6 +38,7 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
 
     // Update payment record status and attach webhook payload
     await updatePaymentStatus(webhookData.orderId, 'success', {
+      maskedCardNumber: extractMaskedCardNumber(webhookData),
       rawWebhook: webhookData,
       transactionId: webhookData.transactionId,
     });

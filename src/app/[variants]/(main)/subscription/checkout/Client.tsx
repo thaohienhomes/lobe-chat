@@ -7,6 +7,7 @@ import { ArrowLeft, CreditCard, Shield } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
+import { CreditCardForm, CreditCardFormData } from '@/components/payment/CreditCardForm';
 
 const { Title, Text } = Typography;
 
@@ -15,11 +16,17 @@ const useStyles = createStyles(({ css, token }) => ({
     margin-block-end: ${token.marginLG}px;
   `,
   container: css`
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
     min-height: 100vh;
     padding: ${token.paddingLG}px;
+
     background: ${token.colorBgLayout};
   `,
   content: css`
+    width: 100%;
     max-width: 800px;
     margin-block: 0;
     margin-inline: auto;
@@ -57,10 +64,11 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 }));
 
+// Updated pricing (2025-01-08): Aligned with new subscription tiers
 const plans = {
-  premium: { monthlyPriceVND: 99_000, name: 'Premium', yearlyPriceVND: 990_000 },
-  starter: { monthlyPriceVND: 29_000, name: 'Starter', yearlyPriceVND: 290_000 },
-  ultimate: { monthlyPriceVND: 289_000, name: 'Ultimate', yearlyPriceVND: 2_890_000 },
+  premium: { monthlyPriceVND: 129_000, name: 'Premium', yearlyPriceVND: 1_290_000 },
+  starter: { monthlyPriceVND: 39_000, name: 'Starter', yearlyPriceVND: 390_000 },
+  ultimate: { monthlyPriceVND: 349_000, name: 'Ultimate', yearlyPriceVND: 3_490_000 },
 };
 
 function CheckoutContent() {
@@ -71,6 +79,7 @@ function CheckoutContent() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>('bank_transfer');
 
   const planId = searchParams.get('plan') as keyof typeof plans;
   const plan = plans[planId];
@@ -91,11 +100,10 @@ function CheckoutContent() {
     }
   }, [planId, plan, user, form, router]);
 
-  const handleSubmit = async (values: any) => {
+  const handleBankTransferSubmit = async (values: any) => {
     if (!plan) return;
     setLoading(true);
     try {
-      // Use direct VND amounts based on plan pricing
       const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
 
       const response = await fetch('/api/payment/sepay/create', {
@@ -118,8 +126,51 @@ function CheckoutContent() {
         message.error(data.message || 'Failed to create payment');
       }
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error('Bank transfer error:', error);
       message.error('Unable to process checkout. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreditCardSubmit = async (cardData: CreditCardFormData) => {
+    if (!plan) return;
+    setLoading(true);
+    try {
+      const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
+      const values = form.getFieldsValue();
+
+      const response = await fetch('/api/payment/sepay/create-credit-card', {
+        body: JSON.stringify({
+          amount: vndAmount,
+          billingCycle,
+          cardCvv: cardData.cardCvv,
+          cardExpiryMonth: cardData.cardExpiryMonth,
+          cardExpiryYear: cardData.cardExpiryYear,
+          cardHolderName: cardData.cardHolderName,
+          cardNumber: cardData.cardNumber,
+          currency: 'VND',
+          customerInfo: { email: values.email, name: values.name, phone: values.phone },
+          planId,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        message.success('Payment processed successfully!');
+        // Redirect to success page or dashboard
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
+      } else {
+        message.error(data.message || 'Failed to process credit card payment');
+      }
+    } catch (error) {
+      console.error('Credit card payment error:', error);
+      message.error('Unable to process credit card payment. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -214,7 +265,7 @@ function CheckoutContent() {
               </div>
             </div>
 
-            <Form form={form} layout="vertical" onFinish={handleSubmit} size="large">
+            <Form form={form} layout="vertical" onFinish={paymentMethod === 'bank_transfer' ? handleBankTransferSubmit : undefined} size="large">
               <Title level={4}>Billing Cycle</Title>
               <Form.Item name="billingCycle">
                 <Radio.Group
@@ -278,23 +329,55 @@ function CheckoutContent() {
                 <Input placeholder="+84 xxx xxx xxx" />
               </Form.Item>
 
-              <Button
-                block
-                htmlType="submit"
-                icon={<CreditCard />}
-                loading={loading}
-                size="large"
-                type="primary"
-              >
-                {loading
-                  ? 'Đang xử lý...'
-                  : `Thanh toán ${new Intl.NumberFormat('vi-VN', {
-                      currency: 'VND',
-                      maximumFractionDigits: 0,
-                      minimumFractionDigits: 0,
-                      style: 'currency'
-                    }).format(vndAmount)}`}
-              </Button>
+              <Divider />
+
+              <Title level={4}>Payment Method</Title>
+              <Form.Item>
+                <Radio.Group
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  style={{ width: '100%' }}
+                  value={paymentMethod}
+                >
+                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="bank_transfer">
+                    <div>
+                      <div>Bank Transfer</div>
+                      <div style={{ color: '#666', fontSize: 12 }}>QR Code</div>
+                    </div>
+                  </Radio.Button>
+                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="credit_card">
+                    <div>
+                      <div>Credit Card</div>
+                      <div style={{ color: '#666', fontSize: 12 }}>Visa/Mastercard</div>
+                    </div>
+                  </Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+
+              {paymentMethod === 'bank_transfer' ? (
+                <Button
+                  block
+                  htmlType="submit"
+                  icon={<CreditCard />}
+                  loading={loading}
+                  size="large"
+                  type="primary"
+                >
+                  {loading
+                    ? 'Đang xử lý...'
+                    : `Thanh toán ${new Intl.NumberFormat('vi-VN', {
+                        currency: 'VND',
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0,
+                        style: 'currency'
+                      }).format(vndAmount)}`}
+                </Button>
+              ) : (
+                <CreditCardForm
+                  amount={vndAmount}
+                  loading={loading}
+                  onSubmit={handleCreditCardSubmit}
+                />
+              )}
 
               <div className={styles.securityNote}>
                 <Shield size={16} />
