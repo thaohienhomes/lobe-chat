@@ -1,10 +1,9 @@
 /**
  * Message Calculator Utility
  * Calculates accurate message limits based on MODEL_COSTS and real USD budgets
- * 
+ *
  * Based on MESSAGE_LIMITS_ANALYSIS.md calculations
  */
-
 import { MODEL_COSTS } from '@/server/modules/CostOptimization';
 
 export interface MessageCalculation {
@@ -117,7 +116,7 @@ export function calculateCostPerMessage(modelKey: string): number {
  */
 export function calculateMessagesForModel(
   modelKey: string,
-  planId: 'starter' | 'premium' | 'ultimate'
+  planId: 'starter' | 'premium' | 'ultimate',
 ): number {
   const budget = PLAN_BUDGETS[planId];
   const costPerMessage = calculateCostPerMessage(modelKey);
@@ -133,9 +132,9 @@ export function calculateMessagesForModel(
  * Calculate all message limits for a specific plan
  */
 export function calculateMessagesForPlan(
-  planId: 'starter' | 'premium' | 'ultimate'
+  planId: 'starter' | 'premium' | 'ultimate',
 ): MessageCalculation[] {
-  return MODEL_CONFIGS.map(config => {
+  return MODEL_CONFIGS.map((config) => {
     const costPerMessage = calculateCostPerMessage(config.key);
     const messagesPerMonth = calculateMessagesForModel(config.key, planId);
 
@@ -158,20 +157,16 @@ export function calculateMessagesForPlan(
 export function getTopModelsForPlan(
   planId: 'starter' | 'premium' | 'ultimate',
   budgetLimit: number = 3,
-  premiumLimit: number = 3
+  premiumLimit: number = 3,
 ): {
   budgetModels: MessageCalculation[];
   premiumModels: MessageCalculation[];
 } {
   const allModels = calculateMessagesForPlan(planId);
 
-  const budgetModels = allModels
-    .filter(m => m.category === 'budget')
-    .slice(0, budgetLimit);
+  const budgetModels = allModels.filter((m) => m.category === 'budget').slice(0, budgetLimit);
 
-  const premiumModels = allModels
-    .filter(m => m.category === 'premium')
-    .slice(0, premiumLimit);
+  const premiumModels = allModels.filter((m) => m.category === 'premium').slice(0, premiumLimit);
 
   return { budgetModels, premiumModels };
 }
@@ -192,9 +187,7 @@ export function formatMessageCount(count: number): string {
 /**
  * Generate feature text for UI display
  */
-export function generateFeatureText(
-  model: MessageCalculation
-): string {
+export function generateFeatureText(model: MessageCalculation): string {
   const formattedCount = formatMessageCount(model.messageCount);
   return `${model.modelName} - ~${formattedCount} messages`;
 }
@@ -202,10 +195,13 @@ export function generateFeatureText(
 /**
  * Get plan comparison data for all plans
  */
-export function getAllPlanComparisons(): Record<string, {
-  budgetModels: MessageCalculation[];
-  premiumModels: MessageCalculation[];
-}> {
+export function getAllPlanComparisons(): Record<
+  string,
+  {
+    budgetModels: MessageCalculation[];
+    premiumModels: MessageCalculation[];
+  }
+> {
   return {
     premium: getTopModelsForPlan('premium'),
     starter: getTopModelsForPlan('starter'),
@@ -219,7 +215,7 @@ export function getAllPlanComparisons(): Record<string, {
 export function calculateCompetitorComparison(planId: 'starter' | 'premium' | 'ultimate') {
   const plan = PLAN_BUDGETS[planId];
   const chatGptPlusUSD = 20; // $20/month
-  const claudeProUSD = 20;   // $20/month
+  const claudeProUSD = 20; // $20/month
 
   const savings = {
     vsChatGptPlus: Math.round((1 - plan.monthlyUSD / chatGptPlusUSD) * 100),
@@ -251,11 +247,11 @@ export function validateCalculations(): {
   // Validate each plan
   for (const planId of ['starter', 'premium', 'ultimate'] as const) {
     const allModels = calculateMessagesForPlan(planId);
-    const budgetModels = allModels.filter(m => m.category === 'budget');
-    const premiumModels = allModels.filter(m => m.category === 'premium');
+    const budgetModels = allModels.filter((m) => m.category === 'budget');
+    const premiumModels = allModels.filter((m) => m.category === 'premium');
 
-    const maxBudgetMessages = Math.max(...budgetModels.map(m => m.messageCount));
-    const maxPremiumMessages = Math.max(...premiumModels.map(m => m.messageCount));
+    const maxBudgetMessages = Math.max(...budgetModels.map((m) => m.messageCount));
+    const maxPremiumMessages = Math.max(...premiumModels.map((m) => m.messageCount));
 
     results.push({
       budgetModels: budgetModels.length,
@@ -287,6 +283,3 @@ export function validateCalculations(): {
     results,
   };
 }
-
-// Export types for use in components
-export type { MessageCalculation, PlanBudget };

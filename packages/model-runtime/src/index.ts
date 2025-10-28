@@ -3,7 +3,7 @@ export { ModelRuntime } from './core/ModelRuntime';
 export { createOpenAICompatibleRuntime } from './core/openaiCompatibleFactory';
 export * from './core/RouterRuntime';
 export * from './helpers';
-export { LobeAgentRouterAI } from './providers/agentrouter';
+// AgentRouter provider removed - file not found
 export { LobeAkashChatAI } from './providers/akashchat';
 export { LobeAnthropicAI } from './providers/anthropic';
 export { LobeAzureAI } from './providers/azureai';

@@ -1,13 +1,12 @@
 /**
  * Optimized Database Service
- * 
+ *
  * Implements database optimization strategies:
  * - Connection pooling with read/write separation
  * - Query optimization and caching
  * - Batch operations
  * - Performance monitoring
  */
-
 import { Pool, PoolClient } from 'pg';
 
 interface DatabaseConfig {
@@ -56,16 +55,15 @@ export class OptimizedDatabase {
       database: config.database,
       host: config.primaryHost,
       // 30% for writes
-idleTimeoutMillis: config.idleTimeoutMs,
-      
-max: Math.floor(config.maxConnections * 0.3), 
-      
-password: config.password,
-      
+      idleTimeoutMillis: config.idleTimeoutMs,
 
-port: config.port,
-      
-user: config.username,
+      max: Math.floor(config.maxConnections * 0.3),
+
+      password: config.password,
+
+      port: config.port,
+
+      user: config.username,
     });
 
     // Read replica pool for reads
@@ -75,44 +73,39 @@ user: config.username,
       database: config.database,
       host: config.readReplicaHost || config.primaryHost,
       // 60% for reads
-idleTimeoutMillis: config.idleTimeoutMs,
-      
-max: Math.floor(config.maxConnections * 0.6), 
-      
-password: config.password,
-      
+      idleTimeoutMillis: config.idleTimeoutMs,
 
-port: config.port,
-      
-user: config.username,
+      max: Math.floor(config.maxConnections * 0.6),
+
+      password: config.password,
+
+      port: config.port,
+
+      user: config.username,
     });
 
     // Analytics pool (optional)
     if (config.analyticsHost) {
       this.analyticsPool = new Pool({
-        
-application_name: 'pho-chat-analytics',
-        
-// Longer idle timeout
-connectionTimeoutMillis: config.connectionTimeoutMs,
-        
-database: config.database,
-        
-host: config.analyticsHost,
-        
-// 10% for analytics
-idleTimeoutMillis: config.idleTimeoutMs * 2,
-        
+        application_name: 'pho-chat-analytics',
 
-max: Math.floor(config.maxConnections * 0.1), 
-        
+        // Longer idle timeout
+        connectionTimeoutMillis: config.connectionTimeoutMs,
 
-password: config.password, 
-        
+        database: config.database,
 
-port: config.port,
-        
-user: config.username,
+        host: config.analyticsHost,
+
+        // 10% for analytics
+        idleTimeoutMillis: config.idleTimeoutMs * 2,
+
+        max: Math.floor(config.maxConnections * 0.1),
+
+        password: config.password,
+
+        port: config.port,
+
+        user: config.username,
       });
     }
 
@@ -137,10 +130,10 @@ user: config.username,
   async query<T = any>(
     sql: string,
     params: any[] = [],
-    options: { cache?: boolean; cacheTTL?: number } = {}
+    options: { cache?: boolean; cacheTTL?: number } = {},
   ): Promise<QueryResult<T>> {
     const startTime = Date.now();
-    
+
     // Check cache first
     if (options.cache) {
       const cached = this.getFromCache(sql, params);
@@ -154,7 +147,7 @@ user: config.username,
     }
 
     const client = await this.readPool.connect();
-    
+
     try {
       const result = await client.query(sql, params);
       const duration = Date.now() - startTime;
@@ -168,7 +161,7 @@ user: config.username,
 
       return {
         duration,
-        rowCount: result.rowCount,
+        rowCount: result.rowCount ?? 0,
         rows: result.rows,
       };
     } finally {
@@ -179,13 +172,10 @@ user: config.username,
   /**
    * Execute write query (uses primary database)
    */
-  async execute<T = any>(
-    sql: string,
-    params: any[] = []
-  ): Promise<QueryResult<T>> {
+  async execute<T = any>(sql: string, params: any[] = []): Promise<QueryResult<T>> {
     const startTime = Date.now();
     const client = await this.writePool.connect();
-    
+
     try {
       const result = await client.query(sql, params);
       const duration = Date.now() - startTime;
@@ -194,7 +184,7 @@ user: config.username,
 
       return {
         duration,
-        rowCount: result.rowCount,
+        rowCount: result.rowCount ?? 0,
         rows: result.rows,
       };
     } finally {
@@ -205,14 +195,11 @@ user: config.username,
   /**
    * Execute analytics query (uses analytics database if available)
    */
-  async analytics<T = any>(
-    sql: string,
-    params: any[] = []
-  ): Promise<QueryResult<T>> {
+  async analytics<T = any>(sql: string, params: any[] = []): Promise<QueryResult<T>> {
     const pool = this.analyticsPool || this.readPool;
     const startTime = Date.now();
     const client = await pool.connect();
-    
+
     try {
       const result = await client.query(sql, params);
       const duration = Date.now() - startTime;
@@ -221,7 +208,7 @@ user: config.username,
 
       return {
         duration,
-        rowCount: result.rowCount,
+        rowCount: result.rowCount ?? 0,
         rows: result.rows,
       };
     } finally {
@@ -232,11 +219,9 @@ user: config.username,
   /**
    * Execute transaction
    */
-  async transaction<T>(
-    callback: (client: PoolClient) => Promise<T>
-  ): Promise<T> {
+  async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
     const client = await this.writePool.connect();
-    
+
     try {
       await client.query('BEGIN');
       const result = await callback(client);
@@ -257,19 +242,21 @@ user: config.username,
     table: string,
     columns: string[],
     values: any[][],
-    batchSize: number = 1000
+    batchSize: number = 1000,
   ): Promise<number> {
     let totalInserted = 0;
-    
+
     for (let i = 0; i < values.length; i += batchSize) {
       const batch = values.slice(i, i + batchSize);
-      
-      const placeholders = batch.map((_, rowIndex) => {
-        const rowPlaceholders = columns.map((_, colIndex) => 
-          `$${rowIndex * columns.length + colIndex + 1}`
-        );
-        return `(${rowPlaceholders.join(', ')})`;
-      }).join(', ');
+
+      const placeholders = batch
+        .map((_, rowIndex) => {
+          const rowPlaceholders = columns.map(
+            (_, colIndex) => `$${rowIndex * columns.length + colIndex + 1}`,
+          );
+          return `(${rowPlaceholders.join(', ')})`;
+        })
+        .join(', ');
 
       const sql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES ${placeholders}`;
       const params = batch.flat();
@@ -332,19 +319,21 @@ user: config.username,
   private getFromCache(sql: string, params: any[]): any | null {
     const key = this.getCacheKey(sql, params);
     const cached = this.queryCache.get(key);
-    
-    if (cached && Date.now() - cached.timestamp < 300_000) { // 5 min TTL
+
+    if (cached && Date.now() - cached.timestamp < 300_000) {
+      // 5 min TTL
       return cached;
     }
-    
+
     if (cached) {
       this.queryCache.delete(key);
     }
-    
+
     return null;
   }
 
-  private setCache(sql: string, params: any[], result: any, ttl: number): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private setCache(sql: string, params: any[], result: any, _ttl: number): void {
     const key = this.getCacheKey(sql, params);
     this.queryCache.set(key, {
       result,
@@ -375,7 +364,7 @@ user: config.username,
    */
   private updateStats(type: 'read' | 'write', duration: number): void {
     this.stats.totalQueries++;
-    
+
     if (type === 'read') {
       this.stats.readQueries++;
     } else {
@@ -383,8 +372,8 @@ user: config.username,
     }
 
     // Update average query time
-    this.stats.averageQueryTime = 
-      (this.stats.averageQueryTime * (this.stats.totalQueries - 1) + duration) / 
+    this.stats.averageQueryTime =
+      (this.stats.averageQueryTime * (this.stats.totalQueries - 1) + duration) /
       this.stats.totalQueries;
   }
 
@@ -467,11 +456,7 @@ user: config.username,
    * Close all connections
    */
   async close(): Promise<void> {
-    await Promise.all([
-      this.writePool.end(),
-      this.readPool.end(),
-      this.analyticsPool?.end(),
-    ]);
+    await Promise.all([this.writePool.end(), this.readPool.end(), this.analyticsPool?.end()]);
   }
 }
 
@@ -485,12 +470,12 @@ export function getOptimizedDatabase(config?: DatabaseConfig): OptimizedDatabase
   if (!dbInstance && config) {
     dbInstance = new OptimizedDatabase(config);
   }
-  
+
   if (!dbInstance) {
     throw new Error('Database not initialized. Provide config on first call.');
   }
-  
+
   return dbInstance;
 }
 
-export type { DatabaseConfig, DatabaseStats,QueryResult };
+export type { DatabaseConfig, DatabaseStats, QueryResult };

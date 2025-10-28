@@ -2,10 +2,11 @@
  * PPP (Purchasing Power Parity) Pricing Service
  * Handles country-specific pricing for pho.chat
  */
-
+/* eslint-disable sort-keys-fix/sort-keys-fix, unicorn/no-zero-fractions */
+import type { LobeChatDatabase } from '@lobechat/database';
 import { eq } from 'drizzle-orm';
+
 import { pppPricing } from '@/database/schemas/billing-multi-market';
-import type { ServerDB } from '@/database/core';
 
 export interface PppPricingData {
   availablePaymentMethods: string[];
@@ -15,9 +16,9 @@ export interface PppPricingData {
   pppMultiplier: number;
   preferredPaymentGateway: string;
   pricing: {
-    premium: { monthly: number; monthlyUsd: number, yearly: number; };
-    starter: { monthly: number; monthlyUsd: number, yearly: number; };
-    ultimate: { monthly: number; monthlyUsd: number, yearly: number; };
+    premium: { monthly: number; monthlyUsd: number; yearly: number };
+    starter: { monthly: number; monthlyUsd: number; yearly: number };
+    ultimate: { monthly: number; monthlyUsd: number; yearly: number };
   };
 }
 
@@ -34,14 +35,16 @@ const BASE_USD_PRICING = {
  * Default PPP multipliers by country
  * Source: World Bank PPP data + Numbeo Cost of Living Index
  */
-export const DEFAULT_PPP_MULTIPLIERS: Record<string, {
-  currency: string;
-  gateway: string;
-  methods: string[];
-  multiplier: number;
-  name: string;
-}> = {
-  
+export const DEFAULT_PPP_MULTIPLIERS: Record<
+  string,
+  {
+    currency: string;
+    gateway: string;
+    methods: string[];
+    multiplier: number;
+    name: string;
+  }
+> = {
   BD: {
     currency: 'BDT',
     gateway: 'stripe',
@@ -49,43 +52,35 @@ export const DEFAULT_PPP_MULTIPLIERS: Record<string, {
     multiplier: 0.32,
     name: 'Bangladesh',
   },
-  
 
-// East Asia
-CN: {
+  // East Asia
+  CN: {
     currency: 'CNY',
     gateway: 'stripe',
     methods: ['card', 'alipay', 'wechat'],
     multiplier: 0.65,
     name: 'China',
   },
-  
 
-
-
-ID: {
+  ID: {
     currency: 'IDR',
     gateway: 'stripe',
     methods: ['card', 'bank_transfer'],
     multiplier: 0.45,
     name: 'Indonesia',
   },
-  
 
-
-// South Asia
-IN: {
+  // South Asia
+  IN: {
     // India - 35% of US purchasing power
-currency: 'INR', 
+    currency: 'INR',
     gateway: 'razorpay',
     methods: ['card', 'upi', 'netbanking', 'wallet'],
     multiplier: 0.35,
     name: 'India',
   },
-  
 
-
-JP: {
+  JP: {
     currency: 'JPY',
     gateway: 'stripe',
     methods: ['card', 'konbini'],
@@ -93,28 +88,23 @@ JP: {
     name: 'Japan',
   },
 
-  
-  
-
-CA: {
+  CA: {
     currency: 'CAD',
     gateway: 'stripe',
     methods: ['card'],
     multiplier: 0.95,
     name: 'Canada',
   },
-  
 
-MY: {
+  MY: {
     currency: 'MYR',
     gateway: 'stripe',
-    multiplier: 0.60,
+    multiplier: 0.6,
     methods: ['card', 'fpx'],
     name: 'Malaysia',
   },
-  
 
-BR: {
+  BR: {
     currency: 'BRL',
     gateway: 'stripe',
     methods: ['card', 'boleto'],
@@ -122,17 +112,15 @@ BR: {
     name: 'Brazil',
   },
 
-  
-  
-TH: {
+  TH: {
     currency: 'THB',
     multiplier: 0.55,
     gateway: 'stripe',
     name: 'Thailand',
     methods: ['card', 'promptpay'],
   },
-  
-AR: {
+
+  AR: {
     currency: 'ARS',
     gateway: 'stripe',
     methods: ['card'],
@@ -140,15 +128,14 @@ AR: {
     name: 'Argentina',
   },
   // Southeast Asia
-VN: {
-    multiplier: 0.40, // Vietnam - 40% of US purchasing power
+  VN: {
+    multiplier: 0.4, // Vietnam - 40% of US purchasing power
     currency: 'VND',
     name: 'Vietnam',
     gateway: 'sepay',
     methods: ['bank_transfer', 'qr_code'],
   },
 
-  
   DE: {
     currency: 'EUR',
     gateway: 'stripe',
@@ -156,33 +143,33 @@ VN: {
     multiplier: 1,
     name: 'Germany',
   },
-  
-ES: {
+
+  ES: {
     currency: 'EUR',
     gateway: 'stripe',
     methods: ['card', 'sepa_debit'],
-    multiplier: 0.90,
+    multiplier: 0.9,
     name: 'Spain',
   },
-  
-PH: {
+
+  PH: {
     multiplier: 0.42,
     currency: 'PHP',
     name: 'Philippines',
     gateway: 'stripe',
     methods: ['card', 'gcash'],
   },
-  
-FR: {
+
+  FR: {
     currency: 'EUR',
     gateway: 'stripe',
     methods: ['card', 'sepa_debit'],
     multiplier: 1,
     name: 'France',
   },
-  
-// Middle East
-AE: {
+
+  // Middle East
+  AE: {
     currency: 'AED',
     gateway: 'stripe',
     multiplier: 0.95,
@@ -190,73 +177,58 @@ AE: {
     name: 'United Arab Emirates',
   },
 
-  
-  
-
-PK: {
-    multiplier: 0.30,
+  PK: {
+    multiplier: 0.3,
     currency: 'PKR',
     name: 'Pakistan',
     gateway: 'stripe',
     methods: ['card'],
   },
-  
 
-
-// Europe
-GB: {
+  // Europe
+  GB: {
     currency: 'GBP',
     gateway: 'stripe',
     methods: ['card', 'bacs'],
     multiplier: 1.05,
     name: 'United Kingdom',
   },
-  
 
-
-
-IT: {
+  IT: {
     currency: 'EUR',
     gateway: 'stripe',
     methods: ['card', 'sepa_debit'],
     multiplier: 0.88,
     name: 'Italy',
   },
-  
 
-
-
-KR: {
+  KR: {
     currency: 'KRW',
     multiplier: 0.95,
     gateway: 'stripe',
     name: 'South Korea',
     methods: ['card'],
   },
-  
 
-
-// Oceania
-AU: {
+  // Oceania
+  AU: {
     currency: 'AUD',
     multiplier: 1.05,
     gateway: 'stripe',
     name: 'Australia',
     methods: ['card', 'becs_debit'],
   },
-  
 
-// Americas
-US: {
-    multiplier: 1.00, // Base reference
+  // Americas
+  US: {
+    multiplier: 1.0, // Base reference
     currency: 'USD',
     name: 'United States',
     gateway: 'stripe',
     methods: ['card', 'ach'],
   },
-  
 
-EG: {
+  EG: {
     currency: 'EGP',
     gateway: 'stripe',
     multiplier: 0.35,
@@ -264,25 +236,23 @@ EG: {
     name: 'Egypt',
   },
 
-  
-  
-MX: {
-    multiplier: 0.50,
+  MX: {
+    multiplier: 0.5,
     currency: 'MXN',
     name: 'Mexico',
     gateway: 'stripe',
     methods: ['card', 'oxxo'],
   },
-  
-NG: {
+
+  NG: {
     currency: 'NGN',
     gateway: 'stripe',
     methods: ['card'],
     multiplier: 0.38,
     name: 'Nigeria',
   },
-  
-NZ: {
+
+  NZ: {
     currency: 'NZD',
     gateway: 'stripe',
     methods: ['card'],
@@ -290,27 +260,23 @@ NZ: {
     name: 'New Zealand',
   },
 
-  
-  
-PL: {
+  PL: {
     currency: 'PLN',
     gateway: 'stripe',
     methods: ['card', 'p24'],
     multiplier: 0.65,
     name: 'Poland',
   },
-  
 
-RU: {
+  RU: {
     currency: 'RUB',
     gateway: 'stripe',
     methods: ['card'],
     multiplier: 0.55,
     name: 'Russia',
   },
-  
 
-SA: {
+  SA: {
     currency: 'SAR',
     gateway: 'stripe',
     methods: ['card'],
@@ -318,9 +284,7 @@ SA: {
     name: 'Saudi Arabia',
   },
 
-  
-  
-TR: {
+  TR: {
     currency: 'TRY',
     gateway: 'stripe',
     methods: ['card'],
@@ -328,7 +292,7 @@ TR: {
     name: 'Turkey',
   },
   // Africa
-ZA: {
+  ZA: {
     currency: 'ZAR',
     gateway: 'stripe',
     methods: ['card'],
@@ -417,7 +381,10 @@ export function calculatePppPricing(countryCode: string): PppPricingData {
 /**
  * Get PPP pricing from database or calculate default
  */
-export async function getPppPricing(db: ServerDB, countryCode: string): Promise<PppPricingData> {
+export async function getPppPricing(
+  db: LobeChatDatabase,
+  countryCode: string,
+): Promise<PppPricingData> {
   try {
     // Try to get from database first
     const result = await db
@@ -461,4 +428,3 @@ export async function getPppPricing(db: ServerDB, countryCode: string): Promise<
   // Fallback to calculated pricing
   return calculatePppPricing(countryCode);
 }
-

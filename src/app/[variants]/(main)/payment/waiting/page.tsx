@@ -1,11 +1,14 @@
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 'use client';
 
+import { Button } from '@lobehub/ui';
 import { Clock, QrCode, RefreshCw } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
-import { Button } from '@lobehub/ui';
 import { useServerConfigStore } from '@/store/serverConfig';
+
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 
 interface PaymentStatus {
   message?: string;
@@ -13,6 +16,12 @@ interface PaymentStatus {
   status: 'waiting' | 'success' | 'failed' | 'timeout';
   transactionId?: string;
 }
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
 
 export default function PaymentWaitingPage() {
   const router = useRouter();
@@ -38,7 +47,7 @@ export default function PaymentWaitingPage() {
   // Debug log (only on client)
   useEffect(() => {
     if (mounted) {
-      console.log('🎯 Waiting page params:', { variants, orderId, amount, qrCodeUrl });
+      console.log('🎯 Waiting page params:', { amount, orderId, qrCodeUrl, variants });
     }
   }, [mounted, variants, orderId, amount, qrCodeUrl]);
 
@@ -92,7 +101,7 @@ export default function PaymentWaitingPage() {
   // Countdown timer
   useEffect(() => {
     if (timeLeft <= 0) {
-      setPaymentStatus({ orderId, status: 'timeout' });
+      setPaymentStatus({ orderId: orderId || undefined, status: 'timeout' });
       setPolling(false);
       return;
     }
@@ -108,12 +117,6 @@ export default function PaymentWaitingPage() {
       return () => clearInterval(interval);
     }
   }, [polling, paymentStatus.status, checkPaymentStatus]);
-
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
 
   const handleRetry = () => {
     router.push(`/${variants}/subscription/checkout`);
@@ -153,7 +156,9 @@ export default function PaymentWaitingPage() {
 
         // Redirect to success page after 2 seconds
         setTimeout(() => {
-          router.push(`/${variants}/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`);
+          router.push(
+            `/${variants}/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`,
+          );
         }, 2000);
       } else {
         alert(`Verification failed: ${data.message}`);
@@ -168,17 +173,21 @@ export default function PaymentWaitingPage() {
 
   if (paymentStatus.status === 'success') {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        padding: '24px',
-        background: '#f5f5f5'
-      }}>
+      <div
+        style={{
+          alignItems: 'center',
+          background: '#f5f5f5',
+          display: 'flex',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: '24px',
+        }}
+      >
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '60px', marginBottom: '16px' }}>✅</div>
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>Thanh toán thành công!</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
+            Thanh toán thành công!
+          </h2>
           <p style={{ color: '#666' }}>Đang chuyển hướng đến trang xác nhận...</p>
         </div>
       </div>
@@ -187,27 +196,29 @@ export default function PaymentWaitingPage() {
 
   if (paymentStatus.status === 'failed' || paymentStatus.status === 'timeout') {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        padding: '24px',
-        background: '#f5f5f5'
-      }}>
-        <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+      <div
+        style={{
+          alignItems: 'center',
+          background: '#f5f5f5',
+          display: 'flex',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: '24px',
+        }}
+      >
+        <div style={{ maxWidth: '600px', textAlign: 'center' }}>
           <div style={{ fontSize: '60px', marginBottom: '16px' }}>❌</div>
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
-            {paymentStatus.status === 'timeout' ? 'Hết thời gian thanh toán' : 'Thanh toán thất bại'}
+            {paymentStatus.status === 'timeout'
+              ? 'Hết thời gian thanh toán'
+              : 'Thanh toán thất bại'}
           </h2>
-          <p style={{ color: '#666', marginBottom: '24px' }}>{paymentStatus.message || 'Vui lòng thử lại hoặc liên hệ hỗ trợ'}</p>
+          <p style={{ color: '#666', marginBottom: '24px' }}>
+            {paymentStatus.message || 'Vui lòng thử lại hoặc liên hệ hỗ trợ'}
+          </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <Button onClick={handleRetry}>
-              Thử lại
-            </Button>
-            <Button onClick={handleCancel}>
-              Hủy bỏ
-            </Button>
+            <Button onClick={handleRetry}>Thử lại</Button>
+            <Button onClick={handleCancel}>Hủy bỏ</Button>
           </div>
         </div>
       </div>
@@ -217,36 +228,42 @@ export default function PaymentWaitingPage() {
   // Prevent hydration mismatch - don't render until mounted
   if (!mounted) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: '#f5f5f5'
-      }}>
+      <div
+        style={{
+          alignItems: 'center',
+          background: '#f5f5f5',
+          display: 'flex',
+          justifyContent: 'center',
+          minHeight: '100vh',
+        }}
+      >
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
       </div>
     );
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      padding: '24px',
-      background: '#f5f5f5'
-    }}>
-      <div style={{
-        maxWidth: '600px',
-        width: '100%',
-        background: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        padding: '32px',
-        textAlign: 'center'
-      }}>
+    <div
+      style={{
+        alignItems: 'center',
+        background: '#f5f5f5',
+        display: 'flex',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '24px',
+      }}
+    >
+      <div
+        style={{
+          background: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          maxWidth: '600px',
+          padding: '32px',
+          textAlign: 'center',
+          width: '100%',
+        }}
+      >
         <div className="mb-6">
           <Clock className="mx-auto mb-4 text-blue-500" size={48} />
           <h2 className="text-2xl font-bold mb-2">Đang chờ thanh toán</h2>
@@ -305,11 +322,13 @@ export default function PaymentWaitingPage() {
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold">Số tiền:</span>
             <span className="text-lg font-semibold text-blue-600">
-              {amount ? new Intl.NumberFormat('vi-VN', {
-                currency: 'VND',
-                maximumFractionDigits: 0,
-                style: 'currency',
-              }).format(parseInt(amount)) : 'Đang tải...'}
+              {amount
+                ? new Intl.NumberFormat('vi-VN', {
+                    currency: 'VND',
+                    maximumFractionDigits: 0,
+                    style: 'currency',
+                  }).format(parseInt(amount))
+                : 'Đang tải...'}
             </span>
           </div>
           <div className="flex justify-between items-center mb-2">
@@ -347,8 +366,8 @@ export default function PaymentWaitingPage() {
           <div className="mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
             <h4 className="text-lg font-semibold mb-2 text-yellow-800">Đã hoàn tất thanh toán?</h4>
             <p className="text-sm text-yellow-700 mb-3">
-              Nếu bạn đã chuyển khoản thành công nhưng hệ thống chưa cập nhật,
-              bạn có thể xác nhận thủ công để kích hoạt ngay gói dịch vụ.
+              Nếu bạn đã chuyển khoản thành công nhưng hệ thống chưa cập nhật, bạn có thể xác nhận
+              thủ công để kích hoạt ngay gói dịch vụ.
             </p>
             <Button
               className="bg-yellow-600 hover:bg-yellow-700"
@@ -365,9 +384,7 @@ export default function PaymentWaitingPage() {
           <Button disabled={!polling} onClick={checkPaymentStatus}>
             Kiểm tra ngay
           </Button>
-          <Button onClick={handleCancel}>
-            Hủy thanh toán
-          </Button>
+          <Button onClick={handleCancel}>Hủy thanh toán</Button>
         </div>
       </div>
     </div>

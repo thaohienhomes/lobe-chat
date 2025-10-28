@@ -1,6 +1,6 @@
 /**
  * Performance Monitoring System
- * 
+ *
  * Real-time monitoring and metrics collection:
  * - Request/response metrics
  * - System performance tracking
@@ -8,6 +8,9 @@
  * - Cost optimization metrics
  * - User experience monitoring
  */
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type NodeJS = NodeJS.Timeout;
 
 interface PerformanceMetrics {
   activeUsers: number;
@@ -61,11 +64,7 @@ export class PerformanceMonitor {
   /**
    * Record a metric data point
    */
-  recordMetric(
-    name: string, 
-    value: number, 
-    tags?: Record<string, string>
-  ): void {
+  recordMetric(name: string, value: number, tags?: Record<string, string>): void {
     if (!this.metrics.has(name)) {
       this.metrics.set(name, []);
     }
@@ -89,20 +88,15 @@ export class PerformanceMonitor {
   /**
    * Track request performance
    */
-  trackRequest(
-    duration: number,
-    success: boolean,
-    model?: string,
-    userId?: string
-  ): void {
-    this.recordMetric('request_duration_ms', duration, { 
-      model, 
-      success: success.toString() 
+  trackRequest(duration: number, success: boolean, model?: string, userId?: string): void {
+    this.recordMetric('request_duration_ms', duration, {
+      model: model ?? 'unknown',
+      success: success.toString(),
     });
-    
-    this.recordMetric('requests_total', 1, { 
-      model, 
-      success: success.toString() 
+
+    this.recordMetric('requests_total', 1, {
+      model: model ?? 'unknown',
+      success: success.toString(),
     });
 
     if (userId) {
@@ -114,24 +108,19 @@ export class PerformanceMonitor {
    * Track cache performance
    */
   trackCache(hit: boolean, model?: string): void {
-    this.recordMetric('cache_requests', 1, { 
-      hit: hit.toString(), 
-      model 
+    this.recordMetric('cache_requests', 1, {
+      hit: hit.toString(),
+      model: model ?? 'unknown',
     });
   }
 
   /**
    * Track cost metrics
    */
-  trackCost(
-    costUSD: number, 
-    model: string, 
-    userId: string,
-    tokens: number
-  ): void {
-    this.recordMetric('cost_usd', costUSD, { model, userId });
-    this.recordMetric('tokens_used', tokens, { model, userId });
-    this.recordMetric('cost_per_token', costUSD / tokens, { model });
+  trackCost(costUSD: number, model: string, userId: string, tokens: number): void {
+    this.recordMetric('cost_usd', costUSD, { model: model ?? 'unknown', userId });
+    this.recordMetric('tokens_used', tokens, { model: model ?? 'unknown', userId });
+    this.recordMetric('cost_per_token', costUSD / tokens, { model: model ?? 'unknown' });
   }
 
   /**
@@ -206,23 +195,23 @@ export class PerformanceMonitor {
     this.alertRules = [
       {
         action: 'log',
-        
-duration: 60, 
-        
-metric: 'request_duration_ms',
+
+        duration: 60,
+
+        metric: 'request_duration_ms',
         // 2 seconds
-operator: 'gt',
+        operator: 'gt',
         severity: 'medium',
         threshold: 2000,
       },
       {
         action: 'email',
-        
-duration: 300, 
-        
-metric: 'error_rate',
+
+        duration: 300,
+
+        metric: 'error_rate',
         // 5%
-operator: 'gt',
+        operator: 'gt',
         severity: 'high',
         threshold: 0.05,
       },
@@ -236,23 +225,23 @@ operator: 'gt',
       },
       {
         action: 'log',
-        
-duration: 300, 
-        
-metric: 'cache_hit_rate',
+
+        duration: 300,
+
+        metric: 'cache_hit_rate',
         // 70%
-operator: 'lt',
+        operator: 'lt',
         severity: 'low',
         threshold: 0.7,
       },
       {
         action: 'email',
-        
-duration: 600, 
-        
-metric: 'cost_per_user',
+
+        duration: 600,
+
+        metric: 'cost_per_user',
         // $2 per user
-operator: 'gt',
+        operator: 'gt',
         severity: 'medium',
         threshold: 2,
       },
@@ -288,7 +277,7 @@ operator: 'gt',
     // Collect performance metrics every 10 seconds
     const performanceInterval = setInterval(async () => {
       const metrics = await this.getPerformanceMetrics();
-      
+
       Object.entries(metrics).forEach(([key, value]) => {
         this.recordMetric(`performance_${key}`, value);
       });
@@ -299,7 +288,7 @@ operator: 'gt',
     // Collect system metrics every 30 seconds
     const systemInterval = setInterval(async () => {
       const metrics = await this.getSystemMetrics();
-      
+
       Object.entries(metrics).forEach(([key, value]) => {
         this.recordMetric(`system_${key}`, value);
       });
@@ -312,8 +301,8 @@ operator: 'gt',
    * Check alert rules
    */
   private checkAlerts(metricName: string, value: number): void {
-    const relevantRules = this.alertRules.filter(rule => rule.metric === metricName);
-    
+    const relevantRules = this.alertRules.filter((rule) => rule.metric === metricName);
+
     for (const rule of relevantRules) {
       const alertKey = `${rule.metric}_${rule.threshold}_${rule.operator}`;
       const shouldAlert = this.evaluateRule(rule, value);
@@ -354,7 +343,7 @@ operator: 'gt',
    */
   private triggerAlert(rule: AlertRule, value: number): void {
     const message = `ALERT: ${rule.metric} is ${value} (threshold: ${rule.threshold})`;
-    
+
     switch (rule.action) {
       case 'log': {
         console.warn(message);
@@ -398,32 +387,26 @@ operator: 'gt',
   /**
    * Helper methods for metric calculations
    */
-  private getMetricSum(
-    name: string, 
-    since: number, 
-    tags?: Record<string, string>
-  ): number {
+  private getMetricSum(name: string, since: number, tags?: Record<string, string>): number {
     const dataPoints = this.metrics.get(name) || [];
     return dataPoints
-      .filter(dp => dp.timestamp >= since)
-      .filter(dp => !tags || this.matchesTags(dp.tags, tags))
+      .filter((dp) => dp.timestamp >= since)
+      .filter((dp) => !tags || this.matchesTags(dp.tags, tags))
       .reduce((sum, dp) => sum + dp.value, 0);
   }
 
   private getMetricValues(name: string, since: number): number[] {
     const dataPoints = this.metrics.get(name) || [];
-    return dataPoints
-      .filter(dp => dp.timestamp >= since)
-      .map(dp => dp.value);
+    return dataPoints.filter((dp) => dp.timestamp >= since).map((dp) => dp.value);
   }
 
   private getUniqueUsers(since: number): number {
     const dataPoints = this.metrics.get('user_activity') || [];
     const uniqueUsers = new Set(
       dataPoints
-        .filter(dp => dp.timestamp >= since)
-        .map(dp => dp.tags?.userId)
-        .filter(Boolean)
+        .filter((dp) => dp.timestamp >= since)
+        .map((dp) => dp.tags?.userId)
+        .filter(Boolean),
     );
     return uniqueUsers.size;
   }
@@ -441,15 +424,13 @@ operator: 'gt',
   }
 
   private matchesTags(
-    dataTags?: Record<string, string>, 
-    filterTags?: Record<string, string>
+    dataTags?: Record<string, string>,
+    filterTags?: Record<string, string>,
   ): boolean {
     if (!filterTags) return true;
     if (!dataTags) return false;
-    
-    return Object.entries(filterTags).every(
-      ([key, value]) => dataTags[key] === value
-    );
+
+    return Object.entries(filterTags).every(([key, value]) => dataTags[key] === value);
   }
 
   /**
@@ -476,4 +457,4 @@ export function getPerformanceMonitor(): PerformanceMonitor {
   return monitorInstance;
 }
 
-export type { AlertRule, MetricDataPoint,PerformanceMetrics, SystemMetrics };
+export type { AlertRule, MetricDataPoint, PerformanceMetrics, SystemMetrics };

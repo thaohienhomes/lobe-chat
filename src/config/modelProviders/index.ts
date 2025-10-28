@@ -1,6 +1,5 @@
 import { ChatModelCard, ModelProviderCard } from '@/types/llm';
 
-import AgentRouterProvider from './agentrouter';
 import Ai21Provider from './ai21';
 import Ai302Provider from './ai302';
 import Ai360Provider from './ai360';
@@ -128,7 +127,6 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   OllamaProvider,
   VLLMProvider,
   XinferenceProvider,
-  AgentRouterProvider,
   AnthropicProvider,
   BedrockProvider,
   GoogleProvider,
@@ -197,7 +195,6 @@ export const isProviderDisableBrowserRequest = (id: string) => {
   return !!provider;
 };
 
-export { default as AgentRouterProviderCard } from './agentrouter';
 export { default as Ai21ProviderCard } from './ai21';
 export { default as Ai302ProviderCard } from './ai302';
 export { default as Ai360ProviderCard } from './ai360';

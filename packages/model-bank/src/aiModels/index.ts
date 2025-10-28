@@ -1,5 +1,5 @@
 import { AiFullModelCard, LobeDefaultAiModelListItem } from '../types/aiModel';
-import { default as agentrouter } from './agentrouter';
+// AgentRouter provider removed - file not found
 import { default as ai21 } from './ai21';
 import { default as ai302 } from './ai302';
 import { default as ai360 } from './ai360';
@@ -84,7 +84,6 @@ const buildDefaultModelList = (map: ModelsMap): LobeDefaultAiModelListItem[] => 
 };
 
 export const LOBE_DEFAULT_MODEL_LIST = buildDefaultModelList({
-  agentrouter,
   ai21,
   ai302,
   ai360,
@@ -150,7 +149,7 @@ export const LOBE_DEFAULT_MODEL_LIST = buildDefaultModelList({
   zhipu,
 });
 
-export { default as agentrouter } from './agentrouter';
+// AgentRouter provider removed - file not found
 export { default as ai21 } from './ai21';
 export { default as ai302 } from './ai302';
 export { default as ai360 } from './ai360';

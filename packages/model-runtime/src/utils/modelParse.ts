@@ -303,9 +303,9 @@ const processModelCard = (
     )
       ? 'image'
       : isKeywordListMatch(
-        model.id.toLowerCase(),
-        EMBEDDING_MODEL_KEYWORDS.map((k) => k.toLowerCase()),
-      )
+            model.id.toLowerCase(),
+            EMBEDDING_MODEL_KEYWORDS.map((k) => k.toLowerCase()),
+          )
         ? 'embedding'
         : 'chat');
 
@@ -421,11 +421,12 @@ export const processMultiProviderModelList = async (
 
   // 如果提供了 providerid，尝试获取该提供商的本地配置
   let providerLocalConfig: any[] | null = null;
-  if (providerid) {
+  if (providerid && providerid !== 'agentrouter') {
     try {
       const modules = await import('model-bank');
 
-      providerLocalConfig = modules[providerid];
+      const config = modules[providerid as keyof typeof modules];
+      providerLocalConfig = Array.isArray(config) ? config : null;
     } catch {
       // 如果配置文件不存在或导入失败，保持为 null
       providerLocalConfig = null;

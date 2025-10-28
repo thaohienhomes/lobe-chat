@@ -109,7 +109,7 @@ export const createModelListSlice: StateCreator<
     const { DEFAULT_MODEL_PROVIDER_LIST } = await import('@/config/modelProviders');
     const defaultModelProviderList = produce(DEFAULT_MODEL_PROVIDER_LIST, (draft) => {
       Object.values(ModelProvider).forEach((id) => {
-        const provider = draft.find((d) => d.id === id);
+        const provider = draft.find((d: ModelProviderCard) => d.id === id);
         if (provider) provider.chatModels = mergeModels(id as any, provider);
       });
     });

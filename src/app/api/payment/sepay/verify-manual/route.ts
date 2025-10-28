@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import {
   activateUserSubscription,
@@ -10,7 +10,7 @@ import {
 /**
  * Manual payment verification endpoint
  * POST /api/payment/sepay/verify-manual
- * 
+ *
  * This endpoint allows manual verification of payments when webhooks fail
  * or when payments are made directly to the bank account
  */
@@ -26,10 +26,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { orderId, transactionId, amount, description } = body;
 
     if (!orderId) {
-      return NextResponse.json({ 
-        message: 'Order ID is required', 
-        success: false 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          message: 'Order ID is required',
+          success: false,
+        },
+        { status: 400 },
+      );
     }
 
     console.log('🔍 Manual payment verification requested:', {
@@ -43,25 +46,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Check if payment record exists
     const payment = await getPaymentByOrderId(orderId);
     if (!payment) {
-      return NextResponse.json({ 
-        message: 'Payment record not found', 
-        success: false 
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          message: 'Payment record not found',
+          success: false,
+        },
+        { status: 404 },
+      );
     }
 
     // Verify the payment belongs to the authenticated user
     if (payment.userId !== userId) {
-      return NextResponse.json({ 
-        message: 'Payment does not belong to authenticated user', 
-        success: false 
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          message: 'Payment does not belong to authenticated user',
+          success: false,
+        },
+        { status: 403 },
+      );
     }
 
     // Update payment status to success
     await updatePaymentStatus(orderId, 'success', {
-      manualVerification: true,
       rawWebhook: {
-        amount: amount || payment.amount,
+        amount: amount || payment.amountVnd,
         currency: 'VND',
         description: description || 'Manual payment verification',
         orderId,
@@ -71,8 +79,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         transactionId: transactionId || `MANUAL_${Date.now()}`,
       },
       transactionId: transactionId || `MANUAL_${Date.now()}`,
-      verifiedAt: new Date().toISOString(),
-      verifiedBy: userId,
     });
 
     // Activate user subscription
@@ -88,20 +94,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     console.log('✅ Payment manually verified and processed:', orderId);
 
-    return NextResponse.json({ 
-      message: 'Payment successfully verified and subscription activated', 
+    return NextResponse.json({
+      message: 'Payment successfully verified and subscription activated',
       orderId,
       success: true,
       transactionId: transactionId || `MANUAL_${Date.now()}`,
     });
-
   } catch (error) {
     console.error('❌ Manual payment verification error:', error);
     return NextResponse.json(
-      { 
-        error: error instanceof Error ? error.message : 'Unknown error', 
+      {
+        error: error instanceof Error ? error.message : 'Unknown error',
         message: 'Failed to verify payment',
-        success: false
+        success: false,
       },
       { status: 500 },
     );
