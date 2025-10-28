@@ -4,9 +4,11 @@
 import { Button } from '@lobehub/ui';
 import { Clock, QrCode, RefreshCw } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 
 import { useServerConfigStore } from '@/store/serverConfig';
+
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 
 /* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 
@@ -23,7 +25,7 @@ const formatTime = (seconds: number) => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-export default function PaymentWaitingPage() {
+function PaymentWaitingContent() {
   const router = useRouter();
   const variants = useServerConfigStore((s) => s.segmentVariants);
   const searchParams = useSearchParams();
@@ -388,5 +390,27 @@ export default function PaymentWaitingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentWaitingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            alignItems: 'center',
+            background: '#f5f5f5',
+            display: 'flex',
+            justifyContent: 'center',
+            minHeight: '100vh',
+          }}
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        </div>
+      }
+    >
+      <PaymentWaitingContent />
+    </Suspense>
   );
 }
