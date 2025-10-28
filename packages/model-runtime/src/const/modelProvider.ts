@@ -1,5 +1,4 @@
 export enum ModelProvider {
-  AgentRouter = 'agentrouter',
   Ai21 = 'ai21',
   Ai302 = 'ai302',
   Ai360 = 'ai360',

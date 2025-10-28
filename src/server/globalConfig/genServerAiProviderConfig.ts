@@ -21,47 +21,45 @@ export const genServerAiProvidersConfig = async (
 
   // 并发处理所有 providers
   const providerConfigs = await Promise.all(
-    Object.values(ModelProvider)
-      .filter((provider) => provider !== 'agentrouter') // Skip agentrouter provider
-      .map(async (provider) => {
-        const providerUpperCase = provider.toUpperCase();
-        const aiModels = AiModels[provider as keyof typeof AiModels] as AiFullModelCard[];
+    Object.values(ModelProvider).map(async (provider) => {
+      const providerUpperCase = provider.toUpperCase();
+      const aiModels = AiModels[provider as keyof typeof AiModels] as AiFullModelCard[];
 
-        if (!aiModels)
-          throw new Error(
-            `Provider [${provider}] not found in aiModels, please make sure you have exported the provider in the \`aiModels/index.ts\``,
-          );
+      if (!aiModels)
+        throw new Error(
+          `Provider [${provider}] not found in aiModels, please make sure you have exported the provider in the \`aiModels/index.ts\``,
+        );
 
-        const providerConfig = specificConfig[provider as keyof typeof specificConfig] || {};
-        const modelString =
-          process.env[providerConfig.modelListKey ?? `${providerUpperCase}_MODEL_LIST`];
+      const providerConfig = specificConfig[provider as keyof typeof specificConfig] || {};
+      const modelString =
+        process.env[providerConfig.modelListKey ?? `${providerUpperCase}_MODEL_LIST`];
 
-        // 并发处理 extractEnabledModels 和 transformToAiModelList
-        const [enabledModels, serverModelLists] = await Promise.all([
-          extractEnabledModels(provider, modelString, providerConfig.withDeploymentName || false),
-          transformToAiModelList({
-            defaultModels: aiModels || [],
-            modelString,
-            providerId: provider,
-            withDeploymentName: providerConfig.withDeploymentName || false,
+      // 并发处理 extractEnabledModels 和 transformToAiModelList
+      const [enabledModels, serverModelLists] = await Promise.all([
+        extractEnabledModels(provider, modelString, providerConfig.withDeploymentName || false),
+        transformToAiModelList({
+          defaultModels: aiModels || [],
+          modelString,
+          providerId: provider,
+          withDeploymentName: providerConfig.withDeploymentName || false,
+        }),
+      ]);
+
+      return {
+        config: {
+          enabled:
+            typeof providerConfig.enabled !== 'undefined'
+              ? providerConfig.enabled
+              : llmConfig[providerConfig.enabledKey || `ENABLED_${providerUpperCase}`],
+          enabledModels,
+          serverModelLists,
+          ...(providerConfig.fetchOnClient !== undefined && {
+            fetchOnClient: providerConfig.fetchOnClient,
           }),
-        ]);
-
-        return {
-          config: {
-            enabled:
-              typeof providerConfig.enabled !== 'undefined'
-                ? providerConfig.enabled
-                : llmConfig[providerConfig.enabledKey || `ENABLED_${providerUpperCase}`],
-            enabledModels,
-            serverModelLists,
-            ...(providerConfig.fetchOnClient !== undefined && {
-              fetchOnClient: providerConfig.fetchOnClient,
-            }),
-          },
-          provider,
-        };
-      }),
+        },
+        provider,
+      };
+    }),
   );
 
   // 将结果转换为对象
