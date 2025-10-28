@@ -7,6 +7,9 @@ export const getLLMConfig = () => {
     server: {
       API_KEY_SELECT_MODE: z.string().optional(),
 
+      ENABLED_AGENTROUTER: z.boolean(),
+      AGENTROUTER_API_KEY: z.string().optional(),
+
       ENABLED_OPENAI: z.boolean(),
       OPENAI_API_KEY: z.string().optional(),
 
@@ -199,6 +202,9 @@ export const getLLMConfig = () => {
     },
     runtimeEnv: {
       API_KEY_SELECT_MODE: process.env.API_KEY_SELECT_MODE,
+
+      ENABLED_AGENTROUTER: !!process.env.AGENTROUTER_API_KEY,
+      AGENTROUTER_API_KEY: process.env.AGENTROUTER_API_KEY,
 
       ENABLED_OPENAI: process.env.ENABLED_OPENAI !== '0',
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,

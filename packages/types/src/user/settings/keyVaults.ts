@@ -37,6 +37,7 @@ export interface SearchEngineKeyVaults {
 }
 
 export interface UserKeyVaults extends SearchEngineKeyVaults {
+  agentrouter?: OpenAICompatibleKeyVault;
   ai21?: OpenAICompatibleKeyVault;
   ai302?: OpenAICompatibleKeyVault;
   ai360?: OpenAICompatibleKeyVault;
