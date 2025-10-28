@@ -1,6 +1,6 @@
 /**
  * Request Batching System
- * 
+ *
  * Batches multiple AI requests to reduce latency and improve throughput:
  * - Groups similar requests together
  * - Processes batches in parallel
@@ -22,7 +22,7 @@ interface BatchRequest {
 interface BatchConfig {
   maxBatchSize: number;
   // milliseconds
-  maxConcurrentBatches: number; 
+  maxConcurrentBatches: number;
   maxWaitTime: number;
   priorityLevels: number;
 }
@@ -37,6 +37,7 @@ interface BatchStats {
 
 export class RequestBatcher {
   private batches: Map<string, BatchRequest[]> = new Map();
+  // eslint-disable-next-line no-undef
   private timers: Map<string, NodeJS.Timeout> = new Map();
   private activeBatches: Set<string> = new Set();
   private config: BatchConfig;
@@ -46,7 +47,7 @@ export class RequestBatcher {
     this.config = {
       maxBatchSize: 10,
       // 100ms
-maxConcurrentBatches: 5, 
+      maxConcurrentBatches: 5,
       maxWaitTime: 100,
       priorityLevels: 3,
       ...config,
@@ -68,7 +69,7 @@ maxConcurrentBatches: 5,
     query: string,
     model: string,
     userId: string,
-    priority: number = 1
+    priority: number = 1,
   ): Promise<any> {
     this.stats.totalRequests++;
 
@@ -85,7 +86,7 @@ maxConcurrentBatches: 5,
       };
 
       const batchKey = this.getBatchKey(model, priority);
-      
+
       // Initialize batch if it doesn't exist
       if (!this.batches.has(batchKey)) {
         this.batches.set(batchKey, []);
@@ -95,15 +96,14 @@ maxConcurrentBatches: 5,
       batch.push(request);
 
       // Process batch if it's full or if we hit the concurrent limit
-      if (batch.length >= this.config.maxBatchSize || 
-          this.shouldProcessImmediately(batchKey)) {
+      if (batch.length >= this.config.maxBatchSize || this.shouldProcessImmediately(batchKey)) {
         this.processBatch(batchKey);
       } else if (!this.timers.has(batchKey)) {
         // Set timer for batch processing
         const timer = setTimeout(() => {
           this.processBatch(batchKey);
         }, this.config.maxWaitTime);
-        
+
         this.timers.set(batchKey, timer);
       }
     });
@@ -137,7 +137,7 @@ maxConcurrentBatches: 5,
 
       // Process requests in parallel
       const results = await Promise.allSettled(
-        batch.map(request => this.processRequest(request))
+        batch.map((request) => this.processRequest(request)),
       );
 
       // Resolve/reject individual promises
@@ -152,10 +152,9 @@ maxConcurrentBatches: 5,
           request.reject(result.reason);
         }
       });
-
     } catch (error) {
       // Reject all requests in batch if batch processing fails
-      batch.forEach(request => request.reject(error));
+      batch.forEach((request) => request.reject(error));
     } finally {
       // Mark batch as completed
       this.activeBatches.delete(batchKey);
@@ -169,7 +168,7 @@ maxConcurrentBatches: 5,
     // This would be replaced with actual AI model API call
     // For now, simulate processing
     await this.simulateProcessing(request.model);
-    
+
     return {
       model: request.model,
       response: `Processed: ${request.query}`,
@@ -193,7 +192,9 @@ maxConcurrentBatches: 5,
     };
 
     const delay = processingTimes[model as keyof typeof processingTimes] || 400;
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
   }
 
   /**
@@ -213,7 +214,8 @@ maxConcurrentBatches: 5,
   /**
    * Check if batch should be processed immediately
    */
-  private shouldProcessImmediately(batchKey: string): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private shouldProcessImmediately(_batchKey: string): boolean {
     // Process immediately if we're at the concurrent batch limit
     return this.activeBatches.size >= this.config.maxConcurrentBatches;
   }
@@ -223,7 +225,7 @@ maxConcurrentBatches: 5,
    */
   private updateAverageBatchSize(batchSize: number): void {
     const totalBatches = this.stats.batchedRequests / this.stats.averageBatchSize || 1;
-    this.stats.averageBatchSize = 
+    this.stats.averageBatchSize =
       (this.stats.averageBatchSize * (totalBatches - 1) + batchSize) / totalBatches;
   }
 
@@ -232,7 +234,7 @@ maxConcurrentBatches: 5,
    */
   private updateAverageWaitTime(waitTime: number): void {
     const totalRequests = this.stats.batchedRequests;
-    this.stats.averageWaitTime = 
+    this.stats.averageWaitTime =
       (this.stats.averageWaitTime * (totalRequests - 1) + waitTime) / totalRequests;
   }
 
@@ -242,7 +244,7 @@ maxConcurrentBatches: 5,
   getStats(): BatchStats {
     const batchingRate = this.stats.batchedRequests / this.stats.totalRequests;
     const throughputImprovement = batchingRate * this.stats.averageBatchSize;
-    
+
     return {
       ...this.stats,
       throughputImprovement,
@@ -257,8 +259,10 @@ maxConcurrentBatches: 5,
     pendingBatches: number;
     totalPendingRequests: number;
   } {
-    const totalPendingRequests = Array.from(this.batches.values())
-      .reduce((sum, batch) => sum + batch.length, 0);
+    const totalPendingRequests = Array.from(this.batches.values()).reduce(
+      (sum, batch) => sum + batch.length,
+      0,
+    );
 
     return {
       activeBatches: this.activeBatches.size,
@@ -279,15 +283,15 @@ maxConcurrentBatches: 5,
 
     // Reject all pending requests
     for (const batch of this.batches.values()) {
-      batch.forEach(request => 
-        request.reject(new Error('Batcher shutting down'))
-      );
+      batch.forEach((request) => request.reject(new Error('Batcher shutting down')));
     }
     this.batches.clear();
 
     // Wait for active batches to complete
     while (this.activeBatches.size > 0) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
     }
   }
 
@@ -319,7 +323,7 @@ export async function withBatching<T>(
   query: string,
   model: string,
   userId: string,
-  priority: number = 1
+  priority: number = 1,
 ): Promise<T> {
   const batcher = getRequestBatcher();
   return batcher.addRequest(query, model, userId, priority);

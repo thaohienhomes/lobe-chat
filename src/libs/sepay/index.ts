@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+
 import { PAYMENT_CONFIG } from '@/config/customizations';
 
 // Payment Method Types
@@ -8,13 +9,13 @@ export type PaymentMethod = 'bank_transfer' | 'credit_card';
 export interface SepayConfig {
   apiUrl: string;
   cancelUrl: string;
+  creditCardApiKey?: string;
+  // Credit Card configuration
+  creditCardEnabled?: boolean;
   merchantId: string;
   notifyUrl: string;
   returnUrl: string;
   secretKey: string;
-  // Credit Card configuration
-  creditCardEnabled?: boolean;
-  creditCardApiKey?: string;
 }
 
 // Credit Card Payment Request Interface
@@ -130,7 +131,7 @@ export class SepayPaymentGateway {
    * Validate credit card number using Luhn algorithm
    */
   private validateCreditCardNumber(cardNumber: string): boolean {
-    const digits = cardNumber.replace(/\D/g, '');
+    const digits = cardNumber.replaceAll(/\D/g, '');
     if (digits.length < 13 || digits.length > 19) return false;
 
     let sum = 0;
@@ -182,7 +183,7 @@ export class SepayPaymentGateway {
    * Mask credit card number for logging (show last 4 digits only)
    */
   private maskCardNumber(cardNumber: string): string {
-    const digits = cardNumber.replace(/\D/g, '');
+    const digits = cardNumber.replaceAll(/\D/g, '');
     return `****-****-****-${digits.slice(-4)}`;
   }
 
@@ -212,7 +213,9 @@ export class SepayPaymentGateway {
       return { accountNumber, bankName };
     }
 
-    console.error('❌ Bank account information not configured. Please set SEPAY_BANK_ACCOUNT and SEPAY_BANK_NAME environment variables.');
+    console.error(
+      '❌ Bank account information not configured. Please set SEPAY_BANK_ACCOUNT and SEPAY_BANK_NAME environment variables.',
+    );
     return null;
   }
 
@@ -221,21 +224,23 @@ export class SepayPaymentGateway {
    */
   public async createPayment(request: SepayPaymentRequest): Promise<SepayPaymentResponse> {
     try {
-
-
-
       // Check if real Sepay API should be used
       const useRealSepayAPI = process.env.SEPAY_SECRET_KEY && process.env.SEPAY_MERCHANT_ID;
 
       if (!useRealSepayAPI) {
-        console.log('🧪 MOCK SEPAY: Using mock implementation (missing SEPAY_SECRET_KEY or SEPAY_MERCHANT_ID)');
+        console.log(
+          '🧪 MOCK SEPAY: Using mock implementation (missing SEPAY_SECRET_KEY or SEPAY_MERCHANT_ID)',
+        );
 
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
 
         // Generate mock payment waiting URL with QR code
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
-        const mockQrCode = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+        const mockQrCode =
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
         const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCode=${mockQrCode}`;
 
         return {
@@ -254,7 +259,8 @@ export class SepayPaymentGateway {
       if (!bankInfo) {
         return {
           error: 'No bank account configured',
-          message: 'Unable to retrieve bank account information. Please configure SEPAY_BANK_ACCOUNT and SEPAY_BANK_NAME.',
+          message:
+            'Unable to retrieve bank account information. Please configure SEPAY_BANK_ACCOUNT and SEPAY_BANK_NAME.',
           orderId: request.orderId,
           success: false,
         };
@@ -288,8 +294,6 @@ export class SepayPaymentGateway {
         success: true,
         transactionId: `SEPAY_${request.orderId}_${Date.now()}`,
       };
-
-
     } catch (error) {
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -304,7 +308,9 @@ export class SepayPaymentGateway {
    * Create credit card payment request
    * Supports international credit card payments
    */
-  public async createCreditCardPayment(request: CreditCardPaymentRequest): Promise<SepayPaymentResponse> {
+  public async createCreditCardPayment(
+    request: CreditCardPaymentRequest,
+  ): Promise<SepayPaymentResponse> {
     try {
       // Validate credit card information
       if (!this.validateCreditCardNumber(request.cardNumber)) {
@@ -342,7 +348,9 @@ export class SepayPaymentGateway {
         console.log('Card:', this.maskCardNumber(request.cardNumber));
 
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1500);
+        });
 
         // Generate mock payment response
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
@@ -439,7 +447,10 @@ export class SepayPaymentGateway {
   /**
    * Query payment status by checking recent transactions
    */
-  public async queryPaymentStatus(orderId: string, expectedAmount?: number): Promise<SepayPaymentResponse> {
+  public async queryPaymentStatus(
+    orderId: string,
+    expectedAmount?: number,
+  ): Promise<SepayPaymentResponse> {
     try {
       // Check if real Sepay API should be used
       const useRealSepayAPI = process.env.SEPAY_SECRET_KEY && process.env.SEPAY_MERCHANT_ID;
@@ -448,7 +459,9 @@ export class SepayPaymentGateway {
         console.log('🧪 MOCK SEPAY: Simulating payment status query for orderId:', orderId);
 
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
 
         // Mock successful payment status
         return {
@@ -464,8 +477,8 @@ export class SepayPaymentGateway {
       // Get recent transactions from Sepay API
       const response = await fetch(`https://my.sepay.vn/userapi/transactions/list?limit=50`, {
         headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${this.config.secretKey}`,
+          Accept: 'application/json',
+          Authorization: `Bearer ${this.config.secretKey}`,
         },
         method: 'GET',
       });
@@ -486,7 +499,7 @@ export class SepayPaymentGateway {
       }
 
       // Look for a transaction that matches our order ID in the transaction content
-      const matchingTransaction = result.transactions.find(transaction => {
+      const matchingTransaction = result.transactions.find((transaction) => {
         const content = transaction.transaction_content.toLowerCase();
         const orderIdLower = orderId.toLowerCase();
 
@@ -494,7 +507,8 @@ export class SepayPaymentGateway {
         const hasOrderId = content.includes(orderIdLower);
 
         // Check if amount matches (if provided)
-        const amountMatches = !expectedAmount ||
+        const amountMatches =
+          !expectedAmount ||
           parseFloat(transaction.amount_in) === expectedAmount ||
           parseFloat(transaction.amount_in) === expectedAmount / 100; // Handle different currency formats
 

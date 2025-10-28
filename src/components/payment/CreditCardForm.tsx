@@ -1,13 +1,13 @@
 'use client';
 
+import { Alert, Button, Form, Input, Space, message } from 'antd';
 import { CreditCard, Lock } from 'lucide-react';
-import { Form, Input, Button, Space, Alert, message } from 'antd';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface CreditCardFormProps {
-  onSubmit: (cardData: CreditCardFormData) => Promise<void>;
-  loading?: boolean;
   amount: number;
+  loading?: boolean;
+  onSubmit: (cardData: CreditCardFormData) => Promise<void>;
 }
 
 export interface CreditCardFormData {
@@ -16,6 +16,54 @@ export interface CreditCardFormData {
   cardExpiryYear: string;
   cardHolderName: string;
   cardNumber: string;
+}
+
+/**
+ * Luhn Algorithm - Validates credit card numbers
+ */
+function validateLuhn(cardNumber: string): boolean {
+  const digits = cardNumber.replaceAll(/\D/g, '');
+  if (digits.length < 13 || digits.length > 19) return false;
+
+  let sum = 0;
+  let isEven = false;
+
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let digit = parseInt(digits[i], 10);
+
+    if (isEven) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+
+    sum += digit;
+    isEven = !isEven;
+  }
+
+  return sum % 10 === 0;
+}
+
+/**
+ * Format expiry date as MM/YY
+ */
+function handleExpiryChange(e: React.ChangeEvent<HTMLInputElement>): void {
+  let value = e.target.value.replaceAll(/\D/g, '');
+  if (value.length > 4) value = value.slice(0, 4);
+
+  if (value.length >= 2) {
+    value = value.slice(0, 2) + '/' + value.slice(2);
+  }
+
+  e.target.value = value;
+}
+
+/**
+ * Format CVV as 3-4 digits
+ */
+function handleCVVChange(e: React.ChangeEvent<HTMLInputElement>): void {
+  let value = e.target.value.replaceAll(/\D/g, '');
+  if (value.length > 4) value = value.slice(0, 4);
+  e.target.value = value;
 }
 
 /**
@@ -28,63 +76,15 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
   const [cardNumberFormatted, setCardNumberFormatted] = useState('');
 
   /**
-   * Luhn Algorithm - Validates credit card numbers
-   */
-  const validateLuhn = (cardNumber: string): boolean => {
-    const digits = cardNumber.replace(/\D/g, '');
-    if (digits.length < 13 || digits.length > 19) return false;
-
-    let sum = 0;
-    let isEven = false;
-
-    for (let i = digits.length - 1; i >= 0; i--) {
-      let digit = parseInt(digits[i], 10);
-
-      if (isEven) {
-        digit *= 2;
-        if (digit > 9) digit -= 9;
-      }
-
-      sum += digit;
-      isEven = !isEven;
-    }
-
-    return sum % 10 === 0;
-  };
-
-  /**
    * Format card number as XXXX XXXX XXXX XXXX
    */
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replaceAll(/\D/g, '');
     if (value.length > 16) value = value.slice(0, 16);
 
-    const formatted = value.replace(/(\d{4})/g, '$1 ').trim();
+    const formatted = value.replaceAll(/(\d{4})/g, '$1 ').trim();
     setCardNumberFormatted(formatted);
     form.setFieldValue('cardNumber', value);
-  };
-
-  /**
-   * Format expiry date as MM/YY
-   */
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 4) value = value.slice(0, 4);
-
-    if (value.length >= 2) {
-      value = value.slice(0, 2) + '/' + value.slice(2);
-    }
-
-    e.target.value = value;
-  };
-
-  /**
-   * Format CVV as 3-4 digits
-   */
-  const handleCVVChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 4) value = value.slice(0, 4);
-    e.target.value = value;
   };
 
   /**
@@ -110,21 +110,21 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
   return (
     <Form form={form} layout="vertical" onFinish={handleSubmit}>
       <Alert
+        description="Your card information is encrypted and secure. We never store your full card number."
         icon={<Lock size={16} />}
         message="Secure Payment"
-        description="Your card information is encrypted and secure. We never store your full card number."
-        type="info"
         showIcon
         style={{ marginBottom: 16 }}
+        type="info"
       />
 
       <Form.Item
         label="Cardholder Name"
         name="cardholderName"
         rules={[
-          { required: true, message: 'Please enter cardholder name' },
-          { min: 3, message: 'Name must be at least 3 characters' },
-          { pattern: /^[a-zA-Z\s]+$/, message: 'Name can only contain letters and spaces' },
+          { message: 'Please enter cardholder name', required: true },
+          { message: 'Name must be at least 3 characters', min: 3 },
+          { message: 'Name can only contain letters and spaces', pattern: /^[\sA-Za-z]+$/ },
         ]}
       >
         <Input placeholder="John Doe" />
@@ -134,11 +134,11 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
         label="Card Number"
         name="cardNumber"
         rules={[
-          { required: true, message: 'Please enter card number' },
+          { message: 'Please enter card number', required: true },
           {
             validator: (_, value) => {
               if (!value) return Promise.resolve();
-              const digits = value.replace(/\D/g, '');
+              const digits = value.replaceAll(/\D/g, '');
               if (digits.length !== 16) {
                 return Promise.reject(new Error('Card number must be 16 digits'));
               }
@@ -151,20 +151,20 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
         ]}
       >
         <Input
-          placeholder="1234 5678 9012 3456"
-          value={cardNumberFormatted}
-          onChange={handleCardNumberChange}
-          prefix={<CreditCard size={16} />}
           maxLength={19}
+          onChange={handleCardNumberChange}
+          placeholder="1234 5678 9012 3456"
+          prefix={<CreditCard size={16} />}
+          value={cardNumberFormatted}
         />
       </Form.Item>
 
-      <Space style={{ width: '100%' }} size="large">
+      <Space size="large" style={{ width: '100%' }}>
         <Form.Item
           label="Expiry Date"
           name="expiry"
           rules={[
-            { required: true, message: 'Please enter expiry date' },
+            { message: 'Please enter expiry date', required: true },
             {
               validator: (_, value) => {
                 if (!value) return Promise.resolve();
@@ -199,19 +199,19 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
           ]}
           style={{ flex: 1 }}
         >
-          <Input placeholder="MM/YY" onChange={handleExpiryChange} maxLength={5} />
+          <Input maxLength={5} onChange={handleExpiryChange} placeholder="MM/YY" />
         </Form.Item>
 
         <Form.Item
           label="CVV"
           name="cvv"
           rules={[
-            { required: true, message: 'Please enter CVV' },
-            { pattern: /^\d{3,4}$/, message: 'CVV must be 3-4 digits' },
+            { message: 'Please enter CVV', required: true },
+            { message: 'CVV must be 3-4 digits', pattern: /^\d{3,4}$/ },
           ]}
           style={{ flex: 1 }}
         >
-          <Input placeholder="123" onChange={handleCVVChange} maxLength={4} />
+          <Input maxLength={4} onChange={handleCVVChange} placeholder="123" />
         </Form.Item>
       </Space>
 
@@ -219,10 +219,10 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
         <Button
           block
           htmlType="submit"
-          type="primary"
-          size="large"
-          loading={loading}
           icon={<Lock size={16} />}
+          loading={loading}
+          size="large"
+          type="primary"
         >
           {loading
             ? 'Processing...'
@@ -235,4 +235,3 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
     </Form>
   );
 }
-
