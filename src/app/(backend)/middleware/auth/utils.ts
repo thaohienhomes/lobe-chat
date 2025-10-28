@@ -2,7 +2,7 @@ import { type AuthObject } from '@clerk/backend';
 import { AgentRuntimeError } from '@lobechat/model-runtime';
 import { ChatErrorType } from '@lobechat/types';
 
-import { enableClerk, enableNextAuth } from '@/const/auth';
+import { AUTH_CONFIG } from '@/config/customizations';
 import { getAppConfig } from '@/envs/app';
 
 interface CheckAuthParams {
@@ -26,7 +26,7 @@ export const checkAuthMethod = ({
   clerkAuth,
 }: CheckAuthParams) => {
   // clerk auth handler
-  if (enableClerk) {
+  if (AUTH_CONFIG.clerk.enabled) {
     // if there is no userId, means the use is not login, just throw error
     if (!(clerkAuth as any)?.userId)
       throw AgentRuntimeError.createError(ChatErrorType.InvalidClerkUser);
@@ -35,7 +35,7 @@ export const checkAuthMethod = ({
   }
 
   // if next auth handler is provided
-  if (enableNextAuth && nextAuthAuthorized) return;
+  if (AUTH_CONFIG.nextAuth.enabled && nextAuthAuthorized) return;
 
   // if apiKey exist
   if (apiKey) return;
