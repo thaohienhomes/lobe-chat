@@ -28,8 +28,8 @@ const UserUpdater = memo(() => {
   useStoreUpdater('user', lobeUser);
   useStoreUpdater('isSignedIn', isSignedIn);
 
-  useStoreUpdater('clerkUser', user);
-  useStoreUpdater('clerkSession', session);
+  useStoreUpdater('clerkUser', user ?? undefined);
+  useStoreUpdater('clerkSession', session ?? undefined);
   useStoreUpdater('clerkSignIn', openSignIn);
   useStoreUpdater('clerkOpenUserProfile', openUserProfile);
   useStoreUpdater('clerkSignOut', signOut);

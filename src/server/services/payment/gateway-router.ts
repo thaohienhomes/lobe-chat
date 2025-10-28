@@ -46,64 +46,28 @@ const GATEWAY_CONFIGS: Record<
   // LemonSqueezy - Merchant of Record
   lemonsqueezy: {
     feeCurrency: 'USD',
-    // Similar to Paddle
-feeFixed: 0.5,
-    
-feePercent: 5,
-    
-// Lower priority
-minAmount: 1,
-
-    
-
-name: 'Lemon Squeezy',
-
-    
-    
-priority: 35,
-
-    
-    
-provider: 'lemonsqueezy',
-
-    
-    
-supportedCountries: ['*'],
-
-    // Global
-supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
+    feeFixed: 0.5,
+    feePercent: 5,
+    minAmount: 1,
+    name: 'Lemon Squeezy',
+    priority: 35,
+    provider: 'lemonsqueezy',
+    supportedCountries: ['*'],
+    supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
     supportedMethods: ['card', 'paypal'],
   },
 
   // Paddle - SaaS-focused
   paddle: {
     feeCurrency: 'USD',
-    // Higher but handles VAT/tax
-feeFixed: 0.5,
-    
-feePercent: 5,
-    
-// Lower priority (higher fees, but good for tax compliance)
-minAmount: 1,
-
-    
-
-name: 'Paddle',
-
-    
-    
-priority: 40,
-
-    
-    
-provider: 'paddle',
-
-    
-    
-supportedCountries: ['*'],
-
-    // Global
-supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'BRL', 'MXN'],
+    feeFixed: 0.5,
+    feePercent: 5,
+    minAmount: 1,
+    name: 'Paddle',
+    priority: 40,
+    provider: 'paddle',
+    supportedCountries: ['*'],
+    supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'BRL', 'MXN'],
     supportedMethods: ['card', 'paypal'],
   },
 
@@ -112,23 +76,12 @@ supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'BRL', 'M
     feeCurrency: 'USD',
     feeFixed: 0.49,
     feePercent: 3.49,
-    // Lower priority (higher fees)
-minAmount: 1,
-
-    
-name: 'PayPal',
-
-    
-priority: 50,
-    
-    
-provider: 'paypal',
-    
-    
-supportedCountries: ['*'],
-
-    // Global
-supportedCurrencies: [
+    minAmount: 1,
+    name: 'PayPal',
+    priority: 50,
+    provider: 'paypal',
+    supportedCountries: ['*'],
+    supportedCurrencies: [
       'USD',
       'EUR',
       'GBP',
@@ -164,79 +117,43 @@ supportedCurrencies: [
   // Polar.sh - International (Merchant of Record)
   polar: {
     feeCurrency: 'USD',
-    // 4% + $0.40
-feeFixed: 0.4,
-    
-feePercent: 4,
-    
-    // High priority for international (Merchant of Record)
-minAmount: 1,
-
-    
-name: 'Polar.sh',
-
-    
+    feeFixed: 0.4,
+    feePercent: 4,
+    minAmount: 1,
+    name: 'Polar.sh',
     priority: 90,
-
     provider: 'polar',
-
     supportedCountries: ['*'],
-
-    // Global except VN (VN uses Sepay)
     supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'SGD', 'INR', 'JPY', 'BRL', 'MXN'],
-    supportedMethods: ['card', 'paypal', 'google_pay', 'apple_pay'], // $1.00 USD
+    supportedMethods: ['card', 'paypal', 'google_pay', 'apple_pay'],
   },
 
   // Razorpay - India
   razorpay: {
     feeCurrency: 'INR',
-    // Lower than Stripe for India
-feeFixed: 0,
-    
-feePercent: 2,
-    
-// Highest priority for India
-minAmount: 1,
-    
-    
-name: 'Razorpay (India)',
-
-    
-priority: 100,
-
-    
+    feeFixed: 0,
+    feePercent: 2,
+    minAmount: 1,
+    name: 'Razorpay (India)',
+    priority: 100,
     provider: 'razorpay',
-
     supportedCountries: ['IN'],
-
     supportedCurrencies: ['INR'],
-    supportedMethods: ['card', 'upi', 'netbanking', 'wallet', 'emi'], // ₹1 INR
+    supportedMethods: ['card', 'upi', 'netbanking', 'wallet', 'emi'],
   },
 
   // Sepay - Vietnam only
   sepay: {
     feeCurrency: 'VND',
-    // No fee for bank transfer
-feeFixed: 0,
-    
-feePercent: 0,
-    
-// Highest priority for Vietnam
-minAmount: 1000,
-    
-    
-name: 'Sepay (Vietnam Bank Transfer)',
-
-    
-priority: 100,
-
-    
+    feeFixed: 0,
+    feePercent: 0,
+    minAmount: 1000,
+    name: 'Sepay (Vietnam Bank Transfer)',
+    priority: 100,
     provider: 'sepay',
-
     supportedCountries: ['VN'],
-
     supportedCurrencies: ['VND'],
-    supportedMethods: ['bank_transfer', 'qr_code'], // 1,000 VND
+    supportedMethods: ['bank_transfer', 'qr_code'],
   },
 
   // Stripe - Global
@@ -244,15 +161,10 @@ priority: 100,
     feeCurrency: 'USD',
     feeFixed: 0.3,
     feePercent: 2.9,
-    // High priority for most countries
-minAmount: 0.5,
-    
-name: 'Stripe',
-    
+    minAmount: 0.5,
+    name: 'Stripe',
     priority: 80,
-
     provider: 'stripe',
-
     supportedCountries: [
       'US',
       'CA',
@@ -299,7 +211,6 @@ name: 'Stripe',
       'SA',
       'ZA',
     ],
-
     supportedCurrencies: [
       'USD',
       'EUR',
@@ -349,7 +260,7 @@ name: 'Stripe',
       'eps',
       'ideal',
       'bancontact',
-    ], // $0.50 USD
+    ],
   },
 };
 
