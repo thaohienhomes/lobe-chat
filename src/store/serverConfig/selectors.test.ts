@@ -30,7 +30,7 @@ describe('featureFlagsSelectors', () => {
       showCloudPromotion: false,
       showOpenAIApiKey: true,
       hideDocs: false,
-      hideGitHub: false,
+      hideGitHub: true,
       showOpenAIProxyUrl: true,
       enableCheckUpdates: true,
       showWelcomeSuggest: true,

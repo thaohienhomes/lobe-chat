@@ -22,6 +22,21 @@ vi.mock('@/const/auth', async (importOriginal) => {
   };
 });
 
+vi.mock('@/config/customizations', () => ({
+  AUTH_CONFIG: {
+    clerk: {
+      get enabled() {
+        return enableClerkMock;
+      },
+    },
+    nextAuth: {
+      get enabled() {
+        return enableNextAuthMock;
+      },
+    },
+  },
+}));
+
 vi.mock('@/envs/app', () => ({
   getAppConfig: vi.fn(),
 }));

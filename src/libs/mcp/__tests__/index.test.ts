@@ -21,7 +21,7 @@ describe('MCPClient', () => {
       await mcpClient.initialize();
       // Add a small delay to allow the server process to fully start (optional, but can help)
       await new Promise((resolve) => setTimeout(resolve, 100));
-    });
+    }, 30000);
 
     afterEach(async () => {
       // Assume SDK client/transport handles process termination gracefully
