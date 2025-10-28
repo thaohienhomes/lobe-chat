@@ -2,28 +2,31 @@
 // if you want to use it in the commercial usage
 // please contact us for more information: hello@lobehub.com
 
-export const LOBE_CHAT_CLOUD = 'pho.chat Cloud';
+import { BRANDING_CONFIG } from '@/config/customizations';
 
-export const BRANDING_NAME = 'pho.chat';
-export const BRANDING_LOGO_URL = '';
+// Use centralized config as source of truth
+export const LOBE_CHAT_CLOUD = `${BRANDING_CONFIG.appName} Cloud`;
 
-export const ORG_NAME = 'pho.chat';
+export const BRANDING_NAME = BRANDING_CONFIG.appName;
+export const BRANDING_LOGO_URL = BRANDING_CONFIG.logoUrl;
+
+export const ORG_NAME = BRANDING_CONFIG.appName;
 
 export const BRANDING_URL = {
-  help: undefined,
-  privacy: undefined,
-  terms: undefined,
+  help: BRANDING_CONFIG.legalLinks.help,
+  privacy: BRANDING_CONFIG.legalLinks.privacy,
+  terms: BRANDING_CONFIG.legalLinks.terms,
 };
 
 export const SOCIAL_URL = {
-  discord: undefined,
-  github: undefined,
-  medium: undefined,
-  x: undefined,
-  youtube: undefined,
+  discord: BRANDING_CONFIG.socialLinks.discord,
+  github: BRANDING_CONFIG.socialLinks.github,
+  medium: undefined, // Not in customizations
+  x: BRANDING_CONFIG.socialLinks.twitter,
+  youtube: undefined, // Not in customizations
 };
 
 export const BRANDING_EMAIL = {
-  business: 'hello@pho.chat',
-  support: 'support@pho.chat',
+  business: BRANDING_CONFIG.businessEmail,
+  support: BRANDING_CONFIG.supportEmail,
 };
