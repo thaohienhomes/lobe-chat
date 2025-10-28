@@ -25,10 +25,10 @@ const StoreUpdater = memo<StoreUpdaterProps>(
     const useStoreUpdater = createStoreUpdater(storeApi);
     const editor = useChatInputEditor();
 
-    useStoreUpdater('mobile', mobile ?? undefined);
-    useStoreUpdater('sendMenu', sendMenu ?? undefined);
-    useStoreUpdater('leftActions', leftActions ?? undefined);
-    useStoreUpdater('rightActions', rightActions ?? undefined);
+    useStoreUpdater('mobile', mobile);
+    useStoreUpdater('sendMenu', sendMenu);
+    useStoreUpdater('leftActions', leftActions);
+    useStoreUpdater('rightActions', rightActions);
 
     useStoreUpdater('sendButtonProps', sendButtonProps);
     useStoreUpdater('onSend', onSend);
