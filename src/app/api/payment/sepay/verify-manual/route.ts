@@ -33,10 +33,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     console.log('🔍 Manual payment verification requested:', {
-      orderId,
-      transactionId: transactionId || 'MANUAL_VERIFICATION',
       amount,
       description,
+      orderId,
+      transactionId: transactionId || 'MANUAL_VERIFICATION',
       userId,
     });
 
@@ -59,20 +59,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Update payment status to success
     await updatePaymentStatus(orderId, 'success', {
-      transactionId: transactionId || `MANUAL_${Date.now()}`,
       manualVerification: true,
-      verifiedAt: new Date().toISOString(),
-      verifiedBy: userId,
       rawWebhook: {
-        orderId,
-        transactionId: transactionId || `MANUAL_${Date.now()}`,
         amount: amount || payment.amount,
         currency: 'VND',
+        description: description || 'Manual payment verification',
+        orderId,
+        signature: 'MANUAL_VERIFICATION',
         status: 'success',
         timestamp: new Date().toISOString(),
-        signature: 'MANUAL_VERIFICATION',
-        description: description || 'Manual payment verification',
+        transactionId: transactionId || `MANUAL_${Date.now()}`,
       },
+      transactionId: transactionId || `MANUAL_${Date.now()}`,
+      verifiedAt: new Date().toISOString(),
+      verifiedBy: userId,
     });
 
     // Activate user subscription
@@ -90,8 +90,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ 
       message: 'Payment successfully verified and subscription activated', 
-      success: true,
       orderId,
+      success: true,
       transactionId: transactionId || `MANUAL_${Date.now()}`,
     });
 
@@ -99,9 +99,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.error('❌ Manual payment verification error:', error);
     return NextResponse.json(
       { 
-        message: 'Failed to verify payment', 
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error', 
+        message: 'Failed to verify payment',
+        success: false
       },
       { status: 500 },
     );

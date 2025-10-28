@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense, useCallback } from 'react';
+import { useServerConfigStore } from '@/store/serverConfig';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Button, Card, Result, Spin, Typography } from 'antd';
@@ -80,6 +81,7 @@ interface PaymentStatus {
 function PaymentSuccessContent() {
   const { styles } = useStyles();
   const router = useRouter();
+  const variants = useServerConfigStore((s) => s.segmentVariants);
   const searchParams = useSearchParams();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({ status: 'unknown' });
   const [loading, setLoading] = useState(true);
@@ -139,15 +141,15 @@ function PaymentSuccessContent() {
   }, [searchParams, queryPaymentStatus]);
 
   const handleGoToDashboard = () => {
-    router.push('/settings/subscription');
+    router.push(`/${variants}/settings/subscription`);
   };
 
   const handleGoHome = () => {
-    router.push('/');
+    router.push(`/${variants}`);
   };
 
   const handleRetryPayment = () => {
-    router.push('/subscription/plans');
+    router.push(`/${variants}/subscription/plans`);
   };
 
   if (loading) {

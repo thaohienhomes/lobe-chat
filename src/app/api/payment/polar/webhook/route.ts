@@ -52,32 +52,39 @@ export async function POST(req: NextRequest) {
 
     // 5. Handle different event types
     switch (type) {
-      case 'checkout.completed':
+      case 'checkout.completed': {
         await handleCheckoutCompleted(data);
         break;
+      }
 
-      case 'subscription.created':
+      case 'subscription.created': {
         await handleSubscriptionCreated(data);
         break;
+      }
 
-      case 'subscription.updated':
+      case 'subscription.updated': {
         await handleSubscriptionUpdated(data);
         break;
+      }
 
-      case 'subscription.canceled':
+      case 'subscription.canceled': {
         await handleSubscriptionCanceled(data);
         break;
+      }
 
-      case 'payment.succeeded':
+      case 'payment.succeeded': {
         await handlePaymentSucceeded(data);
         break;
+      }
 
-      case 'payment.failed':
+      case 'payment.failed': {
         await handlePaymentFailed(data);
         break;
+      }
 
-      default:
+      default: {
         console.log('Unhandled webhook event type:', type);
+      }
     }
 
     // 6. Return success response
@@ -108,7 +115,7 @@ async function handleCheckoutCompleted(data: any) {
     return;
   }
 
-  console.log('Checkout completed:', { checkoutId: id, userId, customerId });
+  console.log('Checkout completed:', { checkoutId: id, customerId, userId });
 
   // Subscription will be created in subscription.created event
   // This is just for logging/tracking
@@ -137,20 +144,20 @@ async function handleSubscriptionCreated(data: any) {
     return;
   }
 
-  console.log('Creating subscription:', { subscriptionId, userId, planId });
+  console.log('Creating subscription:', { planId, subscriptionId, userId });
 
   // Create subscription in database
   await serverDB.insert('subscriptions', {
-    userId,
-    planId,
-    status: 'active',
-    provider: 'polar',
-    providerSubscriptionId: subscriptionId,
-    providerCustomerId: customerId,
-    currentPeriodStart: new Date(currentPeriodStart),
-    currentPeriodEnd: new Date(currentPeriodEnd),
     createdAt: new Date(),
+    currentPeriodEnd: new Date(currentPeriodEnd),
+    currentPeriodStart: new Date(currentPeriodStart),
+    planId,
+    provider: 'polar',
+    providerCustomerId: customerId,
+    providerSubscriptionId: subscriptionId,
+    status: 'active',
     updatedAt: new Date(),
+    userId,
   });
 
   console.log('Subscription created successfully');
@@ -168,18 +175,18 @@ async function handleSubscriptionUpdated(data: any) {
     cancelAtPeriodEnd,
   } = data;
 
-  console.log('Updating subscription:', { subscriptionId, status });
+  console.log('Updating subscription:', { status, subscriptionId });
 
   // Update subscription in database
   await serverDB.update('subscriptions', {
-    where: { providerSubscriptionId: subscriptionId },
     data: {
-      status: mapPolarStatusToDbStatus(status),
-      currentPeriodStart: new Date(currentPeriodStart),
-      currentPeriodEnd: new Date(currentPeriodEnd),
       cancelAtPeriodEnd: cancelAtPeriodEnd || false,
+      currentPeriodEnd: new Date(currentPeriodEnd),
+      currentPeriodStart: new Date(currentPeriodStart),
+      status: mapPolarStatusToDbStatus(status),
       updatedAt: new Date(),
     },
+    where: { providerSubscriptionId: subscriptionId },
   });
 
   console.log('Subscription updated successfully');
@@ -195,12 +202,12 @@ async function handleSubscriptionCanceled(data: any) {
 
   // Update subscription status to canceled
   await serverDB.update('subscriptions', {
-    where: { providerSubscriptionId: subscriptionId },
     data: {
-      status: 'canceled',
       canceledAt: new Date(),
+      status: 'canceled',
       updatedAt: new Date(),
     },
+    where: { providerSubscriptionId: subscriptionId },
   });
 
   console.log('Subscription canceled successfully');
@@ -218,18 +225,18 @@ async function handlePaymentSucceeded(data: any) {
     status,
   } = data;
 
-  console.log('Payment succeeded:', { paymentId, subscriptionId, amount, currency });
+  console.log('Payment succeeded:', { amount, currency, paymentId, subscriptionId });
 
   // Record payment in database
   await serverDB.insert('payments', {
-    subscriptionId,
+    amount,
+    createdAt: new Date(),
+    currency,
+    paidAt: new Date(),
     provider: 'polar',
     providerPaymentId: paymentId,
-    amount,
-    currency,
     status: 'succeeded',
-    paidAt: new Date(),
-    createdAt: new Date(),
+    subscriptionId,
   });
 
   console.log('Payment recorded successfully');
@@ -247,18 +254,18 @@ async function handlePaymentFailed(data: any) {
     failureReason,
   } = data;
 
-  console.error('Payment failed:', { paymentId, subscriptionId, failureReason });
+  console.error('Payment failed:', { failureReason, paymentId, subscriptionId });
 
   // Record failed payment
   await serverDB.insert('payments', {
-    subscriptionId,
+    amount,
+    createdAt: new Date(),
+    currency,
+    failureReason,
     provider: 'polar',
     providerPaymentId: paymentId,
-    amount,
-    currency,
     status: 'failed',
-    failureReason,
-    createdAt: new Date(),
+    subscriptionId,
   });
 
   // TODO: Send email notification to user about failed payment
@@ -271,9 +278,9 @@ function mapPolarStatusToDbStatus(polarStatus: string): string {
   const statusMap: Record<string, string> = {
     'active': 'active',
     'canceled': 'canceled',
-    'past_due': 'past_due',
     'incomplete': 'incomplete',
     'incomplete_expired': 'canceled',
+    'past_due': 'past_due',
     'trialing': 'active',
     'unpaid': 'past_due',
   };

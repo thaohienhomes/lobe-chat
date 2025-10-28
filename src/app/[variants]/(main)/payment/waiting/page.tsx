@@ -5,21 +5,24 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@lobehub/ui';
+import { useServerConfigStore } from '@/store/serverConfig';
 
 interface PaymentStatus {
-  status: 'waiting' | 'success' | 'failed' | 'timeout';
-  orderId?: string;
-  transactionId?: string;
   message?: string;
+  orderId?: string;
+  status: 'waiting' | 'success' | 'failed' | 'timeout';
+  transactionId?: string;
 }
 
 export default function PaymentWaitingPage() {
   const router = useRouter();
+  const variants = useServerConfigStore((s) => s.segmentVariants);
   const searchParams = useSearchParams();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({ status: 'waiting' });
   const [timeLeft, setTimeLeft] = useState(900); // 15 minutes in seconds
   const [polling, setPolling] = useState(true);
   const [verifying, setVerifying] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const orderId = searchParams.get('orderId');
   const amount = searchParams.get('amount');
@@ -27,45 +30,69 @@ export default function PaymentWaitingPage() {
   const bankAccount = searchParams.get('bankAccount');
   const bankName = searchParams.get('bankName');
 
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Debug log (only on client)
+  useEffect(() => {
+    if (mounted) {
+      console.log('🎯 Waiting page params:', { variants, orderId, amount, qrCodeUrl });
+    }
+  }, [mounted, variants, orderId, amount, qrCodeUrl]);
+
   // Poll payment status every 5 seconds
   const checkPaymentStatus = useCallback(async () => {
     if (!orderId || !polling) return;
 
     try {
       const statusUrl = `/api/payment/sepay/status?orderId=${orderId}${amount ? `&amount=${amount}` : ''}`;
+      console.log('🔍 Polling payment status:', statusUrl);
       const response = await fetch(statusUrl);
       const data = await response.json();
+      console.log('📊 Payment status response:', data);
 
       if (data.success && data.status === 'success') {
+        console.log('✅ Payment successful! Redirecting...');
         setPaymentStatus({
-          status: 'success',
-          orderId,
-          transactionId: data.transactionId,
           message: 'Payment completed successfully!',
+          orderId,
+          status: 'success',
+          transactionId: data.transactionId,
         });
         setPolling(false);
-        
+
         // Redirect to success page after 2 seconds
+        // Use variants if available, otherwise use empty string (will use default route)
+        const variantPath = variants || '';
+        const redirectUrl = variantPath
+          ? `/${variantPath}/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`
+          : `/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`;
+        console.log('🔀 Redirect URL:', redirectUrl, '(variants:', variants, ')');
         setTimeout(() => {
-          router.push(`/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`);
+          router.push(redirectUrl);
         }, 2000);
       } else if (data.status === 'failed') {
+        console.log('❌ Payment failed');
         setPaymentStatus({
-          status: 'failed',
-          orderId,
           message: data.message || 'Payment failed',
+          orderId,
+          status: 'failed',
         });
         setPolling(false);
+      } else {
+        console.log('⏳ Payment still pending...');
       }
     } catch (error) {
-      console.error('Error checking payment status:', error);
+      console.error('❌ Error checking payment status:', error);
     }
-  }, [orderId, polling, router]);
+  }, [orderId, amount, polling, router, variants]);
 
   // Countdown timer
   useEffect(() => {
     if (timeLeft <= 0) {
-      setPaymentStatus({ status: 'timeout', orderId });
+      setPaymentStatus({ orderId, status: 'timeout' });
       setPolling(false);
       return;
     }
@@ -89,11 +116,11 @@ export default function PaymentWaitingPage() {
   };
 
   const handleRetry = () => {
-    router.push('/subscription/checkout');
+    router.push(`/${variants}/subscription/checkout`);
   };
 
   const handleCancel = () => {
-    router.push('/settings/subscription');
+    router.push(`/${variants}/settings/subscription`);
   };
 
   const handleManualVerification = async () => {
@@ -102,31 +129,31 @@ export default function PaymentWaitingPage() {
     setVerifying(true);
     try {
       const response = await fetch('/api/payment/sepay/verify-manual', {
-        method: 'POST',
+        body: JSON.stringify({
+          amount: amount ? parseInt(amount) : undefined,
+          description: 'Manual payment verification - User confirmed payment completed',
+          orderId,
+        }),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          orderId,
-          amount: amount ? parseInt(amount) : undefined,
-          description: 'Manual payment verification - User confirmed payment completed',
-        }),
+        method: 'POST',
       });
 
       const data = await response.json();
 
       if (data.success) {
         setPaymentStatus({
-          status: 'success',
-          orderId,
-          transactionId: data.transactionId,
           message: 'Payment manually verified and subscription activated!',
+          orderId,
+          status: 'success',
+          transactionId: data.transactionId,
         });
         setPolling(false);
 
         // Redirect to success page after 2 seconds
         setTimeout(() => {
-          router.push(`/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`);
+          router.push(`/${variants}/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`);
         }, 2000);
       } else {
         alert(`Verification failed: ${data.message}`);
@@ -141,11 +168,18 @@ export default function PaymentWaitingPage() {
 
   if (paymentStatus.status === 'success') {
     return (
-      <div className="container mx-auto max-w-2xl p-6">
-        <div className="text-center">
-          <div className="text-green-500 text-6xl mb-4">✅</div>
-          <h2 className="text-2xl font-bold mb-2">Thanh toán thành công!</h2>
-          <p className="text-gray-600">Đang chuyển hướng đến trang xác nhận...</p>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        padding: '24px',
+        background: '#f5f5f5'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '60px', marginBottom: '16px' }}>✅</div>
+          <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>Thanh toán thành công!</h2>
+          <p style={{ color: '#666' }}>Đang chuyển hướng đến trang xác nhận...</p>
         </div>
       </div>
     );
@@ -153,14 +187,21 @@ export default function PaymentWaitingPage() {
 
   if (paymentStatus.status === 'failed' || paymentStatus.status === 'timeout') {
     return (
-      <div className="container mx-auto max-w-2xl p-6">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold mb-2">
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        padding: '24px',
+        background: '#f5f5f5'
+      }}>
+        <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+          <div style={{ fontSize: '60px', marginBottom: '16px' }}>❌</div>
+          <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
             {paymentStatus.status === 'timeout' ? 'Hết thời gian thanh toán' : 'Thanh toán thất bại'}
           </h2>
-          <p className="text-gray-600 mb-6">{paymentStatus.message || 'Vui lòng thử lại hoặc liên hệ hỗ trợ'}</p>
-          <div className="flex gap-4 justify-center">
+          <p style={{ color: '#666', marginBottom: '24px' }}>{paymentStatus.message || 'Vui lòng thử lại hoặc liên hệ hỗ trợ'}</p>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
             <Button onClick={handleRetry}>
               Thử lại
             </Button>
@@ -173,9 +214,39 @@ export default function PaymentWaitingPage() {
     );
   }
 
+  // Prevent hydration mismatch - don't render until mounted
+  if (!mounted) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: '#f5f5f5'
+      }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto max-w-2xl p-6">
-      <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      padding: '24px',
+      background: '#f5f5f5'
+    }}>
+      <div style={{
+        maxWidth: '600px',
+        width: '100%',
+        background: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        padding: '32px',
+        textAlign: 'center'
+      }}>
         <div className="mb-6">
           <Clock className="mx-auto mb-4 text-blue-500" size={48} />
           <h2 className="text-2xl font-bold mb-2">Đang chờ thanh toán</h2>
@@ -189,20 +260,20 @@ export default function PaymentWaitingPage() {
           {qrCodeUrl ? (
             <div className="mx-auto w-64 h-64 border-2 border-gray-200 rounded-lg flex items-center justify-center bg-white">
               <img
-                src={qrCodeUrl}
                 alt="QR Code thanh toán"
                 className="max-w-full max-h-full"
                 onError={(e) => {
                   console.error('QR Code failed to load:', qrCodeUrl);
                   e.currentTarget.style.display = 'none';
                 }}
+                src={qrCodeUrl}
               />
             </div>
           ) : (
             <div className="mx-auto w-64 h-64 border-2 border-gray-200 rounded-lg flex items-center justify-center">
-              <QrCode size={120} className="text-gray-400" />
+              <QrCode className="text-gray-400" size={120} />
               <div className="absolute">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
               </div>
             </div>
           )}
@@ -235,9 +306,9 @@ export default function PaymentWaitingPage() {
             <span className="font-semibold">Số tiền:</span>
             <span className="text-lg font-semibold text-blue-600">
               {amount ? new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
                 currency: 'VND',
                 maximumFractionDigits: 0,
+                style: 'currency',
               }).format(parseInt(amount)) : 'Đang tải...'}
             </span>
           </div>
@@ -280,9 +351,9 @@ export default function PaymentWaitingPage() {
               bạn có thể xác nhận thủ công để kích hoạt ngay gói dịch vụ.
             </p>
             <Button
-              onClick={handleManualVerification}
-              disabled={verifying}
               className="bg-yellow-600 hover:bg-yellow-700"
+              disabled={verifying}
+              onClick={handleManualVerification}
             >
               {verifying ? 'Đang xác nhận...' : 'Tôi đã thanh toán - Xác nhận ngay'}
             </Button>
@@ -291,7 +362,7 @@ export default function PaymentWaitingPage() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 justify-center">
-          <Button onClick={checkPaymentStatus} disabled={!polling}>
+          <Button disabled={!polling} onClick={checkPaymentStatus}>
             Kiểm tra ngay
           </Button>
           <Button onClick={handleCancel}>

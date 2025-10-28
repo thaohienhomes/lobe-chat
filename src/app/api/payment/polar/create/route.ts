@@ -14,10 +14,10 @@ import { createCheckoutSession, getPolarProductIds } from '@/libs/polar';
 
 // Request validation schema
 const CreateCheckoutSchema = z.object({
-  planId: z.enum(['starter', 'premium', 'ultimate']),
   billingCycle: z.enum(['monthly', 'yearly']),
-  successUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional(),
+  planId: z.enum(['starter', 'premium', 'ultimate']),
+  successUrl: z.string().url().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.errors },
+        { details: validation.error.errors, error: 'Invalid request' },
         { status: 400 }
       );
     }
@@ -53,23 +53,23 @@ export async function POST(req: NextRequest) {
 
     // 5. Create checkout session
     const session = await createCheckoutSession({
-      productId,
-      priceId,
-      successUrl: successUrl || `${baseUrl}/settings/subscription?success=true`,
       cancelUrl: cancelUrl || `${baseUrl}/settings/subscription?canceled=true`,
       metadata: {
-        userId,
-        planId,
         billingCycle,
+        planId,
         source: 'pho.chat',
+        userId,
       },
+      priceId,
+      productId,
+      successUrl: successUrl || `${baseUrl}/settings/subscription?success=true`,
     });
 
     // 6. Return checkout URL
     return NextResponse.json({
-      success: true,
       checkoutUrl: session.url,
       sessionId: session.id,
+      success: true,
     });
 
   } catch (error) {
@@ -88,12 +88,12 @@ export async function POST(req: NextRequest) {
 // OPTIONS for CORS preflight
 export async function OPTIONS() {
   return new NextResponse(null, {
-    status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Origin': '*',
     },
+    status: 200,
   });
 }
 
