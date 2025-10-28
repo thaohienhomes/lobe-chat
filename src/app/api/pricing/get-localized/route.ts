@@ -20,70 +20,70 @@ import { calculatePppPricing } from '@/server/services/pricing/ppp-pricing';
 import { selectPaymentGateway, getAvailablePaymentMethods } from '@/server/services/payment/gateway-router';
 
 export interface LocalizedPricingResponse {
-  success: boolean;
   data?: {
+    // Payment info
+    availablePaymentMethods: string[];
+    // Comparison with US pricing
+    comparisonWithUS: {
+      premiumMonthly: {
+        local: number;
+        savingsPercent: number;
+        us: number;
+      };
+      starterMonthly: {
+        local: number;
+        savingsPercent: number;
+        us: number;
+      };
+      ultimateMonthly: {
+        local: number;
+        savingsPercent: number;
+        us: number;
+      };
+    };
     // Location info
     countryCode: string;
     countryName: string;
+    
     currency: string;
+    
     detectionMethod: string;
     
     // PPP info
     pppMultiplier: number;
-    
     // Pricing
     pricing: {
+      premium: {
+        monthly: number;
+        monthlyUsd: number;
+        yearly: number;
+        yearlyUsd: number;
+        savings: string;
+      };
       starter: {
         monthly: number;
-        yearly: number;
         monthlyUsd: number;
+        yearly: number;
         yearlyUsd: number;
         savings: string; // e.g., "Save 17%"
       };
-      premium: {
-        monthly: number;
-        yearly: number;
-        monthlyUsd: number;
-        yearlyUsd: number;
-        savings: string;
-      };
       ultimate: {
         monthly: number;
-        yearly: number;
         monthlyUsd: number;
-        yearlyUsd: number;
         savings: string;
+        yearlyUsd: number;
+        yearly: number;
       };
     };
     
-    // Payment info
-    availablePaymentMethods: string[];
     recommendedGateway: {
-      provider: string;
-      name: string;
       estimatedFee: number;
-    };
-    
-    // Comparison with US pricing
-    comparisonWithUS: {
-      starterMonthly: {
-        us: number;
-        local: number;
-        savingsPercent: number;
-      };
-      premiumMonthly: {
-        us: number;
-        local: number;
-        savingsPercent: number;
-      };
-      ultimateMonthly: {
-        us: number;
-        local: number;
-        savingsPercent: number;
-      };
+      name: string;
+      provider: string;
     };
   };
   error?: string;
+  success: boolean;
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse<LocalizedPricingResponse>> {
@@ -112,9 +112,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<LocalizedP
     
     // Select recommended payment gateway
     const gateway = selectPaymentGateway({
+      amount: pppData.pricing.starter.monthly,
       countryCode,
       currency: pppData.currency,
-      amount: pppData.pricing.starter.monthly,
     });
     
     // Calculate yearly savings
@@ -149,76 +149,95 @@ export async function GET(request: NextRequest): Promise<NextResponse<LocalizedP
     );
     
     return NextResponse.json({
-      success: true,
       data: {
-        // Location
-        countryCode,
-        countryName: pppData.countryName,
-        currency: pppData.currency,
-        detectionMethod,
         
-        // PPP
-        pppMultiplier: pppData.pppMultiplier,
+        // Payment
+availablePaymentMethods: paymentMethods,
         
-        // Pricing
-        pricing: {
-          starter: {
-            monthly: pppData.pricing.starter.monthly,
-            yearly: pppData.pricing.starter.yearly,
-            monthlyUsd: pppData.pricing.starter.monthlyUsd,
-            yearlyUsd: pppData.pricing.starter.monthlyUsd * 12 * (1 - starterYearlySavings / 100),
-            savings: `Save ${starterYearlySavings}%`,
+
+// Comparison
+comparisonWithUS: {
+          premiumMonthly: {
+            local: pppData.pricing.premium.monthlyUsd,
+            us: usPricing.pricing.premium.monthlyUsd,
+            savingsPercent: premiumSavings,
           },
+          starterMonthly: {
+            local: pppData.pricing.starter.monthlyUsd,
+            us: usPricing.pricing.starter.monthlyUsd,
+            savingsPercent: starterSavings,
+          },
+          ultimateMonthly: {
+            local: pppData.pricing.ultimate.monthlyUsd,
+            savingsPercent: ultimateSavings,
+            us: usPricing.pricing.ultimate.monthlyUsd,
+          },
+        },
+        
+
+// Location
+countryCode,
+        
+
+countryName: pppData.countryName,
+        
+        
+        
+
+currency: pppData.currency,
+        
+        
+        
+
+
+detectionMethod,
+        
+        
+        
+
+// PPP
+pppMultiplier: pppData.pppMultiplier,
+        
+// Pricing
+pricing: {
           premium: {
             monthly: pppData.pricing.premium.monthly,
-            yearly: pppData.pricing.premium.yearly,
             monthlyUsd: pppData.pricing.premium.monthlyUsd,
-            yearlyUsd: pppData.pricing.premium.monthlyUsd * 12 * (1 - premiumYearlySavings / 100),
             savings: `Save ${premiumYearlySavings}%`,
+            yearly: pppData.pricing.premium.yearly,
+            yearlyUsd: pppData.pricing.premium.monthlyUsd * 12 * (1 - premiumYearlySavings / 100),
+          },
+          starter: {
+            monthly: pppData.pricing.starter.monthly,
+            monthlyUsd: pppData.pricing.starter.monthlyUsd,
+            savings: `Save ${starterYearlySavings}%`,
+            yearly: pppData.pricing.starter.yearly,
+            yearlyUsd: pppData.pricing.starter.monthlyUsd * 12 * (1 - starterYearlySavings / 100),
           },
           ultimate: {
             monthly: pppData.pricing.ultimate.monthly,
-            yearly: pppData.pricing.ultimate.yearly,
             monthlyUsd: pppData.pricing.ultimate.monthlyUsd,
-            yearlyUsd: pppData.pricing.ultimate.monthlyUsd * 12 * (1 - ultimateYearlySavings / 100),
             savings: `Save ${ultimateSavings}%`,
+            yearly: pppData.pricing.ultimate.yearly,
+            yearlyUsd: pppData.pricing.ultimate.monthlyUsd * 12 * (1 - ultimateYearlySavings / 100),
           },
         },
         
-        // Payment
-        availablePaymentMethods: paymentMethods,
+        
         recommendedGateway: {
-          provider: gateway.provider,
-          name: gateway.name,
           estimatedFee: gateway.estimatedFee,
-        },
-        
-        // Comparison
-        comparisonWithUS: {
-          starterMonthly: {
-            us: usPricing.pricing.starter.monthlyUsd,
-            local: pppData.pricing.starter.monthlyUsd,
-            savingsPercent: starterSavings,
-          },
-          premiumMonthly: {
-            us: usPricing.pricing.premium.monthlyUsd,
-            local: pppData.pricing.premium.monthlyUsd,
-            savingsPercent: premiumSavings,
-          },
-          ultimateMonthly: {
-            us: usPricing.pricing.ultimate.monthlyUsd,
-            local: pppData.pricing.ultimate.monthlyUsd,
-            savingsPercent: ultimateSavings,
-          },
+          name: gateway.name,
+          provider: gateway.provider,
         },
       },
+      success: true,
     });
   } catch (error) {
     console.error('Error getting localized pricing:', error);
     return NextResponse.json(
       {
-        success: false,
         error: error instanceof Error ? error.message : 'Failed to get localized pricing',
+        success: false,
       },
       { status: 500 }
     );

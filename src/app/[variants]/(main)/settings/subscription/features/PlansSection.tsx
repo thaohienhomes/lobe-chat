@@ -116,35 +116,35 @@ const plans = [
     computeCredits: '5,000,000 / Month',
     description: 'Perfect for occasional AI users and students',
     features: generatePlanFeatures('starter'),
+    highlight: 'Most Popular for Students',
     id: 'starter',
     monthlyPriceVND: 39_000,
     name: 'Starter',
     yearlyDiscount: '17% off',
     yearlyPriceVND: 390_000,
-    highlight: 'Most Popular for Students',
   },
   {
     computeCredits: '15,000,000 / Month',
     description: 'Designed for professional users and content creators',
     features: generatePlanFeatures('premium'),
+    highlight: 'Best Value for Professionals',
     id: 'premium',
     monthlyPriceVND: 129_000,
     name: 'Premium',
     popular: true,
     yearlyDiscount: '17% off',
     yearlyPriceVND: 1_290_000,
-    highlight: 'Best Value for Professionals',
   },
   {
     computeCredits: '35,000,000 / Month',
     description: 'For enterprises, developers, and AI researchers',
     features: generatePlanFeatures('ultimate'),
+    highlight: 'Maximum AI Power',
     id: 'ultimate',
     monthlyPriceVND: 349_000,
     name: 'Ultimate',
     yearlyDiscount: '17% off',
     yearlyPriceVND: 3_490_000,
-    highlight: 'Maximum AI Power',
   },
 ];
 
@@ -176,8 +176,8 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
       >
         {plans.map((plan) => (
           <Card
-            key={plan.id}
             className={`${styles.planCard} ${plan.popular ? 'popular' : ''}`}
+            key={plan.id}
             style={{ padding: mobile ? 16 : 24 }}
           >
             {plan.popular && (
@@ -238,7 +238,7 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
 
                   // Handle feature items
                   return (
-                    <div key={index} className={styles.feature}>
+                    <div className={styles.feature} key={index}>
                       <Check size={16} />
                       <Text>{feature.replace('• ', '')}</Text>
                     </div>
@@ -249,10 +249,10 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
               {/* CTA Button */}
               <Button
                 block
-                size="large"
-                type={plan.popular ? 'primary' : 'default'}
                 onClick={() => handleUpgrade(plan.id)}
+                size="large"
                 style={{ marginTop: 16 }}
+                type={plan.popular ? 'primary' : 'default'}
               >
                 {plan.popular ? 'Choose Premium' : `Choose ${plan.name}`}
               </Button>
@@ -263,13 +263,13 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
 
       {/* Additional Info */}
       <Flexbox gap={8} style={{ marginTop: 16 }}>
-        <Text type="secondary" style={{ fontSize: 12 }}>
+        <Text style={{ fontSize: 12 }} type="secondary">
           💡 <strong>Mix & match models:</strong> Use budget models for simple tasks, premium models for complex work.
         </Text>
-        <Text type="secondary" style={{ fontSize: 12 }}>
+        <Text style={{ fontSize: 12 }} type="secondary">
           🔄 <strong>Flexible usage:</strong> Switch between models anytime based on your needs.
         </Text>
-        <Text type="secondary" style={{ fontSize: 12 }}>
+        <Text style={{ fontSize: 12 }} type="secondary">
           💰 <strong>73% cheaper</strong> than ChatGPT Plus and Claude Pro.
         </Text>
       </Flexbox>
