@@ -131,3 +131,6 @@ Build Logs on Vercel*.csv
 docs/logs_result.json
 vietnam-market-testing-config.json
 .vercel
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github\instructions\snyk_rules.instructions.md
