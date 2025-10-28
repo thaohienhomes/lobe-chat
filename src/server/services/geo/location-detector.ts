@@ -2,12 +2,11 @@
  * GeoLocation Detection Service
  * Detects user's country from IP address and headers
  */
-
 import { geolocation } from '@vercel/functions';
 import type { NextRequest } from 'next/server';
 
 export interface UserLocation {
-  city?: string; 
+  city?: string;
   countryCode: string;
   // ISO 3166-1 alpha-2 (VN, US, IN, etc.)
   countryName: string;
@@ -22,55 +21,55 @@ export interface UserLocation {
  * Country code to name mapping
  */
 const COUNTRY_NAMES: Record<string, string> = {
-  CN: 'China',
-  GB: 'United Kingdom',
-  ID: 'Indonesia',
-  DE: 'Germany',
-  IN: 'India',
-  ES: 'Spain',
-  JP: 'Japan',
-  CA: 'Canada',
-  US: 'United States',
-  AU: 'Australia',
-  VN: 'Vietnam',
-  AR: 'Argentina',
-  KR: 'South Korea',
-  BR: 'Brazil',
-  MY: 'Malaysia',
   AE: 'United Arab Emirates',
-  TH: 'Thailand',
-  FR: 'France',
-  PH: 'Philippines',
-  IT: 'Italy',
-  SG: 'Singapore',
-  EG: 'Egypt',
-  BD: 'Bangladesh',
-  MX: 'Mexico',
-  BE: 'Belgium',
-  NG: 'Nigeria',
+  AR: 'Argentina',
   AT: 'Austria',
-  PL: 'Poland',
+  AU: 'Australia',
+  BD: 'Bangladesh',
+  BE: 'Belgium',
+  BR: 'Brazil',
+  CA: 'Canada',
   CH: 'Switzerland',
-  RU: 'Russia',
-  DK: 'Denmark',
-  SA: 'Saudi Arabia',
-  FI: 'Finland',
-  TR: 'Turkey',
+  CN: 'China',
   CZ: 'Czech Republic',
+  DE: 'Germany',
+  DK: 'Denmark',
+  EG: 'Egypt',
+  ES: 'Spain',
+  FI: 'Finland',
+  FR: 'France',
+  GB: 'United Kingdom',
   GR: 'Greece',
-  ZA: 'South Africa',
-  HU: 'Hungary',
-  NZ: 'New Zealand',
   HK: 'Hong Kong',
-  PK: 'Pakistan',
+  HU: 'Hungary',
+  ID: 'Indonesia',
   IE: 'Ireland',
-  NL: 'Netherlands',
   IL: 'Israel',
+  IN: 'India',
+  IT: 'Italy',
+  JP: 'Japan',
+  KR: 'South Korea',
+  MX: 'Mexico',
+  MY: 'Malaysia',
+  NG: 'Nigeria',
+  NL: 'Netherlands',
   NO: 'Norway',
+  NZ: 'New Zealand',
+  PH: 'Philippines',
+  PK: 'Pakistan',
+  PL: 'Poland',
   PT: 'Portugal',
-  SE: 'Sweden',
   RO: 'Romania',
+  RU: 'Russia',
+  SA: 'Saudi Arabia',
+  SE: 'Sweden',
+  SG: 'Singapore',
+  TH: 'Thailand',
+  TR: 'Turkey',
   TW: 'Taiwan',
+  US: 'United States',
+  VN: 'Vietnam',
+  ZA: 'South Africa',
 };
 
 /**
@@ -254,4 +253,3 @@ export class LocationDetector {
 
 // Export singleton instance
 export const locationDetector = new LocationDetector();
-
