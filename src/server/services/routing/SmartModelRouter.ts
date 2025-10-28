@@ -12,33 +12,38 @@
 import { MODEL_COSTS } from '@/server/modules/CostOptimization';
 
 interface ModelCapabilities {
-  reasoning: number;      // 0-10 reasoning ability
-  creativity: number;     // 0-10 creative writing
-  coding: number;         // 0-10 code generation
-  analysis: number;       // 0-10 data analysis
-  speed: number;          // 0-10 response speed
-  costEfficiency: number; // 0-10 cost per quality
+  // 0-10 code generation
+  analysis: number;      
+  // 0-10 creative writing
+  coding: number;     
+  // 0-10 response speed
+  costEfficiency: number;         
+  // 0-10 reasoning ability
+  creativity: number;       
+  reasoning: number;          
+  // 0-10 data analysis
+  speed: number; // 0-10 cost per quality
 }
 
 interface RoutingDecision {
-  selectedModel: string;
-  reason: string;
-  confidence: number;
   alternativeModels: string[];
+  confidence: number;
   estimatedCost: number;
   estimatedTokens: number;
+  reason: string;
+  selectedModel: string;
 }
 
 interface UserContext {
-  remainingBudgetUSD: number;
-  subscriptionTier: 'starter' | 'premium' | 'ultimate';
   preferredModels: string[];
   queryHistory: QueryHistoryItem[];
+  remainingBudgetUSD: number;
+  subscriptionTier: 'starter' | 'premium' | 'ultimate';
 }
 
 interface QueryHistoryItem {
-  query: string;
   model: string;
+  query: string;
   satisfaction: number; // 0-10 user satisfaction
   timestamp: number;
 }
@@ -46,70 +51,70 @@ interface QueryHistoryItem {
 export class SmartModelRouter {
   // Model capabilities matrix
   private modelCapabilities: Record<string, ModelCapabilities> = {
-    'gemini-1.5-flash': {
-      reasoning: 6,
-      creativity: 7,
-      coding: 6,
-      analysis: 7,
-      speed: 10,
-      costEfficiency: 10,
-    },
-    'gpt-4o-mini': {
-      reasoning: 7,
-      creativity: 7,
-      coding: 8,
-      analysis: 7,
-      speed: 9,
-      costEfficiency: 9,
-    },
     'claude-3-haiku': {
-      reasoning: 6,
-      creativity: 8,
-      coding: 6,
       analysis: 6,
-      speed: 8,
+      coding: 6,
       costEfficiency: 8,
-    },
-    'gemini-1.5-pro': {
-      reasoning: 8,
       creativity: 8,
-      coding: 8,
-      analysis: 9,
-      speed: 7,
-      costEfficiency: 6,
-    },
-    'gpt-4o': {
-      reasoning: 9,
-      creativity: 8,
-      coding: 9,
-      analysis: 8,
-      speed: 6,
-      costEfficiency: 5,
+      reasoning: 6,
+      speed: 8,
     },
     'claude-3-sonnet': {
-      reasoning: 9,
-      creativity: 9,
-      coding: 8,
       analysis: 9,
-      speed: 5,
+      coding: 8,
       costEfficiency: 4,
+      creativity: 9,
+      reasoning: 9,
+      speed: 5,
+    },
+    'gemini-1.5-flash': {
+      analysis: 7,
+      coding: 6,
+      costEfficiency: 10,
+      creativity: 7,
+      reasoning: 6,
+      speed: 10,
+    },
+    'gemini-1.5-pro': {
+      analysis: 9,
+      coding: 8,
+      costEfficiency: 6,
+      creativity: 8,
+      reasoning: 8,
+      speed: 7,
+    },
+    'gpt-4o': {
+      analysis: 8,
+      coding: 9,
+      costEfficiency: 5,
+      creativity: 8,
+      reasoning: 9,
+      speed: 6,
+    },
+    'gpt-4o-mini': {
+      analysis: 7,
+      coding: 8,
+      costEfficiency: 9,
+      creativity: 7,
+      reasoning: 7,
+      speed: 9,
     },
   };
 
   // Query complexity indicators
   private complexityIndicators = {
-    simple: [
-      'hello', 'hi', 'what', 'how', 'when', 'where', 'who',
-      'translate', 'define', 'meaning', 'simple', 'quick',
+    complex: [
+      'code', 'algorithm', 'research', 'detailed', 'comprehensive',
+      'advanced', 'complex', 'deep', 'thorough', 'sophisticated',
+      'implement', 'design', 'architecture', 'optimize',
     ],
     medium: [
       'explain', 'analyze', 'compare', 'summarize', 'write', 'create',
       'describe', 'outline', 'list', 'steps', 'process',
     ],
-    complex: [
-      'code', 'algorithm', 'research', 'detailed', 'comprehensive',
-      'advanced', 'complex', 'deep', 'thorough', 'sophisticated',
-      'implement', 'design', 'architecture', 'optimize',
+    simple: [
+      'hello', 'hi', 'what', 'how', 'when', 'where', 'who',
+      'translate', 'define', 'meaning', 'simple', 'quick',
     ],
   };
 
@@ -130,6 +135,7 @@ export class SmartModelRouter {
 
     // Score each candidate model
     const scoredModels = candidates.map(model => ({
+      cost: this.calculateCost(model, estimatedTokens),
       model,
       score: this.calculateModelScore(
         model,
@@ -138,7 +144,6 @@ export class SmartModelRouter {
         estimatedTokens,
         userContext
       ),
-      cost: this.calculateCost(model, estimatedTokens),
     }));
 
     // Sort by score (highest first)
@@ -156,24 +161,24 @@ export class SmartModelRouter {
       );
 
       return {
-        selectedModel: cheapest.model,
-        reason: 'Budget constraint - using most cost-effective model',
-        confidence: 0.6,
         alternativeModels: [],
+        confidence: 0.6,
         estimatedCost: cheapest.cost,
         estimatedTokens,
+        reason: 'Budget constraint - using most cost-effective model',
+        selectedModel: cheapest.model,
       };
     }
 
     return {
-      selectedModel: selected.model,
-      reason: this.generateReason(selected.model, complexity, queryType),
-      confidence: this.calculateConfidence(selected.score, scoredModels),
       alternativeModels: scoredModels
         .slice(1, 4)
         .map(candidate => candidate.model),
+      confidence: this.calculateConfidence(selected.score, scoredModels),
       estimatedCost: selected.cost,
       estimatedTokens,
+      reason: this.generateReason(selected.model, complexity, queryType),
+      selectedModel: selected.model,
     };
   }
 
@@ -244,9 +249,9 @@ export class SmartModelRouter {
     // Estimate output tokens based on query complexity
     const complexity = this.analyzeComplexity(query);
     const outputMultiplier = {
-      simple: 1.5,
+      complex: 4,
       medium: 2.5,
-      complex: 4.0,
+      simple: 1.5,
     };
 
     const outputTokens = Math.min(
@@ -289,27 +294,32 @@ export class SmartModelRouter {
 
     // Base capability score based on query type
     switch (queryType) {
-      case 'coding':
+      case 'coding': {
         score += capabilities.coding * 0.4;
         break;
-      case 'creative':
+      }
+      case 'creative': {
         score += capabilities.creativity * 0.4;
         break;
-      case 'analysis':
+      }
+      case 'analysis': {
         score += capabilities.analysis * 0.4;
         break;
-      case 'reasoning':
+      }
+      case 'reasoning': {
         score += capabilities.reasoning * 0.4;
         break;
-      default:
+      }
+      default: {
         score += (capabilities.reasoning + capabilities.creativity) * 0.2;
+      }
     }
 
     // Complexity bonus
     const complexityMultiplier = {
-      simple: 0.8,
-      medium: 1.0,
       complex: 1.2,
+      medium: 1,
+      simple: 0.8,
     };
     score *= complexityMultiplier[complexity as keyof typeof complexityMultiplier];
 
@@ -321,7 +331,7 @@ export class SmartModelRouter {
 
     // User preference bonus
     if (userContext.preferredModels.includes(model)) {
-      score += 1.0;
+      score += 1;
     }
 
     // Budget constraint penalty
@@ -357,12 +367,12 @@ export class SmartModelRouter {
     queryType: string
   ): string {
     const reasons = {
-      'gemini-1.5-flash': 'Fastest response with excellent cost efficiency',
-      'gpt-4o-mini': 'Great balance of quality and speed for general tasks',
       'claude-3-haiku': 'Excellent for creative writing and fast responses',
+      'claude-3-sonnet': 'Highest quality for sophisticated analysis and reasoning',
+      'gemini-1.5-flash': 'Fastest response with excellent cost efficiency',
       'gemini-1.5-pro': 'Superior analysis capabilities for complex queries',
       'gpt-4o': 'Advanced reasoning for complex problems and coding',
-      'claude-3-sonnet': 'Highest quality for sophisticated analysis and reasoning',
+      'gpt-4o-mini': 'Great balance of quality and speed for general tasks',
     };
 
     const baseReason = reasons[model as keyof typeof reasons] || 'Optimal for your query';
@@ -385,13 +395,13 @@ export class SmartModelRouter {
     selectedScore: number,
     allScores: Array<{ score: number }>
   ): number {
-    if (allScores.length < 2) return 1.0;
+    if (allScores.length < 2) return 1;
 
     const secondBest = allScores[1].score;
     const gap = selectedScore - secondBest;
     
     // Confidence based on score gap
-    return Math.min(1.0, 0.5 + (gap / 10));
+    return Math.min(1, 0.5 + (gap / 10));
   }
 
   /**
@@ -426,4 +436,4 @@ export function getSmartModelRouter(): SmartModelRouter {
   return routerInstance;
 }
 
-export type { ModelCapabilities, RoutingDecision, UserContext, QueryHistoryItem };
+export type { ModelCapabilities, QueryHistoryItem,RoutingDecision, UserContext };

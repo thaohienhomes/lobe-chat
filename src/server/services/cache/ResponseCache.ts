@@ -8,34 +8,34 @@
  * - Semantic similarity caching
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { LRUCache } from 'lru-cache';
 import Redis from 'ioredis';
 
 interface CacheConfig {
+  budgetModelTTL: number;
+  defaultTTL: number;
   memoryMaxSize: number;
   memoryTTL: number;
-  redisUrl?: string;
-  defaultTTL: number;
-  budgetModelTTL: number;
   premiumModelTTL: number;
+  redisUrl?: string;
 }
 
 interface CacheEntry {
-  response: string;
+  cost: number;
   model: string;
+  response: string;
   timestamp: number;
   tokens: number;
-  cost: number;
 }
 
 interface CacheStats {
-  memoryHits: number;
-  redisHits: number;
-  misses: number;
-  totalRequests: number;
-  hitRate: number;
   costSaved: number;
+  hitRate: number;
+  memoryHits: number;
+  misses: number;
+  redisHits: number;
+  totalRequests: number;
 }
 
 export class ResponseCache {
@@ -53,10 +53,18 @@ export class ResponseCache {
 
   constructor(config: Partial<CacheConfig> = {}) {
     this.config = {
-      memoryMaxSize: 1000, // 1000 entries
-      memoryTTL: 1000 * 60 * 15, // 15 minutes
-      defaultTTL: 1800, // 30 minutes
-      budgetModelTTL: 3600, // 1 hour for budget models
+      
+// 30 minutes
+budgetModelTTL: 3600, 
+      
+
+// 15 minutes
+defaultTTL: 1800, 
+      
+
+memoryMaxSize: 1000, 
+      // 1000 entries
+memoryTTL: 1000 * 60 * 15, // 1 hour for budget models
       premiumModelTTL: 1800, // 30 minutes for premium models
       ...config,
     };
@@ -74,12 +82,12 @@ export class ResponseCache {
 
     // Initialize stats
     this.stats = {
-      memoryHits: 0,
-      redisHits: 0,
-      misses: 0,
-      totalRequests: 0,
-      hitRate: 0,
       costSaved: 0,
+      hitRate: 0,
+      memoryHits: 0,
+      misses: 0,
+      redisHits: 0,
+      totalRequests: 0,
     };
   }
 
@@ -141,11 +149,11 @@ export class ResponseCache {
   ): Promise<void> {
     const key = this.generateCacheKey(query, model);
     const entry: CacheEntry = {
-      response,
+      cost,
       model,
+      response,
       timestamp: Date.now(),
       tokens,
-      cost,
     };
 
     try {
@@ -170,12 +178,12 @@ export class ResponseCache {
     // Normalize query for better cache hits
     const normalized = query
       .toLowerCase()
-      .replace(/\s+/g, ' ')
+      .replaceAll(/\s+/g, ' ')
       .trim()
       // Remove common variations that don't affect meaning
-      .replace(/please|could you|can you|would you/gi, '')
-      .replace(/\?+/g, '?')
-      .replace(/!+/g, '!');
+      .replaceAll(/please|could you|can you|would you/gi, '')
+      .replaceAll(/\?+/g, '?')
+      .replaceAll(/!+/g, '!');
 
     // Create hash
     const hash = crypto
@@ -234,12 +242,12 @@ export class ResponseCache {
 
     // Reset stats
     this.stats = {
-      memoryHits: 0,
-      redisHits: 0,
-      misses: 0,
-      totalRequests: 0,
-      hitRate: 0,
       costSaved: 0,
+      hitRate: 0,
+      memoryHits: 0,
+      misses: 0,
+      redisHits: 0,
+      totalRequests: 0,
     };
   }
 

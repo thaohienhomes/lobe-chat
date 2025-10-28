@@ -10,39 +10,39 @@
  */
 
 interface PerformanceMetrics {
-  requestsPerSecond: number;
-  averageResponseTime: number;
-  p95ResponseTime: number;
-  p99ResponseTime: number;
-  errorRate: number;
   activeUsers: number;
+  averageResponseTime: number;
   cacheHitRate: number;
   costPerUser: number;
+  errorRate: number;
+  p95ResponseTime: number;
+  p99ResponseTime: number;
+  requestsPerSecond: number;
   throughput: number;
 }
 
 interface SystemMetrics {
   cpuUsage: number;
-  memoryUsage: number;
-  diskUsage: number;
-  networkIO: number;
   databaseConnections: number;
+  diskUsage: number;
+  memoryUsage: number;
+  networkIO: number;
   queueLength: number;
 }
 
 interface AlertRule {
-  metric: string;
-  threshold: number;
-  operator: 'gt' | 'lt' | 'eq';
-  duration: number; // seconds
-  severity: 'low' | 'medium' | 'high' | 'critical';
   action: 'log' | 'email' | 'scale' | 'restart';
+  duration: number;
+  metric: string;
+  operator: 'gt' | 'lt' | 'eq'; // seconds
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  threshold: number;
 }
 
 interface MetricDataPoint {
+  tags?: Record<string, string>;
   timestamp: number;
   value: number;
-  tags?: Record<string, string>;
 }
 
 export class PerformanceMonitor {
@@ -72,9 +72,9 @@ export class PerformanceMonitor {
 
     const dataPoints = this.metrics.get(name)!;
     dataPoints.push({
+      tags,
       timestamp: Date.now(),
       value,
-      tags,
     });
 
     // Keep only last 1000 data points per metric
@@ -139,7 +139,7 @@ export class PerformanceMonitor {
    */
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
     const now = Date.now();
-    const oneMinuteAgo = now - 60000;
+    const oneMinuteAgo = now - 60_000;
 
     // Calculate requests per second
     const requestsLastMinute = this.getMetricSum('requests_total', oneMinuteAgo);
@@ -162,21 +162,21 @@ export class PerformanceMonitor {
     const cacheHitRate = cacheRequests > 0 ? cacheHits / cacheRequests : 0;
 
     // Calculate active users (unique users in last 5 minutes)
-    const activeUsers = this.getUniqueUsers(now - 300000);
+    const activeUsers = this.getUniqueUsers(now - 300_000);
 
     // Calculate cost per user
     const totalCost = this.getMetricSum('cost_usd', oneMinuteAgo);
     const costPerUser = activeUsers > 0 ? totalCost / activeUsers : 0;
 
     return {
-      requestsPerSecond,
-      averageResponseTime,
-      p95ResponseTime,
-      p99ResponseTime,
-      errorRate,
       activeUsers,
+      averageResponseTime,
       cacheHitRate,
       costPerUser,
+      errorRate,
+      p95ResponseTime,
+      p99ResponseTime,
+      requestsPerSecond,
       throughput: requestsPerSecond,
     };
   }
@@ -205,44 +205,56 @@ export class PerformanceMonitor {
   private setupDefaultAlertRules(): void {
     this.alertRules = [
       {
-        metric: 'request_duration_ms',
-        threshold: 2000, // 2 seconds
-        operator: 'gt',
-        duration: 60,
-        severity: 'medium',
         action: 'log',
+        
+duration: 60, 
+        
+metric: 'request_duration_ms',
+        // 2 seconds
+operator: 'gt',
+        severity: 'medium',
+        threshold: 2000,
       },
       {
-        metric: 'error_rate',
-        threshold: 0.05, // 5%
-        operator: 'gt',
-        duration: 300,
+        action: 'email',
+        
+duration: 300, 
+        
+metric: 'error_rate',
+        // 5%
+operator: 'gt',
         severity: 'high',
-        action: 'email',
+        threshold: 0.05,
       },
       {
-        metric: 'requests_per_second',
-        threshold: 1000,
-        operator: 'gt',
-        duration: 60,
-        severity: 'medium',
         action: 'scale',
-      },
-      {
-        metric: 'cache_hit_rate',
-        threshold: 0.7, // 70%
-        operator: 'lt',
-        duration: 300,
-        severity: 'low',
-        action: 'log',
-      },
-      {
-        metric: 'cost_per_user',
-        threshold: 2.0, // $2 per user
+        duration: 60,
+        metric: 'requests_per_second',
         operator: 'gt',
-        duration: 600,
         severity: 'medium',
+        threshold: 1000,
+      },
+      {
+        action: 'log',
+        
+duration: 300, 
+        
+metric: 'cache_hit_rate',
+        // 70%
+operator: 'lt',
+        severity: 'low',
+        threshold: 0.7,
+      },
+      {
         action: 'email',
+        
+duration: 600, 
+        
+metric: 'cost_per_user',
+        // $2 per user
+operator: 'gt',
+        severity: 'medium',
+        threshold: 2,
       },
     ];
   }
@@ -280,7 +292,7 @@ export class PerformanceMonitor {
       Object.entries(metrics).forEach(([key, value]) => {
         this.recordMetric(`performance_${key}`, value);
       });
-    }, 10000);
+    }, 10_000);
 
     this.intervals.set('performance', performanceInterval);
 
@@ -291,7 +303,7 @@ export class PerformanceMonitor {
       Object.entries(metrics).forEach(([key, value]) => {
         this.recordMetric(`system_${key}`, value);
       });
-    }, 30000);
+    }, 30_000);
 
     this.intervals.set('system', systemInterval);
   }
@@ -322,14 +334,18 @@ export class PerformanceMonitor {
    */
   private evaluateRule(rule: AlertRule, value: number): boolean {
     switch (rule.operator) {
-      case 'gt':
+      case 'gt': {
         return value > rule.threshold;
-      case 'lt':
+      }
+      case 'lt': {
         return value < rule.threshold;
-      case 'eq':
+      }
+      case 'eq': {
         return value === rule.threshold;
-      default:
+      }
+      default: {
         return false;
+      }
     }
   }
 
@@ -340,22 +356,26 @@ export class PerformanceMonitor {
     const message = `ALERT: ${rule.metric} is ${value} (threshold: ${rule.threshold})`;
     
     switch (rule.action) {
-      case 'log':
+      case 'log': {
         console.warn(message);
         break;
-      case 'email':
+      }
+      case 'email': {
         console.error(message);
         // Would send email notification
         break;
-      case 'scale':
+      }
+      case 'scale': {
         console.error(message);
         // Would trigger auto-scaling
         this.triggerAutoScale();
         break;
-      case 'restart':
+      }
+      case 'restart': {
         console.error(message);
         // Would trigger service restart
         break;
+      }
     }
   }
 
@@ -456,4 +476,4 @@ export function getPerformanceMonitor(): PerformanceMonitor {
   return monitorInstance;
 }
 
-export type { PerformanceMetrics, SystemMetrics, AlertRule, MetricDataPoint };
+export type { AlertRule, MetricDataPoint,PerformanceMetrics, SystemMetrics };

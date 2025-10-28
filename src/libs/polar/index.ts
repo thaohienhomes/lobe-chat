@@ -20,30 +20,30 @@ const polar = new Polar({
 });
 
 export interface PolarCheckoutSession {
-  id: string;
-  url: string;
   customerId?: string;
+  id: string;
   status: 'open' | 'complete' | 'expired';
+  url: string;
 }
 
 export interface PolarSubscription {
-  id: string;
-  customerId: string;
-  productId: string;
-  priceId: string;
-  status: 'active' | 'canceled' | 'past_due' | 'incomplete';
-  currentPeriodStart: Date;
-  currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: Date;
+  currentPeriodStart: Date;
+  customerId: string;
+  id: string;
+  priceId: string;
+  productId: string;
+  status: 'active' | 'canceled' | 'past_due' | 'incomplete';
 }
 
 export interface CreateCheckoutParams {
-  productId: string;
-  priceId: string;
-  customerEmail?: string;
-  successUrl: string;
   cancelUrl: string;
+  customerEmail?: string;
   metadata?: Record<string, string>;
+  priceId: string;
+  productId: string;
+  successUrl: string;
 }
 
 /**
@@ -54,19 +54,19 @@ export async function createCheckoutSession(
 ): Promise<PolarCheckoutSession> {
   try {
     const session = await polar.checkouts.create({
-      productId: params.productId,
-      priceId: params.priceId,
-      customerEmail: params.customerEmail,
-      successUrl: params.successUrl,
       cancelUrl: params.cancelUrl,
+      customerEmail: params.customerEmail,
       metadata: params.metadata,
+      priceId: params.priceId,
+      productId: params.productId,
+      successUrl: params.successUrl,
     });
 
     return {
-      id: session.id,
-      url: session.url,
       customerId: session.customerId,
+      id: session.id,
       status: session.status as 'open' | 'complete' | 'expired',
+      url: session.url,
     };
   } catch (error) {
     console.error('Polar checkout creation failed:', error);
@@ -84,14 +84,14 @@ export async function getSubscription(subscriptionId: string): Promise<PolarSubs
     if (!subscription) return null;
 
     return {
-      id: subscription.id,
-      customerId: subscription.customerId,
-      productId: subscription.productId,
-      priceId: subscription.priceId,
-      status: subscription.status as 'active' | 'canceled' | 'past_due' | 'incomplete',
-      currentPeriodStart: new Date(subscription.currentPeriodStart),
-      currentPeriodEnd: new Date(subscription.currentPeriodEnd),
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd || false,
+      currentPeriodEnd: new Date(subscription.currentPeriodEnd),
+      currentPeriodStart: new Date(subscription.currentPeriodStart),
+      customerId: subscription.customerId,
+      id: subscription.id,
+      priceId: subscription.priceId,
+      productId: subscription.productId,
+      status: subscription.status as 'active' | 'canceled' | 'past_due' | 'incomplete',
     };
   } catch (error) {
     console.error('Failed to get Polar subscription:', error);
@@ -160,19 +160,19 @@ export async function getCustomerPortalUrl(customerId: string): Promise<string |
  * Polar Product IDs (configure these in Polar dashboard)
  */
 export const POLAR_PRODUCTS = {
-  starter: {
-    productId: process.env.POLAR_PRODUCT_STARTER_ID!,
-    monthlyPriceId: process.env.POLAR_PRICE_STARTER_MONTHLY_ID!,
-    yearlyPriceId: process.env.POLAR_PRICE_STARTER_YEARLY_ID!,
-  },
   premium: {
-    productId: process.env.POLAR_PRODUCT_PREMIUM_ID!,
     monthlyPriceId: process.env.POLAR_PRICE_PREMIUM_MONTHLY_ID!,
+    productId: process.env.POLAR_PRODUCT_PREMIUM_ID!,
     yearlyPriceId: process.env.POLAR_PRICE_PREMIUM_YEARLY_ID!,
   },
+  starter: {
+    monthlyPriceId: process.env.POLAR_PRICE_STARTER_MONTHLY_ID!,
+    productId: process.env.POLAR_PRODUCT_STARTER_ID!,
+    yearlyPriceId: process.env.POLAR_PRICE_STARTER_YEARLY_ID!,
+  },
   ultimate: {
-    productId: process.env.POLAR_PRODUCT_ULTIMATE_ID!,
     monthlyPriceId: process.env.POLAR_PRICE_ULTIMATE_MONTHLY_ID!,
+    productId: process.env.POLAR_PRODUCT_ULTIMATE_ID!,
     yearlyPriceId: process.env.POLAR_PRICE_ULTIMATE_YEARLY_ID!,
   },
 } as const;
@@ -185,8 +185,8 @@ export function getPolarProductIds(planId: 'starter' | 'premium' | 'ultimate', b
   const priceId = billingCycle === 'monthly' ? product.monthlyPriceId : product.yearlyPriceId;
 
   return {
-    productId: product.productId,
     priceId,
+    productId: product.productId,
   };
 }
 

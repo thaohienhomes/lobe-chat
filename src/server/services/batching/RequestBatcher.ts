@@ -10,28 +10,29 @@
 
 interface BatchRequest {
   id: string;
-  query: string;
   model: string;
-  userId: string;
-  timestamp: number;
-  resolve: (result: any) => void;
-  reject: (error: any) => void;
   priority: number;
+  query: string;
+  reject: (error: any) => void;
+  resolve: (result: any) => void;
+  timestamp: number;
+  userId: string;
 }
 
 interface BatchConfig {
   maxBatchSize: number;
-  maxWaitTime: number; // milliseconds
-  maxConcurrentBatches: number;
+  // milliseconds
+  maxConcurrentBatches: number; 
+  maxWaitTime: number;
   priorityLevels: number;
 }
 
 interface BatchStats {
-  totalRequests: number;
-  batchedRequests: number;
   averageBatchSize: number;
   averageWaitTime: number;
+  batchedRequests: number;
   throughputImprovement: number;
+  totalRequests: number;
 }
 
 export class RequestBatcher {
@@ -44,18 +45,19 @@ export class RequestBatcher {
   constructor(config: Partial<BatchConfig> = {}) {
     this.config = {
       maxBatchSize: 10,
-      maxWaitTime: 100, // 100ms
-      maxConcurrentBatches: 5,
+      // 100ms
+maxConcurrentBatches: 5, 
+      maxWaitTime: 100,
       priorityLevels: 3,
       ...config,
     };
 
     this.stats = {
-      totalRequests: 0,
-      batchedRequests: 0,
       averageBatchSize: 0,
       averageWaitTime: 0,
+      batchedRequests: 0,
       throughputImprovement: 0,
+      totalRequests: 0,
     };
   }
 
@@ -73,13 +75,13 @@ export class RequestBatcher {
     return new Promise((resolve, reject) => {
       const request: BatchRequest = {
         id: this.generateRequestId(),
-        query,
         model,
-        userId,
-        timestamp: Date.now(),
-        resolve,
-        reject,
         priority,
+        query,
+        reject,
+        resolve,
+        timestamp: Date.now(),
+        userId,
       };
 
       const batchKey = this.getBatchKey(model, priority);
@@ -169,10 +171,10 @@ export class RequestBatcher {
     await this.simulateProcessing(request.model);
     
     return {
-      response: `Processed: ${request.query}`,
       model: request.model,
-      userId: request.userId,
+      response: `Processed: ${request.query}`,
       timestamp: Date.now(),
+      userId: request.userId,
     };
   }
 
@@ -182,12 +184,12 @@ export class RequestBatcher {
   private async simulateProcessing(model: string): Promise<void> {
     // Different models have different processing times
     const processingTimes = {
-      'gemini-1.5-flash': 200,
-      'gpt-4o-mini': 300,
       'claude-3-haiku': 250,
+      'claude-3-sonnet': 1000,
+      'gemini-1.5-flash': 200,
       'gemini-1.5-pro': 500,
       'gpt-4o': 800,
-      'claude-3-sonnet': 1000,
+      'gpt-4o-mini': 300,
     };
 
     const delay = processingTimes[model as keyof typeof processingTimes] || 400;
@@ -205,7 +207,7 @@ export class RequestBatcher {
    * Generate unique request ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
@@ -251,16 +253,16 @@ export class RequestBatcher {
    * Get current queue status
    */
   getQueueStatus(): {
-    pendingBatches: number;
     activeBatches: number;
+    pendingBatches: number;
     totalPendingRequests: number;
   } {
     const totalPendingRequests = Array.from(this.batches.values())
       .reduce((sum, batch) => sum + batch.length, 0);
 
     return {
-      pendingBatches: this.batches.size,
       activeBatches: this.activeBatches.size,
+      pendingBatches: this.batches.size,
       totalPendingRequests,
     };
   }
@@ -323,4 +325,4 @@ export async function withBatching<T>(
   return batcher.addRequest(query, model, userId, priority);
 }
 
-export type { BatchRequest, BatchConfig, BatchStats };
+export type { BatchConfig, BatchRequest, BatchStats };

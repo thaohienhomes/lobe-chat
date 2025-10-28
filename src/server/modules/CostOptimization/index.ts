@@ -299,7 +299,7 @@ export class CostOptimizationEngine {
  * Usage tracking middleware for tRPC integration
  */
 export class UsageTracker {
-  constructor(private db: any, private userId: string) { }
+  constructor(private db: any, private userId: string) {}
 
   async trackUsage(request: {
     costUSD: number;

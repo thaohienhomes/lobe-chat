@@ -11,34 +11,34 @@
 import { Pool, PoolClient } from 'pg';
 
 interface DatabaseConfig {
-  primaryHost: string;
-  readReplicaHost?: string;
   analyticsHost?: string;
+  connectionTimeoutMs: number;
   database: string;
-  username: string;
+  idleTimeoutMs: number;
+  maxConnections: number;
   password: string;
   port: number;
-  maxConnections: number;
-  idleTimeoutMs: number;
-  connectionTimeoutMs: number;
+  primaryHost: string;
+  readReplicaHost?: string;
+  username: string;
 }
 
 interface QueryResult<T = any> {
-  rows: T[];
-  rowCount: number;
   duration: number;
+  rowCount: number;
+  rows: T[];
 }
 
 interface DatabaseStats {
-  totalQueries: number;
-  readQueries: number;
-  writeQueries: number;
   averageQueryTime: number;
   connectionPoolStats: {
-    total: number;
     idle: number;
+    total: number;
     waiting: number;
   };
+  readQueries: number;
+  totalQueries: number;
+  writeQueries: number;
 }
 
 export class OptimizedDatabase {
@@ -51,55 +51,81 @@ export class OptimizedDatabase {
   constructor(config: DatabaseConfig) {
     // Primary database pool for writes
     this.writePool = new Pool({
-      host: config.primaryHost,
-      database: config.database,
-      user: config.username,
-      password: config.password,
-      port: config.port,
-      max: Math.floor(config.maxConnections * 0.3), // 30% for writes
-      idleTimeoutMillis: config.idleTimeoutMs,
-      connectionTimeoutMillis: config.connectionTimeoutMs,
       application_name: 'pho-chat-write',
+      connectionTimeoutMillis: config.connectionTimeoutMs,
+      database: config.database,
+      host: config.primaryHost,
+      // 30% for writes
+idleTimeoutMillis: config.idleTimeoutMs,
+      
+max: Math.floor(config.maxConnections * 0.3), 
+      
+password: config.password,
+      
+
+port: config.port,
+      
+user: config.username,
     });
 
     // Read replica pool for reads
     this.readPool = new Pool({
-      host: config.readReplicaHost || config.primaryHost,
-      database: config.database,
-      user: config.username,
-      password: config.password,
-      port: config.port,
-      max: Math.floor(config.maxConnections * 0.6), // 60% for reads
-      idleTimeoutMillis: config.idleTimeoutMs,
-      connectionTimeoutMillis: config.connectionTimeoutMs,
       application_name: 'pho-chat-read',
+      connectionTimeoutMillis: config.connectionTimeoutMs,
+      database: config.database,
+      host: config.readReplicaHost || config.primaryHost,
+      // 60% for reads
+idleTimeoutMillis: config.idleTimeoutMs,
+      
+max: Math.floor(config.maxConnections * 0.6), 
+      
+password: config.password,
+      
+
+port: config.port,
+      
+user: config.username,
     });
 
     // Analytics pool (optional)
     if (config.analyticsHost) {
       this.analyticsPool = new Pool({
-        host: config.analyticsHost,
-        database: config.database,
-        user: config.username,
-        password: config.password,
-        port: config.port,
-        max: Math.floor(config.maxConnections * 0.1), // 10% for analytics
-        idleTimeoutMillis: config.idleTimeoutMs * 2, // Longer idle timeout
-        connectionTimeoutMillis: config.connectionTimeoutMs,
-        application_name: 'pho-chat-analytics',
+        
+application_name: 'pho-chat-analytics',
+        
+// Longer idle timeout
+connectionTimeoutMillis: config.connectionTimeoutMs,
+        
+database: config.database,
+        
+host: config.analyticsHost,
+        
+// 10% for analytics
+idleTimeoutMillis: config.idleTimeoutMs * 2,
+        
+
+max: Math.floor(config.maxConnections * 0.1), 
+        
+
+password: config.password, 
+        
+
+port: config.port,
+        
+user: config.username,
       });
     }
 
     this.stats = {
-      totalQueries: 0,
-      readQueries: 0,
-      writeQueries: 0,
       averageQueryTime: 0,
       connectionPoolStats: {
-        total: 0,
         idle: 0,
+        total: 0,
         waiting: 0,
       },
+      readQueries: 0,
+      totalQueries: 0,
+      writeQueries: 0,
     };
 
     this.setupEventHandlers();
@@ -120,9 +146,9 @@ export class OptimizedDatabase {
       const cached = this.getFromCache(sql, params);
       if (cached) {
         return {
-          rows: cached.result.rows,
-          rowCount: cached.result.rowCount,
           duration: Date.now() - startTime,
+          rowCount: cached.result.rowCount,
+          rows: cached.result.rows,
         };
       }
     }
@@ -135,15 +161,15 @@ export class OptimizedDatabase {
 
       // Cache result if requested
       if (options.cache) {
-        this.setCache(sql, params, result, options.cacheTTL || 300000); // 5 min default
+        this.setCache(sql, params, result, options.cacheTTL || 300_000); // 5 min default
       }
 
       this.updateStats('read', duration);
 
       return {
-        rows: result.rows,
-        rowCount: result.rowCount,
         duration,
+        rowCount: result.rowCount,
+        rows: result.rows,
       };
     } finally {
       client.release();
@@ -167,9 +193,9 @@ export class OptimizedDatabase {
       this.updateStats('write', duration);
 
       return {
-        rows: result.rows,
-        rowCount: result.rowCount,
         duration,
+        rowCount: result.rowCount,
+        rows: result.rows,
       };
     } finally {
       client.release();
@@ -194,9 +220,9 @@ export class OptimizedDatabase {
       this.updateStats('read', duration);
 
       return {
-        rows: result.rows,
-        rowCount: result.rowCount,
         duration,
+        rowCount: result.rowCount,
+        rows: result.rows,
       };
     } finally {
       client.release();
@@ -274,7 +300,7 @@ export class OptimizedDatabase {
       GROUP BY u.id, u.subscription_tier, u.monthly_budget_vnd
     `;
 
-    const result = await this.query(sql, [userId], { cache: true, cacheTTL: 60000 });
+    const result = await this.query(sql, [userId], { cache: true, cacheTTL: 60_000 });
     return result.rows[0];
   }
 
@@ -307,7 +333,7 @@ export class OptimizedDatabase {
     const key = this.getCacheKey(sql, params);
     const cached = this.queryCache.get(key);
     
-    if (cached && Date.now() - cached.timestamp < 300000) { // 5 min TTL
+    if (cached && Date.now() - cached.timestamp < 300_000) { // 5 min TTL
       return cached;
     }
     
@@ -338,7 +364,7 @@ export class OptimizedDatabase {
   private cleanupCache(): void {
     const now = Date.now();
     for (const [key, value] of this.queryCache.entries()) {
-      if (now - value.timestamp > 300000) {
+      if (now - value.timestamp > 300_000) {
         this.queryCache.delete(key);
       }
     }
@@ -369,8 +395,8 @@ export class OptimizedDatabase {
     return {
       ...this.stats,
       connectionPoolStats: {
-        total: this.writePool.totalCount + this.readPool.totalCount,
         idle: this.writePool.idleCount + this.readPool.idleCount,
+        total: this.writePool.totalCount + this.readPool.totalCount,
         waiting: this.writePool.waitingCount + this.readPool.waitingCount,
       },
     };
@@ -399,14 +425,14 @@ export class OptimizedDatabase {
    * Health check
    */
   async healthCheck(): Promise<{
-    write: boolean;
-    read: boolean;
     analytics: boolean;
+    read: boolean;
+    write: boolean;
   }> {
     const results = {
-      write: false,
-      read: false,
       analytics: false,
+      read: false,
+      write: false,
     };
 
     try {
@@ -467,4 +493,4 @@ export function getOptimizedDatabase(config?: DatabaseConfig): OptimizedDatabase
   return dbInstance;
 }
 
-export type { DatabaseConfig, QueryResult, DatabaseStats };
+export type { DatabaseConfig, DatabaseStats,QueryResult };

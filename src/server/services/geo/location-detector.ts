@@ -7,68 +7,69 @@ import { geolocation } from '@vercel/functions';
 import type { NextRequest } from 'next/server';
 
 export interface UserLocation {
-  countryCode: string; // ISO 3166-1 alpha-2 (VN, US, IN, etc.)
+  city?: string; 
+  countryCode: string;
+  // ISO 3166-1 alpha-2 (VN, US, IN, etc.)
   countryName: string;
-  city?: string;
-  region?: string;
-  timezone?: string;
+  detectionMethod: 'vercel' | 'cloudflare' | 'zeabur' | 'netlify' | 'header' | 'fallback';
   latitude?: number;
   longitude?: number;
-  detectionMethod: 'vercel' | 'cloudflare' | 'zeabur' | 'netlify' | 'header' | 'fallback';
+  region?: string;
+  timezone?: string;
 }
 
 /**
  * Country code to name mapping
  */
 const COUNTRY_NAMES: Record<string, string> = {
-  VN: 'Vietnam',
-  US: 'United States',
-  IN: 'India',
   CN: 'China',
-  JP: 'Japan',
-  KR: 'South Korea',
-  TH: 'Thailand',
-  ID: 'Indonesia',
-  PH: 'Philippines',
-  MY: 'Malaysia',
-  SG: 'Singapore',
   GB: 'United Kingdom',
+  ID: 'Indonesia',
   DE: 'Germany',
-  FR: 'France',
+  IN: 'India',
   ES: 'Spain',
-  IT: 'Italy',
+  JP: 'Japan',
   CA: 'Canada',
+  US: 'United States',
   AU: 'Australia',
-  BR: 'Brazil',
-  MX: 'Mexico',
+  VN: 'Vietnam',
   AR: 'Argentina',
-  PL: 'Poland',
-  RU: 'Russia',
-  TR: 'Turkey',
+  KR: 'South Korea',
+  BR: 'Brazil',
+  MY: 'Malaysia',
   AE: 'United Arab Emirates',
-  SA: 'Saudi Arabia',
-  ZA: 'South Africa',
-  NG: 'Nigeria',
+  TH: 'Thailand',
+  FR: 'France',
+  PH: 'Philippines',
+  IT: 'Italy',
+  SG: 'Singapore',
   EG: 'Egypt',
-  NZ: 'New Zealand',
-  PK: 'Pakistan',
   BD: 'Bangladesh',
-  NL: 'Netherlands',
+  MX: 'Mexico',
   BE: 'Belgium',
+  NG: 'Nigeria',
   AT: 'Austria',
+  PL: 'Poland',
   CH: 'Switzerland',
-  SE: 'Sweden',
-  NO: 'Norway',
+  RU: 'Russia',
   DK: 'Denmark',
+  SA: 'Saudi Arabia',
   FI: 'Finland',
-  IE: 'Ireland',
-  PT: 'Portugal',
+  TR: 'Turkey',
   CZ: 'Czech Republic',
   GR: 'Greece',
-  RO: 'Romania',
+  ZA: 'South Africa',
   HU: 'Hungary',
-  IL: 'Israel',
+  NZ: 'New Zealand',
   HK: 'Hong Kong',
+  PK: 'Pakistan',
+  IE: 'Ireland',
+  NL: 'Netherlands',
+  IL: 'Israel',
+  NO: 'Norway',
+  PT: 'Portugal',
+  SE: 'Sweden',
+  RO: 'Romania',
   TW: 'Taiwan',
 };
 
@@ -81,13 +82,13 @@ export function detectUserLocation(request: NextRequest): UserLocation {
     const geo = geolocation(request);
     if (geo?.country) {
       return {
+        city: geo.city,
         countryCode: geo.country,
         countryName: COUNTRY_NAMES[geo.country] || geo.country,
-        city: geo.city,
-        region: geo.region,
+        detectionMethod: 'vercel',
         latitude: geo.latitude ? parseFloat(geo.latitude) : undefined,
         longitude: geo.longitude ? parseFloat(geo.longitude) : undefined,
-        detectionMethod: 'vercel',
+        region: geo.region,
       };
     }
   } catch (error) {
@@ -112,11 +113,11 @@ export function detectUserLocation(request: NextRequest): UserLocation {
           : 'header';
 
     return {
+      city: request.headers.get('x-vercel-ip-city') || undefined,
       countryCode,
       countryName: COUNTRY_NAMES[countryCode] || countryCode,
-      city: request.headers.get('x-vercel-ip-city') || undefined,
-      region: request.headers.get('x-vercel-ip-region') || undefined,
       detectionMethod: method as UserLocation['detectionMethod'],
+      region: request.headers.get('x-vercel-ip-region') || undefined,
     };
   }
 
@@ -146,14 +147,14 @@ export async function detectLocationFromIP(ipAddress: string): Promise<UserLocat
       const data = await response.json();
       if (data.country_code && data.country_code !== 'XX') {
         return {
+          city: data.city,
           countryCode: data.country_code,
           countryName: data.country_name || COUNTRY_NAMES[data.country_code] || data.country_code,
-          city: data.city,
-          region: data.region,
-          timezone: data.timezone,
+          detectionMethod: 'header',
           latitude: data.latitude,
           longitude: data.longitude,
-          detectionMethod: 'header',
+          region: data.region,
+          timezone: data.timezone,
         };
       }
     }
@@ -201,7 +202,7 @@ export function getCountryName(countryCode: string): string {
  */
 export class LocationDetector {
   private cache: Map<string, { location: UserLocation; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 3600000; // 1 hour in milliseconds
+  private readonly CACHE_TTL = 3_600_000; // 1 hour in milliseconds
 
   /**
    * Detect location with caching

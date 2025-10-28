@@ -6,18 +6,20 @@
  */
 
 export interface PaymentGatewaySelection {
-  provider: 'sepay' | 'polar' | 'stripe' | 'razorpay' | 'paypal' | 'paddle' | 'lemonsqueezy';
-  name: string;
-  supportedMethods: string[];
-  estimatedFee: number; // Percentage
-  estimatedFeeFixed: number; // Fixed amount in currency
+  // Fixed amount in currency
   currency: string;
+  estimatedFee: number;
+  // Percentage
+  estimatedFeeFixed: number;
+  name: string; 
+  provider: 'sepay' | 'polar' | 'stripe' | 'razorpay' | 'paypal' | 'paddle' | 'lemonsqueezy'; 
+  supportedMethods: string[];
 }
 
 export interface PaymentRequest {
   amount: number;
-  currency: string;
   countryCode: string;
+  currency: string;
   paymentMethod?: string; // Optional: user's preferred method
 }
 
@@ -25,129 +27,219 @@ export interface PaymentRequest {
  * Gateway configurations with their capabilities
  */
 const GATEWAY_CONFIGS: Record<string, {
-  provider: PaymentGatewaySelection['provider'];
+  feeCurrency: string;
+  feeFixed: number;
+  feePercent: number;
+  maxAmount?: number;
+  // Higher = preferred
+  minAmount?: number;
   name: string;
-  supportedCountries: string[];
+  priority: number;
+  provider: PaymentGatewaySelection['provider'];
+  supportedCountries: string[]; 
   supportedCurrencies: string[];
   supportedMethods: string[];
-  feePercent: number;
-  feeFixed: number;
-  feeCurrency: string;
-  priority: number; // Higher = preferred
-  minAmount?: number;
-  maxAmount?: number;
 }> = {
-  // Sepay - Vietnam only
-  sepay: {
-    provider: 'sepay',
-    name: 'Sepay (Vietnam Bank Transfer)',
-    supportedCountries: ['VN'],
-    supportedCurrencies: ['VND'],
-    supportedMethods: ['bank_transfer', 'qr_code'],
-    feePercent: 0, // No fee for bank transfer
-    feeFixed: 0,
-    feeCurrency: 'VND',
-    priority: 100, // Highest priority for Vietnam
-    minAmount: 1000, // 1,000 VND
-  },
+  
+  
 
-  // Polar.sh - International (Merchant of Record)
-  polar: {
-    provider: 'polar',
-    name: 'Polar.sh',
-    supportedCountries: ['*'], // Global except VN (VN uses Sepay)
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'SGD', 'INR', 'JPY', 'BRL', 'MXN'],
-    supportedMethods: ['card', 'paypal', 'google_pay', 'apple_pay'],
-    feePercent: 4.0, // 4% + $0.40
-    feeFixed: 0.40,
+// LemonSqueezy - Merchant of Record
+lemonsqueezy: {
+    name: 'Lemon Squeezy',
+    feePercent: 5.0,
+    provider: 'lemonsqueezy', 
     feeCurrency: 'USD',
-    priority: 90, // High priority for international (Merchant of Record)
-    minAmount: 1.00, // $1.00 USD
+    
+supportedCountries: ['*'],
+    
+// Similar to Paddle
+feeFixed: 0.5, 
+    
+// Global
+supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
+    
+// Lower priority
+minAmount: 1,
+    
+supportedMethods: ['card', 'paypal'], 
+    priority: 35,
   },
 
-  // Stripe - Global
-  stripe: {
-    provider: 'stripe',
-    name: 'Stripe',
-    supportedCountries: [
-      'US', 'CA', 'GB', 'DE', 'FR', 'ES', 'IT', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI',
-      'IE', 'PT', 'PL', 'CZ', 'GR', 'RO', 'BG', 'HR', 'SI', 'SK', 'LT', 'LV', 'EE', 'CY', 'MT',
-      'AU', 'NZ', 'SG', 'HK', 'JP', 'MY', 'TH', 'ID', 'PH', 'MX', 'BR', 'AE', 'SA', 'ZA',
-    ],
-    supportedCurrencies: [
-      'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NZD', 'SGD', 'HKD', 'JPY', 'MYR', 'THB', 'IDR', 'PHP',
-      'MXN', 'BRL', 'AED', 'SAR', 'ZAR', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'RON', 'BGN',
-      'HRK', 'HUF',
-    ],
-    supportedMethods: [
-      'card', 'sepa_debit', 'ach', 'bacs', 'becs_debit', 'fpx', 'promptpay', 'alipay', 'wechat',
-      'konbini', 'oxxo', 'boleto', 'p24', 'sofort', 'giropay', 'eps', 'ideal', 'bancontact',
-    ],
-    feePercent: 2.9,
-    feeFixed: 0.30,
+  
+  
+
+
+
+
+// Paddle - SaaS-focused
+paddle: {
+    name: 'Paddle',
+    feePercent: 5.0,
+    provider: 'paddle', 
     feeCurrency: 'USD',
-    priority: 80, // High priority for most countries
-    minAmount: 0.50, // $0.50 USD
+    
+supportedCountries: ['*'],
+    
+// Higher but handles VAT/tax
+feeFixed: 0.5, 
+    
+// Global
+supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'BRL', 'MXN'],
+    
+// Lower priority (higher fees, but good for tax compliance)
+minAmount: 1,
+    
+supportedMethods: ['card', 'paypal'], 
+    priority: 40,
   },
 
-  // Razorpay - India
-  razorpay: {
-    provider: 'razorpay',
-    name: 'Razorpay (India)',
-    supportedCountries: ['IN'],
-    supportedCurrencies: ['INR'],
-    supportedMethods: ['card', 'upi', 'netbanking', 'wallet', 'emi'],
-    feePercent: 2.0, // Lower than Stripe for India
-    feeFixed: 0,
-    feeCurrency: 'INR',
-    priority: 100, // Highest priority for India
-    minAmount: 1, // ₹1 INR
-  },
+  
+  
 
-  // PayPal - Global fallback
-  paypal: {
-    provider: 'paypal',
+
+
+
+
+// PayPal - Global fallback
+paypal: {
     name: 'PayPal',
-    supportedCountries: ['*'], // Global
-    supportedCurrencies: [
+    feePercent: 3.49,
+    provider: 'paypal', 
+    feeCurrency: 'USD',
+    
+supportedCountries: ['*'],
+    
+feeFixed: 0.49,
+    // Global
+supportedCurrencies: [
       'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'INR', 'BRL', 'MXN', 'PHP', 'THB', 'SGD',
       'HKD', 'NZD', 'TWD', 'KRW', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'ILS', 'MYR',
       'RUB', 'ZAR',
     ],
-    supportedMethods: ['paypal', 'card'],
-    feePercent: 3.49,
-    feeFixed: 0.49,
-    feeCurrency: 'USD',
-    priority: 50, // Lower priority (higher fees)
-    minAmount: 1.00,
+    // Lower priority (higher fees)
+minAmount: 1,
+    
+supportedMethods: ['paypal', 'card'], 
+    priority: 50,
   },
 
-  // Paddle - SaaS-focused
-  paddle: {
-    provider: 'paddle',
-    name: 'Paddle',
-    supportedCountries: ['*'], // Global
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'BRL', 'MXN'],
-    supportedMethods: ['card', 'paypal'],
-    feePercent: 5.0, // Higher but handles VAT/tax
-    feeFixed: 0.50,
+  
+  
+
+
+
+
+
+// Polar.sh - International (Merchant of Record)
+polar: {
+    feePercent: 4,
     feeCurrency: 'USD',
-    priority: 40, // Lower priority (higher fees, but good for tax compliance)
-    minAmount: 1.00,
+    name: 'Polar.sh', 
+    // 4% + $0.40
+feeFixed: 0.4,
+    
+
+provider: 'polar',
+    
+
+// High priority for international (Merchant of Record)
+minAmount: 1, 
+    
+
+
+supportedCountries: ['*'],
+    
+
+
+priority: 90,
+    
+// Global except VN (VN uses Sepay)
+supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'SGD', 'INR', 'JPY', 'BRL', 'MXN'], 
+    supportedMethods: ['card', 'paypal', 'google_pay', 'apple_pay'], // $1.00 USD
   },
 
-  // LemonSqueezy - Merchant of Record
-  lemonsqueezy: {
-    provider: 'lemonsqueezy',
-    name: 'Lemon Squeezy',
-    supportedCountries: ['*'], // Global
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
-    supportedMethods: ['card', 'paypal'],
-    feePercent: 5.0, // Similar to Paddle
-    feeFixed: 0.50,
+  
+  
+
+
+
+
+// Razorpay - India
+razorpay: {
+    feePercent: 2.0,
+    name: 'Razorpay (India)',
+    feeCurrency: 'INR',
+    provider: 'razorpay',
+    // Lower than Stripe for India
+feeFixed: 0,
+    
+supportedCountries: ['IN'], 
+    
+// Highest priority for India
+minAmount: 1,
+    
+
+supportedCurrencies: ['INR'],
+    
+priority: 100, 
+    supportedMethods: ['card', 'upi', 'netbanking', 'wallet', 'emi'], // ₹1 INR
+  },
+
+  
+  
+
+
+
+// Sepay - Vietnam only
+sepay: {
+    feePercent: 0,
+    name: 'Sepay (Vietnam Bank Transfer)',
+    feeCurrency: 'VND',
+    provider: 'sepay',
+    // No fee for bank transfer
+feeFixed: 0,
+    
+supportedCountries: ['VN'], 
+    
+// Highest priority for Vietnam
+minAmount: 1000,
+    
+
+supportedCurrencies: ['VND'],
+    
+priority: 100, 
+    supportedMethods: ['bank_transfer', 'qr_code'], // 1,000 VND
+  },
+
+  
+  
+// Stripe - Global
+stripe: {
+    feePercent: 2.9,
     feeCurrency: 'USD',
-    priority: 35, // Lower priority
-    minAmount: 1.00,
+    name: 'Stripe',
+    feeFixed: 0.3,
+    provider: 'stripe',
+    // High priority for most countries
+minAmount: 0.5,
+    
+supportedCountries: [
+      'US', 'CA', 'GB', 'DE', 'FR', 'ES', 'IT', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI',
+      'IE', 'PT', 'PL', 'CZ', 'GR', 'RO', 'BG', 'HR', 'SI', 'SK', 'LT', 'LV', 'EE', 'CY', 'MT',
+      'AU', 'NZ', 'SG', 'HK', 'JP', 'MY', 'TH', 'ID', 'PH', 'MX', 'BR', 'AE', 'SA', 'ZA',
+    ],
+    
+priority: 80,
+    
+supportedCurrencies: [
+      'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NZD', 'SGD', 'HKD', 'JPY', 'MYR', 'THB', 'IDR', 'PHP',
+      'MXN', 'BRL', 'AED', 'SAR', 'ZAR', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'RON', 'BGN',
+      'HRK', 'HUF',
+    ], 
+    supportedMethods: [
+      'card', 'sepa_debit', 'ach', 'bacs', 'becs_debit', 'fpx', 'promptpay', 'alipay', 'wechat',
+      'konbini', 'oxxo', 'boleto', 'p24', 'sofort', 'giropay', 'eps', 'ideal', 'bancontact',
+    ], // $0.50 USD
   },
 };
 
@@ -184,24 +276,24 @@ export function selectPaymentGateway(request: PaymentRequest): PaymentGatewaySel
     // Fallback to PayPal if no gateway found
     const paypalConfig = GATEWAY_CONFIGS.paypal;
     return {
-      provider: paypalConfig.provider,
-      name: paypalConfig.name,
-      supportedMethods: paypalConfig.supportedMethods,
+      currency: paypalConfig.feeCurrency,
       estimatedFee: paypalConfig.feePercent,
       estimatedFeeFixed: paypalConfig.feeFixed,
-      currency: paypalConfig.feeCurrency,
+      name: paypalConfig.name,
+      provider: paypalConfig.provider,
+      supportedMethods: paypalConfig.supportedMethods,
     };
   }
 
   // Return the highest priority gateway
   const [_, selectedConfig] = compatibleGateways[0];
   return {
-    provider: selectedConfig.provider,
-    name: selectedConfig.name,
-    supportedMethods: selectedConfig.supportedMethods,
+    currency: selectedConfig.feeCurrency,
     estimatedFee: selectedConfig.feePercent,
     estimatedFeeFixed: selectedConfig.feeFixed,
-    currency: selectedConfig.feeCurrency,
+    name: selectedConfig.name,
+    provider: selectedConfig.provider,
+    supportedMethods: selectedConfig.supportedMethods,
   };
 }
 
@@ -213,20 +305,20 @@ export function calculateTotalWithFees(
   currency: string,
   gateway: PaymentGatewaySelection,
 ): {
-  subtotal: number;
-  gatewayFee: number;
-  total: number;
   currency: string;
+  gatewayFee: number;
+  subtotal: number;
+  total: number;
 } {
   const percentageFee = amount * (gateway.estimatedFee / 100);
   const fixedFee = gateway.estimatedFeeFixed; // Assume same currency for simplicity
   const totalFee = percentageFee + fixedFee;
 
   return {
-    subtotal: amount,
-    gatewayFee: totalFee,
-    total: amount + totalFee,
     currency,
+    gatewayFee: totalFee,
+    subtotal: amount,
+    total: amount + totalFee,
   };
 }
 
@@ -287,12 +379,12 @@ export function getAvailableGateways(countryCode: string, currency: string): Pay
     })
     .sort((a, b) => b[1].priority - a[1].priority)
     .map(([_, config]) => ({
-      provider: config.provider,
-      name: config.name,
-      supportedMethods: config.supportedMethods,
+      currency: config.feeCurrency,
       estimatedFee: config.feePercent,
       estimatedFeeFixed: config.feeFixed,
-      currency: config.feeCurrency,
+      name: config.name,
+      provider: config.provider,
+      supportedMethods: config.supportedMethods,
     }));
 }
 

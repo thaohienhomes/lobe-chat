@@ -8,38 +8,38 @@
 import { MODEL_COSTS } from '@/server/modules/CostOptimization';
 
 export interface MessageCalculation {
+  category: 'budget' | 'premium';
+  costPerMessage: number;
+  messageCount: number;
   model: string;
   modelName: string;
-  messageCount: number;
-  costPerMessage: number;
-  category: 'budget' | 'premium';
 }
 
 export interface PlanBudget {
-  planId: 'starter' | 'premium' | 'ultimate';
-  monthlyVND: number;
   monthlyUSD: number;
+  monthlyVND: number;
+  planId: 'starter' | 'premium' | 'ultimate';
   tokenBudget: number;
 }
 
 // Real USD budgets based on new pricing (updated 2025-01-08)
 export const PLAN_BUDGETS: Record<string, PlanBudget> = {
-  starter: {
-    planId: 'starter',
-    monthlyVND: 39_000,
-    monthlyUSD: 1.61,
-    tokenBudget: 5_000_000,
-  },
   premium: {
-    planId: 'premium',
-    monthlyVND: 129_000,
     monthlyUSD: 5.34,
+    monthlyVND: 129_000,
+    planId: 'premium',
     tokenBudget: 15_000_000,
   },
+  starter: {
+    monthlyUSD: 1.61,
+    monthlyVND: 39_000,
+    planId: 'starter',
+    tokenBudget: 5_000_000,
+  },
   ultimate: {
-    planId: 'ultimate',
-    monthlyVND: 349_000,
     monthlyUSD: 14.44,
+    monthlyVND: 349_000,
+    planId: 'ultimate',
     tokenBudget: 35_000_000,
   },
 } as const;
@@ -48,48 +48,48 @@ export const PLAN_BUDGETS: Record<string, PlanBudget> = {
 const MODEL_CONFIGS = [
   // Budget Models (High Volume)
   {
-    key: 'gemini-1.5-flash',
+    category: 'Budget Models (High Volume)',
     displayName: 'Gemini 1.5 Flash',
-    type: 'budget' as const,
-    category: 'Budget Models (High Volume)',
+    key: 'gemini-1.5-flash',
     priority: 1,
+    type: 'budget' as const,
   },
   {
-    key: 'gpt-4o-mini',
+    category: 'Budget Models (High Volume)',
     displayName: 'GPT-4o mini',
-    type: 'budget' as const,
-    category: 'Budget Models (High Volume)',
+    key: 'gpt-4o-mini',
     priority: 2,
+    type: 'budget' as const,
   },
   {
-    key: 'claude-3-haiku',
-    displayName: 'Claude 3 Haiku',
-    type: 'budget' as const,
     category: 'Budget Models (High Volume)',
+    displayName: 'Claude 3 Haiku',
+    key: 'claude-3-haiku',
     priority: 3,
+    type: 'budget' as const,
   },
 
   // Premium Models (High Quality)
   {
-    key: 'gemini-1.5-pro',
+    category: 'Premium Models (High Quality)',
     displayName: 'Gemini 1.5 Pro',
-    type: 'premium' as const,
-    category: 'Premium Models (High Quality)',
+    key: 'gemini-1.5-pro',
     priority: 1,
+    type: 'premium' as const,
   },
   {
-    key: 'gpt-4o',
+    category: 'Premium Models (High Quality)',
     displayName: 'GPT-4o',
-    type: 'premium' as const,
-    category: 'Premium Models (High Quality)',
+    key: 'gpt-4o',
     priority: 2,
+    type: 'premium' as const,
   },
   {
-    key: 'claude-3-sonnet',
-    displayName: 'Claude 3.5 Sonnet',
-    type: 'premium' as const,
     category: 'Premium Models (High Quality)',
+    displayName: 'Claude 3.5 Sonnet',
+    key: 'claude-3-sonnet',
     priority: 3,
+    type: 'premium' as const,
   },
 ] as const;
 
@@ -140,11 +140,11 @@ export function calculateMessagesForPlan(
     const messagesPerMonth = calculateMessagesForModel(config.key, planId);
 
     return {
+      category: config.type,
+      costPerMessage,
+      messageCount: messagesPerMonth,
       model: config.key,
       modelName: config.displayName,
-      messageCount: messagesPerMonth,
-      costPerMessage,
-      category: config.type,
     };
   }).sort((a, b) => {
     // Sort by message count (descending)
@@ -180,8 +180,8 @@ export function getTopModelsForPlan(
  * Format message count for display
  */
 export function formatMessageCount(count: number): string {
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M`;
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1)}M`;
   }
   if (count >= 1000) {
     return `${(count / 1000).toFixed(1)}K`;
@@ -207,8 +207,8 @@ export function getAllPlanComparisons(): Record<string, {
   premiumModels: MessageCalculation[];
 }> {
   return {
-    starter: getTopModelsForPlan('starter'),
     premium: getTopModelsForPlan('premium'),
+    starter: getTopModelsForPlan('starter'),
     ultimate: getTopModelsForPlan('ultimate'),
   };
 }
@@ -234,15 +234,15 @@ export function calculateCompetitorComparison(planId: 'starter' | 'premium' | 'u
  * Used for testing and verification
  */
 export function validateCalculations(): {
-  isValid: boolean;
   errors: string[];
+  isValid: boolean;
   results: Array<{
-    planId: string;
-    totalModels: number;
     budgetModels: number;
-    premiumModels: number;
     maxBudgetMessages: number;
     maxPremiumMessages: number;
+    planId: string;
+    premiumModels: number;
+    totalModels: number;
   }>;
 } {
   const errors: string[] = [];
@@ -258,12 +258,12 @@ export function validateCalculations(): {
     const maxPremiumMessages = Math.max(...premiumModels.map(m => m.messageCount));
 
     results.push({
-      planId,
-      totalModels: allModels.length,
       budgetModels: budgetModels.length,
-      premiumModels: premiumModels.length,
       maxBudgetMessages,
       maxPremiumMessages,
+      planId,
+      premiumModels: premiumModels.length,
+      totalModels: allModels.length,
     });
 
     // Basic validation
@@ -282,8 +282,8 @@ export function validateCalculations(): {
   }
 
   return {
-    isValid: errors.length === 0,
     errors,
+    isValid: errors.length === 0,
     results,
   };
 }
