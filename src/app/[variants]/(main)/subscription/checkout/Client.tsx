@@ -23,8 +23,10 @@ const useStyles = createStyles(({ css, token }) => ({
   container: css`
     overflow: hidden auto;
     display: flex;
+    align-items: flex-start;
     justify-content: center;
 
+    width: 100%;
     height: 100%;
 
     background: ${token.colorBgLayout};

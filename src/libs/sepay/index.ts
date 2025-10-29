@@ -239,9 +239,10 @@ export class SepayPaymentGateway {
 
         // Generate mock payment waiting URL with QR code
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
-        const mockQrCode =
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-        const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCode=${mockQrCode}`;
+        // Use a data URL for the mock QR code (1x1 transparent PNG)
+        const mockQrCodeUrl =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+        const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCodeUrl=${encodeURIComponent(mockQrCodeUrl)}&bankAccount=1234567890&bankName=Mock%20Bank`;
 
         return {
           message: 'Payment created successfully (MOCK)',
