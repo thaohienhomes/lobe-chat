@@ -22,15 +22,25 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
   container: css`
     overflow: hidden auto;
+    display: flex;
+    justify-content: center;
+
     height: 100%;
+
     background: ${token.colorBgLayout};
   `,
   content: css`
+    flex: 0 1 1200px;
+
     width: 100%;
     max-width: 1200px;
     margin-block: 0;
     margin-inline: auto;
     padding: ${token.paddingLG}px;
+
+    @media (max-width: 1200px) {
+      padding: ${token.paddingLG}px;
+    }
 
     @media (max-width: 768px) {
       padding: ${token.padding}px;
@@ -87,6 +97,30 @@ const useStyles = createStyles(({ css, token }) => ({
 
       font-size: 18px;
       font-weight: 600;
+    }
+  `,
+  radioButtonGroup: css`
+    display: flex;
+    width: 100%;
+
+    .ant-radio-button-wrapper {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+
+      height: auto;
+      min-height: 100px;
+      padding: 12px !important;
+
+      > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+      }
     }
   `,
   savingsBadge: css`
@@ -444,22 +478,16 @@ function CheckoutContent() {
                     </Title>
                     <Form.Item name="billingCycle" style={{ marginBlockEnd: 0 }}>
                       <Radio.Group
+                        className={styles.radioButtonGroup}
                         onChange={(e) => setBillingCycle(e.target.value)}
-                        style={{ width: '100%' }}
                         value={billingCycle}
                       >
-                        <Radio.Button
-                          style={{
-                            height: 'auto',
-                            padding: '12px',
-                            textAlign: 'center',
-                            width: '50%',
-                          }}
-                          value="yearly"
-                        >
+                        <Radio.Button value="yearly">
                           <div>
-                            <div style={{ fontSize: 16, fontWeight: 500 }}>Hàng năm</div>
-                            <div style={{ color: '#52c41a', fontSize: 13, marginBlockStart: 4 }}>
+                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                              Hàng năm
+                            </div>
+                            <div style={{ color: '#52c41a', fontSize: 13, marginBlockEnd: 4 }}>
                               {new Intl.NumberFormat('vi-VN', {
                                 currency: 'VND',
                                 maximumFractionDigits: 0,
@@ -468,23 +496,17 @@ function CheckoutContent() {
                               }).format(monthlyEquivalentVND)}
                               /tháng
                             </div>
-                            <div style={{ color: '#52c41a', fontSize: 12, marginBlockStart: 2 }}>
-                              Tiết kiệm 17%
+                            <div style={{ color: '#52c41a', fontSize: 12, fontWeight: 500 }}>
+                              ✨ Tiết kiệm 17%
                             </div>
                           </div>
                         </Radio.Button>
-                        <Radio.Button
-                          style={{
-                            height: 'auto',
-                            padding: '12px',
-                            textAlign: 'center',
-                            width: '50%',
-                          }}
-                          value="monthly"
-                        >
+                        <Radio.Button value="monthly">
                           <div>
-                            <div style={{ fontSize: 16, fontWeight: 500 }}>Hàng tháng</div>
-                            <div style={{ color: '#666', fontSize: 13, marginBlockStart: 4 }}>
+                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                              Hàng tháng
+                            </div>
+                            <div style={{ color: '#666', fontSize: 13, marginBlockEnd: 4 }}>
                               {new Intl.NumberFormat('vi-VN', {
                                 currency: 'VND',
                                 maximumFractionDigits: 0,
@@ -493,6 +515,7 @@ function CheckoutContent() {
                               }).format(plan.monthlyPriceVND)}
                               /tháng
                             </div>
+                            <div style={{ color: '#999', fontSize: 12 }}>Linh hoạt</div>
                           </div>
                         </Radio.Button>
                       </Radio.Group>
@@ -540,40 +563,24 @@ function CheckoutContent() {
                     </Title>
                     <Form.Item style={{ marginBlockEnd: 16 }}>
                       <Radio.Group
+                        className={styles.radioButtonGroup}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        style={{ width: '100%' }}
                         value={paymentMethod}
                       >
-                        <Radio.Button
-                          style={{
-                            height: 'auto',
-                            padding: '12px',
-                            textAlign: 'center',
-                            width: '50%',
-                          }}
-                          value="bank_transfer"
-                        >
+                        <Radio.Button value="bank_transfer">
                           <div>
-                            <div style={{ fontSize: 16, fontWeight: 500 }}>Chuyển khoản</div>
-                            <div style={{ color: '#666', fontSize: 12, marginBlockStart: 4 }}>
-                              QR Code
+                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                              Chuyển khoản
                             </div>
+                            <div style={{ color: '#666', fontSize: 12 }}>QR Code</div>
                           </div>
                         </Radio.Button>
-                        <Radio.Button
-                          style={{
-                            height: 'auto',
-                            padding: '12px',
-                            textAlign: 'center',
-                            width: '50%',
-                          }}
-                          value="credit_card"
-                        >
+                        <Radio.Button value="credit_card">
                           <div>
-                            <div style={{ fontSize: 16, fontWeight: 500 }}>Thẻ tín dụng</div>
-                            <div style={{ color: '#666', fontSize: 12, marginBlockStart: 4 }}>
-                              Visa/Mastercard
+                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                              Thẻ tín dụng
                             </div>
+                            <div style={{ color: '#666', fontSize: 12 }}>Visa/Mastercard</div>
                           </div>
                         </Radio.Button>
                       </Radio.Group>
