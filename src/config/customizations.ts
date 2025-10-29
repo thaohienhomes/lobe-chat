@@ -23,56 +23,40 @@
 // This prevents conflicts with upstream branding changes
 
 export const BRANDING_CONFIG = {
-  
   appDescription: process.env.NEXT_PUBLIC_BRAND_DESCRIPTION || 'Vietnamese AI Chat Platform',
   // App name and identity
-appName: process.env.NEXT_PUBLIC_BRAND_NAME || 'pho.chat',
+  appName: process.env.NEXT_PUBLIC_BRAND_NAME || 'pho.chat',
 
-  
   businessEmail: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'hello@pho.chat',
-  
-faviconUrl: process.env.NEXT_PUBLIC_BRAND_FAVICON_URL || '/favicon.ico',
 
-  
-  
-// Legal links
-legalLinks: {
+  faviconUrl: process.env.NEXT_PUBLIC_BRAND_FAVICON_URL || '/favicon.ico',
+
+  // Legal links
+  legalLinks: {
     help: process.env.NEXT_PUBLIC_HELP_URL,
     privacy: process.env.NEXT_PUBLIC_PRIVACY_URL,
     terms: process.env.NEXT_PUBLIC_TERMS_URL,
   },
-  
 
-// Logo and visual identity
-logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO_URL || '',
+  // Logo and visual identity
+  logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO_URL || '',
 
-  
-  
+  neutralColor: process.env.NEXT_PUBLIC_NEUTRAL_COLOR || '#000000',
 
-neutralColor: process.env.NEXT_PUBLIC_NEUTRAL_COLOR || '#000000',
-  
+  // Color scheme
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#FF6B6B',
 
-// Color scheme
-primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#FF6B6B',
-  
-
-// Social links
-socialLinks: {
+  // Social links
+  socialLinks: {
     discord: process.env.NEXT_PUBLIC_DISCORD_URL,
     github: process.env.NEXT_PUBLIC_GITHUB_URL,
     twitter: process.env.NEXT_PUBLIC_TWITTER_URL,
   },
 
-  
-  
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pho.chat',
 
-
-supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pho.chat',
-
-  
-  
-// URLs and links
-websiteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://pho.chat',
+  // URLs and links
+  websiteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://pho.chat',
 };
 
 // ============================================================================
@@ -82,41 +66,30 @@ websiteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://pho.chat',
 // This prevents conflicts with upstream auth system changes
 
 export const AUTH_CONFIG = {
-  
   // Clerk-specific configuration
-clerk: {
-    enabled: process.env.NEXT_PUBLIC_ENABLE_CLERK_AUTH === 'true',
+  clerk: {
+    enabled:
+      process.env.NEXT_PUBLIC_ENABLE_CLERK_AUTH === 'true' ||
+      process.env.NEXT_PUBLIC_ENABLE_CLERK_AUTH === '1' ||
+      !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, // Auto-enable if publishable key exists
     publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     secretKey: process.env.CLERK_SECRET_KEY,
     webhookSecret: process.env.CLERK_WEBHOOK_SECRET,
   },
 
-  
-  
+  // User ID mapping for development
+  devImpersonateUser: process.env.CLERK_DEV_IMPERSONATE_USER,
 
-// User ID mapping for development
-devImpersonateUser: process.env.CLERK_DEV_IMPERSONATE_USER,
+  // Auth protection settings
+  enableAuthProtection: process.env.ENABLE_AUTH_PROTECTION === '1',
 
-  
-  
-
-
-// Auth protection settings
-enableAuthProtection: process.env.ENABLE_AUTH_PROTECTION === '1',
-
-  
-  
-
-
-// NextAuth configuration (for reference, not used in pho.chat)
-nextAuth: {
+  // NextAuth configuration (for reference, not used in pho.chat)
+  nextAuth: {
     enabled: process.env.NEXT_PUBLIC_ENABLE_NEXT_AUTH === 'true',
   },
 
-  
-  
-// Authentication provider selection
-provider: process.env.NEXT_PUBLIC_AUTH_PROVIDER || 'clerk',
+  // Authentication provider selection
+  provider: process.env.NEXT_PUBLIC_AUTH_PROVIDER || 'clerk',
 };
 
 // ============================================================================
@@ -126,50 +99,34 @@ provider: process.env.NEXT_PUBLIC_AUTH_PROVIDER || 'clerk',
 // This prevents conflicts with upstream payment system changes
 
 export const PAYMENT_CONFIG = {
-  
-  
-currency: process.env.NEXT_PUBLIC_PAYMENT_CURRENCY || 'VND',
+  currency: process.env.NEXT_PUBLIC_PAYMENT_CURRENCY || 'VND',
 
-  
-  
+  // Payment settings
+  minAmount: parseInt(process.env.NEXT_PUBLIC_MIN_PAYMENT_AMOUNT || '1000', 10),
 
-
-// Payment settings
-minAmount: parseInt(process.env.NEXT_PUBLIC_MIN_PAYMENT_AMOUNT || '1000', 10),
-
-  
-  
-
-
-// Polar payment configuration (alternative provider)
-polar: {
+  // Polar payment configuration (alternative provider)
+  polar: {
     accessToken: process.env.POLAR_ACCESS_TOKEN,
     enabled: process.env.NEXT_PUBLIC_USE_POLAR === 'true',
     environment: process.env.POLAR_SERVER || 'production',
     webhookSecret: process.env.POLAR_WEBHOOK_SECRET,
   },
 
-  
-  
+  // Payment provider selection
+  provider: process.env.NEXT_PUBLIC_PAYMENT_PROVIDER || 'sepay',
 
-// Payment provider selection
-provider: process.env.NEXT_PUBLIC_PAYMENT_PROVIDER || 'sepay',
-  
-// Sepay-specific configuration
-sepay: {
-    
+  // Sepay-specific configuration
+  sepay: {
     apiUrl: process.env.SEPAY_API_URL || 'https://api.sepay.vn/v1',
     // Bank account for QR code generation (bank transfer method)
-bankAccount: process.env.SEPAY_BANK_ACCOUNT,
+    bankAccount: process.env.SEPAY_BANK_ACCOUNT,
 
-    
     bankName: process.env.SEPAY_BANK_NAME,
 
-    
     // Webhook and callback URLs
-cancelUrl: process.env.SEPAY_CANCEL_URL,
+    cancelUrl: process.env.SEPAY_CANCEL_URL,
     // Credit Card payment support
-creditCardApiKey: process.env.SEPAY_CREDIT_CARD_API_KEY,
+    creditCardApiKey: process.env.SEPAY_CREDIT_CARD_API_KEY,
 
     creditCardEnabled: process.env.NEXT_PUBLIC_SEPAY_CREDIT_CARD_ENABLED === 'true',
     enabled: process.env.NEXT_PUBLIC_USE_SEPAY === 'true',
@@ -195,20 +152,14 @@ export const FEATURE_FLAGS = {
   // Clerk authentication feature
   CLERK_AUTH: AUTH_CONFIG.clerk.enabled,
 
-  
-  
-// Cost optimization features
-COST_OPTIMIZATION: process.env.COST_OPTIMIZATION_ENABLED === 'true',
+  // Cost optimization features
+  COST_OPTIMIZATION: process.env.COST_OPTIMIZATION_ENABLED === 'true',
 
-  
-  
+  // pho.chat branding feature
+  PHO_BRANDING: process.env.NEXT_PUBLIC_USE_PHO_BRANDING !== 'false',
 
-// pho.chat branding feature
-PHO_BRANDING: process.env.NEXT_PUBLIC_USE_PHO_BRANDING !== 'false',
-
-  
   // Sepay payment feature
-SEPAY_PAYMENT: PAYMENT_CONFIG.sepay.enabled,
+  SEPAY_PAYMENT: PAYMENT_CONFIG.sepay.enabled,
 
   // Usage tracking
   USAGE_TRACKING: process.env.USAGE_TRACKING_ENABLED === 'true',
