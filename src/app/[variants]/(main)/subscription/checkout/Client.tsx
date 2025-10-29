@@ -3,39 +3,76 @@
 import { useUser } from '@clerk/nextjs';
 import { Alert, Button, Card, Divider, Form, Input, Radio, Spin, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
-import { ArrowLeft, CreditCard, Shield } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Shield } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
+
 import { CreditCardForm, CreditCardFormData } from '@/components/payment/CreditCardForm';
 
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
+  backButton: css`
+    margin-block-end: ${token.marginMD}px;
+  `,
   checkoutCard: css`
     margin-block-end: ${token.marginLG}px;
+    box-shadow: ${token.boxShadowTertiary};
   `,
   container: css`
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-
-    min-height: 100vh;
-    padding: ${token.paddingLG}px;
-
+    overflow: hidden auto;
+    height: 100%;
     background: ${token.colorBgLayout};
   `,
   content: css`
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px;
     margin-block: 0;
     margin-inline: auto;
+    padding: ${token.paddingLG}px;
+
+    @media (max-width: 768px) {
+      padding: ${token.padding}px;
+    }
+  `,
+  featureItem: css`
+    display: flex;
+    gap: ${token.marginSM}px;
+    align-items: flex-start;
+
+    padding-block: ${token.paddingSM}px;
+    padding-inline: 0;
+
+    svg {
+      flex-shrink: 0;
+      margin-block-start: 2px;
+      color: ${token.colorSuccess};
+    }
+  `,
+  header: css`
+    margin-block-end: ${token.marginXL}px;
+    text-align: center;
+
+    @media (max-width: 768px) {
+      margin-block-end: ${token.marginLG}px;
+    }
+  `,
+  planFeatures: css`
+    margin-block-start: ${token.marginLG}px;
+    padding: ${token.paddingLG}px;
+    border: 1px solid ${token.colorBorderSecondary};
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: ${token.colorBgContainer};
   `,
   planSummary: css`
     margin-block-end: ${token.marginLG}px;
-    padding: ${token.padding}px;
-    border-radius: ${token.borderRadius}px;
-    background: ${token.colorFillAlter};
+    padding: ${token.paddingLG}px;
+    border: 1px solid ${token.colorPrimaryBorder};
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorBgContainer} 100%);
   `,
   priceRow: css`
     display: flex;
@@ -44,13 +81,27 @@ const useStyles = createStyles(({ css, token }) => ({
     margin-block-end: ${token.marginSM}px;
 
     &:last-child {
-      margin-block-end: 0;
-      padding-block-start: ${token.marginSM}px;
-      border-block-start: 1px solid ${token.colorBorder};
+      margin-block: ${token.marginMD}px 0;
+      padding-block-start: ${token.marginMD}px;
+      border-block-start: 2px solid ${token.colorPrimary};
 
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
     }
+  `,
+  savingsBadge: css`
+    display: inline-block;
+
+    margin-block-start: ${token.marginXS}px;
+    padding-block: ${token.paddingXXS}px;
+    padding-inline: ${token.paddingSM}px;
+    border-radius: ${token.borderRadiusSM}px;
+
+    font-size: 12px;
+    font-weight: 600;
+    color: ${token.colorSuccess};
+
+    background: ${token.colorSuccessBg};
   `,
   securityNote: css`
     display: flex;
@@ -58,17 +109,81 @@ const useStyles = createStyles(({ css, token }) => ({
     align-items: center;
 
     margin-block-start: ${token.marginLG}px;
+    padding: ${token.paddingMD}px;
+    border-radius: ${token.borderRadius}px;
 
-    font-size: 12px;
+    font-size: 13px;
     color: ${token.colorTextSecondary};
+
+    background: ${token.colorInfoBg};
+  `,
+  twoColumnLayout: css`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: ${token.marginXL}px;
+    align-items: flex-start;
+
+    @media (max-width: 968px) {
+      grid-template-columns: 1fr;
+      gap: ${token.marginLG}px;
+    }
   `,
 }));
 
 // Updated pricing (2025-01-08): Aligned with new subscription tiers
 const plans = {
-  premium: { monthlyPriceVND: 129_000, name: 'Premium', yearlyPriceVND: 1_290_000 },
-  starter: { monthlyPriceVND: 39_000, name: 'Starter', yearlyPriceVND: 390_000 },
-  ultimate: { monthlyPriceVND: 349_000, name: 'Ultimate', yearlyPriceVND: 3_490_000 },
+  premium: {
+    computeCredits: '15,000,000 / Month',
+    description: 'Designed for professional users and content creators',
+    features: [
+      'Access to all AI models (GPT-4, Claude, Gemini, etc.)',
+      '15M compute credits per month',
+      'Priority support response',
+      'Advanced conversation features',
+      'File upload and analysis',
+      'Custom AI assistants',
+      'Export conversation history',
+      'No ads',
+    ],
+    monthlyPriceVND: 129_000,
+    name: 'Premium',
+    yearlyPriceVND: 1_290_000,
+  },
+  starter: {
+    computeCredits: '5,000,000 / Month',
+    description: 'Perfect for occasional AI users and students',
+    features: [
+      'Access to popular AI models',
+      '5M compute credits per month',
+      'Standard support',
+      'Basic conversation features',
+      'File upload (limited)',
+      'Pre-built AI assistants',
+      'No ads',
+    ],
+    monthlyPriceVND: 39_000,
+    name: 'Starter',
+    yearlyPriceVND: 390_000,
+  },
+  ultimate: {
+    computeCredits: '35,000,000 / Month',
+    description: 'For enterprises, developers, and AI researchers',
+    features: [
+      'Access to all AI models including latest releases',
+      '35M compute credits per month',
+      'Priority support with dedicated channel',
+      'Advanced API access',
+      'Unlimited file uploads and analysis',
+      'Custom AI assistants with fine-tuning',
+      'Team collaboration features',
+      'Advanced analytics and insights',
+      'Export and backup options',
+      'No ads',
+    ],
+    monthlyPriceVND: 349_000,
+    name: 'Ultimate',
+    yearlyPriceVND: 3_490_000,
+  },
 };
 
 function CheckoutContent() {
@@ -79,7 +194,9 @@ function CheckoutContent() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
-  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>('bank_transfer');
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>(
+    'bank_transfer',
+  );
 
   const planId = searchParams.get('plan') as keyof typeof plans;
   const plan = plans[planId];
@@ -208,185 +325,299 @@ function CheckoutContent() {
   }
 
   const currentPriceVND = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
-  const monthlyEquivalentVND = billingCycle === 'yearly' ? plan.yearlyPriceVND / 12 : plan.monthlyPriceVND;
-  const savingsVND = billingCycle === 'yearly' ? plan.monthlyPriceVND * 12 - plan.yearlyPriceVND : 0;
+  const monthlyEquivalentVND =
+    billingCycle === 'yearly' ? plan.yearlyPriceVND / 12 : plan.monthlyPriceVND;
+  const savingsVND =
+    billingCycle === 'yearly' ? plan.monthlyPriceVND * 12 - plan.yearlyPriceVND : 0;
   const vndAmount = currentPriceVND;
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <Flexbox gap={24}>
-          <Flexbox align="center" gap={16} horizontal>
-            <Button icon={<ArrowLeft />} onClick={() => router.back()} type="text">
+        <Flexbox gap={32}>
+          {/* Header */}
+          <div className={styles.header}>
+            <Button
+              className={styles.backButton}
+              icon={<ArrowLeft />}
+              onClick={() => router.back()}
+              type="text"
+            >
               Back
             </Button>
-            <Title level={2} style={{ margin: 0 }}>
+            <Title level={1} style={{ margin: 0, marginBlockEnd: 8 }}>
               Hoàn tất Thanh toán
             </Title>
-          </Flexbox>
+            <Text type="secondary">Chọn chu kỳ thanh toán và hoàn tất đơn hàng của bạn</Text>
+          </div>
 
-          <Card className={styles.checkoutCard}>
-            <div className={styles.planSummary}>
-              <Title level={4}>Tóm tắt Đơn hàng</Title>
-              <div className={styles.priceRow}>
-                <Text>{plan.name} Plan</Text>
-                <Text>
-                  {new Intl.NumberFormat('vi-VN', {
-                    currency: 'VND',
-                    maximumFractionDigits: 0,
-                    minimumFractionDigits: 0,
-                    style: 'currency'
-                  }).format(currentPriceVND)}
-                </Text>
-              </div>
-              {savingsVND > 0 && (
-                <div className={styles.priceRow}>
-                  <Text type="success">Giảm giá hàng năm</Text>
-                  <Text type="success">
-                    -{new Intl.NumberFormat('vi-VN', {
-                      currency: 'VND',
-                      maximumFractionDigits: 0,
-                      minimumFractionDigits: 0,
-                      style: 'currency'
-                    }).format(savingsVND)}
-                  </Text>
-                </div>
-              )}
-              <div className={styles.priceRow}>
-                <Text strong>Tổng cộng</Text>
-                <Text strong>
-                  {new Intl.NumberFormat('vi-VN', {
-                    currency: 'VND',
-                    maximumFractionDigits: 0,
-                    minimumFractionDigits: 0,
-                    style: 'currency'
-                  }).format(vndAmount)}
-                </Text>
-              </div>
-            </div>
+          {/* Two Column Layout */}
+          <div className={styles.twoColumnLayout}>
+            {/* Left Column - Plan Summary & Features */}
+            <Flexbox gap={24}>
+              {/* Plan Summary */}
+              <div className={styles.planSummary}>
+                <Flexbox gap={16}>
+                  <div>
+                    <Title level={3} style={{ margin: 0, marginBlockEnd: 4 }}>
+                      {plan.name} Plan
+                    </Title>
+                    <Text type="secondary">{plan.description}</Text>
+                  </div>
 
-            <Form form={form} layout="vertical" onFinish={paymentMethod === 'bank_transfer' ? handleBankTransferSubmit : undefined} size="large">
-              <Title level={4}>Billing Cycle</Title>
-              <Form.Item name="billingCycle">
-                <Radio.Group
-                  onChange={(e) => setBillingCycle(e.target.value)}
-                  style={{ width: '100%' }}
-                  value={billingCycle}
-                >
-                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="yearly">
-                    <div>
-                      <div>Hàng năm</div>
-                      <div style={{ color: '#666', fontSize: 12 }}>
-                        {new Intl.NumberFormat('vi-VN', {
-                          currency: 'VND',
-                          maximumFractionDigits: 0,
-                          minimumFractionDigits: 0,
-                          style: 'currency'
-                        }).format(monthlyEquivalentVND)}/tháng
-                      </div>
-                    </div>
-                  </Radio.Button>
-                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="monthly">
-                    <div>
-                      <div>Hàng tháng</div>
-                      <div style={{ color: '#666', fontSize: 12 }}>
-                        {new Intl.NumberFormat('vi-VN', {
-                          currency: 'VND',
-                          maximumFractionDigits: 0,
-                          minimumFractionDigits: 0,
-                          style: 'currency'
-                        }).format(plan.monthlyPriceVND)}/tháng
-                      </div>
-                    </div>
-                  </Radio.Button>
-                </Radio.Group>
-              </Form.Item>
-
-              <Divider />
-
-              <Title level={4}>Contact Information</Title>
-
-              <Form.Item
-                label="Email Address"
-                name="email"
-                rules={[
-                  { message: 'Please enter your email', required: true },
-                  { message: 'Please enter a valid email', type: 'email' },
-                ]}
-              >
-                <Input placeholder="your@email.com" />
-              </Form.Item>
-
-              <Form.Item
-                label="Full Name"
-                name="name"
-                rules={[{ message: 'Please enter your full name', required: true }]}
-              >
-                <Input placeholder="Your full name" />
-              </Form.Item>
-
-              <Form.Item label="Phone Number (Optional)" name="phone">
-                <Input placeholder="+84 xxx xxx xxx" />
-              </Form.Item>
-
-              <Divider />
-
-              <Title level={4}>Payment Method</Title>
-              <Form.Item>
-                <Radio.Group
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  style={{ width: '100%' }}
-                  value={paymentMethod}
-                >
-                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="bank_transfer">
-                    <div>
-                      <div>Bank Transfer</div>
-                      <div style={{ color: '#666', fontSize: 12 }}>QR Code</div>
-                    </div>
-                  </Radio.Button>
-                  <Radio.Button style={{ textAlign: 'center', width: '50%' }} value="credit_card">
-                    <div>
-                      <div>Credit Card</div>
-                      <div style={{ color: '#666', fontSize: 12 }}>Visa/Mastercard</div>
-                    </div>
-                  </Radio.Button>
-                </Radio.Group>
-              </Form.Item>
-
-              {paymentMethod === 'bank_transfer' ? (
-                <Button
-                  block
-                  htmlType="submit"
-                  icon={<CreditCard />}
-                  loading={loading}
-                  size="large"
-                  type="primary"
-                >
-                  {loading
-                    ? 'Đang xử lý...'
-                    : `Thanh toán ${new Intl.NumberFormat('vi-VN', {
+                  <div className={styles.priceRow}>
+                    <Text>Giá gói</Text>
+                    <Text>
+                      {new Intl.NumberFormat('vi-VN', {
                         currency: 'VND',
                         maximumFractionDigits: 0,
                         minimumFractionDigits: 0,
-                        style: 'currency'
-                      }).format(vndAmount)}`}
-                </Button>
-              ) : (
-                <CreditCardForm
-                  amount={vndAmount}
-                  loading={loading}
-                  onSubmit={handleCreditCardSubmit}
-                />
-              )}
+                        style: 'currency',
+                      }).format(currentPriceVND)}
+                    </Text>
+                  </div>
 
-              <div className={styles.securityNote}>
-                <Shield size={16} />
-                <Text>
-                  Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật.
-                </Text>
+                  {savingsVND > 0 && (
+                    <>
+                      <div className={styles.priceRow}>
+                        <Text type="success">Giảm giá hàng năm</Text>
+                        <Text type="success">
+                          -
+                          {new Intl.NumberFormat('vi-VN', {
+                            currency: 'VND',
+                            maximumFractionDigits: 0,
+                            minimumFractionDigits: 0,
+                            style: 'currency',
+                          }).format(savingsVND)}
+                        </Text>
+                      </div>
+                      <div className={styles.savingsBadge}>
+                        🎉 Tiết kiệm {Math.round((savingsVND / (plan.monthlyPriceVND * 12)) * 100)}%
+                        khi thanh toán hàng năm
+                      </div>
+                    </>
+                  )}
+
+                  <div className={styles.priceRow}>
+                    <Text strong>Tổng cộng</Text>
+                    <Text strong>
+                      {new Intl.NumberFormat('vi-VN', {
+                        currency: 'VND',
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0,
+                        style: 'currency',
+                      }).format(vndAmount)}
+                    </Text>
+                  </div>
+                </Flexbox>
               </div>
-            </Form>
-          </Card>
+
+              {/* Plan Features */}
+              <div className={styles.planFeatures}>
+                <Title level={4} style={{ marginBlockEnd: 16 }}>
+                  Tính năng bao gồm
+                </Title>
+                <Flexbox gap={8}>
+                  {plan.features.map((feature, index) => (
+                    <div className={styles.featureItem} key={index}>
+                      <Check size={20} />
+                      <Text>{feature}</Text>
+                    </div>
+                  ))}
+                </Flexbox>
+              </div>
+            </Flexbox>
+
+            {/* Right Column - Checkout Form */}
+            <Card className={styles.checkoutCard}>
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={paymentMethod === 'bank_transfer' ? handleBankTransferSubmit : undefined}
+                size="large"
+              >
+                <Flexbox gap={24}>
+                  {/* Billing Cycle */}
+                  <div>
+                    <Title level={4} style={{ marginBlockEnd: 12 }}>
+                      Chu kỳ thanh toán
+                    </Title>
+                    <Form.Item name="billingCycle" style={{ marginBlockEnd: 0 }}>
+                      <Radio.Group
+                        onChange={(e) => setBillingCycle(e.target.value)}
+                        style={{ width: '100%' }}
+                        value={billingCycle}
+                      >
+                        <Radio.Button
+                          style={{
+                            height: 'auto',
+                            padding: '12px',
+                            textAlign: 'center',
+                            width: '50%',
+                          }}
+                          value="yearly"
+                        >
+                          <div>
+                            <div style={{ fontSize: 16, fontWeight: 500 }}>Hàng năm</div>
+                            <div style={{ color: '#52c41a', fontSize: 13, marginBlockStart: 4 }}>
+                              {new Intl.NumberFormat('vi-VN', {
+                                currency: 'VND',
+                                maximumFractionDigits: 0,
+                                minimumFractionDigits: 0,
+                                style: 'currency',
+                              }).format(monthlyEquivalentVND)}
+                              /tháng
+                            </div>
+                            <div style={{ color: '#52c41a', fontSize: 12, marginBlockStart: 2 }}>
+                              Tiết kiệm 17%
+                            </div>
+                          </div>
+                        </Radio.Button>
+                        <Radio.Button
+                          style={{
+                            height: 'auto',
+                            padding: '12px',
+                            textAlign: 'center',
+                            width: '50%',
+                          }}
+                          value="monthly"
+                        >
+                          <div>
+                            <div style={{ fontSize: 16, fontWeight: 500 }}>Hàng tháng</div>
+                            <div style={{ color: '#666', fontSize: 13, marginBlockStart: 4 }}>
+                              {new Intl.NumberFormat('vi-VN', {
+                                currency: 'VND',
+                                maximumFractionDigits: 0,
+                                minimumFractionDigits: 0,
+                                style: 'currency',
+                              }).format(plan.monthlyPriceVND)}
+                              /tháng
+                            </div>
+                          </div>
+                        </Radio.Button>
+                      </Radio.Group>
+                    </Form.Item>
+                  </div>
+
+                  <Divider style={{ margin: 0 }} />
+
+                  {/* Contact Information */}
+                  <div>
+                    <Title level={4} style={{ marginBlockEnd: 16 }}>
+                      Thông tin liên hệ
+                    </Title>
+
+                    <Form.Item
+                      label="Địa chỉ Email"
+                      name="email"
+                      rules={[
+                        { message: 'Vui lòng nhập email', required: true },
+                        { message: 'Email không hợp lệ', type: 'email' },
+                      ]}
+                    >
+                      <Input placeholder="your@email.com" size="large" />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Họ và tên"
+                      name="name"
+                      rules={[{ message: 'Vui lòng nhập họ tên', required: true }]}
+                    >
+                      <Input placeholder="Nguyễn Văn A" size="large" />
+                    </Form.Item>
+
+                    <Form.Item label="Số điện thoại (Tùy chọn)" name="phone">
+                      <Input placeholder="+84 xxx xxx xxx" size="large" />
+                    </Form.Item>
+                  </div>
+
+                  <Divider style={{ margin: 0 }} />
+
+                  {/* Payment Method */}
+                  <div>
+                    <Title level={4} style={{ marginBlockEnd: 12 }}>
+                      Phương thức thanh toán
+                    </Title>
+                    <Form.Item style={{ marginBlockEnd: 16 }}>
+                      <Radio.Group
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        style={{ width: '100%' }}
+                        value={paymentMethod}
+                      >
+                        <Radio.Button
+                          style={{
+                            height: 'auto',
+                            padding: '12px',
+                            textAlign: 'center',
+                            width: '50%',
+                          }}
+                          value="bank_transfer"
+                        >
+                          <div>
+                            <div style={{ fontSize: 16, fontWeight: 500 }}>Chuyển khoản</div>
+                            <div style={{ color: '#666', fontSize: 12, marginBlockStart: 4 }}>
+                              QR Code
+                            </div>
+                          </div>
+                        </Radio.Button>
+                        <Radio.Button
+                          style={{
+                            height: 'auto',
+                            padding: '12px',
+                            textAlign: 'center',
+                            width: '50%',
+                          }}
+                          value="credit_card"
+                        >
+                          <div>
+                            <div style={{ fontSize: 16, fontWeight: 500 }}>Thẻ tín dụng</div>
+                            <div style={{ color: '#666', fontSize: 12, marginBlockStart: 4 }}>
+                              Visa/Mastercard
+                            </div>
+                          </div>
+                        </Radio.Button>
+                      </Radio.Group>
+                    </Form.Item>
+
+                    {paymentMethod === 'bank_transfer' ? (
+                      <Button
+                        block
+                        htmlType="submit"
+                        icon={<CreditCard />}
+                        loading={loading}
+                        size="large"
+                        type="primary"
+                      >
+                        {loading
+                          ? 'Đang xử lý...'
+                          : `Thanh toán ${new Intl.NumberFormat('vi-VN', {
+                              currency: 'VND',
+                              maximumFractionDigits: 0,
+                              minimumFractionDigits: 0,
+                              style: 'currency',
+                            }).format(vndAmount)}`}
+                      </Button>
+                    ) : (
+                      <CreditCardForm
+                        amount={vndAmount}
+                        loading={loading}
+                        onSubmit={handleCreditCardSubmit}
+                      />
+                    )}
+                  </div>
+
+                  {/* Security Note */}
+                  <div className={styles.securityNote}>
+                    <Shield size={16} />
+                    <Text>
+                      Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã
+                      hóa và bảo mật.
+                    </Text>
+                  </div>
+                </Flexbox>
+              </Form>
+            </Card>
+          </div>
         </Flexbox>
       </div>
     </div>
