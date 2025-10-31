@@ -259,6 +259,8 @@ function CheckoutContent() {
     try {
       const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
 
+      console.log('🏦 Bank Transfer: Creating payment...', { billingCycle, planId, vndAmount });
+
       const response = await fetch('/api/payment/sepay/create', {
         body: JSON.stringify({
           amount: vndAmount,
@@ -273,13 +275,17 @@ function CheckoutContent() {
 
       const data = await response.json();
 
+      console.log('🏦 Bank Transfer Response:', data);
+
       if (data.success && data.paymentUrl) {
+        console.log('✅ Redirecting to payment waiting page:', data.paymentUrl);
         window.location.href = data.paymentUrl;
       } else {
+        console.error('❌ Bank transfer failed:', data);
         message.error(data.message || 'Failed to create payment');
       }
     } catch (error) {
-      console.error('Bank transfer error:', error);
+      console.error('❌ Bank transfer error:', error);
       message.error('Unable to process checkout. Please try again.');
     } finally {
       setLoading(false);
@@ -293,6 +299,10 @@ function CheckoutContent() {
       const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
       const values = form.getFieldsValue();
 
+      console.log('💳 Credit Card: Creating payment...', { billingCycle, planId, vndAmount });
+
+      // For now, route all credit card payments to Sepay
+      // TODO: Implement gateway routing based on user location
       const response = await fetch('/api/payment/sepay/create-credit-card', {
         body: JSON.stringify({
           amount: vndAmount,
@@ -312,17 +322,21 @@ function CheckoutContent() {
 
       const data = await response.json();
 
+      console.log('💳 Credit Card Response:', data);
+
       if (data.success) {
+        console.log('✅ Credit card payment created successfully');
         message.success('Payment processed successfully!');
-        // Redirect to success page or dashboard
+        // Redirect to success page
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push('/settings/subscription?success=true');
         }, 1500);
       } else {
+        console.error('❌ Credit card payment failed:', data);
         message.error(data.message || 'Failed to process credit card payment');
       }
     } catch (error) {
-      console.error('Credit card payment error:', error);
+      console.error('❌ Credit card payment error:', error);
       message.error('Unable to process credit card payment. Please try again.');
     } finally {
       setLoading(false);

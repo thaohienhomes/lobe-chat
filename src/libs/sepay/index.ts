@@ -268,6 +268,7 @@ export class SepayPaymentGateway {
       }
 
       // Generate QR code URL using Sepay's QR service
+      // Note: Sepay QR service requires specific parameters
       const qrParams = new URLSearchParams({
         acc: bankInfo.accountNumber,
         amount: request.amount.toString(),
@@ -278,12 +279,23 @@ export class SepayPaymentGateway {
 
       // Generate payment waiting URL with real QR code
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
-      const paymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCodeUrl=${encodeURIComponent(qrCodeUrl)}&bankAccount=${bankInfo.accountNumber}&bankName=${encodeURIComponent(bankInfo.bankName)}`;
+
+      // Construct the payment URL with proper encoding
+      const paymentUrlParams = new URLSearchParams({
+        amount: request.amount.toString(),
+        bankAccount: bankInfo.accountNumber,
+        bankName: bankInfo.bankName,
+        orderId: request.orderId,
+        qrCodeUrl: qrCodeUrl,
+      });
+
+      const paymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?${paymentUrlParams.toString()}`;
 
       console.log('🏦 REAL SEPAY: Payment created with QR code');
       console.log('Bank Account:', bankInfo.accountNumber);
       console.log('Bank Name:', bankInfo.bankName);
       console.log('QR Code URL:', qrCodeUrl);
+      console.log('Payment URL:', paymentUrl);
 
       return {
         bankAccount: bankInfo.accountNumber,
