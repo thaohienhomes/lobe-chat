@@ -126,6 +126,8 @@ Polar automatically retries failed webhooks:
 
 ### Step 3: Update Vercel Environment Variables
 
+**Important**: Polar no longer uses separate price IDs. Each product now includes its own pricing (monthly OR yearly). You need to create separate products for each billing cycle.
+
 Add or update these environment variables in Vercel production:
 
 ```bash
@@ -134,21 +136,20 @@ POLAR_ACCESS_TOKEN=polar_at_xxxxxxxxxxxxx
 POLAR_SERVER=production
 POLAR_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
 
-# Starter Plan (Updated Prices)
-POLAR_PRODUCT_STARTER_ID=prod_xxxxxxxxxxxxx
-POLAR_PRICE_STARTER_MONTHLY_ID=price_xxxxxxxxxxxxx # $1.99/month
-POLAR_PRICE_STARTER_YEARLY_ID=price_xxxxxxxxxxxxx  # $19.99/year
+# Starter Plan Products (Updated Prices)
+POLAR_PRODUCT_STARTER_MONTHLY_ID=prod_xxxxxxxxxxxxx # $1.99/month
+POLAR_PRODUCT_STARTER_YEARLY_ID=prod_xxxxxxxxxxxxx  # $19.99/year
 
-# Premium Plan (Updated Prices)
-POLAR_PRODUCT_PREMIUM_ID=prod_xxxxxxxxxxxxx
-POLAR_PRICE_PREMIUM_MONTHLY_ID=price_xxxxxxxxxxxxx # $5.99/month
-POLAR_PRICE_PREMIUM_YEARLY_ID=price_xxxxxxxxxxxxx  # $59.99/year
+# Premium Plan Products (Updated Prices)
+POLAR_PRODUCT_PREMIUM_MONTHLY_ID=prod_xxxxxxxxxxxxx # $5.99/month
+POLAR_PRODUCT_PREMIUM_YEARLY_ID=prod_xxxxxxxxxxxxx  # $59.99/year
 
-# Ultimate Plan (Updated Prices)
-POLAR_PRODUCT_ULTIMATE_ID=prod_xxxxxxxxxxxxx
-POLAR_PRICE_ULTIMATE_MONTHLY_ID=price_xxxxxxxxxxxxx # $14.99/month
-POLAR_PRICE_ULTIMATE_YEARLY_ID=price_xxxxxxxxxxxxx  # $149.99/year
+# Ultimate Plan Products (Updated Prices)
+POLAR_PRODUCT_ULTIMATE_MONTHLY_ID=prod_xxxxxxxxxxxxx # $14.99/month
+POLAR_PRODUCT_ULTIMATE_YEARLY_ID=prod_xxxxxxxxxxxxx  # $149.99/year
 ```
+
+**Total**: 9 environment variables (3 config + 6 product IDs)
 
 ### Step 4: Redeploy Application
 
@@ -171,14 +172,19 @@ POLAR_PRICE_ULTIMATE_YEARLY_ID=price_xxxxxxxxxxxxx  # $149.99/year
 
 ## ✅ Verification Checklist
 
-- [ ] Polar products updated with new USD pricing
-- [ ] Polar prices created for all plans (monthly + yearly)
-- [ ] Product IDs and Price IDs copied
+- [ ] Created 6 Polar products (3 plans × 2 billing cycles)
+- [ ] Starter Monthly product created ($1.99/month)
+- [ ] Starter Yearly product created ($19.99/year)
+- [ ] Premium Monthly product created ($5.99/month)
+- [ ] Premium Yearly product created ($59.99/year)
+- [ ] Ultimate Monthly product created ($14.99/month)
+- [ ] Ultimate Yearly product created ($149.99/year)
+- [ ] All 6 Product IDs copied
 - [ ] Webhook configured in Polar Dashboard
 - [ ] Webhook URL set to `https://pho.chat/api/payment/polar/webhook`
 - [ ] All 13 webhook events selected
 - [ ] Webhook secret copied
-- [ ] All 12 Polar environment variables added to Vercel
+- [ ] All 9 Polar environment variables added to Vercel
 - [ ] Application redeployed
 - [ ] Webhook delivery tested and verified
 - [ ] Payment flow tested with new pricing

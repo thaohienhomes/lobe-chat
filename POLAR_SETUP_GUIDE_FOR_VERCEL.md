@@ -18,6 +18,14 @@ Polar.sh is the international payment gateway for pho.chat. It handles payments 
 - Automatic currency conversion
 - Subscription management
 
+**Important Update (2025):**
+
+Polar has updated their product model. Each product now has a **single pricing model** (monthly OR yearly). To offer both billing cycles, you create **separate products** for each. This means:
+
+- **6 products total**: 3 plans × 2 billing cycles (monthly + yearly)
+- **9 environment variables**: 3 config + 6 product IDs
+- **No separate price IDs**: Each product includes its pricing
+
 ---
 
 ## 🔑 Step 1: Get Polar API Credentials
@@ -74,57 +82,74 @@ Polar.sh is the international payment gateway for pho.chat. It handles payments 
 
 ---
 
-## 📦 Step 2: Create Products and Prices in Polar
+## 📦 Step 2: Create Products in Polar
 
-### 2.1 Create Starter Product
+**Important**: Polar has updated their product model. Each product now has a **single pricing model** (monthly OR yearly), not multiple prices. To offer both monthly and yearly options, you create **separate products** for each billing cycle.
+
+### 2.1 Create Monthly Products
+
+#### Starter Monthly
 
 1. Go to **Products** in Polar Dashboard
 2. Click **Create Product**
 3. Fill in:
-   - **Name**: Starter Plan
+   - **Name**: Starter Plan (Monthly)
    - **Description**: Perfect for occasional AI users and students
-   - **Type**: Subscription
+   - **Billing Cycle**: Monthly
+   - **Pricing Type**: Fixed price
+   - **Price**: $1.99 USD
+4. Copy the Product ID (format: `prod_xxxxxxxxxxxxx`)
+5. **Save as**: `POLAR_PRODUCT_STARTER_MONTHLY_ID`
 
-### 2.2 Create Starter Prices
-
-For the Starter product, create 2 prices:
-
-**Monthly Price:**
-
-- Amount: $1.99 USD
-- Billing Period: Monthly
-- Copy the Price ID (format: `price_xxxxxxxxxxxxx`)
-- **Save as**: `POLAR_PRICE_STARTER_MONTHLY_ID`
-
-**Yearly Price:**
-
-- Amount: $19.99 USD (17% discount)
-- Billing Period: Yearly
-- Copy the Price ID
-- **Save as**: `POLAR_PRICE_STARTER_YEARLY_ID`
-
-**Get Product ID:**
-
-- Copy the Starter Product ID (format: `prod_xxxxxxxxxxxxx`)
-- **Save as**: `POLAR_PRODUCT_STARTER_ID`
-
-### 2.3 Create Premium Product
+#### Premium Monthly
 
 Repeat for Premium Plan:
 
-- **Name**: Premium Plan
-- **Monthly Price**: $5.99 USD
-- **Yearly Price**: $59.99 USD
-- **Save IDs as**: `POLAR_PRODUCT_PREMIUM_ID`, `POLAR_PRICE_PREMIUM_MONTHLY_ID`, `POLAR_PRICE_PREMIUM_YEARLY_ID`
+- **Name**: Premium Plan (Monthly)
+- **Billing Cycle**: Monthly
+- **Price**: $5.99 USD
+- **Save as**: `POLAR_PRODUCT_PREMIUM_MONTHLY_ID`
 
-### 2.4 Create Ultimate Product
+#### Ultimate Monthly
 
 Repeat for Ultimate Plan:
 
-- **Name**: Ultimate Plan
-- **Monthly Price**: $14.99 USD
-- **Yearly Price**: $149.99 USD
-- **Save IDs as**: `POLAR_PRODUCT_ULTIMATE_ID`, `POLAR_PRICE_ULTIMATE_MONTHLY_ID`, `POLAR_PRICE_ULTIMATE_YEARLY_ID`
+- **Name**: Ultimate Plan (Monthly)
+- **Billing Cycle**: Monthly
+- **Price**: $14.99 USD
+- **Save as**: `POLAR_PRODUCT_ULTIMATE_MONTHLY_ID`
+
+### 2.2 Create Yearly Products
+
+#### Starter Yearly
+
+1. Click **Create Product** again
+2. Fill in:
+   - **Name**: Starter Plan (Yearly)
+   - **Description**: Perfect for occasional AI users and students - Save 17%!
+   - **Billing Cycle**: Yearly
+   - **Pricing Type**: Fixed price
+   - **Price**: $19.99 USD
+3. Copy the Product ID
+4. **Save as**: `POLAR_PRODUCT_STARTER_YEARLY_ID`
+
+#### Premium Yearly
+
+Repeat for Premium Plan:
+
+- **Name**: Premium Plan (Yearly)
+- **Billing Cycle**: Yearly
+- **Price**: $59.99 USD
+- **Save as**: `POLAR_PRODUCT_PREMIUM_YEARLY_ID`
+
+#### Ultimate Yearly
+
+Repeat for Ultimate Plan:
+
+- **Name**: Ultimate Plan (Yearly)
+- **Billing Cycle**: Yearly
+- **Price**: $149.99 USD
+- **Save as**: `POLAR_PRODUCT_ULTIMATE_YEARLY_ID`
 
 ---
 
@@ -147,21 +172,20 @@ POLAR_ACCESS_TOKEN=polar_at_xxxxxxxxxxxxx
 POLAR_SERVER=production
 POLAR_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
 
-# Starter Plan
-POLAR_PRODUCT_STARTER_ID=prod_xxxxxxxxxxxxx
-POLAR_PRICE_STARTER_MONTHLY_ID=price_xxxxxxxxxxxxx
-POLAR_PRICE_STARTER_YEARLY_ID=price_xxxxxxxxxxxxx
+# Starter Plan Products
+POLAR_PRODUCT_STARTER_MONTHLY_ID=prod_xxxxxxxxxxxxx
+POLAR_PRODUCT_STARTER_YEARLY_ID=prod_xxxxxxxxxxxxx
 
-# Premium Plan
-POLAR_PRODUCT_PREMIUM_ID=prod_xxxxxxxxxxxxx
-POLAR_PRICE_PREMIUM_MONTHLY_ID=price_xxxxxxxxxxxxx
-POLAR_PRICE_PREMIUM_YEARLY_ID=price_xxxxxxxxxxxxx
+# Premium Plan Products
+POLAR_PRODUCT_PREMIUM_MONTHLY_ID=prod_xxxxxxxxxxxxx
+POLAR_PRODUCT_PREMIUM_YEARLY_ID=prod_xxxxxxxxxxxxx
 
-# Ultimate Plan
-POLAR_PRODUCT_ULTIMATE_ID=prod_xxxxxxxxxxxxx
-POLAR_PRICE_ULTIMATE_MONTHLY_ID=price_xxxxxxxxxxxxx
-POLAR_PRICE_ULTIMATE_YEARLY_ID=price_xxxxxxxxxxxxx
+# Ultimate Plan Products
+POLAR_PRODUCT_ULTIMATE_MONTHLY_ID=prod_xxxxxxxxxxxxx
+POLAR_PRODUCT_ULTIMATE_YEARLY_ID=prod_xxxxxxxxxxxxx
 ```
+
+**Note**: Each product ID represents a complete product with its own pricing. There are no separate price IDs in the new Polar model.
 
 ### 3.3 Verify Variables
 
