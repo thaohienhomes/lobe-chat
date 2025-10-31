@@ -119,20 +119,20 @@ POLAR_PRICE_ULTIMATE_YEARLY_ID=price_xxxxxxxxxxxxx
 
 ### Starter Plan
 
-- **Monthly**: 39,000 VND (\~$1.61 USD)
-- **Yearly**: 390,000 VND (\~$16.10 USD, 17% discount)
+- **Monthly**: 39,000 VND (Sepay) / $1.99 USD (Polar)
+- **Yearly**: 390,000 VND (Sepay) / $19.99 USD (Polar, 17% discount)
 - **Compute Credits**: 5M/month
 
 ### Premium Plan
 
-- **Monthly**: 129,000 VND (\~$5.34 USD)
-- **Yearly**: 1,290,000 VND (\~$53.40 USD, 17% discount)
+- **Monthly**: 129,000 VND (Sepay) / $5.99 USD (Polar)
+- **Yearly**: 1,290,000 VND (Sepay) / $59.99 USD (Polar, 17% discount)
 - **Compute Credits**: 15M/month
 
 ### Ultimate Plan
 
-- **Monthly**: 349,000 VND (\~$14.44 USD)
-- **Yearly**: 3,490,000 VND (\~$144.40 USD, 17% discount)
+- **Monthly**: 349,000 VND (Sepay) / $14.99 USD (Polar)
+- **Yearly**: 3,490,000 VND (Sepay) / $149.99 USD (Polar, 17% discount)
 - **Compute Credits**: 35M/month
 
 ---
