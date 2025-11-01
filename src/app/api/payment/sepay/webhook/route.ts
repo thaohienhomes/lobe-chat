@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
+import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
 import {
   activateUserSubscription,
   getPaymentByOrderId,
@@ -33,6 +34,7 @@ function extractMaskedCardNumber(webhookData: SepayWebhookData): string | undefi
  * Handle successful payment
  */
 async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<void> {
+  const startTime = Date.now();
   try {
     console.log('Processing successful payment:', webhookData.orderId);
 
@@ -57,8 +59,23 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
       );
     }
 
+    const duration = Date.now() - startTime;
+    paymentMetricsCollector.recordWebhookProcessing(
+      webhookData.orderId,
+      'success',
+      duration,
+    );
+
     console.log('Successfully processed payment:', webhookData.orderId);
   } catch (error) {
+    const duration = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    paymentMetricsCollector.recordWebhookProcessing(
+      webhookData.orderId,
+      'failure',
+      duration,
+      errorMessage,
+    );
     console.error('Error processing successful payment:', error);
     throw error;
   }
@@ -68,6 +85,7 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
  * Handle failed payment
  */
 async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void> {
+  const startTime = Date.now();
   try {
     console.log('Processing failed payment:', webhookData.orderId);
 
@@ -76,8 +94,23 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
       transactionId: webhookData.transactionId,
     });
 
+    const duration = Date.now() - startTime;
+    paymentMetricsCollector.recordWebhookProcessing(
+      webhookData.orderId,
+      'success',
+      duration,
+    );
+
     console.log('Successfully processed failed payment:', webhookData.orderId);
   } catch (error) {
+    const duration = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    paymentMetricsCollector.recordWebhookProcessing(
+      webhookData.orderId,
+      'failure',
+      duration,
+      errorMessage,
+    );
     console.error('Error processing failed payment:', error);
     throw error;
   }
@@ -87,6 +120,7 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
  * Handle pending payment
  */
 async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void> {
+  const startTime = Date.now();
   try {
     console.log('Processing pending payment:', webhookData.orderId);
 
@@ -95,8 +129,23 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
       transactionId: webhookData.transactionId,
     });
 
+    const duration = Date.now() - startTime;
+    paymentMetricsCollector.recordWebhookProcessing(
+      webhookData.orderId,
+      'success',
+      duration,
+    );
+
     console.log('Successfully processed pending payment:', webhookData.orderId);
   } catch (error) {
+    const duration = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    paymentMetricsCollector.recordWebhookProcessing(
+      webhookData.orderId,
+      'failure',
+      duration,
+      errorMessage,
+    );
     console.error('Error processing pending payment:', error);
     throw error;
   }
@@ -111,6 +160,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.log('🔔 Webhook received from:', request.headers.get('user-agent'));
     console.log('🔔 Request headers:', Object.fromEntries(request.headers.entries()));
 
+    // Parse webhook data from Sepay (only parse once!)
     const body = await request.json();
     console.log('🔔 Webhook payload:', body);
 
@@ -143,8 +193,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
     }
 
-    // Parse webhook data from Sepay
-    const webhookData: SepayWebhookData = await request.json();
+    // Use the already-parsed body as webhookData (don't parse again!)
+    const webhookData: SepayWebhookData = body;
 
     console.log('Sepay webhook received:', {
       amount: webhookData.amount,
@@ -185,6 +235,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Return success response to Sepay
     return NextResponse.json({ message: 'Webhook processed', success: true });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    paymentMetricsCollector.recordError(
+      'webhook_processing_error',
+      errorMessage,
+      undefined,
+      undefined,
+      { error: String(error) },
+    );
     console.error('Sepay webhook processing error:', error);
     return NextResponse.json(
       { message: 'Webhook processing failed', success: false },

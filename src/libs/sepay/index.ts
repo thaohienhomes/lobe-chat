@@ -193,7 +193,24 @@ export class SepayPaymentGateway {
   public verifyWebhookSignature(data: SepayWebhookData): boolean {
     const { signature, ...payloadData } = data;
     const expectedSignature = this.generateSignature(payloadData);
-    return signature === expectedSignature;
+    const isValid = signature === expectedSignature;
+
+    if (!isValid) {
+      console.error('❌ Webhook signature verification FAILED:', {
+        expectedSignature: expectedSignature.slice(0, 16) + '...',
+        orderId: data.orderId,
+        payloadKeys: Object.keys(payloadData),
+        providedSignature: signature.slice(0, 16) + '...',
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      console.log('✅ Webhook signature verified successfully:', {
+        orderId: data.orderId,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return isValid;
   }
 
   /**
@@ -528,11 +545,22 @@ export class SepayPaymentGateway {
         transactionCount: result.transactions?.length || 0,
       });
 
-      if (result.status !== 200 || !result.messages.success || !result.transactions) {
-        console.error('❌ Sepay API returned error:', result.error);
+      // Improved error handling with better null checking
+      if (result.status !== 200 || !result.messages?.success) {
+        console.error('❌ Sepay API returned error:', result.error || result.messages?.error);
         return {
-          error: result.error || 'Failed to fetch transactions',
+          error: result.error || result.messages?.error || 'Failed to fetch transactions',
           message: 'Unable to check payment status',
+          orderId,
+          success: false,
+        };
+      }
+
+      // Check if transactions array exists and is valid
+      if (!result.transactions || !Array.isArray(result.transactions) || result.transactions.length === 0) {
+        console.log('⏳ No transactions found in Sepay API response');
+        return {
+          message: 'Payment not found yet',
           orderId,
           success: false,
         };
@@ -551,27 +579,46 @@ export class SepayPaymentGateway {
 
       // Look for a transaction that matches our order ID in the transaction content
       const matchingTransaction = result.transactions.find((transaction) => {
-        const content = transaction.transaction_content.toLowerCase();
-        const orderIdLower = orderId.toLowerCase();
+        try {
+          // Safely get transaction content
+          const content = (transaction.transaction_content || '').toLowerCase();
+          const orderIdLower = orderId.toLowerCase();
 
-        // Check if order ID is mentioned in transaction content
-        const hasOrderId = content.includes(orderIdLower);
+          // Check multiple order ID format variations
+          const hasOrderId =
+            content.includes(orderIdLower) ||
+            content.includes(orderId) ||
+            content.includes(orderId.replaceAll('_', '')) || // Handle underscores
+            content.includes(orderId.replaceAll('_', '-')); // Handle dashes
 
-        // Check if amount matches (if provided)
-        const amountMatches =
-          !expectedAmount ||
-          parseFloat(transaction.amount_in) === expectedAmount ||
-          parseFloat(transaction.amount_in) === expectedAmount / 100; // Handle different currency formats
+          // Safely parse amount
+          const txAmount = parseFloat(transaction.amount_in || '0');
 
-        console.log('🔍 Checking transaction:', {
-          amount: transaction.amount_in,
-          amountMatches,
-          content: transaction.transaction_content,
-          hasOrderId,
-          id: transaction.id,
-        });
+          // Check if amount matches (if provided)
+          // Handle different currency formats (VND, cents, etc.)
+          const amountMatches =
+            !expectedAmount ||
+            txAmount === expectedAmount ||
+            txAmount === expectedAmount / 100 ||
+            txAmount === expectedAmount / 1000 ||
+            Math.abs(txAmount - expectedAmount) < 1; // Allow 1 VND tolerance
 
-        return hasOrderId && amountMatches && parseFloat(transaction.amount_in) > 0;
+          const isValidTransaction = hasOrderId && amountMatches && txAmount > 0;
+
+          console.log('🔍 Checking transaction:', {
+            amount: transaction.amount_in,
+            amountMatches,
+            content: transaction.transaction_content,
+            hasOrderId,
+            id: transaction.id,
+            isValid: isValidTransaction,
+          });
+
+          return isValidTransaction;
+        } catch (err) {
+          console.error('🔍 Error checking transaction:', err);
+          return false;
+        }
       });
 
       if (matchingTransaction) {

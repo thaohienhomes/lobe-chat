@@ -255,6 +255,7 @@ function PaymentWaitingContent() {
   }
 
   if (paymentStatus.status === 'failed' || paymentStatus.status === 'timeout') {
+    const isTimeout = paymentStatus.status === 'timeout';
     return (
       <div
         style={{
@@ -267,19 +268,73 @@ function PaymentWaitingContent() {
         }}
       >
         <div style={{ maxWidth: '600px', textAlign: 'center' }}>
-          <div style={{ fontSize: '60px', marginBottom: '16px' }}>❌</div>
+          <div style={{ fontSize: '60px', marginBottom: '16px' }}>
+            {isTimeout ? '⏱️' : '❌'}
+          </div>
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
-            {paymentStatus.status === 'timeout'
-              ? 'Hết thời gian thanh toán'
-              : 'Thanh toán thất bại'}
+            {isTimeout ? 'Hết thời gian thanh toán' : 'Thanh toán thất bại'}
           </h2>
-          <p style={{ color: '#666', marginBottom: '24px' }}>
-            {paymentStatus.message || 'Vui lòng thử lại hoặc liên hệ hỗ trợ'}
+          <p style={{ color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>
+            {isTimeout
+              ? 'Hệ thống không phát hiện thanh toán trong vòng 15 phút. Nếu bạn đã hoàn tất chuyển khoản, vui lòng xác nhận thủ công hoặc liên hệ hỗ trợ.'
+              : paymentStatus.message || 'Vui lòng thử lại hoặc liên hệ hỗ trợ'}
           </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <Button onClick={handleRetry}>Thử lại</Button>
+
+          {isTimeout && (
+            <div
+              style={{
+                background: '#fff3cd',
+                border: '1px solid #ffc107',
+                borderRadius: '8px',
+                marginBottom: '24px',
+                padding: '16px',
+                textAlign: 'left',
+              }}
+            >
+              <h4 style={{ margin: '0 0 12px 0', color: '#856404', fontWeight: 'bold' }}>
+                💡 Bạn đã hoàn tất thanh toán?
+              </h4>
+              <p style={{ margin: '0 0 12px 0', color: '#856404', fontSize: '14px' }}>
+                Nếu bạn đã chuyển khoản thành công nhưng hệ thống chưa cập nhật, bạn có thể xác nhận
+                thủ công để kích hoạt ngay gói dịch vụ.
+              </p>
+              <Button
+                className="bg-yellow-600 hover:bg-yellow-700 w-full"
+                disabled={verifying}
+                onClick={handleManualVerification}
+              >
+                {verifying ? 'Đang xác nhận...' : '✓ Tôi đã thanh toán - Xác nhận ngay'}
+              </Button>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button onClick={handleRetry}>
+              {isTimeout ? 'Thanh toán lại' : 'Thử lại'}
+            </Button>
             <Button onClick={handleCancel}>Hủy bỏ</Button>
           </div>
+
+          {isTimeout && (
+            <div
+              style={{
+                background: '#e7f3ff',
+                border: '1px solid #b3d9ff',
+                borderRadius: '8px',
+                marginTop: '24px',
+                padding: '16px',
+                textAlign: 'left',
+              }}
+            >
+              <h4 style={{ margin: '0 0 12px 0', color: '#004085', fontWeight: 'bold' }}>
+                📞 Cần hỗ trợ?
+              </h4>
+              <p style={{ margin: '0', color: '#004085', fontSize: '14px' }}>
+                Nếu bạn gặp vấn đề, vui lòng liên hệ với đội hỗ trợ của chúng tôi qua email hoặc
+                chat trực tiếp.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -403,11 +458,24 @@ function PaymentWaitingContent() {
           </div>
           <div className="flex justify-between items-center p-2 bg-white rounded">
             <span className="font-bold text-gray-900 text-base">Thời gian còn lại:</span>
-            <span
-              className={`font-extrabold text-lg ${timeLeft < 300 ? 'text-red-600' : 'text-green-600'}`}
-            >
-              {formatTime(timeLeft)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`font-extrabold text-lg ${
+                  timeLeft < 300
+                    ? 'text-red-600 animate-pulse'
+                    : timeLeft < 600
+                      ? 'text-orange-600'
+                      : 'text-green-600'
+                }`}
+              >
+                {formatTime(timeLeft)}
+              </span>
+              {timeLeft < 300 && (
+                <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
+                  ⚠️ Sắp hết
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

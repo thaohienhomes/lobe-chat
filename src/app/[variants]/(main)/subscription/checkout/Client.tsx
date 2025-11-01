@@ -292,23 +292,33 @@ function CheckoutContent() {
     }
   };
 
-  const handleCreditCardSubmit = async () => {
+  const handleCreditCardSubmit = async (cardData: any) => {
     if (!plan) return;
     setLoading(true);
     try {
-      console.log('💳 Credit Card: Creating Polar checkout session...', {
+      console.log('💳 Credit Card: Creating Sepay payment...', {
         billingCycle,
         planId,
       });
 
-      // Route credit card payments to Polar for international payment processing
-      const baseUrl = window.location.origin;
-      const response = await fetch('/api/payment/polar/create', {
+      // Route credit card payments to Sepay
+      const vndAmount = Math.round(plan.price * 24_167); // USD to VND conversion
+      const response = await fetch('/api/payment/sepay/create-credit-card', {
         body: JSON.stringify({
+          amount: vndAmount,
           billingCycle,
-          cancelUrl: `${baseUrl}/subscription/checkout?plan=${planId}&canceled=true`,
+          cardCvv: cardData.cardCvv,
+          cardExpiryMonth: cardData.cardExpiryMonth,
+          cardExpiryYear: cardData.cardExpiryYear,
+          cardHolderName: cardData.cardHolderName,
+          cardNumber: cardData.cardNumber,
+          currency: 'VND',
+          customerInfo: {
+            email: customerInfo.email,
+            name: customerInfo.name,
+            phone: customerInfo.phone,
+          },
           planId,
-          successUrl: `${baseUrl}/settings/subscription?success=true`,
         }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
@@ -316,15 +326,15 @@ function CheckoutContent() {
 
       const data = await response.json();
 
-      console.log('💳 Polar Checkout Response:', data);
+      console.log('💳 Sepay Credit Card Response:', data);
 
-      if (data.success && data.checkoutUrl) {
-        console.log('✅ Redirecting to Polar checkout:', data.checkoutUrl);
-        // Redirect to Polar checkout page
-        window.location.href = data.checkoutUrl;
+      if (data.success && data.paymentUrl) {
+        console.log('✅ Redirecting to Sepay payment:', data.paymentUrl);
+        // Redirect to Sepay payment page
+        window.location.href = data.paymentUrl;
       } else {
-        console.error('❌ Polar checkout creation failed:', data);
-        message.error(data.error || data.message || 'Failed to create checkout session');
+        console.error('❌ Sepay credit card payment creation failed:', data);
+        message.error(data.error || data.message || 'Failed to create payment');
       }
     } catch (error) {
       console.error('❌ Credit card payment error:', error);
