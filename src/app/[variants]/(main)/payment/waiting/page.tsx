@@ -12,6 +12,8 @@ import { useServerConfigStore } from '@/store/serverConfig';
 
 /* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
+
 interface PaymentStatus {
   message?: string;
   orderId?: string;
@@ -301,15 +303,15 @@ function PaymentWaitingContent() {
         {/* Bank Information */}
         {bankAccount && bankName && (
           <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-lg font-semibold mb-3 text-blue-800">Thông tin chuyển khoản</h4>
+            <h4 className="text-lg font-semibold mb-3 text-blue-900">Thông tin chuyển khoản</h4>
             <div className="space-y-2 text-left">
               <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Ngân hàng:</span>
-                <span className="font-semibold text-blue-600">{decodeURIComponent(bankName)}</span>
+                <span className="font-semibold text-gray-800">Ngân hàng:</span>
+                <span className="font-semibold text-blue-700">{decodeURIComponent(bankName)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Số tài khoản:</span>
-                <span className="font-mono text-lg font-bold text-blue-600">{bankAccount}</span>
+                <span className="font-semibold text-gray-800">Số tài khoản:</span>
+                <span className="font-mono text-lg font-bold text-blue-700">{bankAccount}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-gray-700">Nội dung:</span>
@@ -347,8 +349,8 @@ function PaymentWaitingContent() {
 
         {/* Instructions */}
         <div className="mb-6 text-left">
-          <h4 className="text-lg font-semibold mb-3">Hướng dẫn thanh toán:</h4>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+          <h4 className="text-lg font-semibold mb-3 text-gray-900">Hướng dẫn thanh toán:</h4>
+          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-800">
             <li>Mở ứng dụng ngân hàng trên điện thoại của bạn</li>
             <li>Chọn chức năng "Quét QR" hoặc "Chuyển khoản QR"</li>
             <li>Quét mã QR hiển thị ở trên</li>

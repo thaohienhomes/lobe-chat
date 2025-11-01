@@ -240,9 +240,15 @@ export class SepayPaymentGateway {
 
         // Generate mock payment waiting URL with QR code
         // IMPORTANT: Always use production URL in production environment
+        // Priority: NEXT_PUBLIC_BASE_URL > APP_URL > VERCEL_URL (only in preview) > localhost
         const baseUrl =
           process.env.NEXT_PUBLIC_BASE_URL ||
-          (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
+          process.env.APP_URL ||
+          (process.env.VERCEL_ENV === 'production'
+            ? 'https://pho.chat'
+            : process.env.VERCEL_URL
+              ? `https://${process.env.VERCEL_URL}`
+              : 'http://localhost:3010');
         // Use a data URL for the mock QR code (1x1 transparent PNG)
         const mockQrCodeUrl =
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
@@ -283,9 +289,15 @@ export class SepayPaymentGateway {
 
       // Generate payment waiting URL with real QR code
       // IMPORTANT: Always use production URL in production environment
+      // Priority: NEXT_PUBLIC_BASE_URL > APP_URL > VERCEL_URL (only in preview) > localhost
       const baseUrl =
         process.env.NEXT_PUBLIC_BASE_URL ||
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
+        process.env.APP_URL ||
+        (process.env.VERCEL_ENV === 'production'
+          ? 'https://pho.chat'
+          : process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : 'http://localhost:3010');
 
       // Construct the payment URL with proper encoding
       const paymentUrlParams = new URLSearchParams({
@@ -493,6 +505,7 @@ export class SepayPaymentGateway {
       }
 
       console.log('🔍 REAL SEPAY: Checking payment status for orderId:', orderId);
+      console.log('🔍 Expected amount:', expectedAmount);
 
       // Get recent transactions from Sepay API
       const response = await fetch(`https://my.sepay.vn/userapi/transactions/list?limit=50`, {
@@ -504,12 +517,19 @@ export class SepayPaymentGateway {
       });
 
       if (!response.ok) {
+        console.error('❌ Sepay API error:', response.status, response.statusText);
         throw new Error(`Sepay API error: ${response.status}`);
       }
 
       const result: SepayTransactionResponse = await response.json();
+      console.log('📊 Sepay API response:', {
+        status: result.status,
+        success: result.messages?.success,
+        transactionCount: result.transactions?.length || 0,
+      });
 
       if (result.status !== 200 || !result.messages.success || !result.transactions) {
+        console.error('❌ Sepay API returned error:', result.error);
         return {
           error: result.error || 'Failed to fetch transactions',
           message: 'Unable to check payment status',
@@ -517,6 +537,17 @@ export class SepayPaymentGateway {
           success: false,
         };
       }
+
+      console.log('🔍 Searching for matching transaction...');
+      console.log(
+        '🔍 Recent transactions:',
+        result.transactions.slice(0, 5).map((t) => ({
+          amount: t.amount_in,
+          content: t.transaction_content,
+          date: t.transaction_date,
+          id: t.id,
+        })),
+      );
 
       // Look for a transaction that matches our order ID in the transaction content
       const matchingTransaction = result.transactions.find((transaction) => {
@@ -532,6 +563,14 @@ export class SepayPaymentGateway {
           parseFloat(transaction.amount_in) === expectedAmount ||
           parseFloat(transaction.amount_in) === expectedAmount / 100; // Handle different currency formats
 
+        console.log('🔍 Checking transaction:', {
+          amount: transaction.amount_in,
+          amountMatches,
+          content: transaction.transaction_content,
+          hasOrderId,
+          id: transaction.id,
+        });
+
         return hasOrderId && amountMatches && parseFloat(transaction.amount_in) > 0;
       });
 
@@ -539,6 +578,7 @@ export class SepayPaymentGateway {
         console.log('✅ REAL SEPAY: Payment found!', {
           amount: matchingTransaction.amount_in,
           content: matchingTransaction.transaction_content,
+          date: matchingTransaction.transaction_date,
           transactionId: matchingTransaction.id,
         });
 
@@ -592,9 +632,15 @@ export class SepayPaymentGateway {
 // Default Sepay configuration for pho.chat
 export const createSepayConfig = (): SepayConfig => {
   // IMPORTANT: Always use production URL in production environment
+  // Priority: NEXT_PUBLIC_BASE_URL > APP_URL > VERCEL_URL (only in preview) > localhost
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
+    process.env.APP_URL ||
+    (process.env.VERCEL_ENV === 'production'
+      ? 'https://pho.chat'
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3010');
 
   return {
     apiUrl: PAYMENT_CONFIG.sepay.apiUrl,
