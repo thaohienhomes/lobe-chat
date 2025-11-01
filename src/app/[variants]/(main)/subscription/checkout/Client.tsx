@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { CreditCardForm, CreditCardFormData } from '@/components/payment/CreditCardForm';
+import { CreditCardForm } from '@/components/payment/CreditCardForm';
 
 const { Title, Text } = Typography;
 
@@ -292,29 +292,23 @@ function CheckoutContent() {
     }
   };
 
-  const handleCreditCardSubmit = async (cardData: CreditCardFormData) => {
+  const handleCreditCardSubmit = async () => {
     if (!plan) return;
     setLoading(true);
     try {
-      const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
-      const values = form.getFieldsValue();
+      console.log('💳 Credit Card: Creating Polar checkout session...', {
+        billingCycle,
+        planId,
+      });
 
-      console.log('💳 Credit Card: Creating payment...', { billingCycle, planId, vndAmount });
-
-      // For now, route all credit card payments to Sepay
-      // TODO: Implement gateway routing based on user location
-      const response = await fetch('/api/payment/sepay/create-credit-card', {
+      // Route credit card payments to Polar for international payment processing
+      const baseUrl = window.location.origin;
+      const response = await fetch('/api/payment/polar/create', {
         body: JSON.stringify({
-          amount: vndAmount,
           billingCycle,
-          cardCvv: cardData.cardCvv,
-          cardExpiryMonth: cardData.cardExpiryMonth,
-          cardExpiryYear: cardData.cardExpiryYear,
-          cardHolderName: cardData.cardHolderName,
-          cardNumber: cardData.cardNumber,
-          currency: 'VND',
-          customerInfo: { email: values.email, name: values.name, phone: values.phone },
+          cancelUrl: `${baseUrl}/subscription/checkout?plan=${planId}&canceled=true`,
           planId,
+          successUrl: `${baseUrl}/settings/subscription?success=true`,
         }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
@@ -322,18 +316,15 @@ function CheckoutContent() {
 
       const data = await response.json();
 
-      console.log('💳 Credit Card Response:', data);
+      console.log('💳 Polar Checkout Response:', data);
 
-      if (data.success) {
-        console.log('✅ Credit card payment created successfully');
-        message.success('Payment processed successfully!');
-        // Redirect to success page
-        setTimeout(() => {
-          router.push('/settings/subscription?success=true');
-        }, 1500);
+      if (data.success && data.checkoutUrl) {
+        console.log('✅ Redirecting to Polar checkout:', data.checkoutUrl);
+        // Redirect to Polar checkout page
+        window.location.href = data.checkoutUrl;
       } else {
-        console.error('❌ Credit card payment failed:', data);
-        message.error(data.message || 'Failed to process credit card payment');
+        console.error('❌ Polar checkout creation failed:', data);
+        message.error(data.error || data.message || 'Failed to create checkout session');
       }
     } catch (error) {
       console.error('❌ Credit card payment error:', error);
@@ -633,8 +624,9 @@ function CheckoutContent() {
                   <div className={styles.securityNote}>
                     <Shield size={16} />
                     <Text>
-                      Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã
-                      hóa và bảo mật.
+                      {paymentMethod === 'bank_transfer'
+                        ? 'Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật.'
+                        : 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'}
                     </Text>
                   </div>
                 </Flexbox>

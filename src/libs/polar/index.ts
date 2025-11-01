@@ -40,25 +40,47 @@ export interface CreateCheckoutParams {
   cancelUrl: string;
   customerEmail?: string;
   metadata?: Record<string, string>;
-  priceId: string;
+  priceId?: string; // Optional - not used in new Polar model
   productId: string;
   successUrl: string;
 }
 
 /**
  * Create a checkout session for subscription
+ *
+ * Note: In Polar's new model, priceId is optional and not required.
+ * The product already contains its pricing information.
  */
 export async function createCheckoutSession(
   params: CreateCheckoutParams,
 ): Promise<PolarCheckoutSession> {
   try {
-    const session = await polar.checkouts.create({
+    console.log('🔧 Polar SDK: Creating checkout session with params:', params);
+
+    // Validate required parameters
+    if (!params.productId) {
+      throw new Error('Product ID is required');
+    }
+    if (!params.successUrl) {
+      throw new Error('Success URL is required');
+    }
+
+    // Build checkout params - only include priceId if provided (for backward compatibility)
+    const checkoutParams: any = {
       customerEmail: params.customerEmail,
       metadata: params.metadata,
-      priceId: params.priceId,
       productId: params.productId,
       successUrl: params.successUrl,
-    } as any);
+    };
+
+    // Only include priceId if it's provided (backward compatibility)
+    if (params.priceId) {
+      checkoutParams.priceId = params.priceId;
+    }
+
+    console.log('📤 Polar SDK: Calling Polar API with:', checkoutParams);
+    const session = await polar.checkouts.create(checkoutParams);
+    console.log('📥 Polar SDK: Received session:', session);
 
     return {
       customerId: session.customerId || undefined,
@@ -67,7 +89,17 @@ export async function createCheckoutSession(
       url: session.url,
     };
   } catch (error) {
-    console.error('Polar checkout creation failed:', error);
+    console.error('❌ Polar SDK: Checkout creation failed:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      params,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    // Re-throw with more context
+    if (error instanceof Error) {
+      throw new Error(`Polar checkout creation failed: ${error.message}`);
+    }
     throw new Error('Failed to create Polar checkout session');
   }
 }
@@ -160,38 +192,41 @@ export async function getCustomerPortalUrl(customerId: string): Promise<string |
 
 /**
  * Polar Product IDs (configure these in Polar dashboard)
+ *
+ * Note: Polar's new product model uses separate products for monthly and yearly billing.
+ * Each product has its own pricing embedded - no separate price IDs needed.
  */
 export const POLAR_PRODUCTS = {
   premium: {
-    monthlyPriceId: process.env.POLAR_PRICE_PREMIUM_MONTHLY_ID!,
-    productId: process.env.POLAR_PRODUCT_PREMIUM_ID!,
-    yearlyPriceId: process.env.POLAR_PRICE_PREMIUM_YEARLY_ID!,
+    monthlyProductId: process.env.POLAR_PRODUCT_PREMIUM_MONTHLY_ID!,
+    yearlyProductId: process.env.POLAR_PRODUCT_PREMIUM_YEARLY_ID!,
   },
   starter: {
-    monthlyPriceId: process.env.POLAR_PRICE_STARTER_MONTHLY_ID!,
-    productId: process.env.POLAR_PRODUCT_STARTER_ID!,
-    yearlyPriceId: process.env.POLAR_PRICE_STARTER_YEARLY_ID!,
+    monthlyProductId: process.env.POLAR_PRODUCT_STARTER_MONTHLY_ID!,
+    yearlyProductId: process.env.POLAR_PRODUCT_STARTER_YEARLY_ID!,
   },
   ultimate: {
-    monthlyPriceId: process.env.POLAR_PRICE_ULTIMATE_MONTHLY_ID!,
-    productId: process.env.POLAR_PRODUCT_ULTIMATE_ID!,
-    yearlyPriceId: process.env.POLAR_PRICE_ULTIMATE_YEARLY_ID!,
+    monthlyProductId: process.env.POLAR_PRODUCT_ULTIMATE_MONTHLY_ID!,
+    yearlyProductId: process.env.POLAR_PRODUCT_ULTIMATE_YEARLY_ID!,
   },
 } as const;
 
 /**
- * Get product and price IDs for a plan
+ * Get product ID for a plan and billing cycle
+ *
+ * In Polar's new model, each billing cycle (monthly/yearly) is a separate product.
+ * There are no separate price IDs - pricing is embedded in the product.
  */
 export function getPolarProductIds(
   planId: 'starter' | 'premium' | 'ultimate',
   billingCycle: 'monthly' | 'yearly',
 ) {
   const product = POLAR_PRODUCTS[planId];
-  const priceId = billingCycle === 'monthly' ? product.monthlyPriceId : product.yearlyPriceId;
+  const productId = billingCycle === 'monthly' ? product.monthlyProductId : product.yearlyProductId;
 
   return {
-    priceId,
-    productId: product.productId,
+    priceId: undefined, // No longer used in new Polar model
+    productId,
   };
 }
 

@@ -238,7 +238,10 @@ export class SepayPaymentGateway {
         });
 
         // Generate mock payment waiting URL with QR code
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
+        // IMPORTANT: Always use production URL in production environment
+        const baseUrl =
+          process.env.NEXT_PUBLIC_BASE_URL ||
+          (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
         // Use a data URL for the mock QR code (1x1 transparent PNG)
         const mockQrCodeUrl =
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
@@ -278,7 +281,10 @@ export class SepayPaymentGateway {
       const qrCodeUrl = `https://qr.sepay.vn/img?${qrParams.toString()}`;
 
       // Generate payment waiting URL with real QR code
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
+      // IMPORTANT: Always use production URL in production environment
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
 
       // Construct the payment URL with proper encoding
       const paymentUrlParams = new URLSearchParams({
@@ -584,7 +590,10 @@ export class SepayPaymentGateway {
 
 // Default Sepay configuration for pho.chat
 export const createSepayConfig = (): SepayConfig => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
+  // IMPORTANT: Always use production URL in production environment
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
 
   return {
     apiUrl: PAYMENT_CONFIG.sepay.apiUrl,
