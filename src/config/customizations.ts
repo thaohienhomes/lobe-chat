@@ -133,7 +133,8 @@ export const PAYMENT_CONFIG = {
     merchantId: process.env.SEPAY_MERCHANT_ID,
 
     // Mock mode for testing (when credentials not provided)
-    mockMode: !process.env.SEPAY_SECRET_KEY || !process.env.SEPAY_MERCHANT_ID,
+    // Note: SEPAY_MERCHANT_ID is only required for credit card payments, not for bank transfer QR code
+    mockMode: !process.env.SEPAY_SECRET_KEY,
 
     // Webhook and callback URLs
     returnUrl: process.env.SEPAY_RETURN_URL,
