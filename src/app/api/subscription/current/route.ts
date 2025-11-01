@@ -7,7 +7,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/database';
+import { getServerDB } from '@/database/server';
 import { subscriptions } from '@/database/schemas/billing';
 import { eq, and } from 'drizzle-orm';
 import { pino } from '@/libs/logger';
@@ -19,6 +19,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Get database instance
+    const db = await getServerDB();
 
     // Get current active subscription
     const currentSubscription = await db

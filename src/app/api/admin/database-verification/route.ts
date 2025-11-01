@@ -7,7 +7,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/database';
+import { getServerDB } from '@/database/server';
 import { sepayPayments, subscriptions } from '@/database/schemas/billing';
 import { users } from '@/database/schemas/user';
 import { sql } from 'drizzle-orm';
@@ -34,7 +34,7 @@ interface VerificationReport {
 /**
  * Verify database connection
  */
-async function verifyDatabaseConnection(): Promise<VerificationResult> {
+async function verifyDatabaseConnection(db: any): Promise<VerificationResult> {
   try {
     const result = await db.execute(sql`SELECT 1 as connection_test`);
     return {
@@ -57,7 +57,7 @@ async function verifyDatabaseConnection(): Promise<VerificationResult> {
 /**
  * Verify sepay_payments table
  */
-async function verifySepayPaymentsTable(): Promise<VerificationResult> {
+async function verifySepayPaymentsTable(db: any): Promise<VerificationResult> {
   try {
     const result = await db.select().from(sepayPayments).limit(1);
     const count = await db.execute(
@@ -86,7 +86,7 @@ async function verifySepayPaymentsTable(): Promise<VerificationResult> {
 /**
  * Verify subscriptions table
  */
-async function verifySubscriptionsTable(): Promise<VerificationResult> {
+async function verifySubscriptionsTable(db: any): Promise<VerificationResult> {
   try {
     const result = await db.select().from(subscriptions).limit(1);
     const count = await db.execute(
@@ -115,7 +115,7 @@ async function verifySubscriptionsTable(): Promise<VerificationResult> {
 /**
  * Verify users table
  */
-async function verifyUsersTable(): Promise<VerificationResult> {
+async function verifyUsersTable(db: any): Promise<VerificationResult> {
   try {
     const result = await db.select().from(users).limit(1);
     const count = await db.execute(
@@ -144,11 +144,11 @@ async function verifyUsersTable(): Promise<VerificationResult> {
 /**
  * Verify database indexes
  */
-async function verifyDatabaseIndexes(): Promise<VerificationResult> {
+async function verifyDatabaseIndexes(db: any): Promise<VerificationResult> {
   try {
     const indexes = await db.execute(
       sql`
-        SELECT indexname FROM pg_indexes 
+        SELECT indexname FROM pg_indexes
         WHERE tablename IN ('sepay_payments', 'subscriptions', 'users')
         ORDER BY tablename, indexname
       `
@@ -176,7 +176,7 @@ async function verifyDatabaseIndexes(): Promise<VerificationResult> {
 /**
  * Verify foreign key constraints
  */
-async function verifyForeignKeyConstraints(): Promise<VerificationResult> {
+async function verifyForeignKeyConstraints(db: any): Promise<VerificationResult> {
   try {
     const constraints = await db.execute(
       sql`
@@ -220,14 +220,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     pino.info({}, 'Starting database verification');
 
+    // Get database instance
+    const db = await getServerDB();
+
     // Run all verification checks
     const results = await Promise.all([
-      verifyDatabaseConnection(),
-      verifySepayPaymentsTable(),
-      verifySubscriptionsTable(),
-      verifyUsersTable(),
-      verifyDatabaseIndexes(),
-      verifyForeignKeyConstraints(),
+      verifyDatabaseConnection(db),
+      verifySepayPaymentsTable(db),
+      verifySubscriptionsTable(db),
+      verifyUsersTable(db),
+      verifyDatabaseIndexes(db),
+      verifyForeignKeyConstraints(db),
     ]);
 
     // Calculate summary

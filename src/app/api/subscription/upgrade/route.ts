@@ -7,7 +7,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/database';
+import { getServerDB } from '@/database/server';
 import { subscriptions, sepayPayments } from '@/database/schemas/billing';
 import { eq, and } from 'drizzle-orm';
 import { pino } from '@/libs/logger';
@@ -104,6 +104,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
     }
+
+    // Get database instance
+    const db = await getServerDB();
 
     // Get current subscription
     const currentSubscription = await db
