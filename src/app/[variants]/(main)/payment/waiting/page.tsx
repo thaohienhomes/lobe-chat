@@ -14,6 +14,8 @@ import { useServerConfigStore } from '@/store/serverConfig';
 
 /* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
+
 interface PaymentStatus {
   message?: string;
   orderId?: string;
@@ -36,6 +38,8 @@ function PaymentWaitingContent() {
   const [polling, setPolling] = useState(true);
   const [verifying, setVerifying] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [lastCheckTime, setLastCheckTime] = useState<Date | null>(null);
+  const [pollCount, setPollCount] = useState(0);
 
   const orderId = searchParams.get('orderId');
   const amount = searchParams.get('amount');
@@ -57,17 +61,36 @@ function PaymentWaitingContent() {
 
   // Poll payment status every 5 seconds
   const checkPaymentStatus = useCallback(async () => {
-    if (!orderId || !polling) return;
+    if (!orderId || !polling) {
+      console.log('⏸️ Polling skipped:', { orderId, polling });
+      return;
+    }
+
+    const now = new Date();
+    const pollNumber = pollCount + 1;
+    setPollCount(pollNumber);
+    setLastCheckTime(now);
 
     try {
       const statusUrl = `/api/payment/sepay/status?orderId=${orderId}${amount ? `&amount=${amount}` : ''}`;
-      console.log('🔍 Polling payment status:', statusUrl);
+      console.log(
+        `🔍 [Poll #${pollNumber}] ${now.toLocaleTimeString()} - Checking payment status:`,
+        statusUrl,
+      );
+
       const response = await fetch(statusUrl);
       const data = await response.json();
-      console.log('📊 Payment status response:', data);
+
+      console.log(`📊 [Poll #${pollNumber}] ${now.toLocaleTimeString()} - Response:`, {
+        fullData: data,
+        message: data.message,
+        status: data.status,
+        success: data.success,
+        transactionId: data.transactionId,
+      });
 
       if (data.success && data.status === 'success') {
-        console.log('✅ Payment successful! Redirecting...');
+        console.log(`✅ [Poll #${pollNumber}] Payment successful! Redirecting in 2 seconds...`);
         setPaymentStatus({
           message: 'Payment completed successfully!',
           orderId,
@@ -77,17 +100,24 @@ function PaymentWaitingContent() {
         setPolling(false);
 
         // Redirect to success page after 2 seconds
-        // Use variants if available, otherwise use empty string (will use default route)
         const variantPath = variants || '';
         const redirectUrl = variantPath
           ? `/${variantPath}/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`
           : `/payment/success?orderId=${orderId}&status=success&transactionId=${data.transactionId}`;
-        console.log('🔀 Redirect URL:', redirectUrl, '(variants:', variants, ')');
+        console.log(
+          `🔀 [Poll #${pollNumber}] Redirect URL:`,
+          redirectUrl,
+          '(variants:',
+          variants,
+          ')',
+        );
+
         setTimeout(() => {
+          console.log(`🚀 [Poll #${pollNumber}] Executing redirect now...`);
           router.push(redirectUrl);
         }, 2000);
       } else if (data.status === 'failed') {
-        console.log('❌ Payment failed');
+        console.log(`❌ [Poll #${pollNumber}] Payment failed:`, data.message);
         setPaymentStatus({
           message: data.message || 'Payment failed',
           orderId,
@@ -95,12 +125,19 @@ function PaymentWaitingContent() {
         });
         setPolling(false);
       } else {
-        console.log('⏳ Payment still pending...');
+        console.log(
+          `⏳ [Poll #${pollNumber}] Payment still pending... Will check again in 5 seconds.`,
+        );
       }
     } catch (error) {
-      console.error('❌ Error checking payment status:', error);
+      console.error(`❌ [Poll #${pollNumber}] Error checking payment status:`, error);
+      console.error(`❌ [Poll #${pollNumber}] Error details:`, {
+        message: error instanceof Error ? error.message : String(error),
+        name: error instanceof Error ? error.name : 'Unknown',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
-  }, [orderId, amount, polling, router, variants]);
+  }, [orderId, amount, polling, router, variants, pollCount]);
 
   // Countdown timer
   useEffect(() => {
@@ -117,10 +154,29 @@ function PaymentWaitingContent() {
   // Start polling
   useEffect(() => {
     if (polling && paymentStatus.status === 'waiting') {
+      console.log('🚀 Starting payment status polling (every 5 seconds)...');
+      console.log('📋 Polling configuration:', {
+        amount,
+        orderId,
+        paymentStatus: paymentStatus.status,
+        polling,
+      });
+
+      // Check immediately on mount
+      checkPaymentStatus();
+
       const interval = setInterval(checkPaymentStatus, 5000);
-      return () => clearInterval(interval);
+      return () => {
+        console.log('🛑 Stopping payment status polling');
+        clearInterval(interval);
+      };
+    } else {
+      console.log('⏸️ Polling not started:', {
+        paymentStatus: paymentStatus.status,
+        polling,
+      });
     }
-  }, [polling, paymentStatus.status, checkPaymentStatus]);
+  }, [polling, paymentStatus.status, checkPaymentStatus, orderId, amount]);
 
   const handleRetry = () => {
     router.push(`/${variants}/subscription/checkout`);
@@ -269,9 +325,9 @@ function PaymentWaitingContent() {
         }}
       >
         <div className="mb-6">
-          <Clock className="mx-auto mb-4 text-blue-500" size={48} />
-          <h2 className="text-2xl font-bold mb-2">Đang chờ thanh toán</h2>
-          <p className="text-gray-600">
+          <Clock className="mx-auto mb-4 text-blue-600" size={56} />
+          <h2 className="text-3xl font-extrabold mb-3 text-gray-900">Đang chờ thanh toán</h2>
+          <p className="text-base text-gray-900 font-medium">
             Vui lòng quét mã QR bằng ứng dụng ngân hàng để hoàn tất thanh toán
           </p>
         </div>
@@ -302,30 +358,36 @@ function PaymentWaitingContent() {
 
         {/* Bank Information */}
         {bankAccount && bankName && (
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-lg font-semibold mb-3 text-blue-900">Thông tin chuyển khoản</h4>
-            <div className="space-y-2 text-left">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-800">Ngân hàng:</span>
-                <span className="font-semibold text-blue-700">{decodeURIComponent(bankName)}</span>
+          <div className="mb-6 p-6 bg-blue-100 rounded-lg border-2 border-blue-400 shadow-md">
+            <h4 className="text-xl font-extrabold mb-4 text-blue-950">Thông tin chuyển khoản</h4>
+            <div className="space-y-3 text-left">
+              <div className="flex justify-between items-center p-2 bg-white rounded">
+                <span className="font-bold text-gray-900 text-base">Ngân hàng:</span>
+                <span className="font-extrabold text-blue-900 text-lg">
+                  {decodeURIComponent(bankName)}
+                </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-800">Số tài khoản:</span>
-                <span className="font-mono text-lg font-bold text-blue-700">{bankAccount}</span>
+              <div className="flex justify-between items-center p-2 bg-white rounded">
+                <span className="font-bold text-gray-900 text-base">Số tài khoản:</span>
+                <span className="font-mono text-2xl font-extrabold text-blue-900">
+                  {bankAccount}
+                </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Nội dung:</span>
-                <span className="font-mono text-sm text-gray-600">{orderId}</span>
+              <div className="flex justify-between items-center p-2 bg-white rounded">
+                <span className="font-bold text-gray-900 text-base">Nội dung:</span>
+                <span className="font-mono text-sm font-bold text-gray-900 break-all">
+                  {orderId}
+                </span>
               </div>
             </div>
           </div>
         )}
 
         {/* Payment Details */}
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-semibold">Số tiền:</span>
-            <span className="text-lg font-semibold text-blue-600">
+        <div className="mb-6 p-6 bg-yellow-50 rounded-lg border-2 border-yellow-400 shadow-md">
+          <div className="flex justify-between items-center mb-3 p-2 bg-white rounded">
+            <span className="font-bold text-gray-900 text-base">Số tiền:</span>
+            <span className="text-2xl font-extrabold text-red-600">
               {amount
                 ? new Intl.NumberFormat('vi-VN', {
                     currency: 'VND',
@@ -335,34 +397,52 @@ function PaymentWaitingContent() {
                 : 'Đang tải...'}
             </span>
           </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-semibold">Mã đơn hàng:</span>
-            <span className="font-mono text-sm">{orderId}</span>
+          <div className="flex justify-between items-center mb-3 p-2 bg-white rounded">
+            <span className="font-bold text-gray-900 text-base">Mã đơn hàng:</span>
+            <span className="font-mono text-sm font-bold text-gray-900 break-all">{orderId}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="font-semibold">Thời gian còn lại:</span>
-            <span className={`font-semibold ${timeLeft < 300 ? 'text-red-500' : 'text-green-500'}`}>
+          <div className="flex justify-between items-center p-2 bg-white rounded">
+            <span className="font-bold text-gray-900 text-base">Thời gian còn lại:</span>
+            <span
+              className={`font-extrabold text-lg ${timeLeft < 300 ? 'text-red-600' : 'text-green-600'}`}
+            >
               {formatTime(timeLeft)}
             </span>
           </div>
         </div>
 
         {/* Instructions */}
-        <div className="mb-6 text-left">
-          <h4 className="text-lg font-semibold mb-3 text-gray-900">Hướng dẫn thanh toán:</h4>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-800">
+        <div className="mb-6 text-left p-4 bg-gray-100 rounded-lg border border-gray-300">
+          <h4 className="text-xl font-extrabold mb-4 text-gray-900">Hướng dẫn thanh toán:</h4>
+          <ol className="list-decimal list-inside space-y-2 text-base text-gray-900 font-medium">
             <li>Mở ứng dụng ngân hàng trên điện thoại của bạn</li>
             <li>Chọn chức năng "Quét QR" hoặc "Chuyển khoản QR"</li>
             <li>Quét mã QR hiển thị ở trên</li>
             <li>Xác nhận thông tin và hoàn tất thanh toán</li>
-            <li>Chờ xác nhận từ hệ thống (tự động)</li>
+            <li className="font-bold text-blue-900">
+              Chờ xác nhận từ hệ thống (tự động chuyển trang)
+            </li>
           </ol>
         </div>
 
         {/* Status Indicator */}
-        <div className="flex items-center justify-center mb-4">
-          <RefreshCw className="animate-spin mr-2" size={16} />
-          <span className="text-blue-600">Đang kiểm tra trạng thái thanh toán...</span>
+        <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-300">
+          <div className="flex items-center justify-center mb-2">
+            <RefreshCw className="animate-spin mr-2 text-blue-600" size={20} />
+            <span className="text-blue-900 font-bold text-base">
+              Đang kiểm tra trạng thái thanh toán...
+            </span>
+          </div>
+          {lastCheckTime && (
+            <div className="text-center text-sm text-gray-700">
+              <span className="font-semibold">Lần kiểm tra cuối:</span>{' '}
+              <span className="font-mono">{lastCheckTime.toLocaleTimeString('vi-VN')}</span>{' '}
+              <span className="text-gray-600">(Lần thứ {pollCount})</span>
+            </div>
+          )}
+          <div className="text-center text-xs text-gray-600 mt-1">
+            Hệ thống tự động kiểm tra mỗi 5 giây
+          </div>
         </div>
 
         {/* Manual Verification Notice */}
