@@ -225,12 +225,13 @@ export class SepayPaymentGateway {
   public async createPayment(request: SepayPaymentRequest): Promise<SepayPaymentResponse> {
     try {
       // Check if real Sepay API should be used
-      // Note: For bank transfer QR code, we only need SEPAY_SECRET_KEY (API Token)
-      // SEPAY_MERCHANT_ID is only required for credit card payments
-      const useRealSepayAPI = process.env.SEPAY_SECRET_KEY;
+      // Both SEPAY_SECRET_KEY and SEPAY_MERCHANT_ID are required for Sepay Payment Gateway
+      const useRealSepayAPI = process.env.SEPAY_SECRET_KEY && process.env.SEPAY_MERCHANT_ID;
 
       if (!useRealSepayAPI) {
-        console.log('🧪 MOCK SEPAY: Using mock implementation (missing SEPAY_SECRET_KEY)');
+        console.log(
+          '🧪 MOCK SEPAY: Using mock implementation (missing SEPAY_SECRET_KEY or SEPAY_MERCHANT_ID)',
+        );
 
         // Simulate API delay
         await new Promise((resolve) => {
