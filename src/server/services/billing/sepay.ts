@@ -51,7 +51,7 @@ export async function updatePaymentStatus(
     await db
       .update(sepayPayments)
       .set({
-        maskedCardNumber: opts?.maskedCardNumber,
+        // maskedCardNumber: opts?.maskedCardNumber, // TODO: Add after migration 0037
         rawWebhook: opts?.rawWebhook,
         status,
         transactionId: opts?.transactionId,
