@@ -59,7 +59,7 @@ function PaymentWaitingContent() {
     }
   }, [mounted, variants, orderId, amount, qrCodeUrl]);
 
-  // Poll payment status every 5 seconds
+  // Poll payment status every 15 seconds (reduced from 5s to avoid rate limiting)
   const checkPaymentStatus = useCallback(async () => {
     if (!orderId || !polling) {
       console.log('⏸️ Polling skipped:', { orderId, polling });
@@ -126,7 +126,7 @@ function PaymentWaitingContent() {
         setPolling(false);
       } else {
         console.log(
-          `⏳ [Poll #${pollNumber}] Payment still pending... Will check again in 5 seconds.`,
+          `⏳ [Poll #${pollNumber}] Payment still pending... Will check again in 15 seconds.`,
         );
       }
     } catch (error) {
@@ -154,7 +154,7 @@ function PaymentWaitingContent() {
   // Start polling
   useEffect(() => {
     if (polling && paymentStatus.status === 'waiting') {
-      console.log('🚀 Starting payment status polling (every 5 seconds)...');
+      console.log('🚀 Starting payment status polling (every 15 seconds)...');
       console.log('📋 Polling configuration:', {
         amount,
         orderId,
@@ -165,7 +165,7 @@ function PaymentWaitingContent() {
       // Check immediately on mount
       checkPaymentStatus();
 
-      const interval = setInterval(checkPaymentStatus, 5000);
+      const interval = setInterval(checkPaymentStatus, 15000); // 15 seconds
       return () => {
         console.log('🛑 Stopping payment status polling');
         clearInterval(interval);
@@ -564,29 +564,27 @@ function PaymentWaitingContent() {
             </div>
           )}
           <div className="text-center text-sm mt-2 opacity-90">
-            🔄 Hệ thống tự động kiểm tra mỗi 5 giây
+            🔄 Hệ thống tự động kiểm tra mỗi 15 giây
           </div>
         </div>
 
-        {/* Manual Verification Notice */}
-        {timeLeft < 600 && (
-          <div className="mt-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl shadow-xl p-6 text-white">
-            <h4 className="text-2xl font-bold mb-3 flex items-center gap-2">
-              <span>✅</span> Đã hoàn tất thanh toán?
-            </h4>
-            <p className="text-sm mb-4 opacity-90">
-              Nếu bạn đã chuyển khoản thành công nhưng hệ thống chưa cập nhật, bạn có thể xác nhận
-              thủ công để kích hoạt ngay gói dịch vụ.
-            </p>
-            <Button
-              className="w-full bg-white text-orange-600 hover:bg-gray-100 font-bold py-3 text-lg"
-              disabled={verifying}
-              onClick={handleManualVerification}
-            >
-              {verifying ? '⏳ Đang xác nhận...' : '✓ Tôi đã thanh toán - Xác nhận ngay'}
-            </Button>
-          </div>
-        )}
+        {/* Manual Verification Notice - Always visible */}
+        <div className="mt-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl shadow-xl p-6 text-white">
+          <h4 className="text-2xl font-bold mb-3 flex items-center gap-2">
+            <span>✅</span> Đã hoàn tất thanh toán?
+          </h4>
+          <p className="text-sm mb-4 opacity-90">
+            Nếu bạn đã chuyển khoản thành công nhưng hệ thống chưa cập nhật, bạn có thể xác nhận
+            thủ công để kích hoạt ngay gói dịch vụ.
+          </p>
+          <Button
+            className="w-full bg-white text-orange-600 hover:bg-gray-100 font-bold py-3 text-lg"
+            disabled={verifying}
+            onClick={handleManualVerification}
+          >
+            {verifying ? '⏳ Đang xác nhận...' : '✓ Tôi đã thanh toán - Xác nhận ngay'}
+          </Button>
+        </div>
 
         {/* Action Buttons */}
         <div className="mt-6 flex flex-col sm:flex-row gap-4">

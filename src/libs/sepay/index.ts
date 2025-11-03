@@ -5,6 +5,39 @@ import { PAYMENT_CONFIG } from '@/config/customizations';
 // Payment Method Types
 export type PaymentMethod = 'bank_transfer' | 'credit_card';
 
+// Simple in-memory cache for Sepay API responses
+interface CacheEntry<T> {
+  data: T;
+  expiresAt: number;
+}
+
+class SimpleCache<T> {
+  private cache = new Map<string, CacheEntry<T>>();
+
+  set(key: string, data: T, ttlMs: number): void {
+    this.cache.set(key, {
+      data,
+      expiresAt: Date.now() + ttlMs,
+    });
+  }
+
+  get(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return entry.data;
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
 // Sepay Configuration Interface
 export interface SepayConfig {
   apiUrl: string;
@@ -107,9 +140,11 @@ export interface SepayTransactionResponse {
  */
 export class SepayPaymentGateway {
   private config: SepayConfig;
+  private transactionCache: SimpleCache<SepayTransactionResponse>;
 
   constructor(config: SepayConfig) {
     this.config = config;
+    this.transactionCache = new SimpleCache<SepayTransactionResponse>();
   }
 
   /**
@@ -524,21 +559,39 @@ export class SepayPaymentGateway {
       console.log('🔍 REAL SEPAY: Checking payment status for orderId:', orderId);
       console.log('🔍 Expected amount:', expectedAmount);
 
-      // Get recent transactions from Sepay API
-      const response = await fetch(`https://my.sepay.vn/userapi/transactions/list?limit=50`, {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${this.config.secretKey}`,
-        },
-        method: 'GET',
-      });
+      // Check cache first (TTL: 10 seconds)
+      const cacheKey = 'sepay_transactions';
+      let result: SepayTransactionResponse | null = this.transactionCache.get(cacheKey);
 
-      if (!response.ok) {
-        console.error('❌ Sepay API error:', response.status, response.statusText);
-        throw new Error(`Sepay API error: ${response.status}`);
+      if (result) {
+        console.log('✅ Using cached Sepay transactions (avoiding rate limit)');
+      } else {
+        console.log('🌐 Fetching fresh transactions from Sepay API');
+
+        // Get recent transactions from Sepay API
+        const response = await fetch(`https://my.sepay.vn/userapi/transactions/list?limit=50`, {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${this.config.secretKey}`,
+          },
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          console.error('❌ Sepay API error:', response.status, response.statusText);
+          throw new Error(`Sepay API error: ${response.status}`);
+        }
+
+        result = (await response.json()) as SepayTransactionResponse;
+
+        // Cache for 10 seconds to avoid rate limiting
+        this.transactionCache.set(cacheKey, result, 10_000);
       }
 
-      const result: SepayTransactionResponse = await response.json();
+      // Null check for TypeScript
+      if (!result) {
+        throw new Error('Failed to fetch transactions from Sepay API');
+      }
       console.log('📊 Sepay API response:', {
         status: result.status,
         success: result.messages?.success,
