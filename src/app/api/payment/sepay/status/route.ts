@@ -15,7 +15,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const amountStr = searchParams.get('amount');
     const userIdParam = searchParams.get('userId');
 
+    console.log('🔍 Payment status query received:', {
+      orderId,
+      amount: amountStr,
+      userId: userIdParam,
+      timestamp: new Date().toISOString(),
+    });
+
     if (!orderId) {
+      console.error('❌ Missing orderId parameter');
       return NextResponse.json(
         { message: 'Order ID is required', success: false },
         { status: 400 },
@@ -25,10 +33,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Parse expected amount for better transaction matching
     const expectedAmount = amountStr ? parseInt(amountStr, 10) : undefined;
 
+    console.log('📡 Querying payment status from Sepay gateway...');
     // Query payment status from SePay
     const statusResponse = await sepayGateway.queryPaymentStatus(orderId, expectedAmount);
 
     const latency = Date.now() - startTime;
+
+    console.log('📊 Payment status response:', {
+      latency: `${latency}ms`,
+      message: statusResponse.message,
+      orderId: statusResponse.orderId,
+      success: statusResponse.success,
+      transactionId: statusResponse.transactionId,
+    });
 
     if (statusResponse.success) {
       // Record successful payment detection
@@ -41,6 +58,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         );
       }
 
+      console.log('✅ Payment found successfully:', {
+        latency: `${latency}ms`,
+        orderId,
+        transactionId: statusResponse.transactionId,
+      });
+
       return NextResponse.json({
         message: statusResponse.message,
         orderId: statusResponse.orderId,
@@ -49,6 +72,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         transactionId: statusResponse.transactionId,
       });
     } else {
+      console.log('⏳ Payment not found or still pending:', {
+        latency: `${latency}ms`,
+        orderId,
+        message: statusResponse.message,
+      });
+
       return NextResponse.json({
         message: statusResponse.message || 'Payment not found or still pending',
         orderId,
@@ -59,13 +88,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     const latency = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    console.error('❌ Payment status query error:', {
+      error: errorMessage,
+      latency: `${latency}ms`,
+      stack: errorStack,
+      timestamp: new Date().toISOString(),
+    });
+
     paymentMetricsCollector.recordError(
       'payment_status_query_error',
       errorMessage,
     );
-    console.error('Payment status query error:', error);
+
     return NextResponse.json(
       {
+        error: errorMessage,
         message: 'Failed to query payment status',
         status: 'failed',
         success: false

@@ -600,9 +600,10 @@ export class SepayPaymentGateway {
 
       // Improved error handling with better null checking
       if (result.status !== 200 || !result.messages?.success) {
-        console.error('❌ Sepay API returned error:', result.error || result.messages?.error);
+        const errorMsg = (result as any).error || (result.messages as any)?.error || 'Failed to fetch transactions';
+        console.error('❌ Sepay API returned error:', errorMsg);
         return {
-          error: result.error || result.messages?.error || 'Failed to fetch transactions',
+          error: errorMsg,
           message: 'Unable to check payment status',
           orderId,
           success: false,
@@ -698,10 +699,18 @@ export class SepayPaymentGateway {
         };
       }
     } catch (error) {
-      console.error('❌ REAL SEPAY: Error checking payment status:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      console.error('❌ REAL SEPAY: Error checking payment status:', {
+        error: errorMessage,
+        orderId,
+        stack: errorStack,
+        timestamp: new Date().toISOString(),
+      });
 
       return {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
         message: 'Failed to check payment status',
         orderId,
         success: false,
