@@ -1,10 +1,13 @@
 'use client';
 
-import { Card, Progress, Typography } from 'antd';
+import { Card, Progress, Skeleton, Typography } from 'antd';
 import { createStyles } from 'antd-style';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
+import useSWR from 'swr';
+
+import { trpc } from '@/libs/trpc/client';
 
 const { Title, Text } = Typography;
 
@@ -50,30 +53,14 @@ interface UsageOverviewProps {
   mobile?: boolean;
 }
 
-// Mock data - in real implementation, this would come from API
-const usageData = {
-  billingCycle: 'Monthly',
-  computeCredits: {
-    percentage: 57,
-    total: 15_000_000,
-    used: 8_500_000,
-  },
-  currentPlan: 'Premium',
-  cycleEnd: '2024-01-31',
-  cycleStart: '2024-01-01',
-  fileStorage: {
-    percentage: 60,
-    total: 2,
-    used: 1.2,
-  },
-  messagesThisMonth: 12_450,
-  modelsUsed: 8,
-  vectorStorage: {
-    percentage: 65,
-    total: 10_000,
-    used: 6500,
-  },
-};
+interface UsageSummary {
+  budgetRemainingVND: number;
+  month: string;
+  totalCostVND: number;
+  totalQueries: number;
+  totalTokens: number;
+  usagePercentage: number;
+}
 
 const formatNumber = (num: number) => {
   if (num >= 1_000_000) {
@@ -85,16 +72,73 @@ const formatNumber = (num: number) => {
   return num.toString();
 };
 
+const formatVND = (amount: number) => {
+  return new Intl.NumberFormat('vi-VN', {
+    currency: 'VND',
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    style: 'currency',
+  }).format(amount);
+};
+
 const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
   const { t } = useTranslation('setting');
   const { styles, theme } = useStyles();
+  const [usageData, setUsageData] = useState<UsageSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch usage summary from tRPC
+  const { data: summary, isLoading } = useSWR(
+    'usage-summary',
+    async () => {
+      try {
+        const result = await trpc.costOptimization.getUsageSummary.query();
+        setUsageData(result);
+        return result;
+      } catch (error) {
+        console.error('Failed to fetch usage summary:', error);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    { revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+
+  useEffect(() => {
+    if (summary) {
+      setUsageData(summary);
+    }
+  }, [summary]);
+
+  if (loading || isLoading) {
+    return (
+      <Flexbox gap={24}>
+        <Skeleton active paragraph={{ rows: 4 }} />
+      </Flexbox>
+    );
+  }
+
+  if (!usageData) {
+    return (
+      <Flexbox gap={24}>
+        <Title level={4}>{t('usage.overview.title')}</Title>
+        <Text type="secondary">Unable to load usage data</Text>
+      </Flexbox>
+    );
+  }
+
+  // Calculate cycle dates
+  const [year, month] = usageData.month.split('-');
+  const cycleStart = new Date(parseInt(year), parseInt(month) - 1, 1);
+  const cycleEnd = new Date(parseInt(year), parseInt(month), 0);
 
   return (
     <Flexbox gap={24}>
       <Flexbox gap={16}>
         <Title level={4}>{t('usage.overview.title')}</Title>
         <Text type="secondary">
-          Current billing cycle: {usageData.cycleStart} - {usageData.cycleEnd}
+          Current billing cycle: {cycleStart.toLocaleDateString()} - {cycleEnd.toLocaleDateString()}
         </Text>
       </Flexbox>
 
@@ -102,17 +146,16 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
         <Card className={styles.usageCard} style={{ flex: 1, minWidth: mobile ? '100%' : '300px' }}>
           <Flexbox gap={16}>
             <Flexbox align="center" gap={8} horizontal justify="space-between">
-              <Text strong>Compute Credits</Text>
-              <Text type="secondary">{usageData.currentPlan} Plan</Text>
+              <Text strong>Monthly Budget Usage</Text>
             </Flexbox>
 
             <div className={styles.progressContainer}>
               <Progress
-                percent={usageData.computeCredits.percentage}
+                percent={usageData.usagePercentage}
                 strokeColor={
-                  usageData.computeCredits.percentage > 80
+                  usageData.usagePercentage > 80
                     ? theme.colorError
-                    : usageData.computeCredits.percentage > 60
+                    : usageData.usagePercentage > 60
                       ? theme.colorWarning
                       : theme.colorSuccess
                 }
@@ -121,12 +164,10 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
 
             <Flexbox align="center" horizontal justify="space-between">
               <Text>
-                {formatNumber(usageData.computeCredits.used)} /{' '}
-                {formatNumber(usageData.computeCredits.total)}
+                {formatVND(usageData.totalCostVND)} used
               </Text>
               <Text type="secondary">
-                {formatNumber(usageData.computeCredits.total - usageData.computeCredits.used)}{' '}
-                remaining
+                {formatVND(usageData.budgetRemainingVND)} remaining
               </Text>
             </Flexbox>
           </Flexbox>
@@ -134,27 +175,21 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
 
         <Card className={styles.usageCard} style={{ flex: 1, minWidth: mobile ? '100%' : '300px' }}>
           <Flexbox gap={16}>
-            <Text strong>File Storage</Text>
+            <Text strong>Query Statistics</Text>
 
             <div className={styles.progressContainer}>
               <Progress
-                percent={usageData.fileStorage.percentage}
-                strokeColor={
-                  usageData.fileStorage.percentage > 80
-                    ? theme.colorError
-                    : usageData.fileStorage.percentage > 60
-                      ? theme.colorWarning
-                      : theme.colorSuccess
-                }
+                percent={Math.min(100, (usageData.totalQueries / 1000) * 100)}
+                strokeColor={theme.colorInfo}
               />
             </div>
 
             <Flexbox align="center" horizontal justify="space-between">
               <Text>
-                {usageData.fileStorage.used} GB / {usageData.fileStorage.total} GB
+                {formatNumber(usageData.totalQueries)} queries
               </Text>
               <Text type="secondary">
-                {(usageData.fileStorage.total - usageData.fileStorage.used).toFixed(1)} GB remaining
+                {formatNumber(usageData.totalTokens)} tokens
               </Text>
             </Flexbox>
           </Flexbox>
@@ -164,22 +199,22 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
       <Flexbox gap={16} horizontal={!mobile} style={{ flexWrap: 'wrap' }}>
         <div className={styles.usageItem} style={{ flex: 1, minWidth: mobile ? '100%' : '200px' }}>
           <Flexbox align="center" gap={8}>
-            <div className={styles.statNumber}>{formatNumber(usageData.messagesThisMonth)}</div>
-            <div className={styles.statLabel}>Messages This Month</div>
+            <div className={styles.statNumber}>{formatNumber(usageData.totalQueries)}</div>
+            <div className={styles.statLabel}>Total Queries</div>
           </Flexbox>
         </div>
 
         <div className={styles.usageItem} style={{ flex: 1, minWidth: mobile ? '100%' : '200px' }}>
           <Flexbox align="center" gap={8}>
-            <div className={styles.statNumber}>{usageData.modelsUsed}</div>
-            <div className={styles.statLabel}>AI Models Used</div>
+            <div className={styles.statNumber}>{formatNumber(usageData.totalTokens)}</div>
+            <div className={styles.statLabel}>Total Tokens</div>
           </Flexbox>
         </div>
 
         <div className={styles.usageItem} style={{ flex: 1, minWidth: mobile ? '100%' : '200px' }}>
           <Flexbox align="center" gap={8}>
-            <div className={styles.statNumber}>{formatNumber(usageData.vectorStorage.used)}</div>
-            <div className={styles.statLabel}>Vector Entries</div>
+            <div className={styles.statNumber}>{usageData.usagePercentage.toFixed(0)}%</div>
+            <div className={styles.statLabel}>Budget Used</div>
           </Flexbox>
         </div>
       </Flexbox>

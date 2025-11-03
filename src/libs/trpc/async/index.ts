@@ -1,6 +1,6 @@
 import debug from 'debug';
 
-import { getServerDB } from '@/database/core/db-adaptor';
+import { getServerDB } from '@/database/server';
 
 import { asyncAuth } from './asyncAuth';
 import { asyncTrpc } from './init';

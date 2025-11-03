@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 
-import { getServerDB } from '@/database/core/db-adaptor';
+import { getServerDB } from '@/database/server';
 import { sepayPayments, subscriptions } from '@/database/schemas';
 
 export type CreatePaymentRecordParams = {
@@ -24,8 +24,20 @@ export async function createPaymentRecord(params: CreatePaymentRecordParams) {
       status: 'pending',
       userId: params.userId,
     });
+    console.log('✅ Payment record created successfully:', {
+      orderId: params.orderId,
+      userId: params.userId,
+    });
   } catch (e) {
-    console.warn('[sepay] Skipping DB insertion (likely DB not configured):', e);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error('❌ Failed to create payment record:', {
+      error: errorMessage,
+      orderId: params.orderId,
+      userId: params.userId,
+      timestamp: new Date().toISOString(),
+    });
+    // Re-throw to allow caller to handle
+    throw new Error(`Failed to create payment record: ${errorMessage}`);
   }
 }
 
@@ -39,14 +51,27 @@ export async function updatePaymentStatus(
     await db
       .update(sepayPayments)
       .set({
-        maskedCardNumber: opts?.maskedCardNumber,
+        // maskedCardNumber: opts?.maskedCardNumber, // TODO: Add after migration 0037
         rawWebhook: opts?.rawWebhook,
         status,
         transactionId: opts?.transactionId,
       })
       .where(eq(sepayPayments.orderId, orderId));
+    console.log('✅ Payment status updated successfully:', {
+      orderId,
+      status,
+      transactionId: opts?.transactionId,
+    });
   } catch (e) {
-    console.warn('[sepay] Skipping DB update (likely DB not configured):', e);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error('❌ Failed to update payment status:', {
+      error: errorMessage,
+      orderId,
+      status,
+      timestamp: new Date().toISOString(),
+    });
+    // Re-throw to allow caller to handle
+    throw new Error(`Failed to update payment status: ${errorMessage}`);
   }
 }
 
@@ -79,6 +104,12 @@ export async function activateUserSubscription(params: {
           status: 'active',
         })
         .where(eq(subscriptions.userId, params.userId));
+      console.log('✅ Subscription updated successfully:', {
+        userId: params.userId,
+        planId: params.planId,
+        billingCycle: params.billingCycle,
+        currentPeriodEnd: end.toISOString(),
+      });
     } else {
       await db.insert(subscriptions).values({
         billingCycle: params.billingCycle,
@@ -88,9 +119,23 @@ export async function activateUserSubscription(params: {
         status: 'active',
         userId: params.userId,
       });
+      console.log('✅ Subscription created successfully:', {
+        userId: params.userId,
+        planId: params.planId,
+        billingCycle: params.billingCycle,
+        currentPeriodEnd: end.toISOString(),
+      });
     }
   } catch (e) {
-    console.warn('[sepay] Skipping subscription upsert (likely DB not configured):', e);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error('❌ Failed to activate subscription:', {
+      error: errorMessage,
+      userId: params.userId,
+      planId: params.planId,
+      timestamp: new Date().toISOString(),
+    });
+    // Re-throw to allow caller to handle
+    throw new Error(`Failed to activate subscription: ${errorMessage}`);
   }
 }
 
@@ -102,9 +147,22 @@ export async function getPaymentByOrderId(orderId: string) {
       .from(sepayPayments)
       .where(eq(sepayPayments.orderId, orderId))
       .limit(1);
+    if (rows.length > 0) {
+      console.log('✅ Payment record retrieved successfully:', {
+        orderId,
+        status: rows[0].status,
+      });
+    } else {
+      console.warn('⚠️ Payment record not found:', { orderId });
+    }
     return rows[0];
   } catch (e) {
-    console.warn('[sepay] Skipping DB select (likely DB not configured):', e);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error('❌ Failed to retrieve payment record:', {
+      error: errorMessage,
+      orderId,
+      timestamp: new Date().toISOString(),
+    });
     return undefined;
   }
 }

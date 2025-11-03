@@ -26,7 +26,7 @@ export const sepayPayments = pgTable(
     paymentMethod: varchar('payment_method', { length: 20 }).notNull().default('sepay'),
 
     transactionId: text('transaction_id'),
-    maskedCardNumber: text('masked_card_number'), // e.g., '****-****-****-0366' for credit card payments
+    // maskedCardNumber: text('masked_card_number'), // TODO: Add after running migration 0037
 
     rawWebhook: jsonb('raw_webhook'),
     metadata: jsonb('metadata'),

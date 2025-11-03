@@ -5,6 +5,39 @@ import { PAYMENT_CONFIG } from '@/config/customizations';
 // Payment Method Types
 export type PaymentMethod = 'bank_transfer' | 'credit_card';
 
+// Simple in-memory cache for Sepay API responses
+interface CacheEntry<T> {
+  data: T;
+  expiresAt: number;
+}
+
+class SimpleCache<T> {
+  private cache = new Map<string, CacheEntry<T>>();
+
+  set(key: string, data: T, ttlMs: number): void {
+    this.cache.set(key, {
+      data,
+      expiresAt: Date.now() + ttlMs,
+    });
+  }
+
+  get(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return entry.data;
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
 // Sepay Configuration Interface
 export interface SepayConfig {
   apiUrl: string;
@@ -107,9 +140,11 @@ export interface SepayTransactionResponse {
  */
 export class SepayPaymentGateway {
   private config: SepayConfig;
+  private transactionCache: SimpleCache<SepayTransactionResponse>;
 
   constructor(config: SepayConfig) {
     this.config = config;
+    this.transactionCache = new SimpleCache<SepayTransactionResponse>();
   }
 
   /**
@@ -193,7 +228,24 @@ export class SepayPaymentGateway {
   public verifyWebhookSignature(data: SepayWebhookData): boolean {
     const { signature, ...payloadData } = data;
     const expectedSignature = this.generateSignature(payloadData);
-    return signature === expectedSignature;
+    const isValid = signature === expectedSignature;
+
+    if (!isValid) {
+      console.error('❌ Webhook signature verification FAILED:', {
+        expectedSignature: expectedSignature.slice(0, 16) + '...',
+        orderId: data.orderId,
+        payloadKeys: Object.keys(payloadData),
+        providedSignature: signature.slice(0, 16) + '...',
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      console.log('✅ Webhook signature verified successfully:', {
+        orderId: data.orderId,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return isValid;
   }
 
   /**
@@ -507,32 +559,62 @@ export class SepayPaymentGateway {
       console.log('🔍 REAL SEPAY: Checking payment status for orderId:', orderId);
       console.log('🔍 Expected amount:', expectedAmount);
 
-      // Get recent transactions from Sepay API
-      const response = await fetch(`https://my.sepay.vn/userapi/transactions/list?limit=50`, {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${this.config.secretKey}`,
-        },
-        method: 'GET',
-      });
+      // Check cache first (TTL: 10 seconds)
+      const cacheKey = 'sepay_transactions';
+      let result: SepayTransactionResponse | null = this.transactionCache.get(cacheKey);
 
-      if (!response.ok) {
-        console.error('❌ Sepay API error:', response.status, response.statusText);
-        throw new Error(`Sepay API error: ${response.status}`);
+      if (result) {
+        console.log('✅ Using cached Sepay transactions (avoiding rate limit)');
+      } else {
+        console.log('🌐 Fetching fresh transactions from Sepay API');
+
+        // Get recent transactions from Sepay API
+        const response = await fetch(`https://my.sepay.vn/userapi/transactions/list?limit=50`, {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${this.config.secretKey}`,
+          },
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          console.error('❌ Sepay API error:', response.status, response.statusText);
+          throw new Error(`Sepay API error: ${response.status}`);
+        }
+
+        result = (await response.json()) as SepayTransactionResponse;
+
+        // Cache for 10 seconds to avoid rate limiting
+        this.transactionCache.set(cacheKey, result, 10_000);
       }
 
-      const result: SepayTransactionResponse = await response.json();
+      // Null check for TypeScript
+      if (!result) {
+        throw new Error('Failed to fetch transactions from Sepay API');
+      }
       console.log('📊 Sepay API response:', {
         status: result.status,
         success: result.messages?.success,
         transactionCount: result.transactions?.length || 0,
       });
 
-      if (result.status !== 200 || !result.messages.success || !result.transactions) {
-        console.error('❌ Sepay API returned error:', result.error);
+      // Improved error handling with better null checking
+      if (result.status !== 200 || !result.messages?.success) {
+        const errorMsg = (result as any).error || (result.messages as any)?.error || 'Failed to fetch transactions';
+        console.error('❌ Sepay API returned error:', errorMsg);
         return {
-          error: result.error || 'Failed to fetch transactions',
+          error: errorMsg,
           message: 'Unable to check payment status',
+          orderId,
+          success: false,
+        };
+      }
+
+      // Check if transactions array exists and is valid
+      if (!result.transactions || !Array.isArray(result.transactions) || result.transactions.length === 0) {
+        console.log('⏳ No transactions found in Sepay API response');
+        return {
+          message: 'Payment not found yet',
           orderId,
           success: false,
         };
@@ -551,27 +633,46 @@ export class SepayPaymentGateway {
 
       // Look for a transaction that matches our order ID in the transaction content
       const matchingTransaction = result.transactions.find((transaction) => {
-        const content = transaction.transaction_content.toLowerCase();
-        const orderIdLower = orderId.toLowerCase();
+        try {
+          // Safely get transaction content
+          const content = (transaction.transaction_content || '').toLowerCase();
+          const orderIdLower = orderId.toLowerCase();
 
-        // Check if order ID is mentioned in transaction content
-        const hasOrderId = content.includes(orderIdLower);
+          // Check multiple order ID format variations
+          const hasOrderId =
+            content.includes(orderIdLower) ||
+            content.includes(orderId) ||
+            content.includes(orderId.replaceAll('_', '')) || // Handle underscores
+            content.includes(orderId.replaceAll('_', '-')); // Handle dashes
 
-        // Check if amount matches (if provided)
-        const amountMatches =
-          !expectedAmount ||
-          parseFloat(transaction.amount_in) === expectedAmount ||
-          parseFloat(transaction.amount_in) === expectedAmount / 100; // Handle different currency formats
+          // Safely parse amount
+          const txAmount = parseFloat(transaction.amount_in || '0');
 
-        console.log('🔍 Checking transaction:', {
-          amount: transaction.amount_in,
-          amountMatches,
-          content: transaction.transaction_content,
-          hasOrderId,
-          id: transaction.id,
-        });
+          // Check if amount matches (if provided)
+          // Handle different currency formats (VND, cents, etc.)
+          const amountMatches =
+            !expectedAmount ||
+            txAmount === expectedAmount ||
+            txAmount === expectedAmount / 100 ||
+            txAmount === expectedAmount / 1000 ||
+            Math.abs(txAmount - expectedAmount) < 1; // Allow 1 VND tolerance
 
-        return hasOrderId && amountMatches && parseFloat(transaction.amount_in) > 0;
+          const isValidTransaction = hasOrderId && amountMatches && txAmount > 0;
+
+          console.log('🔍 Checking transaction:', {
+            amount: transaction.amount_in,
+            amountMatches,
+            content: transaction.transaction_content,
+            hasOrderId,
+            id: transaction.id,
+            isValid: isValidTransaction,
+          });
+
+          return isValidTransaction;
+        } catch (err) {
+          console.error('🔍 Error checking transaction:', err);
+          return false;
+        }
       });
 
       if (matchingTransaction) {
@@ -598,10 +699,18 @@ export class SepayPaymentGateway {
         };
       }
     } catch (error) {
-      console.error('❌ REAL SEPAY: Error checking payment status:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      console.error('❌ REAL SEPAY: Error checking payment status:', {
+        error: errorMessage,
+        orderId,
+        stack: errorStack,
+        timestamp: new Date().toISOString(),
+      });
 
       return {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
         message: 'Failed to check payment status',
         orderId,
         success: false,
