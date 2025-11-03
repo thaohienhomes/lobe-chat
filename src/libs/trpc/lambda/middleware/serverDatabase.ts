@@ -1,4 +1,4 @@
-import { getServerDB } from '@/database/core/db-adaptor';
+import { getServerDB } from '@/database/server';
 
 import { trpc } from '../init';
 
