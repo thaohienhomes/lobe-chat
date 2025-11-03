@@ -203,3 +203,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
   }
 }
 
+/**
+ * Handle CORS preflight requests
+ */
+export async function OPTIONS(): Promise<NextResponse> {
+  return new NextResponse(null, {
+    headers: {
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Origin': '*',
+    },
+    status: 200,
+  });
+}
