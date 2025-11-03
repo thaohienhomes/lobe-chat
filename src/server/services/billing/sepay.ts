@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 
-import { getServerDB } from '@/database/core/db-adaptor';
+import { getServerDB } from '@/database/server';
 import { sepayPayments, subscriptions } from '@/database/schemas';
 
 export type CreatePaymentRecordParams = {
