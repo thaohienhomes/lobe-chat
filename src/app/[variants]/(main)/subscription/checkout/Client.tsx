@@ -301,8 +301,11 @@ function CheckoutContent() {
         planId,
       });
 
+      // Get form values for customer info
+      const values = form.getFieldsValue();
+
       // Route credit card payments to Sepay
-      const vndAmount = Math.round(plan.price * 24_167); // USD to VND conversion
+      const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
       const response = await fetch('/api/payment/sepay/create-credit-card', {
         body: JSON.stringify({
           amount: vndAmount,
@@ -314,9 +317,9 @@ function CheckoutContent() {
           cardNumber: cardData.cardNumber,
           currency: 'VND',
           customerInfo: {
-            email: customerInfo.email,
-            name: customerInfo.name,
-            phone: customerInfo.phone,
+            email: values.email,
+            name: values.name,
+            phone: values.phone,
           },
           planId,
         }),
