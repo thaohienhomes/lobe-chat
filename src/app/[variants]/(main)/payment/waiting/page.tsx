@@ -4,7 +4,7 @@
 import { Button } from '@lobehub/ui';
 import { Clock, QrCode, RefreshCw } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useServerConfigStore } from '@/store/serverConfig';
 
@@ -40,6 +40,7 @@ function PaymentWaitingContent() {
   const [mounted, setMounted] = useState(false);
   const [lastCheckTime, setLastCheckTime] = useState<Date | null>(null);
   const [pollCount, setPollCount] = useState(0);
+  const pollNumberRef = useRef(0);
 
   const orderId = searchParams.get('orderId');
   const amount = searchParams.get('amount');
@@ -67,7 +68,9 @@ function PaymentWaitingContent() {
     }
 
     const now = new Date();
-    const pollNumber = pollCount + 1;
+    // increment poll number without causing hook dependencies to change
+    pollNumberRef.current += 1;
+    const pollNumber = pollNumberRef.current;
     setPollCount(pollNumber);
     setLastCheckTime(now);
 
@@ -78,7 +81,7 @@ function PaymentWaitingContent() {
         statusUrl,
       );
 
-      const response = await fetch(statusUrl);
+      const response = await fetch(statusUrl, { cache: 'no-store' });
       const data = await response.json();
 
       console.log(`📊 [Poll #${pollNumber}] ${now.toLocaleTimeString()} - Response:`, {
@@ -137,7 +140,7 @@ function PaymentWaitingContent() {
         stack: error instanceof Error ? error.stack : undefined,
       });
     }
-  }, [orderId, amount, polling, router, variants, pollCount]);
+  }, [orderId, amount, polling, router, variants]);
 
   // Countdown timer
   useEffect(() => {
