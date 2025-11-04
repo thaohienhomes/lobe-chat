@@ -337,6 +337,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // POST /api/payment/sepay/verify-manual (requires Clerk authentication)
     // This prevents unauthorized users from manually verifying payments without proper authentication.
 
+    // Extract orderId early for idempotency check
+    let orderId: string | null = null;
+
+    // Try to extract orderId from different webhook formats
+    if (body.orderId || body.order_id) {
+      orderId = body.orderId || body.order_id;
+    } else if (body.gateway === 'vietqr' || body.content) {
+      // Bank transfer format - extract from content
+      orderId = extractOrderIdFromContent(body.content || body.description || '');
+    }
+
+    // IDEMPOTENCY CHECK: Verify if webhook has already been processed
+    // This prevents duplicate processing if Sepay sends the same webhook multiple times
+    if (orderId) {
+      console.log('🔍 Checking if webhook already processed for orderId:', orderId);
+      const existingPayment = await getPaymentByOrderId(orderId);
+
+      if (existingPayment && existingPayment.status === 'success' && existingPayment.transactionId) {
+        console.log('⚠️ Webhook already processed (idempotent):', {
+          orderId: existingPayment.orderId,
+          transactionId: existingPayment.transactionId,
+          status: existingPayment.status,
+          processedAt: existingPayment.updatedAt,
+        });
+
+        // Return success to acknowledge webhook (don't reprocess)
+        return NextResponse.json({
+          message: 'Webhook already processed',
+          success: true,
+          idempotent: true,
+          orderId: existingPayment.orderId,
+          transactionId: existingPayment.transactionId,
+        });
+      }
+
+      console.log('✅ Webhook not yet processed, continuing...');
+    }
+
     // Detect webhook format: Sepay sends different formats for different payment methods
     let webhookData: SepayWebhookData;
 
