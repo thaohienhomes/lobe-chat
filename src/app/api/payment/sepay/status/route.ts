@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { sepayGateway } from '@/libs/sepay';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
+import { getPaymentByOrderId } from '@/server/services/billing/sepay';
 
 /**
- * Query payment status from SePay
+ * Query payment status from database (NOT from Sepay API to avoid rate limiting)
  * GET /api/payment/sepay/status?orderId=xxx&amount=xxx
+ *
+ * This endpoint checks the database for payment status instead of calling Sepay API.
+ * The webhook handler updates the database when payments are completed.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
@@ -30,24 +33,36 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Parse expected amount for better transaction matching
-    const expectedAmount = amountStr ? parseInt(amountStr, 10) : undefined;
+    console.log('📊 Checking payment status in database (avoiding Sepay API rate limits)...');
 
-    console.log('📡 Querying payment status from Sepay gateway...');
-    // Query payment status from SePay
-    const statusResponse = await sepayGateway.queryPaymentStatus(orderId, expectedAmount);
+    // Query payment status from database instead of Sepay API
+    const payment = await getPaymentByOrderId(orderId);
 
     const latency = Date.now() - startTime;
 
-    console.log('📊 Payment status response:', {
+    if (!payment) {
+      console.log('⏳ Payment record not found in database:', {
+        latency: `${latency}ms`,
+        orderId,
+      });
+
+      return NextResponse.json({
+        message: 'Payment not found or still pending',
+        orderId,
+        status: 'pending',
+        success: false,
+      });
+    }
+
+    console.log('📊 Payment status from database:', {
       latency: `${latency}ms`,
-      message: statusResponse.message,
-      orderId: statusResponse.orderId,
-      success: statusResponse.success,
-      transactionId: statusResponse.transactionId,
+      orderId,
+      status: payment.status,
+      transactionId: payment.transactionId,
     });
 
-    if (statusResponse.success) {
+    // Check if payment is successful
+    if (payment.status === 'success') {
       // Record successful payment detection
       if (userIdParam) {
         paymentMetricsCollector.recordPaymentDetection(
@@ -58,29 +73,41 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         );
       }
 
-      console.log('✅ Payment found successfully:', {
+      console.log('✅ Payment completed successfully:', {
         latency: `${latency}ms`,
         orderId,
-        transactionId: statusResponse.transactionId,
+        transactionId: payment.transactionId,
       });
 
       return NextResponse.json({
-        message: statusResponse.message,
-        orderId: statusResponse.orderId,
+        message: 'Payment completed successfully',
+        orderId: payment.orderId,
         status: 'success',
         success: true,
-        transactionId: statusResponse.transactionId,
+        transactionId: payment.transactionId,
       });
-    } else {
-      console.log('⏳ Payment not found or still pending:', {
+    } else if (payment.status === 'failed') {
+      console.log('❌ Payment failed:', {
         latency: `${latency}ms`,
         orderId,
-        message: statusResponse.message,
       });
 
       return NextResponse.json({
-        message: statusResponse.message || 'Payment not found or still pending',
+        message: 'Payment failed',
+        orderId: payment.orderId,
+        status: 'failed',
+        success: false,
+      });
+    } else {
+      // Status is 'pending'
+      console.log('⏳ Payment still pending:', {
+        latency: `${latency}ms`,
         orderId,
+      });
+
+      return NextResponse.json({
+        message: 'Payment is still pending',
+        orderId: payment.orderId,
         status: 'pending',
         success: false,
       });
