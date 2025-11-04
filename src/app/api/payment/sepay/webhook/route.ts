@@ -228,14 +228,51 @@ function extractOrderIdFromContent(content: string): string | null {
 }
 
 /**
- * Sepay webhook handler and manual payment verification endpoint
+ * Sepay webhook handler
  * POST /api/payment/sepay/webhook
+ *
+ * SECURITY: This endpoint is protected by webhook secret token authentication.
+ * Sepay must include the secret token in the X-Sepay-Webhook-Secret header.
+ * This prevents unauthorized parties from sending fake webhooks to activate subscriptions.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: any;
   try {
     console.log('🔔 Webhook received from:', request.headers.get('user-agent'));
     console.log('🔔 Request headers:', Object.fromEntries(request.headers.entries()));
+
+    // SECURITY CHECK: Verify webhook authentication
+    // Sepay must send the webhook secret token in the X-Sepay-Webhook-Secret header
+    const webhookSecret = process.env.SEPAY_WEBHOOK_SECRET;
+    const providedSecret = request.headers.get('x-sepay-webhook-secret');
+
+    if (!webhookSecret) {
+      console.error('❌ SEPAY_WEBHOOK_SECRET not configured in environment variables');
+      return NextResponse.json(
+        { message: 'Webhook authentication not configured', success: false },
+        { status: 500 }
+      );
+    }
+
+    if (!providedSecret || providedSecret !== webhookSecret) {
+      console.error('❌ Unauthorized webhook request - invalid or missing secret token');
+      console.error('❌ Provided secret:', providedSecret ? '[REDACTED]' : 'NONE');
+
+      paymentMetricsCollector.recordError(
+        'webhook_auth_failed',
+        'Unauthorized webhook request',
+        undefined,
+        undefined,
+        { hasSecret: !!providedSecret }
+      );
+
+      return NextResponse.json(
+        { message: 'Unauthorized - invalid webhook secret', success: false },
+        { status: 401 }
+      );
+    }
+
+    console.log('✅ Webhook authentication successful');
 
     // Parse webhook data from Sepay (only parse once!)
     body = await request.json();
