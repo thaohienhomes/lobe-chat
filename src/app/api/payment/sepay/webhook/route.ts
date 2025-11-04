@@ -278,34 +278,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     body = await request.json();
     console.log('🔔 Webhook payload received:', JSON.stringify(body, null, 2));
 
-    // Check if this is a manual verification request
-    if (body.action === 'manual_verify') {
-      const { orderId, transactionId, amount } = body;
-
-      console.log('🔍 Manual payment verification requested:', {
-        amount,
-        orderId,
-        transactionId,
-      });
-
-      // Process as successful payment
-      const webhookData: SepayWebhookData = {
-        amount: parseFloat(amount),
-        currency: 'VND',
-        orderId,
-        signature: 'MANUAL_VERIFICATION',
-        status: 'success',
-        timestamp: new Date().toISOString(),
-        transactionId: transactionId || `MANUAL_${Date.now()}`, // Skip signature verification for manual
-      };
-
-      await handleSuccessfulPayment(webhookData);
-
-      return NextResponse.json({
-        message: 'Payment manually verified and processed',
-        success: true
-      });
-    }
+    // SECURITY NOTE: Manual verification has been removed from this endpoint.
+    // Manual payment verification must be done through the dedicated authenticated endpoint:
+    // POST /api/payment/sepay/verify-manual (requires Clerk authentication)
+    // This prevents unauthorized users from manually verifying payments without proper authentication.
 
     // Detect webhook format: Sepay sends different formats for different payment methods
     let webhookData: SepayWebhookData;
@@ -395,11 +371,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Verify webhook signature (skip for bank transfers and manual verification)
+    // Verify webhook signature (skip for bank transfers only)
+    // Bank transfers use webhook secret token authentication instead of signature verification
     if (webhookData.paymentMethod === 'bank_transfer') {
-      console.log('ℹ️ Bank transfer webhook - skipping signature verification');
-    } else if (webhookData.signature === 'MANUAL_VERIFICATION') {
-      console.log('ℹ️ Manual verification - skipping signature verification');
+      console.log('ℹ️ Bank transfer webhook - skipping signature verification (authenticated via webhook secret)');
     } else if (webhookData.signature) {
       const isValidSignature = sepayGateway.verifyWebhookSignature(webhookData);
 
