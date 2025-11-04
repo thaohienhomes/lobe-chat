@@ -196,6 +196,38 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
 }
 
 /**
+ * Extract orderId from Sepay bank transfer content
+ * Sepay sends bank transfer details in the content field with format:
+ * "phohat Premium Plan monthly billing RUCSIA1762228747088NTK3U9 FT25308710231543..."
+ *
+ * We need to extract the timestamp and random code to reconstruct the orderId:
+ * Pattern: [PREFIX]_[TIMESTAMP]_[RANDOM] -> PHO_SUB_1762228747088_NTK3U9
+ */
+function extractOrderIdFromContent(content: string): string | null {
+  // Look for pattern: 13-digit timestamp followed by 6 uppercase alphanumeric characters
+  // Example: "RUCSIA1762228747088NTK3U9" -> extract "1762228747088" and "NTK3U9"
+  const pattern = /(\d{13})([A-Z0-9]{6})/;
+  const match = content.match(pattern);
+
+  if (match) {
+    const timestamp = match[1];
+    const randomCode = match[2];
+    // Reconstruct the orderId with our standard format
+    const orderId = `PHO_SUB_${timestamp}_${randomCode}`;
+    console.log('✅ Extracted orderId from content:', {
+      content,
+      timestamp,
+      randomCode,
+      orderId,
+    });
+    return orderId;
+  }
+
+  console.warn('⚠️ Could not extract orderId from content:', content);
+  return null;
+}
+
+/**
  * Sepay webhook handler and manual payment verification endpoint
  * POST /api/payment/sepay/webhook
  */
@@ -238,18 +270,57 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
     }
 
-    // Normalize webhook data - handle different payload structures from Sepay
-    const webhookData: SepayWebhookData = {
-      amount: body.amount || parseFloat(body.amount_in || '0'),
-      currency: body.currency || 'VND',
-      maskedCardNumber: body.maskedCardNumber || body.masked_card_number,
-      orderId: body.orderId || body.order_id,
-      paymentMethod: body.paymentMethod || body.payment_method,
-      signature: body.signature || '',
-      status: (body.status || 'pending') as 'success' | 'failed' | 'pending',
-      timestamp: body.timestamp || new Date().toISOString(),
-      transactionId: body.transactionId || body.transaction_id || '',
-    };
+    // Detect webhook format: Sepay sends different formats for different payment methods
+    let webhookData: SepayWebhookData;
+
+    // Format 1: Bank transfer webhook (VietQR)
+    // Example: { gateway: "vietqr", content: "...", transferAmount: 129000, id: "28956687", ... }
+    if (body.gateway === 'vietqr' || body.content) {
+      console.log('🏦 Detected bank transfer webhook format (VietQR)');
+
+      // Extract orderId from content field
+      const orderId = extractOrderIdFromContent(body.content || body.description || '');
+
+      if (!orderId) {
+        console.error('❌ Could not extract orderId from bank transfer content');
+        return NextResponse.json(
+          {
+            message: 'Could not extract orderId from bank transfer content',
+            success: false,
+            content: body.content,
+          },
+          { status: 400 }
+        );
+      }
+
+      webhookData = {
+        amount: parseFloat(body.transferAmount || body.amount || '0'),
+        currency: 'VND',
+        orderId: orderId,
+        paymentMethod: 'bank_transfer',
+        signature: '', // Bank transfer webhooks don't have signatures
+        status: 'success', // Sepay only sends webhooks for successful transfers
+        timestamp: new Date().toISOString(),
+        transactionId: body.id || body.transactionId || '',
+      };
+    }
+    // Format 2: Credit card webhook (standard format)
+    // Example: { orderId: "PHO_CC_...", transactionId: "...", amount: 129000, status: "success", ... }
+    else {
+      console.log('💳 Detected credit card webhook format (standard)');
+
+      webhookData = {
+        amount: body.amount || parseFloat(body.amount_in || '0'),
+        currency: body.currency || 'VND',
+        maskedCardNumber: body.maskedCardNumber || body.masked_card_number,
+        orderId: body.orderId || body.order_id,
+        paymentMethod: body.paymentMethod || body.payment_method || 'credit_card',
+        signature: body.signature || '',
+        status: (body.status || 'pending') as 'success' | 'failed' | 'pending',
+        timestamp: body.timestamp || new Date().toISOString(),
+        transactionId: body.transactionId || body.transaction_id || '',
+      };
+    }
 
     console.log('🔔 Normalized webhook data:', {
       amount: webhookData.amount,
@@ -263,22 +334,36 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Validate required fields
     if (!webhookData.orderId) {
       console.error('❌ Missing orderId in webhook payload');
+      console.error('❌ Raw webhook body:', JSON.stringify(body, null, 2));
       return NextResponse.json(
-        { message: 'Missing orderId in webhook payload', success: false },
+        {
+          message: 'Missing orderId in webhook payload',
+          success: false,
+          rawBody: body,
+        },
         { status: 400 }
       );
     }
 
     if (!webhookData.transactionId) {
       console.error('❌ Missing transactionId in webhook payload');
+      console.error('❌ Webhook data:', JSON.stringify(webhookData, null, 2));
       return NextResponse.json(
-        { message: 'Missing transactionId in webhook payload', success: false },
+        {
+          message: 'Missing transactionId in webhook payload',
+          success: false,
+          webhookData,
+        },
         { status: 400 }
       );
     }
 
-    // Verify webhook signature (skip for manual verification)
-    if (webhookData.signature !== 'MANUAL_VERIFICATION' && webhookData.signature) {
+    // Verify webhook signature (skip for bank transfers and manual verification)
+    if (webhookData.paymentMethod === 'bank_transfer') {
+      console.log('ℹ️ Bank transfer webhook - skipping signature verification');
+    } else if (webhookData.signature === 'MANUAL_VERIFICATION') {
+      console.log('ℹ️ Manual verification - skipping signature verification');
+    } else if (webhookData.signature) {
       const isValidSignature = sepayGateway.verifyWebhookSignature(webhookData);
 
       if (!isValidSignature) {
@@ -286,8 +371,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         console.error('❌ Signature verification failed - webhook will still be processed for debugging');
         // Note: We're logging the error but still processing to help with debugging
         // In production, you may want to reject invalid signatures
+      } else {
+        console.log('✅ Webhook signature verified successfully');
       }
-    } else if (!webhookData.signature) {
+    } else {
       console.warn('⚠️ No signature provided in webhook - skipping signature verification');
     }
 
