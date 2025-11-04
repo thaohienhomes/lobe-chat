@@ -62,7 +62,6 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
           status: 'success',
           transactionId: webhookData.transactionId,
           rawWebhook: webhookData,
-          maskedCardNumber: extractMaskedCardNumber(webhookData),
         })
         .where(eq(sepayPayments.orderId, webhookData.orderId));
       console.log('✅ Payment status updated successfully');
@@ -184,13 +183,19 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
  */
 async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void> {
   const startTime = Date.now();
+  const db = await getServerDB();
+
   try {
     console.log('Processing failed payment:', webhookData.orderId);
 
-    await updatePaymentStatus(webhookData.orderId, 'failed', {
-      rawWebhook: webhookData,
-      transactionId: webhookData.transactionId,
-    });
+    await db
+      .update(sepayPayments)
+      .set({
+        status: 'failed',
+        transactionId: webhookData.transactionId,
+        rawWebhook: webhookData,
+      })
+      .where(eq(sepayPayments.orderId, webhookData.orderId));
 
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(
@@ -219,13 +224,19 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
  */
 async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void> {
   const startTime = Date.now();
+  const db = await getServerDB();
+
   try {
     console.log('Processing pending payment:', webhookData.orderId);
 
-    await updatePaymentStatus(webhookData.orderId, 'pending', {
-      rawWebhook: webhookData,
-      transactionId: webhookData.transactionId,
-    });
+    await db
+      .update(sepayPayments)
+      .set({
+        status: 'pending',
+        transactionId: webhookData.transactionId,
+        rawWebhook: webhookData,
+      })
+      .where(eq(sepayPayments.orderId, webhookData.orderId));
 
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(
