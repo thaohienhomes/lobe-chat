@@ -1,12 +1,11 @@
+import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getServerDB } from '@/database/server';
+import { sepayPayments, subscriptions } from '@/database/schemas';
 import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
-import {
-  activateUserSubscription,
-  getPaymentByOrderId,
-  updatePaymentStatus,
-} from '@/server/services/billing/sepay';
+import { getPaymentByOrderId } from '@/server/services/billing/sepay';
 
 /**
  * GET endpoint to test webhook accessibility
@@ -32,9 +31,16 @@ function extractMaskedCardNumber(webhookData: SepayWebhookData): string | undefi
 
 /**
  * Handle successful payment
+ *
+ * TRANSACTION SAFETY: This function wraps payment status update and subscription activation
+ * in a database transaction to ensure atomicity. If subscription activation fails, the payment
+ * status update is automatically rolled back, preventing inconsistent state where payment is
+ * marked as successful but user has no active subscription.
  */
 async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<void> {
   const startTime = Date.now();
+  const db = await getServerDB();
+
   try {
     console.log('✅ Processing successful payment:', {
       orderId: webhookData.orderId,
@@ -43,52 +49,100 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
       timestamp: new Date().toISOString(),
     });
 
-    // Update payment record status and attach webhook payload
-    console.log('📝 Updating payment status in database...');
-    await updatePaymentStatus(webhookData.orderId, 'success', {
-      maskedCardNumber: extractMaskedCardNumber(webhookData),
-      rawWebhook: webhookData,
-      transactionId: webhookData.transactionId,
-    });
-    console.log('✅ Payment status updated successfully');
+    // Execute payment processing in a database transaction
+    // This ensures both payment update and subscription activation succeed or fail together
+    await db.transaction(async (tx) => {
+      console.log('🔄 Starting database transaction for payment processing...');
 
-    // Fetch the original payment record to determine userId/plan/billingCycle
-    console.log('🔍 Fetching payment record to get user and plan info...');
-    const payment = await getPaymentByOrderId(webhookData.orderId);
+      // Step 1: Update payment record status and attach webhook payload
+      console.log('📝 Updating payment status in database...');
+      await tx
+        .update(sepayPayments)
+        .set({
+          status: 'success',
+          transactionId: webhookData.transactionId,
+          rawWebhook: webhookData,
+          maskedCardNumber: extractMaskedCardNumber(webhookData),
+        })
+        .where(eq(sepayPayments.orderId, webhookData.orderId));
+      console.log('✅ Payment status updated successfully');
 
-    if (!payment) {
-      console.error('❌ Payment record not found for orderId:', webhookData.orderId);
-      throw new Error(`Payment record not found for orderId: ${webhookData.orderId}`);
-    }
+      // Step 2: Fetch the payment record to get user and plan info
+      console.log('🔍 Fetching payment record to get user and plan info...');
+      const paymentRows = await tx
+        .select()
+        .from(sepayPayments)
+        .where(eq(sepayPayments.orderId, webhookData.orderId))
+        .limit(1);
 
-    console.log('✅ Payment record retrieved:', {
-      billingCycle: payment.billingCycle,
-      planId: payment.planId,
-      userId: payment.userId,
-    });
+      if (!paymentRows || paymentRows.length === 0) {
+        console.error('❌ Payment record not found for orderId:', webhookData.orderId);
+        throw new Error(`Payment record not found for orderId: ${webhookData.orderId}`);
+      }
 
-    if (payment.userId && payment.planId && payment.billingCycle) {
+      const payment = paymentRows[0];
+      console.log('✅ Payment record retrieved:', {
+        billingCycle: payment.billingCycle,
+        planId: payment.planId,
+        userId: payment.userId,
+      });
+
+      // Step 3: Validate payment record has required fields
+      if (!payment.userId || !payment.planId || !payment.billingCycle) {
+        console.error('❌ Payment record incomplete - missing required fields:', {
+          hasUserId: !!payment.userId,
+          hasPlanId: !!payment.planId,
+          hasBillingCycle: !!payment.billingCycle,
+        });
+        throw new Error('Payment record incomplete - cannot activate subscription');
+      }
+
+      // Step 4: Activate subscription (upsert behavior)
       console.log('🎯 Activating subscription for user:', {
         userId: payment.userId,
         planId: payment.planId,
         billingCycle: payment.billingCycle,
       });
 
-      await activateUserSubscription({
-        billingCycle: payment.billingCycle as 'monthly' | 'yearly',
-        planId: payment.planId,
-        userId: payment.userId,
-      });
+      const start = new Date();
+      const end = new Date(start);
+      end.setDate(end.getDate() + (payment.billingCycle === 'yearly' ? 365 : 30));
 
-      console.log('✅ Subscription activated successfully for user:', payment.userId);
-    } else {
-      console.error('❌ Payment record incomplete - missing required fields:', {
-        hasUserId: !!payment.userId,
-        hasPlanId: !!payment.planId,
-        hasBillingCycle: !!payment.billingCycle,
-      });
-      throw new Error('Payment record incomplete - cannot activate subscription');
-    }
+      // Check if user already has a subscription
+      const existing = await tx
+        .select({ id: subscriptions.id })
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, payment.userId));
+
+      if (existing.length > 0) {
+        // Update existing subscription
+        await tx
+          .update(subscriptions)
+          .set({
+            planId: payment.planId,
+            billingCycle: payment.billingCycle,
+            status: 'active',
+            currentPeriodStart: start,
+            currentPeriodEnd: end,
+            paymentProvider: 'sepay',
+          })
+          .where(eq(subscriptions.userId, payment.userId));
+        console.log('✅ Subscription updated successfully for user:', payment.userId);
+      } else {
+        // Create new subscription
+        await tx.insert(subscriptions).values({
+          userId: payment.userId,
+          planId: payment.planId,
+          billingCycle: payment.billingCycle,
+          status: 'active',
+          currentPeriodStart: start,
+          currentPeriodEnd: end,
+        });
+        console.log('✅ Subscription created successfully for user:', payment.userId);
+      }
+
+      console.log('✅ Transaction committed successfully');
+    });
 
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(
@@ -107,7 +161,7 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
 
-    console.error('❌ Error processing successful payment:', {
+    console.error('❌ Error processing successful payment (transaction rolled back):', {
       duration: `${duration}ms`,
       error: errorMessage,
       orderId: webhookData.orderId,
