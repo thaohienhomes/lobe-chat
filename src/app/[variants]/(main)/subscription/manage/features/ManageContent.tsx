@@ -15,49 +15,54 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: 24px;
   `,
   header: css`
-    margin-bottom: 32px;
+    margin-block-end: 32px;
   `,
   backButton: css`
-    margin-bottom: 16px;
+    margin-block-end: 16px;
   `,
   subscriptionCard: css`
+    margin-block-end: 24px;
+    padding: 24px;
     border: 1px solid ${token.colorBorder};
     border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 24px;
   `,
   statusBadge: css`
     display: inline-block;
-    padding: 4px 12px;
+
+    margin-block-end: 16px;
+    padding-block: 4px;
+    padding-inline: 12px;
     border-radius: 4px;
+
     font-size: 12px;
     font-weight: 600;
-    margin-bottom: 16px;
   `,
   statusActive: css`
-    background-color: #f6ffed;
     color: #52c41a;
+    background-color: #f6ffed;
   `,
   statusInactive: css`
-    background-color: #fff1f0;
     color: #ff4d4f;
+    background-color: #fff1f0;
   `,
   infoRow: css`
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid ${token.colorBorderSecondary};
+    justify-content: space-between;
+
+    padding-block: 12px;
+    padding-inline: 0;
+    border-block-end: 1px solid ${token.colorBorderSecondary};
 
     &:last-child {
-      border-bottom: none;
+      border-block-end: none;
     }
   `,
   actionButtons: css`
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
     flex-wrap: wrap;
+    gap: 12px;
+    margin-block-start: 24px;
   `,
 }));
 
@@ -81,11 +86,27 @@ const ManageContent = memo(() => {
     const fetchSubscription = async () => {
       try {
         setLoading(true);
-        // TODO: Implement API call to fetch user's subscription
-        // For now, show placeholder
-        setSubscription(null);
-        setError('Subscription data not available');
+        setError(null);
+
+        // Fetch user's subscription from API
+        const response = await fetch('/api/subscription/current');
+
+        if (response.status === 404) {
+          // No active subscription found
+          setSubscription(null);
+          setError(null);
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch subscription');
+        }
+
+        const data = await response.json();
+        setSubscription(data);
       } catch (err) {
+        console.error('Failed to fetch subscription:', err);
         setError(err instanceof Error ? err.message : 'Failed to load subscription');
       } finally {
         setLoading(false);

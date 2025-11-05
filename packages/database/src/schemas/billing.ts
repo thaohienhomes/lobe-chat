@@ -59,6 +59,12 @@ export const subscriptions = pgTable('subscriptions', {
   cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
   paymentProvider: varchar('payment_provider', { length: 20 }).notNull().default('sepay'),
 
+  // Payment method preferences (added in migration 0037)
+  preferredPaymentMethod: varchar('preferred_payment_method', { length: 20 }), // 'bank_transfer' | 'credit_card' | null
+  autoRenewalEnabled: boolean('auto_renewal_enabled').default(false),
+  paymentTokenId: text('payment_token_id'), // Polar.sh payment method token for auto-renewal
+  lastPaymentMethodUpdate: timestamptz('last_payment_method_update'),
+
   ...timestamps,
 });
 
