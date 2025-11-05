@@ -218,6 +218,26 @@ export const costOptimizationRouter = router({
     .query(async ({ input, ctx }) => {
       const targetMonth = input.month || new Date().toISOString().slice(0, 7);
       try {
+        // First check if user has an active subscription
+        const { subscriptions } = await import('@/database/schemas/billing');
+        const { and } = await import('drizzle-orm');
+
+        const activeSubscription = await ctx.serverDB
+          .select()
+          .from(subscriptions)
+          .where(
+            and(
+              eq(subscriptions.userId, ctx.userId),
+              eq(subscriptions.status, 'active')
+            )
+          )
+          .limit(1);
+
+        // If no active subscription, return null to indicate no subscription
+        if (!activeSubscription || activeSubscription.length === 0) {
+          return null;
+        }
+
         const summaryResult = await ctx.serverDB
           .select()
           .from(monthlyUsageSummary)
@@ -226,9 +246,14 @@ export const costOptimizationRouter = router({
 
         const summary = summaryResult[0];
 
+        // If no usage summary yet but has subscription, return zero usage
         if (!summary) {
+          const subscription = activeSubscription[0];
+          const planId = subscription.planId as 'starter' | 'premium' | 'ultimate';
+          const budgetLimit = VND_PRICING_TIERS[planId]?.monthlyVND || VND_PRICING_TIERS.starter.monthlyVND;
+
           return {
-            budgetRemainingVND: VND_PRICING_TIERS.starter.monthlyVND,
+            budgetRemainingVND: budgetLimit,
             month: targetMonth,
             totalCostVND: 0,
             totalQueries: 0,
@@ -242,7 +267,7 @@ export const costOptimizationRouter = router({
           : 0;
 
         return {
-          budgetRemainingVND: summary.budgetRemainingVND || VND_PRICING_TIERS.starter.monthlyVND,
+          budgetRemainingVND: summary.budgetRemainingVND || 0,
           month: summary.month,
           totalCostVND: summary.totalCostVND || 0,
           totalQueries: summary.totalQueries || 0,
@@ -251,14 +276,8 @@ export const costOptimizationRouter = router({
         };
       } catch (err) {
         console.error('costOptimization.getUsageSummary error', err);
-        return {
-          budgetRemainingVND: VND_PRICING_TIERS.starter.monthlyVND,
-          month: targetMonth,
-          totalCostVND: 0,
-          totalQueries: 0,
-          totalTokens: 0,
-          usagePercentage: 0,
-        };
+        // Return null on error to indicate no data available
+        return null;
       }
     }),
 

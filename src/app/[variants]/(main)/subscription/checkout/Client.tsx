@@ -234,7 +234,9 @@ function CheckoutContent() {
     'bank_transfer',
   );
 
-  const planId = searchParams.get('plan') as keyof typeof plans;
+  // Normalize planId to lowercase to handle case-insensitive URLs
+  const planIdRaw = searchParams.get('plan');
+  const planId = planIdRaw?.toLowerCase() as keyof typeof plans;
   const plan = plans[planId];
 
   useEffect(() => {

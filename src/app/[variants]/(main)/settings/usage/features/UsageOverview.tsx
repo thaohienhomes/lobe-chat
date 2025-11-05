@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Progress, Skeleton, Typography } from 'antd';
+import { Alert, Button, Card, Progress, Skeleton, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -119,11 +119,22 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
     );
   }
 
+  // If no usage data, it means user doesn't have an active subscription
   if (!usageData) {
     return (
       <Flexbox gap={24}>
         <Title level={4}>{t('usage.overview.title')}</Title>
-        <Text type="secondary">Unable to load usage data</Text>
+        <Alert
+          description="You don't have an active subscription. Subscribe to a plan to start using AI features and track your usage."
+          message="No Active Subscription"
+          showIcon
+          type="info"
+          action={
+            <Button type="primary" href="/subscription/plans">
+              View Plans
+            </Button>
+          }
+        />
       </Flexbox>
     );
   }
