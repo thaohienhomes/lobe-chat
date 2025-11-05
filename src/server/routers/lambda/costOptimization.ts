@@ -1,8 +1,10 @@
 // @ts-nocheck
 import { z } from 'zod';
+import { desc, eq } from 'drizzle-orm';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { CostOptimizationEngine, UsageTracker, VND_PRICING_TIERS } from '@/server/modules/CostOptimization';
+import { monthlyUsageSummary, usageLogs } from '@/database/schemas/usage';
 
 const costOptimizationProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
   const { ctx } = opts;
@@ -216,14 +218,13 @@ export const costOptimizationRouter = router({
     .query(async ({ input, ctx }) => {
       const targetMonth = input.month || new Date().toISOString().slice(0, 7);
       try {
-        const summary = await ctx.serverDB
+        const summaryResult = await ctx.serverDB
           .select()
-          .from('monthly_usage_summary')
-          .where({
-            month: targetMonth,
-            userId: ctx.userId,
-          })
-          .first();
+          .from(monthlyUsageSummary)
+          .where(eq(monthlyUsageSummary.userId, ctx.userId))
+          .limit(1);
+
+        const summary = summaryResult[0];
 
         if (!summary) {
           return {
@@ -237,11 +238,15 @@ export const costOptimizationRouter = router({
         }
 
         const usagePercentage = summary.budgetLimitVND
-          ? (summary.budgetUsedVND / summary.budgetLimitVND) * 100
+          ? ((summary.budgetUsedVND || 0) / summary.budgetLimitVND) * 100
           : 0;
 
         return {
-          ...summary,
+          budgetRemainingVND: summary.budgetRemainingVND || VND_PRICING_TIERS.starter.monthlyVND,
+          month: summary.month,
+          totalCostVND: summary.totalCostVND || 0,
+          totalQueries: summary.totalQueries || 0,
+          totalTokens: summary.totalTokens || 0,
           usagePercentage,
         };
       } catch (err) {
@@ -257,8 +262,44 @@ export const costOptimizationRouter = router({
       }
     }),
 
+  /**
+   * Get usage history (recent usage logs)
+   */
+  getUsageHistory: costOptimizationProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).optional().default(30),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      try {
+        const logs = await ctx.serverDB
+          .select({
+            id: usageLogs.id,
+            model: usageLogs.model,
+            provider: usageLogs.provider,
+            inputTokens: usageLogs.inputTokens,
+            outputTokens: usageLogs.outputTokens,
+            totalTokens: usageLogs.totalTokens,
+            costUSD: usageLogs.costUSD,
+            costVND: usageLogs.costVND,
+            queryComplexity: usageLogs.queryComplexity,
+            createdAt: usageLogs.createdAt,
+          })
+          .from(usageLogs)
+          .where(eq(usageLogs.userId, ctx.userId))
+          .orderBy(desc(usageLogs.createdAt))
+          .limit(input.limit);
 
-
+        return logs.map(log => ({
+          ...log,
+          date: log.createdAt.toISOString().split('T')[0],
+        }));
+      } catch (err) {
+        console.error('costOptimization.getUsageHistory error', err);
+        return [];
+      }
+    }),
 
   /**
      * Track usage after AI model request

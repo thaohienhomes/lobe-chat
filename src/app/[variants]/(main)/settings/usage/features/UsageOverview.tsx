@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 import useSWR from 'swr';
 
-import { trpc } from '@/libs/trpc/client';
+import { lambdaClient } from '@/libs/trpc/client';
 
 const { Title, Text } = Typography;
 
@@ -92,7 +92,7 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
     'usage-summary',
     async () => {
       try {
-        const result = await trpc.costOptimization.getUsageSummary.query();
+        const result = await lambdaClient.costOptimization.getUsageSummary.query({});
         setUsageData(result);
         return result;
       } catch (error) {

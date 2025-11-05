@@ -1,10 +1,13 @@
 'use client';
 
-import { Table, Tag, Typography } from 'antd';
+import { Skeleton, Table, Tag, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
+import useSWR from 'swr';
+
+import { lambdaClient } from '@/libs/trpc/client';
 
 const { Title } = Typography;
 
@@ -25,65 +28,71 @@ interface UsageHistoryProps {
   mobile?: boolean;
 }
 
-// Mock usage history data
-const historyData = [
-  {
-    cost: '$2.50',
-    credits: 250_000,
-    date: '2024-01-15',
-    key: '1',
-    messages: 1250,
-    model: 'GPT-4o mini',
-    tokens: 125_000,
-  },
-  {
-    cost: '$4.45',
-    credits: 445_000,
-    date: '2024-01-14',
-    key: '2',
-    messages: 450,
-    model: 'DeepSeek R1',
-    tokens: 89_000,
-  },
-  {
-    cost: '$1.78',
-    credits: 178_000,
-    date: '2024-01-13',
-    key: '3',
-    messages: 890,
-    model: 'GPT-4o mini',
-    tokens: 89_000,
-  },
-  {
-    cost: '$3.20',
-    credits: 320_000,
-    date: '2024-01-12',
-    key: '4',
-    messages: 320,
-    model: 'Claude 3.5 Sonnet',
-    tokens: 64_000,
-  },
-  {
-    cost: '$1.34',
-    credits: 134_000,
-    date: '2024-01-11',
-    key: '5',
-    messages: 670,
-    model: 'GPT-4o mini',
-    tokens: 67_000,
-  },
-];
+interface UsageLog {
+  costUSD: number;
+  costVND: number;
+  createdAt: Date;
+  date: string;
+  id: string;
+  inputTokens: number;
+  model: string;
+  outputTokens: number;
+  provider: string;
+  queryComplexity: string | null;
+  totalTokens: number | null;
+}
 
 const getModelColor = (model: string) => {
-  if (model.includes('GPT')) return 'green';
-  if (model.includes('DeepSeek')) return 'blue';
-  if (model.includes('Claude')) return 'purple';
+  if (model.includes('gpt') || model.includes('GPT')) return 'green';
+  if (model.includes('deepseek') || model.includes('DeepSeek')) return 'blue';
+  if (model.includes('claude') || model.includes('Claude')) return 'purple';
+  if (model.includes('gemini') || model.includes('Gemini')) return 'orange';
   return 'default';
+};
+
+const formatVND = (amount: number) => {
+  return new Intl.NumberFormat('vi-VN', {
+    currency: 'VND',
+    maximumFractionDigits: 0,
+    style: 'currency',
+  }).format(amount);
 };
 
 const UsageHistory = memo<UsageHistoryProps>(({ mobile }) => {
   const { t } = useTranslation('setting');
   const { styles } = useStyles();
+
+  // Fetch usage history from tRPC
+  const { data: usageHistory, isLoading } = useSWR(
+    'usage-history',
+    async () => {
+      try {
+        const result = await lambdaClient.costOptimization.getUsageHistory.query({ limit: 30 });
+        return result;
+      } catch (error) {
+        console.error('Failed to fetch usage history:', error);
+        return [];
+      }
+    },
+    { revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+
+  if (isLoading) {
+    return (
+      <Flexbox gap={16}>
+        <Title level={4}>{t('usage.history.title')}</Title>
+        <Skeleton active paragraph={{ rows: 5 }} />
+      </Flexbox>
+    );
+  }
+
+  const historyData = (usageHistory || []).map((log, index: number) => ({
+    cost: formatVND(log.costVND),
+    date: log.date,
+    key: log.id || index.toString(),
+    model: log.model,
+    tokens: log.totalTokens || (log.inputTokens + log.outputTokens),
+  }));
 
   const columns = [
     {
@@ -105,14 +114,7 @@ const UsageHistory = memo<UsageHistoryProps>(({ mobile }) => {
         </Tag>
       ),
       title: 'Model',
-      width: mobile ? 100 : 150,
-    },
-    {
-      align: 'right' as const,
-      dataIndex: 'messages',
-      key: 'messages',
-      title: 'Messages',
-      width: mobile ? 60 : 80,
+      width: mobile ? 100 : 200,
     },
     {
       align: 'right' as const,
@@ -125,27 +127,14 @@ const UsageHistory = memo<UsageHistoryProps>(({ mobile }) => {
         return tokens.toLocaleString();
       },
       title: 'Tokens',
-      width: mobile ? 60 : 80,
-    },
-    {
-      align: 'right' as const,
-      dataIndex: 'credits',
-      key: 'credits',
-      render: (credits: number) => {
-        if (mobile && credits >= 1000) {
-          return `${(credits / 1000).toFixed(0)}K`;
-        }
-        return credits.toLocaleString();
-      },
-      title: 'Credits',
-      width: mobile ? 60 : 80,
+      width: mobile ? 80 : 100,
     },
     {
       align: 'right' as const,
       dataIndex: 'cost',
       key: 'cost',
       title: 'Cost',
-      width: mobile ? 50 : 70,
+      width: mobile ? 80 : 120,
     },
   ];
 
