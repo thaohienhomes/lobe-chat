@@ -307,9 +307,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.log('🔔 Request headers:', Object.fromEntries(request.headers.entries()));
 
     // SECURITY CHECK: Verify webhook authentication
-    // Sepay must send the webhook secret token in the X-Sepay-Webhook-Secret header
+    // Sepay can send the webhook secret token in two formats:
+    // 1. X-Sepay-Webhook-Secret header (custom header format)
+    // 2. Authorization: Apikey <token> header (API Key format)
     const webhookSecret = process.env.SEPAY_WEBHOOK_SECRET;
-    const providedSecret = request.headers.get('x-sepay-webhook-secret');
+
+    // Try to get secret from X-Sepay-Webhook-Secret header first
+    let providedSecret = request.headers.get('x-sepay-webhook-secret');
+
+    // If not found, try to extract from Authorization header (format: "Apikey <token>")
+    if (!providedSecret) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Apikey ')) {
+        providedSecret = authHeader.substring(7); // Remove "Apikey " prefix
+        console.log('🔑 Extracted secret from Authorization header');
+      }
+    }
 
     if (!webhookSecret) {
       console.error('❌ SEPAY_WEBHOOK_SECRET not configured in environment variables');
@@ -322,13 +335,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!providedSecret || providedSecret !== webhookSecret) {
       console.error('❌ Unauthorized webhook request - invalid or missing secret token');
       console.error('❌ Provided secret:', providedSecret ? '[REDACTED]' : 'NONE');
+      console.error('❌ Authorization header:', request.headers.get('authorization') ? '[REDACTED]' : 'NONE');
 
       paymentMetricsCollector.recordError(
         'webhook_auth_failed',
         'Unauthorized webhook request',
         undefined,
         undefined,
-        { hasSecret: !!providedSecret }
+        { hasSecret: !!providedSecret, hasAuthHeader: !!request.headers.get('authorization') }
       );
 
       return NextResponse.json(
