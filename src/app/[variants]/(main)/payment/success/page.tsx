@@ -141,7 +141,8 @@ function PaymentSuccessContent() {
   }, [searchParams, queryPaymentStatus]);
 
   const handleGoToDashboard = () => {
-    router.push(`/${variants}/settings/subscription`);
+    // Navigate to subscription management page (not settings tab)
+    router.push(`/${variants}/subscription/manage`);
   };
 
   const handleGoHome = () => {
