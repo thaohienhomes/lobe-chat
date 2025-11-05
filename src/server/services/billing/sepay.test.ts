@@ -5,18 +5,22 @@ import {
   activateUserSubscription,
   getPaymentByOrderId,
 } from './sepay';
-import * as dbModule from '@/server/db';
 
 // Mock database
-vi.mock('@/server/db', () => ({
-  getServerDB: vi.fn(),
-}));
+vi.mock('@/database/server', async () => {
+  return {
+    getServerDB: vi.fn(),
+  };
+});
 
 describe('Billing Service - Sepay', () => {
   let mockDb: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    const { getServerDB } = await import('@/database/server');
+
     mockDb = {
       insert: vi.fn().mockReturnThis(),
       values: vi.fn().mockResolvedValue(undefined),
@@ -27,7 +31,7 @@ describe('Billing Service - Sepay', () => {
       from: vi.fn().mockReturnThis(),
       limit: vi.fn().mockResolvedValue([]),
     };
-    vi.mocked(dbModule.getServerDB).mockResolvedValue(mockDb);
+    vi.mocked(getServerDB).mockResolvedValue(mockDb);
   });
 
   describe('createPaymentRecord', () => {

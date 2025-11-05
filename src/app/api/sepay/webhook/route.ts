@@ -57,6 +57,12 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
     // Get payment record to get user and plan info
     console.log('🔍 [COMPAT ROUTE] Fetching payment record to get user and plan info...');
     const payment = await getPaymentByOrderId(webhookData.orderId);
+
+    if (!payment) {
+      console.error('❌ [COMPAT ROUTE] Payment record not found for orderId:', webhookData.orderId);
+      throw new Error('Payment record not found');
+    }
+
     console.log('📋 [COMPAT ROUTE] Payment record retrieved:', {
       userId: payment.userId,
       planId: payment.planId,
@@ -111,8 +117,9 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(
       webhookData.orderId,
-      'error',
+      'failure',
       duration,
+      errorMessage,
     );
 
     throw error;
@@ -165,8 +172,9 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(
       webhookData.orderId,
-      'error',
+      'failure',
       duration,
+      errorMessage,
     );
 
     throw error;
@@ -208,8 +216,9 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(
       webhookData.orderId,
-      'error',
+      'failure',
       duration,
+      errorMessage,
     );
 
     throw error;
