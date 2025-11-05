@@ -1,10 +1,10 @@
 'use client';
 
-import { Alert, Button, Card, Divider, Form, Input, Radio, Typography } from 'antd';
+import { Alert, Button, Card, Divider, Form, Input, Radio, Switch, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
 import { ArrowLeft, CreditCard, QrCode } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
@@ -15,17 +15,19 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: 24px;
   `,
   header: css`
-    margin-bottom: 32px;
+    margin-block-end: 32px;
   `,
   backButton: css`
-    margin-bottom: 16px;
+    margin-block-end: 16px;
   `,
   methodCard: css`
+    cursor: pointer;
+
+    margin-block-end: 16px;
+    padding: 16px;
     border: 1px solid ${token.colorBorder};
     border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    cursor: pointer;
+
     transition: all 0.3s ease;
 
     &:hover {
@@ -38,8 +40,8 @@ const useStyles = createStyles(({ css, token }) => ({
     background-color: ${token.colorPrimaryBg};
   `,
   methodIcon: css`
+    margin-inline-end: 12px;
     font-size: 24px;
-    margin-right: 12px;
   `,
 }));
 
@@ -47,8 +49,34 @@ const PaymentContent = memo(() => {
   const { styles, cx } = useStyles();
   const router = useRouter();
   const { t } = useTranslation('setting');
-  const [paymentMethod, setPaymentMethod] = useState<'bank' | 'card'>('bank');
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>('bank_transfer');
+  const [autoRenewalEnabled, setAutoRenewalEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingPreference, setLoadingPreference] = useState(true);
+
+  // Load current payment preference on mount
+  useEffect(() => {
+    const loadPaymentPreference = async () => {
+      try {
+        const response = await fetch('/api/subscription/payment-method');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            if (data.data.preferredPaymentMethod) {
+              setPaymentMethod(data.data.preferredPaymentMethod as 'bank_transfer' | 'credit_card');
+            }
+            setAutoRenewalEnabled(data.data.autoRenewalEnabled || false);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load payment preference:', error);
+      } finally {
+        setLoadingPreference(false);
+      }
+    };
+
+    loadPaymentPreference();
+  }, []);
 
   const handleCancel = () => {
     router.back();
@@ -57,16 +85,54 @@ const PaymentContent = memo(() => {
   const handleUpdatePaymentMethod = async () => {
     setLoading(true);
     try {
-      // TODO: Implement payment method update logic
-      console.log('Updating payment method to:', paymentMethod);
-      // Show success message
-      router.push('/subscription/manage');
+      // Validate: auto-renewal only for credit card
+      if (paymentMethod === 'bank_transfer' && autoRenewalEnabled) {
+        message.error('Auto-renewal is not supported for bank transfer payments');
+        setLoading(false);
+        return;
+      }
+
+      // Call API to save payment preference
+      const response = await fetch('/api/subscription/payment-method', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          paymentMethod,
+          autoRenewalEnabled: paymentMethod === 'credit_card' ? autoRenewalEnabled : false,
+          // Note: paymentTokenId will be added later when implementing Polar.sh tokenization
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        message.success('Payment method preference updated successfully');
+        // Redirect to subscription management page after successful save
+        setTimeout(() => {
+          router.push('/subscription/manage');
+        }, 1000);
+      } else {
+        message.error(data.error || 'Failed to update payment method preference');
+      }
     } catch (error) {
       console.error('Failed to update payment method:', error);
+      message.error('Unable to update payment method. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingPreference) {
+    return (
+      <div className={styles.container}>
+        <Flexbox align="center" justify="center" style={{ minHeight: '400px' }}>
+          <Text type="secondary">Loading payment preferences...</Text>
+        </Flexbox>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -98,8 +164,11 @@ const PaymentContent = memo(() => {
           <Title level={4}>Available Payment Methods</Title>
 
           <div
-            className={cx(styles.methodCard, paymentMethod === 'bank' && styles.methodSelected)}
-            onClick={() => setPaymentMethod('bank')}
+            className={cx(styles.methodCard, paymentMethod === 'bank_transfer' && styles.methodSelected)}
+            onClick={() => {
+              setPaymentMethod('bank_transfer');
+              setAutoRenewalEnabled(false); // Auto-renewal not supported for bank transfer
+            }}
             role="button"
             tabIndex={0}
           >
@@ -115,8 +184,8 @@ const PaymentContent = memo(() => {
           </div>
 
           <div
-            className={cx(styles.methodCard, paymentMethod === 'card' && styles.methodSelected)}
-            onClick={() => setPaymentMethod('card')}
+            className={cx(styles.methodCard, paymentMethod === 'credit_card' && styles.methodSelected)}
+            onClick={() => setPaymentMethod('credit_card')}
             role="button"
             tabIndex={0}
           >
@@ -132,6 +201,35 @@ const PaymentContent = memo(() => {
           </div>
         </Flexbox>
 
+        {/* Auto-Renewal Toggle (only for credit card) */}
+        {paymentMethod === 'credit_card' && (
+          <>
+            <Divider style={{ margin: '24px 0' }} />
+            <Flexbox gap={12}>
+              <Flexbox gap={8} horizontal style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                <Flexbox gap={4}>
+                  <Text strong>Enable Auto-Renewal</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Automatically renew your subscription when it expires
+                  </Text>
+                </Flexbox>
+                <Switch
+                  checked={autoRenewalEnabled}
+                  onChange={setAutoRenewalEnabled}
+                />
+              </Flexbox>
+              {autoRenewalEnabled && (
+                <Alert
+                  description="Your credit card will be automatically charged when your subscription expires. You can disable auto-renewal at any time."
+                  message="Auto-Renewal Enabled"
+                  showIcon
+                  type="warning"
+                />
+              )}
+            </Flexbox>
+          </>
+        )}
+
         <Divider style={{ margin: '24px 0' }} />
 
         <Flexbox gap={12} horizontal style={{ justifyContent: 'flex-end' }}>
@@ -144,7 +242,7 @@ const PaymentContent = memo(() => {
 
       <Card>
         <Title level={5}>Payment Method Details</Title>
-        {paymentMethod === 'bank' ? (
+        {paymentMethod === 'bank_transfer' ? (
           <Flexbox gap={12}>
             <Text>
               <strong>Bank Transfer (QR Code)</strong>
@@ -158,6 +256,7 @@ const PaymentContent = memo(() => {
               <li>Secure and encrypted</li>
               <li>No additional fees</li>
               <li>Works with all Vietnamese banks</li>
+              <li><strong>Manual renewal:</strong> You will need to manually pay each billing cycle</li>
             </ul>
           </Flexbox>
         ) : (
@@ -173,8 +272,17 @@ const PaymentContent = memo(() => {
               <li>Instant payment processing</li>
               <li>Secure PCI DSS compliant</li>
               <li>International support</li>
-              <li>Automatic renewal available</li>
+              <li><strong>Auto-renewal available:</strong> Enable to automatically renew your subscription</li>
             </ul>
+            {autoRenewalEnabled && (
+              <Alert
+                description="Note: You will need to add your credit card details during checkout to enable auto-renewal. Your card will be securely tokenized and stored by our payment provider (Polar.sh)."
+                message="Card Tokenization Required"
+                showIcon
+                style={{ marginTop: 12 }}
+                type="info"
+              />
+            )}
           </Flexbox>
         )}
       </Card>
