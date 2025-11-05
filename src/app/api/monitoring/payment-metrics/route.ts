@@ -36,19 +36,19 @@ export async function GET(request: NextRequest) {
 
       pino.info(
         {
+          alerts: health.alerts.length,
           healthy: health.healthy,
           warnings: health.warnings.length,
-          alerts: health.alerts.length,
         },
         'Payment system health check',
       );
 
       return NextResponse.json(
         {
-          healthy: health.healthy,
-          warnings: health.warnings,
           alerts: health.alerts,
+          healthy: health.healthy,
           timestamp: Date.now(),
+          warnings: health.warnings,
         },
         {
           status: health.healthy ? 200 : 503,
@@ -61,9 +61,9 @@ export async function GET(request: NextRequest) {
 
     pino.info(
       {
-        webhookSuccessRate: snapshot.webhookSuccessRate,
-        paymentDetectionLatency: snapshot.paymentDetectionLatency,
         errorRate: snapshot.errorRate,
+        paymentDetectionLatency: snapshot.paymentDetectionLatency,
+        webhookSuccessRate: snapshot.webhookSuccessRate,
       },
       'Payment metrics snapshot retrieved',
     );

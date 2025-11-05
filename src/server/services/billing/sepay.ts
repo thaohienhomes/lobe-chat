@@ -33,8 +33,8 @@ export async function createPaymentRecord(params: CreatePaymentRecordParams) {
     console.error('❌ Failed to create payment record:', {
       error: errorMessage,
       orderId: params.orderId,
-      userId: params.userId,
       timestamp: new Date().toISOString(),
+      userId: params.userId,
     });
     // Re-throw to allow caller to handle
     throw new Error(`Failed to create payment record: ${errorMessage}`);
@@ -44,7 +44,7 @@ export async function createPaymentRecord(params: CreatePaymentRecordParams) {
 export async function updatePaymentStatus(
   orderId: string,
   status: 'success' | 'failed' | 'pending',
-  opts?: { rawWebhook?: any; transactionId?: string; maskedCardNumber?: string },
+  opts?: { maskedCardNumber?: string, rawWebhook?: any; transactionId?: string; },
 ) {
   try {
     const db = await getServerDB();
@@ -105,10 +105,10 @@ export async function activateUserSubscription(params: {
         })
         .where(eq(subscriptions.userId, params.userId));
       console.log('✅ Subscription updated successfully:', {
-        userId: params.userId,
-        planId: params.planId,
         billingCycle: params.billingCycle,
         currentPeriodEnd: end.toISOString(),
+        planId: params.planId,
+        userId: params.userId,
       });
     } else {
       await db.insert(subscriptions).values({
@@ -120,19 +120,19 @@ export async function activateUserSubscription(params: {
         userId: params.userId,
       });
       console.log('✅ Subscription created successfully:', {
-        userId: params.userId,
-        planId: params.planId,
         billingCycle: params.billingCycle,
         currentPeriodEnd: end.toISOString(),
+        planId: params.planId,
+        userId: params.userId,
       });
     }
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
     console.error('❌ Failed to activate subscription:', {
       error: errorMessage,
-      userId: params.userId,
       planId: params.planId,
       timestamp: new Date().toISOString(),
+      userId: params.userId,
     });
     // Re-throw to allow caller to handle
     throw new Error(`Failed to activate subscription: ${errorMessage}`);

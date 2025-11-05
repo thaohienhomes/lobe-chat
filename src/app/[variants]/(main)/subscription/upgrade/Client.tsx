@@ -39,10 +39,12 @@ const useStyles = createStyles(({ css, token }) => ({
     }
   `,
   planCard: css`
+    cursor: pointer;
+
+    padding: ${token.paddingLG}px;
     border: 2px solid ${token.colorBorder};
     border-radius: ${token.borderRadiusLG}px;
-    padding: ${token.paddingLG}px;
-    cursor: pointer;
+
     transition: all 0.3s ease;
 
     &:hover {
@@ -58,28 +60,24 @@ const useStyles = createStyles(({ css, token }) => ({
 }));
 
 interface CurrentSubscription {
-  id: string;
-  planId: 'starter' | 'premium' | 'ultimate';
   billingCycle: 'monthly' | 'yearly';
   currentPeriodEnd: string;
+  id: string;
+  planId: 'starter' | 'premium' | 'ultimate';
 }
 
 interface Plan {
-  id: 'starter' | 'premium' | 'ultimate';
-  name: string;
   description: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
   features: string[];
+  id: 'starter' | 'premium' | 'ultimate';
+  monthlyPrice: number;
+  name: string;
+  yearlyPrice: number;
 }
 
 const plans: Plan[] = [
   {
-    id: 'starter',
-    name: 'Starter',
     description: 'Perfect for occasional AI users and students',
-    monthlyPrice: 39_000,
-    yearlyPrice: 390_000,
     features: [
       'Access to popular AI models',
       '5M compute credits per month',
@@ -89,13 +87,13 @@ const plans: Plan[] = [
       'Pre-built AI assistants',
       'No ads',
     ],
+    id: 'starter',
+    monthlyPrice: 39_000,
+    name: 'Starter',
+    yearlyPrice: 390_000,
   },
   {
-    id: 'premium',
-    name: 'Premium',
     description: 'Designed for professional users and content creators',
-    monthlyPrice: 129_000,
-    yearlyPrice: 1_290_000,
     features: [
       'Access to all AI models',
       '15M compute credits per month',
@@ -106,13 +104,13 @@ const plans: Plan[] = [
       'Export conversation history',
       'No ads',
     ],
+    id: 'premium',
+    monthlyPrice: 129_000,
+    name: 'Premium',
+    yearlyPrice: 1_290_000,
   },
   {
-    id: 'ultimate',
-    name: 'Ultimate',
     description: 'For enterprises, developers, and AI researchers',
-    monthlyPrice: 349_000,
-    yearlyPrice: 3_490_000,
     features: [
       'Access to all AI models including latest releases',
       '35M compute credits per month',
@@ -124,6 +122,10 @@ const plans: Plan[] = [
       'Advanced analytics and insights',
       'No ads',
     ],
+    id: 'ultimate',
+    monthlyPrice: 349_000,
+    name: 'Ultimate',
+    yearlyPrice: 3_490_000,
   },
 ];
 
@@ -137,7 +139,6 @@ export default function UpgradeClient() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [proratedAmount, setProratedAmount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -173,12 +174,12 @@ export default function UpgradeClient() {
     setProcessing(true);
     try {
       const response = await fetch('/api/subscription/upgrade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          newPlanId: selectedPlan,
           billingCycle,
+          newPlanId: selectedPlan,
         }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
       });
 
       const data = await response.json();
@@ -213,15 +214,15 @@ export default function UpgradeClient() {
       <div className={styles.container}>
         <div className={styles.content}>
           <Alert
-            message="No Active Subscription"
             description="You don't have an active subscription. Please start with a plan."
-            type="info"
+            message="No Active Subscription"
             showIcon
+            type="info"
           />
           <Button
-            type="primary"
-            style={{ marginTop: 16 }}
             onClick={() => router.push('/subscription/checkout')}
+            style={{ marginTop: 16 }}
+            type="primary"
           >
             Choose a Plan
           </Button>
@@ -237,10 +238,10 @@ export default function UpgradeClient() {
     <div className={styles.container}>
       <div className={styles.content}>
         <Button
-          type="text"
+          className={styles.backButton}
           icon={<ArrowLeft size={20} />}
           onClick={() => router.back()}
-          className={styles.backButton}
+          type="text"
         >
           Back
         </Button>
@@ -255,24 +256,24 @@ export default function UpgradeClient() {
         <Title level={4}>Select a Plan</Title>
 
         <Radio.Group
-          value={billingCycle}
           onChange={(e) => setBillingCycle(e.target.value)}
           style={{ marginBottom: 24 }}
+          value={billingCycle}
         >
           <Radio.Button value="monthly">Monthly</Radio.Button>
           <Radio.Button value="yearly">Yearly (17% off)</Radio.Button>
         </Radio.Group>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', marginBottom: 24 }}>
           {plans.map((plan) => (
             <Card
-              key={plan.id}
               className={`${styles.planCard} ${selectedPlan === plan.id ? 'selected' : ''}`}
+              key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
               style={{ cursor: 'pointer' }}
             >
               <Flexbox gap={12}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
                   <Title level={4} style={{ margin: 0 }}>
                     {plan.name}
                   </Title>
@@ -285,7 +286,7 @@ export default function UpgradeClient() {
 
                 <div style={{ fontSize: 24, fontWeight: 'bold' }}>
                   {(billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice).toLocaleString()} VND
-                  <span style={{ fontSize: 14, fontWeight: 'normal', color: '#999' }}>
+                  <span style={{ color: '#999', fontSize: 14, fontWeight: 'normal' }}>
                     /{billingCycle === 'monthly' ? 'month' : 'year'}
                   </span>
                 </div>
@@ -294,8 +295,8 @@ export default function UpgradeClient() {
 
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
                   {plan.features.map((feature, idx) => (
-                    <li key={idx} style={{ marginBottom: 4, fontSize: 12 }}>
-                      <Check size={14} style={{ display: 'inline', marginRight: 4, color: '#52c41a' }} />
+                    <li key={idx} style={{ fontSize: 12, marginBottom: 4 }}>
+                      <Check size={14} style={{ color: '#52c41a', display: 'inline', marginRight: 4 }} />
                       {feature}
                     </li>
                   ))}
@@ -306,9 +307,9 @@ export default function UpgradeClient() {
         </div>
 
         {selectedPlan && selectedPlan !== currentSubscription.planId && (
-          <Card style={{ marginBottom: 24, background: '#f0f5ff' }}>
+          <Card style={{ background: '#f0f5ff', marginBottom: 24 }}>
             <Title level={5}>Plan Change Summary</Title>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr' }}>
               <div>
                 <Text type="secondary">Current Plan</Text>
                 <div style={{ fontSize: 16, fontWeight: 'bold' }}>{currentPlan?.name}</div>
@@ -322,12 +323,12 @@ export default function UpgradeClient() {
         )}
 
         <Button
-          type="primary"
-          size="large"
-          onClick={handleUpgrade}
-          loading={processing}
           disabled={!selectedPlan || selectedPlan === currentSubscription.planId}
+          loading={processing}
+          onClick={handleUpgrade}
+          size="large"
           style={{ width: '100%' }}
+          type="primary"
         >
           {selectedPlan === currentSubscription.planId ? 'Already on this plan' : 'Confirm Plan Change'}
         </Button>

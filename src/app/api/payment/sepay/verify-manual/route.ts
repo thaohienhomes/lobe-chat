@@ -30,9 +30,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       amount,
       description,
       orderId,
+      timestamp: new Date().toISOString(),
       transactionId: transactionId || 'MANUAL_VERIFICATION',
       userId,
-      timestamp: new Date().toISOString(),
     });
 
     if (!orderId) {
@@ -63,8 +63,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Verify the payment belongs to the authenticated user
     if (payment.userId !== userId) {
       console.error('❌ Payment does not belong to authenticated user:', {
-        paymentUserId: payment.userId,
         authenticatedUserId: userId,
+        paymentUserId: payment.userId,
       });
       return NextResponse.json(
         {
@@ -96,9 +96,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Activate user subscription
     if (payment.planId && payment.billingCycle) {
       console.log('🎯 Activating subscription for user:', {
-        userId: payment.userId,
-        planId: payment.planId,
         billingCycle: payment.billingCycle,
+        planId: payment.planId,
+        userId: payment.userId,
       });
 
       await activateUserSubscription({
@@ -110,15 +110,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.log('✅ Subscription activated successfully for user:', userId);
     } else {
       console.error('❌ Cannot activate subscription - missing plan info:', {
-        hasPlanId: !!payment.planId,
         hasBillingCycle: !!payment.billingCycle,
+        hasPlanId: !!payment.planId,
       });
     }
 
     console.log('✅ Payment manually verified and processed:', {
       orderId,
-      transactionId: manualTransactionId,
       timestamp: new Date().toISOString(),
+      transactionId: manualTransactionId,
     });
 
     return NextResponse.json({

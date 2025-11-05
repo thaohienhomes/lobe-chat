@@ -24,10 +24,10 @@ import {
  */
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json({
-    message: 'Sepay webhook endpoint is accessible (compatibility route)',
-    status: 'ready',
     correctRoute: '/api/payment/sepay/webhook',
+    message: 'Sepay webhook endpoint is accessible (compatibility route)',
     note: 'This route forwards to /api/payment/sepay/webhook for compatibility',
+    status: 'ready',
     timestamp: new Date().toISOString(),
   });
 }
@@ -39,11 +39,11 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
   const startTime = Date.now();
   try {
     console.log('✅ [COMPAT ROUTE] Processing successful payment:', {
-      orderId: webhookData.orderId,
       amount: webhookData.amount,
       currency: webhookData.currency,
-      transactionId: webhookData.transactionId,
+      orderId: webhookData.orderId,
       timestamp: webhookData.timestamp,
+      transactionId: webhookData.transactionId,
     });
 
     // Update payment status in database
@@ -64,17 +64,17 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
     }
 
     console.log('📋 [COMPAT ROUTE] Payment record retrieved:', {
-      userId: payment.userId,
-      planId: payment.planId,
       billingCycle: payment.billingCycle,
+      planId: payment.planId,
+      userId: payment.userId,
     });
 
     // Activate subscription
     if (payment.userId && payment.planId && payment.billingCycle) {
       console.log('🎯 [COMPAT ROUTE] Activating subscription for user:', {
-        userId: payment.userId,
-        planId: payment.planId,
         billingCycle: payment.billingCycle,
+        planId: payment.planId,
+        userId: payment.userId,
       });
 
       await activateUserSubscription({
@@ -86,9 +86,9 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
       console.log('✅ [COMPAT ROUTE] Subscription activated successfully for user:', payment.userId);
     } else {
       console.error('❌ [COMPAT ROUTE] Payment record incomplete - missing required fields:', {
-        hasUserId: !!payment.userId,
-        hasPlanId: !!payment.planId,
         hasBillingCycle: !!payment.billingCycle,
+        hasPlanId: !!payment.planId,
+        hasUserId: !!payment.userId,
       });
       throw new Error('Payment record incomplete - cannot activate subscription');
     }
@@ -108,8 +108,8 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
 
     console.error('❌ [COMPAT ROUTE] Error processing successful payment:', {
       error: errorMessage,
-      stack: errorStack,
       orderId: webhookData.orderId,
+      stack: errorStack,
       timestamp: new Date().toISOString(),
     });
 
@@ -133,11 +133,11 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
   const startTime = Date.now();
   try {
     console.log('❌ [COMPAT ROUTE] Processing failed payment:', {
-      orderId: webhookData.orderId,
       amount: webhookData.amount,
       currency: webhookData.currency,
-      transactionId: webhookData.transactionId,
+      orderId: webhookData.orderId,
       timestamp: webhookData.timestamp,
+      transactionId: webhookData.transactionId,
     });
 
     // Update payment status in database
@@ -163,8 +163,8 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
 
     console.error('❌ [COMPAT ROUTE] Error processing failed payment:', {
       error: errorMessage,
-      stack: errorStack,
       orderId: webhookData.orderId,
+      stack: errorStack,
       timestamp: new Date().toISOString(),
     });
 
@@ -208,8 +208,8 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
 
     console.error('❌ [COMPAT ROUTE] Error processing pending payment:', {
       error: errorMessage,
-      stack: errorStack,
       orderId: webhookData.orderId,
+      stack: errorStack,
       timestamp: new Date().toISOString(),
     });
 
@@ -320,17 +320,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const errorStack = error instanceof Error ? error.stack : undefined;
 
     console.error('❌ [COMPAT ROUTE] Error processing webhook:', {
+      body,
       error: errorMessage,
       stack: errorStack,
-      body,
       timestamp: new Date().toISOString(),
     });
 
     return NextResponse.json(
       {
+        error: errorMessage,
         message: 'Failed to process webhook',
         success: false,
-        error: errorMessage,
       },
       { status: 500 }
     );

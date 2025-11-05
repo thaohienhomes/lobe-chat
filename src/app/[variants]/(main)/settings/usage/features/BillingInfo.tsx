@@ -85,9 +85,9 @@ interface SubscriptionData {
 
 // VND pricing for plans (monthly)
 const PLAN_PRICING: Record<string, number> = {
-  starter: 29000,
-  premium: 149000,
-  ultimate: 349000,
+  premium: 149_000,
+  starter: 29_000,
+  ultimate: 349_000,
 };
 
 const handleManageSubscription = () => {
@@ -165,9 +165,9 @@ const BillingInfo = memo<BillingInfoProps>(({ mobile }) => {
   const planName = subscription.planId.charAt(0).toUpperCase() + subscription.planId.slice(1);
   const amount = PLAN_PRICING[subscription.planId] || 0;
   const nextBilling = new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: '2-digit',
     day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   });
   const billingEmail = user?.primaryEmailAddress?.emailAddress || 'N/A';
 

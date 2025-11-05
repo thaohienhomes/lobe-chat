@@ -168,7 +168,7 @@ function PaymentWaitingContent() {
       // Check immediately on mount
       checkPaymentStatus();
 
-      const interval = setInterval(checkPaymentStatus, 15000); // 15 seconds
+      const interval = setInterval(checkPaymentStatus, 15_000); // 15 seconds
       return () => {
         console.log('🛑 Stopping payment status polling');
         clearInterval(interval);
@@ -277,7 +277,7 @@ function PaymentWaitingContent() {
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
             {isTimeout ? 'Hết thời gian thanh toán' : 'Thanh toán thất bại'}
           </h2>
-          <p style={{ color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>
+          <p style={{ color: '#666', lineHeight: '1.6', marginBottom: '24px' }}>
             {isTimeout
               ? 'Hệ thống không phát hiện thanh toán trong vòng 15 phút. Nếu bạn đã hoàn tất chuyển khoản, vui lòng xác nhận thủ công hoặc liên hệ hỗ trợ.'
               : paymentStatus.message || 'Vui lòng thử lại hoặc liên hệ hỗ trợ'}
@@ -294,10 +294,10 @@ function PaymentWaitingContent() {
                 textAlign: 'left',
               }}
             >
-              <h4 style={{ margin: '0 0 12px 0', color: '#856404', fontWeight: 'bold' }}>
+              <h4 style={{ color: '#856404', fontWeight: 'bold', margin: '0 0 12px 0' }}>
                 💡 Bạn đã hoàn tất thanh toán?
               </h4>
-              <p style={{ margin: '0 0 12px 0', color: '#856404', fontSize: '14px' }}>
+              <p style={{ color: '#856404', fontSize: '14px', margin: '0 0 12px 0' }}>
                 Nếu bạn đã chuyển khoản thành công nhưng hệ thống chưa cập nhật, bạn có thể xác nhận
                 thủ công để kích hoạt ngay gói dịch vụ.
               </p>
@@ -311,7 +311,7 @@ function PaymentWaitingContent() {
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
             <Button onClick={handleRetry}>
               {isTimeout ? 'Thanh toán lại' : 'Thử lại'}
             </Button>
@@ -329,10 +329,10 @@ function PaymentWaitingContent() {
                 textAlign: 'left',
               }}
             >
-              <h4 style={{ margin: '0 0 12px 0', color: '#004085', fontWeight: 'bold' }}>
+              <h4 style={{ color: '#004085', fontWeight: 'bold', margin: '0 0 12px 0' }}>
                 📞 Cần hỗ trợ?
               </h4>
-              <p style={{ margin: '0', color: '#004085', fontSize: '14px' }}>
+              <p style={{ color: '#004085', fontSize: '14px', margin: '0' }}>
                 Nếu bạn gặp vấn đề, vui lòng liên hệ với đội hỗ trợ của chúng tôi qua email hoặc
                 chat trực tiếp.
               </p>

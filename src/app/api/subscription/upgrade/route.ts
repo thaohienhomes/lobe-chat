@@ -8,31 +8,31 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerDB } from '@/database/server';
-import { subscriptions, sepayPayments } from '@/database/schemas/billing';
+import { subscriptions } from '@/database/schemas/billing';
 import { eq, and } from 'drizzle-orm';
 import { pino } from '@/libs/logger';
 
 interface UpgradeRequest {
-  newPlanId: 'starter' | 'premium' | 'ultimate';
   billingCycle: 'monthly' | 'yearly';
+  newPlanId: 'starter' | 'premium' | 'ultimate';
 }
 
 interface UpgradeResponse {
-  success: boolean;
   message: string;
-  proratedAmount?: number;
   newSubscription?: {
-    id: string;
-    planId: string;
     billingCycle: string;
     currentPeriodEnd: string;
+    id: string;
+    planId: string;
   };
+  proratedAmount?: number;
+  success: boolean;
 }
 
 // Plan pricing in VND
 const PLAN_PRICING = {
-  starter: { monthly: 39_000, yearly: 390_000 },
   premium: { monthly: 129_000, yearly: 1_290_000 },
+  starter: { monthly: 39_000, yearly: 390_000 },
   ultimate: { monthly: 349_000, yearly: 3_490_000 },
 };
 
@@ -134,8 +134,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           error: 'Already subscribed to this plan',
-          success: false,
           message: 'You are already subscribed to this plan',
+          success: false,
         },
         { status: 400 },
       );
@@ -151,11 +151,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     pino.info(
       {
-        userId,
+        billingCycle,
         currentPlan: subscription.planId,
         newPlan: newPlanId,
-        billingCycle,
         proratedAmount,
+        userId,
       },
       'Processing subscription upgrade/downgrade',
     );
@@ -173,10 +173,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const updatedSubscription = await db
       .update(subscriptions)
       .set({
-        planId: newPlanId,
         billingCycle,
-        currentPeriodStart: newPeriodStart,
         currentPeriodEnd: newPeriodEnd,
+        currentPeriodStart: newPeriodStart,
+        planId: newPlanId,
         updatedAt: new Date(),
       })
       .where(eq(subscriptions.id, subscription.id))
@@ -184,27 +184,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     pino.info(
       {
-        userId,
-        subscriptionId: subscription.id,
         newPlan: newPlanId,
+        subscriptionId: subscription.id,
+        userId,
       },
       'Subscription upgraded/downgraded successfully',
     );
 
     const response: UpgradeResponse = {
-      success: true,
       message: proratedAmount > 0
         ? `Upgrade successful. Prorated charge: ${proratedAmount.toLocaleString()} VND`
         : proratedAmount < 0
           ? `Downgrade successful. Credit: ${Math.abs(proratedAmount).toLocaleString()} VND`
           : 'Plan changed successfully. No additional charge.',
-      proratedAmount,
       newSubscription: {
-        id: updatedSubscription[0].id,
-        planId: updatedSubscription[0].planId,
         billingCycle: updatedSubscription[0].billingCycle,
         currentPeriodEnd: updatedSubscription[0].currentPeriodEnd.toISOString(),
+        id: updatedSubscription[0].id,
+        planId: updatedSubscription[0].planId,
       },
+      proratedAmount,
+      success: true,
     };
 
     return NextResponse.json(response);

@@ -19,10 +19,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const userIdParam = searchParams.get('userId');
 
     console.log('🔍 Payment status query received:', {
-      orderId,
       amount: amountStr,
-      userId: userIdParam,
+      orderId,
       timestamp: new Date().toISOString(),
+      userId: userIdParam,
     });
 
     if (!orderId) {

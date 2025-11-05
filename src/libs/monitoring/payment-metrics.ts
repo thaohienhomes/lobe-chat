@@ -6,32 +6,36 @@
 import { pino } from '@/libs/logger';
 
 export interface PaymentMetric {
-  timestamp: number;
-  type: 'webhook' | 'payment_detection' | 'error' | 'database';
-  status: 'success' | 'failure' | 'timeout';
-  duration?: number; // milliseconds
-  orderId?: string;
-  userId?: string;
+  duration?: number;
   errorMessage?: string;
   metadata?: Record<string, any>;
+  // milliseconds
+  orderId?: string;
+  status: 'success' | 'failure' | 'timeout';
+  timestamp: number;
+  type: 'webhook' | 'payment_detection' | 'error' | 'database';
+  userId?: string;
 }
 
 export interface MetricsSnapshot {
-  webhookSuccessRate: number; // percentage
-  paymentDetectionLatency: number; // milliseconds (average)
-  errorRate: number; // percentage
-  totalWebhooks: number;
-  successfulWebhooks: number;
-  failedWebhooks: number;
-  totalPaymentDetections: number;
   averageDetectionTime: number;
-  totalErrors: number;
+  // milliseconds (average)
+  errorRate: number;
+  failedWebhooks: number;
+  // percentage
+  paymentDetectionLatency: number;
+  successfulWebhooks: number;
   timestamp: number;
+  totalErrors: number;
+  totalPaymentDetections: number;
+  // percentage
+  totalWebhooks: number;
+  webhookSuccessRate: number;
 }
 
 class PaymentMetricsCollector {
   private metrics: PaymentMetric[] = [];
-  private readonly maxMetricsSize = 10000; // Keep last 10k metrics in memory
+  private readonly maxMetricsSize = 10_000; // Keep last 10k metrics in memory
   private readonly metricsWindow = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
   /**
@@ -62,21 +66,21 @@ class PaymentMetricsCollector {
     errorMessage?: string,
   ): void {
     this.recordMetric({
-      type: 'webhook',
-      status,
       duration,
-      orderId,
       errorMessage,
+      orderId,
+      status,
       timestamp: Date.now(),
+      type: 'webhook',
     });
 
     pino.info(
       {
-        type: 'webhook_processing',
-        orderId,
-        status,
         duration,
         errorMessage,
+        orderId,
+        status,
+        type: 'webhook_processing',
       },
       `Webhook processing: ${status}`,
     );
@@ -92,21 +96,21 @@ class PaymentMetricsCollector {
     status: 'success' | 'timeout',
   ): void {
     this.recordMetric({
-      type: 'payment_detection',
-      status,
       duration: latency,
       orderId,
-      userId,
+      status,
       timestamp: Date.now(),
+      type: 'payment_detection',
+      userId,
     });
 
     pino.info(
       {
-        type: 'payment_detection',
-        orderId,
-        userId,
         latency,
+        orderId,
         status,
+        type: 'payment_detection',
+        userId,
       },
       `Payment detection: ${status} (${latency}ms)`,
     );
@@ -123,22 +127,22 @@ class PaymentMetricsCollector {
     metadata?: Record<string, any>,
   ): void {
     this.recordMetric({
-      type: 'error',
-      status: 'failure',
       errorMessage,
-      orderId,
-      userId,
       metadata,
+      orderId,
+      status: 'failure',
       timestamp: Date.now(),
+      type: 'error',
+      userId,
     });
 
     pino.error(
       {
-        type,
         errorMessage,
-        orderId,
-        userId,
         metadata,
+        orderId,
+        type,
+        userId,
       },
       `Payment error: ${type}`,
     );
@@ -154,21 +158,21 @@ class PaymentMetricsCollector {
     errorMessage?: string,
   ): void {
     this.recordMetric({
-      type: 'database',
-      status,
       duration,
-      metadata: { operation },
       errorMessage,
+      metadata: { operation },
+      status,
       timestamp: Date.now(),
+      type: 'database',
     });
 
     pino.info(
       {
-        type: 'database_operation',
-        operation,
         duration,
-        status,
         errorMessage,
+        operation,
+        status,
+        type: 'database_operation',
       },
       `Database operation: ${operation} (${duration}ms)`,
     );
@@ -200,17 +204,17 @@ class PaymentMetricsCollector {
     const totalErrors = errors.length;
 
     return {
+      averageDetectionTime,
+      errorRate: totalMetrics > 0 ? (totalErrors / totalMetrics) * 100 : 0,
+      failedWebhooks,
+      paymentDetectionLatency: averageDetectionTime,
+      successfulWebhooks,
+      timestamp: now,
+      totalErrors,
+      totalPaymentDetections: paymentDetections.length,
+      totalWebhooks: webhooks.length,
       webhookSuccessRate:
         webhooks.length > 0 ? (successfulWebhooks / webhooks.length) * 100 : 0,
-      paymentDetectionLatency: averageDetectionTime,
-      errorRate: totalMetrics > 0 ? (totalErrors / totalMetrics) * 100 : 0,
-      totalWebhooks: webhooks.length,
-      successfulWebhooks,
-      failedWebhooks,
-      totalPaymentDetections: paymentDetections.length,
-      averageDetectionTime,
-      totalErrors,
-      timestamp: now,
     };
   }
 
@@ -218,9 +222,9 @@ class PaymentMetricsCollector {
    * Check if metrics are within acceptable thresholds
    */
   checkHealthStatus(): {
+    alerts: string[];
     healthy: boolean;
     warnings: string[];
-    alerts: string[];
   } {
     const snapshot = this.getMetricsSnapshot();
     const warnings: string[] = [];
@@ -238,11 +242,11 @@ class PaymentMetricsCollector {
     }
 
     // Check payment detection latency (target: <30s)
-    if (snapshot.paymentDetectionLatency > 30000 && snapshot.paymentDetectionLatency <= 45000) {
+    if (snapshot.paymentDetectionLatency > 30_000 && snapshot.paymentDetectionLatency <= 45_000) {
       warnings.push(
         `Payment detection latency is ${(snapshot.paymentDetectionLatency / 1000).toFixed(2)}s (target: <30s)`,
       );
-    } else if (snapshot.paymentDetectionLatency > 45000) {
+    } else if (snapshot.paymentDetectionLatency > 45_000) {
       alerts.push(
         `CRITICAL: Payment detection latency is ${(snapshot.paymentDetectionLatency / 1000).toFixed(2)}s (target: <30s)`,
       );
@@ -256,16 +260,16 @@ class PaymentMetricsCollector {
     }
 
     return {
+      alerts,
       healthy: alerts.length === 0,
       warnings,
-      alerts,
     };
   }
 
   /**
    * Log metric to external monitoring system (Vercel Analytics, PostHog, etc.)
    */
-  private logMetricToExternalSystem(metric: PaymentMetric): void {
+  private logMetricToExternalSystem(): void {
     // This can be extended to send metrics to external services like:
     // - Vercel Analytics
     // - PostHog

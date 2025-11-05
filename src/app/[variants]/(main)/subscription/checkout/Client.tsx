@@ -294,7 +294,7 @@ function CheckoutContent() {
     }
   };
 
-  const handleCreditCardSubmit = async (cardData: any) => {
+  const handleCreditCardSubmit = async () => {
     if (!plan) return;
     setLoading(true);
     try {
@@ -309,9 +309,9 @@ function CheckoutContent() {
       // Route credit card payments to Polar.sh (international payment gateway)
       const response = await fetch('/api/payment/polar/create', {
         body: JSON.stringify({
-          planId,
           billingCycle,
           customerEmail: values.email || user?.emailAddresses?.[0]?.emailAddress,
+          planId,
         }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',

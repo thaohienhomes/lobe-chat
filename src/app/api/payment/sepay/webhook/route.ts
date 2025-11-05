@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getServerDB } from '@/database/server';
@@ -19,17 +19,6 @@ export async function GET(): Promise<NextResponse> {
 }
 
 /**
- * Extract masked card number from webhook data
- */
-function extractMaskedCardNumber(webhookData: SepayWebhookData): string | undefined {
-  // If payment method is credit card, extract masked card from webhook
-  if (webhookData.paymentMethod === 'credit_card' && webhookData.maskedCardNumber) {
-    return webhookData.maskedCardNumber;
-  }
-  return undefined;
-}
-
-/**
  * Handle successful payment
  *
  * TRANSACTION SAFETY: This function wraps payment status update and subscription activation
@@ -43,10 +32,10 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
 
   try {
     console.log('✅ Processing successful payment:', {
-      orderId: webhookData.orderId,
-      transactionId: webhookData.transactionId,
       amount: webhookData.amount,
+      orderId: webhookData.orderId,
       timestamp: new Date().toISOString(),
+      transactionId: webhookData.transactionId,
     });
 
     // Execute payment processing in a database transaction
@@ -59,9 +48,9 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
       await tx
         .update(sepayPayments)
         .set({
+          rawWebhook: webhookData,
           status: 'success',
           transactionId: webhookData.transactionId,
-          rawWebhook: webhookData,
         })
         .where(eq(sepayPayments.orderId, webhookData.orderId));
       console.log('✅ Payment status updated successfully');
@@ -89,18 +78,18 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
       // Step 3: Validate payment record has required fields
       if (!payment.userId || !payment.planId || !payment.billingCycle) {
         console.error('❌ Payment record incomplete - missing required fields:', {
-          hasUserId: !!payment.userId,
-          hasPlanId: !!payment.planId,
           hasBillingCycle: !!payment.billingCycle,
+          hasPlanId: !!payment.planId,
+          hasUserId: !!payment.userId,
         });
         throw new Error('Payment record incomplete - cannot activate subscription');
       }
 
       // Step 4: Activate subscription (upsert behavior)
       console.log('🎯 Activating subscription for user:', {
-        userId: payment.userId,
-        planId: payment.planId,
         billingCycle: payment.billingCycle,
+        planId: payment.planId,
+        userId: payment.userId,
       });
 
       const start = new Date();
@@ -118,24 +107,24 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         await tx
           .update(subscriptions)
           .set({
-            planId: payment.planId,
             billingCycle: payment.billingCycle,
-            status: 'active',
-            currentPeriodStart: start,
             currentPeriodEnd: end,
+            currentPeriodStart: start,
             paymentProvider: 'sepay',
+            planId: payment.planId,
+            status: 'active',
           })
           .where(eq(subscriptions.userId, payment.userId));
         console.log('✅ Subscription updated successfully for user:', payment.userId);
       } else {
         // Create new subscription
         await tx.insert(subscriptions).values({
-          userId: payment.userId,
-          planId: payment.planId,
           billingCycle: payment.billingCycle,
-          status: 'active',
-          currentPeriodStart: start,
           currentPeriodEnd: end,
+          currentPeriodStart: start,
+          planId: payment.planId,
+          status: 'active',
+          userId: payment.userId,
         });
         console.log('✅ Subscription created successfully for user:', payment.userId);
       }
@@ -191,9 +180,9 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
     await db
       .update(sepayPayments)
       .set({
+        rawWebhook: webhookData,
         status: 'failed',
         transactionId: webhookData.transactionId,
-        rawWebhook: webhookData,
       })
       .where(eq(sepayPayments.orderId, webhookData.orderId));
 
@@ -232,9 +221,9 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
     await db
       .update(sepayPayments)
       .set({
+        rawWebhook: webhookData,
         status: 'pending',
         transactionId: webhookData.transactionId,
-        rawWebhook: webhookData,
       })
       .where(eq(sepayPayments.orderId, webhookData.orderId));
 
@@ -271,7 +260,7 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
 function extractOrderIdFromContent(content: string): string | null {
   // Look for pattern: 13-digit timestamp followed by 6 uppercase alphanumeric characters
   // Example: "RUCSIA1762228747088NTK3U9" -> extract "1762228747088" and "NTK3U9"
-  const pattern = /(\d{13})([A-Z0-9]{6})/;
+  const pattern = /(\d{13})([\dA-Z]{6})/;
   const match = content.match(pattern);
 
   if (match) {
@@ -281,9 +270,9 @@ function extractOrderIdFromContent(content: string): string | null {
     const orderId = `PHO_SUB_${timestamp}_${randomCode}`;
     console.log('✅ Extracted orderId from content:', {
       content,
-      timestamp,
-      randomCode,
       orderId,
+      randomCode,
+      timestamp,
     });
     return orderId;
   }
@@ -319,7 +308,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!providedSecret) {
       const authHeader = request.headers.get('authorization');
       if (authHeader && authHeader.startsWith('Apikey ')) {
-        providedSecret = authHeader.substring(7); // Remove "Apikey " prefix
+        providedSecret = authHeader.slice(7); // Remove "Apikey " prefix
         console.log('🔑 Extracted secret from Authorization header');
       }
     }
@@ -342,7 +331,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         'Unauthorized webhook request',
         undefined,
         undefined,
-        { hasSecret: !!providedSecret, hasAuthHeader: !!request.headers.get('authorization') }
+        { hasAuthHeader: !!request.headers.get('authorization'), hasSecret: !!providedSecret }
       );
 
       return NextResponse.json(
@@ -382,17 +371,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       if (existingPayment && existingPayment.status === 'success' && existingPayment.transactionId) {
         console.log('⚠️ Webhook already processed (idempotent):', {
           orderId: existingPayment.orderId,
-          transactionId: existingPayment.transactionId,
-          status: existingPayment.status,
           processedAt: existingPayment.updatedAt,
+          status: existingPayment.status,
+          transactionId: existingPayment.transactionId,
         });
 
         // Return success to acknowledge webhook (don't reprocess)
         return NextResponse.json({
-          message: 'Webhook already processed',
-          success: true,
           idempotent: true,
+          message: 'Webhook already processed',
           orderId: existingPayment.orderId,
+          success: true,
           transactionId: existingPayment.transactionId,
         });
       }
@@ -415,9 +404,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         console.error('❌ Could not extract orderId from bank transfer content');
         return NextResponse.json(
           {
+            content: body.content,
             message: 'Could not extract orderId from bank transfer content',
             success: false,
-            content: body.content,
           },
           { status: 400 }
         );
@@ -468,8 +457,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           message: 'Missing orderId in webhook payload',
-          success: false,
           rawBody: body,
+          success: false,
         },
         { status: 400 }
       );
@@ -537,9 +526,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const errorStack = error instanceof Error ? error.stack : undefined;
 
     console.error('❌ Sepay webhook processing error:', {
+      body: body ? JSON.stringify(body) : 'No body parsed',
       error: errorMessage,
       stack: errorStack,
-      body: body ? JSON.stringify(body) : 'No body parsed',
       timestamp: new Date().toISOString(),
     });
 
@@ -552,7 +541,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     return NextResponse.json(
-      { message: 'Webhook processing failed', success: false, error: errorMessage },
+      { error: errorMessage, message: 'Webhook processing failed', success: false },
       { status: 500 },
     );
   }

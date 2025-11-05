@@ -7,10 +7,10 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { MetricsSnapshot } from '@/libs/monitoring/payment-metrics';
 
 interface HealthStatus {
-  healthy: boolean;
-  warnings: string[];
   alerts: string[];
+  healthy: boolean;
   timestamp: number;
+  warnings: string[];
 }
 
 export default function MonitoringPage() {
@@ -53,13 +53,13 @@ export default function MonitoringPage() {
   useEffect(() => {
     fetchMetrics();
     // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchMetrics, 30000);
+    const interval = setInterval(fetchMetrics, 30_000);
     return () => clearInterval(interval);
   }, []);
 
   if (loading && !metrics) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div style={{ alignItems: 'center', display: 'flex', height: '100vh', justifyContent: 'center' }}>
         <Spin size="large" tip="Loading metrics..." />
       </div>
     );
@@ -67,14 +67,14 @@ export default function MonitoringPage() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
         <h1>Payment System Monitoring</h1>
         <Space>
           <Button
-            type="primary"
             icon={<ReloadOutlined />}
-            onClick={fetchMetrics}
             loading={loading}
+            onClick={fetchMetrics}
+            type="primary"
           >
             Refresh
           </Button>
@@ -88,18 +88,18 @@ export default function MonitoringPage() {
 
       {error && (
         <Alert
-          message="Error"
-          description={error}
-          type="error"
-          showIcon
           closable
+          description={error}
+          message="Error"
+          showIcon
           style={{ marginBottom: '24px' }}
+          type="error"
         />
       )}
 
       {health && (
         <Card style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
             <div>
               <h3>System Health</h3>
               {health.healthy ? (
@@ -110,18 +110,18 @@ export default function MonitoringPage() {
             </div>
             {health.warnings.length > 0 && (
               <Alert
-                message={`${health.warnings.length} Warning(s)`}
                 description={health.warnings.join(', ')}
-                type="warning"
+                message={`${health.warnings.length} Warning(s)`}
                 style={{ flex: 1 }}
+                type="warning"
               />
             )}
             {health.alerts.length > 0 && (
               <Alert
-                message={`${health.alerts.length} Alert(s)`}
                 description={health.alerts.join(', ')}
-                type="error"
+                message={`${health.alerts.length} Alert(s)`}
                 style={{ flex: 1 }}
+                type="error"
               />
             )}
           </div>
@@ -131,58 +131,58 @@ export default function MonitoringPage() {
       {metrics && (
         <>
           <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-            <Col xs={24} sm={12} lg={6}>
+            <Col lg={6} sm={12} xs={24}>
               <Card>
                 <Statistic
-                  title="Webhook Success Rate"
-                  value={metrics.webhookSuccessRate}
                   precision={2}
                   suffix="%"
+                  title="Webhook Success Rate"
+                  value={metrics.webhookSuccessRate}
                   valueStyle={{
                     color: metrics.webhookSuccessRate >= 95 ? '#52c41a' : '#faad14',
                   }}
                 />
-                <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
+                <div style={{ color: '#999', fontSize: '12px', marginTop: '8px' }}>
                   Target: &gt;95%
                 </div>
               </Card>
             </Col>
 
-            <Col xs={24} sm={12} lg={6}>
+            <Col lg={6} sm={12} xs={24}>
               <Card>
                 <Statistic
-                  title="Payment Detection Latency"
-                  value={metrics.paymentDetectionLatency / 1000}
                   precision={2}
                   suffix="s"
+                  title="Payment Detection Latency"
+                  value={metrics.paymentDetectionLatency / 1000}
                   valueStyle={{
-                    color: metrics.paymentDetectionLatency <= 30000 ? '#52c41a' : '#faad14',
+                    color: metrics.paymentDetectionLatency <= 30_000 ? '#52c41a' : '#faad14',
                   }}
                 />
-                <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
+                <div style={{ color: '#999', fontSize: '12px', marginTop: '8px' }}>
                   Target: &lt;30s
                 </div>
               </Card>
             </Col>
 
-            <Col xs={24} sm={12} lg={6}>
+            <Col lg={6} sm={12} xs={24}>
               <Card>
                 <Statistic
-                  title="Error Rate"
-                  value={metrics.errorRate}
                   precision={2}
                   suffix="%"
+                  title="Error Rate"
+                  value={metrics.errorRate}
                   valueStyle={{
                     color: metrics.errorRate <= 1 ? '#52c41a' : '#faad14',
                   }}
                 />
-                <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
+                <div style={{ color: '#999', fontSize: '12px', marginTop: '8px' }}>
                   Target: &lt;1%
                 </div>
               </Card>
             </Col>
 
-            <Col xs={24} sm={12} lg={6}>
+            <Col lg={6} sm={12} xs={24}>
               <Card>
                 <Statistic
                   title="Total Errors"
@@ -194,18 +194,18 @@ export default function MonitoringPage() {
           </Row>
 
           <Row gutter={[16, 16]}>
-            <Col xs={24} sm={12}>
+            <Col sm={12} xs={24}>
               <Card title="Webhook Processing">
                 <Statistic
+                  style={{ marginBottom: '16px' }}
                   title="Total Webhooks"
                   value={metrics.totalWebhooks}
-                  style={{ marginBottom: '16px' }}
                 />
                 <Statistic
+                  style={{ marginBottom: '16px' }}
                   title="Successful"
                   value={metrics.successfulWebhooks}
                   valueStyle={{ color: '#52c41a' }}
-                  style={{ marginBottom: '16px' }}
                 />
                 <Statistic
                   title="Failed"
@@ -215,20 +215,20 @@ export default function MonitoringPage() {
               </Card>
             </Col>
 
-            <Col xs={24} sm={12}>
+            <Col sm={12} xs={24}>
               <Card title="Payment Detection">
                 <Statistic
+                  style={{ marginBottom: '16px' }}
                   title="Total Detections"
                   value={metrics.totalPaymentDetections}
-                  style={{ marginBottom: '16px' }}
                 />
                 <Statistic
-                  title="Average Latency"
-                  value={metrics.averageDetectionTime / 1000}
                   precision={2}
                   suffix="s"
+                  title="Average Latency"
+                  value={metrics.averageDetectionTime / 1000}
                   valueStyle={{
-                    color: metrics.averageDetectionTime <= 30000 ? '#52c41a' : '#faad14',
+                    color: metrics.averageDetectionTime <= 30_000 ? '#52c41a' : '#faad14',
                   }}
                 />
               </Card>

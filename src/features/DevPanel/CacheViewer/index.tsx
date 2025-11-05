@@ -1,7 +1,5 @@
 'use client';
 
-import { Empty } from 'antd';
-import { Center } from 'react-layout-kit';
 
 import DataTable from './DataTable';
 import { CachePanelContextProvider } from './cacheProvider';

@@ -5,45 +5,25 @@ import { createStyles } from 'antd-style';
 import { ArrowLeft, Calendar, CreditCard, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
+  actionButtons: css`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-block-start: 24px;
+  `,
+  backButton: css`
+    margin-block-end: 16px;
+  `,
   container: css`
     padding: 24px;
   `,
   header: css`
     margin-block-end: 32px;
-  `,
-  backButton: css`
-    margin-block-end: 16px;
-  `,
-  subscriptionCard: css`
-    margin-block-end: 24px;
-    padding: 24px;
-    border: 1px solid ${token.colorBorder};
-    border-radius: 8px;
-  `,
-  statusBadge: css`
-    display: inline-block;
-
-    margin-block-end: 16px;
-    padding-block: 4px;
-    padding-inline: 12px;
-    border-radius: 4px;
-
-    font-size: 12px;
-    font-weight: 600;
-  `,
-  statusActive: css`
-    color: #52c41a;
-    background-color: #f6ffed;
-  `,
-  statusInactive: css`
-    color: #ff4d4f;
-    background-color: #fff1f0;
   `,
   infoRow: css`
     display: flex;
@@ -58,11 +38,30 @@ const useStyles = createStyles(({ css, token }) => ({
       border-block-end: none;
     }
   `,
-  actionButtons: css`
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-block-start: 24px;
+  statusActive: css`
+    color: #52c41a;
+    background-color: #f6ffed;
+  `,
+  statusBadge: css`
+    display: inline-block;
+
+    margin-block-end: 16px;
+    padding-block: 4px;
+    padding-inline: 12px;
+    border-radius: 4px;
+
+    font-size: 12px;
+    font-weight: 600;
+  `,
+  statusInactive: css`
+    color: #ff4d4f;
+    background-color: #fff1f0;
+  `,
+  subscriptionCard: css`
+    margin-block-end: 24px;
+    padding: 24px;
+    border: 1px solid ${token.colorBorder};
+    border-radius: 8px;
   `,
 }));
 
@@ -77,7 +76,6 @@ interface SubscriptionData {
 const ManageContent = memo(() => {
   const { styles } = useStyles();
   const router = useRouter();
-  const { t } = useTranslation('setting');
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

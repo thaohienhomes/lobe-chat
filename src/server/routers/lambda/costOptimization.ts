@@ -134,9 +134,55 @@ export const costOptimizationRouter = router({
 
 
 
+
   /**
-     * Get detailed usage logs for analysis
-     */
+   * Get usage history (recent usage logs)
+   */
+  getUsageHistory: costOptimizationProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).optional().default(30),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      try {
+        const logs = await ctx.serverDB
+          .select({
+            costUSD: usageLogs.costUSD,
+            costVND: usageLogs.costVND,
+            createdAt: usageLogs.createdAt,
+            id: usageLogs.id,
+            inputTokens: usageLogs.inputTokens,
+            model: usageLogs.model,
+            outputTokens: usageLogs.outputTokens,
+            provider: usageLogs.provider,
+            queryComplexity: usageLogs.queryComplexity,
+            totalTokens: usageLogs.totalTokens,
+          })
+          .from(usageLogs)
+          .where(eq(usageLogs.userId, ctx.userId))
+          .orderBy(desc(usageLogs.createdAt))
+          .limit(input.limit);
+
+        return logs.map(log => ({
+          ...log,
+          date: log.createdAt.toISOString().split('T')[0],
+        }));
+      } catch (err) {
+        console.error('costOptimization.getUsageHistory error', err);
+        return [];
+      }
+    }),
+
+
+
+
+
+
+
+  /**
+       * Get detailed usage logs for analysis
+       */
   getUsageLogs: costOptimizationProcedure
     .input(
       z.object({
@@ -201,9 +247,6 @@ export const costOptimizationRouter = router({
         };
       }
     }),
-
-
-
 
 
   /**
@@ -278,45 +321,6 @@ export const costOptimizationRouter = router({
         console.error('costOptimization.getUsageSummary error', err);
         // Return null on error to indicate no data available
         return null;
-      }
-    }),
-
-  /**
-   * Get usage history (recent usage logs)
-   */
-  getUsageHistory: costOptimizationProcedure
-    .input(
-      z.object({
-        limit: z.number().min(1).max(100).optional().default(30),
-      })
-    )
-    .query(async ({ input, ctx }) => {
-      try {
-        const logs = await ctx.serverDB
-          .select({
-            id: usageLogs.id,
-            model: usageLogs.model,
-            provider: usageLogs.provider,
-            inputTokens: usageLogs.inputTokens,
-            outputTokens: usageLogs.outputTokens,
-            totalTokens: usageLogs.totalTokens,
-            costUSD: usageLogs.costUSD,
-            costVND: usageLogs.costVND,
-            queryComplexity: usageLogs.queryComplexity,
-            createdAt: usageLogs.createdAt,
-          })
-          .from(usageLogs)
-          .where(eq(usageLogs.userId, ctx.userId))
-          .orderBy(desc(usageLogs.createdAt))
-          .limit(input.limit);
-
-        return logs.map(log => ({
-          ...log,
-          date: log.createdAt.toISOString().split('T')[0],
-        }));
-      } catch (err) {
-        console.error('costOptimization.getUsageHistory error', err);
-        return [];
       }
     }),
 

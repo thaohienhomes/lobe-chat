@@ -56,23 +56,23 @@ export interface LocalizedPricingResponse {
       premium: {
         monthly: number;
         monthlyUsd: number;
+        savings: string;
         yearly: number;
         yearlyUsd: number;
-        savings: string;
       };
       starter: {
         monthly: number;
         monthlyUsd: number;
+        savings: string;
         yearly: number;
-        yearlyUsd: number;
-        savings: string; // e.g., "Save 17%"
+        yearlyUsd: number; // e.g., "Save 17%"
       };
       ultimate: {
         monthly: number;
         monthlyUsd: number;
         savings: string;
-        yearlyUsd: number;
         yearly: number;
+        yearlyUsd: number;
       };
     };
     
@@ -159,13 +159,13 @@ availablePaymentMethods: paymentMethods,
 comparisonWithUS: {
           premiumMonthly: {
             local: pppData.pricing.premium.monthlyUsd,
-            us: usPricing.pricing.premium.monthlyUsd,
             savingsPercent: premiumSavings,
+            us: usPricing.pricing.premium.monthlyUsd,
           },
           starterMonthly: {
             local: pppData.pricing.starter.monthlyUsd,
-            us: usPricing.pricing.starter.monthlyUsd,
             savingsPercent: starterSavings,
+            us: usPricing.pricing.starter.monthlyUsd,
           },
           ultimateMonthly: {
             local: pppData.pricing.ultimate.monthlyUsd,

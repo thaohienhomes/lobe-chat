@@ -5,22 +5,39 @@ import { Card, Button, Space, Spin, Alert, Tag, Table, Divider } from 'antd';
 import { ReloadOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 
 interface VerificationResult {
+  details?: Record<string, any>;
+  message: string;
   name: string;
   status: 'pass' | 'fail' | 'warning';
-  message: string;
-  details?: Record<string, any>;
 }
 
 interface VerificationReport {
-  timestamp: number;
   healthy: boolean;
   results: VerificationResult[];
   summary: {
-    passed: number;
     failed: number;
+    passed: number;
     warnings: number;
   };
+  timestamp: number;
 }
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'pass': {
+      return 'green';
+    }
+    case 'fail': {
+      return 'red';
+    }
+    case 'warning': {
+      return 'orange';
+    }
+    default: {
+      return 'default';
+    }
+  }
+};
 
 export default function DatabaseVerificationPage() {
   const [report, setReport] = useState<VerificationReport | null>(null);
@@ -55,59 +72,50 @@ export default function DatabaseVerificationPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pass':
+      case 'pass': {
         return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
-      case 'fail':
+      }
+      case 'fail': {
         return <CloseCircleOutlined style={{ color: '#ff4d4f' }} />;
-      case 'warning':
+      }
+      case 'warning': {
         return <WarningOutlined style={{ color: '#faad14' }} />;
-      default:
+      }
+      default: {
         return null;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pass':
-        return 'green';
-      case 'fail':
-        return 'red';
-      case 'warning':
-        return 'orange';
-      default:
-        return 'default';
+      }
     }
   };
 
   const columns = [
     {
-      title: 'Check',
       dataIndex: 'name',
       key: 'name',
+      title: 'Check',
       width: '30%',
     },
     {
-      title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      width: '15%',
       render: (status: string) => (
         <Tag color={getStatusColor(status)} icon={getStatusIcon(status)}>
           {status.toUpperCase()}
         </Tag>
       ),
+      title: 'Status',
+      width: '15%',
     },
     {
-      title: 'Message',
       dataIndex: 'message',
       key: 'message',
+      title: 'Message',
       width: '55%',
     },
   ];
 
   if (loading && !report) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div style={{ alignItems: 'center', display: 'flex', height: '100vh', justifyContent: 'center' }}>
         <Spin size="large" tip="Verifying database..." />
       </div>
     );
@@ -115,14 +123,14 @@ export default function DatabaseVerificationPage() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
         <h1>Database Verification</h1>
         <Space>
           <Button
-            type="primary"
             icon={<ReloadOutlined />}
-            onClick={fetchVerification}
             loading={loading}
+            onClick={fetchVerification}
+            type="primary"
           >
             Verify Now
           </Button>
@@ -136,19 +144,19 @@ export default function DatabaseVerificationPage() {
 
       {error && (
         <Alert
-          message="Error"
-          description={error}
-          type="error"
-          showIcon
           closable
+          description={error}
+          message="Error"
+          showIcon
           style={{ marginBottom: '24px' }}
+          type="error"
         />
       )}
 
       {report && (
         <>
           <Card style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <div style={{ alignItems: 'center', display: 'flex', gap: '32px' }}>
               <div>
                 <h3>Overall Status</h3>
                 {report.healthy ? (
@@ -163,22 +171,22 @@ export default function DatabaseVerificationPage() {
               </div>
 
               <div>
-                <div style={{ fontSize: '12px', color: '#999' }}>Passed</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#52c41a' }}>
+                <div style={{ color: '#999', fontSize: '12px' }}>Passed</div>
+                <div style={{ color: '#52c41a', fontSize: '24px', fontWeight: 'bold' }}>
                   {report.summary.passed}
                 </div>
               </div>
 
               <div>
-                <div style={{ fontSize: '12px', color: '#999' }}>Warnings</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#faad14' }}>
+                <div style={{ color: '#999', fontSize: '12px' }}>Warnings</div>
+                <div style={{ color: '#faad14', fontSize: '24px', fontWeight: 'bold' }}>
                   {report.summary.warnings}
                 </div>
               </div>
 
               <div>
-                <div style={{ fontSize: '12px', color: '#999' }}>Failed</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ff4d4f' }}>
+                <div style={{ color: '#999', fontSize: '12px' }}>Failed</div>
+                <div style={{ color: '#ff4d4f', fontSize: '24px', fontWeight: 'bold' }}>
                   {report.summary.failed}
                 </div>
               </div>
@@ -197,17 +205,17 @@ export default function DatabaseVerificationPage() {
           <Card style={{ marginTop: '24px' }} title="Details">
             {report.results.map((result, index) => (
               <div key={index} style={{ marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <div style={{ alignItems: 'center', display: 'flex', gap: '8px', marginBottom: '8px' }}>
                   {getStatusIcon(result.status)}
                   <strong>{result.name}</strong>
                   <Tag color={getStatusColor(result.status)}>{result.status.toUpperCase()}</Tag>
                 </div>
-                <div style={{ marginLeft: '24px', marginBottom: '8px', color: '#666' }}>
+                <div style={{ color: '#666', marginBottom: '8px', marginLeft: '24px' }}>
                   {result.message}
                 </div>
                 {result.details && (
-                  <div style={{ marginLeft: '24px', marginBottom: '8px' }}>
-                    <pre style={{ background: '#f5f5f5', padding: '8px', borderRadius: '4px', fontSize: '12px' }}>
+                  <div style={{ marginBottom: '8px', marginLeft: '24px' }}>
+                    <pre style={{ background: '#f5f5f5', borderRadius: '4px', fontSize: '12px', padding: '8px' }}>
                       {JSON.stringify(result.details, null, 2)}
                     </pre>
                   </div>

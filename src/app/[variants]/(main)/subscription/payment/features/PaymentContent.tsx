@@ -1,24 +1,23 @@
 'use client';
 
-import { Alert, Button, Card, Divider, Form, Input, Radio, Switch, Typography, message } from 'antd';
+import { Alert, Button, Card, Divider, Switch, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
 import { ArrowLeft, CreditCard, QrCode } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
+  backButton: css`
+    margin-block-end: 16px;
+  `,
   container: css`
     padding: 24px;
   `,
   header: css`
     margin-block-end: 32px;
-  `,
-  backButton: css`
-    margin-block-end: 16px;
   `,
   methodCard: css`
     cursor: pointer;
@@ -35,20 +34,19 @@ const useStyles = createStyles(({ css, token }) => ({
       background-color: ${token.colorPrimaryBg};
     }
   `,
-  methodSelected: css`
-    border-color: ${token.colorPrimary};
-    background-color: ${token.colorPrimaryBg};
-  `,
   methodIcon: css`
     margin-inline-end: 12px;
     font-size: 24px;
+  `,
+  methodSelected: css`
+    border-color: ${token.colorPrimary};
+    background-color: ${token.colorPrimaryBg};
   `,
 }));
 
 const PaymentContent = memo(() => {
   const { styles, cx } = useStyles();
   const router = useRouter();
-  const { t } = useTranslation('setting');
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>('bank_transfer');
   const [autoRenewalEnabled, setAutoRenewalEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -94,15 +92,15 @@ const PaymentContent = memo(() => {
 
       // Call API to save payment preference
       const response = await fetch('/api/subscription/payment-method', {
-        method: 'POST',
+        body: JSON.stringify({
+          autoRenewalEnabled: paymentMethod === 'credit_card' ? autoRenewalEnabled : false,
+          paymentMethod,
+          // Note: paymentTokenId will be added later when implementing Polar.sh tokenization
+        }),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          paymentMethod,
-          autoRenewalEnabled: paymentMethod === 'credit_card' ? autoRenewalEnabled : false,
-          // Note: paymentTokenId will be added later when implementing Polar.sh tokenization
-        }),
+        method: 'POST',
       });
 
       const data = await response.json();
@@ -176,7 +174,7 @@ const PaymentContent = memo(() => {
               <QrCode className={styles.methodIcon} />
               <Flexbox gap={4}>
                 <Text strong>Bank Transfer (QR Code)</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text style={{ fontSize: 12 }} type="secondary">
                   Fast and secure bank transfer via QR code
                 </Text>
               </Flexbox>
@@ -193,7 +191,7 @@ const PaymentContent = memo(() => {
               <CreditCard className={styles.methodIcon} />
               <Flexbox gap={4}>
                 <Text strong>Credit Card</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text style={{ fontSize: 12 }} type="secondary">
                   Visa, Mastercard, and other major credit cards
                 </Text>
               </Flexbox>
@@ -209,7 +207,7 @@ const PaymentContent = memo(() => {
               <Flexbox gap={8} horizontal style={{ alignItems: 'center', justifyContent: 'space-between' }}>
                 <Flexbox gap={4}>
                   <Text strong>Enable Auto-Renewal</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
+                  <Text style={{ fontSize: 12 }} type="secondary">
                     Automatically renew your subscription when it expires
                   </Text>
                 </Flexbox>

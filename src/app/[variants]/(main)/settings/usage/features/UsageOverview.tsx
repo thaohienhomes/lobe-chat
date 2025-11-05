@@ -125,15 +125,15 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
       <Flexbox gap={24}>
         <Title level={4}>{t('usage.overview.title')}</Title>
         <Alert
+          action={
+            <Button href="/subscription/plans" type="primary">
+              View Plans
+            </Button>
+          }
           description="You don't have an active subscription. Subscribe to a plan to start using AI features and track your usage."
           message="No Active Subscription"
           showIcon
           type="info"
-          action={
-            <Button type="primary" href="/subscription/plans">
-              View Plans
-            </Button>
-          }
         />
       </Flexbox>
     );

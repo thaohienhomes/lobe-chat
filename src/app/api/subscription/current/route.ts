@@ -6,13 +6,13 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerDB } from '@/database/server';
 import { subscriptions } from '@/database/schemas/billing';
 import { eq, and } from 'drizzle-orm';
 import { pino } from '@/libs/logger';
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
     // Verify authentication
     const { userId } = await auth();
@@ -46,21 +46,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     pino.info(
       {
-        userId,
-        planId: subscription.planId,
         billingCycle: subscription.billingCycle,
+        planId: subscription.planId,
+        userId,
       },
       'Current subscription retrieved',
     );
 
     return NextResponse.json({
+      billingCycle: subscription.billingCycle,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+      currentPeriodStart: subscription.currentPeriodStart.toISOString(),
       id: subscription.id,
       planId: subscription.planId,
-      billingCycle: subscription.billingCycle,
       status: subscription.status,
-      currentPeriodStart: subscription.currentPeriodStart.toISOString(),
-      currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
-      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

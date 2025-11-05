@@ -28,20 +28,6 @@ interface UsageHistoryProps {
   mobile?: boolean;
 }
 
-interface UsageLog {
-  costUSD: number;
-  costVND: number;
-  createdAt: Date;
-  date: string;
-  id: string;
-  inputTokens: number;
-  model: string;
-  outputTokens: number;
-  provider: string;
-  queryComplexity: string | null;
-  totalTokens: number | null;
-}
-
 const getModelColor = (model: string) => {
   if (model.includes('gpt') || model.includes('GPT')) return 'green';
   if (model.includes('deepseek') || model.includes('DeepSeek')) return 'blue';
