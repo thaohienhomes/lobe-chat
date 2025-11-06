@@ -65,18 +65,21 @@ export async function createCheckoutSession(
       throw new Error('Success URL is required');
     }
 
-    // Build checkout params - only include priceId if provided (for backward compatibility)
+    // Build checkout params per Polar SDK types (CheckoutCreate)
+    // Required: products (list of product IDs)
     const checkoutParams: any = {
-      customerEmail: params.customerEmail,
+      customerEmail: params.customerEmail ?? null,
       metadata: params.metadata,
-      productId: params.productId,
+      
+// Polar expects an array of product IDs
+products: [params.productId],
+      
+      
+// Use returnUrl as the "back" button / cancel destination
+returnUrl: params.cancelUrl,
+      
       successUrl: params.successUrl,
     };
-
-    // Only include priceId if it's provided (backward compatibility)
-    if (params.priceId) {
-      checkoutParams.priceId = params.priceId;
-    }
 
     console.log('📤 Polar SDK: Calling Polar API with:', checkoutParams);
     const session = await polar.checkouts.create(checkoutParams);
