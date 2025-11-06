@@ -2,7 +2,6 @@
  * Payment System Monitoring Metrics
  * Tracks webhook success rates, payment detection latency, error rates, and database performance
  */
-
 import { pino } from '@/libs/logger';
 
 export interface PaymentMetric {
@@ -53,7 +52,7 @@ class PaymentMetricsCollector {
     }
 
     // Log metric for external monitoring systems
-    this.logMetricToExternalSystem(metric);
+    this.logMetricToExternalSystem();
   }
 
   /**
@@ -213,8 +212,7 @@ class PaymentMetricsCollector {
       totalErrors,
       totalPaymentDetections: paymentDetections.length,
       totalWebhooks: webhooks.length,
-      webhookSuccessRate:
-        webhooks.length > 0 ? (successfulWebhooks / webhooks.length) * 100 : 0,
+      webhookSuccessRate: webhooks.length > 0 ? (successfulWebhooks / webhooks.length) * 100 : 0,
     };
   }
 
@@ -291,8 +289,10 @@ export const paymentMetricsCollector = new PaymentMetricsCollector();
 
 // Periodically clear old metrics (every hour)
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    paymentMetricsCollector.clearOldMetrics();
-  }, 60 * 60 * 1000);
+  setInterval(
+    () => {
+      paymentMetricsCollector.clearOldMetrics();
+    },
+    60 * 60 * 1000,
+  );
 }
-
