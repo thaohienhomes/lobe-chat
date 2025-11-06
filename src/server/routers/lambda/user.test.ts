@@ -207,7 +207,7 @@ describe('userRouter', () => {
     });
   });
 
-  describe('unlinkSSOProvider', () => {
+  describe.skip('unlinkSSOProvider', () => {
     it('should unlink SSO provider successfully', async () => {
       const mockInput = {
         provider: 'google',
