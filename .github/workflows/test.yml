@@ -35,7 +35,7 @@ jobs:
       - name: Install bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ secrets.BUN_VERSION }}
+          bun-version: latest
 
       - name: Install deps
         run: bun i
@@ -45,6 +45,7 @@ jobs:
 
       - name: Upload ${{ matrix.package }} coverage to Codecov
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./packages/${{ matrix.package }}/coverage/lcov.info
@@ -70,7 +71,7 @@ jobs:
       - name: Install bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ secrets.BUN_VERSION }}
+          bun-version: latest
 
       - name: Install deps
         run: bun i
@@ -80,6 +81,7 @@ jobs:
 
       - name: Upload ${{ matrix.package }} coverage to Codecov
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./packages/${{ matrix.package }}/coverage/lcov.info
@@ -103,7 +105,7 @@ jobs:
       - name: Install bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ secrets.BUN_VERSION }}
+          bun-version: latest
 
       - name: Install deps
         run: bun i
@@ -113,6 +115,7 @@ jobs:
 
       - name: Upload App Coverage to Codecov
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/app/lcov.info
@@ -131,7 +134,6 @@ jobs:
         options: >-
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s  --health-retries 5
 
-
         ports:
           - 5432:5432
 
@@ -147,7 +149,7 @@ jobs:
       - name: Install bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ secrets.BUN_VERSION }}
+          bun-version: latest
 
       - name: Install deps
         run: bun i
@@ -174,6 +176,7 @@ jobs:
 
       - name: Upload Database coverage to Codecov
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./packages/database/coverage/lcov.info
