@@ -70,14 +70,10 @@ export async function createCheckoutSession(
     const checkoutParams: any = {
       customerEmail: params.customerEmail ?? null,
       metadata: params.metadata,
-      
-// Polar expects an array of product IDs
-products: [params.productId],
-      
-      
-// Use returnUrl as the "back" button / cancel destination
-returnUrl: params.cancelUrl,
-      
+      // Polar expects an array of product IDs
+      products: [params.productId],
+      // Use returnUrl as the "back" button / cancel destination
+      returnUrl: params.cancelUrl,
       successUrl: params.successUrl,
     };
 
