@@ -218,9 +218,10 @@ export function CreditCardForm({ onSubmit, loading = false, amount }: CreditCard
       <Form.Item style={{ marginTop: 24 }}>
         <Button
           block
-          htmlType="submit"
+          htmlType="button"
           icon={<Lock size={16} />}
           loading={loading}
+          onClick={() => form.submit()}
           size="large"
           type="primary"
         >
