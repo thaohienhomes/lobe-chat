@@ -3,12 +3,10 @@
 import { useUser } from '@clerk/nextjs';
 import { Alert, Button, Card, Divider, Form, Input, Radio, Spin, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
-import { ArrowLeft, Check, CreditCard, Shield } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Lock, Shield } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
-
-import { CreditCardForm } from '@/components/payment/CreditCardForm';
 
 const { Title, Text } = Typography;
 
@@ -296,6 +294,15 @@ function CheckoutContent() {
 
   const handleCreditCardSubmit = async () => {
     if (!plan) return;
+
+    // Validate form before proceeding
+    try {
+      await form.validateFields(['email', 'name']);
+    } catch {
+      message.error('Vui lòng điền đầy đủ thông tin liên hệ');
+      return;
+    }
+
     setLoading(true);
     try {
       console.log('💳 Credit Card: Creating Polar.sh checkout session...', {
@@ -311,6 +318,7 @@ function CheckoutContent() {
         body: JSON.stringify({
           billingCycle,
           customerEmail: values.email || user?.emailAddresses?.[0]?.emailAddress,
+          customerName: values.name || user?.fullName,
           planId,
         }),
         headers: { 'Content-Type': 'application/json' },
@@ -615,11 +623,25 @@ function CheckoutContent() {
                             }).format(vndAmount)}`}
                       </Button>
                     ) : (
-                      <CreditCardForm
-                        amount={vndAmount}
-                        loading={loading}
-                        onSubmit={handleCreditCardSubmit}
-                      />
+                      <div>
+                        <Alert
+                          description="Bạn sẽ được chuyển hướng đến trang thanh toán an toàn của Polar.sh để hoàn tất giao dịch."
+                          message="Thanh toán quốc tế qua Polar.sh"
+                          showIcon
+                          style={{ marginBlockEnd: 16 }}
+                          type="info"
+                        />
+                        <Button
+                          block
+                          icon={<Lock size={16} />}
+                          loading={loading}
+                          onClick={handleCreditCardSubmit}
+                          size="large"
+                          type="primary"
+                        >
+                          {loading ? 'Đang xử lý...' : 'Tiếp tục thanh toán'}
+                        </Button>
+                      </div>
                     )}
                   </div>
 

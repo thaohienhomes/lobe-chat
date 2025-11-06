@@ -39,6 +39,7 @@ export interface PolarSubscription {
 export interface CreateCheckoutParams {
   cancelUrl: string;
   customerEmail?: string;
+  customerName?: string;
   metadata?: Record<string, string>;
   priceId?: string; // Optional - not used in new Polar model
   productId: string;
@@ -69,6 +70,7 @@ export async function createCheckoutSession(
     // Required: products (list of product IDs)
     const checkoutParams: any = {
       customerEmail: params.customerEmail ?? null,
+      customerName: params.customerName ?? null,
       metadata: params.metadata,
       // Polar expects an array of product IDs
       products: [params.productId],

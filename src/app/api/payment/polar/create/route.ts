@@ -15,6 +15,8 @@ import { createCheckoutSession, getPolarProductIds } from '@/libs/polar';
 const CreateCheckoutSchema = z.object({
   billingCycle: z.enum(['monthly', 'yearly']),
   cancelUrl: z.string().url().optional(),
+  customerEmail: z.string().email().optional(),
+  customerName: z.string().optional(),
   planId: z.enum(['starter', 'premium', 'ultimate']),
   successUrl: z.string().url().optional(),
 });
@@ -43,7 +45,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { planId, billingCycle, successUrl, cancelUrl } = validation.data;
+    const { planId, billingCycle, successUrl, cancelUrl, customerEmail, customerName } =
+      validation.data;
 
     // 3. Get Polar product and price IDs
     const { productId, priceId } = getPolarProductIds(planId, billingCycle);
@@ -70,6 +73,8 @@ export async function POST(req: NextRequest) {
     // 5. Create checkout session
     const checkoutParams = {
       cancelUrl: cancelUrl || `${baseUrl}/settings/subscription?canceled=true`,
+      customerEmail,
+      customerName,
       metadata: {
         billingCycle,
         planId,
