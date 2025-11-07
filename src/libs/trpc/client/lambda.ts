@@ -22,14 +22,15 @@ const errorHandlingLink: TRPCLink<LambdaRouter> = () => {
           if (showError) {
             const status = err.data?.httpStatus as number;
 
-            const { loginRequired } = await import('@/components/Error/loginRequiredNotification');
             const { fetchErrorNotification } = await import(
               '@/components/Error/fetchErrorNotification'
             );
 
+            // Don't show notification for 401 errors - let the message error handler display ClerkLogin component
+            // This allows proper error handling in the catch block to create ChatErrorType.InvalidClerkUser
             switch (status) {
               case 401: {
-                loginRequired.redirect();
+                // Skip notification for 401 - will be handled by message error handler
                 break;
               }
 

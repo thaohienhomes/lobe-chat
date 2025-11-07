@@ -394,11 +394,20 @@ export const chatMessage: StateCreator<
       return id;
     } catch (e) {
       internal_toggleMessageLoading(false, tempId);
+
+      // Check if error is 401 UNAUTHORIZED (user not logged in)
+      const isUnauthorized =
+        (e as any)?.data?.httpStatus === 401 || (e as any)?.code === 'UNAUTHORIZED';
+
+      const errorType = isUnauthorized
+        ? ChatErrorType.InvalidClerkUser
+        : ChatErrorType.CreateMessageError;
+
       internal_dispatchMessage({
         id: tempId,
         type: 'updateMessage',
         value: {
-          error: { type: ChatErrorType.CreateMessageError, message: (e as Error).message, body: e },
+          error: { type: errorType, message: (e as Error).message, body: e },
         },
       });
     }
