@@ -301,9 +301,10 @@ export class SepayPaymentGateway {
             : process.env.VERCEL_URL
               ? `https://${process.env.VERCEL_URL}`
               : 'http://localhost:3010');
-        // Use a data URL for the mock QR code (1x1 transparent PNG)
-        const mockQrCodeUrl =
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+        // Use a real QR code generator for better mock testing
+        // This generates a visible QR code so you can see the scanning animation
+        const mockQrData = `MOCK PAYMENT - Order: ${request.orderId} - Amount: ${request.amount} VND`;
+        const mockQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(mockQrData)}`;
         const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCodeUrl=${encodeURIComponent(mockQrCodeUrl)}&bankAccount=1234567890&bankName=Mock%20Bank`;
 
         return {
@@ -600,7 +601,10 @@ export class SepayPaymentGateway {
 
       // Improved error handling with better null checking
       if (result.status !== 200 || !result.messages?.success) {
-        const errorMsg = (result as any).error || (result.messages as any)?.error || 'Failed to fetch transactions';
+        const errorMsg =
+          (result as any).error ||
+          (result.messages as any)?.error ||
+          'Failed to fetch transactions';
         console.error('❌ Sepay API returned error:', errorMsg);
         return {
           error: errorMsg,
@@ -611,7 +615,11 @@ export class SepayPaymentGateway {
       }
 
       // Check if transactions array exists and is valid
-      if (!result.transactions || !Array.isArray(result.transactions) || result.transactions.length === 0) {
+      if (
+        !result.transactions ||
+        !Array.isArray(result.transactions) ||
+        result.transactions.length === 0
+      ) {
         console.log('⏳ No transactions found in Sepay API response');
         return {
           message: 'Payment not found yet',
