@@ -11,6 +11,8 @@ import { Flexbox } from 'react-layout-kit';
 
 import { useServerConfigStore } from '@/store/serverConfig';
 
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
+
 const { Title, Paragraph, Text } = Typography;
 
 // Force dynamic rendering
@@ -25,7 +27,11 @@ const useStyles = createStyles(({ css, token }) => ({
     border: 1px solid ${token.colorWarningBorder};
     border-radius: ${token.borderRadiusLG}px;
 
-    background: linear-gradient(135deg, ${token.colorWarningBg} 0%, ${token.colorWarningBgHover} 100%);
+    background: linear-gradient(
+      135deg,
+      ${token.colorWarningBg} 0%,
+      ${token.colorWarningBgHover} 100%
+    );
 
     transition: all 0.3s ease;
 
@@ -83,7 +89,7 @@ const useStyles = createStyles(({ css, token }) => ({
     min-height: 100vh;
     padding: ${token.padding}px;
 
-    background: ${token.colorBgLayout};
+    background: #f5f5f5;
   `,
   copyButton: css`
     cursor: pointer;
@@ -156,34 +162,35 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: ${token.paddingLG}px;
     border-radius: ${token.borderRadiusLG}px;
 
-    background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorPrimaryBgHover} 100%);
+    background: linear-gradient(135deg, #e6f4ff 0%, #bae0ff 100%);
+    box-shadow: inset 0 0 0 1px rgba(24, 144, 255, 20%);
   `,
-  
+
   qrSection: css`
     display: flex;
     flex-direction: column;
 
     padding: ${token.paddingLG}px;
-    border: 1px solid ${token.colorBorder};
+    border: 1px solid #f0f0f0;
     border-radius: ${token.borderRadiusLG}px;
 
-    background: ${token.colorBgContainer};
+    background: #fff;
 
     transition: all 0.3s ease;
 
     &:hover {
-      box-shadow: ${token.boxShadowSecondary};
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 10%);
     }
   `,
-  
-referenceBox: css`
+
+  referenceBox: css`
     padding-block: ${token.paddingSM}px;
     padding-inline: ${token.padding}px;
     border-radius: ${token.borderRadius}px;
     background: ${token.colorFillQuaternary};
   `,
-  
-referenceText: css`
+
+  referenceText: css`
     padding-block: ${token.paddingXS}px;
     padding-inline: ${token.paddingSM}px;
     border-radius: ${token.borderRadiusSM}px;
@@ -196,7 +203,7 @@ referenceText: css`
     background: ${token.colorBgContainer};
   `,
   // QR Code scanning animation - vertical scan line effect
-scanLine: css`
+  scanLine: css`
     pointer-events: none;
 
     position: absolute;
@@ -250,11 +257,7 @@ scanLine: css`
 
       height: 30px;
 
-      background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        ${token.colorPrimary}22 100%
-      );
+      background: linear-gradient(to bottom, transparent 0%, ${token.colorPrimary}22 100%);
     }
 
     &::after {
@@ -266,11 +269,7 @@ scanLine: css`
 
       height: 30px;
 
-      background: linear-gradient(
-        to top,
-        transparent 0%,
-        ${token.colorPrimary}22 100%
-      );
+      background: linear-gradient(to top, transparent 0%, ${token.colorPrimary}22 100%);
     }
   `,
   statusBar: css`
@@ -307,7 +306,8 @@ scanLine: css`
     }
 
     @keyframes pulse {
-      0%, 100% {
+      0%,
+      100% {
         opacity: 1;
       }
 
@@ -369,11 +369,12 @@ scanLine: css`
   validityInfo: css`
     padding-block: ${token.paddingSM}px;
     padding-inline: ${token.padding}px;
+    border: 1px solid #91caff;
     border-radius: ${token.borderRadius}px;
 
     text-align: center;
 
-    background: ${token.colorPrimaryBg};
+    background: #e6f4ff;
   `,
 }));
 
@@ -813,7 +814,9 @@ function PaymentWaitingContent() {
                 Valid for: {formatTime(timeLeft)}
               </Text>
               <br />
-              <Text style={{ color: '#1890ff', fontSize: 12 }}>QR code expires after 15 minutes</Text>
+              <Text style={{ color: '#1890ff', fontSize: 12 }}>
+                QR code expires after 15 minutes
+              </Text>
             </div>
           </div>
 
@@ -897,7 +900,10 @@ function PaymentWaitingContent() {
           <Title level={4} style={{ marginBottom: 20 }}>
             How to Pay
           </Title>
-          <Flexbox gap={12} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
+          <Flexbox
+            gap={12}
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}
+          >
             {[
               { icon: '📱', step: 'Open your banking app' },
               { icon: '🔍', step: 'Select "Scan QR" or "Transfer"' },
