@@ -13,6 +13,8 @@ import { useServerConfigStore } from '@/store/serverConfig';
 
 /* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
+
 const { Title, Paragraph, Text } = Typography;
 
 // Force dynamic rendering
@@ -87,9 +89,9 @@ const useStyles = createStyles(({ css, token }) => ({
     justify-content: center;
 
     min-height: 100vh;
-    padding: ${token.padding}px;
+    padding: ${token.paddingLG}px;
 
-    background: #f5f5f5;
+    background: linear-gradient(135deg, #e6f4ff 0%, #f0f5ff 50%, #f5f5f5 100%);
   `,
   copyButton: css`
     cursor: pointer;
@@ -139,7 +141,11 @@ const useStyles = createStyles(({ css, token }) => ({
   mainCard: css`
     width: 100%;
     max-width: 1200px;
-    padding: ${token.paddingLG}px;
+    padding: ${token.paddingXL}px;
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: ${token.colorBgContainer};
+    box-shadow: ${token.boxShadowSecondary};
   `,
   qrCodeContainer: css`
     position: relative;
@@ -149,6 +155,18 @@ const useStyles = createStyles(({ css, token }) => ({
     max-width: 300px;
     margin-block: 0 ${token.marginLG}px;
     margin-inline: auto;
+  `,
+  qrCodeLoading: css`
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: ${token.colorFillQuaternary};
   `,
   qrCodeWrapper: css`
     position: relative;
@@ -162,24 +180,29 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: ${token.paddingLG}px;
     border-radius: ${token.borderRadiusLG}px;
 
-    background: linear-gradient(135deg, #e6f4ff 0%, #bae0ff 100%);
-    box-shadow: inset 0 0 0 1px rgba(24, 144, 255, 20%);
+    background: linear-gradient(
+      135deg,
+      ${token.colorPrimaryBg} 0%,
+      ${token.colorPrimaryBgHover} 100%
+    );
+    box-shadow: inset 0 0 0 1px ${token.colorPrimaryBorder}33;
   `,
 
   qrSection: css`
     display: flex;
     flex-direction: column;
 
-    padding: ${token.paddingLG}px;
-    border: 1px solid #f0f0f0;
+    padding: ${token.paddingXL}px;
+    border: 1px solid ${token.colorBorderSecondary};
     border-radius: ${token.borderRadiusLG}px;
 
-    background: #fff;
+    background: ${token.colorBgContainer};
 
     transition: all 0.3s ease;
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 10%);
+      border-color: ${token.colorPrimaryBorder};
+      box-shadow: ${token.boxShadow};
     }
   `,
 
@@ -366,15 +389,32 @@ const useStyles = createStyles(({ css, token }) => ({
 
     background: ${token.colorWarningBg};
   `,
+  timerBadge: css`
+    padding-block: ${token.paddingXS}px;
+    padding-inline: ${token.padding}px;
+    border-radius: ${token.borderRadius}px;
+    background: ${token.colorFillQuaternary};
+  `,
+  urgentBadge: css`
+    padding-block: 2px;
+    padding-inline: ${token.paddingXS}px;
+    border-radius: ${token.borderRadiusSM}px;
+
+    font-size: ${token.fontSizeSM}px;
+    font-weight: 600;
+    color: ${token.colorWhite};
+
+    background: ${token.colorError};
+  `,
   validityInfo: css`
     padding-block: ${token.paddingSM}px;
     padding-inline: ${token.padding}px;
-    border: 1px solid #91caff;
+    border: 1px solid ${token.colorPrimaryBorder};
     border-radius: ${token.borderRadius}px;
 
     text-align: center;
 
-    background: #e6f4ff;
+    background: ${token.colorPrimaryBg};
   `,
 }));
 
@@ -392,7 +432,7 @@ const formatTime = (seconds: number) => {
 };
 
 function PaymentWaitingContent() {
-  const { styles, cx } = useStyles();
+  const { styles, cx, theme } = useStyles();
   const router = useRouter();
   const variants = useServerConfigStore((s) => s.segmentVariants);
   const searchParams = useSearchParams();
@@ -609,14 +649,29 @@ function PaymentWaitingContent() {
 
   if (paymentStatus.status === 'success') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="text-center animate-in fade-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10 text-green-600" />
+      <div className={styles.container}>
+        <Flexbox align="center" gap={24} style={{ textAlign: 'center' }}>
+          <div
+            style={{
+              alignItems: 'center',
+              background: theme.colorSuccessBg,
+              borderRadius: '50%',
+              display: 'flex',
+              height: 80,
+              justifyContent: 'center',
+              width: 80,
+            }}
+          >
+            <Check size={40} style={{ color: theme.colorSuccess }} />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Thanh toán thành công!</h2>
-          <p className="text-gray-600">Đang chuyển hướng đến trang xác nhận...</p>
-        </div>
+          <Title level={2} style={{ marginBottom: 0 }}>
+            Thanh toán thành công!
+          </Title>
+          <Paragraph style={{ color: theme.colorTextSecondary, fontSize: 16 }}>
+            Đang chuyển hướng đến trang xác nhận...
+          </Paragraph>
+          <Spin size="large" />
+        </Flexbox>
       </div>
     );
   }
@@ -709,16 +764,7 @@ function PaymentWaitingContent() {
                 )}
               </Flexbox>
             </Flexbox>
-            <Flexbox
-              align="center"
-              gap={8}
-              horizontal
-              style={{
-                background: '#f5f5f5',
-                borderRadius: 12,
-                padding: '8px 16px',
-              }}
-            >
+            <Flexbox align="center" className={styles.timerBadge} gap={8} horizontal>
               <Clock size={16} />
               <Text style={{ fontSize: 14 }}>Time:</Text>
               <Text
@@ -733,21 +779,7 @@ function PaymentWaitingContent() {
               >
                 {formatTime(timeLeft)}
               </Text>
-              {timeLeft < 300 && (
-                <span
-                  style={{
-                    background: '#ff4d4f',
-                    borderRadius: 12,
-                    color: '#fff',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    marginLeft: 4,
-                    padding: '2px 8px',
-                  }}
-                >
-                  Hurry!
-                </span>
-              )}
+              {timeLeft < 300 && <span className={styles.urgentBadge}>Hurry!</span>}
             </Flexbox>
           </Flexbox>
         </div>
@@ -781,17 +813,9 @@ function PaymentWaitingContent() {
                     <div className={styles.scanLine} />
                   </div>
                 ) : (
-                  <Flexbox
-                    align="center"
-                    justify="center"
-                    style={{
-                      background: '#f5f5f5',
-                      borderRadius: 16,
-                      height: '100%',
-                    }}
-                  >
+                  <Flexbox align="center" className={styles.qrCodeLoading} justify="center">
                     <div style={{ position: 'relative' }}>
-                      <QrCode size={128} style={{ color: '#d9d9d9' }} />
+                      <QrCode size={128} style={{ color: theme.colorTextQuaternary }} />
                       <div
                         style={{
                           alignItems: 'center',
@@ -810,11 +834,11 @@ function PaymentWaitingContent() {
             </Flexbox>
 
             <div className={styles.validityInfo}>
-              <Text strong style={{ color: '#1890ff' }}>
+              <Text strong style={{ color: theme.colorPrimary }}>
                 Valid for: {formatTime(timeLeft)}
               </Text>
               <br />
-              <Text style={{ color: '#1890ff', fontSize: 12 }}>
+              <Text style={{ color: theme.colorPrimary, fontSize: 12 }}>
                 QR code expires after 15 minutes
               </Text>
             </div>
