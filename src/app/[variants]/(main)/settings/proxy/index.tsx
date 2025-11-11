@@ -3,7 +3,6 @@
 import ProxyForm from './features/ProxyForm';
 
 const ProxySettings = () => {
-
   return (
     <div>
       <ProxyForm />

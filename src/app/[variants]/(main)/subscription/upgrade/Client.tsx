@@ -264,7 +264,14 @@ export default function UpgradeClient() {
           <Radio.Button value="yearly">Yearly (17% off)</Radio.Button>
         </Radio.Group>
 
-        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', marginBottom: 24 }}>
+        <div
+          style={{
+            display: 'grid',
+            gap: 16,
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            marginBottom: 24,
+          }}
+        >
           {plans.map((plan) => (
             <Card
               className={`${styles.planCard} ${selectedPlan === plan.id ? 'selected' : ''}`}
@@ -273,19 +280,23 @@ export default function UpgradeClient() {
               style={{ cursor: 'pointer' }}
             >
               <Flexbox gap={12}>
-                <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+                <div
+                  style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}
+                >
                   <Title level={4} style={{ margin: 0 }}>
                     {plan.name}
                   </Title>
-                  {currentSubscription.planId === plan.id && (
-                    <Tag color="blue">Current</Tag>
-                  )}
+                  {currentSubscription.planId === plan.id && <Tag color="blue">Current</Tag>}
                 </div>
 
                 <Text type="secondary">{plan.description}</Text>
 
                 <div style={{ fontSize: 24, fontWeight: 'bold' }}>
-                  {(billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice).toLocaleString()} VND
+                  {(billingCycle === 'monthly'
+                    ? plan.monthlyPrice
+                    : plan.yearlyPrice
+                  ).toLocaleString()}{' '}
+                  VND
                   <span style={{ color: '#999', fontSize: 14, fontWeight: 'normal' }}>
                     /{billingCycle === 'monthly' ? 'month' : 'year'}
                   </span>
@@ -296,7 +307,10 @@ export default function UpgradeClient() {
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
                   {plan.features.map((feature, idx) => (
                     <li key={idx} style={{ fontSize: 12, marginBottom: 4 }}>
-                      <Check size={14} style={{ color: '#52c41a', display: 'inline', marginRight: 4 }} />
+                      <Check
+                        size={14}
+                        style={{ color: '#52c41a', display: 'inline', marginRight: 4 }}
+                      />
                       {feature}
                     </li>
                   ))}
@@ -330,10 +344,11 @@ export default function UpgradeClient() {
           style={{ width: '100%' }}
           type="primary"
         >
-          {selectedPlan === currentSubscription.planId ? 'Already on this plan' : 'Confirm Plan Change'}
+          {selectedPlan === currentSubscription.planId
+            ? 'Already on this plan'
+            : 'Confirm Plan Change'}
         </Button>
       </div>
     </div>
   );
 }
-

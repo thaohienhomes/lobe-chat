@@ -2,8 +2,10 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { CreditCardPaymentRequest, SepayPaymentGateway, sepayGateway } from '@/libs/sepay';
-import { createPaymentRecord } from '@/server/services/billing/sepay';
 import { checkPaymentRateLimit } from '@/middleware/rate-limit';
+import { createPaymentRecord } from '@/server/services/billing/sepay';
+
+import { resolveCorsHeaders } from '../utils';
 
 export interface CreateCreditCardPaymentRequest {
   amount: number;
@@ -206,14 +208,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
 /**
  * Handle CORS preflight requests
  */
-export async function OPTIONS(): Promise<NextResponse> {
+export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
+  const headers = resolveCorsHeaders(request, ['POST', 'OPTIONS']);
+
   return new NextResponse(null, {
-    headers: {
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers,
     status: 200,
   });
 }

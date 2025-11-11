@@ -159,9 +159,7 @@ const ManageContent = memo(() => {
 
       {subscription ? (
         <Card className={styles.subscriptionCard}>
-          <div className={`${styles.statusBadge} ${styles.statusActive}`}>
-            Active
-          </div>
+          <div className={`${styles.statusBadge} ${styles.statusActive}`}>Active</div>
 
           <Flexbox gap={16}>
             <div className={styles.infoRow}>
@@ -169,7 +167,9 @@ const ManageContent = memo(() => {
                 <Package size={16} />
                 <Text strong>Plan</Text>
               </Flexbox>
-              <Text>{subscription.planId.charAt(0).toUpperCase() + subscription.planId.slice(1)}</Text>
+              <Text>
+                {subscription.planId.charAt(0).toUpperCase() + subscription.planId.slice(1)}
+              </Text>
             </div>
 
             <div className={styles.infoRow}>
@@ -195,17 +195,12 @@ const ManageContent = memo(() => {
             <Button onClick={handleUpgrade} type="primary">
               Upgrade Plan
             </Button>
-            <Button danger>
-              Cancel Subscription
-            </Button>
+            <Button danger>Cancel Subscription</Button>
           </div>
         </Card>
       ) : (
         <Card>
-          <Empty
-            description="No active subscription"
-            style={{ padding: '40px 0' }}
-          >
+          <Empty description="No active subscription" style={{ padding: '40px 0' }}>
             <Button onClick={handleUpgrade} type="primary">
               View Plans
             </Button>
@@ -219,4 +214,3 @@ const ManageContent = memo(() => {
 ManageContent.displayName = 'ManageContent';
 
 export default ManageContent;
-

@@ -147,6 +147,16 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
     protected _options: ConstructorOptions<T>;
 
     constructor(options: ClientOptions & Record<string, any> = {}) {
+      // 🔍 DEBUG: Log constructor input
+      console.log(`[${provider}] Constructor called with options:`, {
+        apiKeyLength: options.apiKey?.length || 0,
+        apiKeyPrefix: options.apiKey?.slice(0, 10) || 'none',
+        baseURL: options.baseURL,
+        defaultApiKey: DEFAULT_API_LEY,
+        defaultBaseURL: DEFAULT_BASE_URL,
+        hasApiKey: !!options.apiKey,
+      });
+
       const _options = {
         ...options,
         apiKey: options.apiKey?.trim() || DEFAULT_API_LEY,
@@ -155,9 +165,27 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
       const { apiKey, baseURL = DEFAULT_BASE_URL, ...res } = _options;
       this._options = _options as ConstructorOptions<T>;
 
-      if (!apiKey) throw AgentRuntimeError.createError(ErrorType?.invalidAPIKey);
+      // 🔍 DEBUG: Log final values before validation
+      console.log(`[${provider}] Final values:`, {
+        apiKeyLength: apiKey?.length || 0,
+        apiKeyPrefix: apiKey?.slice(0, 10) || 'none',
+        baseURL,
+        hasApiKey: !!apiKey,
+      });
+
+      if (!apiKey) {
+        console.error(`[${provider}] ❌ API Key is missing!`);
+        throw AgentRuntimeError.createError(ErrorType?.invalidAPIKey);
+      }
 
       const initOptions = { apiKey, baseURL, ...constructorOptions, ...res };
+
+      // 🔍 DEBUG: Log OpenAI client initialization
+      console.log(`[${provider}] Initializing OpenAI client with:`, {
+        apiKeyLength: initOptions.apiKey?.length || 0,
+        baseURL: initOptions.baseURL,
+        hasApiKey: !!initOptions.apiKey,
+      });
 
       // if the custom client is provided, use it as client
       if (customClient?.createClient) {
@@ -169,6 +197,8 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
       this.baseURL = baseURL || this.client.baseURL;
 
       this.id = options.id || provider;
+
+      console.log(`[${provider}] ✅ Client initialized successfully`);
     }
 
     async chat({ responseMode, ...payload }: ChatStreamPayload, options?: ChatMethodOptions) {
@@ -214,11 +244,23 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
             console.log(JSON.stringify(finalPayload), '\n');
           }
 
+          // 🔍 DEBUG: Log API request details
+          console.log(`[${provider}] Making API request:`, {
+            apiKeyLength: this.client.apiKey?.length || 0,
+            apiKeyPrefix: this.client.apiKey?.slice(0, 10) || 'none',
+            baseURL: this.baseURL,
+            hasApiKey: !!this.client.apiKey,
+            messagesCount: finalPayload.messages?.length || 0,
+            model: finalPayload.model,
+          });
+
           response = await this.client.chat.completions.create(finalPayload, {
             // https://github.com/lobehub/lobe-chat/pull/318
             headers: { Accept: '*/*', ...options?.requestHeaders },
             signal: options?.signal,
           });
+
+          console.log(`[${provider}] ✅ API request successful`);
         }
 
         if (postPayload.stream) {
@@ -266,6 +308,13 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
           },
         );
       } catch (error) {
+        console.error(`[${provider}] ❌ Chat API error:`, {
+          baseURL: this.baseURL,
+          error,
+          errorCode: (error as any)?.code,
+          errorMessage: (error as any)?.message,
+          errorStatus: (error as any)?.status,
+        });
         throw this.handleError(error);
       }
     }

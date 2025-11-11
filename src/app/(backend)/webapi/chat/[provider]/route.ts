@@ -22,6 +22,17 @@ export const maxDuration = 300;
 export const POST = checkAuth(async (req: Request, { params, jwtPayload, createRuntime }) => {
   const { provider } = await params;
 
+  // 🔍 DEBUG: Log request info
+  console.log('='.repeat(80));
+  console.log(`[Chat API] Request received for provider: ${provider}`);
+  console.log(`[Chat API] User ID: ${jwtPayload.userId}`);
+  console.log(`[Chat API] JWT Payload:`, {
+    apiKeyLength: jwtPayload.apiKey?.length || 0,
+    baseURL: jwtPayload.baseURL,
+    hasApiKey: !!jwtPayload.apiKey,
+    hasBaseURL: !!jwtPayload.baseURL,
+  });
+
   try {
     // ============  0. Cost Optimization Setup   ============ //
     // Disabled for initial deployment
@@ -58,12 +69,16 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     }
 
     // ============  1. init chat model   ============ //
+    console.log(`[Chat API] Initializing model runtime...`);
     let modelRuntime: ModelRuntime;
     if (createRuntime) {
+      console.log(`[Chat API] Using custom createRuntime function`);
       modelRuntime = createRuntime(jwtPayload);
     } else {
+      console.log(`[Chat API] Using initModelRuntimeWithUserPayload`);
       modelRuntime = await initModelRuntimeWithUserPayload(provider, jwtPayload);
     }
+    console.log(`[Chat API] ✅ Model runtime initialized successfully`);
 
     // ============  2. create chat completion   ============ //
 
@@ -83,17 +98,26 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     }
 
     // ============  3. Execute Chat Completion   ============ //
+    console.log(`[Chat API] Executing chat completion with model: ${data.model}`);
+    console.log(`[Chat API] Messages count: ${data.messages?.length || 0}`);
+
     const response = await modelRuntime.chat(data, {
       user: jwtPayload.userId,
       ...traceOptions,
       signal: req.signal,
     });
 
+    console.log(`[Chat API] ✅ Chat completion successful`);
+    console.log('='.repeat(80));
+
     // ============  4. Track Usage (for non-streaming responses)   ============ //
     // Disabled for initial deployment.
 
     return response;
   } catch (e) {
+    console.log('='.repeat(80));
+    console.error(`[Chat API] ❌ Error occurred:`, e);
+
     const {
       errorType = ChatErrorType.InternalServerError,
       error: errorContent,
@@ -105,6 +129,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     const logMethod = AGENT_RUNTIME_ERROR_SET.has(errorType as string) ? 'warn' : 'error';
     // track the error at server side
     console[logMethod](`Route: [${provider}] ${errorType}:`, error);
+    console.log('='.repeat(80));
 
     return createErrorResponse(errorType, { error, ...res, provider });
   }

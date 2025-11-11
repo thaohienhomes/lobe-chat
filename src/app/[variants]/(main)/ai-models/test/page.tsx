@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, Form, Input, Select, Alert, Typography, Divider } from 'antd';
+import { Alert, Button, Card, Divider, Form, Input, Select, Typography } from 'antd';
 import { memo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
@@ -46,8 +46,8 @@ const AIModelTestPage = memo(() => {
           messages: [
             {
               content: 'Hello! This is a test message from pho.chat. Please respond briefly.',
-              role: 'user'
-            }
+              role: 'user',
+            },
           ],
           model: values.model || 'gpt-3.5-turbo',
           temperature: 0.7,
@@ -71,7 +71,6 @@ const AIModelTestPage = memo(() => {
         provider: values.provider,
         timestamp: new Date().toISOString(),
       });
-
     } catch (err: any) {
       setError(err.message || 'Unknown error occurred');
       console.error('AI Model Test Error:', err);
@@ -99,13 +98,12 @@ const AIModelTestPage = memo(() => {
       }
 
       const data = await response.json();
-      
+
       setResult({
         data: data,
         timestamp: new Date().toISOString(),
         type: 'tRPC',
       });
-
     } catch (err: any) {
       setError(err.message || 'tRPC test failed');
       console.error('tRPC Test Error:', err);
@@ -117,7 +115,7 @@ const AIModelTestPage = memo(() => {
   return (
     <Flexbox gap={24} style={{ margin: '0 auto', maxWidth: '1000px', padding: '24px' }}>
       <Title level={2}>🤖 AI Model Integration Test</Title>
-      
+
       <Alert
         description="Test your AI model integrations, API keys, and routing system"
         message="AI Model Testing Tool"
@@ -140,7 +138,7 @@ const AIModelTestPage = memo(() => {
             rules={[{ message: 'Please select a provider', required: true }]}
           >
             <Select placeholder="Select AI Provider">
-              {testProviders.map(provider => (
+              {testProviders.map((provider) => (
                 <Option key={provider.value} value={provider.value}>
                   {provider.label}
                 </Option>
@@ -156,10 +154,7 @@ const AIModelTestPage = memo(() => {
             <Input.Password placeholder="Enter your API key" />
           </Form.Item>
 
-          <Form.Item
-            label="Model (Optional)"
-            name="model"
-          >
+          <Form.Item label="Model (Optional)" name="model">
             <Input placeholder="e.g., gpt-3.5-turbo, claude-3-sonnet" />
           </Form.Item>
 
@@ -180,58 +175,56 @@ const AIModelTestPage = memo(() => {
         </Flexbox>
       </Card>
 
-      {error && (
-        <Alert
-          closable
-          description={error}
-          message="Test Failed"
-          showIcon
-          type="error"
-        />
-      )}
+      {error && <Alert closable description={error} message="Test Failed" showIcon type="error" />}
 
       {result && (
         <Card title="Test Results">
           <Flexbox gap={16}>
             <Text strong>Test completed at: {result.timestamp}</Text>
             <Divider />
-            
+
             {result.type === 'tRPC' ? (
               <div>
                 <Title level={4}>tRPC Response:</Title>
-                <pre style={{ 
-                  background: '#f5f5f5', 
-                  borderRadius: '4px', 
-                  maxHeight: '300px',
-                  overflow: 'auto',
-                  padding: '16px'
-                }}>
+                <pre
+                  style={{
+                    background: '#f5f5f5',
+                    borderRadius: '4px',
+                    maxHeight: '300px',
+                    overflow: 'auto',
+                    padding: '16px',
+                  }}
+                >
                   {JSON.stringify(result.data, null, 2)}
                 </pre>
               </div>
             ) : (
               <div>
                 <Title level={4}>Provider: {result.provider}</Title>
-                
+
                 <Title level={5}>Available Models:</Title>
-                <pre style={{ 
-                  background: '#f5f5f5', 
-                  borderRadius: '4px', 
-                  maxHeight: '200px',
-                  overflow: 'auto',
-                  padding: '16px'
-                }}>
+                <pre
+                  style={{
+                    background: '#f5f5f5',
+                    borderRadius: '4px',
+                    maxHeight: '200px',
+                    overflow: 'auto',
+                    padding: '16px',
+                  }}
+                >
                   {JSON.stringify(result.models, null, 2)}
                 </pre>
 
                 <Title level={5}>Chat Response:</Title>
-                <pre style={{ 
-                  background: '#f5f5f5', 
-                  borderRadius: '4px', 
-                  maxHeight: '200px',
-                  overflow: 'auto',
-                  padding: '16px'
-                }}>
+                <pre
+                  style={{
+                    background: '#f5f5f5',
+                    borderRadius: '4px',
+                    maxHeight: '200px',
+                    overflow: 'auto',
+                    padding: '16px',
+                  }}
+                >
                   {JSON.stringify(result.chatResponse, null, 2)}
                 </pre>
               </div>
@@ -245,7 +238,7 @@ const AIModelTestPage = memo(() => {
           <Title level={5}>1. Environment Variables</Title>
           <Text>Add to your .env.local file:</Text>
           <pre style={{ background: '#f5f5f5', borderRadius: '4px', padding: '12px' }}>
-{`OPENAI_API_KEY=your_key_here
+            {`OPENAI_API_KEY=your_key_here
 ANTHROPIC_API_KEY=your_key_here
 GOOGLE_API_KEY=your_key_here`}
           </pre>

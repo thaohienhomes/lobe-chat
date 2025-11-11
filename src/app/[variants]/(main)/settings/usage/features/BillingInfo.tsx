@@ -1,12 +1,12 @@
 'use client';
 
+import { useUser } from '@clerk/nextjs';
 import { Button, Card, Skeleton, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import { Calendar, CreditCard, DollarSign } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
-import { useUser } from '@clerk/nextjs';
 
 const { Title } = Typography;
 

@@ -26,8 +26,19 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
         upperProvider = ModelProvider.OpenAI.toUpperCase(); // Use OpenAI options as default
       }
 
+      // Debug log for OpenRouter configuration
+      console.log('[ModelRuntime] Provider:', provider);
+      console.log('[ModelRuntime] Payload API Key:', payload?.apiKey);
+      console.log('[ModelRuntime] Env API Key:', llmConfig[`${upperProvider}_API_KEY`]);
+      console.log('[ModelRuntime] Payload Base URL:', payload?.baseURL);
+      console.log('[ModelRuntime] Env PROXY_URL:', process.env[`${upperProvider}_PROXY_URL`]);
+
       const apiKey = apiKeyManager.pick(payload?.apiKey || llmConfig[`${upperProvider}_API_KEY`]);
       const baseURL = payload?.baseURL || process.env[`${upperProvider}_PROXY_URL`];
+
+      console.log('[ModelRuntime] Final API Key exists:', !!apiKey);
+      console.log('[ModelRuntime] Final API Key length:', apiKey?.length || 0);
+      console.log('[ModelRuntime] Final Base URL:', baseURL);
 
       return baseURL ? { apiKey, baseURL } : { apiKey };
     }

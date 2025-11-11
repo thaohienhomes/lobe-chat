@@ -60,7 +60,7 @@ const UsageHistory = memo<UsageHistoryProps>(({ mobile }) => {
         return [];
       }
     },
-    { revalidateOnFocus: false, revalidateOnReconnect: false }
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   if (isLoading) {
@@ -77,7 +77,7 @@ const UsageHistory = memo<UsageHistoryProps>(({ mobile }) => {
     date: log.date,
     key: log.id || index.toString(),
     model: log.model,
-    tokens: log.totalTokens || (log.inputTokens + log.outputTokens),
+    tokens: log.totalTokens || log.inputTokens + log.outputTokens,
   }));
 
   const columns = [

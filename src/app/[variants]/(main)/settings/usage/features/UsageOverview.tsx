@@ -102,7 +102,7 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
         setLoading(false);
       }
     },
-    { revalidateOnFocus: false, revalidateOnReconnect: false }
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   useEffect(() => {
@@ -174,12 +174,8 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
             </div>
 
             <Flexbox align="center" horizontal justify="space-between">
-              <Text>
-                {formatVND(usageData.totalCostVND)} used
-              </Text>
-              <Text type="secondary">
-                {formatVND(usageData.budgetRemainingVND)} remaining
-              </Text>
+              <Text>{formatVND(usageData.totalCostVND)} used</Text>
+              <Text type="secondary">{formatVND(usageData.budgetRemainingVND)} remaining</Text>
             </Flexbox>
           </Flexbox>
         </Card>
@@ -196,12 +192,8 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
             </div>
 
             <Flexbox align="center" horizontal justify="space-between">
-              <Text>
-                {formatNumber(usageData.totalQueries)} queries
-              </Text>
-              <Text type="secondary">
-                {formatNumber(usageData.totalTokens)} tokens
-              </Text>
+              <Text>{formatNumber(usageData.totalQueries)} queries</Text>
+              <Text type="secondary">{formatNumber(usageData.totalTokens)} tokens</Text>
             </Flexbox>
           </Flexbox>
         </Card>

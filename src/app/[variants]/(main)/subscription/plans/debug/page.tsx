@@ -12,7 +12,9 @@ const DebugSubscriptionPage = memo(() => {
 
   const debugInfo = {
     currentLanguage: i18n.language,
-    subscriptionPlansTitle: t('subscription.plans.title', { defaultValue: 'MISSING: subscription.plans.title' }),
+    subscriptionPlansTitle: t('subscription.plans.title', {
+      defaultValue: 'MISSING: subscription.plans.title',
+    }),
     subscriptionTitle: t('subscription.title', { defaultValue: 'MISSING: subscription.title' }),
     translationNamespace: 'setting',
   };
@@ -20,7 +22,7 @@ const DebugSubscriptionPage = memo(() => {
   return (
     <Flexbox gap={24} style={{ margin: '0 auto', maxWidth: '800px', padding: '24px' }}>
       <Title level={2}>🔍 Subscription Plans Debug Page</Title>
-      
+
       <Alert
         description="This page helps diagnose subscription plans display issues"
         message="Debug Information"
@@ -30,21 +32,35 @@ const DebugSubscriptionPage = memo(() => {
 
       <Card title="Translation Debug">
         <Flexbox gap={16}>
-          <Text><strong>Current Language:</strong> {debugInfo.currentLanguage}</Text>
-          <Text><strong>Translation Namespace:</strong> {debugInfo.translationNamespace}</Text>
-          <Text><strong>Subscription Title:</strong> {debugInfo.subscriptionTitle}</Text>
-          <Text><strong>Subscription Plans Title:</strong> {debugInfo.subscriptionPlansTitle}</Text>
+          <Text>
+            <strong>Current Language:</strong> {debugInfo.currentLanguage}
+          </Text>
+          <Text>
+            <strong>Translation Namespace:</strong> {debugInfo.translationNamespace}
+          </Text>
+          <Text>
+            <strong>Subscription Title:</strong> {debugInfo.subscriptionTitle}
+          </Text>
+          <Text>
+            <strong>Subscription Plans Title:</strong> {debugInfo.subscriptionPlansTitle}
+          </Text>
         </Flexbox>
       </Card>
 
       <Card title="Static Plans Test">
         <Flexbox gap={16}>
           <Title level={4}>Test Plans Display</Title>
-          <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+          <div
+            style={{
+              display: 'grid',
+              gap: '16px',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            }}
+          >
             {[
               { id: 'starter', name: 'Starter', price: '$9.9' },
               { id: 'premium', name: 'Premium', price: '$19.9' },
-              { id: 'ultimate', name: 'Ultimate', price: '$39.9' }
+              { id: 'ultimate', name: 'Ultimate', price: '$39.9' },
             ].map((plan) => (
               <Card key={plan.id} style={{ border: '1px solid #d9d9d9' }}>
                 <Title level={5}>{plan.name}</Title>
@@ -55,14 +71,14 @@ const DebugSubscriptionPage = memo(() => {
                       console.log(`Clicked ${plan.name} plan`);
                       alert(`${plan.name} plan clicked! Check console for details.`);
                     }}
-                    style={{ 
-                      backgroundColor: '#1890ff', 
-                      border: 'none', 
-                      borderRadius: '4px', 
-                      color: 'white', 
-                      cursor: 'pointer', 
+                    style={{
+                      backgroundColor: '#1890ff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      color: 'white',
+                      cursor: 'pointer',
                       padding: '8px 16px',
-                      width: '100%'
+                      width: '100%',
                     }}
                     type="button"
                   >

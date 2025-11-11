@@ -9,7 +9,7 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { getTopModelsForPlan, generateFeatureText } from '@/utils/messageCalculator';
+import { generateFeatureText, getTopModelsForPlan } from '@/utils/messageCalculator';
 
 const { Title, Text } = Typography;
 
@@ -56,22 +56,26 @@ const useStyles = createStyles(({ css, token }) => ({
 
   popularBadge: css`
     position: absolute;
-    top: -12px;
-    left: 50%;
+    inset-block-start: -12px;
+    inset-inline-start: 50%;
     transform: translateX(-50%);
-    background: ${token.colorPrimary};
-    color: white;
-    padding: 4px 16px;
+
+    padding-block: 4px;
+    padding-inline: 16px;
     border-radius: 12px;
+
     font-size: 12px;
     font-weight: 600;
+    color: white;
+
+    background: ${token.colorPrimary};
   `,
 
   price: css`
     font-size: 32px;
     font-weight: 700;
-    color: ${token.colorText};
     line-height: 1;
+    color: ${token.colorText};
   `,
 
   priceUnit: css`
@@ -88,22 +92,28 @@ interface PlansSectionProps {
 // Generate dynamic plans with accurate message calculations
 const generatePlanFeatures = (planId: 'starter' | 'premium' | 'ultimate') => {
   const { budgetModels, premiumModels } = getTopModelsForPlan(planId, 3, 3);
-  
+
   const features = [
     // Budget Models Section
     '📱 Budget Models (High Volume):',
-    ...budgetModels.slice(0, 3).map(model => `• ${generateFeatureText(model)}`),
+    ...budgetModels.slice(0, 3).map((model) => `• ${generateFeatureText(model)}`),
     '',
-    // Premium Models Section  
+    // Premium Models Section
     '🚀 Premium Models (High Quality):',
-    ...premiumModels.slice(0, 3).map(model => `• ${generateFeatureText(model)}`),
+    ...premiumModels.slice(0, 3).map((model) => `• ${generateFeatureText(model)}`),
     '',
     // Storage & Features
     '💾 Storage & Features:',
-    planId === 'starter' ? '• File Storage - 1.0 GB' : 
-    planId === 'premium' ? '• File Storage - 2.0 GB' : '• File Storage - 4.0 GB',
-    planId === 'starter' ? '• Vector Storage - 5,000 entries' :
-    planId === 'premium' ? '• Vector Storage - 10,000 entries' : '• Vector Storage - 20,000 entries',
+    planId === 'starter'
+      ? '• File Storage - 1.0 GB'
+      : planId === 'premium'
+        ? '• File Storage - 2.0 GB'
+        : '• File Storage - 4.0 GB',
+    planId === 'starter'
+      ? '• Vector Storage - 5,000 entries'
+      : planId === 'premium'
+        ? '• Vector Storage - 10,000 entries'
+        : '• Vector Storage - 20,000 entries',
     '• Knowledge Base & File Upload',
     '• Mix & match models based on needs',
   ];
@@ -180,11 +190,7 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
             key={plan.id}
             style={{ padding: mobile ? 16 : 24 }}
           >
-            {plan.popular && (
-              <div className={styles.popularBadge}>
-                Most Popular
-              </div>
-            )}
+            {plan.popular && <div className={styles.popularBadge}>Most Popular</div>}
 
             <Flexbox gap={16}>
               {/* Plan Header */}
@@ -201,9 +207,7 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
               {/* Pricing */}
               <Flexbox gap={4}>
                 <div>
-                  <span className={styles.price}>
-                    {plan.monthlyPriceVND.toLocaleString()}
-                  </span>
+                  <span className={styles.price}>{plan.monthlyPriceVND.toLocaleString()}</span>
                   <span className={styles.priceUnit}> VND/month</span>
                 </div>
                 <Text className={styles.discount}>
@@ -230,7 +234,7 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
                       </Text>
                     );
                   }
-                  
+
                   // Handle empty lines for spacing
                   if (feature === '') {
                     return <div key={index} style={{ height: 4 }} />;
@@ -264,7 +268,8 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
       {/* Additional Info */}
       <Flexbox gap={8} style={{ marginTop: 16 }}>
         <Text style={{ fontSize: 12 }} type="secondary">
-          💡 <strong>Mix & match models:</strong> Use budget models for simple tasks, premium models for complex work.
+          💡 <strong>Mix & match models:</strong> Use budget models for simple tasks, premium models
+          for complex work.
         </Text>
         <Text style={{ fontSize: 12 }} type="secondary">
           🔄 <strong>Flexible usage:</strong> Switch between models anytime based on your needs.

@@ -14,10 +14,7 @@ export default function Desktop({ children }: DesktopProps) {
         width: '100%',
       }}
     >
-      <div style={{ maxWidth: '1024px', width: '100%' }}>
-        {children}
-      </div>
+      <div style={{ maxWidth: '1024px', width: '100%' }}>{children}</div>
     </div>
   );
 }
-

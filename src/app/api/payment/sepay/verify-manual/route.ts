@@ -7,6 +7,12 @@ import {
   updatePaymentStatus,
 } from '@/server/services/billing/sepay';
 
+import { resolveCorsHeaders } from '../utils';
+
+const manualVerificationEnabled =
+  process.env.MANUAL_PAYMENT_VERIFY_ENABLED === 'true' ||
+  process.env.NEXT_PUBLIC_ENABLE_MANUAL_PAYMENT_VERIFY === 'true';
+
 /**
  * Manual payment verification endpoint
  * POST /api/payment/sepay/verify-manual
@@ -21,6 +27,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!userId) {
       console.error('❌ Unauthorized manual verification attempt');
       return NextResponse.json({ message: 'Unauthorized', success: false }, { status: 401 });
+    }
+
+    if (!manualVerificationEnabled) {
+      console.warn('Manual payment verification attempted while feature disabled', {
+        timestamp: new Date().toISOString(),
+        userId,
+      });
+
+      return NextResponse.json(
+        {
+          message:
+            'Manual verification is currently disabled. Please contact support for assistance.',
+          success: false,
+        },
+        { status: 403 },
+      );
     }
 
     const body = await request.json();
@@ -146,4 +168,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 500 },
     );
   }
+}
+
+export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
+  const headers = resolveCorsHeaders(request, ['POST', 'OPTIONS']);
+
+  return new NextResponse(null, {
+    headers,
+    status: 200,
+  });
 }

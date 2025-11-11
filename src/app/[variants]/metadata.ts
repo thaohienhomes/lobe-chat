@@ -22,10 +22,10 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
     icons: isCustomBranding
       ? BRANDING_LOGO_URL
       : {
-        apple: '/apple-touch-icon.png?v=1',
-        icon: '/favicon.ico?v=1',
-        shortcut: '/favicon-32x32.ico?v=1',
-      },
+          apple: '/apple-touch-icon.png?v=1',
+          icon: '/favicon.ico?v=1',
+          shortcut: '/favicon-32x32.ico?v=1',
+        },
     manifest: '/manifest.json',
     metadataBase: new URL(OFFICIAL_URL),
     openGraph: {

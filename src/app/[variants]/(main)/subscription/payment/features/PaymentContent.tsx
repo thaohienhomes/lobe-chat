@@ -4,7 +4,7 @@ import { Alert, Button, Card, Divider, Switch, Typography, message } from 'antd'
 import { createStyles } from 'antd-style';
 import { ArrowLeft, CreditCard, QrCode } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { memo, useState, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 const { Title, Text } = Typography;
@@ -47,7 +47,9 @@ const useStyles = createStyles(({ css, token }) => ({
 const PaymentContent = memo(() => {
   const { styles, cx } = useStyles();
   const router = useRouter();
-  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>('bank_transfer');
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>(
+    'bank_transfer',
+  );
   const [autoRenewalEnabled, setAutoRenewalEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingPreference, setLoadingPreference] = useState(true);
@@ -162,7 +164,10 @@ const PaymentContent = memo(() => {
           <Title level={4}>Available Payment Methods</Title>
 
           <div
-            className={cx(styles.methodCard, paymentMethod === 'bank_transfer' && styles.methodSelected)}
+            className={cx(
+              styles.methodCard,
+              paymentMethod === 'bank_transfer' && styles.methodSelected,
+            )}
             onClick={() => {
               setPaymentMethod('bank_transfer');
               setAutoRenewalEnabled(false); // Auto-renewal not supported for bank transfer
@@ -182,7 +187,10 @@ const PaymentContent = memo(() => {
           </div>
 
           <div
-            className={cx(styles.methodCard, paymentMethod === 'credit_card' && styles.methodSelected)}
+            className={cx(
+              styles.methodCard,
+              paymentMethod === 'credit_card' && styles.methodSelected,
+            )}
             onClick={() => setPaymentMethod('credit_card')}
             role="button"
             tabIndex={0}
@@ -204,17 +212,18 @@ const PaymentContent = memo(() => {
           <>
             <Divider style={{ margin: '24px 0' }} />
             <Flexbox gap={12}>
-              <Flexbox gap={8} horizontal style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+              <Flexbox
+                gap={8}
+                horizontal
+                style={{ alignItems: 'center', justifyContent: 'space-between' }}
+              >
                 <Flexbox gap={4}>
                   <Text strong>Enable Auto-Renewal</Text>
                   <Text style={{ fontSize: 12 }} type="secondary">
                     Automatically renew your subscription when it expires
                   </Text>
                 </Flexbox>
-                <Switch
-                  checked={autoRenewalEnabled}
-                  onChange={setAutoRenewalEnabled}
-                />
+                <Switch checked={autoRenewalEnabled} onChange={setAutoRenewalEnabled} />
               </Flexbox>
               {autoRenewalEnabled && (
                 <Alert
@@ -254,7 +263,9 @@ const PaymentContent = memo(() => {
               <li>Secure and encrypted</li>
               <li>No additional fees</li>
               <li>Works with all Vietnamese banks</li>
-              <li><strong>Manual renewal:</strong> You will need to manually pay each billing cycle</li>
+              <li>
+                <strong>Manual renewal:</strong> You will need to manually pay each billing cycle
+              </li>
             </ul>
           </Flexbox>
         ) : (
@@ -270,7 +281,10 @@ const PaymentContent = memo(() => {
               <li>Instant payment processing</li>
               <li>Secure PCI DSS compliant</li>
               <li>International support</li>
-              <li><strong>Auto-renewal available:</strong> Enable to automatically renew your subscription</li>
+              <li>
+                <strong>Auto-renewal available:</strong> Enable to automatically renew your
+                subscription
+              </li>
             </ul>
             {autoRenewalEnabled && (
               <Alert
@@ -291,4 +305,3 @@ const PaymentContent = memo(() => {
 PaymentContent.displayName = 'PaymentContent';
 
 export default PaymentContent;
-
