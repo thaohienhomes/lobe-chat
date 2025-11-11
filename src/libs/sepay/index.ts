@@ -70,6 +70,7 @@ export interface CreditCardPaymentRequest {
 // Payment Request Interface (supports both bank transfer and credit card)
 export interface SepayPaymentRequest {
   amount: number;
+  baseUrl?: string; // Optional base URL for payment redirect (overrides env vars)
   currency: string;
   customerEmail?: string;
   customerName?: string;
@@ -291,9 +292,10 @@ export class SepayPaymentGateway {
         });
 
         // Generate mock payment waiting URL with QR code
-        // IMPORTANT: Always use production URL in production environment
-        // Priority: NEXT_PUBLIC_BASE_URL > APP_URL > VERCEL_URL (only in preview) > localhost
+        // IMPORTANT: Use baseUrl from request if provided (for correct Vercel preview URLs)
+        // Priority: request.baseUrl > NEXT_PUBLIC_BASE_URL > APP_URL > VERCEL_URL > localhost
         const baseUrl =
+          request.baseUrl ||
           process.env.NEXT_PUBLIC_BASE_URL ||
           process.env.APP_URL ||
           (process.env.VERCEL_ENV === 'production'
@@ -301,11 +303,10 @@ export class SepayPaymentGateway {
             : process.env.VERCEL_URL
               ? `https://${process.env.VERCEL_URL}`
               : 'http://localhost:3010');
-        // Use a real QR code generator for better mock testing
-        // This generates a visible QR code so you can see the scanning animation
-        const mockQrData = `MOCK PAYMENT - Order: ${request.orderId} - Amount: ${request.amount} VND`;
-        const mockQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(mockQrData)}`;
-        const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}&amount=${request.amount}&qrCodeUrl=${encodeURIComponent(mockQrCodeUrl)}&bankAccount=1234567890&bankName=Mock%20Bank`;
+
+        console.log('🌐 MOCK SEPAY: Using base URL:', baseUrl);
+
+        const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}`;
 
         return {
           message: 'Payment created successfully (MOCK)',
@@ -341,9 +342,10 @@ export class SepayPaymentGateway {
       const qrCodeUrl = `https://qr.sepay.vn/img?${qrParams.toString()}`;
 
       // Generate payment waiting URL with real QR code
-      // IMPORTANT: Always use production URL in production environment
-      // Priority: NEXT_PUBLIC_BASE_URL > APP_URL > VERCEL_URL (only in preview) > localhost
+      // IMPORTANT: Use baseUrl from request if provided (for correct Vercel preview URLs)
+      // Priority: request.baseUrl > NEXT_PUBLIC_BASE_URL > APP_URL > VERCEL_URL > localhost
       const baseUrl =
+        request.baseUrl ||
         process.env.NEXT_PUBLIC_BASE_URL ||
         process.env.APP_URL ||
         (process.env.VERCEL_ENV === 'production'
@@ -352,16 +354,10 @@ export class SepayPaymentGateway {
             ? `https://${process.env.VERCEL_URL}`
             : 'http://localhost:3010');
 
-      // Construct the payment URL with proper encoding
-      const paymentUrlParams = new URLSearchParams({
-        amount: request.amount.toString(),
-        bankAccount: bankInfo.accountNumber,
-        bankName: bankInfo.bankName,
-        orderId: request.orderId,
-        qrCodeUrl: qrCodeUrl,
-      });
+      console.log('🌐 REAL SEPAY: Using base URL:', baseUrl);
 
-      const paymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?${paymentUrlParams.toString()}`;
+      // Construct the payment URL with proper encoding
+      const paymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}`;
 
       console.log('🏦 REAL SEPAY: Payment created with QR code');
       console.log('Bank Account:', bankInfo.accountNumber);

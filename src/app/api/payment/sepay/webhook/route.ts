@@ -1,10 +1,10 @@
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getServerDB } from '@/database/server';
 import { sepayPayments, subscriptions } from '@/database/schemas';
-import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
+import { getServerDB } from '@/database/server';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
+import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
 import { getPaymentByOrderId } from '@/server/services/billing/sepay';
 
 /**
@@ -133,11 +133,7 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
     });
 
     const duration = Date.now() - startTime;
-    paymentMetricsCollector.recordWebhookProcessing(
-      webhookData.orderId,
-      'success',
-      duration,
-    );
+    paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
     console.log('✅ Successfully processed payment:', {
       duration: `${duration}ms`,
@@ -187,11 +183,7 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
       .where(eq(sepayPayments.orderId, webhookData.orderId));
 
     const duration = Date.now() - startTime;
-    paymentMetricsCollector.recordWebhookProcessing(
-      webhookData.orderId,
-      'success',
-      duration,
-    );
+    paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
     console.log('Successfully processed failed payment:', webhookData.orderId);
   } catch (error) {
@@ -228,11 +220,7 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
       .where(eq(sepayPayments.orderId, webhookData.orderId));
 
     const duration = Date.now() - startTime;
-    paymentMetricsCollector.recordWebhookProcessing(
-      webhookData.orderId,
-      'success',
-      duration,
-    );
+    paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
     console.log('Successfully processed pending payment:', webhookData.orderId);
   } catch (error) {
@@ -292,8 +280,17 @@ function extractOrderIdFromContent(content: string): string | null {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: any;
   try {
-    console.log('🔔 Webhook received from:', request.headers.get('user-agent'));
-    console.log('🔔 Request headers:', Object.fromEntries(request.headers.entries()));
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const origin = request.headers.get('origin');
+    const contentType = request.headers.get('content-type');
+
+    console.log('Webhook received from:', userAgent);
+    console.log('Webhook headers (sanitized):', {
+      'content-type': contentType,
+      origin,
+      'x-forwarded-for': forwardedFor,
+    });
 
     // SECURITY CHECK: Verify webhook authentication
     // Sepay can send the webhook secret token in two formats:
@@ -317,26 +314,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.error('❌ SEPAY_WEBHOOK_SECRET not configured in environment variables');
       return NextResponse.json(
         { message: 'Webhook authentication not configured', success: false },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     if (!providedSecret || providedSecret !== webhookSecret) {
       console.error('❌ Unauthorized webhook request - invalid or missing secret token');
       console.error('❌ Provided secret:', providedSecret ? '[REDACTED]' : 'NONE');
-      console.error('❌ Authorization header:', request.headers.get('authorization') ? '[REDACTED]' : 'NONE');
+      console.error(
+        '❌ Authorization header:',
+        request.headers.get('authorization') ? '[REDACTED]' : 'NONE',
+      );
 
       paymentMetricsCollector.recordError(
         'webhook_auth_failed',
         'Unauthorized webhook request',
         undefined,
         undefined,
-        { hasAuthHeader: !!request.headers.get('authorization'), hasSecret: !!providedSecret }
+        { hasAuthHeader: !!request.headers.get('authorization'), hasSecret: !!providedSecret },
       );
 
       return NextResponse.json(
         { message: 'Unauthorized - invalid webhook secret', success: false },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -368,7 +368,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.log('🔍 Checking if webhook already processed for orderId:', orderId);
       const existingPayment = await getPaymentByOrderId(orderId);
 
-      if (existingPayment && existingPayment.status === 'success' && existingPayment.transactionId) {
+      if (
+        existingPayment &&
+        existingPayment.status === 'success' &&
+        existingPayment.transactionId
+      ) {
         console.log('⚠️ Webhook already processed (idempotent):', {
           orderId: existingPayment.orderId,
           processedAt: existingPayment.updatedAt,
@@ -408,7 +412,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             message: 'Could not extract orderId from bank transfer content',
             success: false,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -460,7 +464,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           rawBody: body,
           success: false,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -473,20 +477,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           success: false,
           webhookData,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Verify webhook signature (skip for bank transfers only)
     // Bank transfers use webhook secret token authentication instead of signature verification
     if (webhookData.paymentMethod === 'bank_transfer') {
-      console.log('ℹ️ Bank transfer webhook - skipping signature verification (authenticated via webhook secret)');
+      console.log(
+        'ℹ️ Bank transfer webhook - skipping signature verification (authenticated via webhook secret)',
+      );
     } else if (webhookData.signature) {
       const isValidSignature = sepayGateway.verifyWebhookSignature(webhookData);
 
       if (!isValidSignature) {
         console.error('❌ Invalid webhook signature:', webhookData.orderId);
-        console.error('❌ Signature verification failed - webhook will still be processed for debugging');
+        console.error(
+          '❌ Signature verification failed - webhook will still be processed for debugging',
+        );
         // Note: We're logging the error but still processing to help with debugging
         // In production, you may want to reject invalid signatures
       } else {

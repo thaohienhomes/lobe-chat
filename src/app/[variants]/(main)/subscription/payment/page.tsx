@@ -33,4 +33,3 @@ const SubscriptionPaymentPage = async (props: DynamicLayoutProps) => {
 };
 
 export default SubscriptionPaymentPage;
-

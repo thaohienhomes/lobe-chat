@@ -4,8 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SepayPaymentGateway, sepayGateway } from '@/libs/sepay';
 import { createPaymentRecord } from '@/server/services/billing/sepay';
 
+import { resolveCorsHeaders } from '../utils';
+
 export interface CreatePaymentRequest {
   amount: number;
+  baseUrl?: string; // Optional base URL for payment redirect
   billingCycle: 'monthly' | 'yearly';
   currency: string;
   customerInfo?: {
@@ -68,9 +71,28 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
     const planName = planNames[planId as keyof typeof planNames] || 'Subscription Plan';
     const description = `pho.chat ${planName} - ${billingCycle} billing`;
 
+    // Get base URL from request headers to ensure correct deployment URL
+    // This is critical for Vercel preview deployments where VERCEL_URL may be stale
+    const host = request.headers.get('host');
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    const baseUrl = host
+      ? `${protocol}://${host}`
+      : process.env.NEXT_PUBLIC_BASE_URL ||
+        process.env.APP_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
+
+    console.log('🌐 Base URL for payment redirect:', {
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      VERCEL_URL: process.env.VERCEL_URL,
+      baseUrl,
+      host,
+      protocol,
+    });
+
     // Create payment request
     const paymentRequest = {
       amount,
+      baseUrl, // Pass baseUrl to payment gateway
       currency,
       customerEmail: customerInfo?.email,
       customerName: customerInfo?.name,
@@ -165,14 +187,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 /**
  * Handle CORS preflight requests
  */
-export async function OPTIONS(): Promise<NextResponse> {
+export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
+  const headers = resolveCorsHeaders(request, ['GET', 'POST', 'OPTIONS']);
+
   return new NextResponse(null, {
-    headers: {
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers,
     status: 200,
   });
 }

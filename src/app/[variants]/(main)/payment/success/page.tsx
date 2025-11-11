@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, Suspense, useCallback } from 'react';
-import { useServerConfigStore } from '@/store/serverConfig';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Button, Card, Result, Spin, Typography } from 'antd';
 import { createStyles } from 'antd-style';
+import { CheckCircle, Clock, XCircle } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
+
+import { useServerConfigStore } from '@/store/serverConfig';
 
 // Force dynamic rendering to avoid static generation issues with useSearchParams
 export const dynamic = 'force-dynamic';
@@ -33,7 +34,7 @@ const useStyles = createStyles(({ css, token }) => ({
     display: flex;
     justify-content: space-between;
     margin-block-end: ${token.marginSM}px;
-    
+
     &:last-child {
       margin-block-end: 0;
     }
@@ -220,7 +221,9 @@ function PaymentSuccessContent() {
             ]}
             icon={<XCircle className={`${styles.icon} ${styles.errorIcon}`} />}
             status="error"
-            subTitle={paymentStatus.message || 'Your payment could not be processed. Please try again.'}
+            subTitle={
+              paymentStatus.message || 'Your payment could not be processed. Please try again.'
+            }
             title="Payment Failed"
           />
         );
@@ -247,7 +250,7 @@ function PaymentSuccessContent() {
     <div className={styles.container}>
       <Card className={styles.card}>
         {renderContent()}
-        
+
         {(paymentStatus.orderId || paymentStatus.transactionId) && (
           <div className={styles.details}>
             <Title level={5}>Payment Details</Title>
@@ -291,13 +294,15 @@ export default function PaymentSuccessPage() {
   const { styles } = useStyles();
 
   return (
-    <Suspense fallback={
-      <div className={styles.container}>
-        <Flexbox align="center" justify="center" style={{ minHeight: '50vh' }}>
-          <Spin size="large" />
-        </Flexbox>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className={styles.container}>
+          <Flexbox align="center" justify="center" style={{ minHeight: '50vh' }}>
+            <Spin size="large" />
+          </Flexbox>
+        </div>
+      }
+    >
       <PaymentSuccessContent />
     </Suspense>
   );

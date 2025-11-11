@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Card, Statistic, Row, Col, Spin, Alert, Button, Space, Tag } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Col, Row, Space, Spin, Statistic, Tag } from 'antd';
+import { useEffect, useState } from 'react';
 
 import { MetricsSnapshot } from '@/libs/monitoring/payment-metrics';
 
@@ -59,7 +59,9 @@ export default function MonitoringPage() {
 
   if (loading && !metrics) {
     return (
-      <div style={{ alignItems: 'center', display: 'flex', height: '100vh', justifyContent: 'center' }}>
+      <div
+        style={{ alignItems: 'center', display: 'flex', height: '100vh', justifyContent: 'center' }}
+      >
         <Spin size="large" tip="Loading metrics..." />
       </div>
     );
@@ -67,15 +69,17 @@ export default function MonitoringPage() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '24px',
+        }}
+      >
         <h1>Payment System Monitoring</h1>
         <Space>
-          <Button
-            icon={<ReloadOutlined />}
-            loading={loading}
-            onClick={fetchMetrics}
-            type="primary"
-          >
+          <Button icon={<ReloadOutlined />} loading={loading} onClick={fetchMetrics} type="primary">
             Refresh
           </Button>
           {lastUpdated && (
@@ -240,13 +244,23 @@ export default function MonitoringPage() {
       <Card style={{ marginTop: '24px' }}>
         <h3>Monitoring Information</h3>
         <ul>
-          <li><strong>Webhook Success Rate:</strong> Percentage of webhooks processed successfully (target: &gt;95%)</li>
-          <li><strong>Payment Detection Latency:</strong> Average time to detect payment completion (target: &lt;30 seconds)</li>
-          <li><strong>Error Rate:</strong> Percentage of operations that resulted in errors (target: &lt;1%)</li>
-          <li><strong>Auto-refresh:</strong> Metrics update every 30 seconds</li>
+          <li>
+            <strong>Webhook Success Rate:</strong> Percentage of webhooks processed successfully
+            (target: &gt;95%)
+          </li>
+          <li>
+            <strong>Payment Detection Latency:</strong> Average time to detect payment completion
+            (target: &lt;30 seconds)
+          </li>
+          <li>
+            <strong>Error Rate:</strong> Percentage of operations that resulted in errors (target:
+            &lt;1%)
+          </li>
+          <li>
+            <strong>Auto-refresh:</strong> Metrics update every 30 seconds
+          </li>
         </ul>
       </Card>
     </div>
   );
 }
-

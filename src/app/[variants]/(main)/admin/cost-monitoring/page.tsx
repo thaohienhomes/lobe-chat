@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Alert } from 'antd';
+import { Alert, Card } from 'antd';
 import { Flexbox } from 'react-layout-kit';
 
 export default function CostMonitoringPage() {
@@ -17,4 +17,3 @@ export default function CostMonitoringPage() {
     </Flexbox>
   );
 }
-

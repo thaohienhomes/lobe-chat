@@ -14,10 +14,7 @@ export default function Mobile({ children }: MobileProps) {
         width: '100%',
       }}
     >
-      <div style={{ maxWidth: '100%', width: '100%' }}>
-        {children}
-      </div>
+      <div style={{ maxWidth: '100%', width: '100%' }}>{children}</div>
     </div>
   );
 }
-

@@ -1,8 +1,13 @@
 'use client';
 
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ReloadOutlined,
+  WarningOutlined,
+} from '@ant-design/icons';
+import { Alert, Button, Card, Divider, Space, Spin, Table, Tag } from 'antd';
 import { useEffect, useState } from 'react';
-import { Card, Button, Space, Spin, Alert, Tag, Table, Divider } from 'antd';
-import { ReloadOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 
 interface VerificationResult {
   details?: Record<string, any>;
@@ -115,7 +120,9 @@ export default function DatabaseVerificationPage() {
 
   if (loading && !report) {
     return (
-      <div style={{ alignItems: 'center', display: 'flex', height: '100vh', justifyContent: 'center' }}>
+      <div
+        style={{ alignItems: 'center', display: 'flex', height: '100vh', justifyContent: 'center' }}
+      >
         <Spin size="large" tip="Verifying database..." />
       </div>
     );
@@ -123,7 +130,14 @@ export default function DatabaseVerificationPage() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '24px',
+        }}
+      >
         <h1>Database Verification</h1>
         <Space>
           <Button
@@ -205,7 +219,9 @@ export default function DatabaseVerificationPage() {
           <Card style={{ marginTop: '24px' }} title="Details">
             {report.results.map((result, index) => (
               <div key={index} style={{ marginBottom: '16px' }}>
-                <div style={{ alignItems: 'center', display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <div
+                  style={{ alignItems: 'center', display: 'flex', gap: '8px', marginBottom: '8px' }}
+                >
                   {getStatusIcon(result.status)}
                   <strong>{result.name}</strong>
                   <Tag color={getStatusColor(result.status)}>{result.status.toUpperCase()}</Tag>
@@ -215,7 +231,14 @@ export default function DatabaseVerificationPage() {
                 </div>
                 {result.details && (
                   <div style={{ marginBottom: '8px', marginLeft: '24px' }}>
-                    <pre style={{ background: '#f5f5f5', borderRadius: '4px', fontSize: '12px', padding: '8px' }}>
+                    <pre
+                      style={{
+                        background: '#f5f5f5',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        padding: '8px',
+                      }}
+                    >
                       {JSON.stringify(result.details, null, 2)}
                     </pre>
                   </div>
@@ -240,4 +263,3 @@ export default function DatabaseVerificationPage() {
     </div>
   );
 }
-

@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
 import { getPaymentByOrderId } from '@/server/services/billing/sepay';
 
+import { resolveCorsHeaders } from '../utils';
+
 /**
  * Query payment status from database (NOT from Sepay API to avoid rate limiting)
  * GET /api/payment/sepay/status?orderId=xxx&amount=xxx
@@ -65,12 +67,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (payment.status === 'success') {
       // Record successful payment detection
       if (userIdParam) {
-        paymentMetricsCollector.recordPaymentDetection(
-          orderId,
-          userIdParam,
-          latency,
-          'success',
-        );
+        paymentMetricsCollector.recordPaymentDetection(orderId, userIdParam, latency, 'success');
       }
 
       console.log('✅ Payment completed successfully:', {
@@ -124,17 +121,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       timestamp: new Date().toISOString(),
     });
 
-    paymentMetricsCollector.recordError(
-      'payment_status_query_error',
-      errorMessage,
-    );
+    paymentMetricsCollector.recordError('payment_status_query_error', errorMessage);
 
     return NextResponse.json(
       {
         error: errorMessage,
         message: 'Failed to query payment status',
         status: 'failed',
-        success: false
+        success: false,
       },
       { status: 500 },
     );
@@ -144,14 +138,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 /**
  * Handle CORS preflight requests
  */
-export async function OPTIONS(): Promise<NextResponse> {
+export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
+  const headers = resolveCorsHeaders(request, ['GET', 'OPTIONS']);
+
   return new NextResponse(null, {
-    headers: {
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers,
     status: 200,
   });
 }
