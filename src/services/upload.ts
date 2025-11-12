@@ -277,7 +277,10 @@ class UploadService {
     // 生成文件路径元数据
     const { date, dirname, filename, pathname } = generateFilePathMetadata(file.name, options);
 
-    const preSignUrl = await edgeClient.upload.createS3PreSignedUrl.mutate({ pathname });
+    const preSignUrl = await edgeClient.upload.createS3PreSignedUrl.mutate({
+      contentType: file.type,
+      pathname,
+    });
 
     return {
       date,
