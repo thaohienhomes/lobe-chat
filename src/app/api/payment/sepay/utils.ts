@@ -10,7 +10,7 @@ const rawOrigins = [
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
   'http://localhost:3000',
   'http://localhost:3010',
-].filter(Boolean);
+].filter(Boolean) as string[];
 
 const originMap = new Map(rawOrigins.map((origin) => [normalizeOrigin(origin), origin]));
 const fallbackOrigin = rawOrigins[0];
