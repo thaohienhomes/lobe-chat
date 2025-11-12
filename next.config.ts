@@ -1,5 +1,6 @@
 import analyzer from '@next/bundle-analyzer';
 import withSerwistInit from '@serwist/next';
+import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 import ReactComponentName from 'react-scan/react-component-name/webpack';
 
@@ -338,4 +339,18 @@ const withPWA =
     })
     : noWrapper;
 
-export default withBundleAnalyzer(withPWA(nextConfig as NextConfig));
+export default withSentryConfig(
+  withBundleAnalyzer(withPWA(nextConfig as NextConfig)),
+  {
+    // For all available options, see:
+    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+
+    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    widenClientFileUpload: true,
+
+    // Routes browser requests to Sentry through a same-origin proxy, so they use your server URL instead of being made directly to Sentry's servers. (increases server load)
+    // Note: Bear in mind that your server needs to allow outgoing requests to Sentry in order for the proxy to work.
+    // In serverless environments, this generally means adding Sentry's outgoing IP to your edge function allowlist.
+    tunnelRoute: '/monitoring',
+  },
+);
