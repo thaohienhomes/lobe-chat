@@ -7,65 +7,89 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { ProductLogo } from '@/components/Branding';
 import BrandWatermark from '@/components/BrandWatermark';
+import { ProductLogo } from '@/components/Branding';
 import { useUserStore } from '@/store/user';
 
 const useStyles = createStyles(({ css, token, isDarkMode }) => ({
+  benefitDesc: css`
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: ${token.colorTextSecondary};
+  `,
   benefitIcon: css`
     display: flex;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    
+
     width: 48px;
     height: 48px;
-    
-    font-size: 24px;
-    
-    background: ${token.colorBgLayout};
     border-radius: ${token.borderRadius}px;
-  `,
-  benefitDesc: css`
-    margin: 0;
-    
-    font-size: 14px;
-    line-height: 1.6;
-    color: ${token.colorTextSecondary};
+
+    font-size: 24px;
+
+    background: ${token.colorBgLayout};
   `,
   benefitItem: css`
     display: flex;
     gap: 16px;
     align-items: flex-start;
-    
-    margin-bottom: 24px;
-    
+    margin-block-end: 24px;
+
     &:last-child {
-      margin-bottom: 0;
+      margin-block-end: 0;
     }
   `,
   benefitText: css`
     flex: 1;
+  `,
+  benefitTitle: css`
+    margin-block: 0 4px;
+    margin-inline: 0;
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
   `,
   benefitsList: css`
     margin: 0;
     padding: 0;
     list-style: none;
   `,
-  benefitTitle: css`
-    margin: 0 0 4px;
-    
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.4;
-  `,
-  header: css`
-    padding: 32px 32px 24px;
-    text-align: center;
-    border-bottom: 1px solid ${token.colorBorderSecondary};
-  `,
   content: css`
     padding: 32px;
+  `,
+  footer: css`
+    padding-block: 24px 32px;
+    padding-inline: 32px;
+    border-block-start: 1px solid ${token.colorBorderSecondary};
+  `,
+  footerLinks: css`
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+
+    margin-block-start: 16px;
+
+    font-size: 12px;
+    color: ${token.colorTextSecondary};
+
+    a {
+      color: ${token.colorTextSecondary};
+      text-decoration: none;
+
+      &:hover {
+        color: ${token.colorText};
+      }
+    }
+  `,
+  header: css`
+    padding-block: 32px 24px;
+    padding-inline: 32px;
+    border-block-end: 1px solid ${token.colorBorderSecondary};
+    text-align: center;
   `,
   modal: css`
     .ant-modal-content {
@@ -74,39 +98,16 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => ({
       background: ${isDarkMode ? token.colorBgElevated : token.colorBgContainer};
     }
   `,
-  footer: css`
-    padding: 24px 32px 32px;
-    border-top: 1px solid ${token.colorBorderSecondary};
-  `,
   subtitle: css`
     margin: 0;
-    
     font-size: 14px;
     line-height: 1.6;
     color: ${token.colorTextSecondary};
   `,
-  footerLinks: css`
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    
-    margin-top: 16px;
-    
-    font-size: 12px;
-    color: ${token.colorTextSecondary};
-    
-    a {
-      color: ${token.colorTextSecondary};
-      text-decoration: none;
-      
-      &:hover {
-        color: ${token.colorText};
-      }
-    }
-  `,
   title: css`
-    margin: 16px 0 8px;
-    
+    margin-block: 16px 8px;
+    margin-inline: 0;
+
     font-size: 24px;
     font-weight: 600;
     line-height: 1.3;
@@ -202,4 +203,3 @@ const SignInBenefitsModal = memo<SignInBenefitsModalProps>(({ open, onClose }) =
 SignInBenefitsModal.displayName = 'SignInBenefitsModal';
 
 export default SignInBenefitsModal;
-
