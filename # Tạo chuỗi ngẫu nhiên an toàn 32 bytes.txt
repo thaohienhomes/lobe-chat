@@ -1,5 +1,0 @@
-# Tạo chuỗi ngẫu nhiên an toàn 32 bytes
-openssl rand -base64 32
-
-# Ví dụ output:
-# 7xK9mP2nQ5vL8wR3tY6uI1oE4sA0zX7cV9bN5mH2jK8=
