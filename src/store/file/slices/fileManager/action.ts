@@ -99,13 +99,24 @@ export const createFileManageSlice: StateCreator<
     });
 
     const pools = files.map(async (file) => {
-      await get().uploadWithProgress({
-        file,
-        knowledgeBaseId,
-        onStatusUpdate: dispatchDockFileList,
-      });
+      try {
+        await get().uploadWithProgress({
+          file,
+          knowledgeBaseId,
+          onStatusUpdate: dispatchDockFileList,
+        });
 
-      await get().refreshFileList();
+        await get().refreshFileList();
+      } catch (error) {
+        // Update file status to error
+        dispatchDockFileList({
+          id: file.name,
+          type: 'updateFile',
+          value: { status: 'error' },
+        });
+
+        console.error(`Failed to upload file ${file.name}:`, error);
+      }
     });
 
     await Promise.all(pools);
