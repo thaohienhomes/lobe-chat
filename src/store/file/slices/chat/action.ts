@@ -129,18 +129,27 @@ export const createFileSlice: StateCreator<
         });
       } catch (error) {
         // skip `UNAUTHORIZED` error
-        if ((error as any)?.message !== 'UNAUTHORIZED')
+        if ((error as any)?.message !== 'UNAUTHORIZED') {
+          const errorMessage = (error as Error)?.message || '';
+          let description: string;
+
+          if (error === UPLOAD_NETWORK_ERROR) {
+            description = t('upload.networkError', { ns: 'error' });
+          } else if (errorMessage.includes('CORS_ERROR')) {
+            description =
+              t('upload.corsError', { ns: 'error' }) ||
+              'S3 bucket CORS policy is not configured. Please contact support.';
+          } else if (typeof error === 'string') {
+            description = error;
+          } else {
+            description = t('upload.unknownError', { ns: 'error', reason: errorMessage });
+          }
+
           notification.error({
-            description:
-              // it may be a network error or the cors error
-              error === UPLOAD_NETWORK_ERROR
-                ? t('upload.networkError', { ns: 'error' })
-                : // or the error from the server
-                  typeof error === 'string'
-                  ? error
-                  : t('upload.unknownError', { ns: 'error', reason: (error as Error).message }),
+            description,
             message: t('upload.uploadFailed', { ns: 'error' }),
           });
+        }
 
         dispatchChatUploadFileList({ id: file.name, type: 'removeFile' });
       }

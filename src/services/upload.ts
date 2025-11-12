@@ -201,12 +201,25 @@ class UploadService {
           });
           resolve(xhr.response);
         } else {
-          reject(xhr.statusText);
+          // Detect CORS errors (status 0 with CORS issue)
+          const errorMsg = xhr.statusText || 'Upload failed';
+          reject(new Error(errorMsg));
         }
       });
       xhr.addEventListener('error', () => {
-        if (xhr.status === 0) reject(UPLOAD_NETWORK_ERROR);
-        else reject(xhr.statusText);
+        // CORS errors result in status 0
+        if (xhr.status === 0) {
+          reject(
+            new Error(
+              'CORS_ERROR: S3 bucket CORS policy not configured. Please check S3 bucket CORS settings.',
+            ),
+          );
+        } else {
+          reject(new Error(`Upload error: ${xhr.statusText}`));
+        }
+      });
+      xhr.addEventListener('abort', () => {
+        reject(new Error('Upload aborted'));
       });
       xhr.send(data);
     });
