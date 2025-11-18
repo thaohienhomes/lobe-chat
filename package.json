@@ -87,7 +87,12 @@
     "workflow:i18n": "tsx ./scripts/i18nWorkflow/index.ts",
     "workflow:mdx": "tsx ./scripts/mdxWorkflow/index.ts",
     "workflow:readme": "tsx ./scripts/readmeWorkflow/index.ts",
-    "workflow:set-desktop-version": "tsx ./scripts/electronWorkflow/setDesktopVersion.ts"
+    "workflow:set-desktop-version": "tsx ./scripts/electronWorkflow/setDesktopVersion.ts",
+    "generate:assets": "tsx ./scripts/generate-assets.ts",
+    "seed:demo": "tsx ./scripts/seed-demo-content.ts",
+    "capture:screenshots": "tsx ./scripts/capture-screenshots.ts",
+    "assets:optimize": "tsx ./scripts/optimize-assets.ts",
+    "assets:all": "npm run generate:assets && npm run capture:screenshots && npm run assets:optimize"
   },
   "lint-staged": {
     "*.md": [
@@ -168,6 +173,7 @@
     "@next/third-parties": "^15.5.3",
     "@polar-sh/sdk": "^0.40.2",
     "@react-spring/web": "^9.7.5",
+    "@sentry/nextjs": "^10.25.0",
     "@serwist/next": "^9.2.1",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@tanstack/react-query": "^5.87.4",
@@ -267,7 +273,6 @@
     "resolve-accept-language": "^3.1.13",
     "rtl-detect": "^1.1.2",
     "semver": "^7.7.2",
-    "sharp": "^0.34.3",
     "shiki": "^3.12.2",
     "stripe": "^17.7.0",
     "superjson": "^2.2.2",
@@ -356,6 +361,8 @@
     "node-gyp": "^11.4.2",
     "openapi-typescript": "^7.9.1",
     "p-map": "^7.0.3",
+    "playwright": "^1.56.1",
+    "pngquant-bin": "^9.0.0",
     "prettier": "^3.6.2",
     "remark-cli": "^12.0.1",
     "remark-frontmatter": "^5.0.0",
@@ -363,6 +370,7 @@
     "remark-parse": "^11.0.0",
     "semantic-release": "^21.1.2",
     "serwist": "^9.2.1",
+    "sharp": "^0.34.5",
     "stylelint": "^15.11.0",
     "tsx": "^4.20.5",
     "type-fest": "^4.41.0",
@@ -379,7 +387,8 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@vercel/speed-insights"
+      "@vercel/speed-insights",
+      "pngquant-bin"
     ],
     "overrides": {
       "mdast-util-gfm-autolink-literal": "2.0.0"

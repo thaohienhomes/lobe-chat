@@ -1,5 +1,6 @@
 import analyzer from '@next/bundle-analyzer';
 import withSerwistInit from '@serwist/next';
+import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 import ReactComponentName from 'react-scan/react-component-name/webpack';
 
@@ -338,4 +339,16 @@ const withPWA =
     })
     : noWrapper;
 
-export default withBundleAnalyzer(withPWA(nextConfig as NextConfig));
+export default withBundleAnalyzer(
+  withPWA(
+    withSentryConfig(nextConfig as NextConfig, {
+      // For all available options, see:
+      // https://github.com/getsentry/sentry-webpack-plugin/blob/master/src/index.ts#L29-L102
+
+      // Suppresses source map uploading logs during build
+      silent: true,
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+    }),
+  ),
+);
