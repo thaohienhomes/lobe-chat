@@ -13,13 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      NODE_OPTIONS: --max-old-space-size=7168
+      NODE_OPTIONS: --max-old-space-size=8192
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       KEY_VAULTS_SECRET: ${{ secrets.KEY_VAULTS_SECRET }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       MIGRATE_ON_BUILD: ${{ secrets.MIGRATE_ON_BUILD }}
+      SENTRY_SUPPRESS_INSTRUMENTATION_FILE_WARNING: 1
+      SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: 1
 
     steps:
       - name: Checkout

@@ -1,6 +1,6 @@
 import analyzer from '@next/bundle-analyzer';
-import withSerwistInit from '@serwist/next';
 import { withSentryConfig } from '@sentry/nextjs';
+import withSerwistInit from '@serwist/next';
 import type { NextConfig } from 'next';
 import ReactComponentName from 'react-scan/react-component-name/webpack';
 
@@ -327,28 +327,28 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true' ? analyzer() : noWrapp
 const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
-      // Allow precaching of large PGLite assets for offline functionality
-      // Reduced from 10MB to 8MB to optimize build memory usage
-      maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+        // Allow precaching of large PGLite assets for offline functionality
+        // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 
-      register: false,
+        register: false,
 
-      swDest: 'public/sw.js',
+        swDest: 'public/sw.js',
 
-      swSrc: 'src/app/sw.ts', // 8MB
-    })
+        swSrc: 'src/app/sw.ts', // 5MB
+      })
     : noWrapper;
 
 export default withBundleAnalyzer(
   withPWA(
     withSentryConfig(nextConfig as NextConfig, {
+      org: process.env.SENTRY_ORG,
+
+      project: process.env.SENTRY_PROJECT,
       // For all available options, see:
       // https://github.com/getsentry/sentry-webpack-plugin/blob/master/src/index.ts#L29-L102
-
       // Suppresses source map uploading logs during build
       silent: true,
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
     }),
   ),
 );
