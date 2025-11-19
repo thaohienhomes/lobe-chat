@@ -20,22 +20,27 @@ export const LobeOpenRouterAI = createOpenAICompatibleRuntime({
 
       if (thinking?.type === 'enabled') {
         const modelConfig = OpenRouterModels.find((m) => m.id === model);
-        const defaultMaxOutput = modelConfig?.maxOutput;
+        const reasoningConfig = modelConfig as any;
 
-        // 配置优先级：用户设置 > 模型配置 > 硬编码默认值
-        const getMaxTokens = () => {
-          if (max_tokens) return max_tokens;
-          if (defaultMaxOutput) return defaultMaxOutput;
-          return undefined;
-        };
+        // Only add reasoning if the model supports it
+        if (reasoningConfig?.reasoning) {
+          const defaultMaxOutput = reasoningConfig?.maxOutput as number | undefined;
 
-        const maxTokens = getMaxTokens() || 32_000; // Claude Opus 4 has minimum maxOutput
+          // 配置优先级：用户设置 > 模型配置 > 硬编码默认值
+          const getMaxTokens = () => {
+            if (max_tokens) return max_tokens;
+            if (defaultMaxOutput) return defaultMaxOutput;
+            return undefined;
+          };
 
-        reasoning = {
-          max_tokens: thinking?.budget_tokens
-            ? Math.min(thinking.budget_tokens, maxTokens - 1)
-            : 1024,
-        };
+          const maxTokens = getMaxTokens() || 32_000; // Claude Opus 4 has minimum maxOutput
+
+          reasoning = {
+            max_tokens: thinking?.budget_tokens
+              ? Math.min(thinking.budget_tokens, maxTokens - 1)
+              : 1024,
+          };
+        }
       }
 
       return {

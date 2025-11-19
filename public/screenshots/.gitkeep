@@ -1,0 +1,19 @@
+# Screenshots Directory
+
+This directory will contain PWA screenshots:
+
+## Mobile Screenshots (750×1334)
+- shot-1.mobile.png - Main chat interface
+- shot-2.mobile.png - Model selection
+- shot-3.mobile.png - Settings panel
+- shot-4.mobile.png - Plugin marketplace
+- shot-5.mobile.png - Knowledge base
+
+## Desktop Screenshots (1920×1080)
+- shot-1.desktop.png - Main dashboard
+- shot-2.desktop.png - Multi-model chat
+- shot-3.desktop.png - Advanced settings
+- shot-4.desktop.png - Plugin integration
+- shot-5.desktop.png - Knowledge management
+
+See docs/SCREENSHOT_CAPTURE_GUIDE.md for capture instructions.

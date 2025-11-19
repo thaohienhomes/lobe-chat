@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monochrome Version -->
+  <!-- Bowl -->
+  <path d="M140 280 Q140 360 256 360 Q372 360 372 280 L372 260 Q372 240 256 240 Q140 240 140 260 Z" 
+        fill="#000000"/>
+  
+  <!-- Bowl Rim -->
+  <ellipse cx="256" cy="260" rx="116" ry="20" fill="#333333"/>
+  
+  <!-- Steam Lines -->
+  <path d="M200 220 Q205 200 210 180 Q215 160 220 140" 
+        stroke="#000000" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <path d="M256 210 Q261 190 266 170 Q271 150 276 130" 
+        stroke="#000000" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <path d="M312 220 Q307 200 302 180 Q297 160 292 140" 
+        stroke="#000000" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.5"/>
+</svg>

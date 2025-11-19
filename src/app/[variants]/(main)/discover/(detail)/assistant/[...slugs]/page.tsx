@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import urlJoin from 'url-join';
 
 import StructuredData from '@/components/StructuredData';
+import { OFFICIAL_SITE } from '@/const/url';
 import { Locales } from '@/locales/resources';
 import { ldModule } from '@/server/ld';
 import { metadataModule } from '@/server/metadata';
@@ -53,7 +54,7 @@ export const generateMetadata = async (props: DiscoverPageProps) => {
     keywords: tags,
     ...metadataModule.generate({
       alternate: true,
-      canonical: urlJoin('https://lobehub.com/agent', identifier),
+      canonical: urlJoin(OFFICIAL_SITE, '/discover/assistant', identifier),
       description: description,
       locale,
       tags: tags,

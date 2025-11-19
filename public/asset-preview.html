@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pho.chat Asset Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #FF6B6B;
+      margin-bottom: 0.5rem;
+      font-size: 2.5rem;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+    
+    h2 {
+      color: #333;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #FF6B6B;
+    }
+    
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .asset-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .asset-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .asset-card img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 1rem;
+    }
+    
+    .asset-card h3 {
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    
+    .asset-card p {
+      font-size: 0.875rem;
+      color: #666;
+    }
+    
+    .size-badge {
+      display: inline-block;
+      background: #FF6B6B;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    
+    .preview-bg {
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .bg-white {
+      background: white;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .bg-dark {
+      background: #1a1a1a;
+    }
+    
+    .bg-brand {
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+    }
+    
+    .color-palette {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+    
+    .color-swatch {
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+    }
+    
+    .color-box {
+      height: 100px;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .color-info {
+      font-size: 0.875rem;
+    }
+    
+    .color-name {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .color-hex {
+      color: #666;
+      font-family: monospace;
+    }
+    
+    .usage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .usage-card {
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #FF6B6B;
+    }
+    
+    .usage-card h4 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    
+    .usage-card ul {
+      list-style: none;
+      font-size: 0.875rem;
+      color: #666;
+    }
+    
+    .usage-card li:before {
+      content: "✓ ";
+      color: #FF6B6B;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🍜 pho.chat Asset Preview</h1>
+    <p class="subtitle">Complete brand asset system for Vietnamese AI Chat Platform</p>
+    
+    <!-- Color Palette -->
+    <h2>Color Palette</h2>
+    <div class="color-palette">
+      <div class="color-swatch">
+        <div class="color-box" style="background: #FF6B6B;"></div>
+        <div class="color-info">
+          <div class="color-name">Primary</div>
+          <div class="color-hex">#FF6B6B</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-box" style="background: #FF7675;"></div>
+        <div class="color-info">
+          <div class="color-name">Secondary</div>
+          <div class="color-hex">#FF7675</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-box" style="background: #FFF5E6;"></div>
+        <div class="color-info">
+          <div class="color-name">Accent</div>
+          <div class="color-hex">#FFF5E6</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-box" style="background: #000000;"></div>
+        <div class="color-info">
+          <div class="color-name">Neutral</div>
+          <div class="color-hex">#000000</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Logo Variants -->
+    <h2>Logo Variants</h2>
+    <div class="asset-grid">
+      <div class="asset-card">
+        <div class="preview-bg bg-white">
+          <img src="/logo/logo-full.svg" alt="Full Color Logo" style="max-height: 120px;">
+        </div>
+        <h3>Full Color (3D)</h3>
+        <p>Primary branding logo</p>
+        <span class="size-badge">SVG</span>
+      </div>
+      
+      <div class="asset-card">
+        <div class="preview-bg bg-white">
+          <img src="/logo/logo-flat.svg" alt="Flat Logo" style="max-height: 120px;">
+        </div>
+        <h3>Flat Design</h3>
+        <p>UI components</p>
+        <span class="size-badge">SVG</span>
+      </div>
+      
+      <div class="asset-card">
+        <div class="preview-bg bg-white">
+          <img src="/logo/logo-mono.svg" alt="Monochrome Logo" style="max-height: 120px;">
+        </div>
+        <h3>Monochrome</h3>
+        <p>Print & grayscale</p>
+        <span class="size-badge">SVG</span>
+      </div>
+      
+      <div class="asset-card">
+        <div class="preview-bg bg-white">
+          <img src="/logo/logo-text.svg" alt="Text Logo" style="max-height: 60px;">
+        </div>
+        <h3>Text Only</h3>
+        <p>Headers & footers</p>
+        <span class="size-badge">SVG</span>
+      </div>
+      
+      <div class="asset-card">
+        <div class="preview-bg bg-white">
+          <img src="/logo/logo-combined.svg" alt="Combined Logo" style="max-height: 80px;">
+        </div>
+        <h3>Combined</h3>
+        <p>Logo + text</p>
+        <span class="size-badge">SVG</span>
+      </div>
+    </div>
+    
+    <!-- Logo on Different Backgrounds -->
+    <h2>Logo Versatility</h2>
+    <div class="asset-grid">
+      <div class="asset-card">
+        <div class="preview-bg bg-white">
+          <img src="/logo/logo-full.svg" alt="Logo on White" style="max-height: 100px;">
+        </div>
+        <h3>On White Background</h3>
+      </div>
+      
+      <div class="asset-card">
+        <div class="preview-bg bg-dark">
+          <img src="/logo/logo-full.svg" alt="Logo on Dark" style="max-height: 100px;">
+        </div>
+        <h3>On Dark Background</h3>
+      </div>
+      
+      <div class="asset-card">
+        <div class="preview-bg bg-brand">
+          <img src="/logo/logo-mono.svg" alt="Logo on Brand" style="max-height: 100px; filter: brightness(0) invert(1);">
+        </div>
+        <h3>On Brand Background</h3>
+      </div>
+    </div>
+    
+    <!-- PWA Icons -->
+    <h2>PWA Icons</h2>
+    <div class="asset-grid">
+      <div class="asset-card">
+        <img src="/icons/icon-192x192.png" alt="192x192 Icon" style="max-width: 120px;">
+        <h3>Standard Icon</h3>
+        <p>Android home screen</p>
+        <span class="size-badge">192×192</span>
+      </div>
+      
+      <div class="asset-card">
+        <img src="/icons/icon-192x192.maskable.png" alt="192x192 Maskable" style="max-width: 120px;">
+        <h3>Maskable Icon</h3>
+        <p>Adaptive icon</p>
+        <span class="size-badge">192×192</span>
+      </div>
+      
+      <div class="asset-card">
+        <img src="/icons/icon-512x512.png" alt="512x512 Icon" style="max-width: 120px;">
+        <h3>High-Res Icon</h3>
+        <p>Splash screen</p>
+        <span class="size-badge">512×512</span>
+      </div>
+      
+      <div class="asset-card">
+        <img src="/icons/icon-512x512.maskable.png" alt="512x512 Maskable" style="max-width: 120px;">
+        <h3>High-Res Maskable</h3>
+        <p>Adaptive icon</p>
+        <span class="size-badge">512×512</span>
+      </div>
+    </div>
+    
+    <!-- Favicons -->
+    <h2>Favicons & Touch Icons</h2>
+    <div class="asset-grid">
+      <div class="asset-card">
+        <img src="/favicon-32x32.ico" alt="Favicon" style="max-width: 64px; image-rendering: pixelated;">
+        <h3>Favicon</h3>
+        <p>Browser tab icon</p>
+        <span class="size-badge">32×32</span>
+      </div>
+      
+      <div class="asset-card">
+        <img src="/apple-touch-icon.png" alt="Apple Touch Icon" style="max-width: 120px;">
+        <h3>Apple Touch Icon</h3>
+        <p>iOS home screen</p>
+        <span class="size-badge">180×180</span>
+      </div>
+    </div>
+    
+    <!-- Usage Guidelines -->
+    <h2>Usage Guidelines</h2>
+    <div class="usage-grid">
+      <div class="usage-card">
+        <h4>✅ Do</h4>
+        <ul>
+          <li>Maintain clear space</li>
+          <li>Use approved colors</li>
+          <li>Scale proportionally</li>
+          <li>Use SVG when possible</li>
+        </ul>
+      </div>
+      
+      <div class="usage-card">
+        <h4>❌ Don't</h4>
+        <ul>
+          <li>Distort or stretch</li>
+          <li>Rotate the logo</li>
+          <li>Add effects</li>
+          <li>Change colors</li>
+        </ul>
+      </div>
+      
+      <div class="usage-card">
+        <h4>📏 Minimum Sizes</h4>
+        <ul>
+          <li>Icon: 24×24px</li>
+          <li>Text: 24px height</li>
+          <li>Combined: 120px width</li>
+          <li>Favicon: 16×16px</li>
+        </ul>
+      </div>
+      
+      <div class="usage-card">
+        <h4>🎨 Clear Space</h4>
+        <ul>
+          <li>Minimum: 25% height</li>
+          <li>Recommended: 50%</li>
+          <li>All sides equal</li>
+          <li>No overlapping</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e0e0e0; text-align: center; color: #666;">
+      <p>pho.chat Brand Assets © 2025</p>
+      <p style="font-size: 0.875rem; margin-top: 0.5rem;">
+        For questions: <a href="mailto:support@pho.chat" style="color: #FF6B6B;">support@pho.chat</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

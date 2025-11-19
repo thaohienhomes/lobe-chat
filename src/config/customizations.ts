@@ -23,7 +23,9 @@
 // This prevents conflicts with upstream branding changes
 
 export const BRANDING_CONFIG = {
-  appDescription: process.env.NEXT_PUBLIC_BRAND_DESCRIPTION || 'Vietnamese AI Chat Platform',
+  appDescription:
+    process.env.NEXT_PUBLIC_BRAND_DESCRIPTION ||
+    'Fast, convenient and affordable AI agent platform',
   // App name and identity
   appName: process.env.NEXT_PUBLIC_BRAND_NAME || 'pho.chat',
 
@@ -39,7 +41,7 @@ export const BRANDING_CONFIG = {
   },
 
   // Logo and visual identity
-  logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO_URL || '',
+  logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO_URL || '/logo/logo-full.svg',
 
   neutralColor: process.env.NEXT_PUBLIC_NEUTRAL_COLOR || '#000000',
 
@@ -53,7 +55,7 @@ export const BRANDING_CONFIG = {
     twitter: process.env.NEXT_PUBLIC_TWITTER_URL,
   },
 
-  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pho.chat',
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'hi@pho.chat',
 
   // URLs and links
   websiteUrl: process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://pho.chat',

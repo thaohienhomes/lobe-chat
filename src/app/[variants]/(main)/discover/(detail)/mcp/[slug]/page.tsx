@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import urlJoin from 'url-join';
 
 import StructuredData from '@/components/StructuredData';
+import { OFFICIAL_SITE } from '@/const/url';
 import { isDesktop } from '@/const/version';
 import { ldModule } from '@/server/ld';
 import { metadataModule } from '@/server/metadata';
@@ -47,7 +48,7 @@ export const generateMetadata = async (props: DiscoverPageProps) => {
     keywords: tags,
     ...metadataModule.generate({
       alternate: true,
-      canonical: urlJoin('https://lobehub.com/mcp', identifier),
+      canonical: urlJoin(OFFICIAL_SITE, '/discover/mcp', identifier),
       description: description,
       locale,
       tags: tags,

@@ -1,0 +1,28 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pho Bowl Base -->
+  <circle cx="256" cy="280" r="160" fill="#FF6B6B" opacity="0.1"/>
+  
+  <!-- Bowl -->
+  <path d="M140 280 Q140 360 256 360 Q372 360 372 280 L372 260 Q372 240 256 240 Q140 240 140 260 Z" 
+        fill="#FF6B6B" stroke="#D63031" stroke-width="4"/>
+  
+  <!-- Bowl Rim -->
+  <ellipse cx="256" cy="260" rx="116" ry="20" fill="#FF7675" stroke="#D63031" stroke-width="3"/>
+  
+  <!-- Noodles -->
+  <path d="M200 280 Q210 300 220 280 Q230 260 240 280" stroke="#FFF5E6" stroke-width="3" fill="none" opacity="0.8"/>
+  <path d="M240 285 Q250 305 260 285 Q270 265 280 285" stroke="#FFF5E6" stroke-width="3" fill="none" opacity="0.8"/>
+  <path d="M280 280 Q290 300 300 280 Q310 260 320 280" stroke="#FFF5E6" stroke-width="3" fill="none" opacity="0.8"/>
+  
+  <!-- Steam Lines (wavy) -->
+  <path d="M200 220 Q205 200 210 180 Q215 160 220 140" 
+        stroke="#FF6B6B" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <path d="M256 210 Q261 190 266 170 Q271 150 276 130" 
+        stroke="#FF6B6B" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M312 220 Q307 200 302 180 Q297 160 292 140" 
+        stroke="#FF6B6B" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/>
+  
+  <!-- Chopsticks (optional detail) -->
+  <line x1="340" y1="240" x2="380" y2="200" stroke="#8B4513" stroke-width="4" stroke-linecap="round"/>
+  <line x1="345" y1="245" x2="385" y2="205" stroke="#A0522D" stroke-width="4" stroke-linecap="round"/>
+</svg>

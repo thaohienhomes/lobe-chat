@@ -9,6 +9,10 @@ Supports speech synthesis, multi-modal, and extensible ([function call][docs-fun
 One-click **FREE** deployment of your private OpenAI ChatGPT/Claude/Gemini/Groq/Ollama chat application.
 
 **English** · [简体中文](./README.zh-CN.md) · [Official Site][official-site] · [Changelog][changelog] · [Documents][docs] · [Blog][blog] · [Feedback][github-issues-link]
+**pho.chat rebranding**
+
+pho.chat is a global, performance-oriented deployment and customization of the open-source [LobeChat](https://github.com/lobehub/lobe-chat) project, focused on fast, convenient and affordable AI agents.
+This repository keeps the upstream feature documentation, but the actual product branding, domain, and configuration are adapted for pho.chat.
 
 <!-- SHIELD GROUP -->
 
@@ -27,7 +31,7 @@ One-click **FREE** deployment of your private OpenAI ChatGPT/Claude/Gemini/Groq/
 [![][github-license-shield]][github-license-link]<br>
 [![][sponsor-shield]][sponsor-link]
 
-**Share LobeChat Repository**
+**Share pho.chat (based on LobeChat)**
 
 [![][share-x-shield]][share-x-link]
 [![][share-telegram-shield]][share-telegram-link]
@@ -96,7 +100,7 @@ One-click **FREE** deployment of your private OpenAI ChatGPT/Claude/Gemini/Groq/
 We are a group of e/acc design-engineers, hoping to provide modern design components and tools for AIGC.
 By adopting the Bootstrapping approach, we aim to provide developers and users with a more open, transparent, and user-friendly product ecosystem.
 
-Whether for users or professional developers, LobeHub will be your AI Agent playground. Please be aware that LobeChat is currently under active development, and feedback is welcome for any [issues][issues-link] encountered.
+Whether for individual creators, teams, or power users, **pho.chat** is your fast, convenient and affordable AI agent playground, built on the powerful open-source LobeChat project, which is under active development and welcoming feedback for any [issues][issues-link] encountered.
 
 | [![][vercel-shield-badge]][vercel-link]   | No installation or registration necessary! Visit our website to experience it firsthand.                           |
 | :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
