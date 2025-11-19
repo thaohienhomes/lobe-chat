@@ -339,18 +339,16 @@ const withPWA =
     })
     : noWrapper;
 
-export default withSentryConfig(
-  withBundleAnalyzer(withPWA(nextConfig as NextConfig)),
-  {
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+export default withBundleAnalyzer(
+  withPWA(
+    withSentryConfig(nextConfig as NextConfig, {
+      // For all available options, see:
+      // https://github.com/getsentry/sentry-webpack-plugin/blob/master/src/index.ts#L29-L102
 
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: true,
-
-    // Routes browser requests to Sentry through a same-origin proxy, so they use your server URL instead of being made directly to Sentry's servers. (increases server load)
-    // Note: Bear in mind that your server needs to allow outgoing requests to Sentry in order for the proxy to work.
-    // In serverless environments, this generally means adding Sentry's outgoing IP to your edge function allowlist.
-    tunnelRoute: '/monitoring',
-  },
+      // Suppresses source map uploading logs during build
+      silent: true,
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+    }),
+  ),
 );

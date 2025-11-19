@@ -5,6 +5,7 @@ import { analyticsEnv } from '@/envs/analytics';
 
 import Desktop from './Desktop';
 import Google from './Google';
+import Sentry from './Sentry';
 import Vercel from './Vercel';
 
 const Plausible = dynamic(() => import('./Plausible'));
@@ -15,6 +16,7 @@ const ReactScan = dynamic(() => import('./ReactScan'));
 const Analytics = () => {
   return (
     <>
+      {process.env.NEXT_PUBLIC_ENABLE_SENTRY === 'true' && <Sentry />}
       {analyticsEnv.ENABLE_VERCEL_ANALYTICS && <Vercel />}
       {analyticsEnv.ENABLE_GOOGLE_ANALYTICS && <Google />}
       {analyticsEnv.ENABLED_PLAUSIBLE_ANALYTICS && (
