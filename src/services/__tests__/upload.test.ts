@@ -82,7 +82,7 @@ describe('UploadService', () => {
     it('should handle network error', async () => {
       const xhr = new XMLHttpRequest();
 
-      // Simulate network error
+      // Simulate network error (CORS or connectivity issue)
       vi.spyOn(xhr, 'addEventListener').mockImplementation((event, handler) => {
         if (event === 'error') {
           Object.assign(xhr, { status: 0 });
@@ -91,13 +91,13 @@ describe('UploadService', () => {
         }
       });
 
-      await expect(uploadService.uploadToServerS3(mockFile, {})).rejects.toBe(UPLOAD_NETWORK_ERROR);
+      await expect(uploadService.uploadToServerS3(mockFile, {})).rejects.toThrow('CORS_ERROR');
     });
 
     it('should handle upload error', async () => {
       const xhr = new XMLHttpRequest();
 
-      // Simulate upload error
+      // Simulate upload error with non-2xx status
       vi.spyOn(xhr, 'addEventListener').mockImplementation((event, handler) => {
         if (event === 'load') {
           Object.assign(xhr, { status: 400, statusText: 'Bad Request' });
@@ -107,7 +107,7 @@ describe('UploadService', () => {
         }
       });
 
-      await expect(uploadService.uploadToServerS3(mockFile, {})).rejects.toBe('Bad Request');
+      await expect(uploadService.uploadToServerS3(mockFile, {})).rejects.toThrow('Bad Request');
     });
   });
 

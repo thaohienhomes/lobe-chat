@@ -17,9 +17,14 @@ vi.mock('@clerk/nextjs/server', () => ({
   currentUser: vi.fn(),
 }));
 
-vi.mock('@/database/server', () => ({
-  serverDB: {},
-}));
+vi.mock('@/database/server', () => {
+  const mockServerDB = {} as any;
+
+  return {
+    getServerDB: vi.fn().mockResolvedValue(mockServerDB),
+    serverDB: mockServerDB,
+  };
+});
 
 vi.mock('@/database/models/message');
 vi.mock('@/database/models/session');

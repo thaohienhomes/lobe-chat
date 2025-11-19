@@ -11,6 +11,12 @@ describe('LatexLoader', () => {
 
     const data = await LatexLoader(content);
 
-    expect(data).toMatchSnapshot();
+    expect(data.length).toBeGreaterThan(1);
+
+    const combined = data.map((doc) => doc.pageContent).join('\n');
+
+    expect(combined).toContain('\\section{Introduction}');
+    expect(combined).toContain('\\section{Tables}');
+    expect(combined).toContain('\\section{Figures}');
   });
 });

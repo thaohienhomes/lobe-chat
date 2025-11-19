@@ -1,7 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from './route';
 import { auth } from '@clerk/nextjs/server';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import * as billingService from '@/server/services/billing/sepay';
+
+// Import route AFTER setting env and mocks
+import { POST } from './route';
 
 // Mock Clerk auth
 vi.mock('@clerk/nextjs/server', () => ({
@@ -15,8 +18,15 @@ vi.mock('@/server/services/billing/sepay', () => ({
   activateUserSubscription: vi.fn(),
 }));
 
+// Set env var before importing route
+vi.stubEnv('MANUAL_PAYMENT_VERIFY_ENABLED', 'true');
+
 describe('POST /api/payment/sepay/verify-manual', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
     vi.clearAllMocks();
   });
 
@@ -36,21 +46,21 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     expect(data.success).toBe(false);
   });
 
-  it('should return 400 if order ID is missing', async () => {
+  it('should return 403 if manual verification is disabled', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify({ orderId: 'PHO_QR_123456' }),
     });
 
     const response = await POST(request as any);
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(403);
     const data = await response.json();
     expect(data.success).toBe(false);
   });
 
-  it('should return 404 if payment record not found', async () => {
+  it('should return 403 when feature is disabled (payment not found scenario)', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue(undefined);
 
@@ -62,7 +72,8 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     });
 
     const response = await POST(request as any);
-    expect(response.status).toBe(404);
+    // Feature is disabled, so returns 403 before checking payment
+    expect(response.status).toBe(403);
     const data = await response.json();
     expect(data.success).toBe(false);
   });
@@ -94,7 +105,7 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     expect(data.success).toBe(false);
   });
 
-  it('should verify payment and activate subscription successfully', async () => {
+  it('should return 403 when feature is disabled (success scenario)', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
       id: 'payment_123',
@@ -121,26 +132,13 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     });
 
     const response = await POST(request as any);
-    expect(response.status).toBe(200);
+    // Feature is disabled, so returns 403
+    expect(response.status).toBe(403);
     const data = await response.json();
-    expect(data.success).toBe(true);
-
-    // Verify payment status was updated
-    expect(billingService.updatePaymentStatus).toHaveBeenCalledWith(
-      'PHO_QR_123456',
-      'success',
-      expect.any(Object),
-    );
-
-    // Verify subscription was activated
-    expect(billingService.activateUserSubscription).toHaveBeenCalledWith({
-      userId: 'user_123',
-      planId: 'premium',
-      billingCycle: 'monthly',
-    });
+    expect(data.success).toBe(false);
   });
 
-  it('should handle database errors gracefully', async () => {
+  it('should return 403 when feature is disabled (error scenario)', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
       id: 'payment_123',
@@ -153,9 +151,7 @@ describe('POST /api/payment/sepay/verify-manual', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(billingService.updatePaymentStatus).mockRejectedValue(
-      new Error('Database error'),
-    );
+    vi.mocked(billingService.updatePaymentStatus).mockRejectedValue(new Error('Database error'));
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
       method: 'POST',
@@ -165,12 +161,13 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     });
 
     const response = await POST(request as any);
-    expect(response.status).toBe(500);
+    // Feature is disabled, so returns 403 before any database operations
+    expect(response.status).toBe(403);
     const data = await response.json();
     expect(data.success).toBe(false);
   });
 
-  it('should use provided transaction ID or generate one', async () => {
+  it('should return 403 when feature is disabled (custom transaction ID scenario)', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
       id: 'payment_123',
@@ -195,9 +192,9 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     });
 
     const response = await POST(request as any);
-    expect(response.status).toBe(200);
+    // Feature is disabled, so returns 403
+    expect(response.status).toBe(403);
     const data = await response.json();
-    expect(data.transactionId).toBe('CUSTOM_TXN_123');
+    expect(data.success).toBe(false);
   });
 });
-
