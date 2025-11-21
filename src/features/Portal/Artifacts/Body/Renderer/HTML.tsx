@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 
 interface HTMLRendererProps {
   height?: string;
@@ -8,33 +8,30 @@ interface HTMLRendererProps {
 
 /**
  * HTMLRenderer component for rendering HTML content in an iframe
- * Uses srcDoc instead of doc.write() for better compatibility with ES6 modules
- * Includes sandbox attributes for security and proper script execution
- * Injects base tag to support external CDN resources (Three.js, etc.)
+ * Uses Blob URL approach for better ES6 module support and external script loading
+ * This approach creates a proper document URL, avoiding srcDoc limitations
  */
 const HTMLRenderer = memo<HTMLRendererProps>(({ htmlContent, width = '100%', height = '100%' }) => {
-  // Inject base tag to support external resources from CDN
-  const processedContent = useMemo(() => {
-    // If content already has a base tag, don't inject
-    if (htmlContent.includes('<base')) return htmlContent;
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    // Inject base tag after <head> or at the beginning
-    const baseTag = '<base href="https://pho.chat/" target="_blank">';
-
-    if (htmlContent.includes('<head>')) {
-      return htmlContent.replace('<head>', `<head>${baseTag}`);
-    } else if (htmlContent.includes('<head ')) {
-      return htmlContent.replace(/<head\s/, `<head>${baseTag}<head `);
-    } else {
-      // If no head tag, wrap content with html structure
-      return `<!DOCTYPE html><html><head>${baseTag}</head><body>${htmlContent}</body></html>`;
-    }
+  // Create blob URL from HTML content
+  const blobUrl = useMemo(() => {
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    return URL.createObjectURL(blob);
   }, [htmlContent]);
+
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      URL.revokeObjectURL(blobUrl);
+    };
+  }, [blobUrl]);
 
   return (
     <iframe
+      ref={iframeRef}
       sandbox="allow-scripts allow-same-origin"
-      srcDoc={processedContent}
+      src={blobUrl}
       style={{ border: 'none', height, width }}
       title="html-renderer"
     />
