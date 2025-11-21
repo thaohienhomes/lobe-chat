@@ -60,6 +60,28 @@ const falImageModels: AIImageModelCard[] = [
   },
   {
     description:
+      'Nano Banana Pro (又名 Nano Banana 2) 是 Google 最新的 Gemini 3 Pro Image 架构，专注于高质量图像生成和编辑，支持多图像输入（最多14张）、文本渲染和角色一致性（最多5人）。成本 $0.15/image，4K 输出双倍收费。',
+    displayName: 'Nano Banana Pro',
+    enabled: true,
+    id: 'fal-ai/nano-banana-pro/edit',
+    parameters: {
+      aspectRatio: {
+        default: 'auto',
+        enum: ['auto', '21:9', '16:9', '3:2', '4:3', '5:4', '1:1', '4:5', '3:4', '2:3', '9:16'],
+      },
+      imageUrls: { default: [], maxCount: 14 },
+      prompt: {
+        default: '',
+      },
+    },
+    pricing: {
+      units: [{ name: 'imageGeneration', rate: 0.15, strategy: 'fixed', unit: 'image' }],
+    },
+    releasedAt: '2025-11-20',
+    type: 'image',
+  },
+  {
+    description:
       'Seedream 4.0 图片生成模型由字节跳动 Seed 团队研发，支持文字与图片输入，提供高可控、高质量的图片生成体验。基于文本提示词生成图片。',
     displayName: 'Seedream 4.0',
     enabled: true,
