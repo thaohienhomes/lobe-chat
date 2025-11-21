@@ -10,13 +10,23 @@ interface HTMLRendererProps {
  * HTMLRenderer component for rendering HTML content in an iframe
  * Uses Blob URL approach for better ES6 module support and external script loading
  * This approach creates a proper document URL, avoiding srcDoc limitations
+ * Auto-fixes common syntax errors in AI-generated HTML (e.g., missing 'import' keyword)
  */
 const HTMLRenderer = memo<HTMLRendererProps>(({ htmlContent, width = '100%', height = '100%' }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Create blob URL from HTML content
+  // Create blob URL from HTML content with auto-fixes
   const blobUrl = useMemo(() => {
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+    // Fix common AI-generated syntax errors
+    let fixedContent = htmlContent;
+
+    // Fix: "importGUI from" -> "import GUI from"
+    fixedContent = fixedContent.replaceAll(/\bimportGUI\s+from\b/g, 'import GUI from');
+
+    // Fix: "importX from" -> "import X from" (generic pattern)
+    fixedContent = fixedContent.replaceAll(/\bimport([A-Z][\dA-Za-z]*)\s+from\b/g, 'import $1 from');
+
+    const blob = new Blob([fixedContent], { type: 'text/html' });
     return URL.createObjectURL(blob);
   }, [htmlContent]);
 
