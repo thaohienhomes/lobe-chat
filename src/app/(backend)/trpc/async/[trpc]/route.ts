@@ -5,6 +5,10 @@ import { pino } from '@/libs/logger';
 import { createAsyncRouteContext } from '@/libs/trpc/async/context';
 import { asyncRouter } from '@/server/routers/async';
 
+// Set max duration to 300 seconds (5 minutes) for long-running image generation tasks
+// This matches ASYNC_TASK_TIMEOUT (298s) and enables Fluid Compute on Vercel
+export const maxDuration = 300;
+
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
     // 避免请求之间互相影响
