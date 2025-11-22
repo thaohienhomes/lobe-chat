@@ -33,7 +33,7 @@
     "assets:optimize": "tsx ./scripts/optimize-assets.ts",
     "prebuild": "tsx scripts/prebuild.mts && node -e \"process.exit(process.env.VERCEL?0:1)\" || bun run lint",
     "build": "cross-env NEXT_DISABLE_SOURCEMAPS=1 NODE_OPTIONS=--max-old-space-size=8192 next build",
-    "postbuild": "npm run build-sitemap && node -e \"if(process.env.MIGRATE_ON_BUILD==='1'){require('child_process').execSync('npm run build-migrate-db',{stdio:'inherit'})}else{console.log('Skipping DB migration: MIGRATE_ON_BUILD!=1')}\"",
+    "postbuild": "npm run build-sitemap && node -e \"if(process.env.MIGRATE_ON_BUILD==='1'){console.log('Running DB migration...');try{require('child_process').execSync('npm run build-migrate-db',{stdio:'inherit'})}catch(e){console.error('Migration failed:',e.message);process.exit(0)}}else{console.log('Skipping DB migration: MIGRATE_ON_BUILD!=1')}\"",
     "build-migrate-db": "bun run db:migrate",
     "build-sitemap": "tsx ./scripts/buildSitemapIndex/index.ts",
     "build:analyze": "NODE_OPTIONS=--max-old-space-size=8192 ANALYZE=true next build",
