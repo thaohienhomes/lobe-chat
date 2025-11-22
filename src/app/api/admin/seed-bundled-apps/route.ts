@@ -130,6 +130,38 @@ Always:
 
 export const GET = async () => {
   try {
+    // First, check if table exists by trying a simple query
+    let tableExists = false;
+    try {
+      const model = new BundledAppModel(serverDB);
+      await model.findById('test-check');
+      tableExists = true;
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      if (errorMessage.includes('relation "bundled_apps" does not exist')) {
+        return NextResponse.json(
+          {
+            error: 'Table "bundled_apps" does not exist. Please run database migration first.',
+            hint: 'Set MIGRATE_ON_BUILD=1 in Vercel environment variables and redeploy, or run migration manually.',
+            success: false,
+          },
+          { status: 500 },
+        );
+      }
+      // Other errors mean table exists but query failed for other reasons
+      tableExists = true;
+    }
+
+    if (!tableExists) {
+      return NextResponse.json(
+        {
+          error: 'Database table not ready',
+          success: false,
+        },
+        { status: 500 },
+      );
+    }
+
     const model = new BundledAppModel(serverDB);
 
     const results = {
