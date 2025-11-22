@@ -50,8 +50,8 @@ export const setSentryUser = (userId?: string, email?: string, username?: string
   if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== 'true') return;
 
   Sentry.setUser({
-    id: userId,
     email,
+    id: userId,
     username,
   });
 };
@@ -64,4 +64,3 @@ export const clearSentryUser = () => {
 
   Sentry.setUser(null);
 };
-

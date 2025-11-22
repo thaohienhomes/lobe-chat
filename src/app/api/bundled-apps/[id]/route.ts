@@ -1,20 +1,13 @@
 import { getUserAuth } from '@lobechat/utils/server';
-import { notFound, redirect } from 'next/navigation';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { SESSION_CHAT_URL } from '@/const/url';
 import { createCallerFactory } from '@/libs/trpc/lambda';
 import { lambdaRouter } from '@/server/routers/lambda';
-import { PagePropsWithId } from '@/types/next';
 
 const createCaller = createCallerFactory(lambdaRouter);
 
-/**
- * Bundled App Page
- *
- * This page handles bundled app links like /apps/bundled/artifact-creator
- * It creates a new session with the bundled app's configuration and redirects to chat
- */
-export default async function BundledAppPage(props: PagePropsWithId) {
+export const GET = async (req: NextRequest, props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
   const { id } = params;
 
@@ -23,7 +16,7 @@ export default async function BundledAppPage(props: PagePropsWithId) {
   const bundledApp = await caller.bundledApp.getAppById({ id });
 
   if (!bundledApp) {
-    return notFound();
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   // Get user auth
@@ -31,7 +24,9 @@ export default async function BundledAppPage(props: PagePropsWithId) {
 
   if (!auth) {
     // If not authenticated, redirect to login with return URL
-    return redirect(`/login?callbackUrl=${encodeURIComponent(`/apps/bundled/${id}`)}`);
+    const loginUrl = new URL('/login', req.url);
+    loginUrl.searchParams.set('callbackUrl', `/apps/bundled/${id}`);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Create session with bundled app config
@@ -61,8 +56,9 @@ export default async function BundledAppPage(props: PagePropsWithId) {
   await caller.bundledApp.trackUsage({ id });
 
   // Redirect to chat
-  return redirect(SESSION_CHAT_URL(sessionId, false));
-}
+  const chatUrl = new URL(SESSION_CHAT_URL(sessionId, false), req.url);
+  return NextResponse.redirect(chatUrl);
+};
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

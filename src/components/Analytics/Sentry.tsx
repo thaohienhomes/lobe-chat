@@ -1,6 +1,5 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
 
 /**
@@ -20,4 +19,3 @@ const SentryComponent = () => {
 };
 
 export default SentryComponent;
-

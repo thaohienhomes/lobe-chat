@@ -18,7 +18,7 @@ const SentryErrorBoundary = ({ children }: SentryErrorBoundaryProps) => {
       fallback={
         <div style={{ padding: '20px', textAlign: 'center' }}>
           <h1>Something went wrong</h1>
-          <p>We've been notified about this error. Please try refreshing the page.</p>
+          <p>We&apos;ve been notified about this error. Please try refreshing the page.</p>
         </div>
       }
       showDialog
@@ -29,4 +29,3 @@ const SentryErrorBoundary = ({ children }: SentryErrorBoundaryProps) => {
 };
 
 export default SentryErrorBoundary;
-

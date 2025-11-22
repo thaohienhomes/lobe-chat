@@ -24,7 +24,29 @@ const HTMLRenderer = memo<HTMLRendererProps>(({ htmlContent, width = '100%', hei
     fixedContent = fixedContent.replaceAll(/\bimportGUI\s+from\b/g, 'import GUI from');
 
     // Fix: "importX from" -> "import X from" (generic pattern)
-    fixedContent = fixedContent.replaceAll(/\bimport([A-Z][\dA-Za-z]*)\s+from\b/g, 'import $1 from');
+    fixedContent = fixedContent.replaceAll(
+      /\bimport([A-Z][\dA-Za-z]*)\s+from\b/g,
+      'import $1 from',
+    );
+
+    // Inject error handler script to catch and log errors
+    const errorHandlerScript = `
+      <script>
+        window.addEventListener('error', function(e) {
+          console.error('[HTMLRenderer Error]', e.message, e.filename, e.lineno, e.colno);
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+          console.error('[HTMLRenderer Promise Rejection]', e.reason);
+        });
+      </script>
+    `;
+
+    // Inject error handler before closing </head> or at the beginning
+    if (fixedContent.includes('</head>')) {
+      fixedContent = fixedContent.replace('</head>', `${errorHandlerScript}</head>`);
+    } else {
+      fixedContent = errorHandlerScript + fixedContent;
+    }
 
     const blob = new Blob([fixedContent], { type: 'text/html' });
     return URL.createObjectURL(blob);
@@ -36,6 +58,28 @@ const HTMLRenderer = memo<HTMLRendererProps>(({ htmlContent, width = '100%', hei
       URL.revokeObjectURL(blobUrl);
     };
   }, [blobUrl]);
+
+  // Add iframe load handler for debugging
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleLoad = () => {
+      console.log('[HTMLRenderer] Iframe loaded successfully');
+    };
+
+    const handleError = () => {
+      console.error('[HTMLRenderer] Iframe failed to load');
+    };
+
+    iframe.addEventListener('load', handleLoad);
+    iframe.addEventListener('error', handleError);
+
+    return () => {
+      iframe.removeEventListener('load', handleLoad);
+      iframe.removeEventListener('error', handleError);
+    };
+  }, []);
 
   return (
     <iframe

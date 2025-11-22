@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
       // Test message capture
       Sentry.captureMessage('Test message from pho.chat', 'info');
       return NextResponse.json({
-        success: true,
         message: 'Test message sent to Sentry',
+        success: true,
       });
     } else if (type === 'exception') {
       // Test exception capture
@@ -26,16 +26,16 @@ export async function GET(request: NextRequest) {
       const testError = new Error('Test error from pho.chat');
       Sentry.captureException(testError);
       return NextResponse.json({
-        success: true,
         message: 'Test error sent to Sentry',
+        success: true,
       });
     }
   } catch (error) {
     Sentry.captureException(error, {
       contexts: {
         test: {
-          type,
           endpoint: '/api/test-sentry',
+          type,
         },
       },
     });
@@ -49,4 +49,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
