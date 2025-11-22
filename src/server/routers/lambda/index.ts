@@ -8,6 +8,7 @@ import { aiChatRouter } from './aiChat';
 import { aiModelRouter } from './aiModel';
 import { aiProviderRouter } from './aiProvider';
 import { apiKeyRouter } from './apiKey';
+import { bundledAppRouter } from './bundledApp';
 import { chunkRouter } from './chunk';
 import { configRouter } from './config';
 import { costOptimizationRouter } from './costOptimization';
@@ -36,6 +37,7 @@ export const lambdaRouter = router({
   aiModel: aiModelRouter,
   aiProvider: aiProviderRouter,
   apiKey: apiKeyRouter,
+  bundledApp: bundledAppRouter,
   chunk: chunkRouter,
   config: configRouter,
   costOptimization: costOptimizationRouter,

@@ -3,6 +3,7 @@ export * from './aiInfra';
 export * from './apiKey';
 export * from './asyncTask';
 export * from './billing';
+export * from './bundledApp';
 export * from './chatGroup';
 export * from './document';
 export * from './file';
