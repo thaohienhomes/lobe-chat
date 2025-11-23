@@ -21,7 +21,6 @@ const ShareLink = memo(() => {
 
   const currentAgentMeta = useSessionStore(sessionMetaSelectors.currentAgentMeta);
   const currentAgentConfig = useAgentStore(agentSelectors.currentAgentConfig);
-  const activeId = useSessionStore((s) => s.activeId);
 
   // Get messages from current conversation
   const messages = useChatStore(chatSelectors.activeBaseChatsWithoutTool);
@@ -54,7 +53,12 @@ const ShareLink = memo(() => {
       setShareUrl(fullUrl);
     } catch (error) {
       console.error('Error generating share link:', error);
-      message.error(t('shareModal.linkGenerationFailed', { ns: 'chat' }));
+      message.error(
+        t('shareModal.linkGenerationFailed', {
+          defaultValue: 'Failed to generate share link',
+          ns: 'chat',
+        }),
+      );
     } finally {
       setLoading(false);
     }
@@ -84,18 +88,15 @@ const ShareLink = memo(() => {
 
       <Flexbox align={'center'} gap={8} horizontal width={'100%'}>
         <Input
-          placeholder={loading ? t('shareModal.generating', { ns: 'chat' }) : ''}
+          placeholder={
+            loading ? t('shareModal.generating', { defaultValue: 'Generating...', ns: 'chat' }) : ''
+          }
           readOnly
           style={{ flex: 1 }}
           value={shareUrl}
           variant={'filled'}
         />
-        <CopyButton
-          content={shareUrl}
-          icon={LinkIcon}
-          placement="left"
-          size={{ blockSize: 36, size: 16 }}
-        />
+        <CopyButton content={shareUrl} icon={LinkIcon} size={{ blockSize: 36, size: 16 }} />
       </Flexbox>
 
       {loading && (
@@ -149,4 +150,3 @@ const ShareLink = memo(() => {
 });
 
 export default ShareLink;
-
