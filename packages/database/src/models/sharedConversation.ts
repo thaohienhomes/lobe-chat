@@ -1,9 +1,14 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 
-import { BaseModel } from './_base';
 import { NewSharedConversation, SharedConversation, sharedConversations } from '../schemas';
+import { LobeChatDatabase } from '../type';
 
-export class SharedConversationModel extends BaseModel {
+export class SharedConversationModel {
+  private db: LobeChatDatabase;
+
+  constructor(db: LobeChatDatabase) {
+    this.db = db;
+  }
   /**
    * Create a new shared conversation
    */
@@ -20,7 +25,7 @@ export class SharedConversationModel extends BaseModel {
       .select()
       .from(sharedConversations)
       .where(eq(sharedConversations.id, id));
-    
+
     return result;
   }
 
@@ -29,14 +34,14 @@ export class SharedConversationModel extends BaseModel {
    */
   async getPublicById(id: string): Promise<SharedConversation | undefined> {
     const conversation = await this.findById(id);
-    
+
     if (!conversation || !conversation.isPublic) {
       return undefined;
     }
 
     // Increment view count
     await this.incrementViewCount(id);
-    
+
     return conversation;
   }
 
