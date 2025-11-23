@@ -1,6 +1,6 @@
+import { getUserAuth } from '@lobechat/utils/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getUserAuth } from '@/app/api/middleware/auth/getUserAuth';
 import { BundledAppModel } from '@/database/models/bundledApp';
 import { NewBundledApp } from '@/database/schemas';
 import { serverDB } from '@/database/server';

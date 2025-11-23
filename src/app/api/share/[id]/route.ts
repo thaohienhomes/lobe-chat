@@ -1,8 +1,11 @@
-import { SESSION_CHAT_URL } from '@lobechat/const';
+import { getUserAuth } from '@lobechat/utils/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getUserAuth } from '@/app/api/middleware/auth/getUserAuth';
-import { createCaller } from '@/server/routers/_app';
+import { SESSION_CHAT_URL } from '@/const/url';
+import { createCallerFactory } from '@/libs/trpc/lambda';
+import { lambdaRouter } from '@/server/routers/lambda';
+
+const createCaller = createCallerFactory(lambdaRouter);
 
 /**
  * Handle shared template links
