@@ -164,6 +164,8 @@ const isPublicRoute = createRouteMatcher([
   // oauth
   '/oidc/handoff',
   '/oidc/token',
+  // public share
+  '/share(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([

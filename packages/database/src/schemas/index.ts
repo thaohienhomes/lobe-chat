@@ -16,5 +16,6 @@ export * from './ragEvals';
 export * from './rbac';
 export * from './relations';
 export * from './session';
+export * from './sharedConversation';
 export * from './topic';
 export * from './user';

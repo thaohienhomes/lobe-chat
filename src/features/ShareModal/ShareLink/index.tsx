@@ -8,6 +8,8 @@ import { Flexbox } from 'react-layout-kit';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
+import { useChatStore } from '@/store/chat';
+import { chatSelectors } from '@/store/chat/selectors';
 import { useSessionStore } from '@/store/session';
 import { sessionMetaSelectors } from '@/store/session/selectors';
 
@@ -21,15 +23,21 @@ const ShareLink = memo(() => {
   const currentAgentConfig = useAgentStore(agentSelectors.currentAgentConfig);
   const activeId = useSessionStore((s) => s.activeId);
 
+  // Get messages from current conversation
+  const messages = useChatStore(chatSelectors.activeBaseChatsWithoutTool);
+
   const generateShareLink = async () => {
     setLoading(true);
     try {
-      // Call API to create shareable link
+      // Call API to create shareable link with messages
       const response = await fetch('/api/share/create', {
         body: JSON.stringify({
           config: currentAgentConfig,
+          messages: messages.map((msg) => ({
+            content: msg.content,
+            role: msg.role,
+          })),
           meta: currentAgentMeta,
-          sessionId: activeId,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +50,7 @@ const ShareLink = memo(() => {
       }
 
       const data = await response.json();
-      const fullUrl = `${window.location.origin}/api/share/${data.id}`;
+      const fullUrl = `${window.location.origin}${data.url}`;
       setShareUrl(fullUrl);
     } catch (error) {
       console.error('Error generating share link:', error);
@@ -63,10 +71,15 @@ const ShareLink = memo(() => {
         <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14 }}>
           {t('shareModal.linkDescription', {
             defaultValue:
-              'Share this link with others. They will get a new conversation with the same configuration (agent, model, system role, etc.)',
+              'Share this conversation publicly. Anyone with the link can view the full conversation history without logging in.',
             ns: 'chat',
           })}
         </div>
+        {messages.length > 0 && (
+          <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>
+            📝 {messages.length} message{messages.length > 1 ? 's' : ''} will be shared
+          </div>
+        )}
       </Flexbox>
 
       <Flexbox align={'center'} gap={8} horizontal width={'100%'}>
@@ -113,19 +126,19 @@ const ShareLink = memo(() => {
         <ul style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, margin: 0, paddingLeft: 20 }}>
           <li>
             {t('shareModal.linkTip1', {
-              defaultValue: 'Recipients will need to log in to use the shared template',
+              defaultValue: 'Anyone with the link can view this conversation (no login required)',
               ns: 'chat',
             })}
           </li>
           <li>
             {t('shareModal.linkTip2', {
-              defaultValue: 'Each person gets their own separate conversation',
+              defaultValue: 'Full conversation history is shared publicly',
               ns: 'chat',
             })}
           </li>
           <li>
             {t('shareModal.linkTip3', {
-              defaultValue: 'Your conversation history is NOT shared',
+              defaultValue: 'Viewers can fork to create their own copy (requires login)',
               ns: 'chat',
             })}
           </li>

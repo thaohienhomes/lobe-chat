@@ -1,8 +1,8 @@
 import { getUserAuth } from '@lobechat/utils/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { BundledAppModel } from '@/database/models/bundledApp';
-import { NewBundledApp } from '@/database/schemas';
+import { SharedConversationModel } from '@/database/models/sharedConversation';
+import { NewSharedConversation } from '@/database/schemas';
 import { serverDB } from '@/database/server';
 
 export const POST = async (req: NextRequest) => {
@@ -16,41 +16,47 @@ export const POST = async (req: NextRequest) => {
 
     // Parse request body
     const body = await req.json();
-    const { config, meta, sessionId } = body;
+    const { config, meta, messages } = body;
 
-    // Generate unique ID for the shared template
-    const shareId = `shared-${auth.userId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    // Generate unique ID for the shared conversation
+    const shareId = `share-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
-    // Create a bundled app entry for this shared template
-    const model = new BundledAppModel(serverDB);
+    // Create shared conversation
+    const model = new SharedConversationModel(serverDB);
 
-    const sharedApp: NewBundledApp = {
-      avatar: meta?.avatar || '🔗',
-      backgroundColor: meta?.backgroundColor || '#6366f1',
-      category: 'shared',
-      chatConfig: config?.chatConfig || {},
-      config: {
-        model: config?.model || 'gpt-4o-mini',
-        params: config?.params || {},
-        provider: config?.provider || 'openai',
-      },
-      description: meta?.description || 'Shared conversation template',
+    const sharedConversation: NewSharedConversation = {
       id: shareId,
-      isFeatured: false,
-      isPublic: true,
-      openingMessage: config?.openingMessage,
-      openingQuestions: config?.openingQuestions || [],
+      userId: auth.userId,
+
+      // Metadata
+      title: meta?.title || 'Shared Conversation',
+      description: meta?.description || '',
+      avatar: meta?.avatar || '💬',
+      backgroundColor: meta?.backgroundColor || '#6366f1',
+      tags: meta?.tags || [],
+
+      // Agent configuration
       systemRole: config?.systemRole || '',
-      tags: meta?.tags || ['shared'],
-      title: meta?.title || 'Shared Template',
+      model: config?.model || 'gpt-4o-mini',
+      provider: config?.provider || 'openai',
+      params: config?.params || {},
+      chatConfig: config?.chatConfig || {},
+
+      // Messages (full conversation history)
+      messages: messages || [],
+
+      // Stats
+      isPublic: true,
+      viewCount: 0,
+      forkCount: 0,
     };
 
-    await model.create(sharedApp);
+    await model.create(sharedConversation);
 
     return NextResponse.json({
       id: shareId,
       success: true,
-      url: `/api/share/${shareId}`,
+      url: `/share/${shareId}`,
     });
   } catch (error) {
     console.error('Error creating share link:', error);
