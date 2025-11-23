@@ -7,20 +7,26 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 
 import ShareImage from './ShareImage';
 import ShareJSON from './ShareJSON';
+import ShareLink from './ShareLink';
 import ShareText from './ShareText';
 
 enum Tab {
   JSON = 'json',
+  Link = 'link',
   Screenshot = 'screenshot',
   Text = 'text',
 }
 
 const ShareModal = memo<ModalProps>(({ onCancel, open }) => {
-  const [tab, setTab] = useState<Tab>(Tab.Screenshot);
+  const [tab, setTab] = useState<Tab>(Tab.Link);
   const { t } = useTranslation('chat');
 
   const options: SegmentedProps['options'] = useMemo(
     () => [
+      {
+        label: t('shareModal.link', { defaultValue: 'Link', ns: 'chat' }),
+        value: Tab.Link,
+      },
       {
         label: t('shareModal.screenshot'),
         value: Tab.Screenshot,
@@ -57,6 +63,7 @@ const ShareModal = memo<ModalProps>(({ onCancel, open }) => {
           value={tab}
           variant={'filled'}
         />
+        {tab === Tab.Link && <ShareLink />}
         {tab === Tab.Screenshot && <ShareImage mobile={isMobile} />}
         {tab === Tab.Text && <ShareText />}
         {tab === Tab.JSON && <ShareJSON />}
