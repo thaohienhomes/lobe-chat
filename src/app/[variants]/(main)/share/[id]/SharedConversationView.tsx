@@ -2,7 +2,7 @@
 
 import { ActionIcon, Avatar, Button } from '@lobehub/ui';
 import { message } from 'antd';
-import { Copy, Eye, GitFork, LogIn, Share2 } from 'lucide-react';
+import { Copy, Eye, GitFork, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
@@ -38,7 +38,7 @@ const SharedConversationView = memo<SharedConversationViewProps>(
         }
 
         const data = await response.json();
-        
+
         // Redirect to new session
         router.push(`/chat?session=${data.sessionId}`);
       } catch (error) {

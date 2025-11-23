@@ -1,5 +1,5 @@
 import { getUserAuth } from '@lobechat/utils/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { Flexbox } from 'react-layout-kit';
 
 import { SharedConversationModel } from '@/database/models/sharedConversation';
