@@ -2,7 +2,7 @@ import debug from 'debug';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { serverDBEnv } from '@/config/db';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 import { dateKeys } from '@/libs/next-auth/adapter';
 import { NextAuthUserService } from '@/server/services/nextAuthUser';
 
@@ -40,6 +40,9 @@ export async function POST(req: NextRequest) {
         }
       }
     }
+
+    // Get database instance
+    const serverDB = await getServerDB();
     const service = new NextAuthUserService(serverDB);
     let result;
     switch (data.action) {

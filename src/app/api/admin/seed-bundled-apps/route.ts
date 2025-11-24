@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { BundledAppModel } from '@/database/models/bundledApp';
 import { NewBundledApp } from '@/database/schemas';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 
 const BUNDLED_APPS: NewBundledApp[] = [
   {
@@ -130,6 +130,9 @@ Always:
 
 export const GET = async () => {
   try {
+    // Get database instance
+    const serverDB = await getServerDB();
+
     // First, check if table exists by trying a simple query
     let tableExists = false;
     try {

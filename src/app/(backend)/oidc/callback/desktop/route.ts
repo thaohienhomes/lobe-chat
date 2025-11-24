@@ -2,7 +2,7 @@ import debug from 'debug';
 import { NextRequest, NextResponse, after } from 'next/server';
 
 import { OAuthHandoffModel } from '@/database/models/oauthHandoff';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 import { correctOIDCUrl } from '@/utils/server/correctOIDCUrl';
 
 const log = debug('lobe-oidc:callback:desktop');
@@ -70,6 +70,8 @@ export const GET = async (req: NextRequest) => {
     const payload = { code, state };
     const id = state;
 
+    // Get database instance
+    const serverDB = await getServerDB();
     const authHandoffModel = new OAuthHandoffModel(serverDB);
     await authHandoffModel.create({ client, id, payload });
     log('Handoff record created successfully for id: %s', id);

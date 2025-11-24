@@ -2,7 +2,7 @@ import debug from 'debug';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { OAuthHandoffModel } from '@/database/models/oauthHandoff';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 
 const log = debug('lobe-oidc:handoff');
 
@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
 
     log('Fetching handoff record - id=%s, client=%s', id, client);
 
+    // Get database instance
+    const serverDB = await getServerDB();
     const authHandoffModel = new OAuthHandoffModel(serverDB);
     const result = await authHandoffModel.fetchAndConsume(id, client);
 
