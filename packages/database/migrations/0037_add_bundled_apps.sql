@@ -1,0 +1,20 @@
+CREATE TABLE "bundled_apps" (
+	"id" varchar(100) PRIMARY KEY NOT NULL,
+	"title" varchar(255) NOT NULL,
+	"description" text,
+	"avatar" text,
+	"background_color" text,
+	"tags" jsonb DEFAULT '[]'::jsonb,
+	"system_role" text NOT NULL,
+	"config" jsonb,
+	"chat_config" jsonb,
+	"opening_message" text,
+	"opening_questions" jsonb,
+	"is_public" boolean DEFAULT true,
+	"is_featured" boolean DEFAULT false,
+	"category" varchar(50),
+	"usage_count" jsonb DEFAULT '0'::jsonb,
+	"accessed_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);

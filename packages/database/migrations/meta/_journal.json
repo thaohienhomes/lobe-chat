@@ -256,22 +256,15 @@
     {
       "idx": 36,
       "version": "7",
-      "when": 1763781049720,
+      "when": 1763781049721,
       "tag": "0036_multi_market_billing",
       "breakpoints": true
     },
     {
       "idx": 37,
       "version": "7",
-      "when": 1763781049721,
-      "tag": "0037_add_payment_preferences",
-      "breakpoints": true
-    },
-    {
-      "idx": 38,
-      "version": "7",
       "when": 1763781049722,
-      "tag": "0038_add_bundled_apps",
+      "tag": "0037_add_bundled_apps",
       "breakpoints": true
     }
   ],

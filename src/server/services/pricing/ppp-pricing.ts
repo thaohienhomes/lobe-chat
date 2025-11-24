@@ -400,22 +400,22 @@ export async function getPppPricing(
         countryCode: data.countryCode,
         countryName: data.countryName,
         currency: data.currency,
-        pppMultiplier: data.pppMultiplier,
+        pppMultiplier: parseFloat(data.pppMultiplier),
         preferredPaymentGateway: data.preferredPaymentGateway || 'stripe',
         pricing: {
           premium: {
             monthly: data.premiumMonthly,
-            monthlyUsd: data.premiumMonthlyUsd,
+            monthlyUsd: parseFloat(data.premiumMonthlyUsd),
             yearly: data.premiumYearly,
           },
           starter: {
             monthly: data.starterMonthly,
-            monthlyUsd: data.starterMonthlyUsd,
+            monthlyUsd: parseFloat(data.starterMonthlyUsd),
             yearly: data.starterYearly,
           },
           ultimate: {
             monthly: data.ultimateMonthly,
-            monthlyUsd: data.ultimateMonthlyUsd,
+            monthlyUsd: parseFloat(data.ultimateMonthlyUsd),
             yearly: data.ultimateYearly,
           },
         },
