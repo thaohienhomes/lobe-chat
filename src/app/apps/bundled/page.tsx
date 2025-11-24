@@ -2,11 +2,14 @@ import { getUserAuth } from '@lobechat/utils/server';
 import { Flexbox } from 'react-layout-kit';
 
 import { BundledAppModel } from '@/database/models/bundledApp';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 
 import BundledAppsDiscoveryView from './BundledAppsDiscoveryView';
 
 const BundledAppsDiscoveryPage = async () => {
+  // Get database instance
+  const serverDB = await getServerDB();
+
   // Get all public bundled apps
   const model = new BundledAppModel(serverDB);
   const [featuredApps, allApps] = await Promise.all([

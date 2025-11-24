@@ -56,7 +56,7 @@ const SharedConversationView = memo<SharedConversationViewProps>(
     };
 
     return (
-      <Flexbox gap={24} padding={24} style={{ maxWidth: 900, margin: '0 auto', width: '100%' }}>
+      <Flexbox gap={24} padding={24} style={{ margin: '0 auto', maxWidth: 900, width: '100%' }}>
         {/* Header */}
         <Flexbox gap={16}>
           <Flexbox align={'center'} gap={12} horizontal>
@@ -113,8 +113,8 @@ const SharedConversationView = memo<SharedConversationViewProps>(
           {sharedConversation.messages && sharedConversation.messages.length > 0 ? (
             sharedConversation.messages.map((msg: any, index: number) => (
               <Flexbox
-                key={index}
                 gap={8}
+                key={index}
                 padding={16}
                 style={{
                   background: msg.role === 'user' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(0,0,0,0.2)',
@@ -141,4 +141,3 @@ const SharedConversationView = memo<SharedConversationViewProps>(
 );
 
 export default SharedConversationView;
-

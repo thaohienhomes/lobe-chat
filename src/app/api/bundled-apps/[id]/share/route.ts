@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { BundledAppModel } from '@/database/models/bundledApp';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 
 /**
  * Generate share link for a bundled app
@@ -11,6 +11,9 @@ export const POST = async (req: NextRequest, props: { params: Promise<{ id: stri
   try {
     const params = await props.params;
     const { id } = params;
+
+    // Get database instance
+    const serverDB = await getServerDB();
 
     // Get bundled app
     const model = new BundledAppModel(serverDB);
@@ -64,6 +67,9 @@ export const GET = async (req: NextRequest, props: { params: Promise<{ id: strin
   try {
     const params = await props.params;
     const { id } = params;
+
+    // Get database instance
+    const serverDB = await getServerDB();
 
     // Get bundled app
     const model = new BundledAppModel(serverDB);

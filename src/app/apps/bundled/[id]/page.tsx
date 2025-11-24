@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Flexbox } from 'react-layout-kit';
 
 import { BundledAppModel } from '@/database/models/bundledApp';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 import { PagePropsWithId } from '@/types/next';
 
 import BundledAppLandingView from './BundledAppLandingView';
@@ -11,6 +11,9 @@ import BundledAppLandingView from './BundledAppLandingView';
 const BundledAppLandingPage = async (props: PagePropsWithId) => {
   const params = await props.params;
   const { id } = params;
+
+  // Get database instance
+  const serverDB = await getServerDB();
 
   // Get bundled app (public access - no auth required for viewing)
   const model = new BundledAppModel(serverDB);
@@ -50,6 +53,8 @@ export async function generateMetadata(props: PagePropsWithId) {
   const { id } = params;
 
   try {
+    // Get database instance
+    const serverDB = await getServerDB();
     const model = new BundledAppModel(serverDB);
     const bundledApp = await model.findById(id);
 

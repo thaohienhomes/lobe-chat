@@ -18,7 +18,12 @@ interface BundledAppLandingViewProps {
 
 const BundledAppLandingView = memo<BundledAppLandingViewProps>(
   ({ bundledApp, isAuthenticated }) => {
-    const [shareUrl] = useState(`${window.location.origin}/apps/bundled/${bundledApp.id}`);
+    const [shareUrl] = useState(() => {
+      if (typeof window !== 'undefined') {
+        return `${window.location.origin}/apps/bundled/${bundledApp.id}`;
+      }
+      return `/apps/bundled/${bundledApp.id}`;
+    });
 
     const handleStartChat = () => {
       if (!isAuthenticated) {
