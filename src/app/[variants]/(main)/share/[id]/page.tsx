@@ -27,7 +27,7 @@ const SharedConversationPage = async (props: PagePropsWithId) => {
   const auth = await getUserAuth();
 
   return (
-    <Flexbox height={'100%'} width={'100%'}>
+    <Flexbox height={'100%'} style={{ overflowX: 'hidden', overflowY: 'auto' }} width={'100%'}>
       <SharedConversationView isAuthenticated={!!auth} sharedConversation={sharedConversation} />
     </Flexbox>
   );

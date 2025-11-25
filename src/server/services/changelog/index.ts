@@ -136,8 +136,19 @@ export class ChangelogService {
         rawTitle: match ? match[1] : '',
       };
     } catch (e) {
-      console.error('[ChangelogFetchError]failed to fetch changlog post', id);
-      console.error(e);
+      const error = e as Error;
+      const cause = error.cause as { code?: string } | undefined;
+      const code = cause?.code;
+
+      if (code && (code.includes('ETIMEDOUT') || code.includes('ECONNRESET'))) {
+        console.warn(
+          '[ChangelogFetchError] failed to fetch changelog post due to transient network issue',
+          id,
+          code,
+        );
+      } else {
+        console.error('[ChangelogFetchError] failed to fetch changelog post', id, error);
+      }
 
       return false as any;
     }
