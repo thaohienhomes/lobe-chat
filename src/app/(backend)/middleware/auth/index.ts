@@ -14,13 +14,14 @@ import {
   OAUTH_AUTHORIZED,
   enableClerk,
 } from '@/const/auth';
-import { getServerDB } from '@/database/server';
 import { ClerkAuth } from '@/libs/clerk-auth';
 import { validateOIDCJWT } from '@/libs/oidc-provider/jwt';
-import { SubscriptionService } from '@/server/services/subscription';
 import { createErrorResponse } from '@/utils/errorResponse';
 
 import { checkAuthMethod } from './utils';
+
+// NOTE: Database imports are done dynamically inside the function to avoid
+// bundling Node.js modules for edge runtime routes that use this middleware
 
 type CreateRuntime = (jwtPayload: ClientSecretPayload) => ModelRuntime;
 type RequestOptions = { createRuntime?: CreateRuntime; params: Promise<{ provider: string }> };
@@ -111,8 +112,13 @@ export const checkAuth =
 
     // ============  Subscription Validation   ============ //
     // Check if user has a paid subscription before allowing AI model access
+    // NOTE: Using dynamic imports to avoid bundling Node.js modules for edge runtime
     if (jwtPayload.userId) {
       try {
+        // Dynamic import to avoid edge runtime bundling issues
+        const { getServerDB } = await import('@/database/server');
+        const { SubscriptionService } = await import('@/server/services/subscription');
+
         const db = await getServerDB();
         const subscriptionService = new SubscriptionService(db);
         const canAccess = await subscriptionService.canAccessAIModels(jwtPayload.userId);
