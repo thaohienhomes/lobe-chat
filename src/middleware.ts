@@ -162,9 +162,13 @@ const isPublicRoute = createRouteMatcher([
   '/trpc(.*)',
   // next auth
   '/next-auth/(.*)',
-  // clerk
+  // clerk - include OAuth callback routes
   '/login',
+  '/login(.*)',
   '/signup',
+  '/signup(.*)',
+  '/sso-callback',
+  '/sso-callback(.*)',
   // oauth
   '/oidc/handoff',
   '/oidc/token',
@@ -232,35 +236,47 @@ const nextAuthMiddleware = NextAuth.auth((req) => {
 
 const clerkAuthMiddleware = clerkMiddleware(
   async (auth, req) => {
-    logClerk('Clerk middleware processing request: %s %s', req.method, req.url);
+    try {
+      logClerk('Clerk middleware processing request: %s %s', req.method, req.url);
 
-    // when enable auth protection, only public route is not protected, others are all protected
-    const isProtected = appEnv.ENABLE_AUTH_PROTECTION ? !isPublicRoute(req) : isProtectedRoute(req);
+      // when enable auth protection, only public route is not protected, others are all protected
+      const isProtected = appEnv.ENABLE_AUTH_PROTECTION
+        ? !isPublicRoute(req)
+        : isProtectedRoute(req);
 
-    logClerk('Route protection status: %s, %s', req.url, isProtected ? 'protected' : 'public');
+      logClerk('Route protection status: %s, %s', req.url, isProtected ? 'protected' : 'public');
 
-    if (isProtected) {
-      logClerk('Protecting route: %s', req.url);
-      await auth.protect();
+      // Get auth data first before creating response
+      const data = await auth();
+      logClerk('Clerk auth status: %O', {
+        isSignedIn: !!data.userId,
+        userId: data.userId,
+      });
+
+      // Protect route if needed (this will redirect to login if not authenticated)
+      if (isProtected) {
+        logClerk('Protecting route: %s', req.url);
+        await auth.protect();
+      }
+
+      // Create the response after auth checks
+      const response = defaultMiddleware(req);
+
+      // If OIDC is enabled and Clerk user is logged in, add OIDC session pre-sync header
+      if (oidcEnv.ENABLE_OIDC && data.userId) {
+        logClerk('OIDC session pre-sync: Setting %s = %s', OIDC_SESSION_HEADER, data.userId);
+        response.headers.set(OIDC_SESSION_HEADER, data.userId);
+      } else if (oidcEnv.ENABLE_OIDC) {
+        logClerk('No Clerk user detected, not setting OIDC session sync header');
+      }
+
+      return response;
+    } catch (error) {
+      logClerk('Clerk middleware error: %O', error);
+      console.error('Clerk middleware error:', error);
+      // Re-throw to let Clerk handle the error (e.g., redirect to login)
+      throw error;
     }
-
-    const response = defaultMiddleware(req);
-
-    const data = await auth();
-    logClerk('Clerk auth status: %O', {
-      isSignedIn: !!data.userId,
-      userId: data.userId,
-    });
-
-    // If OIDC is enabled and Clerk user is logged in, add OIDC session pre-sync header
-    if (oidcEnv.ENABLE_OIDC && data.userId) {
-      logClerk('OIDC session pre-sync: Setting %s = %s', OIDC_SESSION_HEADER, data.userId);
-      response.headers.set(OIDC_SESSION_HEADER, data.userId);
-    } else if (oidcEnv.ENABLE_OIDC) {
-      logClerk('No Clerk user detected, not setting OIDC session sync header');
-    }
-
-    return response;
   },
   {
     // https://github.com/lobehub/lobe-chat/pull/3084

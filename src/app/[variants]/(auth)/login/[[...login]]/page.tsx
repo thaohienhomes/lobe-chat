@@ -21,7 +21,7 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
 const Page = () => {
   if (!enableClerk) return notFound();
 
-  return <SignIn path="/login" />;
+  return <SignIn afterSignInUrl="/" fallbackRedirectUrl="/" path="/login" signUpUrl="/signup" />;
 };
 
 Page.displayName = 'Login';

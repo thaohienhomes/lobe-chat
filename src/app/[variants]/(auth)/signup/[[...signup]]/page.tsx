@@ -27,7 +27,7 @@ const Page = () => {
     redirect('/login');
   }
 
-  return <SignUp path="/signup" />;
+  return <SignUp afterSignUpUrl="/" fallbackRedirectUrl="/" path="/signup" />;
 };
 
 Page.displayName = 'SignUp';

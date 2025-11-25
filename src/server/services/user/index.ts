@@ -7,6 +7,7 @@ import { pino } from '@/libs/logger';
 import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
 import { S3 } from '@/server/modules/S3';
 import { AgentService } from '@/server/services/agent';
+import { SubscriptionService } from '@/server/services/subscription';
 
 export class UserService {
   private db: LobeChatDatabase;
@@ -57,6 +58,11 @@ export class UserService {
     /* ↓ cloud slot ↓ */
 
     /* ↑ cloud slot ↑ */
+
+    // 4. Create a FREE subscription for the new user
+    const subscriptionService = new SubscriptionService(this.db);
+    await subscriptionService.createFreeSubscription(id);
+    pino.info({ userId: id }, 'Free subscription created for new user');
 
     //analytics
     const analytics = await initializeServerAnalytics();

@@ -5,21 +5,25 @@ import { MessageModel } from '@/database/models/message';
 import { TopicModel } from '@/database/models/topic';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { subscriptionAuth } from '@/libs/trpc/middleware/subscriptionAuth';
 import { AiChatService } from '@/server/services/aiChat';
 import { FileService } from '@/server/services/file';
 
-const aiChatProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
-  const { ctx } = opts;
+const aiChatProcedure = authedProcedure
+  .use(serverDatabase)
+  .use(subscriptionAuth) // Add subscription validation
+  .use(async (opts) => {
+    const { ctx } = opts;
 
-  return opts.next({
-    ctx: {
-      aiChatService: new AiChatService(ctx.serverDB, ctx.userId),
-      fileService: new FileService(ctx.serverDB, ctx.userId),
-      messageModel: new MessageModel(ctx.serverDB, ctx.userId),
-      topicModel: new TopicModel(ctx.serverDB, ctx.userId),
-    },
+    return opts.next({
+      ctx: {
+        aiChatService: new AiChatService(ctx.serverDB, ctx.userId),
+        fileService: new FileService(ctx.serverDB, ctx.userId),
+        messageModel: new MessageModel(ctx.serverDB, ctx.userId),
+        topicModel: new TopicModel(ctx.serverDB, ctx.userId),
+      },
+    });
   });
-});
 
 export const aiChatRouter = router({
   sendMessageInServer: aiChatProcedure

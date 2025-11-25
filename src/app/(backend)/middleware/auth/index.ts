@@ -14,8 +14,10 @@ import {
   OAUTH_AUTHORIZED,
   enableClerk,
 } from '@/const/auth';
+import { getServerDB } from '@/database/server';
 import { ClerkAuth } from '@/libs/clerk-auth';
 import { validateOIDCJWT } from '@/libs/oidc-provider/jwt';
+import { SubscriptionService } from '@/server/services/subscription';
 import { createErrorResponse } from '@/utils/errorResponse';
 
 import { checkAuthMethod } from './utils';
@@ -105,6 +107,47 @@ export const checkAuth =
       const error = errorContent || e;
 
       return createErrorResponse(errorType, { error, ...res, provider: params?.provider });
+    }
+
+    // ============  Subscription Validation   ============ //
+    // Check if user has a paid subscription before allowing AI model access
+    if (jwtPayload.userId) {
+      try {
+        const db = await getServerDB();
+        const subscriptionService = new SubscriptionService(db);
+        const canAccess = await subscriptionService.canAccessAIModels(jwtPayload.userId);
+
+        if (!canAccess) {
+          const plan = await subscriptionService.getSubscriptionPlan(jwtPayload.userId);
+          console.warn(
+            '[Subscription Auth] User attempted to access AI models without paid subscription:',
+            {
+              planId: plan.planId,
+              status: plan.status,
+              userId: jwtPayload.userId,
+            },
+          );
+
+          return createErrorResponse(ChatErrorType.Unauthorized, {
+            error: new Error(
+              'AI model access requires a paid subscription. Please upgrade your plan.',
+            ),
+            message:
+              'AI model access requires a paid subscription. Please upgrade your plan at /settings/subscription',
+            planId: plan.planId,
+            upgradeUrl: '/settings/subscription',
+          });
+        }
+
+        console.log(
+          '[Subscription Auth] ✅ Subscription validation passed for user:',
+          jwtPayload.userId,
+        );
+      } catch (error) {
+        console.error('[Subscription Auth] Error validating subscription:', error);
+        // Don't block the request if subscription check fails - log and continue
+        // This prevents service disruption if the subscription service has issues
+      }
     }
 
     return handler(req, { ...options, jwtPayload });
