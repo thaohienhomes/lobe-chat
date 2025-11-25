@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 
 export const GET = async () => {
   try {
-    const { serverDB } = await import('@/database/server');
+    const { getServerDB } = await import('@/database/server');
+    const serverDB = await getServerDB();
 
     // Read the SQL file content directly
     const fs = await import('node:fs');

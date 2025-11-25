@@ -2,7 +2,7 @@ import { getUserAuth } from '@lobechat/utils/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { SharedConversationModel } from '@/database/models/sharedConversation';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 import { createCallerFactory } from '@/libs/trpc/lambda';
 import { lambdaRouter } from '@/server/routers/lambda';
 
@@ -23,6 +23,9 @@ export const POST = async (req: NextRequest, props: { params: Promise<{ id: stri
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Get database instance
+    const serverDB = await getServerDB();
 
     // Get shared conversation
     const model = new SharedConversationModel(serverDB);
@@ -78,4 +81,3 @@ export const POST = async (req: NextRequest, props: { params: Promise<{ id: stri
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-

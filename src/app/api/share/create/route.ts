@@ -3,10 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { SharedConversationModel } from '@/database/models/sharedConversation';
 import { NewSharedConversation } from '@/database/schemas';
-import { serverDB } from '@/database/server';
+import { getServerDB } from '@/database/server';
 
 // Auto-run migration if table doesn't exist
 const ensureTableExists = async () => {
+  // Get database instance
+  const serverDB = await getServerDB();
+
   try {
     // Try to query the table
     await serverDB.execute('SELECT 1 FROM shared_conversations LIMIT 1');
@@ -62,6 +65,9 @@ export const POST = async (req: NextRequest) => {
 
     // Generate unique ID for the shared conversation
     const shareId = `share-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+
+    // Get database instance
+    const serverDB = await getServerDB();
 
     // Create shared conversation
     const model = new SharedConversationModel(serverDB);
