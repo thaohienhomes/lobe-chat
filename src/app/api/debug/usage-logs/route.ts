@@ -29,15 +29,9 @@ export async function GET(): Promise<NextResponse> {
       .orderBy(desc(usageLogs.createdAt))
       .limit(10);
 
-    // Get total count
-    const totalCount = await db
-      .select({ count: 'COUNT(*)' })
-      .from(usageLogs)
-      .where(eq(usageLogs.userId, userId));
-
     return NextResponse.json({
       userId,
-      totalLogs: totalCount[0]?.count || 0,
+      totalLogs: logs.length,
       recentLogs: logs,
       message: logs.length > 0 ? 'Usage logs found' : 'No usage logs found for this user'
     });

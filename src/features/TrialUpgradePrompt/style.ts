@@ -24,37 +24,44 @@ export const useStyles = createStyles(({ css, token }) => ({
     justify-content: center;
     gap: 6px;
 
-    padding: 10px 16px;
+    padding: 12px 20px;
 
-    font-size: 13px;
-    font-weight: 600;
-    color: #ffffff !important;
-    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000000 !important;
+    text-decoration: none !important;
 
-    background: linear-gradient(135deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
+    background: linear-gradient(135deg, #ffd700 0%, #ffb700 50%, #ff9500 100%);
     border-radius: 8px;
-    border: none;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.4);
 
     transition: all 0.2s ease;
 
     &:hover {
-      color: #ffffff !important;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px ${token.colorPrimaryBg};
-      text-decoration: none;
+      color: #000000 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 165, 0, 0.5);
+      text-decoration: none !important;
+      background: linear-gradient(135deg, #ffe44d 0%, #ffcc00 50%, #ffa500 100%);
     }
 
     &:active {
-      color: #ffffff !important;
+      color: #000000 !important;
       transform: translateY(0);
     }
 
     &:visited {
-      color: #ffffff !important;
+      color: #000000 !important;
     }
 
     span {
-      color: #ffffff !important;
+      color: #000000 !important;
+      font-weight: 700 !important;
+    }
+
+    svg {
+      color: #000000 !important;
     }
   `,
 

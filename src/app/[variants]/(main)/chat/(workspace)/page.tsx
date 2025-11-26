@@ -12,7 +12,8 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 
 import PageTitle from '../features/PageTitle';
 import Changelog from './features/ChangelogModal';
-import TelemetryNotification from './features/TelemetryNotification';
+// TelemetryNotification removed - pho.chat doesn't need Lobe telemetry consent
+// import TelemetryNotification from './features/TelemetryNotification';
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);
@@ -38,7 +39,7 @@ const Page = async (props: DynamicLayoutProps) => {
     <>
       <StructuredData ld={ld} />
       <PageTitle />
-      <TelemetryNotification mobile={isMobile} />
+      {/* TelemetryNotification removed for pho.chat */}
       {!isDesktop && showChangelog && !hideDocs && !isMobile && (
         <Suspense>
           <Changelog />

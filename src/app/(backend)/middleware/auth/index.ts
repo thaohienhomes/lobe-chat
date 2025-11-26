@@ -149,7 +149,7 @@ export const checkAuth =
           });
         }
 
-        // Log trial user access
+        // Log and track trial user access
         if (trialAccess.isTrialUser) {
           console.log(
             '[Subscription Auth] 🆓 Trial user access granted:',
@@ -159,6 +159,33 @@ export const checkAuth =
               userId: jwtPayload.userId,
             },
           );
+
+          // Track usage for trial users (increment message count)
+          // This ensures the counter updates even for streaming responses
+          try {
+            const { usageLogs } = await import('@/database/schemas/usage');
+
+            await db.insert(usageLogs).values({
+              costUSD: 0.001, // Minimal cost for trial tracking
+              costVND: 24.167,
+              createdAt: new Date(),
+              inputTokens: 100,
+              model: trialAccess.model || 'meta-llama/llama-3.1-8b-instruct',
+              outputTokens: 200,
+              provider: 'openrouter',
+              queryComplexity: 'simple',
+              sessionId: `trial-${Date.now()}`,
+              totalTokens: 300,
+              updatedAt: new Date(),
+              userId: jwtPayload.userId,
+            });
+
+            const remaining = (trialAccess.messagesRemaining ?? 0) - 1;
+            console.log(`📊 Trial usage tracked for user: ${jwtPayload.userId} (${remaining} messages remaining)`);
+          } catch (trackingError) {
+            console.warn('⚠️ Failed to track trial usage:', trackingError);
+            // Don't block the request if tracking fails
+          }
         } else {
           console.log(
             '[Subscription Auth] ✅ Paid subscription validated for user:',
