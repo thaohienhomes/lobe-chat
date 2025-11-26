@@ -306,20 +306,35 @@ export class UsageTracker {
     inputTokens: number;
     model: string;
     outputTokens: number;
+    provider?: string;
     queryComplexity: string;
     sessionId: string;
   }): Promise<void> {
     const costVND = request.costUSD * 24_167; // USD to VND conversion
+    const totalTokens = request.inputTokens + request.outputTokens;
 
-    await this.db.insert('usage_logs').values({
-      costUSD: request.costUSD,
-      costVND: costVND,
-      inputTokens: request.inputTokens,
+    // Import the schema here to avoid circular dependencies
+    const { usageLogs } = await import('@/database/schemas/usage');
+
+    await this.db.insert(usageLogs).values({
+      
+costUSD: request.costUSD,
+      
+
+costVND: costVND,
+      
+
+createdAt: new Date(),
+      
+// Use provided provider or default to openai
+inputTokens: request.inputTokens, 
       model: request.model,
       outputTokens: request.outputTokens,
+      provider: request.provider || 'openai',
       queryComplexity: request.queryComplexity,
       sessionId: request.sessionId,
-      timestamp: new Date(),
+      totalTokens: totalTokens,
+      updatedAt: new Date(),
       userId: this.userId,
     });
 

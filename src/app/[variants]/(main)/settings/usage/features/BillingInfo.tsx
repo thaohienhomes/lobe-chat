@@ -85,9 +85,9 @@ interface SubscriptionData {
 
 // VND pricing for plans (monthly)
 const PLAN_PRICING: Record<string, number> = {
-  premium: 149_000,
-  starter: 29_000,
-  ultimate: 349_000,
+  premium: 129_000,  // Fixed: was 149_000 VND
+  starter: 39_000,   // Fixed: was 29_000 VND
+  ultimate: 349_000, // Correct
 };
 
 const handleManageSubscription = () => {

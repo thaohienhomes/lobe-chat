@@ -7,15 +7,14 @@ import { ChatErrorType } from '@lobechat/types';
 
 import { checkAuth } from '@/app/(backend)/middleware/auth';
 import { createTraceOptions, initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
-// Disabled for initial deployment
-// import { CostOptimizationEngine, UsageTracker, VND_PRICING_TIERS } from '@/server/modules/CostOptimization';
-// import { IntelligentModelRouter } from '@/server/modules/IntelligentModelRouter';
-// import { isCostOptimizationEnabled, isIntelligentRoutingEnabled, isUsageTrackingEnabled } from '@/server/services/FeatureFlags';
+import { CostOptimizationEngine, UsageTracker } from '@/server/modules/CostOptimization';
+import { IntelligentModelRouter } from '@/server/modules/IntelligentModelRouter';
+import { isCostOptimizationEnabled, isIntelligentRoutingEnabled, isUsageTrackingEnabled } from '@/server/services/FeatureFlags';
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
 import { getTracePayload } from '@/utils/trace';
 
-// import { getServerDB } from '@lobechat/database/core/db-adaptor'; // Disabled for initial deployment
+import { getServerDB } from '@/database/server';
 
 export const maxDuration = 300;
 
@@ -35,26 +34,25 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
   try {
     // ============  0. Cost Optimization Setup   ============ //
-    // Disabled for initial deployment
-    const costOptimizationEnabled = false; // jwtPayload.userId ? isCostOptimizationEnabled(jwtPayload.userId) : false;
-    const intelligentRoutingEnabled = false; // jwtPayload.userId ? isIntelligentRoutingEnabled(jwtPayload.userId) : false;
-    const usageTrackingEnabled = false; // jwtPayload.userId ? isUsageTrackingEnabled(jwtPayload.userId) : false;
+    const costOptimizationEnabled = jwtPayload.userId ? isCostOptimizationEnabled(jwtPayload.userId) : false;
+    const intelligentRoutingEnabled = jwtPayload.userId ? isIntelligentRoutingEnabled(jwtPayload.userId) : false;
+    const usageTrackingEnabled = jwtPayload.userId ? isUsageTrackingEnabled(jwtPayload.userId) : false;
 
-    // let costEngine: CostOptimizationEngine | undefined;
-    // let usageTracker: UsageTracker | undefined;
-    // let modelRouter: IntelligentModelRouter | undefined;
+    let costEngine: CostOptimizationEngine | undefined;
+    let usageTracker: UsageTracker | undefined;
+    let modelRouter: IntelligentModelRouter | undefined;
 
     if (costOptimizationEnabled && jwtPayload.userId) {
       try {
-        // const serverDB = await getServerDB(); // Disabled for initial deployment
-        // costEngine = new CostOptimizationEngine(); // Disabled for initial deployment
+        const serverDB = await getServerDB();
+        costEngine = new CostOptimizationEngine();
 
         if (usageTrackingEnabled) {
-          // usageTracker = new UsageTracker(serverDB, jwtPayload.userId); // Disabled for initial deployment
+          usageTracker = new UsageTracker(serverDB, jwtPayload.userId);
         }
 
         if (intelligentRoutingEnabled) {
-          // modelRouter = new IntelligentModelRouter(); // Disabled for initial deployment
+          modelRouter = new IntelligentModelRouter();
         }
 
         console.log(
@@ -111,7 +109,29 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     console.log('='.repeat(80));
 
     // ============  4. Track Usage (for non-streaming responses)   ============ //
-    // Disabled for initial deployment.
+    if (usageTracker && costEngine && !data.stream) {
+      try {
+        // For non-streaming responses, we can track usage immediately
+        // Note: For streaming responses, usage tracking should be handled in the stream completion
+        const inputTokens = data.messages?.reduce((acc, msg) => acc + (msg.content?.length || 0), 0) || 0;
+        const estimatedInputTokens = Math.ceil(inputTokens / 4); // Rough estimate: 4 chars per token
+        const estimatedOutputTokens = 150; // Default estimate for non-streaming
+
+        await trackUsageAfterCompletion({
+          costEngine,
+          inputTokens: estimatedInputTokens,
+          model: data.model,
+          outputTokens: estimatedOutputTokens,
+          provider: params.provider,
+          responseTimeMs: 0, // For non-streaming, response time is not critical
+          sessionId: data.sessionId || 'unknown',
+          usageTracker,
+          userId: jwtPayload.userId!,
+        });
+      } catch (error) {
+        console.warn('⚠️ Failed to track usage for non-streaming response:', error);
+      }
+    }
 
     return response;
   } catch (e) {
@@ -200,7 +220,6 @@ async function getUserSubscriptionTier(
 /**
  * Track usage after completion
  */
-/*
 async function trackUsageAfterCompletion(params: {
   costEngine: CostOptimizationEngine;
   inputTokens: number;
@@ -231,6 +250,7 @@ async function trackUsageAfterCompletion(params: {
       inputTokens: params.inputTokens,
       model: params.model,
       outputTokens: params.outputTokens,
+      provider: params.provider,
       queryComplexity: complexity,
       sessionId: params.sessionId,
     });
@@ -240,4 +260,3 @@ async function trackUsageAfterCompletion(params: {
     console.error('Failed to track usage:', error);
   }
 }
-*/
