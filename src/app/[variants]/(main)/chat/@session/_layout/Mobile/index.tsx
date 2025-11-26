@@ -12,11 +12,15 @@ const MobileLayout = ({ children }: PropsWithChildren) => {
       <div style={{ padding: '8px 16px' }}>
         <SessionSearchBar mobile />
       </div>
-      {children}
-      {/* ↓ cloud slot ↓ */}
-      <Suspense fallback={null}>
-        <TrialUpgradePrompt compact />
-      </Suspense>
+      <div style={{ flex: 1 }}>
+        {children}
+      </div>
+      {/* ↓ cloud slot - moved to bottom ↓ */}
+      <div style={{ padding: '8px 16px' }}>
+        <Suspense fallback={null}>
+          <TrialUpgradePrompt compact />
+        </Suspense>
+      </div>
       {/* ↑ cloud slot ↑ */}
     </MobileContentLayout>
   );

@@ -31,6 +31,7 @@ export function useTrialStatus() {
     error,
     isLoading,
     isTrialUser: data?.isTrialUser ?? false,
+    maxMessages: data?.maxMessages ?? 10,
     messagesRemaining: data?.messagesRemaining ?? 0,
     mutate,
     planId: data?.planId ?? 'free',
