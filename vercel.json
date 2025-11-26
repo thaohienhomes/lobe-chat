@@ -11,8 +11,8 @@
   },
   "build": {
     "env": {
-      "NODE_OPTIONS": "--max-old-space-size=8192",
-      "NEXT_DISABLE_SOURCEMAPS": "1"
+      "NODE_OPTIONS": "--max-old-space-size=16384",
+      "SENTRY_LOG_LEVEL": "warn"
     }
   }
 }
