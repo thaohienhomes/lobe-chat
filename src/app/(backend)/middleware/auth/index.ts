@@ -110,8 +110,8 @@ export const checkAuth =
       return createErrorResponse(errorType, { error, ...res, provider: params?.provider });
     }
 
-    // ============  Subscription Validation   ============ //
-    // Check if user has a paid subscription before allowing AI model access
+    // ============  Subscription & Trial Validation   ============ //
+    // Check if user can access AI models (paid subscription OR free trial)
     // NOTE: Using dynamic imports to avoid bundling Node.js modules for edge runtime
     if (jwtPayload.userId) {
       try {
@@ -121,34 +121,50 @@ export const checkAuth =
 
         const db = await getServerDB();
         const subscriptionService = new SubscriptionService(db);
-        const canAccess = await subscriptionService.canAccessAIModels(jwtPayload.userId);
 
-        if (!canAccess) {
+        // Check trial access with the requested model
+        const trialAccess = await subscriptionService.checkTrialAccess(jwtPayload.userId);
+
+        if (!trialAccess.allowed) {
           const plan = await subscriptionService.getSubscriptionPlan(jwtPayload.userId);
           console.warn(
-            '[Subscription Auth] User attempted to access AI models without paid subscription:',
+            '[Subscription Auth] Trial expired - user needs to upgrade:',
             {
+              messagesRemaining: trialAccess.messagesRemaining,
               planId: plan.planId,
-              status: plan.status,
+              reason: trialAccess.reason,
+              tokensRemaining: trialAccess.tokensRemaining,
               userId: jwtPayload.userId,
             },
           );
 
           return createErrorResponse(ChatErrorType.Unauthorized, {
-            error: new Error(
-              'AI model access requires a paid subscription. Please upgrade your plan.',
-            ),
-            message:
-              'AI model access requires a paid subscription. Please upgrade your plan at /settings/subscription',
+            error: new Error(trialAccess.reason || 'Free trial expired. Please upgrade your plan.'),
+            isTrialExpired: true,
+            message: trialAccess.reason || 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat.',
+            messagesRemaining: trialAccess.messagesRemaining,
             planId: plan.planId,
+            tokensRemaining: trialAccess.tokensRemaining,
             upgradeUrl: '/settings/subscription',
           });
         }
 
-        console.log(
-          '[Subscription Auth] ✅ Subscription validation passed for user:',
-          jwtPayload.userId,
-        );
+        // Log trial user access
+        if (trialAccess.isTrialUser) {
+          console.log(
+            '[Subscription Auth] 🆓 Trial user access granted:',
+            {
+              messagesRemaining: trialAccess.messagesRemaining,
+              tokensRemaining: trialAccess.tokensRemaining,
+              userId: jwtPayload.userId,
+            },
+          );
+        } else {
+          console.log(
+            '[Subscription Auth] ✅ Paid subscription validated for user:',
+            jwtPayload.userId,
+          );
+        }
       } catch (error) {
         console.error('[Subscription Auth] Error validating subscription:', error);
         // Don't block the request if subscription check fails - log and continue

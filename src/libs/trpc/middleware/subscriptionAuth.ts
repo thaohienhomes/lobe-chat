@@ -8,7 +8,9 @@ import { trpc } from '../lambda/init';
 
 /**
  * Subscription authorization middleware
- * Ensures users have an active PAID subscription before accessing AI features
+ * Allows access for:
+ * - Paid subscribers (unlimited)
+ * - Free trial users (limited messages/tokens)
  *
  * IMPORTANT: This middleware must be used AFTER:
  * - authedProcedure (provides userId)
@@ -32,38 +34,55 @@ export const subscriptionAuth = trpc.middleware(async (opts) => {
 
   const subscriptionService = new SubscriptionService(serverDB);
 
-  // Check if user can access AI models
-  const canAccess = await subscriptionService.canAccessAIModels(ctx.userId);
+  // Check trial access (works for both paid and free users)
+  const trialAccess = await subscriptionService.checkTrialAccess(ctx.userId);
 
-  if (!canAccess) {
+  if (!trialAccess.allowed) {
     const plan = await subscriptionService.getSubscriptionPlan(ctx.userId);
 
     pino.warn(
       {
+        messagesRemaining: trialAccess.messagesRemaining,
         planId: plan.planId,
-        status: plan.status,
+        reason: trialAccess.reason,
+        tokensRemaining: trialAccess.tokensRemaining,
         userId: ctx.userId,
       },
-      'User attempted to access AI models without paid subscription',
+      'Trial expired - user needs to upgrade',
     );
 
     throw new TRPCError({
       cause: {
+        isTrialExpired: true,
+        messagesRemaining: trialAccess.messagesRemaining,
         planId: plan.planId,
-        status: plan.status,
+        tokensRemaining: trialAccess.tokensRemaining,
         upgradeUrl: '/settings/subscription',
       },
       code: 'FORBIDDEN',
-      message:
-        'AI model access requires a paid subscription. Please upgrade your plan to access AI features.',
+      message: trialAccess.reason || 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat.',
     });
   }
 
-  pino.info({ userId: ctx.userId }, 'Subscription validation passed');
+  if (trialAccess.isTrialUser) {
+    pino.info(
+      {
+        messagesRemaining: trialAccess.messagesRemaining,
+        tokensRemaining: trialAccess.tokensRemaining,
+        userId: ctx.userId,
+      },
+      'Trial user access granted',
+    );
+  } else {
+    pino.info({ userId: ctx.userId }, 'Paid subscription validation passed');
+  }
 
   return opts.next({
     ctx: {
+      isTrialUser: trialAccess.isTrialUser,
+      messagesRemaining: trialAccess.messagesRemaining,
       subscriptionService,
+      tokensRemaining: trialAccess.tokensRemaining,
     },
   });
 });

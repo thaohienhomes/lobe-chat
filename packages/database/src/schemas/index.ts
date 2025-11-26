@@ -18,4 +18,5 @@ export * from './relations';
 export * from './session';
 export * from './sharedConversation';
 export * from './topic';
+export * from './usage';
 export * from './user';

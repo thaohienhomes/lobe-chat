@@ -1,6 +1,7 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, Suspense } from 'react';
 
 import MobileContentLayout from '@/components/server/MobileNavLayout';
+import TrialUpgradePrompt from '@/features/TrialUpgradePrompt';
 
 import SessionSearchBar from '../../features/SessionSearchBar';
 import SessionHeader from './SessionHeader';
@@ -13,7 +14,9 @@ const MobileLayout = ({ children }: PropsWithChildren) => {
       </div>
       {children}
       {/* ↓ cloud slot ↓ */}
-
+      <Suspense fallback={null}>
+        <TrialUpgradePrompt compact />
+      </Suspense>
       {/* ↑ cloud slot ↑ */}
     </MobileContentLayout>
   );
