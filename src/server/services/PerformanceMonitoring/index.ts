@@ -101,10 +101,15 @@ export class PerformanceMonitoringService {
       WHERE created_at BETWEEN ${start} AND ${end}
     `);
 
-    const latency = latencyMetrics[0];
-    const cost = costMetrics[0];
-    const budget = budgetMetrics[0];
-    const routing = routingMetrics[0];
+    const latencyRows = latencyMetrics.rows as any[] || [];
+    const costRows = costMetrics.rows as any[] || [];
+    const budgetRows = budgetMetrics.rows as any[] || [];
+    const routingRows = routingMetrics.rows as any[] || [];
+
+    const latency = latencyRows[0];
+    const cost = costRows[0];
+    const budget = budgetRows[0];
+    const routing = routingRows[0];
 
     return {
       averageCostPerQuery: Number(cost?.avg_cost_per_query) || 0,
@@ -117,7 +122,7 @@ export class PerformanceMonitoringService {
 
       modelRoutingAccuracy:
         (Number(routing?.simple_routing_accuracy) + Number(routing?.complex_routing_accuracy)) /
-          2 || 0,
+        2 || 0,
 
       optimalModelUsageRate: await this.calculateOptimalModelUsage(timeRange),
 
@@ -135,7 +140,7 @@ export class PerformanceMonitoringService {
   async checkAlerts(): Promise<
     Array<{ message: string; severity: 'low' | 'medium' | 'high'; type: string }>
   > {
-    const alerts = [];
+    const alerts: Array<{ message: string; severity: 'low' | 'medium' | 'high'; type: string }> = [];
     const metrics = await this.getPerformanceMetrics({
       // Last 24 hours
       end: new Date(),
@@ -245,7 +250,8 @@ export class PerformanceMonitoringService {
       WHERE created_at BETWEEN ${start} AND ${end}
     `);
 
-    return Number(result[0]?.optimal_usage_rate) || 0;
+    const rows = result.rows as any[] || [];
+    return Number(rows[0]?.optimal_usage_rate) || 0;
   }
 
   /**
@@ -258,19 +264,20 @@ export class PerformanceMonitoringService {
     const { start, end } = timeRange;
 
     const result = await this.db.execute(sql`
-      SELECT 
+      SELECT
         DATE(created_at) as date,
         AVG(response_time_ms) as avg_latency,
         AVG(cost_vnd) as avg_cost,
         COUNT(*) as total_queries,
         COUNT(CASE WHEN response_time_ms > 2000 THEN 1 END) * 100.0 / COUNT(*) as error_rate
-      FROM usage_logs 
+      FROM usage_logs
       WHERE created_at BETWEEN ${start} AND ${end}
       GROUP BY DATE(created_at)
       ORDER BY date
     `);
 
-    return result.map((row: any) => ({
+    const rows = result.rows as any[] || [];
+    return rows.map((row: any) => ({
       avgCost: Number(row.avg_cost),
       avgLatency: Number(row.avg_latency),
       date: row.date,

@@ -122,9 +122,9 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           inputTokens: estimatedInputTokens,
           model: data.model,
           outputTokens: estimatedOutputTokens,
-          provider: params.provider,
+          provider,
           responseTimeMs: 0, // For non-streaming, response time is not critical
-          sessionId: data.sessionId || 'unknown',
+          sessionId: (data as any).sessionId || 'unknown',
           usageTracker,
           userId: jwtPayload.userId!,
         });

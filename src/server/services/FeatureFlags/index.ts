@@ -156,7 +156,7 @@ export class FeatureFlagService {
     try {
       // Import performance monitoring service
       const { PerformanceMonitoringService } = await import('../PerformanceMonitoring');
-      const { getServerDB } = await import('@lobechat/database/core/db-adaptor');
+      const { getServerDB } = await import('@/database/server');
 
       const db = await getServerDB();
       const monitoring = new PerformanceMonitoringService(db);
