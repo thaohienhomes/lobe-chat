@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/nextjs';
  * @param context - Additional context information
  */
 export const captureException = (error: Error | string, context?: Record<string, any>) => {
-  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== 'true') {
+  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== '1') {
     console.error('[Sentry] Disabled, error:', error);
     return;
   }
@@ -29,7 +29,7 @@ export const captureMessage = (
   level: 'fatal' | 'error' | 'warning' | 'info' | 'debug' = 'info',
   context?: Record<string, any>,
 ) => {
-  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== 'true') {
+  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== '1') {
     console.log(`[Sentry] Disabled, message (${level}):`, message);
     return;
   }
@@ -47,7 +47,7 @@ export const captureMessage = (
  * @param username - The username
  */
 export const setSentryUser = (userId?: string, email?: string, username?: string) => {
-  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== 'true') return;
+  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== '1') return;
 
   Sentry.setUser({
     email,
@@ -60,7 +60,7 @@ export const setSentryUser = (userId?: string, email?: string, username?: string
  * Clear user context from Sentry
  */
 export const clearSentryUser = () => {
-  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== 'true') return;
+  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY !== '1') return;
 
   Sentry.setUser(null);
 };

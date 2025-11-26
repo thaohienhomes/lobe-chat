@@ -30,15 +30,15 @@ export async function GET(): Promise<NextResponse> {
       .limit(10);
 
     return NextResponse.json({
-      userId,
-      totalLogs: logs.length,
+      message: logs.length > 0 ? 'Usage logs found' : 'No usage logs found for this user',
       recentLogs: logs,
-      message: logs.length > 0 ? 'Usage logs found' : 'No usage logs found for this user'
+      totalLogs: logs.length,
+      userId
     });
   } catch (error) {
     console.error('Debug usage logs error:', error);
     return NextResponse.json(
-      { error: 'Failed to retrieve usage logs', details: error instanceof Error ? error.message : String(error) },
+      { details: error instanceof Error ? error.message : String(error), error: 'Failed to retrieve usage logs' },
       { status: 500 }
     );
   }
@@ -61,17 +61,17 @@ export async function POST(): Promise<NextResponse> {
 
     // Create a test usage log entry
     const testLog = {
-      userId,
-      model: 'meta-llama/llama-3.1-8b-instruct',
-      provider: 'openrouter',
-      inputTokens: 50,
-      outputTokens: 100,
-      totalTokens: 150,
       costUSD: 0.001,
       costVND: 24.167,
+      createdAt: new Date(),
+      inputTokens: 50,
+      model: 'meta-llama/llama-3.1-8b-instruct',
+      outputTokens: 100,
+      provider: 'openrouter',
       queryComplexity: 'simple',
       sessionId: 'debug-test-session',
-      createdAt: new Date(),
+      totalTokens: 150,
+      userId,
       updatedAt: new Date(),
     };
 
@@ -84,7 +84,7 @@ export async function POST(): Promise<NextResponse> {
   } catch (error) {
     console.error('Debug create usage log error:', error);
     return NextResponse.json(
-      { error: 'Failed to create test usage log', details: error instanceof Error ? error.message : String(error) },
+      { details: error instanceof Error ? error.message : String(error), error: 'Failed to create test usage log' },
       { status: 500 }
     );
   }

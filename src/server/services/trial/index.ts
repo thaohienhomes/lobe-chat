@@ -1,6 +1,6 @@
 import { LobeChatDatabase } from '@lobechat/database';
 import { usageLogs } from '@lobechat/database/schemas';
-import { and, eq, gte, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 import { pino } from '@/libs/logger';
 
@@ -141,6 +141,6 @@ export class TrialService {
   }
 }
 
-export { TRIAL_CONFIG, FREE_TIER_MODELS, DEFAULT_FREE_MODEL, PLAN_PRICING } from './config';
 export type { TrialStatus } from './config';
+export { DEFAULT_FREE_MODEL, FREE_TIER_MODELS, PLAN_PRICING,TRIAL_CONFIG } from './config';
 

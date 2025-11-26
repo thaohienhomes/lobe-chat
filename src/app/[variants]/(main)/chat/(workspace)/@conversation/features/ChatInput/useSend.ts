@@ -1,19 +1,34 @@
 import { useAnalytics } from '@lobehub/analytics/react';
 import { useMemo } from 'react';
 
+import { PENDING_MESSAGE_KEY } from '@/const/localStorage';
 import { useGeminiChineseWarning } from '@/hooks/useGeminiChineseWarning';
 import { getAgentStoreState } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
 import { getChatStoreState, useChatStore } from '@/store/chat';
 import { aiChatSelectors, chatSelectors, topicSelectors } from '@/store/chat/selectors';
 import { fileChatSelectors, useFileStore } from '@/store/file';
-import { getUserStoreState } from '@/store/user';
+import { getUserStoreState, useUserStore } from '@/store/user';
 
 export interface UseSendMessageParams {
   isWelcomeQuestion?: boolean;
   onlyAddAIMessage?: boolean;
   onlyAddUserMessage?: boolean;
 }
+
+/**
+ * Save pending message to localStorage for restoration after auth
+ */
+const savePendingMessage = (message: string, hasFiles: boolean) => {
+  if (typeof window === 'undefined') return;
+
+  const pendingData = {
+    hasFiles,
+    message,
+    timestamp: Date.now(),
+  };
+  localStorage.setItem(PENDING_MESSAGE_KEY, JSON.stringify(pendingData));
+};
 
 export const useSend = () => {
   const [
@@ -37,6 +52,13 @@ export const useSend = () => {
   ]);
   const { analytics } = useAnalytics();
   const checkGeminiChineseWarning = useGeminiChineseWarning();
+
+  // Auth state for checking if user is signed in
+  const [isSignedIn, isLoaded, openLogin] = useUserStore((s) => [
+    s.isSignedIn,
+    s.isLoaded,
+    s.openLogin,
+  ]);
 
   // 使用订阅以保持最新文件列表
   const reactiveFileList = useFileStore(fileChatSelectors.chatUploadFileList);
@@ -69,6 +91,20 @@ export const useSend = () => {
 
     // if there is no message and no image, then we should not send the message
     if (!inputMessage && fileList.length === 0) return;
+
+    // ============ AUTH CHECK ============
+    // If auth is loaded and user is not signed in, save message and trigger login
+    if (isLoaded && !isSignedIn) {
+      // Save the pending message to localStorage
+      savePendingMessage(inputMessage, fileList.length > 0);
+
+      // Trigger Clerk sign-in modal
+      openLogin();
+
+      // Don't proceed with sending - user needs to authenticate first
+      return;
+    }
+    // ====================================
 
     // Check for Chinese text warning with Gemini model
     const agentStore = getAgentStoreState();

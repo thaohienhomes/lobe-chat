@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+import { PendingMessageHandler, UnauthenticatedPrompt } from '@/features/Auth';
 import { isDesktop } from '@/const/version';
 import InitClientDB from '@/features/InitClientDB';
 import ProtocolUrlHandler from '@/features/ProtocolUrlHandler';
@@ -30,6 +31,14 @@ const Layout = ({ children, session }: LayoutProps) => {
         <RegisterHotkeys />
       </Suspense>
       {isDesktop && <ProtocolUrlHandler />}
+      {/* Auth prompt for unauthenticated users */}
+      <Suspense>
+        <UnauthenticatedPrompt />
+      </Suspense>
+      {/* Handle pending messages after authentication */}
+      <Suspense>
+        <PendingMessageHandler />
+      </Suspense>
     </>
   );
 };

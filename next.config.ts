@@ -327,28 +327,38 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true' ? analyzer() : noWrapp
 const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
-        // Allow precaching of large PGLite assets for offline functionality
-        // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      // Allow precaching of large PGLite assets for offline functionality
+      // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 
-        register: false,
+      register: false,
 
-        swDest: 'public/sw.js',
+      swDest: 'public/sw.js',
 
-        swSrc: 'src/app/sw.ts', // 5MB
-      })
+      swSrc: 'src/app/sw.ts', // 5MB
+    })
     : noWrapper;
 
-export default withBundleAnalyzer(
-  withPWA(
-    withSentryConfig(nextConfig as NextConfig, {
-      org: process.env.SENTRY_ORG,
+// Conditionally wrap with Sentry based on environment variable
+const ENABLE_SENTRY = process.env.NEXT_PUBLIC_ENABLE_SENTRY === '1';
+const hasSentryCredentials = !!(process.env.SENTRY_ORG && process.env.SENTRY_PROJECT);
 
+const withSentry = ENABLE_SENTRY && hasSentryCredentials
+  ? (config: NextConfig) =>
+    withSentryConfig(config, {
+      org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
-      // For all available options, see:
-      // https://github.com/getsentry/sentry-webpack-plugin/blob/master/src/index.ts#L29-L102
       // Suppresses source map uploading logs during build
       silent: true,
-    }),
-  ),
-);
+      // Disable source map upload in CI to reduce memory usage
+      // Source maps will still be generated but not uploaded
+      disableServerWebpackPlugin: process.env.VERCEL === '1',
+      disableClientWebpackPlugin: process.env.VERCEL === '1',
+      // Reduce memory usage by not including source content
+      hideSourceMaps: true,
+      // Skip source map upload entirely during Vercel builds
+      skipEnvironmentCheck: true,
+    })
+  : (config: NextConfig) => config;
+
+export default withBundleAnalyzer(withPWA(withSentry(nextConfig as NextConfig)));

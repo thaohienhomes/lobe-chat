@@ -5,6 +5,28 @@ export const useStyles = createStyles(({ css, token }) => ({
     padding: 12px;
   `,
 
+  blackFridayBanner: css`
+    padding: 6px 8px;
+
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    border-radius: 4px;
+
+    animation: pulse 2s infinite;
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+    }
+  `,
+
   container: css`
     display: flex;
     flex-direction: column;
@@ -16,6 +38,14 @@ export const useStyles = createStyles(({ css, token }) => ({
     background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorBgElevated} 100%);
     border: 1px solid ${token.colorPrimaryBorder};
     border-radius: 12px;
+  `,
+
+  blackFridayText: css`
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   `,
 
   ctaButton: css`
@@ -62,6 +92,23 @@ export const useStyles = createStyles(({ css, token }) => ({
 
     svg {
       color: #000000 !important;
+    }
+  `,
+
+  giftIcon: css`
+    color: #ffffff;
+    animation: bounce 1s infinite;
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-3px);
+      }
+      60% {
+        transform: translateY(-1px);
+      }
     }
   `,
 
@@ -127,53 +174,6 @@ export const useStyles = createStyles(({ css, token }) => ({
     font-size: 13px;
     font-weight: 600;
     color: ${token.colorText};
-  `,
-
-  blackFridayBanner: css`
-    padding: 6px 8px;
-
-    font-size: 10px;
-    font-weight: 700;
-    text-align: center;
-
-    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-    border-radius: 4px;
-
-    animation: pulse 2s infinite;
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.02);
-      }
-    }
-  `,
-
-  blackFridayText: css`
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  `,
-
-  giftIcon: css`
-    color: #ffffff;
-    animation: bounce 1s infinite;
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-3px);
-      }
-      60% {
-        transform: translateY(-1px);
-      }
-    }
   `,
 }));
 

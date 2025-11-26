@@ -5,6 +5,7 @@ import { Suspense, memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { withSuspense } from '@/components/withSuspense';
+import { PendingMessageHandler, UnauthenticatedPrompt } from '@/features/Auth';
 import InitClientDB from '@/features/InitClientDB';
 import { useShowMobileWorkspace } from '@/hooks/useShowMobileWorkspace';
 
@@ -42,6 +43,14 @@ const Layout = memo<LayoutProps>(({ children, session }) => {
       </Flexbox>
       <Suspense>
         <InitClientDB bottom={100} />
+      </Suspense>
+      {/* Auth prompt for unauthenticated users */}
+      <Suspense>
+        <UnauthenticatedPrompt mobile />
+      </Suspense>
+      {/* Handle pending messages after authentication */}
+      <Suspense>
+        <PendingMessageHandler />
       </Suspense>
     </>
   );

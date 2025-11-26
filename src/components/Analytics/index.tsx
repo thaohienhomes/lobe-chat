@@ -16,7 +16,7 @@ const ReactScan = dynamic(() => import('./ReactScan'));
 const Analytics = () => {
   return (
     <>
-      {process.env.NEXT_PUBLIC_ENABLE_SENTRY === 'true' && <Sentry />}
+      {process.env.NEXT_PUBLIC_ENABLE_SENTRY === '1' && <Sentry />}
       {analyticsEnv.ENABLE_VERCEL_ANALYTICS && <Vercel />}
       {analyticsEnv.ENABLE_GOOGLE_ANALYTICS && <Google />}
       {analyticsEnv.ENABLED_PLAUSIBLE_ANALYTICS && (

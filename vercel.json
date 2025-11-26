@@ -11,8 +11,9 @@
   },
   "build": {
     "env": {
-      "NODE_OPTIONS": "--max-old-space-size=16384",
-      "SENTRY_LOG_LEVEL": "warn"
+      "NODE_OPTIONS": "--max-old-space-size=16384 --expose-gc",
+      "SENTRY_LOG_LEVEL": "warn",
+      "NEXT_TELEMETRY_DISABLED": "1"
     }
   }
 }

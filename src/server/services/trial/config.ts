@@ -11,11 +11,13 @@ export const TRIAL_CONFIG = {
   // Maximum tokens a free user can consume
   maxTokens: 50_000,
   
-  // Trial period in days (0 = no time limit, only message/token limits)
-  trialPeriodDays: 0,
   
   // Trial reset period (0 = never reset, users must upgrade)
-  resetPeriodDays: 0,
+resetPeriodDays: 0,
+  
+  
+  // Trial period in days (0 = no time limit, only message/token limits)
+trialPeriodDays: 0,
 } as const;
 
 // Free tier allowed models (fast, cost-effective models through OpenRouter)
@@ -40,16 +42,16 @@ export const DEFAULT_FREE_MODEL = 'meta-llama/llama-3.1-8b-instruct';
 
 // Subscription plan pricing (VND)
 export const PLAN_PRICING = {
-  starter: 39_000,
   premium: 129_000,
+  starter: 39_000,
   ultimate: 349_000,
 } as const;
 
 // Plan compute credits per month
 export const PLAN_CREDITS = {
   free: 0,
-  starter: 5_000_000,
   premium: 15_000_000,
+  starter: 5_000_000,
   ultimate: 35_000_000,
 } as const;
 

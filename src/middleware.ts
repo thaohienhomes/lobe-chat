@@ -174,6 +174,14 @@ const isPublicRoute = createRouteMatcher([
   '/oidc/token',
   // public share
   '/share(.*)',
+  // public chat interface - allows unauthenticated users to view chat UI
+  // (message sending is blocked in the frontend until authenticated)
+  '/',
+  '/chat',
+  '/chat(.*)',
+  // discover page - public browsing
+  '/discover',
+  '/discover(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([

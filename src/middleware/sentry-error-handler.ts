@@ -40,7 +40,7 @@ export const withSentryErrorHandler = (
 export const addSentryContext = (
   context: Record<string, any>,
 ) => {
-  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY === 'true') {
+  if (process.env.NEXT_PUBLIC_ENABLE_SENTRY === '1') {
     Sentry.setContext('api_request', context);
   }
 };

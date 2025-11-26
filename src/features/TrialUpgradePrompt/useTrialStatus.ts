@@ -19,10 +19,12 @@ export function useTrialStatus() {
     {
       // Revalidate every 30 seconds
       refreshInterval: 30_000,
-      // Don't retry on error
-      shouldRetryOnError: false,
+      
       // Keep previous data while revalidating
-      revalidateOnFocus: true,
+revalidateOnFocus: true,
+      
+      // Don't retry on error
+shouldRetryOnError: false,
     }
   );
 

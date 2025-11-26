@@ -10,7 +10,7 @@ const SentryComponent = () => {
   useEffect(() => {
     // Sentry is already initialized in sentry.client.config.ts
     // This component just ensures it's loaded on the client
-    if (process.env.NEXT_PUBLIC_ENABLE_SENTRY === 'true') {
+    if (process.env.NEXT_PUBLIC_ENABLE_SENTRY === '1') {
       console.debug('[Sentry] Error tracking enabled');
     }
   }, []);

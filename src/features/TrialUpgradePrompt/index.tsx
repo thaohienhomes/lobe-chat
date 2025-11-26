@@ -56,22 +56,22 @@ const TrialUpgradePrompt = memo<TrialUpgradePromptProps>(({ compact = false }) =
 
       {/* Black Friday Promotion */}
       {!compact && (
-        <Flexbox gap={4} className={styles.blackFridayBanner}>
-          <Gift size={12} className={styles.giftIcon} />
+        <Flexbox className={styles.blackFridayBanner} gap={4}>
+          <Gift className={styles.giftIcon} size={12} />
           <span className={styles.blackFridayText}>🔥 BLACK FRIDAY SALE</span>
         </Flexbox>
       )}
 
       {/* Pricing hint */}
       {!compact && (
-        <Flexbox gap={4} className={styles.pricingHint}>
+        <Flexbox className={styles.pricingHint} gap={4}>
           <span>Chỉ từ <strong>39,000đ/tháng</strong></span>
           <span className={styles.pricingDetail}>Quyền truy cập mô hình cao cấp</span>
         </Flexbox>
       )}
 
       {/* CTA Button */}
-      <Link href="/settings?active=subscription" className={styles.ctaButton}>
+      <Link className={styles.ctaButton} href="/settings?active=subscription">
         <Zap size={14} />
         <span>Nâng cấp ngay</span>
       </Link>
