@@ -49,18 +49,32 @@ if (!isDesktop && connectionString) {
 
   // eslint-disable-next-line unicorn/prefer-top-level-await
   runMigrations().catch((err) => {
-    const errMsg = (err as Error)?.message || String(err);
+    const error = err as any;
+    const errMsg = (error as Error)?.message || String(error);
 
-    // Treat benign "already exists" errors as a successful, idempotent migration
-    if (errMsg.toLowerCase().includes('already exists')) {
+    // Some drivers (pg / neon) expose a sqlState or code field with the
+    // PostgreSQL error code. 42P07 == duplicate_table.
+    const pgCode = error?.code || error?.sqlState;
+
+    const normalizedMsg = errMsg.toLowerCase();
+    const isDuplicateTableError =
+      pgCode === '42P07' ||
+      normalizedMsg.includes('already exists') ||
+      normalizedMsg.includes('duplicate table') ||
+      normalizedMsg.includes('already a relation');
+
+    // Treat benign duplicate-table / already-exists errors as a successful,
+    // idempotent migration so Vercel builds don't fail when the schema is
+    // already in place.
+    if (isDuplicateTableError) {
       console.warn(
-        '[db:migrate] Detected existing database objects ("already exists"), treating migration as already applied.',
+        '[db:migrate] Detected existing database objects (duplicate_table / "already exists"), treating migration as already applied.',
       );
       // eslint-disable-next-line unicorn/no-process-exit
       process.exit(0);
     }
 
-    console.error('❌ Database migrate failed:', err);
+    console.error('❌ Database migrate failed:', error);
 
     if (errMsg.includes('extension "vector" is not available')) {
       console.info(PGVECTOR_HINT);

@@ -2,10 +2,16 @@
   "buildCommand": "bun run build",
   "installCommand": "bun install",
   "functions": {
-    "src/app/**/*.ts": {
+    "src/app/(backend)/**/*.ts": {
       "maxDuration": 60
     },
-    "src/app/**/*.tsx": {
+    "src/app/(backend)/**/*.tsx": {
+      "maxDuration": 60
+    },
+    "src/app/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/**/*.tsx": {
       "maxDuration": 60
     }
   },

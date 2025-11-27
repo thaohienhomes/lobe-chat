@@ -276,7 +276,12 @@ const nextConfig: NextConfig = {
   ],
 
   // when external packages in dev mode with turbopack, this config will lead to bundle error
-  serverExternalPackages: isProd ? ['@electric-sql/pglite', '@xmldom/xmldom'] : ['@xmldom/xmldom'],
+  // For production we also externalize large server-only SDKs to keep individual
+  // Serverless Function bundles smaller (the packages are still present in
+  // node_modules at runtime on Vercel).
+  serverExternalPackages: isProd
+    ? ['@electric-sql/pglite', '@xmldom/xmldom', '@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner']
+    : ['@xmldom/xmldom'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
   typescript: {
