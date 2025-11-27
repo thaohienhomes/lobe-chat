@@ -1,0 +1,82 @@
+{
+  "trialBanner": {
+    "accessPremium": "Access to premium AI models",
+    "blackFriday": "BLACK FRIDAY SALE",
+    "days": "DAYS",
+    "hours": "HRS",
+    "messagesRemaining": "{{remaining}}/{{max}} messages remaining",
+    "minutes": "MIN",
+    "pricingFrom": "From {{price}}/month",
+    "seconds": "SEC",
+    "title": "Free Trial",
+    "titleExpired": "Trial Expired",
+    "trialExpiredMessage": "You have used all your free messages",
+    "upgradeNow": "Upgrade Now"
+  },
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Already paid?",
+      "alreadyPaidDesc": "If payment went through but is still pending in the system, request manual verification",
+      "cancelPayment": "Cancel payment",
+      "checkNow": "Check status now",
+      "quickActions": "Quick Actions",
+      "verifyPayment": "I have completed payment",
+      "verifying": "Verifying..."
+    },
+    "details": {
+      "accountNumber": "Account Number",
+      "amountLabel": "Amount to Pay",
+      "bankName": "Bank Name",
+      "copyFailed": "Copy failed",
+      "copySuccess": "Copied",
+      "title": "Payment Details",
+      "transferExact": "Transfer exact amount",
+      "transferReference": "Transfer Reference"
+    },
+    "failed": {
+      "cancel": "Cancel",
+      "retryButton": "Retry payment",
+      "timeout": "Payment timed out",
+      "timeoutMessage": "We did not detect a payment within 15 minutes. If you already transferred the funds, you can request a manual review.",
+      "title": "Payment failed",
+      "tryAgain": "Try again"
+    },
+    "footer": {
+      "autoCheck": "System checks payment status automatically every 15 seconds",
+      "needHelp": "Need help? Contact support if you encounter any issues"
+    },
+    "header": {
+      "subtitle": "Scan the QR code with your banking app",
+      "title": "Complete Your Payment"
+    },
+    "instructions": {
+      "step1": "Open your banking app",
+      "step2": "Scan or enter details",
+      "step3": "Confirm transfer",
+      "step4": "Confirm and complete the payment",
+      "title": "How to Pay"
+    },
+    "qrCode": {
+      "expires": "QR code expires after 15 minutes",
+      "loading": "Loading...",
+      "subtitle": "Scan to complete payment instantly",
+      "title": "Payment QR Code",
+      "validity": "Valid for"
+    },
+    "status": {
+      "checking": "Checking payment status...",
+      "hurry": "Hurry!",
+      "lastCheck": "Last check",
+      "timeRemaining": "Time remaining"
+    },
+    "success": {
+      "message": "Redirecting to the confirmation page...",
+      "title": "Payment successful!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Already completed the transfer?",
+      "manualReviewDesc": "If the funds have left your account but the system has not updated yet, please request manual verification",
+      "requestVerification": "I have paid - request verification"
+    }
+  }
+}

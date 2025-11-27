@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Już zapłacono?",
+      "alreadyPaidDesc": "Jeśli płatność została dokonana, ale system nadal pokazuje status oczekujący, uruchom ręczną weryfikację.",
+      "cancelPayment": "Anuluj płatność",
+      "checkNow": "Sprawdź teraz",
+      "quickActions": "Szybkie działania",
+      "verifyPayment": "Zweryfikuj płatność",
+      "verifying": "Weryfikacja..."
+    },
+    "details": {
+      "accountNumber": "Numer konta",
+      "amountLabel": "Kwota do zapłaty",
+      "bankName": "Nazwa banku",
+      "copyFailed": "Kopiowanie nie powiodło się",
+      "copySuccess": "Skopiowano",
+      "title": "Szczegóły płatności",
+      "transferExact": "Proszę przelać dokładną kwotę",
+      "transferReference": "Tytuł przelewu"
+    },
+    "failed": {
+      "cancel": "Anuluj",
+      "retryButton": "Spróbuj ponownie",
+      "timeout": "Przekroczono czas płatności",
+      "timeoutMessage": "Nie wykryto płatności w ciągu 15 minut. Jeśli już przelałeś środki, możesz poprosić o ręczną weryfikację.",
+      "title": "Płatność nie powiodła się",
+      "tryAgain": "Ponów próbę"
+    },
+    "footer": {
+      "autoCheck": "System automatycznie sprawdza status płatności co 15 sekund",
+      "needHelp": "Potrzebujesz pomocy? W razie problemów skontaktuj się z obsługą klienta"
+    },
+    "header": {
+      "subtitle": "Zeskanuj kod QR za pomocą aplikacji bankowej",
+      "title": "Zakończ płatność"
+    },
+    "instructions": {
+      "step1": "Otwórz swoją aplikację bankową",
+      "step2": "Wybierz „Skanuj kod QR” lub „Przelew”",
+      "step3": "Zeskanuj powyższy kod QR",
+      "step4": "Potwierdź i zakończ płatność",
+      "title": "Jak zapłacić"
+    },
+    "qrCode": {
+      "expires": "Kod QR wygaśnie za 15 minut",
+      "loading": "Ładowanie...",
+      "subtitle": "Zeskanuj, aby natychmiast zakończyć płatność",
+      "title": "Kod QR do płatności",
+      "validity": "Ważność"
+    },
+    "status": {
+      "checking": "Sprawdzanie statusu płatności...",
+      "hurry": "Pośpiesz się!",
+      "lastCheck": "Ostatnia kontrola",
+      "timeRemaining": "Pozostały czas"
+    },
+    "success": {
+      "message": "Trwa przekierowanie do strony potwierdzenia...",
+      "title": "Płatność zakończona sukcesem!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Przelew już wykonany?",
+      "manualReviewDesc": "Jeśli środki zostały pobrane z Twojego konta, ale system nie został zaktualizowany, poproś nas o ręczną weryfikację.",
+      "requestVerification": "Zapłaciłem - poproś o weryfikację"
+    }
+  }
+}

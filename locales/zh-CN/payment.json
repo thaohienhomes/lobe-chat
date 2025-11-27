@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "header": {
+      "title": "完成支付",
+      "subtitle": "使用银行应用扫描二维码"
+    },
+    "status": {
+      "checking": "正在检查支付状态...",
+      "lastCheck": "最后检查",
+      "timeRemaining": "剩余时间",
+      "hurry": "快点！"
+    },
+    "qrCode": {
+      "title": "支付二维码",
+      "subtitle": "扫描即可立即完成支付",
+      "loading": "加载中...",
+      "validity": "有效期",
+      "expires": "二维码将在15分钟后过期"
+    },
+    "details": {
+      "title": "支付详情",
+      "amountLabel": "应付金额",
+      "transferExact": "请转账准确金额",
+      "bankName": "银行名称",
+      "accountNumber": "账号",
+      "transferReference": "转账备注",
+      "copySuccess": "已复制",
+      "copyFailed": "复制失败"
+    },
+    "instructions": {
+      "title": "如何支付",
+      "step1": "打开您的银行应用",
+      "step2": "选择\"扫描二维码\"或\"转账\"",
+      "step3": "扫描上方二维码",
+      "step4": "确认并完成支付"
+    },
+    "actions": {
+      "alreadyPaid": "已经支付？",
+      "alreadyPaidDesc": "如果支付已完成但系统仍显示待处理，请启动手动审核。",
+      "verifyPayment": "验证支付",
+      "verifying": "验证中...",
+      "quickActions": "快速操作",
+      "checkNow": "立即检查状态",
+      "cancelPayment": "取消支付"
+    },
+    "footer": {
+      "autoCheck": "系统每15秒自动检查支付状态",
+      "needHelp": "需要帮助？如遇到任何问题，请联系客服"
+    },
+    "success": {
+      "title": "支付成功！",
+      "message": "正在跳转到确认页面..."
+    },
+    "failed": {
+      "title": "支付失败",
+      "timeout": "支付超时",
+      "timeoutMessage": "我们在15分钟内未检测到支付。如果您已经转账，可以请求手动审核。",
+      "retryButton": "重试支付",
+      "tryAgain": "重试",
+      "cancel": "取消"
+    },
+    "timeout": {
+      "alreadyCompleted": "已经完成转账？",
+      "manualReviewDesc": "如果资金已从您的账户转出但系统尚未更新，请要求我们手动验证。",
+      "requestVerification": "我已支付 - 请求验证"
+    }
+  }
+}

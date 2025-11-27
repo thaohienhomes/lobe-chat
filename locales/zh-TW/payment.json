@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "已經支付？",
+      "alreadyPaidDesc": "如果支付已完成但系統仍顯示待處理，請啟動手動審核。",
+      "cancelPayment": "取消支付",
+      "checkNow": "立即檢查狀態",
+      "quickActions": "快速操作",
+      "verifyPayment": "驗證支付",
+      "verifying": "驗證中..."
+    },
+    "details": {
+      "accountNumber": "帳號",
+      "amountLabel": "應付金額",
+      "bankName": "銀行名稱",
+      "copyFailed": "複製失敗",
+      "copySuccess": "已複製",
+      "title": "支付詳情",
+      "transferExact": "請轉帳準確金額",
+      "transferReference": "轉帳備註"
+    },
+    "failed": {
+      "cancel": "取消",
+      "retryButton": "重試支付",
+      "timeout": "支付逾時",
+      "timeoutMessage": "我們在15分鐘內未檢測到支付。如果您已經轉帳，可以請求手動審核。",
+      "title": "支付失敗",
+      "tryAgain": "重試"
+    },
+    "footer": {
+      "autoCheck": "系統每15秒自動檢查支付狀態",
+      "needHelp": "需要幫助？如遇到任何問題，請聯繫客服"
+    },
+    "header": {
+      "subtitle": "使用銀行應用掃描二維碼",
+      "title": "完成支付"
+    },
+    "instructions": {
+      "step1": "打開您的銀行應用",
+      "step2": "選擇「掃描二維碼」或「轉帳」",
+      "step3": "掃描上方二維碼",
+      "step4": "確認並完成支付",
+      "title": "如何支付"
+    },
+    "qrCode": {
+      "expires": "二維碼將在15分鐘後過期",
+      "loading": "加載中...",
+      "subtitle": "掃描即可立即完成支付",
+      "title": "支付二維碼",
+      "validity": "有效期"
+    },
+    "status": {
+      "checking": "正在檢查支付狀態...",
+      "hurry": "快點！",
+      "lastCheck": "最後檢查",
+      "timeRemaining": "剩餘時間"
+    },
+    "success": {
+      "message": "正在跳轉到確認頁面...",
+      "title": "支付成功！"
+    },
+    "timeout": {
+      "alreadyCompleted": "已經完成轉帳？",
+      "manualReviewDesc": "如果資金已從您的帳戶轉出但系統尚未更新，請要求我們手動驗證。",
+      "requestVerification": "我已支付 - 請求驗證"
+    }
+  }
+}

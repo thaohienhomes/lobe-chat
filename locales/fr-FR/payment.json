@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Déjà payé ?",
+      "alreadyPaidDesc": "Si le paiement est effectué mais que le système affiche toujours en attente, veuillez lancer une vérification manuelle.",
+      "cancelPayment": "Annuler le paiement",
+      "checkNow": "Vérifier maintenant",
+      "quickActions": "Actions rapides",
+      "verifyPayment": "Vérifier le paiement",
+      "verifying": "Vérification en cours..."
+    },
+    "details": {
+      "accountNumber": "Numéro de compte",
+      "amountLabel": "Montant à payer",
+      "bankName": "Nom de la banque",
+      "copyFailed": "Échec de la copie",
+      "copySuccess": "Copié avec succès",
+      "title": "Détails du paiement",
+      "transferExact": "Veuillez transférer le montant exact",
+      "transferReference": "Référence du transfert"
+    },
+    "failed": {
+      "cancel": "Annuler",
+      "retryButton": "Réessayer le paiement",
+      "timeout": "Délai de paiement dépassé",
+      "timeoutMessage": "Nous n’avons pas détecté de paiement dans les 15 minutes. Si vous avez déjà effectué le virement, vous pouvez demander une vérification manuelle.",
+      "title": "Échec du paiement",
+      "tryAgain": "Réessayer"
+    },
+    "footer": {
+      "autoCheck": "Le système vérifie automatiquement le statut du paiement toutes les 15 secondes",
+      "needHelp": "Besoin d’aide ? Pour toute question, veuillez contacter le service client"
+    },
+    "header": {
+      "subtitle": "Scannez le code QR avec votre application bancaire",
+      "title": "Paiement terminé"
+    },
+    "instructions": {
+      "step1": "Ouvrez votre application bancaire",
+      "step2": "Sélectionnez « Scanner un code QR » ou « Virement »",
+      "step3": "Scannez le code QR ci-dessus",
+      "step4": "Confirmez et finalisez le paiement",
+      "title": "Comment payer"
+    },
+    "qrCode": {
+      "expires": "Le code QR expirera dans 15 minutes",
+      "loading": "Chargement...",
+      "subtitle": "Scannez pour finaliser le paiement immédiatement",
+      "title": "Code QR de paiement",
+      "validity": "Validité"
+    },
+    "status": {
+      "checking": "Vérification du statut du paiement en cours...",
+      "hurry": "Dépêchez-vous !",
+      "lastCheck": "Dernière vérification",
+      "timeRemaining": "Temps restant"
+    },
+    "success": {
+      "message": "Redirection vers la page de confirmation...",
+      "title": "Paiement réussi !"
+    },
+    "timeout": {
+      "alreadyCompleted": "Virement déjà effectué ?",
+      "manualReviewDesc": "Si les fonds ont été débités de votre compte mais que le système n’a pas encore été mis à jour, veuillez demander une vérification manuelle.",
+      "requestVerification": "J’ai payé - Demander une vérification"
+    }
+  }
+}

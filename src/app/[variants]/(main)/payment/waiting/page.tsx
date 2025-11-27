@@ -8,17 +8,10 @@ import { createStyles } from 'antd-style';
 import { Check, Clock, Copy, QrCode } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { useServerConfigStore } from '@/store/serverConfig';
-
-/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
-
-/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
-
-/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
-
-/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -109,7 +102,7 @@ const useStyles = createStyles(({ css, token }) => ({
     min-height: 100vh;
     padding: ${token.paddingLG}px;
 
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f0 100%);
+    background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
 
     @media (max-width: 768px) {
       padding: ${token.padding}px;
@@ -191,15 +184,15 @@ const useStyles = createStyles(({ css, token }) => ({
 
   mainCard: css`
     width: 100%;
-    max-width: 1200px;
-    padding: ${token.paddingXL * 1.5}px;
+    max-width: 900px;
+    padding: 0;
     border-radius: ${token.borderRadiusLG}px;
 
-    background: ${token.colorBgContainer};
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 12%);
+    background: transparent;
+    box-shadow: none;
 
     @media (max-width: 768px) {
-      padding: ${token.paddingLG}px;
+      padding: 0;
     }
   `,
 
@@ -487,12 +480,59 @@ const useStyles = createStyles(({ css, token }) => ({
 
   twoColumnLayout: css`
     display: grid;
-    grid-template-columns: 40% 60%;
+    grid-template-columns: 1fr 1fr;
     gap: ${token.marginLG}px;
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
       gap: ${token.marginMD}px;
+    }
+  `,
+
+  modernCard: css`
+    padding: ${token.paddingXL}px;
+    border: 1px solid rgba(255, 255, 255, 10%);
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: rgba(26, 35, 50, 60%);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 30%);
+
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 20%);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 40%);
+    }
+  `,
+
+  statusCard: css`
+    padding-block: ${token.paddingLG}px;
+    padding-inline: ${token.paddingXL}px;
+    border: 1px solid rgba(34, 197, 94, 30%);
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: rgba(34, 197, 94, 10%);
+    backdrop-filter: blur(10px);
+
+    @media (max-width: 768px) {
+      padding-block: ${token.paddingMD}px;
+      padding-inline: ${token.paddingLG}px;
+    }
+  `,
+
+  infoRow: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-block: ${token.paddingSM}px;
+    padding-inline: 0;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: ${token.marginXS}px;
+      align-items: flex-start;
     }
   `,
 
@@ -563,6 +603,7 @@ const formatTime = (seconds: number) => {
 
 function PaymentWaitingContent() {
   const { styles, cx, theme } = useStyles();
+  const { t } = useTranslation('payment');
 
   const router = useRouter();
 
@@ -1001,7 +1042,7 @@ function PaymentWaitingContent() {
               marginBottom: 0,
             }}
           >
-            Payment successful!
+            {t('waiting.success.title')}
           </Title>
 
           <Paragraph
@@ -1013,7 +1054,7 @@ function PaymentWaitingContent() {
               lineHeight: 1.6,
             }}
           >
-            Redirecting to the confirmation page...
+            {t('waiting.success.message')}
           </Paragraph>
 
           <Spin size="large" />
@@ -1046,7 +1087,7 @@ function PaymentWaitingContent() {
                 marginBottom: 0,
               }}
             >
-              {isTimeout ? 'Payment timed out' : 'Payment failed'}
+              {isTimeout ? t('waiting.failed.timeout') : t('waiting.failed.title')}
             </Title>
             <Paragraph
               style={{
@@ -1057,8 +1098,8 @@ function PaymentWaitingContent() {
               }}
             >
               {isTimeout
-                ? 'We did not detect a payment within 15 minutes. If you already transferred the funds, you can request a manual review.'
-                : paymentStatus.message || 'Please try again or contact support.'}
+                ? t('waiting.failed.timeoutMessage')
+                : paymentStatus.message || t('waiting.failed.title')}
             </Paragraph>
             {isTimeout && manualVerificationFeatureEnabled && (
               <div className={styles.timeoutCard} style={{ width: '100%' }}>
@@ -1070,7 +1111,7 @@ function PaymentWaitingContent() {
                     fontWeight: 600,
                   }}
                 >
-                  Already completed the transfer?
+                  {t('waiting.timeout.alreadyCompleted')}
                 </Title>
                 <Paragraph
                   style={{
@@ -1079,8 +1120,7 @@ function PaymentWaitingContent() {
                     lineHeight: 1.6,
                   }}
                 >
-                  If the funds have left your account but the system has not updated yet, please ask
-                  us to verify it manually.
+                  {t('waiting.timeout.manualReviewDesc')}
                 </Paragraph>
                 <Button
                   block
@@ -1091,7 +1131,7 @@ function PaymentWaitingContent() {
                   style={{ fontWeight: 600, height: 48 }}
                   type="primary"
                 >
-                  {verifying ? 'Verifying...' : 'I have paid - request verification'}
+                  {verifying ? t('waiting.actions.verifying') : t('waiting.timeout.requestVerification')}
                 </Button>
               </div>
             )}
@@ -1158,7 +1198,7 @@ function PaymentWaitingContent() {
               marginBottom: theme.marginXS,
             }}
           >
-            Complete Your Payment
+            {t('waiting.header.title')}
           </Title>
 
           <Paragraph
@@ -1172,7 +1212,7 @@ function PaymentWaitingContent() {
               marginBottom: 0,
             }}
           >
-            Scan the QR code with your banking app
+            {t('waiting.header.subtitle')}
           </Paragraph>
         </Flexbox>
 
@@ -1194,7 +1234,7 @@ function PaymentWaitingContent() {
                     fontWeight: 600,
                   }}
                 >
-                  Checking payment status...
+                  {t('waiting.status.checking')}
                 </Text>
 
                 {lastCheckTime && (
@@ -1268,7 +1308,7 @@ function PaymentWaitingContent() {
                   marginBottom: theme.marginXS,
                 }}
               >
-                Payment QR Code
+                {t('waiting.qrCode.title')}
               </Title>
 
               <Text
@@ -1280,7 +1320,7 @@ function PaymentWaitingContent() {
                   lineHeight: 1.6,
                 }}
               >
-                Scan to complete payment instantly
+                {t('waiting.qrCode.subtitle')}
               </Text>
             </Flexbox>
 
@@ -1356,7 +1396,7 @@ function PaymentWaitingContent() {
                   marginTop: theme.marginXXS,
                 }}
               >
-                QR code expires after 15 minutes
+                {t('waiting.qrCode.expires')}
               </Text>
             </div>
           </div>
@@ -1376,7 +1416,7 @@ function PaymentWaitingContent() {
                 marginBottom: theme.marginLG,
               }}
             >
-              Payment Details
+              {t('waiting.details.title')}
             </Title>
 
             <Flexbox gap={theme.marginMD} style={{ flex: 1 }}>
@@ -1384,7 +1424,7 @@ function PaymentWaitingContent() {
 
               <div className={styles.amountCard}>
                 <div className={styles.label} style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  Amount to Pay
+                  {t('waiting.details.amountLabel')}
                 </div>
 
                 <div className={styles.amountText}>
@@ -1397,7 +1437,7 @@ function PaymentWaitingContent() {
                         style: 'currency',
                       }).format(amountValue)
                     : sessionLoading
-                      ? 'Loading...'
+                      ? t('waiting.qrCode.loading')
                       : '--'}
                 </div>
 
@@ -1419,7 +1459,7 @@ function PaymentWaitingContent() {
               {bankAccount && bankName && (
                 <Flexbox gap={theme.marginMD}>
                   <div>
-                    <div className={styles.label}>Bank Name</div>
+                    <div className={styles.label}>{t('waiting.details.bankName')}</div>
 
                     <div className={styles.bankDetailRow}>
                       <Text
@@ -1438,7 +1478,7 @@ function PaymentWaitingContent() {
                   </div>
 
                   <div>
-                    <div className={styles.label}>Account Number</div>
+                    <div className={styles.label}>{t('waiting.details.accountNumber')}</div>
 
                     <div className={styles.bankDetailRow}>
                       <Text
@@ -1471,7 +1511,7 @@ function PaymentWaitingContent() {
                   </div>
 
                   <div>
-                    <div className={styles.label}>Transfer Reference</div>
+                    <div className={styles.label}>{t('waiting.details.transferReference')}</div>
 
                     <div className={styles.referenceBox}>
                       <Flexbox align="center" gap={8} horizontal justify="space-between">
@@ -1513,7 +1553,7 @@ function PaymentWaitingContent() {
               marginBottom: theme.marginLG,
             }}
           >
-            How to Pay
+            {t('waiting.instructions.title')}
           </Title>
 
           <Flexbox
@@ -1521,13 +1561,11 @@ function PaymentWaitingContent() {
             style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}
           >
             {[
-              { icon: '', step: 'Open your banking app' },
+              { icon: '', step: t('waiting.instructions.step1') },
 
-              { icon: '', step: 'Select "Scan QR" or "Transfer"' },
+              { icon: '', step: t('waiting.instructions.step2') },
 
-              { icon: '', step: 'Scan the QR code above' },
-
-              { icon: '', step: 'Confirm and complete payment' },
+              { icon: '', step: t('waiting.instructions.step3') },
             ].map((item, index) => (
               <div className={styles.instructionStep} key={index}>
                 <div className={styles.stepNumber}>{index + 1}</div>
@@ -1566,7 +1604,7 @@ function PaymentWaitingContent() {
                   marginBottom: theme.marginXS,
                 }}
               >
-                Already paid?
+                {t('waiting.actions.alreadyPaid')}
               </Title>
               <Paragraph
                 style={{
@@ -1588,7 +1626,7 @@ function PaymentWaitingContent() {
                 size="large"
                 type="primary"
               >
-                {verifying ? 'Verifying...' : 'Verify payment'}
+                {verifying ? t('waiting.actions.verifying') : t('waiting.actions.verifyPayment')}
               </Button>
             </div>
           )}
@@ -1620,7 +1658,7 @@ function PaymentWaitingContent() {
                 size="large"
                 type="primary"
               >
-                Check status now
+                {t('waiting.actions.checkNow')}
               </Button>
 
               <Button
@@ -1634,7 +1672,7 @@ function PaymentWaitingContent() {
                   color: theme.colorText,
                 }}
               >
-                Cancel payment
+                {t('waiting.actions.cancelPayment')}
               </Button>
             </Flexbox>
           </div>
@@ -1652,7 +1690,7 @@ function PaymentWaitingContent() {
               lineHeight: 1.6,
             }}
           >
-            System checks payment status automatically every 15 seconds
+            {t('waiting.footer.autoCheck')}
           </Text>
 
           <Text
@@ -1664,7 +1702,7 @@ function PaymentWaitingContent() {
               lineHeight: 1.6,
             }}
           >
-            Need help? Contact support if you encounter any issues
+            {t('waiting.footer.needHelp')}
           </Text>
         </Flexbox>
       </div>

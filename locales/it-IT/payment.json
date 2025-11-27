@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Hai già pagato?",
+      "alreadyPaidDesc": "Se il pagamento è stato completato ma il sistema mostra ancora in attesa, avvia la verifica manuale.",
+      "cancelPayment": "Annulla pagamento",
+      "checkNow": "Controlla ora lo stato",
+      "quickActions": "Azioni rapide",
+      "verifyPayment": "Verifica pagamento",
+      "verifying": "Verifica in corso..."
+    },
+    "details": {
+      "accountNumber": "Numero di conto",
+      "amountLabel": "Importo da pagare",
+      "bankName": "Nome della banca",
+      "copyFailed": "Copia non riuscita",
+      "copySuccess": "Copiato con successo",
+      "title": "Dettagli del pagamento",
+      "transferExact": "Si prega di trasferire l'importo esatto",
+      "transferReference": "Riferimento del trasferimento"
+    },
+    "failed": {
+      "cancel": "Annulla",
+      "retryButton": "Riprova il pagamento",
+      "timeout": "Timeout del pagamento",
+      "timeoutMessage": "Non abbiamo rilevato il pagamento entro 15 minuti. Se hai già effettuato il trasferimento, puoi richiedere una verifica manuale.",
+      "title": "Pagamento fallito",
+      "tryAgain": "Riprova"
+    },
+    "footer": {
+      "autoCheck": "Il sistema verifica automaticamente lo stato del pagamento ogni 15 secondi",
+      "needHelp": "Hai bisogno di aiuto? Per qualsiasi problema, contatta il servizio clienti"
+    },
+    "header": {
+      "subtitle": "Scansiona il codice QR con l'app della banca",
+      "title": "Completa il pagamento"
+    },
+    "instructions": {
+      "step1": "Apri l'app della tua banca",
+      "step2": "Seleziona \"Scansiona codice QR\" o \"Trasferimento\"",
+      "step3": "Scansiona il codice QR sopra",
+      "step4": "Conferma e completa il pagamento",
+      "title": "Come pagare"
+    },
+    "qrCode": {
+      "expires": "Il codice QR scadrà tra 15 minuti",
+      "loading": "Caricamento in corso...",
+      "subtitle": "Scansiona per completare immediatamente il pagamento",
+      "title": "Codice QR per il pagamento",
+      "validity": "Validità"
+    },
+    "status": {
+      "checking": "Verifica dello stato del pagamento in corso...",
+      "hurry": "Affrettati!",
+      "lastCheck": "Ultima verifica",
+      "timeRemaining": "Tempo rimanente"
+    },
+    "success": {
+      "message": "Reindirizzamento alla pagina di conferma in corso...",
+      "title": "Pagamento riuscito!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Hai già completato il trasferimento?",
+      "manualReviewDesc": "Se i fondi sono stati detratti dal tuo conto ma il sistema non è stato aggiornato, richiedi una verifica manuale.",
+      "requestVerification": "Ho pagato - Richiedi verifica"
+    }
+  }
+}

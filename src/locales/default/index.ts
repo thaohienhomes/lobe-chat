@@ -18,6 +18,7 @@ import migration from './migration';
 import modelProvider from './modelProvider';
 import models from './models';
 import oauth from './oauth';
+import payment from './payment';
 import plugin from './plugin';
 import portal from './portal';
 import providers from './providers';
@@ -50,6 +51,7 @@ const resources = {
   modelProvider,
   models,
   oauth,
+  payment,
   plugin,
   portal,
   providers,

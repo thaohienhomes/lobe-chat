@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Bereits bezahlt?",
+      "alreadyPaidDesc": "Wenn die Zahlung abgeschlossen ist, aber das System noch auf Bearbeitung wartet, starten Sie bitte die manuelle Überprüfung.",
+      "cancelPayment": "Zahlung abbrechen",
+      "checkNow": "Status jetzt prüfen",
+      "quickActions": "Schnellaktionen",
+      "verifyPayment": "Zahlung verifizieren",
+      "verifying": "Wird verifiziert..."
+    },
+    "details": {
+      "accountNumber": "Kontonummer",
+      "amountLabel": "Zu zahlender Betrag",
+      "bankName": "Bankname",
+      "copyFailed": "Kopieren fehlgeschlagen",
+      "copySuccess": "Kopiert",
+      "title": "Zahlungsdetails",
+      "transferExact": "Bitte überweisen Sie den genauen Betrag",
+      "transferReference": "Verwendungszweck"
+    },
+    "failed": {
+      "cancel": "Abbrechen",
+      "retryButton": "Zahlung erneut versuchen",
+      "timeout": "Zahlungstimeout",
+      "timeoutMessage": "Wir haben innerhalb von 15 Minuten keine Zahlung erkannt. Wenn Sie bereits überwiesen haben, können Sie eine manuelle Überprüfung anfordern.",
+      "title": "Zahlung fehlgeschlagen",
+      "tryAgain": "Erneut versuchen"
+    },
+    "footer": {
+      "autoCheck": "Das System überprüft den Zahlungsstatus alle 15 Sekunden automatisch",
+      "needHelp": "Brauchen Sie Hilfe? Bei Problemen kontaktieren Sie bitte den Kundenservice"
+    },
+    "header": {
+      "subtitle": "Scannen Sie den QR-Code mit Ihrer Banking-App",
+      "title": "Zahlung abschließen"
+    },
+    "instructions": {
+      "step1": "Öffnen Sie Ihre Banking-App",
+      "step2": "Wählen Sie „QR-Code scannen“ oder „Überweisung“",
+      "step3": "Scannen Sie den obigen QR-Code",
+      "step4": "Bestätigen und schließen Sie die Zahlung ab",
+      "title": "So zahlen Sie"
+    },
+    "qrCode": {
+      "expires": "Der QR-Code läuft in 15 Minuten ab",
+      "loading": "Lädt...",
+      "subtitle": "Scannen Sie, um die Zahlung sofort abzuschließen",
+      "title": "Zahlungs-QR-Code",
+      "validity": "Gültigkeitsdauer"
+    },
+    "status": {
+      "checking": "Zahlungsstatus wird überprüft...",
+      "hurry": "Beeilen Sie sich!",
+      "lastCheck": "Letzte Überprüfung",
+      "timeRemaining": "Verbleibende Zeit"
+    },
+    "success": {
+      "message": "Weiterleitung zur Bestätigungsseite...",
+      "title": "Zahlung erfolgreich!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Überweisung bereits abgeschlossen?",
+      "manualReviewDesc": "Wenn das Geld von Ihrem Konto abgebucht wurde, das System aber noch nicht aktualisiert ist, bitten Sie uns um eine manuelle Überprüfung.",
+      "requestVerification": "Ich habe bezahlt – Verifizierung anfordern"
+    }
+  }
+}

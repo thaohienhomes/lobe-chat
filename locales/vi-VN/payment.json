@@ -1,0 +1,82 @@
+{
+  "trialBanner": {
+    "accessPremium": "Quyền truy cập mô hình cao cấp",
+    "blackFriday": "BLACK FRIDAY SALE",
+    "days": "NGÀY",
+    "hours": "GIỜ",
+    "messagesRemaining": "Còn {{remaining}}/{{max}} tin nhắn",
+    "minutes": "PHÚT",
+    "pricingFrom": "Chỉ từ {{price}}/tháng",
+    "seconds": "GIÂY",
+    "title": "Bản dùng thử miễn phí",
+    "titleExpired": "Dùng thử đã hết",
+    "trialExpiredMessage": "Bạn đã sử dụng hết tin nhắn miễn phí",
+    "upgradeNow": "Nâng cấp ngay"
+  },
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Đã thanh toán?",
+      "alreadyPaidDesc": "Nếu bạn đã hoàn tất chuyển khoản nhưng hệ thống vẫn hiển thị đang chờ, hãy yêu cầu xác minh thủ công",
+      "cancelPayment": "Hủy thanh toán",
+      "checkNow": "Kiểm tra ngay",
+      "quickActions": "Thao Tác Nhanh",
+      "verifyPayment": "Tôi đã thanh toán",
+      "verifying": "Đang xác minh..."
+    },
+    "details": {
+      "accountNumber": "Số Tài Khoản",
+      "amountLabel": "Số Tiền Cần Thanh Toán",
+      "bankName": "Ngân Hàng",
+      "copyFailed": "Sao chép thất bại",
+      "copySuccess": "Đã sao chép",
+      "title": "Thông Tin Thanh Toán",
+      "transferExact": "Vui lòng chuyển đúng số tiền",
+      "transferReference": "Nội Dung Chuyển Khoản"
+    },
+    "failed": {
+      "cancel": "Hủy",
+      "retryButton": "Thử lại thanh toán",
+      "timeout": "Hết thời gian thanh toán",
+      "timeoutMessage": "Chúng tôi không phát hiện thanh toán trong vòng 15 phút. Nếu bạn đã chuyển khoản, vui lòng yêu cầu xác minh thủ công.",
+      "title": "Thanh toán thất bại",
+      "tryAgain": "Thử lại"
+    },
+    "footer": {
+      "autoCheck": "Hệ thống tự động kiểm tra trạng thái thanh toán mỗi 15 giây",
+      "needHelp": "Cần hỗ trợ? Liên hệ bộ phận chăm sóc khách hàng nếu gặp vấn đề"
+    },
+    "header": {
+      "subtitle": "Quét mã QR bằng ứng dụng ngân hàng của bạn",
+      "title": "Hoàn Tất Thanh Toán"
+    },
+    "instructions": {
+      "step1": "Mở ứng dụng ngân hàng",
+      "step2": "Quét hoặc nhập thông tin",
+      "step3": "Xác nhận chuyển khoản",
+      "step4": "Xác nhận và hoàn tất thanh toán",
+      "title": "Hướng Dẫn Thanh Toán"
+    },
+    "qrCode": {
+      "expires": "Mã QR sẽ hết hạn sau 15 phút",
+      "loading": "Đang tải...",
+      "subtitle": "Quét để hoàn tất thanh toán ngay lập tức",
+      "title": "Mã QR Thanh Toán",
+      "validity": "Có hiệu lực trong"
+    },
+    "status": {
+      "checking": "Đang kiểm tra trạng thái thanh toán...",
+      "hurry": "Nhanh lên!",
+      "lastCheck": "Kiểm tra lần cuối",
+      "timeRemaining": "Thời gian còn lại"
+    },
+    "success": {
+      "message": "Đang chuyển đến trang xác nhận...",
+      "title": "Thanh toán thành công!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Đã hoàn tất chuyển khoản?",
+      "manualReviewDesc": "Nếu tiền đã được chuyển từ tài khoản của bạn nhưng hệ thống chưa cập nhật, vui lòng yêu cầu xác minh thủ công",
+      "requestVerification": "Tôi đã thanh toán - yêu cầu xác minh"
+    }
+  }
+}

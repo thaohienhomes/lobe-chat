@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "¿Ya pagó?",
+      "alreadyPaidDesc": "Si el pago está completado pero el sistema aún muestra pendiente, inicie una revisión manual.",
+      "cancelPayment": "Cancelar pago",
+      "checkNow": "Comprobar estado ahora",
+      "quickActions": "Acciones rápidas",
+      "verifyPayment": "Verificar pago",
+      "verifying": "Verificando..."
+    },
+    "details": {
+      "accountNumber": "Número de cuenta",
+      "amountLabel": "Cantidad a pagar",
+      "bankName": "Nombre del banco",
+      "copyFailed": "Error al copiar",
+      "copySuccess": "Copiado",
+      "title": "Detalles del pago",
+      "transferExact": "Por favor, transfiera la cantidad exacta",
+      "transferReference": "Referencia de la transferencia"
+    },
+    "failed": {
+      "cancel": "Cancelar",
+      "retryButton": "Reintentar pago",
+      "timeout": "Tiempo de pago agotado",
+      "timeoutMessage": "No detectamos el pago en 15 minutos. Si ya realizó la transferencia, puede solicitar una revisión manual.",
+      "title": "Pago fallido",
+      "tryAgain": "Intentar de nuevo"
+    },
+    "footer": {
+      "autoCheck": "El sistema verifica automáticamente el estado del pago cada 15 segundos",
+      "needHelp": "¿Necesita ayuda? Si tiene algún problema, contacte con atención al cliente"
+    },
+    "header": {
+      "subtitle": "Escanee el código QR con la aplicación bancaria",
+      "title": "Completar pago"
+    },
+    "instructions": {
+      "step1": "Abra su aplicación bancaria",
+      "step2": "Seleccione \"Escanear código QR\" o \"Transferencia\"",
+      "step3": "Escanee el código QR arriba",
+      "step4": "Confirme y complete el pago",
+      "title": "Cómo pagar"
+    },
+    "qrCode": {
+      "expires": "El código QR expirará en 15 minutos",
+      "loading": "Cargando...",
+      "subtitle": "Escanee para completar el pago inmediatamente",
+      "title": "Código QR de pago",
+      "validity": "Validez"
+    },
+    "status": {
+      "checking": "Comprobando el estado del pago...",
+      "hurry": "¡Apúrate!",
+      "lastCheck": "Última comprobación",
+      "timeRemaining": "Tiempo restante"
+    },
+    "success": {
+      "message": "Redirigiendo a la página de confirmación...",
+      "title": "¡Pago exitoso!"
+    },
+    "timeout": {
+      "alreadyCompleted": "¿Ya completó la transferencia?",
+      "manualReviewDesc": "Si los fondos ya salieron de su cuenta pero el sistema no se ha actualizado, solicite una verificación manual.",
+      "requestVerification": "He pagado - Solicitar verificación"
+    }
+  }
+}

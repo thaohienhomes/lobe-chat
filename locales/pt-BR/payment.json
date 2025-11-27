@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Já pagou?",
+      "alreadyPaidDesc": "Se o pagamento foi concluído mas o sistema ainda mostra pendente, inicie a verificação manual.",
+      "cancelPayment": "Cancelar Pagamento",
+      "checkNow": "Verificar status agora",
+      "quickActions": "Ações Rápidas",
+      "verifyPayment": "Verificar Pagamento",
+      "verifying": "Verificando..."
+    },
+    "details": {
+      "accountNumber": "Número da Conta",
+      "amountLabel": "Valor a Pagar",
+      "bankName": "Nome do Banco",
+      "copyFailed": "Falha ao copiar",
+      "copySuccess": "Copiado com sucesso",
+      "title": "Detalhes do Pagamento",
+      "transferExact": "Por favor, transfira o valor exato",
+      "transferReference": "Referência da Transferência"
+    },
+    "failed": {
+      "cancel": "Cancelar",
+      "retryButton": "Tentar pagar novamente",
+      "timeout": "Tempo de pagamento esgotado",
+      "timeoutMessage": "Não detectamos o pagamento em até 15 minutos. Se você já realizou a transferência, pode solicitar uma verificação manual.",
+      "title": "Falha no Pagamento",
+      "tryAgain": "Tentar novamente"
+    },
+    "footer": {
+      "autoCheck": "O sistema verifica automaticamente o status do pagamento a cada 15 segundos",
+      "needHelp": "Precisa de ajuda? Se tiver qualquer problema, entre em contato com o suporte"
+    },
+    "header": {
+      "subtitle": "Use o aplicativo do banco para escanear o código QR",
+      "title": "Pagamento Concluído"
+    },
+    "instructions": {
+      "step1": "Abra o aplicativo do seu banco",
+      "step2": "Selecione \"Escanear código QR\" ou \"Transferência\"",
+      "step3": "Escaneie o código QR acima",
+      "step4": "Confirme e conclua o pagamento",
+      "title": "Como Pagar"
+    },
+    "qrCode": {
+      "expires": "O código QR expirará em 15 minutos",
+      "loading": "Carregando...",
+      "subtitle": "Escaneie para concluir o pagamento imediatamente",
+      "title": "Código QR para Pagamento",
+      "validity": "Validade"
+    },
+    "status": {
+      "checking": "Verificando status do pagamento...",
+      "hurry": "Apresse-se!",
+      "lastCheck": "Última verificação",
+      "timeRemaining": "Tempo restante"
+    },
+    "success": {
+      "message": "Redirecionando para a página de confirmação...",
+      "title": "Pagamento realizado com sucesso!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Já realizou a transferência?",
+      "manualReviewDesc": "Se o valor já foi debitado da sua conta mas o sistema não foi atualizado, solicite uma verificação manual.",
+      "requestVerification": "Já paguei - Solicitar verificação"
+    }
+  }
+}

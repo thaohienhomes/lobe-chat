@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Zaten ödediniz mi?",
+      "alreadyPaidDesc": "Ödeme tamamlandıysa ancak sistem hala beklemede gösteriyorsa, manuel incelemeyi başlatın.",
+      "cancelPayment": "Ödemeyi İptal Et",
+      "checkNow": "Durumu Şimdi Kontrol Et",
+      "quickActions": "Hızlı İşlemler",
+      "verifyPayment": "Ödemeyi Doğrula",
+      "verifying": "Doğrulanıyor..."
+    },
+    "details": {
+      "accountNumber": "Hesap Numarası",
+      "amountLabel": "Ödenecek Tutar",
+      "bankName": "Banka Adı",
+      "copyFailed": "Kopyalama başarısız",
+      "copySuccess": "Kopyalandı",
+      "title": "Ödeme Detayları",
+      "transferExact": "Lütfen tam tutarı transfer edin",
+      "transferReference": "Transfer Notu"
+    },
+    "failed": {
+      "cancel": "İptal",
+      "retryButton": "Ödemeyi Tekrar Dene",
+      "timeout": "Ödeme zaman aşımına uğradı",
+      "timeoutMessage": "15 dakika içinde ödeme tespit edilemedi. Eğer transfer yaptıysanız, manuel inceleme talep edebilirsiniz.",
+      "title": "Ödeme Başarısız",
+      "tryAgain": "Tekrar Dene"
+    },
+    "footer": {
+      "autoCheck": "Sistem her 15 saniyede bir ödeme durumunu otomatik kontrol eder",
+      "needHelp": "Yardıma mı ihtiyacınız var? Herhangi bir sorunla karşılaşırsanız lütfen müşteri hizmetleri ile iletişime geçin"
+    },
+    "header": {
+      "subtitle": "Banka uygulamanızla QR kodunu tarayın",
+      "title": "Ödeme Tamamlandı"
+    },
+    "instructions": {
+      "step1": "Banka uygulamanızı açın",
+      "step2": "\"QR kodu tara\" veya \"Transfer\" seçeneğini seçin",
+      "step3": "Yukarıdaki QR kodunu tarayın",
+      "step4": "Onaylayın ve ödemeyi tamamlayın",
+      "title": "Nasıl Ödeme Yapılır"
+    },
+    "qrCode": {
+      "expires": "QR kodu 15 dakika sonra geçersiz olacaktır",
+      "loading": "Yükleniyor...",
+      "subtitle": "Ödemeyi hemen tamamlamak için tarayın",
+      "title": "Ödeme QR Kodu",
+      "validity": "Geçerlilik süresi"
+    },
+    "status": {
+      "checking": "Ödeme durumu kontrol ediliyor...",
+      "hurry": "Acelez edin!",
+      "lastCheck": "Son kontrol",
+      "timeRemaining": "Kalan süre"
+    },
+    "success": {
+      "message": "Onay sayfasına yönlendiriliyorsunuz...",
+      "title": "Ödeme Başarılı!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Transferi zaten tamamladınız mı?",
+      "manualReviewDesc": "Fonlar hesabınızdan çıktıysa ancak sistem güncellenmediyse, manuel doğrulama talep edin.",
+      "requestVerification": "Ödeme yaptım - Doğrulama talep et"
+    }
+  }
+}

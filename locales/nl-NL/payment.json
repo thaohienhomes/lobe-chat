@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "Al betaald?",
+      "alreadyPaidDesc": "Als de betaling is voltooid maar het systeem toont nog 'in behandeling', start dan een handmatige controle.",
+      "cancelPayment": "Betaling annuleren",
+      "checkNow": "Status nu controleren",
+      "quickActions": "Snelle acties",
+      "verifyPayment": "Betaling verifiëren",
+      "verifying": "Bezig met verifiëren..."
+    },
+    "details": {
+      "accountNumber": "Rekeningnummer",
+      "amountLabel": "Te betalen bedrag",
+      "bankName": "Banknaam",
+      "copyFailed": "Kopiëren mislukt",
+      "copySuccess": "Gekopieerd",
+      "title": "Betalingsgegevens",
+      "transferExact": "Maak het exacte bedrag over",
+      "transferReference": "Overboekingsreferentie"
+    },
+    "failed": {
+      "cancel": "Annuleren",
+      "retryButton": "Betaling opnieuw proberen",
+      "timeout": "Betalingstijd verstreken",
+      "timeoutMessage": "We hebben binnen 15 minuten geen betaling gedetecteerd. Als u al heeft overgemaakt, kunt u een handmatige controle aanvragen.",
+      "title": "Betaling mislukt",
+      "tryAgain": "Opnieuw proberen"
+    },
+    "footer": {
+      "autoCheck": "Het systeem controleert elke 15 seconden automatisch de betalingsstatus",
+      "needHelp": "Hulp nodig? Neem contact op met de klantenservice bij problemen"
+    },
+    "header": {
+      "subtitle": "Scan de QR-code met uw bankapp",
+      "title": "Betaling voltooien"
+    },
+    "instructions": {
+      "step1": "Open uw bankapp",
+      "step2": "Kies 'QR-code scannen' of 'Overboeking'",
+      "step3": "Scan de bovenstaande QR-code",
+      "step4": "Bevestig en voltooi de betaling",
+      "title": "Hoe te betalen"
+    },
+    "qrCode": {
+      "expires": "De QR-code verloopt over 15 minuten",
+      "loading": "Bezig met laden...",
+      "subtitle": "Scan om direct te betalen",
+      "title": "Betaal QR-code",
+      "validity": "Geldigheidsduur"
+    },
+    "status": {
+      "checking": "Betalingsstatus wordt gecontroleerd...",
+      "hurry": "Schiet op!",
+      "lastCheck": "Laatste controle",
+      "timeRemaining": "Resterende tijd"
+    },
+    "success": {
+      "message": "Wordt doorgestuurd naar de bevestigingspagina...",
+      "title": "Betaling geslaagd!"
+    },
+    "timeout": {
+      "alreadyCompleted": "Heeft u de overboeking al voltooid?",
+      "manualReviewDesc": "Als het geld van uw rekening is afgeschreven maar het systeem nog niet is bijgewerkt, vraag dan om handmatige verificatie.",
+      "requestVerification": "Ik heb betaald - vraag verificatie aan"
+    }
+  }
+}

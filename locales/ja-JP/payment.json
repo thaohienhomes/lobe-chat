@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "すでに支払い済みですか？",
+      "alreadyPaidDesc": "支払いが完了しているのにシステムが処理中のままの場合は、手動確認を開始してください。",
+      "cancelPayment": "支払いをキャンセル",
+      "checkNow": "今すぐ状況を確認",
+      "quickActions": "クイック操作",
+      "verifyPayment": "支払いを確認する",
+      "verifying": "確認中..."
+    },
+    "details": {
+      "accountNumber": "口座番号",
+      "amountLabel": "支払金額",
+      "bankName": "銀行名",
+      "copyFailed": "コピーに失敗しました",
+      "copySuccess": "コピーしました",
+      "title": "支払い詳細",
+      "transferExact": "正確な金額を振り込んでください",
+      "transferReference": "振込メモ"
+    },
+    "failed": {
+      "cancel": "キャンセル",
+      "retryButton": "支払いを再試行",
+      "timeout": "支払いタイムアウト",
+      "timeoutMessage": "15分以内に支払いが検出されませんでした。すでに振込済みの場合は手動確認を依頼してください。",
+      "title": "支払い失敗",
+      "tryAgain": "再試行"
+    },
+    "footer": {
+      "autoCheck": "システムは15秒ごとに支払い状況を自動確認します",
+      "needHelp": "お困りですか？問題があればカスタマーサポートにお問い合わせください"
+    },
+    "header": {
+      "subtitle": "銀行アプリでQRコードをスキャンしてください",
+      "title": "支払い完了"
+    },
+    "instructions": {
+      "step1": "銀行アプリを開く",
+      "step2": "\"QRコードをスキャン\"または\"振込\"を選択",
+      "step3": "上のQRコードをスキャン",
+      "step4": "確認して支払いを完了する",
+      "title": "支払い方法"
+    },
+    "qrCode": {
+      "expires": "QRコードは15分後に期限切れになります",
+      "loading": "読み込み中...",
+      "subtitle": "スキャンしてすぐに支払いを完了できます",
+      "title": "支払い用QRコード",
+      "validity": "有効期限"
+    },
+    "status": {
+      "checking": "支払い状況を確認中...",
+      "hurry": "お急ぎください！",
+      "lastCheck": "最終確認",
+      "timeRemaining": "残り時間"
+    },
+    "success": {
+      "message": "確認ページに移動しています...",
+      "title": "支払い成功！"
+    },
+    "timeout": {
+      "alreadyCompleted": "すでに振込済みですか？",
+      "manualReviewDesc": "資金が口座から引き落とされているのにシステムが更新されていない場合は、手動確認を依頼してください。",
+      "requestVerification": "支払い済み - 確認を依頼する"
+    }
+  }
+}

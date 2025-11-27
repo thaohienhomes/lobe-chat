@@ -1,0 +1,68 @@
+{
+  "waiting": {
+    "actions": {
+      "alreadyPaid": "이미 결제하셨나요?",
+      "alreadyPaidDesc": "결제가 완료되었는데도 시스템에 처리 중으로 표시된다면 수동 검토를 시작해 주세요.",
+      "cancelPayment": "결제 취소",
+      "checkNow": "지금 상태 확인",
+      "quickActions": "빠른 작업",
+      "verifyPayment": "결제 확인",
+      "verifying": "확인 중..."
+    },
+    "details": {
+      "accountNumber": "계좌번호",
+      "amountLabel": "지불 금액",
+      "bankName": "은행명",
+      "copyFailed": "복사 실패",
+      "copySuccess": "복사 완료",
+      "title": "결제 상세 정보",
+      "transferExact": "정확한 금액을 이체해 주세요",
+      "transferReference": "이체 메모"
+    },
+    "failed": {
+      "cancel": "취소",
+      "retryButton": "결제 재시도",
+      "timeout": "결제 시간 초과",
+      "timeoutMessage": "15분 내에 결제가 감지되지 않았습니다. 이미 이체하셨다면 수동 검토를 요청할 수 있습니다.",
+      "title": "결제 실패",
+      "tryAgain": "다시 시도"
+    },
+    "footer": {
+      "autoCheck": "시스템이 15초마다 자동으로 결제 상태를 확인합니다",
+      "needHelp": "도움이 필요하신가요? 문제가 발생하면 고객센터에 문의해 주세요"
+    },
+    "header": {
+      "subtitle": "은행 앱으로 QR 코드 스캔",
+      "title": "결제 완료"
+    },
+    "instructions": {
+      "step1": "은행 앱을 실행하세요",
+      "step2": "\"QR 코드 스캔\" 또는 \"이체\" 선택",
+      "step3": "위 QR 코드를 스캔하세요",
+      "step4": "확인 후 결제 완료",
+      "title": "결제 방법"
+    },
+    "qrCode": {
+      "expires": "QR 코드는 15분 후 만료됩니다",
+      "loading": "로딩 중...",
+      "subtitle": "스캔하여 즉시 결제 완료",
+      "title": "결제 QR 코드",
+      "validity": "유효 기간"
+    },
+    "status": {
+      "checking": "결제 상태 확인 중...",
+      "hurry": "서둘러 주세요!",
+      "lastCheck": "마지막 확인",
+      "timeRemaining": "남은 시간"
+    },
+    "success": {
+      "message": "확인 페이지로 이동 중...",
+      "title": "결제 성공!"
+    },
+    "timeout": {
+      "alreadyCompleted": "이미 이체하셨나요?",
+      "manualReviewDesc": "계좌에서 자금이 출금되었으나 시스템이 아직 업데이트되지 않았다면 수동 확인을 요청해 주세요.",
+      "requestVerification": "결제 완료 - 확인 요청"
+    }
+  }
+}
