@@ -49,7 +49,7 @@ const useStyles = createStyles(({ css, token }) => ({
 
     text-align: center;
 
-    background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 15%);
   `,
 
@@ -57,8 +57,8 @@ const useStyles = createStyles(({ css, token }) => ({
     margin-block-end: ${token.marginXS}px;
 
     font-size: ${token.fontSizeSM}px;
-    font-weight: 500;
-    color: ${token.colorTextSecondary};
+    font-weight: 600;
+    color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   `,
@@ -69,14 +69,14 @@ const useStyles = createStyles(({ css, token }) => ({
 
     font-size: ${token.fontSizeHeading3}px;
     font-weight: 700;
-    color: ${token.colorPrimary};
+    color: #1a1a1a;
     letter-spacing: -0.5px;
   `,
 
   amountNote: css`
     font-size: ${token.fontSizeSM}px;
     font-weight: 500;
-    color: ${token.colorTextSecondary};
+    color: #888;
   `,
 
   bankDetailRow: css`
@@ -457,10 +457,10 @@ const useStyles = createStyles(({ css, token }) => ({
 
     font-size: ${token.fontSize}px;
     font-weight: 700;
-    color: ${token.colorWhite};
+    color: #fff;
 
-    background: ${token.colorPrimary};
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 15%);
+    background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+    box-shadow: 0 2px 8px rgba(247, 147, 30, 40%);
   `,
 
   timeLeft: css`
