@@ -4,13 +4,16 @@ import { Flexbox } from 'react-layout-kit';
 
 import FileViewer from '@/features/FileViewer';
 import { createCallerFactory } from '@/libs/trpc/lambda';
-import { lambdaRouter } from '@/server/routers/lambda';
+import { minimalFileRouter } from '@/server/routers/minimal-file';
 import { PagePropsWithId } from '@/types/next';
 
 import FileDetail from '../features/FileDetail';
 import Header from './Header';
 
-const createCaller = createCallerFactory(lambdaRouter);
+// Use minimal file router instead of full lambdaRouter to reduce bundle size
+// The full lambdaRouter pulls in 200+ MB of dependencies (AWS SDK, file loaders,
+// Sharp, AI runtimes, etc.) which causes Vercel serverless function size limit errors.
+const createCaller = createCallerFactory(minimalFileRouter);
 
 const FilePage = async (props: PagePropsWithId) => {
   const params = await props.params;
@@ -19,7 +22,7 @@ const FilePage = async (props: PagePropsWithId) => {
 
   const caller = createCaller({ userId });
 
-  const file = await caller.file.getFileItemById({ id: params.id });
+  const file = await caller.getFileItemById({ id: params.id });
 
   if (!file) return notFound();
 

@@ -39,6 +39,17 @@ const nextConfig: NextConfig = {
       '@lobehub/icons',
       'gpt-tokenizer',
     ],
+    // Exclude unnecessary files from serverless function bundles to reduce size
+    outputFileTracingExcludes: {
+      '*': [
+        'node_modules/@swc/core-linux-x64-gnu',
+        'node_modules/@swc/core-linux-x64-musl',
+        'node_modules/@esbuild/linux-x64',
+        'node_modules/webpack',
+        'node_modules/rollup',
+        'node_modules/terser',
+      ],
+    },
     // oidc provider depend on constructor.name
     // but swc minification will remove the name
     // so we need to disable it
@@ -280,7 +291,18 @@ const nextConfig: NextConfig = {
   // Serverless Function bundles smaller (the packages are still present in
   // node_modules at runtime on Vercel).
   serverExternalPackages: isProd
-    ? ['@electric-sql/pglite', '@xmldom/xmldom', '@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner']
+    ? [
+      '@electric-sql/pglite',
+      '@xmldom/xmldom',
+      '@aws-sdk/client-s3',
+      '@aws-sdk/s3-request-presigner',
+      'sharp',
+      '@img/sharp-libvips-linux-x64',
+      '@img/sharp-libvips-linuxmusl-x64',
+      '@shikijs/langs',
+      '@shikijs/themes',
+      '@shikijs/engine-oniguruma',
+    ]
     : ['@xmldom/xmldom'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
