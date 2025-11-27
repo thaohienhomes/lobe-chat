@@ -1,4 +1,4 @@
-import { Bot, Brain, Info, Mic2, Settings2, Sparkles } from 'lucide-react';
+import { Bot, Brain, CreditCard, Info, Mic2, Settings2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 
@@ -40,6 +40,11 @@ export const useCategory = () => {
       icon: Bot,
       key: SettingsTabs.Agent,
       label: t('tab.agent'),
+    },
+    {
+      icon: CreditCard,
+      key: SettingsTabs.Subscription,
+      label: t('tab.subscription'),
     },
     {
       icon: Info,

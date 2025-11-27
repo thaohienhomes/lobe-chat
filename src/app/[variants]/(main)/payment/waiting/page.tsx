@@ -47,11 +47,20 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: ${token.paddingXL}px;
     border-radius: ${token.borderRadiusLG}px;
 
-    color: ${token.colorWhite};
     text-align: center;
 
-    background: linear-gradient(135deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
+    background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 15%);
+  `,
+
+  amountCardLabel: css`
+    margin-block-end: ${token.marginXS}px;
+
+    font-size: ${token.fontSizeSM}px;
+    font-weight: 500;
+    color: ${token.colorTextSecondary};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   `,
 
   amountText: css`
@@ -60,8 +69,14 @@ const useStyles = createStyles(({ css, token }) => ({
 
     font-size: ${token.fontSizeHeading3}px;
     font-weight: 700;
-    color: ${token.colorWhite};
+    color: ${token.colorPrimary};
     letter-spacing: -0.5px;
+  `,
+
+  amountNote: css`
+    font-size: ${token.fontSizeSM}px;
+    font-weight: 500;
+    color: ${token.colorTextSecondary};
   `,
 
   bankDetailRow: css`
@@ -145,11 +160,12 @@ const useStyles = createStyles(({ css, token }) => ({
   instructionCard: css`
     margin-block-end: ${token.marginLG}px;
     padding: ${token.paddingXL}px;
-    border: 1px solid ${token.colorBorder};
+    border: 1px solid rgba(255, 255, 255, 10%);
     border-radius: ${token.borderRadiusLG}px;
 
-    background: ${token.colorBgContainer};
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 8%);
+    background: rgba(26, 35, 50, 60%);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 20%);
   `,
 
   instructionStep: css`
@@ -159,17 +175,24 @@ const useStyles = createStyles(({ css, token }) => ({
 
     padding-block: ${token.paddingMD}px;
     padding-inline: ${token.paddingLG}px;
-    border: 1px solid ${token.colorBorderSecondary};
+    border: 1px solid rgba(255, 255, 255, 15%);
     border-radius: ${token.borderRadius}px;
 
-    background: ${token.colorBgLayout};
+    background: rgba(15, 20, 25, 70%);
 
     transition: all 0.2s ease;
 
     &:hover {
       border-color: ${token.colorPrimaryBorder};
-      background: ${token.colorBgContainer};
+      background: rgba(26, 35, 50, 80%);
     }
+  `,
+
+  instructionStepText: css`
+    font-size: ${token.fontSize}px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 90%);
   `,
 
   label: css`
@@ -933,7 +956,8 @@ function PaymentWaitingContent() {
   };
 
   const handleCancel = () => {
-    router.push(buildPath('/settings/subscription'));
+    // Navigate to subscription settings tab (works for both mobile and desktop)
+    router.push(buildPath('/settings?active=subscription'));
   };
 
   const handleManualVerification = async () => {
@@ -1423,7 +1447,7 @@ function PaymentWaitingContent() {
               {/* Amount */}
 
               <div className={styles.amountCard}>
-                <div className={styles.label} style={{ color: 'rgba(255,255,255,0.85)' }}>
+                <div className={styles.amountCardLabel}>
                   {t('waiting.details.amountLabel')}
                 </div>
 
@@ -1431,9 +1455,7 @@ function PaymentWaitingContent() {
                   {typeof amountValue === 'number'
                     ? new Intl.NumberFormat('vi-VN', {
                         currency,
-
                         maximumFractionDigits: 0,
-
                         style: 'currency',
                       }).format(amountValue)
                     : sessionLoading
@@ -1441,17 +1463,9 @@ function PaymentWaitingContent() {
                       : '--'}
                 </div>
 
-                <Text
-                  style={{
-                    color: 'rgba(255,255,255,0.85)',
-
-                    fontSize: theme.fontSizeSM,
-
-                    fontWeight: 500,
-                  }}
-                >
-                  Transfer exact amount
-                </Text>
+                <div className={styles.amountNote}>
+                  {t('waiting.details.transferExact')}
+                </div>
               </div>
 
               {/* Bank Details */}
@@ -1544,12 +1558,9 @@ function PaymentWaitingContent() {
           <Title
             level={4}
             style={{
-              color: theme.colorTextHeading,
-
+              color: 'rgba(255, 255, 255, 0.95)',
               fontSize: theme.fontSizeHeading4,
-
               fontWeight: 600,
-
               marginBottom: theme.marginLG,
             }}
           >
@@ -1562,27 +1573,12 @@ function PaymentWaitingContent() {
           >
             {[
               { icon: '', step: t('waiting.instructions.step1') },
-
               { icon: '', step: t('waiting.instructions.step2') },
-
               { icon: '', step: t('waiting.instructions.step3') },
             ].map((item, index) => (
               <div className={styles.instructionStep} key={index}>
                 <div className={styles.stepNumber}>{index + 1}</div>
-
-                <Text
-                  style={{
-                    color: theme.colorText,
-
-                    fontSize: theme.fontSize,
-
-                    fontWeight: 500,
-
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {item.step}
-                </Text>
+                <span className={styles.instructionStepText}>{item.step}</span>
               </div>
             ))}
           </Flexbox>
