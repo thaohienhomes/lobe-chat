@@ -1232,6 +1232,9 @@
   "fal-ai/nano-banana": {
     "description": "Nano Banana 是 Google 最新、最快、最高效的原生多模態模型，它允許您透過對話生成和編輯圖像。"
   },
+  "fal-ai/nano-banana-pro/edit": {
+    "description": "Nano Banana Pro（又名 Nano Banana 2）是 Google 最新的 Gemini 3 Pro 影像架構，專注於高品質圖像生成與編輯，支援多圖像輸入（最多14張）、文字渲染及角色一致性（最多5人）。成本為 $0.15/張圖像，4K 輸出收取雙倍費用。"
+  },
   "fal-ai/qwen-image": {
     "description": "Qwen 團隊帶來的強大生圖模型，具有令人印象深刻的中文文字生成能力和多樣圖片視覺風格。"
   },

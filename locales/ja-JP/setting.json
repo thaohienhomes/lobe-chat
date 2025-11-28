@@ -36,6 +36,7 @@
     }
   },
   "header": {
+    "back": "戻る",
     "desc": "設定優先順位和模型設置。",
     "global": "グローバル設定",
     "session": "セッション設定",
@@ -459,6 +460,16 @@
     "unSaved": "未保存の変更",
     "unSavedWarning": "現在、未保存の変更があります"
   },
+  "subscription": {
+    "compare": {
+      "title": "プラン比較"
+    },
+    "plans": {
+      "title": "プランと料金",
+      "upgrade": "アップグレード"
+    },
+    "title": "サブスクリプション管理"
+  },
   "sync": {
     "device": {
       "deviceName": {
@@ -553,9 +564,11 @@
     "provider": "AIサービスプロバイダー",
     "proxy": "ネットワークプロキシ",
     "storage": "データストレージ",
+    "subscription": "サブスクリプション管理",
     "sync": "クラウド同期",
     "system-agent": "システムアシスタント",
-    "tts": "音声サービス"
+    "tts": "音声サービス",
+    "usage": "使用状況"
   },
   "tools": {
     "builtins": {
@@ -569,5 +582,17 @@
       "store": "プラグインストア"
     },
     "title": "拡張ツール"
+  },
+  "usage": {
+    "billing": {
+      "title": "請求情報"
+    },
+    "history": {
+      "title": "使用履歴"
+    },
+    "overview": {
+      "title": "使用概要"
+    },
+    "title": "使用状況"
   }
 }

@@ -36,6 +36,7 @@
     }
   },
   "header": {
+    "back": "뒤로",
     "desc": "설정 및 모델 설정.",
     "global": "전역 설정",
     "session": "세션 설정",
@@ -459,6 +460,16 @@
     "unSaved": "저장되지 않은 변경 사항",
     "unSavedWarning": "현재 저장되지 않은 변경 사항이 있습니다."
   },
+  "subscription": {
+    "compare": {
+      "title": "요금제 비교"
+    },
+    "plans": {
+      "title": "요금제 및 가격",
+      "upgrade": "업그레이드"
+    },
+    "title": "구독 관리"
+  },
   "sync": {
     "device": {
       "deviceName": {
@@ -553,9 +564,11 @@
     "provider": "AI 서비스 제공자",
     "proxy": "네트워크 프록시",
     "storage": "데이터 저장소",
+    "subscription": "구독 관리",
     "sync": "클라우드 동기화",
     "system-agent": "시스템 도우미",
-    "tts": "음성 서비스"
+    "tts": "음성 서비스",
+    "usage": "사용 현황"
   },
   "tools": {
     "builtins": {
@@ -569,5 +582,17 @@
       "store": "플러그인 스토어"
     },
     "title": "확장 도구"
+  },
+  "usage": {
+    "billing": {
+      "title": "청구 정보"
+    },
+    "history": {
+      "title": "사용 내역"
+    },
+    "overview": {
+      "title": "사용 개요"
+    },
+    "title": "사용 현황"
   }
 }

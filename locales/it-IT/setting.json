@@ -36,6 +36,7 @@
     }
   },
   "header": {
+    "back": "Indietro",
     "desc": "Preferenze e impostazioni del modello.",
     "global": "Impostazioni globali",
     "session": "Impostazioni della sessione",
@@ -459,6 +460,16 @@
     "unSaved": "Modifiche non salvate",
     "unSavedWarning": "Ci sono modifiche non salvate attualmente"
   },
+  "subscription": {
+    "compare": {
+      "title": "Confronto dei piani"
+    },
+    "plans": {
+      "title": "Piani e prezzi",
+      "upgrade": "Aggiorna"
+    },
+    "title": "Gestione abbonamento"
+  },
   "sync": {
     "device": {
       "deviceName": {
@@ -553,9 +564,11 @@
     "provider": "Fornitore di servizi AI",
     "proxy": "Proxy di rete",
     "storage": "Storage dati",
+    "subscription": "Gestione abbonamento",
     "sync": "云端同步",
     "system-agent": "Assistente di sistema",
-    "tts": "Servizio vocale"
+    "tts": "Servizio vocale",
+    "usage": "Utilizzo"
   },
   "tools": {
     "builtins": {
@@ -569,5 +582,17 @@
       "store": "Negozio dei plugin"
     },
     "title": "Strumenti aggiuntivi"
+  },
+  "usage": {
+    "billing": {
+      "title": "Informazioni di fatturazione"
+    },
+    "history": {
+      "title": "Cronologia utilizzo"
+    },
+    "overview": {
+      "title": "Panoramica utilizzo"
+    },
+    "title": "Utilizzo"
   }
 }

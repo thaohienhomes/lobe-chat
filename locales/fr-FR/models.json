@@ -1232,6 +1232,9 @@
   "fal-ai/nano-banana": {
     "description": "Nano Banana est le modèle multimodal natif le plus récent, rapide et efficace de Google, permettant de générer et d'éditer des images par conversation."
   },
+  "fal-ai/nano-banana-pro/edit": {
+    "description": "Nano Banana Pro (également connu sous le nom de Nano Banana 2) est la dernière architecture Gemini 3 Pro Image de Google, spécialisée dans la génération et l'édition d'images de haute qualité. Elle prend en charge plusieurs entrées d'images (jusqu'à 14), le rendu de texte et la cohérence des personnages (jusqu'à 5 personnes). Coût : 0,15 $/image, double tarif pour une sortie 4K."
+  },
   "fal-ai/qwen-image": {
     "description": "Modèle puissant de génération d'images brutes de l'équipe Qwen, avec une capacité impressionnante de génération de texte en chinois et une grande diversité de styles visuels."
   },

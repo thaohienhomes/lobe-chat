@@ -1232,6 +1232,9 @@
   "fal-ai/nano-banana": {
     "description": "Nano Banana, Google'ın en yeni, en hızlı ve en verimli yerel çok modlu modelidir; diyalog yoluyla görüntü oluşturma ve düzenleme imkanı sunar."
   },
+  "fal-ai/nano-banana-pro/edit": {
+    "description": "Nano Banana Pro (diğer adıyla Nano Banana 2), Google'ın en yeni Gemini 3 Pro Görüntü mimarisi olup, yüksek kaliteli görüntü oluşturma ve düzenlemeye odaklanır. Çoklu görüntü girişi (en fazla 14 adet), metin işleme ve karakter tutarlılığı (en fazla 5 kişi) destekler. Maliyet $0.15/görüntü, 4K çıktı için iki kat ücretlendirme uygulanır."
+  },
   "fal-ai/qwen-image": {
     "description": "Qwen ekibinin güçlü ham görüntü modeli, etkileyici Çince metin oluşturma yeteneği ve çeşitli görsel stil seçenekleri sunar."
   },

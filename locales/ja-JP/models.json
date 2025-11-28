@@ -1232,6 +1232,9 @@
   "fal-ai/nano-banana": {
     "description": "Nano Banana は Google の最新かつ最速で最も効率的なネイティブマルチモーダルモデルで、対話を通じて画像の生成と編集が可能です。"
   },
+  "fal-ai/nano-banana-pro/edit": {
+    "description": "Nano Banana Pro（別名 Nano Banana 2）は、Googleの最新のGemini 3 Proイメージアーキテクチャであり、高品質な画像生成と編集に特化しています。最大14枚の複数画像入力、テキストレンダリング、最大5人のキャラクター一貫性をサポートします。コストは1画像あたり0.15ドルで、4K出力は2倍の料金がかかります。"
+  },
   "fal-ai/qwen-image": {
     "description": "Qwen チームによる強力な生画像モデルで、印象的な中国語テキスト生成能力と多様な画像ビジュアルスタイルを備えています。"
   },

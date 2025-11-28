@@ -36,6 +36,7 @@
     }
   },
   "header": {
+    "back": "Terug",
     "desc": "Voorkeuren en modelinstellingen.",
     "global": "Algemene instellingen",
     "session": "Sessie-instellingen",
@@ -459,6 +460,16 @@
     "unSaved": "Onopgeslagen wijzigingen",
     "unSavedWarning": "Er zijn momenteel onopgeslagen wijzigingen"
   },
+  "subscription": {
+    "compare": {
+      "title": "Pakketvergelijking"
+    },
+    "plans": {
+      "title": "Pakketten en Prijzen",
+      "upgrade": "Upgrade"
+    },
+    "title": "Abonnementsbeheer"
+  },
   "sync": {
     "device": {
       "deviceName": {
@@ -553,9 +564,11 @@
     "provider": "AI-dienstverlener",
     "proxy": "Netwerkproxy",
     "storage": "Gegevensopslag",
+    "subscription": "Abonnementsbeheer",
     "sync": "Cloudsynchronisatie",
     "system-agent": "Systeemassistent",
-    "tts": "Spraakdienst"
+    "tts": "Spraakdienst",
+    "usage": "Gebruik"
   },
   "tools": {
     "builtins": {
@@ -569,5 +582,17 @@
       "store": "Plug-in store"
     },
     "title": "Uitbreidingsgereedschap"
+  },
+  "usage": {
+    "billing": {
+      "title": "Facturatiegegevens"
+    },
+    "history": {
+      "title": "Gebruiksgeschiedenis"
+    },
+    "overview": {
+      "title": "Gebruiksoverzicht"
+    },
+    "title": "Gebruik"
   }
 }

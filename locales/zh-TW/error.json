@@ -164,6 +164,7 @@
     }
   },
   "upload": {
+    "corsError": "S3 儲存服務跨域設定未正確設置，請聯絡管理員配置 CORS 策略",
     "desc": "詳情: {{detail}}",
     "fileOnlySupportInServerMode": "當前部署模式不支持上傳非圖片文件，如需上傳 {{ext}} 格式，請切換到伺服器數據庫部署或使用 {{cloud}} 服務",
     "networkError": "請確認你的網路是否正常，並檢查檔案儲存服務的跨域配置是否正確",

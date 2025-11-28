@@ -75,7 +75,7 @@
     }
   },
   "notSupportGuide": {
-    "desc": "The current deployment instance uses client-side database mode and does not support AI image generation. Please switch to the <1>server-side database deployment mode</1>, or use <3>pho.chat Cloud</3> directly.",
+    "desc": "The current deployment instance is in client database mode and cannot use the AI image generation feature. Please switch to the <1>server database deployment mode</1>, or directly use <3>pho.chat Cloud</3>",
     "features": {
       "fileIntegration": {
         "desc": "Deep integration with the file management system; generated images are automatically saved to the file system for unified management and organization.",

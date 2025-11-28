@@ -53,8 +53,8 @@ export const LobeOpenRouterAI = createOpenAICompatibleRuntime({
   },
   constructorOptions: {
     defaultHeaders: {
-      'HTTP-Referer': 'https://lobehub.com',
-      'X-Title': 'LobeHub',
+      'HTTP-Referer': 'https://pho.chat',
+      'X-Title': 'pho.chat',
     },
   },
   debug: {

@@ -164,6 +164,7 @@
     }
   },
   "upload": {
+    "corsError": "Konfiguracja CORS usługi przechowywania S3 nie została poprawnie ustawiona, skontaktuj się z administratorem w celu skonfigurowania polityki CORS",
     "desc": "Szczegóły: {{detail}}",
     "fileOnlySupportInServerMode": "Aktualny tryb wdrożenia nie obsługuje przesyłania plików, które nie są obrazami. Aby przesłać pliki w formacie {{ext}}, przełącz się na wdrożenie bazy danych na serwerze lub skorzystaj z usługi {{cloud}}.",
     "networkError": "Proszę upewnić się, że Twoja sieć działa poprawnie oraz sprawdzić, czy konfiguracja CORS dla usługi przechowywania plików jest prawidłowa.",

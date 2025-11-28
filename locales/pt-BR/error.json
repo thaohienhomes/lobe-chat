@@ -164,6 +164,7 @@
     }
   },
   "upload": {
+    "corsError": "A configuração CORS do serviço de armazenamento S3 não está correta. Por favor, entre em contato com o administrador para configurar a política CORS.",
     "desc": "Detalhes: {{detail}}",
     "fileOnlySupportInServerMode": "O modo de implantação atual não suporta o upload de arquivos que não sejam imagens. Para fazer o upload de arquivos no formato {{ext}}, mude para a implantação do banco de dados no servidor ou utilize o serviço {{cloud}}.",
     "networkError": "Por favor, verifique se sua rede está funcionando corretamente e se a configuração de CORS do serviço de armazenamento de arquivos está correta.",

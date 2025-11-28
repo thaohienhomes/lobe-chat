@@ -36,6 +36,7 @@
     }
   },
   "header": {
+    "back": "Zurück",
     "desc": "Präferenzen und Modellkonfigurationen.",
     "global": "Global Einstellungen",
     "session": "Sitzungseinstellungen",
@@ -459,6 +460,16 @@
     "unSaved": "Nicht gespeicherte Änderungen",
     "unSavedWarning": "Es gibt derzeit nicht gespeicherte Änderungen"
   },
+  "subscription": {
+    "compare": {
+      "title": "Paketvergleich"
+    },
+    "plans": {
+      "title": "Pakete und Preise",
+      "upgrade": "Upgrade"
+    },
+    "title": "Abonnementverwaltung"
+  },
   "sync": {
     "device": {
       "deviceName": {
@@ -553,9 +564,11 @@
     "provider": "KI-Dienstanbieter",
     "proxy": "Netzwerkproxy",
     "storage": "Datenspeicher",
+    "subscription": "Abonnementverwaltung",
     "sync": "Cloud-Synchronisierung",
     "system-agent": "Systemassistent",
-    "tts": "Sprachdienste"
+    "tts": "Sprachdienste",
+    "usage": "Nutzung"
   },
   "tools": {
     "builtins": {
@@ -569,5 +582,17 @@
       "store": "Plugin-Store"
     },
     "title": "Erweiterungswerkzeuge"
+  },
+  "usage": {
+    "billing": {
+      "title": "Rechnungsinformationen"
+    },
+    "history": {
+      "title": "Nutzungsverlauf"
+    },
+    "overview": {
+      "title": "Nutzungsübersicht"
+    },
+    "title": "Nutzung"
   }
 }

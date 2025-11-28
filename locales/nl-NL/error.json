@@ -164,6 +164,7 @@
     }
   },
   "upload": {
+    "corsError": "De CORS-configuratie van de S3-opslagservice is niet correct ingesteld. Neem contact op met de beheerder om het CORS-beleid te configureren",
     "desc": "Details: {{detail}}",
     "fileOnlySupportInServerMode": "De huidige implementatiemodus ondersteunt het uploaden van niet-afbeeldingsbestanden niet. Als u bestanden in {{ext}}-formaat wilt uploaden, schakelt u over naar de serverdatabase-implementatie of gebruikt u de {{cloud}}-dienst.",
     "networkError": "Controleer of je netwerk goed werkt en of de cross-origin configuratie van de bestandsopslagservice correct is.",

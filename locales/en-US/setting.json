@@ -36,6 +36,7 @@
     }
   },
   "header": {
+    "back": "Back",
     "desc": "Preferences and model settings.",
     "global": "Global Settings",
     "session": "Session Settings",
@@ -464,7 +465,8 @@
       "title": "Plan Comparison"
     },
     "plans": {
-      "title": "Plans & Pricing"
+      "title": "Plans & Pricing",
+      "upgrade": "Upgrade"
     },
     "title": "Subscription Management"
   },
@@ -562,9 +564,9 @@
     "provider": "AI Service Provider",
     "proxy": "Network Proxy",
     "storage": "Data Storage",
+    "subscription": "Subscription Management",
     "sync": "Cloud Sync",
     "system-agent": "System Assistant",
-    "subscription": "Subscription",
     "tts": "Text-to-Speech",
     "usage": "Usage"
   },

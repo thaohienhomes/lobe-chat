@@ -1232,6 +1232,9 @@
   "fal-ai/nano-banana": {
     "description": "Nano Banana là mô hình đa phương thức nguyên bản mới nhất, nhanh nhất và hiệu quả nhất của Google, cho phép bạn tạo và chỉnh sửa hình ảnh qua đối thoại."
   },
+  "fal-ai/nano-banana-pro/edit": {
+    "description": "Nano Banana Pro (còn gọi là Nano Banana 2) là kiến trúc Gemini 3 Pro Image mới nhất của Google, tập trung vào việc tạo và chỉnh sửa hình ảnh chất lượng cao, hỗ trợ đầu vào đa hình ảnh (tối đa 14 ảnh), kết xuất văn bản và nhất quán nhân vật (tối đa 5 người). Chi phí $0.15/hình, xuất 4K tính phí gấp đôi."
+  },
   "fal-ai/qwen-image": {
     "description": "Mô hình ảnh thô mạnh mẽ do đội Qwen phát triển, có khả năng tạo văn bản tiếng Trung ấn tượng và đa dạng phong cách hình ảnh."
   },

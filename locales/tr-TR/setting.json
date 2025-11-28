@@ -36,6 +36,7 @@
     }
   },
   "header": {
+    "back": "Geri",
     "desc": "Tercihler ve model ayarları.",
     "global": "Genel Ayarlar",
     "session": "Oturum Ayarları",
@@ -459,6 +460,16 @@
     "unSaved": "Kaydedilmemiş değişiklikler",
     "unSavedWarning": "Şu anda kaydedilmemiş değişiklikler var"
   },
+  "subscription": {
+    "compare": {
+      "title": "Paket Karşılaştırması"
+    },
+    "plans": {
+      "title": "Paketler ve Fiyatlandırma",
+      "upgrade": "Yükselt"
+    },
+    "title": "Abonelik Yönetimi"
+  },
   "sync": {
     "device": {
       "deviceName": {
@@ -553,9 +564,11 @@
     "provider": "Yapay Zeka Hizmet Sağlayıcısı",
     "proxy": "Ağ Proxy",
     "storage": "Veri Depolama",
+    "subscription": "Abonelik Yönetimi",
     "sync": "Bulut Senkronizasyonu",
     "system-agent": "Sistem Asistanı",
-    "tts": "Metin Seslendirme"
+    "tts": "Metin Seslendirme",
+    "usage": "Kullanım"
   },
   "tools": {
     "builtins": {
@@ -569,5 +582,17 @@
       "store": "Eklenti Mağazası"
     },
     "title": "Uzantı Araçları"
+  },
+  "usage": {
+    "billing": {
+      "title": "Fatura Bilgileri"
+    },
+    "history": {
+      "title": "Kullanım Geçmişi"
+    },
+    "overview": {
+      "title": "Kullanım Genel Bakışı"
+    },
+    "title": "Kullanım"
   }
 }
