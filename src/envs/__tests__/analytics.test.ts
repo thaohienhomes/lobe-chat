@@ -22,6 +22,7 @@ describe('getAnalyticsConfig', () => {
     process.env.CLARITY_PROJECT_ID = 'clarity_id';
     process.env.ENABLE_VERCEL_ANALYTICS = '1';
     process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID = 'ga_id';
+    process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID = 'tiktok_pixel_id';
 
     const config = getAnalyticsConfig();
 
@@ -42,6 +43,8 @@ describe('getAnalyticsConfig', () => {
       DEBUG_VERCEL_ANALYTICS: false,
       ENABLE_GOOGLE_ANALYTICS: true,
       GOOGLE_ANALYTICS_MEASUREMENT_ID: 'ga_id',
+      ENABLED_TIKTOK_PIXEL: true,
+      TIKTOK_PIXEL_ID: 'tiktok_pixel_id',
     });
   });
 });

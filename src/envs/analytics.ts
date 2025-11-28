@@ -28,6 +28,9 @@ export const getAnalyticsConfig = () => {
       GOOGLE_ANALYTICS_MEASUREMENT_ID: z.string().optional(),
 
       REACT_SCAN_MONITOR_API_KEY: z.string().optional(),
+
+      ENABLED_TIKTOK_PIXEL: z.boolean(),
+      TIKTOK_PIXEL_ID: z.string().optional(),
     },
     runtimeEnv: {
       // Plausible Analytics
@@ -61,6 +64,10 @@ export const getAnalyticsConfig = () => {
       // React Scan Monitor
       // https://dashboard.react-scan.com
       REACT_SCAN_MONITOR_API_KEY: process.env.REACT_SCAN_MONITOR_API_KEY,
+
+      // TikTok Pixel
+      ENABLED_TIKTOK_PIXEL: !!process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID,
+      TIKTOK_PIXEL_ID: process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID,
     },
   });
 };
