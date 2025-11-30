@@ -1,30 +1,27 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
 import { PropsWithChildren, cloneElement, isValidElement, memo } from 'react';
-
-import { enableClerk } from '@/const/auth';
 
 /**
  * TikTokProvider component that provides user data to TikTok Pixel component
- * This component wraps the TikTok component and passes user information for identification
+ *
+ * Note: This component is rendered outside of ClerkProvider in the layout,
+ * so we cannot use useUser() hook here. User identification for TikTok Pixel
+ * is handled separately in components that are inside the ClerkProvider context
+ * (e.g., UserUpdater for registration tracking, payment pages for subscription tracking).
+ *
+ * This provider is kept for future extensibility and to maintain the component structure.
  */
 const TikTokProvider = memo<PropsWithChildren>(({ children }) => {
-  // Get user data from Clerk if enabled
-  const { user, isSignedIn } = enableClerk ? useUser() : { user: null, isSignedIn: false };
+  // Note: We cannot use useUser() here because this component is rendered
+  // outside of ClerkProvider in the Analytics component.
+  // User identification is handled in individual tracking calls where
+  // user data is available from the Clerk context.
 
-  // Extract user information for TikTok identification
-  const userEmail = isSignedIn && user?.emailAddresses?.[0]?.emailAddress;
-  const userId = isSignedIn && user?.id;
-  const userPhone = isSignedIn && user?.phoneNumbers?.[0]?.phoneNumber;
-
-  // Clone children and pass user data to TikTok components
+  // Clone children and pass any additional props if needed
   const enhancedChildren = isValidElement(children)
     ? cloneElement(children, {
         ...(children.props || {}),
-        userEmail: userEmail || undefined,
-        userId: userId || undefined,
-        userPhone: userPhone || undefined,
       } as any)
     : children;
 
