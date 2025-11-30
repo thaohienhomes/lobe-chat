@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+import { trackSubscribe } from '@/utils/tiktok-events';
+
 import { useServerConfigStore } from '@/store/serverConfig';
 
 // Force dynamic rendering to avoid static generation issues with useSearchParams
@@ -99,6 +101,16 @@ function PaymentSuccessContent() {
           status: 'success',
           transactionId: data.transactionId,
         });
+
+        // Track successful subscription purchase
+        if (data.planId && data.planName && data.amount) {
+          trackSubscribe(
+            data.planId,
+            data.planName,
+            data.amount,
+            data.billingCycle || 'monthly'
+          );
+        }
       } else {
         setPaymentStatus({
           message: data.message,

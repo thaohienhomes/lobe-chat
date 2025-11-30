@@ -13,6 +13,7 @@ const Umami = dynamic(() => import('./Umami'));
 const Clarity = dynamic(() => import('./Clarity'));
 const ReactScan = dynamic(() => import('./ReactScan'));
 const TikTok = dynamic(() => import('./TikTok'));
+const TikTokProvider = dynamic(() => import('./TikTokProvider'));
 
 const Analytics = () => {
   return (
@@ -39,7 +40,9 @@ const Analytics = () => {
         <ReactScan apiKey={analyticsEnv.REACT_SCAN_MONITOR_API_KEY} />
       )}
       {analyticsEnv.ENABLED_TIKTOK_PIXEL && (
-        <TikTok pixelId={analyticsEnv.TIKTOK_PIXEL_ID} />
+        <TikTokProvider>
+          <TikTok pixelId={analyticsEnv.TIKTOK_PIXEL_ID} />
+        </TikTokProvider>
       )}
       {isDesktop && <Desktop />}
     </>

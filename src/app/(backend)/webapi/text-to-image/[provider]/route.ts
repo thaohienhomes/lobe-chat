@@ -1,8 +1,13 @@
-import { ChatCompletionErrorPayload, TextToImagePayload } from '@lobechat/model-runtime';
+import {
+  ChatCompletionErrorPayload,
+  ModelProvider,
+  TextToImagePayload,
+} from '@lobechat/model-runtime';
 import { ChatErrorType } from '@lobechat/types';
 import { NextResponse } from 'next/server';
 
 import { checkAuth } from '@/app/(backend)/middleware/auth';
+import { getLLMConfig } from '@/envs/llm';
 import { initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
 import { createErrorResponse } from '@/utils/errorResponse';
 
@@ -49,7 +54,29 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload }) => {
 
   try {
     // ============  1. init chat model   ============ //
-    const agentRuntime = await initModelRuntimeWithUserPayload(provider, jwtPayload);
+    // For OpenAI image generation, use dedicated OPENAI_IMAGE_API_KEY if available
+    // This is necessary when OPENAI_API_KEY is proxied through OpenRouter or other
+    // providers that don't support the /v1/images/generate endpoint
+    let imageJwtPayload = { ...jwtPayload };
+
+    if (provider === ModelProvider.OpenAI) {
+      const llmConfig = getLLMConfig();
+      const imageApiKey = llmConfig.OPENAI_IMAGE_API_KEY;
+
+      if (imageApiKey) {
+        console.log('[Text-to-Image] Using dedicated OPENAI_IMAGE_API_KEY for image generation');
+        // Override the API key and use direct OpenAI endpoint for images
+        imageJwtPayload = {
+          ...jwtPayload,
+          apiKey: imageApiKey,
+          baseURL: 'https://api.openai.com/v1', // Use direct OpenAI, not proxy
+        };
+      } else {
+        console.log('[Text-to-Image] No OPENAI_IMAGE_API_KEY configured, using default config');
+      }
+    }
+
+    const agentRuntime = await initModelRuntimeWithUserPayload(provider, imageJwtPayload);
 
     // ============  2. create chat completion   ============ //
 

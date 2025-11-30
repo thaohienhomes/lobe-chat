@@ -12,6 +12,10 @@ export const getLLMConfig = () => {
 
       ENABLED_OPENAI: z.boolean(),
       OPENAI_API_KEY: z.string().optional(),
+      // Separate API key for OpenAI image generation (DALL-E)
+      // Use this when OPENAI_API_KEY is proxied through OpenRouter or other providers
+      // that don't support the /v1/images/generate endpoint
+      OPENAI_IMAGE_API_KEY: z.string().optional(),
 
       ENABLED_AZURE_OPENAI: z.boolean(),
       AZURE_API_KEY: z.string().optional(),
@@ -208,6 +212,7 @@ export const getLLMConfig = () => {
 
       ENABLED_OPENAI: process.env.ENABLED_OPENAI !== '0',
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      OPENAI_IMAGE_API_KEY: process.env.OPENAI_IMAGE_API_KEY,
 
       ENABLED_AZURE_OPENAI: !!process.env.AZURE_API_KEY,
       AZURE_API_KEY: process.env.AZURE_API_KEY,

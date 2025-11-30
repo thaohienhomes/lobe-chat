@@ -8,6 +8,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+import { trackAddPaymentInfo } from '@/utils/tiktok-events';
+
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -259,6 +261,9 @@ function CheckoutContent() {
     try {
       const vndAmount = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
 
+      // Track AddPaymentInfo event
+      trackAddPaymentInfo(planId, plan.name);
+
       console.log('🏦 Bank Transfer: Creating payment...', { billingCycle, planId, vndAmount });
 
       const response = await fetch('/api/payment/sepay/create', {
@@ -305,6 +310,9 @@ function CheckoutContent() {
 
     setLoading(true);
     try {
+      // Track AddPaymentInfo event
+      trackAddPaymentInfo(planId, plan.name);
+
       console.log('💳 Credit Card: Creating Polar.sh checkout session...', {
         billingCycle,
         planId,
