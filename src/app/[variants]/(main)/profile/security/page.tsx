@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 
 import { enableClerk } from '@/const/auth';
+
+// Force dynamic rendering to avoid static generation issues with Clerk hooks
+export const dynamic = 'force-dynamic';
 import { metadataModule } from '@/server/metadata';
 import { translation } from '@/server/translation';
 import { DynamicLayoutProps } from '@/types/next';

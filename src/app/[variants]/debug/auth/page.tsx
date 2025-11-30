@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering to avoid static generation issues with Clerk hooks
+export const dynamic = 'force-dynamic';
+
 import { useUser } from '@clerk/nextjs';
 import { Card } from 'antd';
 import Link from 'next/link';

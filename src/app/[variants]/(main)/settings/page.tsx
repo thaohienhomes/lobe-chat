@@ -1,6 +1,9 @@
 import ServerLayout from '@/components/server/ServerLayout';
 import { serverFeatureFlags } from '@/config/featureFlags';
 import { metadataModule } from '@/server/metadata';
+
+// Force dynamic rendering to avoid static generation issues with Clerk hooks
+export const dynamic = 'force-dynamic';
 import { translation } from '@/server/translation';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
