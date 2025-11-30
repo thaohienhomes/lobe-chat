@@ -16,6 +16,10 @@ import { Locales } from '@/locales/resources';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
+// Force dynamic rendering to avoid static generation issues with Clerk hooks
+// This is required because Clerk's useUser hook cannot be used during static generation
+export const dynamic = 'force-dynamic';
+
 const inVercel = process.env.VERCEL === '1';
 
 interface RootLayoutProps extends DynamicLayoutProps {

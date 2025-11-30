@@ -7,6 +7,9 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 
 import Category from './features/Category';
 
+// Force dynamic rendering to avoid static generation issues with Clerk hooks
+export const dynamic = 'force-dynamic';
+
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);
   const { t } = await translation('setting', locale);
