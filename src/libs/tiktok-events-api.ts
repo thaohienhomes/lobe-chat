@@ -11,7 +11,7 @@
 import { analyticsEnv } from '@/envs/analytics';
 import crypto from 'crypto';
 
-// TikTok Events API endpoint
+// TikTok Events API endpoint (Events 2.0)
 const TIKTOK_EVENTS_API_URL = 'https://business-api.tiktok.com/open_api/v1.3/event/track/';
 
 // Event names supported by TikTok Events API
@@ -25,11 +25,14 @@ export type TikTokServerEventName =
   | 'InitiateCheckout'
   | 'CompletePayment';
 
-// User identification parameters (PII should be hashed with SHA-256)
+// User identification parameters.
+// NOTE: Callers are responsible for hashing PII (email / phone / external_id)
+// before passing it here when required by TikTok. This module forwards
+// whatever values it receives.
 export interface TikTokServerUserData {
-  email?: string; // SHA-256 hashed
-  phone?: string; // SHA-256 hashed (E.164 format before hashing)
-  external_id?: string; // SHA-256 hashed user ID
+  email?: string; // Typically SHA-256 hashed
+  phone?: string; // Typically SHA-256 hashed (E.164 format before hashing)
+  external_id?: string; // User ID (hashed or raw, depending on your policy)
   ip?: string; // User's IP address
   user_agent?: string; // User's browser user agent
 }
@@ -98,24 +101,31 @@ export async function sendTikTokServerEvent(event: TikTokServerEvent): Promise<{
   }
 
   try {
-    const payload = {
-      pixel_code: analyticsEnv.TIKTOK_PIXEL_ID,
+    // Build per-event payload according to TikTok Events API (Events 2.0) shape
+    const testEventCode = event.test_event_code || analyticsEnv.TIKTOK_TEST_EVENT_CODE;
+    const eventData: Record<string, any> = {
       event: event.event,
       event_time: event.event_time,
+      event_id: event.event_id || generateEventId(event.event),
       user: event.user,
       properties: event.properties,
-      event_id: event.event_id || generateEventId(event.event),
-      // Add test_event_code if configured (for testing in TikTok Events Manager)
-      ...(analyticsEnv.TIKTOK_TEST_EVENT_CODE && { test_event_code: analyticsEnv.TIKTOK_TEST_EVENT_CODE }),
-      // Add test_event_code from event if provided (overrides env var)
-      ...(event.test_event_code && { test_event_code: event.test_event_code }),
+    };
+
+    if (testEventCode) {
+      eventData.test_event_code = testEventCode;
+    }
+
+    const payload = {
+      event_source: 'web',
+      event_source_id: analyticsEnv.TIKTOK_PIXEL_ID,
+      data: [eventData],
     };
 
     console.debug('Sending TikTok server event:', {
       event: event.event,
       hasUser: !!event.user,
       hasProperties: !!event.properties,
-      testMode: !!(payload.test_event_code),
+      testMode: !!testEventCode,
     });
 
     const response = await fetch(TIKTOK_EVENTS_API_URL, {
@@ -124,9 +134,7 @@ export async function sendTikTokServerEvent(event: TikTokServerEvent): Promise<{
         'Content-Type': 'application/json',
         'Access-Token': analyticsEnv.TIKTOK_ACCESS_TOKEN,
       },
-      body: JSON.stringify({
-        data: [payload], // TikTok Events API accepts an array of events
-      }),
+      body: JSON.stringify(payload),
     });
 
     const result = await response.json();
