@@ -1,9 +1,7 @@
 'use client';
 
-import { analyticsEnv } from '@/envs/analytics';
-
 // TikTok Pixel Event Types
-export type TikTokEventName = 
+export type TikTokEventName =
   | 'ViewContent'
   | 'Search'
   | 'ClickButton'
@@ -50,9 +48,11 @@ declare global {
 
 /**
  * Check if TikTok Pixel is enabled and loaded
+ * Note: The Pixel ID is embedded in the script tag loaded by the TikTok component.
+ * We only need to check if the ttq object is available on the window.
  */
 export const isTikTokPixelEnabled = (): boolean => {
-  return !!(analyticsEnv.TIKTOK_PIXEL_ID && typeof window !== 'undefined' && window.ttq);
+  return typeof window !== 'undefined' && !!window.ttq;
 };
 
 /**
@@ -99,7 +99,7 @@ export const identifyTikTokUser = (userParams: TikTokUserParams): void => {
  */
 export const trackCompleteRegistration = (planId?: string, planName?: string): void => {
   const contents: TikTokContent[] = [];
-  
+
   if (planId && planName) {
     contents.push({
       content_id: planId,
@@ -161,7 +161,7 @@ export const trackClickButton = (buttonText: string, description?: string): void
  */
 export const trackAddPaymentInfo = (planId?: string, planName?: string): void => {
   const contents: TikTokContent[] = [];
-  
+
   if (planId && planName) {
     contents.push({
       content_id: planId,
