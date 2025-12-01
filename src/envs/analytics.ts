@@ -31,6 +31,8 @@ export const getAnalyticsConfig = () => {
 
       ENABLED_TIKTOK_PIXEL: z.boolean(),
       TIKTOK_PIXEL_ID: z.string().optional(),
+      TIKTOK_ACCESS_TOKEN: z.string().optional(),
+      TIKTOK_TEST_EVENT_CODE: z.string().optional(),
     },
     runtimeEnv: {
       // Plausible Analytics
@@ -68,6 +70,8 @@ export const getAnalyticsConfig = () => {
       // TikTok Pixel
       ENABLED_TIKTOK_PIXEL: !!process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID,
       TIKTOK_PIXEL_ID: process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID,
+      TIKTOK_ACCESS_TOKEN: process.env.TIKTOK_ACCESS_TOKEN,
+      TIKTOK_TEST_EVENT_CODE: process.env.TIKTOK_TEST_EVENT_CODE,
     },
   });
 };

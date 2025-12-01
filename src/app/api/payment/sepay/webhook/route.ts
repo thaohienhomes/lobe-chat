@@ -5,6 +5,7 @@ import { sepayPayments, subscriptions } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
 import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
+import { sendTikTokServerEvent } from '@/libs/tiktok-events-api';
 import { getPaymentByOrderId } from '@/server/services/billing/sepay';
 
 /**
@@ -131,6 +132,35 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
 
       console.log('✅ Transaction committed successfully');
     });
+
+    // Track successful subscription purchase with TikTok Events API
+    try {
+      const payment = await getPaymentByOrderId(webhookData.orderId);
+      if (payment?.userId && payment?.planId && payment?.amountVnd) {
+        console.log('📊 Tracking TikTok Subscribe event for successful payment...');
+        await sendTikTokServerEvent({
+          event: 'Subscribe',
+          event_time: Math.floor(Date.now() / 1000),
+          user: {
+            external_id: payment.userId, // Will be hashed by the function
+          },
+          properties: {
+            contents: [{
+              content_id: payment.planId,
+              content_type: 'product',
+              content_name: `${payment.planId} (${payment.billingCycle})`,
+              price: payment.amountVnd,
+            }],
+            value: payment.amountVnd,
+            currency: 'VND',
+          },
+        });
+        console.log('✅ TikTok Subscribe event tracked successfully');
+      }
+    } catch (tiktokError) {
+      // Don't fail the webhook if TikTok tracking fails
+      console.error('⚠️ Failed to track TikTok event (non-critical):', tiktokError);
+    }
 
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);

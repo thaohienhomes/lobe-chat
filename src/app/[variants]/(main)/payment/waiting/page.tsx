@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { useServerConfigStore } from '@/store/serverConfig';
+import { trackServerCompletePayment, trackServerViewContent } from '@/utils/tiktok-server-events';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -738,6 +739,15 @@ function PaymentWaitingContent() {
         if (response.ok && data.success) {
           setSessionDetails(data);
 
+          // Track ViewContent event for payment waiting page
+          if (data.amount && data.planId) {
+            trackServerViewContent(
+              data.planId,
+              `Payment Waiting - ${data.planId}`,
+              data.amount
+            ).catch(console.error);
+          }
+
           if (data.status === 'success') {
             setPaymentStatus({
               message: 'Payment completed successfully!',
@@ -750,6 +760,15 @@ function PaymentWaitingContent() {
             });
 
             setPolling(false);
+
+            // Track successful payment
+            if (data.amount) {
+              trackServerCompletePayment(
+                data.orderId,
+                data.amount,
+                data.planId
+              ).catch(console.error);
+            }
           } else if (data.status === 'failed') {
             setPaymentStatus({
               message: data.message || 'Payment failed',
@@ -846,6 +865,15 @@ function PaymentWaitingContent() {
         });
 
         setPolling(false);
+
+        // Track successful payment completion
+        if (sessionDetails?.amount) {
+          trackServerCompletePayment(
+            orderId,
+            sessionDetails.amount,
+            sessionDetails.planId
+          ).catch(console.error);
+        }
 
         // Redirect to success page after 2 seconds
 

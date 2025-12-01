@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { generateFeatureText, getTopModelsForPlan } from '@/utils/messageCalculator';
-import { trackViewContent } from '@/utils/tiktok-events';
+import { trackServerInitiateCheckout, trackServerViewContent } from '@/utils/tiktok-server-events';
 import { useTikTokTracking } from '@/hooks/useTikTokTracking';
 
 const { Title, Text } = Typography;
@@ -166,13 +166,24 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
   const router = useRouter();
   const { trackUpgradeClick } = useTikTokTracking();
 
-  const handleUpgrade = (planId: string) => {
+  const handleUpgrade = async (planId: string) => {
     // Find the plan details for tracking
     const plan = plans.find(p => p.id === planId);
 
-    // Track ViewContent event for plan selection
+    // Track ViewContent and InitiateCheckout events for plan selection
+    // Using server-side tracking for better reliability (bypasses ad blockers)
     if (plan) {
-      trackViewContent(planId, plan.name, plan.monthlyPriceVND);
+      console.log('🎯 Tracking plan selection:', { planId, planName: plan.name });
+
+      // Track both ViewContent and InitiateCheckout events
+      await Promise.all([
+        trackServerViewContent(planId, plan.name, plan.monthlyPriceVND),
+        trackServerInitiateCheckout(planId, plan.name, plan.monthlyPriceVND),
+      ]).catch(error => {
+        console.error('Failed to track TikTok events:', error);
+      });
+
+      // Also track with client-side hook for redundancy
       trackUpgradeClick(plan.name, 'Plans Section');
     }
 
