@@ -25,6 +25,9 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
   });
 };
 
+// Wrap in single root element (div) instead of fragment to fix React boundary error
+// "A previously unvisited boundary must have exactly one root segment"
+// Sentry issue: PHO-JAVASCRIPT-NEXTJS-J
 const Page = async (props: DynamicLayoutProps) => {
   const { hideDocs, showChangelog } = serverFeatureFlags();
   const { isMobile, locale } = await RouteVariants.getVariantsFromProps(props);
@@ -36,7 +39,7 @@ const Page = async (props: DynamicLayoutProps) => {
   });
 
   return (
-    <>
+    <div>
       <StructuredData ld={ld} />
       <PageTitle />
       {/* TelemetryNotification removed for pho.chat */}
@@ -45,7 +48,7 @@ const Page = async (props: DynamicLayoutProps) => {
           <Changelog />
         </Suspense>
       )}
-    </>
+    </div>
   );
 };
 

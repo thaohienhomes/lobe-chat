@@ -1,4 +1,5 @@
 import { Suspense, lazy } from 'react';
+import { Flexbox } from 'react-layout-kit';
 
 import CircleLoading from '@/components/Loading/CircleLoading';
 import ServerLayout from '@/components/server/ServerLayout';
@@ -13,15 +14,20 @@ const SessionListContent = lazy(() => import('./features/SessionListContent'));
 
 const Layout = ServerLayout({ Desktop, Mobile });
 
+// Wrap in single root element (Flexbox) instead of having multiple children in Suspense
+// to fix React boundary error "A previously unvisited boundary must have exactly one root segment"
+// Sentry issue: PHO-JAVASCRIPT-NEXTJS-J
 const Session = (props: DynamicLayoutProps) => {
   return (
     <Suspense fallback={<CircleLoading />}>
-      <Layout {...props}>
-        <Suspense fallback={<SkeletonList />}>
-          <SessionListContent />
-        </Suspense>
-      </Layout>
-      <SessionHydration />
+      <Flexbox height={'100%'} style={{ position: 'relative' }}>
+        <Layout {...props}>
+          <Suspense fallback={<SkeletonList />}>
+            <SessionListContent />
+          </Suspense>
+        </Layout>
+        <SessionHydration />
+      </Flexbox>
     </Suspense>
   );
 };
