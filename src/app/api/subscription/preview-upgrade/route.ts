@@ -6,10 +6,17 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
+import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerDB } from '@/database/server';
+
 import { subscriptions } from '@/database/schemas/billing';
-import { eq, and } from 'drizzle-orm';
+import { getServerDB } from '@/database/server';
+import {
+  PLAN_PRICING,
+  PLAN_TIERS,
+  calculateDaysRemaining,
+  calculateProratedAmount,
+} from '@/server/services/billing/proration';
 
 interface PreviewRequest {
   billingCycle: 'monthly' | 'yearly';
@@ -38,65 +45,12 @@ interface PreviewResponse {
   success: boolean;
 }
 
-// Plan pricing in VND (free plan has 0 cost)
-const PLAN_PRICING: Record<string, { monthly: number; yearly: number }> = {
-  free: { monthly: 0, yearly: 0 },
-  premium: { monthly: 129_000, yearly: 1_290_000 },
-  starter: { monthly: 39_000, yearly: 390_000 },
-  ultimate: { monthly: 349_000, yearly: 3_490_000 },
-};
-
 const PLAN_NAMES: Record<string, string> = {
   free: 'Free',
   premium: 'Premium',
   starter: 'Starter',
   ultimate: 'Ultimate',
 };
-
-// Plan tier order for determining upgrade vs downgrade
-const PLAN_TIERS: Record<string, number> = {
-  free: 0,
-  starter: 1,
-  premium: 2,
-  ultimate: 3,
-};
-
-/**
- * Calculate prorated amount for plan change preview
- */
-function calculateProratedAmount(
-  currentPlan: string,
-  newPlan: string,
-  billingCycle: 'monthly' | 'yearly',
-  currentPeriodEnd: Date,
-): { daysRemaining: number; proratedAmount: number } {
-  const now = new Date();
-  const daysRemaining = Math.max(0, Math.ceil(
-    (currentPeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-  ));
-  const totalDays = billingCycle === 'monthly' ? 30 : 365;
-
-  const currentPricing = PLAN_PRICING[currentPlan] || { monthly: 0, yearly: 0 };
-  const newPricing = PLAN_PRICING[newPlan] || { monthly: 0, yearly: 0 };
-  
-  const currentPrice = currentPricing[billingCycle];
-  const newPrice = newPricing[billingCycle];
-
-  // Special case: upgrading from free plan - charge full price for new plan
-  if (currentPlan === 'free') {
-    return { daysRemaining, proratedAmount: newPrice };
-  }
-
-  // Calculate daily rates
-  const currentDailyRate = currentPrice / totalDays;
-  const newDailyRate = newPrice / totalDays;
-
-  // Calculate credit and charge
-  const credit = currentDailyRate * daysRemaining;
-  const charge = newDailyRate * daysRemaining;
-
-  return { daysRemaining, proratedAmount: Math.round(charge - credit) };
-}
 
 /**
  * POST /api/subscription/preview-upgrade
@@ -137,16 +91,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<PreviewRe
 
     const subscription = currentSubscription[0];
     const currentPlanId = subscription.planId;
-    
-    const { daysRemaining, proratedAmount } = calculateProratedAmount(
+
+    // Calculate days remaining and prorated amount using shared utilities
+    const daysRemaining = calculateDaysRemaining(subscription.currentPeriodEnd);
+    const proratedAmount = calculateProratedAmount(
       currentPlanId,
       newPlanId,
       billingCycle,
       subscription.currentPeriodEnd,
     );
 
-    const currentTier = PLAN_TIERS[currentPlanId] || 0;
-    const newTier = PLAN_TIERS[newPlanId] || 0;
+    const currentTier = PLAN_TIERS[currentPlanId] ?? 0;
+    const newTier = PLAN_TIERS[newPlanId] ?? 0;
     const isUpgrade = newTier > currentTier;
     const isDowngrade = newTier < currentTier;
 

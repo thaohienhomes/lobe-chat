@@ -39,59 +39,10 @@ interface UpgradeResponse {
   success: boolean;
 }
 
-// Plan pricing in VND (free plan has 0 cost)
-const PLAN_PRICING: Record<string, { monthly: number; yearly: number }> = {
-  free: { monthly: 0, yearly: 0 },
-  premium: { monthly: 129_000, yearly: 1_290_000 },
-  starter: { monthly: 39_000, yearly: 390_000 },
-  ultimate: { monthly: 349_000, yearly: 3_490_000 },
-};
-
-/**
- * Calculate prorated amount for plan change
- * @param currentPlan - Current plan ID (free, starter, premium, ultimate)
- * @param newPlan - New plan ID to upgrade/downgrade to
- * @param billingCycle - Billing cycle (monthly or yearly)
- * @param currentPeriodEnd - Current subscription period end date
- * @returns Prorated amount in VND (positive = charge, negative = credit)
- */
-function calculateProratedAmount(
-  currentPlan: string,
-  newPlan: string,
-  billingCycle: 'monthly' | 'yearly',
-  currentPeriodEnd: Date,
-): number {
-  const now = new Date();
-  const daysRemaining = Math.ceil(
-    (currentPeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-  );
-  const totalDays = billingCycle === 'monthly' ? 30 : 365;
-
-  // Get pricing with fallback to 0 for unknown plans (like 'free')
-  const currentPricing = PLAN_PRICING[currentPlan] || { monthly: 0, yearly: 0 };
-  const newPricing = PLAN_PRICING[newPlan] || { monthly: 0, yearly: 0 };
-
-  const currentPrice = currentPricing[billingCycle];
-  const newPrice = newPricing[billingCycle];
-
-  // Special case: upgrading from free plan - charge full price for new plan
-  if (currentPlan === 'free') {
-    return newPrice;
-  }
-
-  // Calculate daily rates
-  const currentDailyRate = currentPrice / totalDays;
-  const newDailyRate = newPrice / totalDays;
-
-  // Calculate credit for remaining days on current plan
-  const credit = currentDailyRate * daysRemaining;
-
-  // Calculate charge for new plan for remaining days
-  const charge = newDailyRate * daysRemaining;
-
-  // Prorated amount (positive = charge, negative = credit)
-  return Math.round(charge - credit);
-}
+import {
+  PLAN_TIERS,
+  calculateProratedAmount,
+} from '@/server/services/billing/proration';
 
 /**
  * POST /api/subscription/upgrade
@@ -175,9 +126,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     // Determine if this is an upgrade or downgrade based on plan tier
-    const PLAN_TIERS: Record<string, number> = { free: 0, starter: 1, premium: 2, ultimate: 3 };
-    const currentTier = PLAN_TIERS[subscription.planId] || 0;
-    const newTier = PLAN_TIERS[newPlanId] || 0;
+    const currentTier = PLAN_TIERS[subscription.planId] ?? 0;
+    const newTier = PLAN_TIERS[newPlanId] ?? 0;
     const isUpgrade = newTier > currentTier;
 
     pino.info(
