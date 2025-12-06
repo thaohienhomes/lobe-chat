@@ -20,8 +20,11 @@ const standaloneConfig: NextConfig = {
   outputFileTracingIncludes: { '*': ['public/**/*', '.next/static/**/*'] },
 };
 
+const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+
 const nextConfig: NextConfig = {
   ...(isStandaloneMode ? standaloneConfig : {}),
+  assetPrefix,
   compiler: {
     emotion: true,
   },
@@ -29,8 +32,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
-  
+
   experimental: {
     optimizePackageImports: [
       'emoji-mart',
@@ -55,9 +57,8 @@ const nextConfig: NextConfig = {
       },
     }),
   },
-  
 
-async headers() {
+  async headers() {
     const securityHeaders = [
       {
         key: 'x-robots-tag',
@@ -201,17 +202,16 @@ async headers() {
       },
     ];
   },
-  
 
-logging: {
+  logging: {
     fetches: {
       fullUrl: true,
       hmrRefreshes: true,
     },
   },
   // Exclude unnecessary files from serverless function bundles to reduce size
-// Moved from experimental to top-level in Next.js 15
-outputFileTracingExcludes: {
+  // Moved from experimental to top-level in Next.js 15
+  outputFileTracingExcludes: {
     '*': [
       'node_modules/@swc/core-linux-x64-gnu',
       'node_modules/@swc/core-linux-x64-musl',
@@ -349,6 +349,20 @@ outputFileTracingExcludes: {
       ...config.resolve.fallback,
       zipfile: false,
     };
+
+    if (assetPrefix && (assetPrefix.startsWith('http://') || assetPrefix.startsWith('https://'))) {
+      // fix the Worker URL cross-origin issue
+      // refs: https://github.com/lobehub/lobe-chat/pull/9624
+      config.module.rules.push({
+        generator: {
+          // @see https://webpack.js.org/configuration/module/#rulegeneratorpublicpath
+          publicPath: '/_next/',
+        },
+        test: /worker\.ts$/,
+        // @see https://webpack.js.org/guides/asset-modules/
+        type: 'asset/resource',
+      });
+    }
 
     return config;
   },

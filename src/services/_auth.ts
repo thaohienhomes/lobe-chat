@@ -72,6 +72,11 @@ export const getProviderAuthPayload = (
       };
     }
 
+    case ModelProvider.VertexAI: {
+      // Vertex AI uses JSON credentials, should not split by comma
+      return { apiKey: keyVaults?.apiKey, baseURL: keyVaults?.baseURL };
+    }
+
     default: {
       return { apiKey: keyVaults?.apiKey, baseURL: keyVaults?.baseURL };
     }
