@@ -77,54 +77,87 @@ export async function updatePaymentStatus(
 
 export async function activateUserSubscription(params: {
   billingCycle: 'monthly' | 'yearly';
+  /** If true, this is an upgrade payment - preserve existing period dates */
+  isUpgrade?: boolean;
   planId: string;
   userId: string;
 }) {
   try {
     const db = await getServerDB();
-    const start = new Date();
-    const end = new Date(start);
-    end.setDate(end.getDate() + (params.billingCycle === 'yearly' ? 365 : 30));
 
     // Upsert behavior: if user already has a subscription, update it; else insert
     const existing = await db
-      .select({ id: subscriptions.id })
+      .select()
       .from(subscriptions)
       .where(and(eq(subscriptions.userId, params.userId)));
 
-    if (existing.length > 0) {
+    if (params.isUpgrade && existing.length > 0) {
+      // UPGRADE: Preserve existing period dates, only update plan
+      const existingSubscription = existing[0];
+      console.log('🔄 Processing upgrade - preserving existing period:', {
+        currentPeriodEnd: existingSubscription.currentPeriodEnd,
+        currentPeriodStart: existingSubscription.currentPeriodStart,
+        newPlanId: params.planId,
+        oldPlanId: existingSubscription.planId,
+      });
+
       await db
         .update(subscriptions)
         .set({
           billingCycle: params.billingCycle,
-          currentPeriodEnd: end,
-          currentPeriodStart: start,
+          currentPeriodEnd: existingSubscription.currentPeriodEnd,
+          currentPeriodStart: existingSubscription.currentPeriodStart,
           paymentProvider: 'sepay',
           planId: params.planId,
           status: 'active',
         })
         .where(eq(subscriptions.userId, params.userId));
-      console.log('✅ Subscription updated successfully:', {
+      console.log('✅ Subscription upgraded successfully:', {
         billingCycle: params.billingCycle,
-        currentPeriodEnd: end.toISOString(),
+        currentPeriodEnd: existingSubscription.currentPeriodEnd.toISOString(),
         planId: params.planId,
         userId: params.userId,
       });
     } else {
-      await db.insert(subscriptions).values({
-        billingCycle: params.billingCycle,
-        currentPeriodEnd: end,
-        currentPeriodStart: start,
-        planId: params.planId,
-        status: 'active',
-        userId: params.userId,
-      });
-      console.log('✅ Subscription created successfully:', {
-        billingCycle: params.billingCycle,
-        currentPeriodEnd: end.toISOString(),
-        planId: params.planId,
-        userId: params.userId,
-      });
+      // NEW SUBSCRIPTION or RENEWAL: Create new billing period
+      const start = new Date();
+      const end = new Date(start);
+      end.setDate(end.getDate() + (params.billingCycle === 'yearly' ? 365 : 30));
+
+      if (existing.length > 0) {
+        await db
+          .update(subscriptions)
+          .set({
+            billingCycle: params.billingCycle,
+            currentPeriodEnd: end,
+            currentPeriodStart: start,
+            paymentProvider: 'sepay',
+            planId: params.planId,
+            status: 'active',
+          })
+          .where(eq(subscriptions.userId, params.userId));
+        console.log('✅ Subscription renewed successfully:', {
+          billingCycle: params.billingCycle,
+          currentPeriodEnd: end.toISOString(),
+          planId: params.planId,
+          userId: params.userId,
+        });
+      } else {
+        await db.insert(subscriptions).values({
+          billingCycle: params.billingCycle,
+          currentPeriodEnd: end,
+          currentPeriodStart: start,
+          planId: params.planId,
+          status: 'active',
+          userId: params.userId,
+        });
+        console.log('✅ Subscription created successfully:', {
+          billingCycle: params.billingCycle,
+          currentPeriodEnd: end.toISOString(),
+          planId: params.planId,
+          userId: params.userId,
+        });
+      }
     }
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);

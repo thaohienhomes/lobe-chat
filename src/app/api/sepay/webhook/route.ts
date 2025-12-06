@@ -71,14 +71,18 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
 
     // Activate subscription
     if (payment.userId && payment.planId && payment.billingCycle) {
+      // Detect if this is an upgrade payment (orderId starts with PHO_UPG)
+      const isUpgradePayment = webhookData.orderId.startsWith('PHO_UPG');
       console.log('🎯 [COMPAT ROUTE] Activating subscription for user:', {
         billingCycle: payment.billingCycle,
+        isUpgrade: isUpgradePayment,
         planId: payment.planId,
         userId: payment.userId,
       });
 
       await activateUserSubscription({
         billingCycle: payment.billingCycle as 'monthly' | 'yearly',
+        isUpgrade: isUpgradePayment,
         planId: payment.planId,
         userId: payment.userId,
       });
