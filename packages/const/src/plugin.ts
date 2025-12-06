@@ -5,7 +5,10 @@ export const ARTIFACT_TAG = 'lobeArtifact';
 export const ARTIFACT_THINKING_TAG = 'lobeThinking';
 
 // https://regex101.com/r/TwzTkf/2
-export const ARTIFACT_TAG_REGEX = /<lobeArtifact\b[^>]*>(?<content>[\S\s]*?)(?:<\/lobeArtifact>|$)/;
+// Note: Using regular capture group instead of named group (?<content>...)
+// for iOS 15 Safari compatibility (named groups not supported in iOS < 16)
+// Sentry issue: PHO-JAVASCRIPT-NEXTJS-7
+export const ARTIFACT_TAG_REGEX = /<lobeArtifact\b[^>]*>([\S\s]*?)(?:<\/lobeArtifact>|$)/;
 
 // https://regex101.com/r/r9gqGg/1
 export const ARTIFACT_TAG_CLOSED_REGEX = /<lobeArtifact\b[^>]*>([\S\s]*?)<\/lobeArtifact>/;

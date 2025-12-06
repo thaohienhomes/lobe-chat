@@ -35,7 +35,9 @@ const artifactCode = (id: string) => (s: ChatStoreState) => {
   const messageContent = artifactMessageContent(id)(s);
   const result = messageContent.match(ARTIFACT_TAG_REGEX);
 
-  let content = result?.groups?.content || '';
+  // Use indexed access [1] instead of named group for iOS 15 Safari compatibility
+  // Sentry issue: PHO-JAVASCRIPT-NEXTJS-7
+  let content = result?.[1] || '';
 
   // Remove markdown code block if content is wrapped
   content = content.replace(/^\s*```[^\n]*\n([\S\s]*?)\n```\s*$/, '$1');
