@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { Alert, Button, Card, Divider, Radio, Spin, Tag, Typography, message } from 'antd';
+import { Alert, Button, Card, Divider, Modal, Radio, Spin, Tag, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
 import { ArrowLeft, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -139,6 +139,15 @@ export default function UpgradeClient() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewData, setPreviewData] = useState<{
+    daysRemaining: number;
+    isDowngrade: boolean;
+    isUpgrade: boolean;
+    message: string;
+    proratedAmount: number;
+  } | null>(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -168,9 +177,47 @@ export default function UpgradeClient() {
     fetchSubscription();
   }, [isLoaded, user, router]);
 
+  // Fetch preview when plan or billing cycle changes
+  useEffect(() => {
+    if (!selectedPlan || !currentSubscription) return;
+    if (selectedPlan === currentSubscription.planId && billingCycle === currentSubscription.billingCycle) {
+      setPreviewData(null);
+      return;
+    }
+
+    const fetchPreview = async () => {
+      setPreviewLoading(true);
+      try {
+        const response = await fetch('/api/subscription/preview-upgrade', {
+          body: JSON.stringify({ billingCycle, newPlanId: selectedPlan }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPreviewData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch preview:', error);
+      } finally {
+        setPreviewLoading(false);
+      }
+    };
+
+    fetchPreview();
+  }, [selectedPlan, billingCycle, currentSubscription]);
+
+  // Show confirmation modal before processing
+  const handleConfirmClick = () => {
+    if (!selectedPlan || selectedPlan === currentSubscription?.planId) return;
+    setConfirmModalOpen(true);
+  };
+
+  // Process the actual upgrade/downgrade
   const handleUpgrade = async () => {
     if (!selectedPlan || !currentSubscription) return;
 
+    setConfirmModalOpen(false);
     setProcessing(true);
     try {
       const response = await fetch('/api/subscription/upgrade', {
@@ -189,6 +236,15 @@ export default function UpgradeClient() {
         return;
       }
 
+      // Check if payment is required (upgrade case)
+      if (data.paymentRequired && data.paymentUrl) {
+        message.info('Redirecting to payment...');
+        // Redirect to Sepay payment page
+        window.location.href = data.paymentUrl;
+        return;
+      }
+
+      // No payment required (downgrade or plan change within same tier)
       message.success(data.message);
       setTimeout(() => {
         router.push('/subscription/manage');
@@ -323,7 +379,90 @@ export default function UpgradeClient() {
         {selectedPlan && selectedPlan !== currentSubscription.planId && (
           <Card style={{ background: '#f0f5ff', marginBottom: 24 }}>
             <Title level={5}>Plan Change Summary</Title>
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr' }}>
+            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr 1fr' }}>
+              <div>
+                <Text type="secondary">Current Plan</Text>
+                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{currentPlan?.name}</div>
+              </div>
+              <div>
+                <Text type="secondary">New Plan</Text>
+                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{selectedPlanData?.name}</div>
+              </div>
+              <div>
+                <Text type="secondary">
+                  {previewLoading ? 'Calculating...' : previewData?.isUpgrade ? 'Upgrade Fee' : previewData?.isDowngrade ? 'Credit' : 'Amount'}
+                </Text>
+                <div style={{
+                  color: previewData?.proratedAmount && previewData.proratedAmount > 0 ? '#cf1322' : '#389e0d',
+                  fontSize: 16,
+                  fontWeight: 'bold'
+                }}>
+                  {previewLoading ? '...' : previewData ? (
+                    previewData.proratedAmount > 0
+                      ? `+${previewData.proratedAmount.toLocaleString()} VND`
+                      : previewData.proratedAmount < 0
+                        ? `${previewData.proratedAmount.toLocaleString()} VND (credit)`
+                        : 'No charge'
+                  ) : '...'}
+                </div>
+              </div>
+            </div>
+            {previewData && previewData.daysRemaining > 0 && (
+              <div style={{ color: '#666', fontSize: 12, marginTop: 12 }}>
+                {previewData.daysRemaining} days remaining in current billing period
+              </div>
+            )}
+            {previewData?.isUpgrade && previewData.proratedAmount > 0 && (
+              <Alert
+                message="Payment Required"
+                description={`You will be charged ${previewData.proratedAmount.toLocaleString()} VND for the upgrade.`}
+                showIcon
+                style={{ marginTop: 12 }}
+                type="info"
+              />
+            )}
+            {previewData?.isDowngrade && (
+              <Alert
+                message="Downgrade Notice"
+                description={`Your plan will be changed immediately. ${previewData.proratedAmount < 0 ? `Credit of ${Math.abs(previewData.proratedAmount).toLocaleString()} VND will be noted for your records.` : 'No credit applicable.'}`}
+                showIcon
+                style={{ marginTop: 12 }}
+                type="warning"
+              />
+            )}
+          </Card>
+        )}
+
+        <Button
+          disabled={!selectedPlan || selectedPlan === currentSubscription.planId || previewLoading}
+          loading={processing}
+          onClick={handleConfirmClick}
+          size="large"
+          style={{ width: '100%' }}
+          type="primary"
+        >
+          {selectedPlan === currentSubscription.planId
+            ? 'Already on this plan'
+            : previewData?.isUpgrade
+              ? `Upgrade to ${selectedPlanData?.name}`
+              : previewData?.isDowngrade
+                ? `Downgrade to ${selectedPlanData?.name}`
+                : 'Confirm Plan Change'}
+        </Button>
+
+        {/* Confirmation Modal */}
+        <Modal
+          cancelText="Cancel"
+          centered
+          okButtonProps={{ danger: previewData?.isDowngrade, loading: processing }}
+          okText={previewData?.isUpgrade ? 'Proceed to Payment' : 'Confirm Downgrade'}
+          onCancel={() => setConfirmModalOpen(false)}
+          onOk={handleUpgrade}
+          open={confirmModalOpen}
+          title={previewData?.isUpgrade ? '🚀 Confirm Upgrade' : '⚠️ Confirm Downgrade'}
+        >
+          <div style={{ padding: '16px 0' }}>
+            <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1fr 1fr', marginBottom: 16 }}>
               <div>
                 <Text type="secondary">Current Plan</Text>
                 <div style={{ fontSize: 16, fontWeight: 'bold' }}>{currentPlan?.name}</div>
@@ -333,21 +472,52 @@ export default function UpgradeClient() {
                 <div style={{ fontSize: 16, fontWeight: 'bold' }}>{selectedPlanData?.name}</div>
               </div>
             </div>
-          </Card>
-        )}
 
-        <Button
-          disabled={!selectedPlan || selectedPlan === currentSubscription.planId}
-          loading={processing}
-          onClick={handleUpgrade}
-          size="large"
-          style={{ width: '100%' }}
-          type="primary"
-        >
-          {selectedPlan === currentSubscription.planId
-            ? 'Already on this plan'
-            : 'Confirm Plan Change'}
-        </Button>
+            <Divider style={{ margin: '12px 0' }} />
+
+            {previewData?.isUpgrade && previewData.proratedAmount > 0 && (
+              <Alert
+                description={
+                  <div>
+                    <p style={{ margin: 0 }}>
+                      You will be redirected to complete payment of{' '}
+                      <strong>{previewData.proratedAmount.toLocaleString()} VND</strong>.
+                    </p>
+                    <p style={{ color: '#666', fontSize: 12, marginBottom: 0, marginTop: 8 }}>
+                      Your new plan will be activated immediately after payment.
+                    </p>
+                  </div>
+                }
+                message="Payment Required"
+                showIcon
+                type="info"
+              />
+            )}
+
+            {previewData?.isDowngrade && (
+              <Alert
+                description={
+                  <div>
+                    <p style={{ margin: 0 }}>
+                      Your plan will be changed to <strong>{selectedPlanData?.name}</strong> immediately.
+                    </p>
+                    {previewData.proratedAmount < 0 && (
+                      <p style={{ color: '#666', fontSize: 12, marginBottom: 0, marginTop: 8 }}>
+                        Credit of {Math.abs(previewData.proratedAmount).toLocaleString()} VND noted for your records.
+                      </p>
+                    )}
+                    <p style={{ color: '#fa8c16', fontSize: 12, marginBottom: 0, marginTop: 8 }}>
+                      You will lose access to features not included in the new plan.
+                    </p>
+                  </div>
+                }
+                message="Downgrade Warning"
+                showIcon
+                type="warning"
+              />
+            )}
+          </div>
+        </Modal>
       </div>
     </div>
   );

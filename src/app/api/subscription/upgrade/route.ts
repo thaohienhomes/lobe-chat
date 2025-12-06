@@ -14,7 +14,14 @@ import { pino } from '@/libs/logger';
 
 interface UpgradeRequest {
   billingCycle: 'monthly' | 'yearly';
+  /**
+   * If true, skip payment requirement and just update subscription
+   * Used for downgrades or when payment is confirmed via webhook
+   */
+  bypassPayment?: boolean;
   newPlanId: 'starter' | 'premium' | 'ultimate';
+  /** Order ID from completed Sepay payment (for upgrade with payment) */
+  paymentOrderId?: string;
 }
 
 interface UpgradeResponse {
@@ -25,12 +32,16 @@ interface UpgradeResponse {
     id: string;
     planId: string;
   };
+  /** If payment is required, contains payment URL to redirect user */
+  paymentRequired?: boolean;
+  paymentUrl?: string;
   proratedAmount?: number;
   success: boolean;
 }
 
-// Plan pricing in VND
-const PLAN_PRICING = {
+// Plan pricing in VND (free plan has 0 cost)
+const PLAN_PRICING: Record<string, { monthly: number; yearly: number }> = {
+  free: { monthly: 0, yearly: 0 },
   premium: { monthly: 129_000, yearly: 1_290_000 },
   starter: { monthly: 39_000, yearly: 390_000 },
   ultimate: { monthly: 349_000, yearly: 3_490_000 },
@@ -38,6 +49,11 @@ const PLAN_PRICING = {
 
 /**
  * Calculate prorated amount for plan change
+ * @param currentPlan - Current plan ID (free, starter, premium, ultimate)
+ * @param newPlan - New plan ID to upgrade/downgrade to
+ * @param billingCycle - Billing cycle (monthly or yearly)
+ * @param currentPeriodEnd - Current subscription period end date
+ * @returns Prorated amount in VND (positive = charge, negative = credit)
  */
 function calculateProratedAmount(
   currentPlan: string,
@@ -51,8 +67,17 @@ function calculateProratedAmount(
   );
   const totalDays = billingCycle === 'monthly' ? 30 : 365;
 
-  const currentPrice = PLAN_PRICING[currentPlan as keyof typeof PLAN_PRICING][billingCycle];
-  const newPrice = PLAN_PRICING[newPlan as keyof typeof PLAN_PRICING][billingCycle];
+  // Get pricing with fallback to 0 for unknown plans (like 'free')
+  const currentPricing = PLAN_PRICING[currentPlan] || { monthly: 0, yearly: 0 };
+  const newPricing = PLAN_PRICING[newPlan] || { monthly: 0, yearly: 0 };
+
+  const currentPrice = currentPricing[billingCycle];
+  const newPrice = newPricing[billingCycle];
+
+  // Special case: upgrading from free plan - charge full price for new plan
+  if (currentPlan === 'free') {
+    return newPrice;
+  }
 
   // Calculate daily rates
   const currentDailyRate = currentPrice / totalDays;
@@ -149,10 +174,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       subscription.currentPeriodEnd,
     );
 
+    // Determine if this is an upgrade or downgrade based on plan tier
+    const PLAN_TIERS: Record<string, number> = { free: 0, starter: 1, premium: 2, ultimate: 3 };
+    const currentTier = PLAN_TIERS[subscription.planId] || 0;
+    const newTier = PLAN_TIERS[newPlanId] || 0;
+    const isUpgrade = newTier > currentTier;
+
     pino.info(
       {
         billingCycle,
         currentPlan: subscription.planId,
+        isUpgrade,
         newPlan: newPlanId,
         proratedAmount,
         userId,
@@ -160,7 +192,66 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       'Processing subscription upgrade/downgrade',
     );
 
-    // Calculate new period end
+    // For upgrades with payment required, create Sepay payment and return payment URL
+    // Only proceed with direct update if:
+    // - It's a downgrade (proratedAmount <= 0)
+    // - Or bypassPayment is true (payment already confirmed via webhook)
+    // - Or proratedAmount is 0 (no payment needed)
+    if (isUpgrade && proratedAmount > 0 && !body.bypassPayment) {
+      // Create Sepay payment for upgrade fee
+      const { SepayPaymentGateway, sepayGateway } = await import('@/libs/sepay');
+      const { createPaymentRecord } = await import('@/server/services/billing/sepay');
+
+      const orderId = SepayPaymentGateway.generateOrderId('PHO_UPG');
+      const description = `pho.chat Upgrade to ${newPlanId} - prorated fee`;
+
+      // Get base URL from request headers
+      const host = request.headers.get('host');
+      const protocol = request.headers.get('x-forwarded-proto') || 'https';
+      const baseUrl = host
+        ? `${protocol}://${host}`
+        : process.env.NEXT_PUBLIC_BASE_URL || 'https://pho.chat';
+
+      const paymentResponse = await sepayGateway.createPayment({
+        amount: proratedAmount,
+        baseUrl,
+        currency: 'VND',
+        description,
+        orderId,
+      });
+
+      if (paymentResponse.success) {
+        // Store pending upgrade info in payment record metadata
+        await createPaymentRecord({
+          amountVnd: proratedAmount,
+          billingCycle,
+          currency: 'VND',
+          orderId,
+          planId: newPlanId,
+          userId,
+        });
+
+        pino.info(
+          { orderId, proratedAmount, userId },
+          'Upgrade payment created, awaiting payment confirmation',
+        );
+
+        return NextResponse.json({
+          message: `Payment of ${proratedAmount.toLocaleString()} VND required for upgrade`,
+          paymentRequired: true,
+          paymentUrl: paymentResponse.paymentUrl,
+          proratedAmount,
+          success: true,
+        } as UpgradeResponse);
+      } else {
+        return NextResponse.json(
+          { error: 'Failed to create payment', message: paymentResponse.message, success: false },
+          { status: 500 },
+        );
+      }
+    }
+
+    // Proceed with direct subscription update (downgrade, no payment, or payment confirmed)
     const newPeriodStart = new Date();
     const newPeriodEnd = new Date();
     if (billingCycle === 'monthly') {
@@ -169,7 +260,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       newPeriodEnd.setFullYear(newPeriodEnd.getFullYear() + 1);
     }
 
-    // Update subscription
     const updatedSubscription = await db
       .update(subscriptions)
       .set({
@@ -183,11 +273,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .returning();
 
     pino.info(
-      {
-        newPlan: newPlanId,
-        subscriptionId: subscription.id,
-        userId,
-      },
+      { newPlan: newPlanId, subscriptionId: subscription.id, userId },
       'Subscription upgraded/downgraded successfully',
     );
 
@@ -203,6 +289,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         id: updatedSubscription[0].id,
         planId: updatedSubscription[0].planId,
       },
+      paymentRequired: false,
       proratedAmount,
       success: true,
     };
