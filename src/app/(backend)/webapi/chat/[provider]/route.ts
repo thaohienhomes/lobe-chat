@@ -6,17 +6,65 @@ import {
 import { ChatErrorType } from '@lobechat/types';
 
 import { checkAuth } from '@/app/(backend)/middleware/auth';
-import { createTraceOptions, initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
+import { getServerDB } from '@/database/server';
 import { CostOptimizationEngine, UsageTracker } from '@/server/modules/CostOptimization';
-import { IntelligentModelRouter } from '@/server/modules/IntelligentModelRouter';
-import { isCostOptimizationEnabled, isIntelligentRoutingEnabled, isUsageTrackingEnabled } from '@/server/services/FeatureFlags';
+import { createTraceOptions, initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
+import {
+  isCostOptimizationEnabled,
+  isIntelligentRoutingEnabled,
+  isUsageTrackingEnabled,
+} from '@/server/services/FeatureFlags';
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
 import { getTracePayload } from '@/utils/trace';
 
-import { getServerDB } from '@/database/server';
-
 export const maxDuration = 300;
+
+/**
+ * Track usage after completion
+ */
+async function trackUsageAfterCompletion(params: {
+  costEngine: CostOptimizationEngine;
+  inputTokens: number;
+  model: string;
+  outputTokens: number;
+  provider: string;
+  responseTimeMs: number;
+  sessionId: string;
+  usageTracker: UsageTracker;
+  userId: string;
+}): Promise<void> {
+  try {
+    const cost = params.costEngine.calculateCost({
+      inputTokens: params.inputTokens,
+      model: params.model,
+      outputTokens: params.outputTokens,
+      sessionId: params.sessionId,
+      userId: params.userId,
+    });
+
+    // Determine query complexity based on input tokens
+    let complexity: 'simple' | 'medium' | 'complex' = 'simple';
+    if (params.inputTokens > 500) complexity = 'complex';
+    else if (params.inputTokens > 100) complexity = 'medium';
+
+    await params.usageTracker.trackUsage({
+      costUSD: cost,
+      inputTokens: params.inputTokens,
+      model: params.model,
+      outputTokens: params.outputTokens,
+      provider: params.provider,
+      queryComplexity: complexity,
+      sessionId: params.sessionId,
+    });
+
+    console.log(
+      `📊 Usage tracked: ${params.model} - ${cost.toFixed(6)} USD (${(cost * 24_167).toFixed(0)} VND)`,
+    );
+  } catch (error) {
+    console.error('Failed to track usage:', error);
+  }
+}
 
 export const POST = checkAuth(async (req: Request, { params, jwtPayload, createRuntime }) => {
   const { provider } = await params;
@@ -34,13 +82,20 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
   try {
     // ============  0. Cost Optimization Setup   ============ //
-    const costOptimizationEnabled = jwtPayload.userId ? isCostOptimizationEnabled(jwtPayload.userId) : false;
-    const intelligentRoutingEnabled = jwtPayload.userId ? isIntelligentRoutingEnabled(jwtPayload.userId) : false;
-    const usageTrackingEnabled = jwtPayload.userId ? isUsageTrackingEnabled(jwtPayload.userId) : false;
+    const costOptimizationEnabled = jwtPayload.userId
+      ? isCostOptimizationEnabled(jwtPayload.userId)
+      : false;
+    const intelligentRoutingEnabled = jwtPayload.userId
+      ? isIntelligentRoutingEnabled(jwtPayload.userId)
+      : false;
+    const usageTrackingEnabled = jwtPayload.userId
+      ? isUsageTrackingEnabled(jwtPayload.userId)
+      : false;
 
     let costEngine: CostOptimizationEngine | undefined;
     let usageTracker: UsageTracker | undefined;
-    let modelRouter: IntelligentModelRouter | undefined;
+    // TODO: Implement intelligent model routing
+    // let modelRouter: IntelligentModelRouter | undefined;
 
     if (costOptimizationEnabled && jwtPayload.userId) {
       try {
@@ -51,9 +106,10 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           usageTracker = new UsageTracker(serverDB, jwtPayload.userId);
         }
 
-        if (intelligentRoutingEnabled) {
-          modelRouter = new IntelligentModelRouter();
-        }
+        // TODO: Implement intelligent model routing
+        // if (intelligentRoutingEnabled) {
+        //   _modelRouter = new IntelligentModelRouter();
+        // }
 
         console.log(
           `🎯 Cost optimization enabled for user ${jwtPayload.userId} (routing: ${intelligentRoutingEnabled}, tracking: ${usageTrackingEnabled})`,
@@ -113,7 +169,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       try {
         // For non-streaming responses, we can track usage immediately
         // Note: For streaming responses, usage tracking should be handled in the stream completion
-        const inputTokens = data.messages?.reduce((acc, msg) => acc + (msg.content?.length || 0), 0) || 0;
+        const inputTokens =
+          data.messages?.reduce((acc, msg) => acc + (msg.content?.length || 0), 0) || 0;
         const estimatedInputTokens = Math.ceil(inputTokens / 4); // Rough estimate: 4 chars per token
         const estimatedOutputTokens = 150; // Default estimate for non-streaming
 
@@ -216,47 +273,3 @@ async function getUserSubscriptionTier(
 //   // Rough estimation: ~4 characters per token
 //   return Math.ceil(totalText.length / 4);
 // }
-
-/**
- * Track usage after completion
- */
-async function trackUsageAfterCompletion(params: {
-  costEngine: CostOptimizationEngine;
-  inputTokens: number;
-  model: string;
-  outputTokens: number;
-  provider: string;
-  responseTimeMs: number;
-  sessionId: string;
-  usageTracker: UsageTracker;
-  userId: string;
-}): Promise<void> {
-  try {
-    const cost = params.costEngine.calculateCost({
-      inputTokens: params.inputTokens,
-      model: params.model,
-      outputTokens: params.outputTokens,
-      sessionId: params.sessionId,
-      userId: params.userId,
-    });
-
-    // Determine query complexity based on input tokens
-    let complexity: 'simple' | 'medium' | 'complex' = 'simple';
-    if (params.inputTokens > 500) complexity = 'complex';
-    else if (params.inputTokens > 100) complexity = 'medium';
-
-    await params.usageTracker.trackUsage({
-      costUSD: cost,
-      inputTokens: params.inputTokens,
-      model: params.model,
-      outputTokens: params.outputTokens,
-      provider: params.provider,
-      queryComplexity: complexity,
-      sessionId: params.sessionId,
-    });
-
-    console.log(`📊 Usage tracked: ${params.model} - ${cost.toFixed(6)} USD (${(cost * 24_167).toFixed(0)} VND)`);
-  } catch (error) {
-    console.error('Failed to track usage:', error);
-  }
-}

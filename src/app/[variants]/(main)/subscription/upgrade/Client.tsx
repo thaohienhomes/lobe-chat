@@ -180,7 +180,10 @@ export default function UpgradeClient() {
   // Fetch preview when plan or billing cycle changes
   useEffect(() => {
     if (!selectedPlan || !currentSubscription) return;
-    if (selectedPlan === currentSubscription.planId && billingCycle === currentSubscription.billingCycle) {
+    if (
+      selectedPlan === currentSubscription.planId &&
+      billingCycle === currentSubscription.billingCycle
+    ) {
       setPreviewData(null);
       return;
     }
@@ -390,20 +393,33 @@ export default function UpgradeClient() {
               </div>
               <div>
                 <Text type="secondary">
-                  {previewLoading ? 'Calculating...' : previewData?.isUpgrade ? 'Upgrade Fee' : previewData?.isDowngrade ? 'Credit' : 'Amount'}
+                  {previewLoading
+                    ? 'Calculating...'
+                    : previewData?.isUpgrade
+                      ? 'Upgrade Fee'
+                      : previewData?.isDowngrade
+                        ? 'Credit'
+                        : 'Amount'}
                 </Text>
-                <div style={{
-                  color: previewData?.proratedAmount && previewData.proratedAmount > 0 ? '#cf1322' : '#389e0d',
-                  fontSize: 16,
-                  fontWeight: 'bold'
-                }}>
-                  {previewLoading ? '...' : previewData ? (
-                    previewData.proratedAmount > 0
-                      ? `+${previewData.proratedAmount.toLocaleString()} VND`
-                      : previewData.proratedAmount < 0
-                        ? `${previewData.proratedAmount.toLocaleString()} VND (credit)`
-                        : 'No charge'
-                  ) : '...'}
+                <div
+                  style={{
+                    color:
+                      previewData?.proratedAmount && previewData.proratedAmount > 0
+                        ? '#cf1322'
+                        : '#389e0d',
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {previewLoading
+                    ? '...'
+                    : previewData
+                      ? previewData.proratedAmount > 0
+                        ? `+${previewData.proratedAmount.toLocaleString()} VND`
+                        : previewData.proratedAmount < 0
+                          ? `${previewData.proratedAmount.toLocaleString()} VND (credit)`
+                          : 'No charge'
+                      : '...'}
                 </div>
               </div>
             </div>
@@ -414,8 +430,8 @@ export default function UpgradeClient() {
             )}
             {previewData?.isUpgrade && previewData.proratedAmount > 0 && (
               <Alert
-                message="Payment Required"
                 description={`You will be charged ${previewData.proratedAmount.toLocaleString()} VND for the upgrade.`}
+                message="Payment Required"
                 showIcon
                 style={{ marginTop: 12 }}
                 type="info"
@@ -423,8 +439,8 @@ export default function UpgradeClient() {
             )}
             {previewData?.isDowngrade && (
               <Alert
-                message="Downgrade Notice"
                 description={`Your plan will be changed immediately. ${previewData.proratedAmount < 0 ? `Credit of ${Math.abs(previewData.proratedAmount).toLocaleString()} VND will be noted for your records.` : 'No credit applicable.'}`}
+                message="Downgrade Notice"
                 showIcon
                 style={{ marginTop: 12 }}
                 type="warning"
@@ -462,7 +478,9 @@ export default function UpgradeClient() {
           title={previewData?.isUpgrade ? '🚀 Confirm Upgrade' : '⚠️ Confirm Downgrade'}
         >
           <div style={{ padding: '16px 0' }}>
-            <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1fr 1fr', marginBottom: 16 }}>
+            <div
+              style={{ display: 'grid', gap: 12, gridTemplateColumns: '1fr 1fr', marginBottom: 16 }}
+            >
               <div>
                 <Text type="secondary">Current Plan</Text>
                 <div style={{ fontSize: 16, fontWeight: 'bold' }}>{currentPlan?.name}</div>
@@ -499,11 +517,13 @@ export default function UpgradeClient() {
                 description={
                   <div>
                     <p style={{ margin: 0 }}>
-                      Your plan will be changed to <strong>{selectedPlanData?.name}</strong> immediately.
+                      Your plan will be changed to <strong>{selectedPlanData?.name}</strong>{' '}
+                      immediately.
                     </p>
                     {previewData.proratedAmount < 0 && (
                       <p style={{ color: '#666', fontSize: 12, marginBottom: 0, marginTop: 8 }}>
-                        Credit of {Math.abs(previewData.proratedAmount).toLocaleString()} VND noted for your records.
+                        Credit of {Math.abs(previewData.proratedAmount).toLocaleString()} VND noted
+                        for your records.
                       </p>
                     )}
                     <p style={{ color: '#fa8c16', fontSize: 12, marginBottom: 0, marginTop: 8 }}>

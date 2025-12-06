@@ -31,8 +31,9 @@ const UserUpdater = memo(() => {
   useStoreUpdater('user', lobeUser);
   useStoreUpdater('isSignedIn', isSignedIn);
 
-  useStoreUpdater('clerkUser', user ?? undefined);
-  useStoreUpdater('clerkSession', session?.status === 'active' ? session : undefined);
+  // Type assertion needed due to Clerk type version mismatch after Next.js 15.5.7 update
+  useStoreUpdater('clerkUser', (user ?? undefined) as any);
+  useStoreUpdater('clerkSession', (session?.status === 'active' ? session : undefined) as any);
   useStoreUpdater('clerkSignIn', openSignIn);
   useStoreUpdater('clerkOpenUserProfile', openUserProfile);
   useStoreUpdater('clerkSignOut', signOut);

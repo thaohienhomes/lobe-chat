@@ -14,6 +14,8 @@ import { Flexbox } from 'react-layout-kit';
 import { useServerConfigStore } from '@/store/serverConfig';
 import { trackServerCompletePayment, trackServerViewContent } from '@/utils/tiktok-server-events';
 
+/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
+
 const { Title, Paragraph, Text } = Typography;
 
 // Force dynamic rendering
@@ -64,6 +66,12 @@ const useStyles = createStyles(({ css, token }) => ({
     letter-spacing: 0.5px;
   `,
 
+  amountNote: css`
+    font-size: ${token.fontSizeSM}px;
+    font-weight: 500;
+    color: #888;
+  `,
+
   amountText: css`
     margin-block: ${token.marginSM}px;
     margin-inline: 0;
@@ -72,12 +80,6 @@ const useStyles = createStyles(({ css, token }) => ({
     font-weight: 700;
     color: #1a1a1a;
     letter-spacing: -0.5px;
-  `,
-
-  amountNote: css`
-    font-size: ${token.fontSizeSM}px;
-    font-weight: 500;
-    color: #888;
   `,
 
   bankDetailRow: css`
@@ -158,6 +160,21 @@ const useStyles = createStyles(({ css, token }) => ({
     box-shadow: 0 4px 12px rgba(0, 0, 0, 10%);
   `,
 
+  infoRow: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-block: ${token.paddingSM}px;
+    padding-inline: 0;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: ${token.marginXS}px;
+      align-items: flex-start;
+    }
+  `,
+
   instructionCard: css`
     margin-block-end: ${token.marginLG}px;
     padding: ${token.paddingXL}px;
@@ -217,6 +234,23 @@ const useStyles = createStyles(({ css, token }) => ({
 
     @media (max-width: 768px) {
       padding: 0;
+    }
+  `,
+
+  modernCard: css`
+    padding: ${token.paddingXL}px;
+    border: 1px solid rgba(255, 255, 255, 10%);
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: rgba(26, 35, 50, 60%);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 30%);
+
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 20%);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 40%);
     }
   `,
 
@@ -311,7 +345,6 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 
   // QR Code scanning animation - vertical scan line effect
-
   scanLine: css`
     pointer-events: none;
 
@@ -396,6 +429,21 @@ const useStyles = createStyles(({ css, token }) => ({
 
     background: ${token.colorBgContainer};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 8%);
+  `,
+
+  statusCard: css`
+    padding-block: ${token.paddingLG}px;
+    padding-inline: ${token.paddingXL}px;
+    border: 1px solid rgba(34, 197, 94, 30%);
+    border-radius: ${token.borderRadiusLG}px;
+
+    background: rgba(34, 197, 94, 10%);
+    backdrop-filter: blur(10px);
+
+    @media (max-width: 768px) {
+      padding-block: ${token.paddingMD}px;
+      padding-inline: ${token.paddingLG}px;
+    }
   `,
 
   statusIndicator: css`
@@ -510,53 +558,6 @@ const useStyles = createStyles(({ css, token }) => ({
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
       gap: ${token.marginMD}px;
-    }
-  `,
-
-  modernCard: css`
-    padding: ${token.paddingXL}px;
-    border: 1px solid rgba(255, 255, 255, 10%);
-    border-radius: ${token.borderRadiusLG}px;
-
-    background: rgba(26, 35, 50, 60%);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 30%);
-
-    transition: all 0.3s ease;
-
-    &:hover {
-      border-color: rgba(255, 255, 255, 20%);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 40%);
-    }
-  `,
-
-  statusCard: css`
-    padding-block: ${token.paddingLG}px;
-    padding-inline: ${token.paddingXL}px;
-    border: 1px solid rgba(34, 197, 94, 30%);
-    border-radius: ${token.borderRadiusLG}px;
-
-    background: rgba(34, 197, 94, 10%);
-    backdrop-filter: blur(10px);
-
-    @media (max-width: 768px) {
-      padding-block: ${token.paddingMD}px;
-      padding-inline: ${token.paddingLG}px;
-    }
-  `,
-
-  infoRow: css`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding-block: ${token.paddingSM}px;
-    padding-inline: 0;
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: ${token.marginXS}px;
-      align-items: flex-start;
     }
   `,
 
@@ -744,7 +745,7 @@ function PaymentWaitingContent() {
             trackServerViewContent(
               data.planId,
               `Payment Waiting - ${data.planId}`,
-              data.amount
+              data.amount,
             ).catch(console.error);
           }
 
@@ -763,11 +764,9 @@ function PaymentWaitingContent() {
 
             // Track successful payment
             if (data.amount) {
-              trackServerCompletePayment(
-                data.orderId,
-                data.amount,
-                data.planId
-              ).catch(console.error);
+              trackServerCompletePayment(data.orderId, data.amount, data.planId).catch(
+                console.error,
+              );
             }
           } else if (data.status === 'failed') {
             setPaymentStatus({
@@ -868,11 +867,9 @@ function PaymentWaitingContent() {
 
         // Track successful payment completion
         if (sessionDetails?.amount) {
-          trackServerCompletePayment(
-            orderId,
-            sessionDetails.amount,
-            sessionDetails.planId
-          ).catch(console.error);
+          trackServerCompletePayment(orderId, sessionDetails.amount, sessionDetails.planId).catch(
+            console.error,
+          );
         }
 
         // Redirect to success page after 2 seconds
@@ -1183,7 +1180,9 @@ function PaymentWaitingContent() {
                   style={{ fontWeight: 600, height: 48 }}
                   type="primary"
                 >
-                  {verifying ? t('waiting.actions.verifying') : t('waiting.timeout.requestVerification')}
+                  {verifying
+                    ? t('waiting.actions.verifying')
+                    : t('waiting.timeout.requestVerification')}
                 </Button>
               </div>
             )}
@@ -1475,9 +1474,7 @@ function PaymentWaitingContent() {
               {/* Amount */}
 
               <div className={styles.amountCard}>
-                <div className={styles.amountCardLabel}>
-                  {t('waiting.details.amountLabel')}
-                </div>
+                <div className={styles.amountCardLabel}>{t('waiting.details.amountLabel')}</div>
 
                 <div className={styles.amountText}>
                   {typeof amountValue === 'number'
@@ -1491,9 +1488,7 @@ function PaymentWaitingContent() {
                       : '--'}
                 </div>
 
-                <div className={styles.amountNote}>
-                  {t('waiting.details.transferExact')}
-                </div>
+                <div className={styles.amountNote}>{t('waiting.details.transferExact')}</div>
               </div>
 
               {/* Bank Details */}

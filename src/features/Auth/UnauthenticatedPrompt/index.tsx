@@ -38,6 +38,7 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => ({
     }
   `,
   signInWrapper: css`
+    /* stylelint-disable selector-class-pattern */
     .cl-cardBox {
       border: none !important;
       box-shadow: none !important;
@@ -46,6 +47,7 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => ({
     .cl-rootBox {
       width: 100%;
     }
+    /* stylelint-enable selector-class-pattern */
   `,
 }));
 
@@ -122,4 +124,3 @@ const UnauthenticatedPrompt = memo<UnauthenticatedPromptProps>(({ mobile }) => {
 UnauthenticatedPrompt.displayName = 'UnauthenticatedPrompt';
 
 export default UnauthenticatedPrompt;
-

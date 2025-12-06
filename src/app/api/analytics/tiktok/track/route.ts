@@ -1,14 +1,13 @@
 /**
  * TikTok Server-Side Event Tracking API
  * POST /api/analytics/tiktok/track
- * 
+ *
  * This endpoint receives event data from the client and sends it to TikTok Events API
  * for server-side conversion tracking. This provides better tracking accuracy and
  * bypasses ad blockers.
  */
-
-import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import {
   TikTokServerEvent,
@@ -23,12 +22,12 @@ import {
 interface TrackEventRequest {
   event: TikTokServerEventName;
   properties?: TikTokServerEventProperties;
+  test_event_code?: string;
   user?: {
     email?: string; // Will be hashed
     phone?: string; // Will be hashed
     userId?: string; // Will be hashed
-  };
-  test_event_code?: string; // For testing in TikTok Events Manager
+  }; // For testing in TikTok Events Manager
 }
 
 /**
@@ -38,9 +37,10 @@ interface TrackEventRequest {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Get user IP and user agent from request headers
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-               request.headers.get('x-real-ip') || 
-               undefined;
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      request.headers.get('x-real-ip') ||
+      undefined;
     const userAgent = request.headers.get('user-agent') || undefined;
 
     // Parse request body
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!body.event) {
       return NextResponse.json(
-        { success: false, error: 'Event name is required' },
-        { status: 400 }
+        { error: 'Event name is required', success: false },
+        { status: 400 },
       );
     }
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // If no user data provided in request, try to get from Clerk session
-    if (!body.user && (!userData.email && !userData.external_id)) {
+    if (!body.user && !userData.email && !userData.external_id) {
       try {
         const { userId } = await auth();
         if (userId) {
@@ -86,10 +86,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Build event payload
     const event: TikTokServerEvent = {
       event: body.event,
-      event_time: Math.floor(Date.now() / 1000), // Unix timestamp in seconds
-      user: userData,
+      event_time: Math.floor(Date.now() / 1000),
       properties: body.properties,
+
       test_event_code: body.test_event_code,
+      // Unix timestamp in seconds
+      user: userData,
     };
 
     // Send event to TikTok Events API
@@ -97,27 +99,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (result.success) {
       return NextResponse.json({
-        success: true,
         message: 'Event tracked successfully',
+        success: true,
       });
     } else {
       return NextResponse.json(
         {
-          success: false,
-          error: result.message || 'Failed to track event',
           code: result.code,
+          error: result.message || 'Failed to track event',
+          success: false,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
   } catch (error) {
     console.error('Error tracking TikTok event:', error);
     return NextResponse.json(
       {
-        success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
+        success: false,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -128,8 +130,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  */
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json({
-    status: 'ok',
     message: 'TikTok server-side event tracking endpoint',
+    status: 'ok',
   });
 }
-

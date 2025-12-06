@@ -1,10 +1,9 @@
 /**
  * Preview Subscription Upgrade/Downgrade Endpoint
  * Calculates prorated amount without processing the change
- * 
+ *
  * POST /api/subscription/preview-upgrade - Calculate upgrade preview
  */
-
 import { auth } from '@clerk/nextjs/server';
 import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -59,10 +58,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<PreviewRe
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized', success: false } as PreviewResponse,
-        { status: 401 },
-      );
+      return NextResponse.json({ error: 'Unauthorized', success: false } as PreviewResponse, {
+        status: 401,
+      });
     }
 
     const body: PreviewRequest = await request.json();
@@ -119,11 +117,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<PreviewRe
       daysRemaining,
       isDowngrade,
       isUpgrade,
-      message: proratedAmount > 0
-        ? `Upgrade fee: ${proratedAmount.toLocaleString()} VND`
-        : proratedAmount < 0
-          ? `Credit: ${Math.abs(proratedAmount).toLocaleString()} VND`
-          : 'No additional charge',
+      message:
+        proratedAmount > 0
+          ? `Upgrade fee: ${proratedAmount.toLocaleString()} VND`
+          : proratedAmount < 0
+            ? `Credit: ${Math.abs(proratedAmount).toLocaleString()} VND`
+            : 'No additional charge',
       newPlan: {
         billingCycle,
         name: PLAN_NAMES[newPlanId] || newPlanId,
@@ -133,11 +132,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<PreviewRe
       proratedAmount,
       success: true,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to calculate preview', success: false } as PreviewResponse,
       { status: 500 },
     );
   }
 }
-

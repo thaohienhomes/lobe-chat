@@ -1,6 +1,6 @@
 'use client';
 
-import { PropsWithChildren, cloneElement, isValidElement, memo } from 'react';
+import { PropsWithChildren, ReactElement, memo } from 'react';
 
 /**
  * TikTokProvider component that provides user data to TikTok Pixel component
@@ -18,14 +18,8 @@ const TikTokProvider = memo<PropsWithChildren>(({ children }) => {
   // User identification is handled in individual tracking calls where
   // user data is available from the Clerk context.
 
-  // Clone children and pass any additional props if needed
-  const enhancedChildren = isValidElement(children)
-    ? cloneElement(children, {
-        ...(children.props || {}),
-      } as any)
-    : children;
-
-  return <>{enhancedChildren}</>;
+  // Simply return children as-is - this provider is a passthrough for now
+  return children as ReactElement;
 });
 
 TikTokProvider.displayName = 'TikTokProvider';

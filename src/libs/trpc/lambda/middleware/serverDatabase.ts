@@ -37,7 +37,10 @@ const isTransientDBError = (error: unknown): boolean => {
 /**
  * Sleep helper for retry delays
  */
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(() => resolve(), ms);
+  });
 
 /**
  * Server database middleware with retry logic for transient connection errors.
@@ -57,9 +60,7 @@ export const serverDatabase = trpc.middleware(async (opts) => {
 
       // If this is a retry attempt that succeeded, log it for monitoring
       if (attempt > 0) {
-        pino.info(
-          `[pho.chat] Database connection recovered after ${attempt} retry attempt(s)`,
-        );
+        pino.info(`[pho.chat] Database connection recovered after ${attempt} retry attempt(s)`);
       }
 
       return opts.next({

@@ -34,7 +34,10 @@ const isTransientDBError = (error: unknown): boolean => {
   );
 };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(() => resolve(), ms);
+  });
 
 export const publicProcedure = asyncTrpc.procedure;
 
@@ -57,9 +60,7 @@ const dbMiddleware = asyncTrpc.middleware(async (opts) => {
       log('Database connection established successfully');
 
       if (attempt > 0) {
-        pino.info(
-          `[pho.chat] Async DB connection recovered after ${attempt} retry attempt(s)`,
-        );
+        pino.info(`[pho.chat] Async DB connection recovered after ${attempt} retry attempt(s)`);
       }
 
       return opts.next({

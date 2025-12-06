@@ -1,6 +1,6 @@
 /**
  * TikTok Server-Side Event Tracking Utilities
- * 
+ *
  * This module provides client-side functions to send events to the server-side
  * TikTok Events API endpoint. This ensures events are tracked even if client-side
  * pixel is blocked by ad blockers.
@@ -10,15 +10,23 @@
 
 import { TikTokServerEventName, TikTokServerEventProperties } from '@/libs/tiktok-events-api';
 
+/**
+ * TikTok Server-Side Event Tracking Utilities
+ *
+ * This module provides client-side functions to send events to the server-side
+ * TikTok Events API endpoint. This ensures events are tracked even if client-side
+ * pixel is blocked by ad blockers.
+ */
+
 interface TrackServerEventOptions {
   event: TikTokServerEventName;
   properties?: TikTokServerEventProperties;
+  test_event_code?: string;
   user?: {
     email?: string;
     phone?: string;
     userId?: string;
   };
-  test_event_code?: string;
 }
 
 /**
@@ -28,11 +36,11 @@ interface TrackServerEventOptions {
 export async function trackTikTokServerEvent(options: TrackServerEventOptions): Promise<boolean> {
   try {
     const response = await fetch('/api/analytics/tiktok/track', {
-      method: 'POST',
+      body: JSON.stringify(options),
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(options),
+      method: 'POST',
     });
 
     const result = await response.json();
@@ -58,7 +66,7 @@ export async function trackTikTokDualEvent(
   eventName: TikTokServerEventName,
   properties?: TikTokServerEventProperties,
   user?: { email?: string; phone?: string; userId?: string },
-  test_event_code?: string
+  test_event_code?: string,
 ): Promise<void> {
   // Track client-side event (if pixel is loaded)
   if (typeof window !== 'undefined' && window.ttq) {
@@ -74,8 +82,8 @@ export async function trackTikTokDualEvent(
   await trackTikTokServerEvent({
     event: eventName,
     properties,
-    user,
     test_event_code,
+    user,
   });
 }
 
@@ -85,21 +93,23 @@ export async function trackServerViewContent(
   contentId: string,
   contentName: string,
   value?: number,
-  user?: { email?: string; phone?: string; userId?: string }
+  user?: { email?: string; phone?: string; userId?: string },
 ): Promise<void> {
   await trackTikTokDualEvent(
     'ViewContent',
     {
-      contents: [{
-        content_id: contentId,
-        content_type: 'product',
-        content_name: contentName,
-        price: value,
-      }],
-      value,
+      contents: [
+        {
+          content_id: contentId,
+          content_name: contentName,
+          content_type: 'product',
+          price: value,
+        },
+      ],
       currency: 'VND',
+      value,
     },
-    user
+    user,
   );
 }
 
@@ -108,21 +118,23 @@ export async function trackServerSubscribe(
   planName: string,
   value: number,
   billingCycle: 'monthly' | 'yearly',
-  user?: { email?: string; phone?: string; userId?: string }
+  user?: { email?: string; phone?: string; userId?: string },
 ): Promise<void> {
   await trackTikTokDualEvent(
     'Subscribe',
     {
-      contents: [{
-        content_id: planId,
-        content_type: 'product',
-        content_name: `${planName} (${billingCycle})`,
-        price: value,
-      }],
-      value,
+      contents: [
+        {
+          content_id: planId,
+          content_name: `${planName} (${billingCycle})`,
+          content_type: 'product',
+          price: value,
+        },
+      ],
       currency: 'VND',
+      value,
     },
-    user
+    user,
   );
 }
 
@@ -130,22 +142,26 @@ export async function trackServerCompletePayment(
   orderId: string,
   value: number,
   planName?: string,
-  user?: { email?: string; phone?: string; userId?: string }
+  user?: { email?: string; phone?: string; userId?: string },
 ): Promise<void> {
   await trackTikTokDualEvent(
     'CompletePayment',
     {
-      contents: planName ? [{
-        content_id: orderId,
-        content_type: 'product',
-        content_name: planName,
-        price: value,
-      }] : undefined,
-      value,
+      contents: planName
+        ? [
+            {
+              content_id: orderId,
+              content_name: planName,
+              content_type: 'product',
+              price: value,
+            },
+          ]
+        : undefined,
       currency: 'VND',
       description: `Payment completed for order ${orderId}`,
+      value,
     },
-    user
+    user,
   );
 }
 
@@ -153,21 +169,22 @@ export async function trackServerInitiateCheckout(
   planId: string,
   planName: string,
   value: number,
-  user?: { email?: string; phone?: string; userId?: string }
+  user?: { email?: string; phone?: string; userId?: string },
 ): Promise<void> {
   await trackTikTokDualEvent(
     'InitiateCheckout',
     {
-      contents: [{
-        content_id: planId,
-        content_type: 'product',
-        content_name: planName,
-        price: value,
-      }],
-      value,
+      contents: [
+        {
+          content_id: planId,
+          content_name: planName,
+          content_type: 'product',
+          price: value,
+        },
+      ],
       currency: 'VND',
+      value,
     },
-    user
+    user,
   );
 }
-

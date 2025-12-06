@@ -16,6 +16,7 @@ import { FileModel } from '@/database/models/file';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { FileService } from '@/server/services/file';
+import { AsyncTaskStatus } from '@/types/asyncTask';
 import { FileListItem } from '@/types/files';
 
 const fileProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
@@ -52,14 +53,17 @@ export const minimalFileRouter = router({
         chunkingTask = await ctx.asyncTaskModel.findById(item.chunkTaskId);
       }
 
-      const chunkCount = await ctx.chunkModel.count(input.id);
+      const chunkCount = await ctx.chunkModel.countByFileId(input.id);
 
       return {
         chunkCount,
-        chunkingStatus: chunkingTask?.status,
+        chunkingError: chunkingTask?.error ?? null,
+        chunkingStatus: chunkingTask?.status as AsyncTaskStatus | null | undefined,
         createdAt: item.createdAt,
-        embeddingStatus: embeddingTask?.status,
+        embeddingError: embeddingTask?.error ?? null,
+        embeddingStatus: embeddingTask?.status as AsyncTaskStatus | null | undefined,
         fileType: item.fileType,
+        finishEmbedding: embeddingTask?.status === AsyncTaskStatus.Success,
         id: item.id,
         name: item.name,
         size: item.size,
@@ -68,4 +72,3 @@ export const minimalFileRouter = router({
       };
     }),
 });
-

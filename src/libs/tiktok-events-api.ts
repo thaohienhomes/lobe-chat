@@ -1,15 +1,15 @@
 /**
  * TikTok Events API - Server-Side Event Tracking
- * 
+ *
  * This module provides server-side event tracking using the TikTok Events API.
  * It supports sending conversion events from the server to TikTok for better
  * tracking accuracy and to bypass ad blockers.
- * 
+ *
  * Documentation: https://business-api.tiktok.com/portal/docs?id=1771100865818625
  */
+import crypto from 'node:crypto';
 
 import { analyticsEnv } from '@/envs/analytics';
-import crypto from 'crypto';
 
 // TikTok Events API endpoint (Events 2.0)
 const TIKTOK_EVENTS_API_URL = 'https://business-api.tiktok.com/open_api/v1.3/event/track/';
@@ -30,18 +30,21 @@ export type TikTokServerEventName =
 // before passing it here when required by TikTok. This module forwards
 // whatever values it receives.
 export interface TikTokServerUserData {
-  email?: string; // Typically SHA-256 hashed
-  phone?: string; // Typically SHA-256 hashed (E.164 format before hashing)
-  external_id?: string; // User ID (hashed or raw, depending on your policy)
-  ip?: string; // User's IP address
+  email?: string;
+  // Typically SHA-256 hashed (E.164 format before hashing)
+  external_id?: string;
+  // User ID (hashed or raw, depending on your policy)
+  ip?: string;
+  // Typically SHA-256 hashed
+  phone?: string; // User's IP address
   user_agent?: string; // User's browser user agent
 }
 
 // Content item for events
 export interface TikTokServerContent {
   content_id: string;
-  content_type?: 'product' | 'product_group';
   content_name?: string;
+  content_type?: 'product' | 'product_group';
   price?: number;
   quantity?: number;
 }
@@ -49,20 +52,22 @@ export interface TikTokServerContent {
 // Event properties
 export interface TikTokServerEventProperties {
   contents?: TikTokServerContent[];
-  value?: number;
   currency?: string;
   description?: string;
   query?: string;
+  value?: number;
 }
 
 // Complete event payload
 export interface TikTokServerEvent {
   event: TikTokServerEventName;
-  event_time: number; // Unix timestamp in seconds
-  user: TikTokServerUserData;
+  event_id?: string;
+  event_time: number;
   properties?: TikTokServerEventProperties;
-  event_id?: string; // Unique event ID for deduplication
-  test_event_code?: string; // For testing events in TikTok Events Manager
+  // Unique event ID for deduplication
+  test_event_code?: string;
+  // Unix timestamp in seconds
+  user: TikTokServerUserData; // For testing events in TikTok Events Manager
 }
 
 /**
@@ -79,25 +84,29 @@ export function hashSHA256(value: string): string {
  */
 export function generateEventId(eventName: string): string {
   const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 15);
+  const random = Math.random().toString(36).slice(2, 15);
   return `${eventName}_${timestamp}_${random}`;
 }
 
 /**
  * Send an event to TikTok Events API
- * 
+ *
  * @param event - The event to send
  * @returns Response from TikTok Events API
  */
 export async function sendTikTokServerEvent(event: TikTokServerEvent): Promise<{
-  success: boolean;
-  message?: string;
   code?: number;
+  message?: string;
+  success: boolean;
 }> {
   // Check if TikTok Events API is configured
-  if (!analyticsEnv.ENABLED_TIKTOK_PIXEL || !analyticsEnv.TIKTOK_PIXEL_ID || !analyticsEnv.TIKTOK_ACCESS_TOKEN) {
+  if (
+    !analyticsEnv.ENABLED_TIKTOK_PIXEL ||
+    !analyticsEnv.TIKTOK_PIXEL_ID ||
+    !analyticsEnv.TIKTOK_ACCESS_TOKEN
+  ) {
     console.debug('TikTok Events API not configured, skipping server-side event:', event.event);
-    return { success: false, message: 'TikTok Events API not configured' };
+    return { message: 'TikTok Events API not configured', success: false };
   }
 
   try {
@@ -105,10 +114,10 @@ export async function sendTikTokServerEvent(event: TikTokServerEvent): Promise<{
     const testEventCode = event.test_event_code || analyticsEnv.TIKTOK_TEST_EVENT_CODE;
     const eventData: Record<string, any> = {
       event: event.event,
-      event_time: event.event_time,
       event_id: event.event_id || generateEventId(event.event),
-      user: event.user,
+      event_time: event.event_time,
       properties: event.properties,
+      user: event.user,
     };
 
     if (testEventCode) {
@@ -116,25 +125,25 @@ export async function sendTikTokServerEvent(event: TikTokServerEvent): Promise<{
     }
 
     const payload = {
+      data: [eventData],
       event_source: 'web',
       event_source_id: analyticsEnv.TIKTOK_PIXEL_ID,
-      data: [eventData],
     };
 
     console.debug('Sending TikTok server event:', {
       event: event.event,
-      hasUser: !!event.user,
       hasProperties: !!event.properties,
+      hasUser: !!event.user,
       testMode: !!testEventCode,
     });
 
     const response = await fetch(TIKTOK_EVENTS_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Token': analyticsEnv.TIKTOK_ACCESS_TOKEN,
-      },
       body: JSON.stringify(payload),
+      headers: {
+        'Access-Token': analyticsEnv.TIKTOK_ACCESS_TOKEN,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
     });
 
     const result = await response.json();
@@ -145,17 +154,16 @@ export async function sendTikTokServerEvent(event: TikTokServerEvent): Promise<{
     } else {
       console.error('TikTok Events API error:', result);
       return {
-        success: false,
-        message: result.message || 'Unknown error',
         code: result.code,
+        message: result.message || 'Unknown error',
+        success: false,
       };
     }
   } catch (error) {
     console.error('Failed to send TikTok server event:', error);
     return {
-      success: false,
       message: error instanceof Error ? error.message : 'Unknown error',
+      success: false,
     };
   }
 }
-

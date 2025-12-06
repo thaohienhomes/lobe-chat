@@ -13,35 +13,37 @@ export type TikTokEventName =
 // Content item for TikTok events
 export interface TikTokContent {
   content_id: string;
-  content_type: 'product' | 'product_group';
   content_name: string;
+  content_type: 'product' | 'product_group';
   price?: number;
 }
 
 // TikTok event parameters
 export interface TikTokEventParams {
-  contents?: TikTokContent[];
-  value?: number;
-  currency?: string;
-  search_string?: string;
   button_text?: string;
+  contents?: TikTokContent[];
+  currency?: string;
   description?: string;
+  search_string?: string;
+  value?: number;
 }
 
 // User identification parameters (PII should be hashed)
 export interface TikTokUserParams {
-  email?: string; // SHA-256 hashed
+  email?: string;
+  // SHA-256 hashed
+  external_id?: string;
+  // SHA-256 hashed
   phone_number?: string; // SHA-256 hashed
-  external_id?: string; // SHA-256 hashed
 }
 
 // Global ttq object type declaration
 declare global {
   interface Window {
     ttq?: {
-      track: (eventName: TikTokEventName, params?: TikTokEventParams) => void;
       identify: (userParams: TikTokUserParams) => void;
       page: () => void;
+      track: (eventName: TikTokEventName, params?: TikTokEventParams) => void;
     };
   }
 }
@@ -85,7 +87,11 @@ export const identifyTikTokUser = (userParams: TikTokUserParams): void => {
   }
 
   try {
-    console.debug('Identifying TikTok user', { hasEmail: !!userParams.email, hasPhone: !!userParams.phone_number, hasExternalId: !!userParams.external_id });
+    console.debug('Identifying TikTok user', {
+      hasEmail: !!userParams.email,
+      hasExternalId: !!userParams.external_id,
+      hasPhone: !!userParams.phone_number,
+    });
     window.ttq!.identify(userParams);
   } catch (error) {
     console.error('Failed to identify TikTok user:', error);
@@ -103,8 +109,8 @@ export const trackCompleteRegistration = (planId?: string, planName?: string): v
   if (planId && planName) {
     contents.push({
       content_id: planId,
-      content_type: 'product',
       content_name: planName,
+      content_type: 'product',
     });
   }
 
@@ -117,16 +123,23 @@ export const trackCompleteRegistration = (planId?: string, planName?: string): v
 /**
  * Track subscription purchase
  */
-export const trackSubscribe = (planId: string, planName: string, value: number, billingCycle: 'monthly' | 'yearly'): void => {
+export const trackSubscribe = (
+  planId: string,
+  planName: string,
+  value: number,
+  billingCycle: 'monthly' | 'yearly',
+): void => {
   trackTikTokEvent('Subscribe', {
-    contents: [{
-      content_id: planId,
-      content_type: 'product',
-      content_name: `${planName} (${billingCycle})`,
-      price: value,
-    }],
-    value,
+    contents: [
+      {
+        content_id: planId,
+        content_name: `${planName} (${billingCycle})`,
+        content_type: 'product',
+        price: value,
+      },
+    ],
     currency: 'VND',
+    value,
   });
 };
 
@@ -135,14 +148,16 @@ export const trackSubscribe = (planId: string, planName: string, value: number, 
  */
 export const trackViewContent = (planId: string, planName: string, value?: number): void => {
   trackTikTokEvent('ViewContent', {
-    contents: [{
-      content_id: planId,
-      content_type: 'product',
-      content_name: planName,
-      price: value,
-    }],
-    value,
+    contents: [
+      {
+        content_id: planId,
+        content_name: planName,
+        content_type: 'product',
+        price: value,
+      },
+    ],
     currency: 'VND',
+    value,
   });
 };
 
@@ -165,8 +180,8 @@ export const trackAddPaymentInfo = (planId?: string, planName?: string): void =>
   if (planId && planName) {
     contents.push({
       content_id: planId,
-      content_type: 'product',
       content_name: planName,
+      content_type: 'product',
     });
   }
 

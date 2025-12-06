@@ -46,12 +46,12 @@ export const useTikTokTracking = () => {
 
   return {
     trackButtonClick,
-    trackSearchAction,
-    trackContentView,
-    trackUpgradeClick,
-    trackNavigationClick,
-    trackFeatureClick,
     trackCTAClick,
+    trackContentView,
+    trackFeatureClick,
+    trackNavigationClick,
+    trackSearchAction,
+    trackUpgradeClick,
   };
 };
 

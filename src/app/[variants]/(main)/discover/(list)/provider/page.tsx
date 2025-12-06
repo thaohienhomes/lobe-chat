@@ -1,13 +1,13 @@
 import StructuredData from '@/components/StructuredData';
 import { ldModule } from '@/server/ld';
 import { metadataModule } from '@/server/metadata';
-
-// Force dynamic rendering to avoid static generation issues with Clerk hooks
-export const dynamic = 'force-dynamic';
 import { DynamicLayoutProps } from '@/types/next';
 import { parsePageMetaProps } from '@/utils/server/pageProps';
 
 import Client from './Client';
+
+// Force dynamic rendering to avoid static generation issues with Clerk hooks
+export const dynamic = 'force-dynamic';
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const { locale, t } = await parsePageMetaProps(props);

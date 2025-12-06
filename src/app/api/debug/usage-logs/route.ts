@@ -2,13 +2,12 @@
  * Debug endpoint to check usage logs
  * GET /api/debug/usage-logs
  */
-
 import { auth } from '@clerk/nextjs/server';
+import { desc, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
-import { getServerDB } from '@/database/server';
 import { usageLogs } from '@/database/schemas/usage';
-import { eq, desc } from 'drizzle-orm';
+import { getServerDB } from '@/database/server';
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -33,13 +32,16 @@ export async function GET(): Promise<NextResponse> {
       message: logs.length > 0 ? 'Usage logs found' : 'No usage logs found for this user',
       recentLogs: logs,
       totalLogs: logs.length,
-      userId
+      userId,
     });
   } catch (error) {
     console.error('Debug usage logs error:', error);
     return NextResponse.json(
-      { details: error instanceof Error ? error.message : String(error), error: 'Failed to retrieve usage logs' },
-      { status: 500 }
+      {
+        details: error instanceof Error ? error.message : String(error),
+        error: 'Failed to retrieve usage logs',
+      },
+      { status: 500 },
     );
   }
 }
@@ -71,21 +73,24 @@ export async function POST(): Promise<NextResponse> {
       queryComplexity: 'simple',
       sessionId: 'debug-test-session',
       totalTokens: 150,
-      userId,
       updatedAt: new Date(),
+      userId,
     };
 
     await db.insert(usageLogs).values(testLog);
 
     return NextResponse.json({
       message: 'Test usage log created successfully',
-      testLog
+      testLog,
     });
   } catch (error) {
     console.error('Debug create usage log error:', error);
     return NextResponse.json(
-      { details: error instanceof Error ? error.message : String(error), error: 'Failed to create test usage log' },
-      { status: 500 }
+      {
+        details: error instanceof Error ? error.message : String(error),
+        error: 'Failed to create test usage log',
+      },
+      { status: 500 },
     );
   }
 }

@@ -29,7 +29,7 @@ export const sha256Hash = async (input: string): Promise<string> => {
 
     // Convert hash to hexadecimal string
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
     return hashHex;
   } catch (error) {
@@ -63,8 +63,8 @@ export const hashPhoneNumber = async (phone: string): Promise<string> => {
   }
 
   // Normalize phone number: remove all non-digit characters
-  const normalizedPhone = phone.replace(/\D/g, '');
-  
+  const normalizedPhone = phone.replaceAll(/\D/g, '');
+
   if (normalizedPhone.length < 10) {
     throw new Error('Phone number must be at least 10 digits');
   }
@@ -97,13 +97,13 @@ export const hashUserPII = async (userData: {
   userId?: string;
 }): Promise<{
   email?: string;
-  phone_number?: string;
   external_id?: string;
+  phone_number?: string;
 }> => {
   const hashedData: {
     email?: string;
-    phone_number?: string;
     external_id?: string;
+    phone_number?: string;
   } = {};
 
   try {
@@ -138,7 +138,9 @@ export const hashUserPII = async (userData: {
  * @returns boolean - True if Web Crypto API is available
  */
 export const isCryptoAvailable = (): boolean => {
-  return typeof window !== 'undefined' && 
-         typeof window.crypto !== 'undefined' && 
-         typeof window.crypto.subtle !== 'undefined';
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.crypto !== 'undefined' &&
+    typeof window.crypto.subtle !== 'undefined'
+  );
 };

@@ -176,18 +176,20 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         await sendTikTokServerEvent({
           event: 'Subscribe',
           event_time: Math.floor(Date.now() / 1000),
+          properties: {
+            contents: [
+              {
+                content_id: payment.planId,
+                content_name: `${payment.planId} (${payment.billingCycle})`,
+                content_type: 'product',
+                price: payment.amountVnd,
+              },
+            ],
+            currency: 'VND',
+            value: payment.amountVnd,
+          },
           user: {
             external_id: payment.userId, // Will be hashed by the function
-          },
-          properties: {
-            contents: [{
-              content_id: payment.planId,
-              content_type: 'product',
-              content_name: `${payment.planId} (${payment.billingCycle})`,
-              price: payment.amountVnd,
-            }],
-            value: payment.amountVnd,
-            currency: 'VND',
           },
         });
         console.log('✅ TikTok Subscribe event tracked successfully');

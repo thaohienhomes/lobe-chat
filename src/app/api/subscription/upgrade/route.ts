@@ -1,16 +1,17 @@
 /**
  * Subscription Upgrade/Downgrade Endpoint
  * Handles plan changes with prorated charges
- * 
+ *
  * POST /api/subscription/upgrade - Upgrade or downgrade subscription
  */
-
 import { auth } from '@clerk/nextjs/server';
+import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerDB } from '@/database/server';
+
 import { subscriptions } from '@/database/schemas/billing';
-import { eq, and } from 'drizzle-orm';
+import { getServerDB } from '@/database/server';
 import { pino } from '@/libs/logger';
+import { PLAN_TIERS, calculateProratedAmount } from '@/server/services/billing/proration';
 
 interface UpgradeRequest {
   billingCycle: 'monthly' | 'yearly';
@@ -39,11 +40,6 @@ interface UpgradeResponse {
   success: boolean;
 }
 
-import {
-  PLAN_TIERS,
-  calculateProratedAmount,
-} from '@/server/services/billing/proration';
-
 /**
  * POST /api/subscription/upgrade
  */
@@ -67,18 +63,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Validate plan ID
     if (!['starter', 'premium', 'ultimate'].includes(newPlanId)) {
-      return NextResponse.json(
-        { error: 'Invalid plan ID' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Invalid plan ID' }, { status: 400 });
     }
 
     // Validate billing cycle
     if (!['monthly', 'yearly'].includes(billingCycle)) {
-      return NextResponse.json(
-        { error: 'Invalid billing cycle' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Invalid billing cycle' }, { status: 400 });
     }
 
     // Get database instance
@@ -88,19 +78,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const currentSubscription = await db
       .select()
       .from(subscriptions)
-      .where(
-        and(
-          eq(subscriptions.userId, userId),
-          eq(subscriptions.status, 'active'),
-        ),
-      )
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')))
       .limit(1);
 
     if (!currentSubscription || currentSubscription.length === 0) {
-      return NextResponse.json(
-        { error: 'No active subscription found' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'No active subscription found' }, { status: 404 });
     }
 
     const subscription = currentSubscription[0];
@@ -228,11 +210,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     const response: UpgradeResponse = {
-      message: proratedAmount > 0
-        ? `Upgrade successful. Prorated charge: ${proratedAmount.toLocaleString()} VND`
-        : proratedAmount < 0
-          ? `Downgrade successful. Credit: ${Math.abs(proratedAmount).toLocaleString()} VND`
-          : 'Plan changed successfully. No additional charge.',
+      message:
+        proratedAmount > 0
+          ? `Upgrade successful. Prorated charge: ${proratedAmount.toLocaleString()} VND`
+          : proratedAmount < 0
+            ? `Downgrade successful. Credit: ${Math.abs(proratedAmount).toLocaleString()} VND`
+            : 'Plan changed successfully. No additional charge.',
       newSubscription: {
         billingCycle: updatedSubscription[0].billingCycle,
         currentPeriodEnd: updatedSubscription[0].currentPeriodEnd.toISOString(),
@@ -264,4 +247,3 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
-

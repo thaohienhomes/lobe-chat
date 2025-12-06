@@ -29,6 +29,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  
+  
   experimental: {
     optimizePackageImports: [
       'emoji-mart',
@@ -39,17 +41,6 @@ const nextConfig: NextConfig = {
       '@lobehub/icons',
       'gpt-tokenizer',
     ],
-    // Exclude unnecessary files from serverless function bundles to reduce size
-    outputFileTracingExcludes: {
-      '*': [
-        'node_modules/@swc/core-linux-x64-gnu',
-        'node_modules/@swc/core-linux-x64-musl',
-        'node_modules/@esbuild/linux-x64',
-        'node_modules/webpack',
-        'node_modules/rollup',
-        'node_modules/terser',
-      ],
-    },
     // oidc provider depend on constructor.name
     // but swc minification will remove the name
     // so we need to disable it
@@ -64,7 +55,9 @@ const nextConfig: NextConfig = {
       },
     }),
   },
-  async headers() {
+  
+
+async headers() {
     const securityHeaders = [
       {
         key: 'x-robots-tag',
@@ -208,11 +201,25 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  logging: {
+  
+
+logging: {
     fetches: {
       fullUrl: true,
       hmrRefreshes: true,
     },
+  },
+  // Exclude unnecessary files from serverless function bundles to reduce size
+// Moved from experimental to top-level in Next.js 15
+outputFileTracingExcludes: {
+    '*': [
+      'node_modules/@swc/core-linux-x64-gnu',
+      'node_modules/@swc/core-linux-x64-musl',
+      'node_modules/@esbuild/linux-x64',
+      'node_modules/webpack',
+      'node_modules/rollup',
+      'node_modules/terser',
+    ],
   },
   reactStrictMode: true,
 
@@ -292,17 +299,17 @@ const nextConfig: NextConfig = {
   // node_modules at runtime on Vercel).
   serverExternalPackages: isProd
     ? [
-      '@electric-sql/pglite',
-      '@xmldom/xmldom',
-      '@aws-sdk/client-s3',
-      '@aws-sdk/s3-request-presigner',
-      'sharp',
-      '@img/sharp-libvips-linux-x64',
-      '@img/sharp-libvips-linuxmusl-x64',
-      '@shikijs/langs',
-      '@shikijs/themes',
-      '@shikijs/engine-oniguruma',
-    ]
+        '@electric-sql/pglite',
+        '@xmldom/xmldom',
+        '@aws-sdk/client-s3',
+        '@aws-sdk/s3-request-presigner',
+        'sharp',
+        '@img/sharp-libvips-linux-x64',
+        '@img/sharp-libvips-linuxmusl-x64',
+        '@shikijs/langs',
+        '@shikijs/themes',
+        '@shikijs/engine-oniguruma',
+      ]
     : ['@xmldom/xmldom'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
@@ -354,38 +361,36 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true' ? analyzer() : noWrapp
 const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
-      // Allow precaching of large PGLite assets for offline functionality
-      // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
-      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Allow precaching of large PGLite assets for offline functionality
+        // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 
-      register: false,
+        register: false,
 
-      swDest: 'public/sw.js',
+        swDest: 'public/sw.js',
 
-      swSrc: 'src/app/sw.ts', // 5MB
-    })
+        swSrc: 'src/app/sw.ts', // 5MB
+      })
     : noWrapper;
 
 // Conditionally wrap with Sentry based on environment variable
 const ENABLE_SENTRY = process.env.NEXT_PUBLIC_ENABLE_SENTRY === '1';
 const hasSentryCredentials = !!(process.env.SENTRY_ORG && process.env.SENTRY_PROJECT);
 
-const withSentry = ENABLE_SENTRY && hasSentryCredentials
-  ? (config: NextConfig) =>
-    withSentryConfig(config, {
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      // Suppresses source map uploading logs during build
-      silent: true,
-      // Disable source map upload in CI to reduce memory usage
-      // Source maps will still be generated but not uploaded
-      disableServerWebpackPlugin: process.env.VERCEL === '1',
-      disableClientWebpackPlugin: process.env.VERCEL === '1',
-      // Reduce memory usage by not including source content
-      hideSourceMaps: true,
-      // Skip source map upload entirely during Vercel builds
-      skipEnvironmentCheck: true,
-    })
-  : (config: NextConfig) => config;
+const withSentry =
+  ENABLE_SENTRY && hasSentryCredentials
+    ? (config: NextConfig) =>
+        withSentryConfig(config, {
+          org: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          // Suppresses source map uploading logs during build
+          silent: true,
+          // Disable source maps upload in Vercel to reduce memory usage
+          // Updated for Sentry SDK compatibility with Next.js 15.5.7
+          sourcemaps: {
+            disable: process.env.VERCEL === '1',
+          },
+        })
+    : (config: NextConfig) => config;
 
 export default withBundleAnalyzer(withPWA(withSentry(nextConfig as NextConfig)));
