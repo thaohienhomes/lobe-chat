@@ -485,10 +485,10 @@ const hunyuanChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 40_000,
     description:
-      '混元最新版t1-vision多模态理解深度思考模型，支持多模态原生长思维链，相比上一代默认版本模型全面提升。',
-    displayName: 'Hunyuan T1 Vision 20250619',
-    id: 'hunyuan-t1-vision-20250619',
-    maxOutput: 24_000,
+      '混元最新版 t1-vision 视觉深度思考模型，相比上一版模型在通用图文问答、视觉定位、OCR、图表、拍题解题、看图创作等任务上全面提升，显著优化了英文和小语种能力。',
+    displayName: 'Hunyuan T1 Vision 20250916',
+    id: 'hunyuan-t1-vision-20250916',
+    maxOutput: 16_000,
     pricing: {
       currency: 'CNY',
       units: [
