@@ -6,9 +6,9 @@
   },
   "dialect": "postgresql",
   "enums": {},
-  "id": "c35d9885-7c8e-41bb-846e-86df3115ab8d",
+  "id": "8e0eb597-c9f3-4dd1-93aa-bf632f04cbc1",
   "policies": {},
-  "prevId": "45c77737-0084-4fd1-83be-b8e28fb45d06",
+  "prevId": "c35d9885-7c8e-41bb-846e-86df3115ab8d",
   "roles": {},
   "schemas": {},
   "sequences": {},
@@ -7418,6 +7418,20 @@
           "primaryKey": false,
           "notNull": true
         },
+        "points_deducted": {
+          "name": "points_deducted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "model_tier": {
+          "name": "model_tier",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
         "query_complexity": {
           "name": "query_complexity",
           "type": "varchar(20)",
@@ -7492,12 +7506,25 @@
           "primaryKey": true,
           "notNull": true
         },
+        "monthly_budget_points": {
+          "name": "monthly_budget_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 50000
+        },
+        "daily_budget_points": {
+          "name": "daily_budget_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "monthly_budget_vnd": {
           "name": "monthly_budget_vnd",
           "type": "real",
           "primaryKey": false,
           "notNull": false,
-          "default": 39000
+          "default": 0
         },
         "daily_budget_vnd": {
           "name": "daily_budget_vnd",
@@ -7838,12 +7865,18 @@
           "primaryKey": false,
           "notNull": false
         },
-        "pho_credit_balance": {
-          "name": "pho_credit_balance",
+        "pho_points_balance": {
+          "name": "pho_points_balance",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": 50000
+        },
+        "points_reset_date": {
+          "name": "points_reset_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "lifetime_spent": {
           "name": "lifetime_spent",
@@ -7852,8 +7885,42 @@
           "notNull": false,
           "default": 0
         },
+        "current_plan_id": {
+          "name": "current_plan_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'vn_free'"
+        },
+        "subscription_status": {
+          "name": "subscription_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'FREE'"
+        },
+        "country_code": {
+          "name": "country_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "daily_tier1_usage": {
           "name": "daily_tier1_usage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "daily_tier2_usage": {
+          "name": "daily_tier2_usage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "daily_tier3_usage": {
+          "name": "daily_tier3_usage",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -7865,6 +7932,19 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "streak_count": {
+          "name": "streak_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "last_active_date": {
+          "name": "last_active_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "accessed_at": {
           "name": "accessed_at",
@@ -7902,6 +7982,96 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.daily_usage": {
+      "name": "daily_usage",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tier1_messages": {
+          "name": "tier1_messages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "tier2_messages": {
+          "name": "tier2_messages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "tier3_messages": {
+          "name": "tier3_messages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "points_used": {
+          "name": "points_used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "accessed_at": {
+          "name": "accessed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "daily_usage_user_id_users_id_fk": {
+          "name": "daily_usage_user_id_users_id_fk",
+          "tableFrom": "daily_usage",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.model_pricing": {
       "name": "model_pricing",
       "schema": "",
@@ -7918,17 +8088,31 @@
           "primaryKey": false,
           "notNull": true
         },
+        "input_cost_per_1m": {
+          "name": "input_cost_per_1m",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "output_cost_per_1m": {
+          "name": "output_cost_per_1m",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
         "input_price": {
           "name": "input_price",
           "type": "real",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": 0
         },
         "output_price": {
           "name": "output_price",
           "type": "real",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": 0
         },
         "per_msg_fee": {
           "name": "per_msg_fee",
@@ -7941,7 +8125,7 @@
           "name": "tier",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": 1
         },
         "is_active": {
@@ -7983,6 +8167,112 @@
           "columns": ["model_id"]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.transactions": {
+      "name": "transactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_tx_id": {
+          "name": "provider_tx_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan_code": {
+          "name": "plan_code",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "points_granted": {
+          "name": "points_granted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "accessed_at": {
+          "name": "accessed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "transactions_user_id_users_id_fk": {
+          "name": "transactions_user_id_users_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

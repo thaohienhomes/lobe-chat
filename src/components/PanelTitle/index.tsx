@@ -15,9 +15,11 @@ const useStyles = createStyles(({ token, css }) => ({
   `,
   title: css`
     margin: 0;
+
     font-size: 26px;
     font-weight: 600;
     line-height: 1.3;
+    color: ${token.colorText};
   `,
 }));
 

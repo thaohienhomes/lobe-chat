@@ -13,6 +13,47 @@ import { getServerDB } from '@/database/server';
 import { pino } from '@/libs/logger';
 import { PLAN_TIERS, calculateProratedAmount } from '@/server/services/billing/proration';
 
+/**
+ * Plan pricing based on PRICING_MASTERPLAN.md.md
+ * Uses Phở Points system
+ */
+export const PLAN_PRICING = {
+  
+  // per user
+// Legacy mappings (for backward compatibility)
+premium: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
+  
+
+
+starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
+  
+
+
+ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
+  
+
+// Vietnam Plans
+vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 }, 
+
+  
+  vn_free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
+  vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
+  vn_team: { monthly: 149_000, monthlyPoints: 0, yearly: 1_490_000 },
+} as const;
+
+export type PlanId = keyof typeof PLAN_PRICING;
+
+// Valid plan IDs (both new and legacy)
+const VALID_PLAN_IDS = new Set<PlanId>([
+  'vn_free',
+  'vn_basic',
+  'vn_pro',
+  'vn_team',
+  'starter',
+  'premium',
+  'ultimate',
+]);
+
 interface UpgradeRequest {
   billingCycle: 'monthly' | 'yearly';
   /**
@@ -20,7 +61,7 @@ interface UpgradeRequest {
    * Used for downgrades or when payment is confirmed via webhook
    */
   bypassPayment?: boolean;
-  newPlanId: 'starter' | 'premium' | 'ultimate';
+  newPlanId: string; // vn_free | vn_basic | vn_pro | vn_team (or legacy: starter | premium | ultimate)
   /** Order ID from completed Sepay payment (for upgrade with payment) */
   paymentOrderId?: string;
 }
@@ -61,8 +102,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Validate plan ID
-    if (!['starter', 'premium', 'ultimate'].includes(newPlanId)) {
+    // Validate plan ID (supports both new and legacy plan IDs)
+    if (!VALID_PLAN_IDS.has(newPlanId as PlanId)) {
       return NextResponse.json({ error: 'Invalid plan ID' }, { status: 400 });
     }
 

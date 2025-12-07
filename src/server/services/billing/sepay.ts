@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 
-import { getServerDB } from '@/database/server';
 import { sepayPayments, subscriptions } from '@/database/schemas';
+import { getServerDB } from '@/database/server';
 
 export type CreatePaymentRecordParams = {
   amountVnd: number;
@@ -44,7 +44,7 @@ export async function createPaymentRecord(params: CreatePaymentRecordParams) {
 export async function updatePaymentStatus(
   orderId: string,
   status: 'success' | 'failed' | 'pending',
-  opts?: { maskedCardNumber?: string, rawWebhook?: any; transactionId?: string; },
+  opts?: { maskedCardNumber?: string; rawWebhook?: any; transactionId?: string },
 ) {
   try {
     const db = await getServerDB();

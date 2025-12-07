@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix  */
 import { LobeChatPluginManifest } from '@lobehub/chat-plugin-sdk';
-import { boolean, jsonb, pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
+import { boolean, integer, jsonb, pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
 
 import { DEFAULT_PREFERENCE } from '@/const/user';
 import { CustomPluginParams } from '@/types/tool/plugin';
@@ -26,6 +26,29 @@ export const users = pgTable('users', {
   emailVerifiedAt: timestamptz('email_verified_at'),
 
   preference: jsonb('preference').$defaultFn(() => DEFAULT_PREFERENCE),
+
+  // Phở Points System (from PRICING_MASTERPLAN)
+  // phoPointsBalance: Monthly allowance of points based on plan
+  // Default: 50,000 for vn_free tier
+  phoPointsBalance: integer('pho_points_balance').default(50_000),
+  pointsResetDate: timestamptz('points_reset_date'), // For monthly quota reset
+  lifetimeSpent: integer('lifetime_spent').default(0),
+
+  // Current subscription plan
+  // vn_free | vn_basic | vn_pro | vn_team | gl_starter | gl_standard | gl_premium | gl_lifetime
+  currentPlanId: text('current_plan_id').default('vn_free'),
+  subscriptionStatus: text('subscription_status').default('FREE'), // FREE | ACTIVE | PAST_DUE | CANCELLED
+  countryCode: text('country_code'), // 'VN' or others - for geo-fencing
+
+  // Fair Usage Policy (FUP) - Daily tier limits
+  dailyTier1Usage: integer('daily_tier1_usage').default(0),
+  dailyTier2Usage: integer('daily_tier2_usage').default(0),
+  dailyTier3Usage: integer('daily_tier3_usage').default(0),
+  lastUsageDate: timestamptz('last_usage_date').defaultNow(),
+
+  // Gamification - Daily streak
+  streakCount: integer('streak_count').default(0),
+  lastActiveDate: timestamptz('last_active_date'),
 
   ...timestamps,
 });

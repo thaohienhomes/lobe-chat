@@ -9,9 +9,8 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { generateFeatureText, getTopModelsForPlan } from '@/utils/messageCalculator';
-import { trackServerInitiateCheckout, trackServerViewContent } from '@/utils/tiktok-server-events';
 import { useTikTokTracking } from '@/hooks/useTikTokTracking';
+import { trackServerInitiateCheckout, trackServerViewContent } from '@/utils/tiktok-server-events';
 
 const { Title, Text } = Typography;
 
@@ -42,7 +41,13 @@ const useStyles = createStyles(({ css, token }) => ({
 
   planCard: css`
     position: relative;
+
     border: 2px solid ${token.colorBorder};
+
+    color: ${token.colorText};
+
+    background: ${token.colorBgContainer};
+
     transition: all 0.3s ease;
 
     &:hover {
@@ -83,7 +88,7 @@ const useStyles = createStyles(({ css, token }) => ({
   priceUnit: css`
     font-size: 16px;
     font-weight: 400;
-    color: ${token.colorTextSecondary};
+    color: ${token.colorTextDescription};
   `,
 }));
 
@@ -91,84 +96,116 @@ interface PlansSectionProps {
   mobile?: boolean;
 }
 
-// Generate dynamic plans with accurate message calculations
-const generatePlanFeatures = (planId: 'starter' | 'premium' | 'ultimate') => {
-  const { budgetModels, premiumModels } = getTopModelsForPlan(planId, 3, 3);
+/**
+ * Generate plan features based on PRICING_MASTERPLAN.md.md
+ * Uses Phở Points system with tiered model access
+ */
+const generatePlanFeatures = (planId: 'vn_free' | 'vn_basic' | 'vn_pro') => {
+  const features: string[] = [];
 
-  const features = [
-    // Budget Models Section
-    '📱 Budget Models (High Volume):',
-    ...budgetModels.slice(0, 3).map((model) => `• ${generateFeatureText(model)}`),
-    '',
-    // Premium Models Section
-    '🚀 Premium Models (High Quality):',
-    ...premiumModels.slice(0, 3).map((model) => `• ${generateFeatureText(model)}`),
-    '',
-    // Storage & Features
-    '💾 Storage & Features:',
-    planId === 'starter'
-      ? '• File Storage - 1.0 GB'
-      : planId === 'premium'
-        ? '• File Storage - 2.0 GB'
-        : '• File Storage - 4.0 GB',
-    planId === 'starter'
-      ? '• Vector Storage - 5,000 entries'
-      : planId === 'premium'
-        ? '• Vector Storage - 10,000 entries'
-        : '• Vector Storage - 20,000 entries',
-    '• Knowledge Base & File Upload',
-    '• Mix & match models based on needs',
-  ];
+  switch (planId) {
+  case 'vn_free': {
+    features.push(
+      '🆓 Tier 1 Models Only:',
+      '• GPT-4o-mini, Gemini Flash, Claude Haiku',
+      '• 50,000 Phở Points/tháng',
+      '',
+      '⚠️ Giới hạn:',
+      '• Không lưu lịch sử hội thoại',
+      '• Không truy cập Tier 2/3 models',
+    );
+  
+  break;
+  }
+  case 'vn_basic': {
+    features.push(
+      '🚀 Tier 1 Models (Unlimited):',
+      '• GPT-4o-mini, Gemini Flash, Claude Haiku',
+      '',
+      '⭐ Tier 2 Models (30 msg/ngày):',
+      '• GPT-4o, Claude Sonnet, Gemini Pro',
+      '',
+      '💎 300,000 Phở Points/tháng',
+      '💾 Lưu trữ lịch sử hội thoại',
+      '📁 Upload file',
+    );
+  
+  break;
+  }
+  case 'vn_pro': {
+    features.push(
+      '🚀 Tier 1 & 2 Models (Unlimited):',
+      '• GPT-4o-mini, Gemini Flash, Claude Haiku',
+      '• GPT-4o, Claude Sonnet, Gemini Pro',
+      '',
+      '👑 Tier 3 Models (50 msg/ngày):',
+      '• Claude Opus, GPT-4 Turbo, O1',
+      '',
+      '💎 2,000,000 Phở Points/tháng',
+      '🎯 Priority support',
+      '🔧 Advanced features',
+    );
+  
+  break;
+  }
+  // No default
+  }
 
   return features;
 };
 
+/**
+ * Vietnam Plans based on PRICING_MASTERPLAN.md.md
+ */
 const plans = [
   {
-    computeCredits: '5,000,000 / Month',
-    description: 'Perfect for occasional AI users and students',
-    features: generatePlanFeatures('starter'),
-    highlight: 'Most Popular for Students',
-    id: 'starter',
-    monthlyPriceVND: 39_000,
-    name: 'Starter',
-    yearlyDiscount: '17% off',
-    yearlyPriceVND: 390_000,
+    code: 'vn_free',
+    description: 'Trải nghiệm miễn phí với Tier 1 models',
+    features: generatePlanFeatures('vn_free'),
+    highlight: 'Miễn phí trọn đời',
+    id: 'vn_free',
+    monthlyPoints: 50_000,
+    monthlyPriceVND: 0,
+    name: 'Phở Không Người Lái',
+    yearlyDiscount: '',
+    yearlyPriceVND: 0,
   },
   {
-    computeCredits: '15,000,000 / Month',
-    description: 'Designed for professional users and content creators',
-    features: generatePlanFeatures('premium'),
-    highlight: 'Best Value for Professionals',
-    id: 'premium',
-    monthlyPriceVND: 129_000,
-    name: 'Premium',
+    code: 'vn_basic',
+    description: 'Dành cho sinh viên và người dùng cá nhân',
+    features: generatePlanFeatures('vn_basic'),
+    highlight: 'Phổ biến nhất',
+    id: 'vn_basic',
+    monthlyPoints: 300_000,
+    monthlyPriceVND: 69_000,
+    name: 'Phở Tái',
     popular: true,
-    yearlyDiscount: '17% off',
-    yearlyPriceVND: 1_290_000,
+    yearlyDiscount: 'Tặng 2 tháng',
+    yearlyPriceVND: 690_000,
   },
   {
-    computeCredits: '35,000,000 / Month',
-    description: 'For enterprises, developers, and AI researchers',
-    features: generatePlanFeatures('ultimate'),
-    highlight: 'Maximum AI Power',
-    id: 'ultimate',
-    monthlyPriceVND: 349_000,
-    name: 'Ultimate',
-    yearlyDiscount: '17% off',
-    yearlyPriceVND: 3_490_000,
+    code: 'vn_pro',
+    description: 'Cho người dùng chuyên nghiệp và doanh nghiệp',
+    features: generatePlanFeatures('vn_pro'),
+    highlight: 'Sức mạnh tối đa',
+    id: 'vn_pro',
+    monthlyPoints: 2_000_000,
+    monthlyPriceVND: 199_000,
+    name: 'Phở Đặc Biệt',
+    yearlyDiscount: 'Tặng 2 tháng',
+    yearlyPriceVND: 1_990_000,
   },
 ];
 
 const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
   const { t } = useTranslation('setting');
-  const { styles } = useStyles();
+  const { styles, theme: token } = useStyles();
   const router = useRouter();
   const { trackUpgradeClick } = useTikTokTracking();
 
   const handleUpgrade = async (planId: string) => {
     // Find the plan details for tracking
-    const plan = plans.find(p => p.id === planId);
+    const plan = plans.find((p) => p.id === planId);
 
     // Track ViewContent and InitiateCheckout events for plan selection
     // Using server-side tracking for better reliability (bypasses ad blockers)
@@ -179,7 +216,7 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
       await Promise.all([
         trackServerViewContent(planId, plan.name, plan.monthlyPriceVND),
         trackServerInitiateCheckout(planId, plan.name, plan.monthlyPriceVND),
-      ]).catch(error => {
+      ]).catch((error) => {
         console.error('Failed to track TikTok events:', error);
       });
 
@@ -194,7 +231,7 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
   return (
     <Flexbox gap={24} width="100%">
       <Flexbox align="center" gap={8} horizontal>
-        <Title level={3} style={{ margin: 0 }}>
+        <Title level={3} style={{ color: token.colorText, margin: 0 }}>
           {t('subscription.plans.title', { ns: 'setting' })}
         </Title>
         <Badge count="New Pricing" style={{ backgroundColor: '#52c41a' }} />
@@ -212,16 +249,17 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
             className={`${styles.planCard} ${plan.popular ? 'popular' : ''}`}
             key={plan.id}
             style={{ padding: mobile ? 16 : 24 }}
+            variant="borderless"
           >
             {plan.popular && <div className={styles.popularBadge}>Most Popular</div>}
 
             <Flexbox gap={16}>
               {/* Plan Header */}
               <Flexbox gap={8}>
-                <Title level={4} style={{ margin: 0 }}>
+                <Title level={4} style={{ color: token.colorText, margin: 0 }}>
                   {plan.name}
                 </Title>
-                <Text type="secondary">{plan.description}</Text>
+                <Text style={{ color: token.colorTextDescription }}>{plan.description}</Text>
                 {plan.highlight && (
                   <Badge count={plan.highlight} style={{ backgroundColor: '#1890ff' }} />
                 )}
@@ -230,7 +268,9 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
               {/* Pricing */}
               <Flexbox gap={4}>
                 <div>
-                  <span className={styles.price}>{plan.monthlyPriceVND.toLocaleString()}</span>
+                  <span className={styles.price} style={{ color: token.colorText }}>
+                    {plan.monthlyPriceVND.toLocaleString()}
+                  </span>
                   <span className={styles.priceUnit}> VND/month</span>
                 </div>
                 <Text className={styles.discount}>
@@ -240,10 +280,14 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
 
               <Divider style={{ margin: '8px 0' }} />
 
-              {/* Compute Credits */}
+              {/* Phở Points */}
               <Flexbox gap={4}>
-                <Text strong>Compute Credits:</Text>
-                <Text>{plan.computeCredits}</Text>
+                <Text strong style={{ color: token.colorText }}>
+                  Phở Points:
+                </Text>
+                <Text style={{ color: token.colorText }}>
+                  {plan.monthlyPoints.toLocaleString()} / tháng
+                </Text>
               </Flexbox>
 
               {/* Features */}
@@ -252,7 +296,11 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
                   // Handle section headers (without bullet points)
                   if (feature.includes(':') && !feature.startsWith('•')) {
                     return (
-                      <Text key={index} strong style={{ marginTop: index > 0 ? 8 : 0 }}>
+                      <Text
+                        key={index}
+                        strong
+                        style={{ color: token.colorText, marginTop: index > 0 ? 8 : 0 }}
+                      >
                         {feature}
                       </Text>
                     );
@@ -267,7 +315,7 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
                   return (
                     <div className={styles.feature} key={index}>
                       <Check size={16} />
-                      <Text>{feature.replace('• ', '')}</Text>
+                      <Text style={{ color: token.colorText }}>{feature.replace('• ', '')}</Text>
                     </div>
                   );
                 })}
@@ -290,14 +338,14 @@ const PlansSection = memo<PlansSectionProps>(({ mobile }) => {
 
       {/* Additional Info */}
       <Flexbox gap={8} style={{ marginTop: 16 }}>
-        <Text style={{ fontSize: 12 }} type="secondary">
+        <Text style={{ color: token.colorTextDescription, fontSize: 12 }}>
           💡 <strong>Mix & match models:</strong> Use budget models for simple tasks, premium models
           for complex work.
         </Text>
-        <Text style={{ fontSize: 12 }} type="secondary">
+        <Text style={{ color: token.colorTextDescription, fontSize: 12 }}>
           🔄 <strong>Flexible usage:</strong> Switch between models anytime based on your needs.
         </Text>
-        <Text style={{ fontSize: 12 }} type="secondary">
+        <Text style={{ color: token.colorTextDescription, fontSize: 12 }}>
           💰 <strong>73% cheaper</strong> than ChatGPT Plus and Claude Pro.
         </Text>
       </Flexbox>

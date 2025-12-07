@@ -1,45 +1,93 @@
 /**
  * Message Calculator Utility
- * Calculates accurate message limits based on MODEL_COSTS and real USD budgets
+ * Calculates message limits based on Phở Points system
  *
- * Based on MESSAGE_LIMITS_ANALYSIS.md calculations
+ * Based on PRICING_MASTERPLAN.md.md
  */
-import { MODEL_COSTS } from '@/server/modules/CostOptimization';
+import {
+  MODEL_COSTS,
+} from '@/server/modules/CostOptimization';
 
 export interface MessageCalculation {
-  category: 'budget' | 'premium';
+  category: 'tier1' | 'tier2' | 'tier3';
   costPerMessage: number;
   messageCount: number;
   model: string;
   modelName: string;
+  tier: number;
 }
 
 export interface PlanBudget {
-  monthlyUSD: number;
+  dailyTier2Limit: number;
+  dailyTier3Limit: number;
+  monthlyPoints: number;
   monthlyVND: number;
-  planId: 'starter' | 'premium' | 'ultimate';
-  tokenBudget: number;
+  planId: string;
 }
 
-// Real USD budgets based on new pricing (updated 2025-01-08)
+/**
+ * Plan budgets based on PRICING_MASTERPLAN.md.md
+ * Using Phở Points system
+ */
 export const PLAN_BUDGETS: Record<string, PlanBudget> = {
-  premium: {
-    monthlyUSD: 5.34,
-    monthlyVND: 129_000,
-    planId: 'premium',
-    tokenBudget: 15_000_000,
+  
+  // Legacy mappings (for backward compatibility)
+premium: {
+    dailyTier2Limit: 30,
+    dailyTier3Limit: 0,
+    monthlyPoints: 300_000,
+    monthlyVND: 69_000,
+    planId: 'vn_basic',
   },
-  starter: {
-    monthlyUSD: 1.61,
-    monthlyVND: 39_000,
-    planId: 'starter',
-    tokenBudget: 5_000_000,
+  
+
+starter: {
+    dailyTier2Limit: 0,
+    dailyTier3Limit: 0,
+    monthlyPoints: 50_000,
+    monthlyVND: 0,
+    planId: 'vn_free',
   },
-  ultimate: {
-    monthlyUSD: 14.44,
-    monthlyVND: 349_000,
-    planId: 'ultimate',
-    tokenBudget: 35_000_000,
+  
+
+ultimate: {
+    dailyTier2Limit: -1,
+    dailyTier3Limit: 50,
+    monthlyPoints: 2_000_000,
+    monthlyVND: 199_000,
+    planId: 'vn_pro',
+  },
+  
+// Vietnam Plans
+vn_basic: {
+    dailyTier2Limit: 30,
+    dailyTier3Limit: 0,
+    monthlyPoints: 300_000,
+    monthlyVND: 69_000,
+    planId: 'vn_basic',
+  },
+
+  
+  vn_free: {
+    dailyTier2Limit: 0,
+    dailyTier3Limit: 0,
+    monthlyPoints: 50_000,
+    monthlyVND: 0,
+    planId: 'vn_free',
+  },
+  vn_pro: {
+    dailyTier2Limit: -1, // Unlimited
+    dailyTier3Limit: 50,
+    monthlyPoints: 2_000_000,
+    monthlyVND: 199_000,
+    planId: 'vn_pro',
+  },
+  vn_team: {
+    dailyTier2Limit: -1,
+    dailyTier3Limit: -1,
+    monthlyPoints: 0, // Pooled
+    monthlyVND: 149_000,
+    planId: 'vn_team',
   },
 } as const;
 
@@ -114,36 +162,38 @@ export function calculateCostPerMessage(modelKey: string): number {
 /**
  * Calculate messages per month for a specific model and plan
  */
-export function calculateMessagesForModel(
-  modelKey: string,
-  planId: 'starter' | 'premium' | 'ultimate',
-): number {
+export function calculateMessagesForModel(modelKey: string, planId: string): number {
   const budget = PLAN_BUDGETS[planId];
+  if (!budget) return 0;
+
   const costPerMessage = calculateCostPerMessage(modelKey);
 
   if (costPerMessage === 0) {
     return 0;
   }
 
-  return Math.floor(budget.monthlyUSD / costPerMessage);
+  // Use monthlyPoints for Phở Points system
+  return Math.floor(budget.monthlyPoints / (costPerMessage * 1000));
 }
 
 /**
  * Calculate all message limits for a specific plan
+ * Updated for Phở Points system
  */
-export function calculateMessagesForPlan(
-  planId: 'starter' | 'premium' | 'ultimate',
-): MessageCalculation[] {
+export function calculateMessagesForPlan(planId: string): MessageCalculation[] {
   return MODEL_CONFIGS.map((config) => {
     const costPerMessage = calculateCostPerMessage(config.key);
     const messagesPerMonth = calculateMessagesForModel(config.key, planId);
+    const tier = config.type === 'budget' ? 1 : 2;
+    const category: 'tier1' | 'tier2' | 'tier3' = config.type === 'budget' ? 'tier1' : 'tier2';
 
     return {
-      category: config.type,
+      category,
       costPerMessage,
       messageCount: messagesPerMonth,
       model: config.key,
       modelName: config.displayName,
+      tier,
     };
   }).sort((a, b) => {
     // Sort by message count (descending)
@@ -155,18 +205,18 @@ export function calculateMessagesForPlan(
  * Get top models for display in UI (limit to avoid clutter)
  */
 export function getTopModelsForPlan(
-  planId: 'starter' | 'premium' | 'ultimate',
-  budgetLimit: number = 3,
-  premiumLimit: number = 3,
+  planId: string,
+  tier1Limit: number = 3,
+  tier2Limit: number = 3,
 ): {
   budgetModels: MessageCalculation[];
   premiumModels: MessageCalculation[];
 } {
   const allModels = calculateMessagesForPlan(planId);
 
-  const budgetModels = allModels.filter((m) => m.category === 'budget').slice(0, budgetLimit);
+  const budgetModels = allModels.filter((m) => m.category === 'tier1').slice(0, tier1Limit);
 
-  const premiumModels = allModels.filter((m) => m.category === 'premium').slice(0, premiumLimit);
+  const premiumModels = allModels.filter((m) => m.category === 'tier2').slice(0, tier2Limit);
 
   return { budgetModels, premiumModels };
 }
@@ -212,14 +262,19 @@ export function getAllPlanComparisons(): Record<
 /**
  * Calculate cost savings compared to competitors
  */
-export function calculateCompetitorComparison(planId: 'starter' | 'premium' | 'ultimate') {
+export function calculateCompetitorComparison(planId: string) {
   const plan = PLAN_BUDGETS[planId];
+  if (!plan) return { vsChatGptPlus: 0, vsClaudePro: 0 };
+
   const chatGptPlusUSD = 20; // $20/month
   const claudeProUSD = 20; // $20/month
 
+  // Convert VND to USD (approximate rate)
+  const planUSD = plan.monthlyVND / 24_000;
+
   const savings = {
-    vsChatGptPlus: Math.round((1 - plan.monthlyUSD / chatGptPlusUSD) * 100),
-    vsClaudePro: Math.round((1 - plan.monthlyUSD / claudeProUSD) * 100),
+    vsChatGptPlus: Math.round((1 - planUSD / chatGptPlusUSD) * 100),
+    vsClaudePro: Math.round((1 - planUSD / claudeProUSD) * 100),
   };
 
   return savings;
@@ -245,10 +300,10 @@ export function validateCalculations(): {
   const results = [];
 
   // Validate each plan
-  for (const planId of ['starter', 'premium', 'ultimate'] as const) {
+  for (const planId of ['vn_free', 'vn_basic', 'vn_pro'] as const) {
     const allModels = calculateMessagesForPlan(planId);
-    const budgetModels = allModels.filter((m) => m.category === 'budget');
-    const premiumModels = allModels.filter((m) => m.category === 'premium');
+    const budgetModels = allModels.filter((m) => m.category === 'tier1');
+    const premiumModels = allModels.filter((m) => m.category === 'tier2');
 
     const maxBudgetMessages = Math.max(...budgetModels.map((m) => m.messageCount));
     const maxPremiumMessages = Math.max(...premiumModels.map((m) => m.messageCount));

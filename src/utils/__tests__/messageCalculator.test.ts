@@ -1,19 +1,19 @@
 /**
  * Test Suite for Message Calculator
- * 
+ *
  * Tests all message calculation functions to ensure accuracy
  * and consistency with pricing model.
  */
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import {
+  PLAN_BUDGETS,
   calculateCostPerMessage,
   calculateMessagesForPlan,
-  getTopModelsForPlan,
   formatMessageCount,
   generateFeatureText,
+  getTopModelsForPlan,
   validateCalculations,
-  PLAN_BUDGETS,
 } from '../messageCalculator';
 
 describe('Message Calculator', () => {
@@ -50,7 +50,7 @@ describe('Message Calculator', () => {
       const messages = calculateMessagesForPlan('starter');
 
       // Find GPT-4o mini in results
-      const gpt4oMini = messages.find(m => m.model === 'gpt-4o-mini');
+      const gpt4oMini = messages.find((m) => m.model === 'gpt-4o-mini');
       expect(gpt4oMini).toBeDefined();
 
       // Starter budget: $1.61, GPT-4o mini cost: $0.000195/message
@@ -62,7 +62,7 @@ describe('Message Calculator', () => {
       const messages = calculateMessagesForPlan('premium');
 
       // Find Gemini 1.5 Flash in results
-      const geminiFlash = messages.find(m => m.model === 'gemini-1.5-flash');
+      const geminiFlash = messages.find((m) => m.model === 'gemini-1.5-flash');
       expect(geminiFlash).toBeDefined();
 
       // Premium budget: $5.34, Gemini Flash cost: $0.0000975/message
@@ -74,7 +74,7 @@ describe('Message Calculator', () => {
       const messages = calculateMessagesForPlan('ultimate');
 
       // Find Claude 3.5 Sonnet in results
-      const claudeSonnet = messages.find(m => m.model === 'claude-3-sonnet');
+      const claudeSonnet = messages.find((m) => m.model === 'claude-3-sonnet');
       expect(claudeSonnet).toBeDefined();
 
       // Ultimate budget: $14.44, Claude Sonnet cost: $0.0048/message
@@ -94,8 +94,8 @@ describe('Message Calculator', () => {
         'claude-3-sonnet',
       ];
 
-      const actualModels = messages.map(m => m.model);
-      expectedModels.forEach(model => {
+      const actualModels = messages.map((m) => m.model);
+      expectedModels.forEach((model) => {
         expect(actualModels).toContain(model);
       });
     });
@@ -117,13 +117,13 @@ describe('Message Calculator', () => {
       expect(premiumModels).toHaveLength(3);
 
       // Budget models should be cheaper (more messages)
-      const budgetModelNames = budgetModels.map(m => m.model);
+      const budgetModelNames = budgetModels.map((m) => m.model);
       expect(budgetModelNames).toContain('gemini-1.5-flash');
       expect(budgetModelNames).toContain('gpt-4o-mini');
       expect(budgetModelNames).toContain('claude-3-haiku');
 
       // Premium models should be more expensive (fewer messages)
-      const premiumModelNames = premiumModels.map(m => m.model);
+      const premiumModelNames = premiumModels.map((m) => m.model);
       expect(premiumModelNames).toContain('gemini-1.5-pro');
       expect(premiumModelNames).toContain('gpt-4o');
       expect(premiumModelNames).toContain('claude-3-sonnet');
@@ -141,12 +141,16 @@ describe('Message Calculator', () => {
 
       // Budget models should be sorted by message count (descending)
       for (let i = 1; i < budgetModels.length; i++) {
-        expect(budgetModels[i - 1].messageCount).toBeGreaterThanOrEqual(budgetModels[i].messageCount);
+        expect(budgetModels[i - 1].messageCount).toBeGreaterThanOrEqual(
+          budgetModels[i].messageCount,
+        );
       }
 
       // Premium models should be sorted by message count (descending)
       for (let i = 1; i < premiumModels.length; i++) {
-        expect(premiumModels[i - 1].messageCount).toBeGreaterThanOrEqual(premiumModels[i].messageCount);
+        expect(premiumModels[i - 1].messageCount).toBeGreaterThanOrEqual(
+          premiumModels[i].messageCount,
+        );
       }
     });
   });
@@ -183,7 +187,8 @@ describe('Message Calculator', () => {
         modelName: 'GPT-4o mini',
         messageCount: 8256,
         costPerMessage: 0.000195,
-        category: 'budget' as const,
+        category: 'tier1' as const,
+        tier: 1,
       };
 
       const text = generateFeatureText(messageCalc);
@@ -196,7 +201,8 @@ describe('Message Calculator', () => {
         modelName: 'Claude 3.5 Sonnet',
         messageCount: 3008,
         costPerMessage: 0.0048,
-        category: 'premium' as const,
+        category: 'tier2' as const,
+        tier: 2,
       };
 
       const text = generateFeatureText(messageCalc);
@@ -212,7 +218,7 @@ describe('Message Calculator', () => {
       expect(validation.errors).toHaveLength(0);
 
       // Check that all plans have reasonable message counts
-      validation.results.forEach(result => {
+      validation.results.forEach((result) => {
         expect(result.totalModels).toBeGreaterThan(0);
         expect(result.budgetModels).toBeGreaterThan(0);
         expect(result.premiumModels).toBeGreaterThan(0);
@@ -231,9 +237,9 @@ describe('Message Calculator', () => {
       // For the same model, higher tier should have more messages
       const modelToCheck = 'gpt-4o-mini';
 
-      const starterGPT = starterMessages.find(m => m.model === modelToCheck)!;
-      const premiumGPT = premiumMessages.find(m => m.model === modelToCheck)!;
-      const ultimateGPT = ultimateMessages.find(m => m.model === modelToCheck)!;
+      const starterGPT = starterMessages.find((m) => m.model === modelToCheck)!;
+      const premiumGPT = premiumMessages.find((m) => m.model === modelToCheck)!;
+      const ultimateGPT = ultimateMessages.find((m) => m.model === modelToCheck)!;
 
       expect(premiumGPT.messageCount).toBeGreaterThan(starterGPT.messageCount);
       expect(ultimateGPT.messageCount).toBeGreaterThan(premiumGPT.messageCount);
@@ -241,27 +247,22 @@ describe('Message Calculator', () => {
   });
 
   describe('PLAN_BUDGETS', () => {
-    it('should have correct budget values', () => {
-      expect(PLAN_BUDGETS.starter.monthlyVND).toBe(39_000);
-      expect(PLAN_BUDGETS.starter.monthlyUSD).toBeCloseTo(1.61, 2);
-      expect(PLAN_BUDGETS.starter.tokenBudget).toBe(5_000_000);
+    it('should have correct budget values for Vietnam plans', () => {
+      expect(PLAN_BUDGETS.vn_free.monthlyVND).toBe(0);
+      expect(PLAN_BUDGETS.vn_free.monthlyPoints).toBe(50_000);
 
-      expect(PLAN_BUDGETS.premium.monthlyVND).toBe(129_000);
-      expect(PLAN_BUDGETS.premium.monthlyUSD).toBeCloseTo(5.34, 2);
-      expect(PLAN_BUDGETS.premium.tokenBudget).toBe(15_000_000);
+      expect(PLAN_BUDGETS.vn_basic.monthlyVND).toBe(69_000);
+      expect(PLAN_BUDGETS.vn_basic.monthlyPoints).toBe(300_000);
 
-      expect(PLAN_BUDGETS.ultimate.monthlyVND).toBe(349_000);
-      expect(PLAN_BUDGETS.ultimate.monthlyUSD).toBeCloseTo(14.44, 2);
-      expect(PLAN_BUDGETS.ultimate.tokenBudget).toBe(35_000_000);
+      expect(PLAN_BUDGETS.vn_pro.monthlyVND).toBe(199_000);
+      expect(PLAN_BUDGETS.vn_pro.monthlyPoints).toBe(2_000_000);
     });
 
-    it('should have reasonable USD to VND conversion rates', () => {
-      // Check that all plans have reasonable exchange rates (around 24,000 VND per USD)
-      Object.values(PLAN_BUDGETS).forEach(plan => {
-        const planRate = plan.monthlyVND / plan.monthlyUSD;
-        expect(planRate).toBeGreaterThan(20000); // At least 20,000 VND per USD
-        expect(planRate).toBeLessThan(30000); // At most 30,000 VND per USD
-      });
+    it('should have legacy plan mappings', () => {
+      // Legacy plans should map to new plans
+      expect(PLAN_BUDGETS.starter.monthlyPoints).toBe(50_000);
+      expect(PLAN_BUDGETS.premium.monthlyPoints).toBe(300_000);
+      expect(PLAN_BUDGETS.ultimate.monthlyPoints).toBe(2_000_000);
     });
   });
 
@@ -285,9 +286,9 @@ describe('Message Calculator', () => {
       const ultimate = calculateMessagesForPlan('ultimate');
 
       // Premium should have roughly 3x more messages than Starter
-      const starterGPT = starter.find(m => m.model === 'gpt-4o-mini')!;
-      const premiumGPT = premium.find(m => m.model === 'gpt-4o-mini')!;
-      const ultimateGPT = ultimate.find(m => m.model === 'gpt-4o-mini')!;
+      const starterGPT = starter.find((m) => m.model === 'gpt-4o-mini')!;
+      const premiumGPT = premium.find((m) => m.model === 'gpt-4o-mini')!;
+      const ultimateGPT = ultimate.find((m) => m.model === 'gpt-4o-mini')!;
 
       const premiumRatio = premiumGPT.messageCount / starterGPT.messageCount;
       const ultimateRatio = ultimateGPT.messageCount / starterGPT.messageCount;

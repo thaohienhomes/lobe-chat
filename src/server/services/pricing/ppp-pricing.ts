@@ -16,19 +16,36 @@ export interface PppPricingData {
   pppMultiplier: number;
   preferredPaymentGateway: string;
   pricing: {
+    // Global plans (USD via Polar.sh)
+    gl_premium: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
+    gl_standard: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
+    gl_starter: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
+    // Legacy mappings
     premium: { monthly: number; monthlyUsd: number; yearly: number };
     starter: { monthly: number; monthlyUsd: number; yearly: number };
     ultimate: { monthly: number; monthlyUsd: number; yearly: number };
+    // Vietnam plans (VND via Sepay)
+    vn_basic: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
+    vn_free: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
+    vn_pro: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
   };
 }
 
 /**
- * Base USD pricing (reference point)
+ * Base USD pricing based on PRICING_MASTERPLAN.md.md
+ * Global plans (via Polar.sh)
  */
 const BASE_USD_PRICING = {
-  premium: { monthly: 4, yearly: 40 },
-  starter: { monthly: 1.2, yearly: 12 },
-  ultimate: { monthly: 11.6, yearly: 116 },
+  // Global plans
+  gl_lifetime: { monthly: 149.0, monthlyPoints: 500_000, yearly: 149.0 }, // One-time
+  gl_premium: { monthly: 19.9, monthlyPoints: 2_000_000, yearly: 199.0 },
+  gl_standard: { monthly: 9.9, monthlyPoints: 500_000, yearly: 99.0 },
+  gl_starter: { monthly: 0, monthlyPoints: 30_000, yearly: 0 },
+
+  // Legacy mappings (for backward compatibility)
+  premium: { monthly: 2.85, yearly: 28.5 }, // ~69,000 VND
+  starter: { monthly: 0, yearly: 0 }, // Free
+  ultimate: { monthly: 8.25, yearly: 82.5 }, // ~199,000 VND
 };
 
 /**
@@ -343,13 +360,18 @@ export function calculatePppPricing(countryCode: string): PppPricingData {
   const { multiplier, currency, name, gateway, methods } = countryData;
   const exchangeRate = CURRENCY_RATES[currency] || 1;
 
-  // Calculate prices in local currency
+  // Calculate prices in local currency (legacy plans)
   const starterMonthly = BASE_USD_PRICING.starter.monthly * multiplier * exchangeRate;
   const starterYearly = BASE_USD_PRICING.starter.yearly * multiplier * exchangeRate;
   const premiumMonthly = BASE_USD_PRICING.premium.monthly * multiplier * exchangeRate;
   const premiumYearly = BASE_USD_PRICING.premium.yearly * multiplier * exchangeRate;
   const ultimateMonthly = BASE_USD_PRICING.ultimate.monthly * multiplier * exchangeRate;
   const ultimateYearly = BASE_USD_PRICING.ultimate.yearly * multiplier * exchangeRate;
+
+  // Calculate global plan prices
+  const glStarterMonthly = BASE_USD_PRICING.gl_starter.monthly * multiplier * exchangeRate;
+  const glStandardMonthly = BASE_USD_PRICING.gl_standard.monthly * multiplier * exchangeRate;
+  const glPremiumMonthly = BASE_USD_PRICING.gl_premium.monthly * multiplier * exchangeRate;
 
   return {
     availablePaymentMethods: methods,
@@ -359,6 +381,30 @@ export function calculatePppPricing(countryCode: string): PppPricingData {
     pppMultiplier: multiplier,
     preferredPaymentGateway: gateway,
     pricing: {
+      // Global plans (USD via Polar.sh)
+      gl_premium: {
+        monthly: Math.round(glPremiumMonthly),
+        monthlyPoints: BASE_USD_PRICING.gl_premium.monthlyPoints,
+        monthlyUsd: BASE_USD_PRICING.gl_premium.monthly * multiplier,
+        yearly: Math.round(glPremiumMonthly * 10),
+      },
+      gl_standard: {
+        monthly: Math.round(glStandardMonthly),
+        monthlyPoints: BASE_USD_PRICING.gl_standard.monthlyPoints,
+        monthlyUsd: BASE_USD_PRICING.gl_standard.monthly * multiplier,
+        yearly: Math.round(glStandardMonthly * 10),
+      },
+      gl_starter: {
+        monthly: Math.round(glStarterMonthly),
+        monthlyPoints: BASE_USD_PRICING.gl_starter.monthlyPoints,
+        monthlyUsd: BASE_USD_PRICING.gl_starter.monthly * multiplier,
+        yearly: 0,
+      },
+      // Vietnam plans (VND via Sepay) - fixed prices
+      vn_basic: { monthly: 69_000, monthlyPoints: 300_000, monthlyUsd: 2.85, yearly: 690_000 },
+      vn_free: { monthly: 0, monthlyPoints: 50_000, monthlyUsd: 0, yearly: 0 },
+      vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, monthlyUsd: 8.25, yearly: 1_990_000 },
+      // Legacy mappings
       premium: {
         monthly: Math.round(premiumMonthly),
         monthlyUsd: BASE_USD_PRICING.premium.monthly * multiplier,
@@ -395,6 +441,7 @@ export async function getPppPricing(
 
     if (result.length > 0) {
       const data = result[0];
+      const calculated = calculatePppPricing(countryCode);
       return {
         availablePaymentMethods: (data.availablePaymentMethods as string[]) || [],
         countryCode: data.countryCode,
@@ -403,6 +450,9 @@ export async function getPppPricing(
         pppMultiplier: parseFloat(data.pppMultiplier),
         preferredPaymentGateway: data.preferredPaymentGateway || 'stripe',
         pricing: {
+          // Include all plans from calculated pricing
+          ...calculated.pricing,
+          // Override with database values for legacy plans
           premium: {
             monthly: data.premiumMonthly,
             monthlyUsd: parseFloat(data.premiumMonthlyUsd),

@@ -11,6 +11,7 @@ export * from './generation';
 export * from './message';
 export * from './nextauth';
 export * from './oidc';
+export * from './pricing';
 export * from './rag';
 export * from './ragEvals';
 export * from './rbac';

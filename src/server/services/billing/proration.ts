@@ -1,21 +1,65 @@
 /**
  * Proration calculation utilities for subscription upgrades/downgrades
+ * Based on PRICING_MASTERPLAN.md.md
  */
 
-// Plan pricing in VND (free plan has 0 cost)
-export const PLAN_PRICING: Record<string, { monthly: number; yearly: number }> = {
-  free: { monthly: 0, yearly: 0 },
-  premium: { monthly: 129_000, yearly: 1_290_000 },
-  starter: { monthly: 39_000, yearly: 390_000 },
-  ultimate: { monthly: 349_000, yearly: 3_490_000 },
+/**
+ * Plan pricing in VND based on PRICING_MASTERPLAN.md.md
+ * Uses Phở Points system
+ */
+export const PLAN_PRICING: Record<
+  string,
+  { monthly: number; monthlyPoints: number; yearly: number }
+> = {
+  
+  // per user
+// Legacy mappings (for backward compatibility)
+free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
+  
+
+
+premium: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
+  
+
+
+starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
+  
+
+
+ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 }, 
+
+  
+  // Vietnam Plans
+vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
+  vn_free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
+  vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
+  vn_team: { monthly: 149_000, monthlyPoints: 0, yearly: 1_490_000 },
 };
 
-// Plan tier hierarchy for determining upgrade vs downgrade
+/**
+ * Plan tier hierarchy for determining upgrade vs downgrade
+ * Higher number = higher tier
+ */
 export const PLAN_TIERS: Record<string, number> = {
-  free: 0,
-  premium: 2,
-  starter: 1,
-  ultimate: 3,
+  
+  // Legacy mappings
+free: 0,
+  
+
+premium: 1,
+  
+
+starter: 0,
+  
+
+ultimate: 2,
+
+  
+  // Vietnam Plans
+vn_basic: 1,
+  vn_free: 0,
+  vn_pro: 2,
+  vn_team: 3,
 };
 
 /**
@@ -90,13 +134,9 @@ export function getPlanChangeType(
  * @param now - Current date (optional, defaults to new Date())
  * @returns Number of days remaining
  */
-export function calculateDaysRemaining(
-  currentPeriodEnd: Date,
-  now: Date = new Date(),
-): number {
+export function calculateDaysRemaining(currentPeriodEnd: Date, now: Date = new Date()): number {
   return Math.max(
     0,
     Math.ceil((currentPeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
   );
 }
-

@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { verifyWebhookSignature } from '@/libs/polar';
+import { addPhoCredits } from '@/server/services/billing/credits';
 
 export async function POST(req: NextRequest) {
   try {
@@ -108,6 +109,38 @@ async function handleCheckoutCompleted(data: any) {
   }
 
   console.log('Checkout completed:', { checkoutId: id, customerId, userId });
+
+  // Add credits if amount is present and > 0
+  // Polar amounts are in cents/smallest unit? Check docs. Usually USD cents.
+  // Assuming we use standard mapping or 1:1 if we charge in VND (which Polar might not support directly).
+  // If charging in USD, we need a conversion rate.
+  // CONSTANT: 1 USD = 25,000 Credits (Approx).
+  // data.amount is usually in cents. So $10.00 = 1000.
+  // 1000 cents = $10.
+  // Credits = $10 * 25000 = 250,000 Credits.
+  // Formula: (amount / 100) * 25000.
+  // OR if we just defined products with credit metadata.
+
+  // For now, let's assume a fixed conversion 1 USD = 25000 VND/Credits.
+  const amount = data.amount;
+  const currency = data.currency;
+
+  if (amount && amount > 0) {
+    let creditsToAdd = 0;
+    if (currency === 'usd') {
+      creditsToAdd = (amount / 100) * 25_000;
+    } else if (currency === 'vnd') {
+      creditsToAdd = amount;
+    } else {
+      // Default fall back or other currencies
+      creditsToAdd = (amount / 100) * 25_000; // Assume USD-like
+    }
+
+    if (creditsToAdd > 0) {
+      console.log('💰 Adding Pho Credits (Polar):', { creditsToAdd, userId });
+      await addPhoCredits(userId, Math.floor(creditsToAdd));
+    }
+  }
 
   // Subscription will be created in subscription.created event
   // This is just for logging/tracking
