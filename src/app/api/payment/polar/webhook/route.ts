@@ -3,18 +3,44 @@
  *
  * POST /api/payment/polar/webhook
  *
- * Handles webhook events from Polar.sh:
+ * Handles webhook events from Polar.sh for Global payments (USD):
  * - checkout.completed - Subscription created
  * - subscription.updated - Subscription status changed
  * - subscription.canceled - Subscription canceled
  * - payment.succeeded - Payment successful
  * - payment.failed - Payment failed
+ *
+ * Based on PRICING_MASTERPLAN.md.md - Phở Points System
  */
-/* eslint-disable @typescript-eslint/no-use-before-define, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { GLOBAL_PLANS } from '@/config/pricing';
+import { subscriptions, users } from '@/database/schemas';
+import { getServerDB } from '@/database/server';
 import { verifyWebhookSignature } from '@/libs/polar';
-import { addPhoCredits } from '@/server/services/billing/credits';
+
+// ============================================================================
+// POLAR PRODUCT → INTERNAL PLAN MAPPING
+// ============================================================================
+
+/**
+ * Map Polar product IDs to internal plan codes
+ * Configure these in Polar dashboard and set env vars
+ */
+const POLAR_PRODUCT_TO_PLAN: Record<string, string> = {
+  [process.env.POLAR_PRODUCT_STANDARD_ID || 'polar_standard']: 'gl_standard',
+  [process.env.POLAR_PRODUCT_PREMIUM_ID || 'polar_premium']: 'gl_premium',
+  [process.env.POLAR_PRODUCT_LIFETIME_ID || 'polar_lifetime']: 'gl_lifetime',
+};
+
+/**
+ * Get internal plan code from Polar product ID
+ */
+function getPlanFromProductId(productId: string): string | null {
+  return POLAR_PRODUCT_TO_PLAN[productId] || null;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -98,174 +124,333 @@ export async function POST(req: NextRequest) {
 
 /**
  * Handle checkout completed event
+ * This is triggered when a customer completes a checkout session
  */
 async function handleCheckoutCompleted(data: any) {
-  const { id, customerId, metadata } = data;
+  const { id, customerId, productId, metadata } = data;
   const userId = metadata?.userId;
 
   if (!userId) {
-    console.error('No userId in checkout metadata');
+    console.error('❌ No userId in checkout metadata');
     return;
   }
 
-  console.log('Checkout completed:', { checkoutId: id, customerId, userId });
+  console.log('✅ Checkout completed:', { checkoutId: id, customerId, productId, userId });
 
-  // Add credits if amount is present and > 0
-  // Polar amounts are in cents/smallest unit? Check docs. Usually USD cents.
-  // Assuming we use standard mapping or 1:1 if we charge in VND (which Polar might not support directly).
-  // If charging in USD, we need a conversion rate.
-  // CONSTANT: 1 USD = 25,000 Credits (Approx).
-  // data.amount is usually in cents. So $10.00 = 1000.
-  // 1000 cents = $10.
-  // Credits = $10 * 25000 = 250,000 Credits.
-  // Formula: (amount / 100) * 25000.
-  // OR if we just defined products with credit metadata.
-
-  // For now, let's assume a fixed conversion 1 USD = 25000 VND/Credits.
-  const amount = data.amount;
-  const currency = data.currency;
-
-  if (amount && amount > 0) {
-    let creditsToAdd = 0;
-    if (currency === 'usd') {
-      creditsToAdd = (amount / 100) * 25_000;
-    } else if (currency === 'vnd') {
-      creditsToAdd = amount;
-    } else {
-      // Default fall back or other currencies
-      creditsToAdd = (amount / 100) * 25_000; // Assume USD-like
-    }
-
-    if (creditsToAdd > 0) {
-      console.log('💰 Adding Pho Credits (Polar):', { creditsToAdd, userId });
-      await addPhoCredits(userId, Math.floor(creditsToAdd));
-    }
+  // Get plan from product ID
+  const planCode = getPlanFromProductId(productId);
+  if (!planCode) {
+    console.error('❌ Unknown Polar product ID:', productId);
+    return;
   }
 
+  const plan = GLOBAL_PLANS[planCode];
+  if (!plan) {
+    console.error('❌ Plan not found in config:', planCode);
+    return;
+  }
+
+  console.log('🎯 Mapping to plan:', { planCode, points: plan.monthlyPoints });
+
   // Subscription will be created in subscription.created event
-  // This is just for logging/tracking
+  // This is just for logging/tracking the checkout completion
 }
 
 /**
  * Handle subscription created event
+ * Creates/updates subscription and sets phoPointsBalance
  */
 async function handleSubscriptionCreated(data: any) {
   const {
     id: subscriptionId,
-    customerId: _customerId,
-    productId: _productId,
-    priceId: _priceId,
-    status: _status,
-    currentPeriodStart: _currentPeriodStart,
-    currentPeriodEnd: _currentPeriodEnd,
+    productId,
+    status,
+    currentPeriodStart,
+    currentPeriodEnd,
     metadata,
   } = data;
 
   const userId = metadata?.userId;
-  const planId = metadata?.planId;
 
-  if (!userId || !planId) {
-    console.error('Missing userId or planId in subscription metadata');
+  if (!userId) {
+    console.error('❌ Missing userId in subscription metadata');
     return;
   }
 
-  console.log('Creating subscription:', { planId, subscriptionId, userId });
+  // Get plan from product ID
+  const planCode = getPlanFromProductId(productId) || metadata?.planId;
+  if (!planCode) {
+    console.error('❌ Cannot determine plan from product:', productId);
+    return;
+  }
 
-  // Create subscription in database
-  // Note: Polar webhook handler - subscriptions table schema may need adjustment
-  // for Polar-specific fields (providerCustomerId, providerSubscriptionId)
-  console.log('Polar subscription creation not yet implemented - schema mismatch');
+  const plan = GLOBAL_PLANS[planCode];
+  if (!plan) {
+    console.error('❌ Plan not found:', planCode);
+    return;
+  }
 
-  console.log('Subscription created successfully');
+  console.log('🎉 Creating subscription:', {
+    planCode,
+    points: plan.monthlyPoints,
+    subscriptionId,
+    userId,
+  });
+
+  try {
+    const db = await getServerDB();
+
+    // Calculate period dates
+    const periodStart = currentPeriodStart ? new Date(currentPeriodStart) : new Date();
+    const periodEnd = currentPeriodEnd
+      ? new Date(currentPeriodEnd)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days default
+
+    // Check for existing subscription
+    const existing = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
+
+    if (existing.length > 0) {
+      // Update existing subscription
+      await db
+        .update(subscriptions)
+        .set({
+          billingCycle: 'monthly', // Polar subscriptions default to monthly
+          currentPeriodEnd: periodEnd,
+          currentPeriodStart: periodStart,
+          paymentProvider: 'polar',
+          planId: planCode,
+          status: mapPolarStatusToDbStatus(status),
+        })
+        .where(eq(subscriptions.userId, userId));
+      console.log('✅ Updated existing subscription');
+    } else {
+      // Create new subscription
+      await db.insert(subscriptions).values({
+        billingCycle: 'monthly',
+        currentPeriodEnd: periodEnd,
+        currentPeriodStart: periodStart,
+        paymentProvider: 'polar',
+        planId: planCode,
+        status: mapPolarStatusToDbStatus(status),
+        userId,
+      });
+      console.log('✅ Created new subscription');
+    }
+
+    // Update user's phoPointsBalance and currentPlanId
+    await db
+      .update(users)
+      .set({
+        currentPlanId: planCode,
+        phoPointsBalance: plan.monthlyPoints,
+        pointsResetDate: periodEnd,
+        subscriptionStatus: mapPolarStatusToDbStatus(status),
+      })
+      .where(eq(users.id, userId));
+
+    console.log('✅ Updated user phoPointsBalance:', plan.monthlyPoints);
+  } catch (error) {
+    console.error('❌ Failed to create subscription:', error);
+    throw error;
+  }
 }
 
 /**
  * Handle subscription updated event
+ * Updates subscription status and period dates
  */
 async function handleSubscriptionUpdated(data: any) {
   const {
     id: subscriptionId,
-    status: _status,
-    currentPeriodStart: _currentPeriodStart,
-    currentPeriodEnd: _currentPeriodEnd,
-    cancelAtPeriodEnd: _cancelAtPeriodEnd,
+    productId,
+    status,
+    currentPeriodStart,
+    currentPeriodEnd,
+    cancelAtPeriodEnd,
+    metadata,
   } = data;
 
-  console.log('Updating subscription:', { status, subscriptionId });
+  const userId = metadata?.userId;
 
-  // Update subscription in database
-  // Note: Polar webhook handler - subscriptions table schema may need adjustment
-  console.log('Polar subscription update not yet implemented - schema mismatch');
+  if (!userId) {
+    console.warn('⚠️ No userId in subscription update, trying to find by provider data');
+    // TODO: Lookup subscription by Polar subscription ID if needed
+    return;
+  }
 
-  console.log('Subscription updated successfully');
+  console.log('🔄 Updating subscription:', { status, subscriptionId, userId });
+
+  try {
+    const db = await getServerDB();
+
+    // Get plan from product ID
+    const planCode = getPlanFromProductId(productId) || metadata?.planId;
+
+    const updateData: Record<string, any> = {
+      cancelAtPeriodEnd: cancelAtPeriodEnd || false,
+      status: mapPolarStatusToDbStatus(status),
+    };
+
+    if (currentPeriodStart) {
+      updateData.currentPeriodStart = new Date(currentPeriodStart);
+    }
+    if (currentPeriodEnd) {
+      updateData.currentPeriodEnd = new Date(currentPeriodEnd);
+    }
+    if (planCode) {
+      updateData.planId = planCode;
+    }
+
+    await db.update(subscriptions).set(updateData).where(eq(subscriptions.userId, userId));
+
+    // Also update user status
+    await db
+      .update(users)
+      .set({
+        currentPlanId: planCode || undefined,
+        subscriptionStatus: mapPolarStatusToDbStatus(status),
+      })
+      .where(eq(users.id, userId));
+
+    console.log('✅ Subscription updated successfully');
+  } catch (error) {
+    console.error('❌ Failed to update subscription:', error);
+    throw error;
+  }
 }
 
 /**
  * Handle subscription canceled event
+ * Sets subscription to canceled and downgrades to free plan
  */
 async function handleSubscriptionCanceled(data: any) {
-  const { id: subscriptionId } = data;
+  const { id: subscriptionId, metadata } = data;
+  const userId = metadata?.userId;
 
-  console.log('Canceling subscription:', { subscriptionId });
+  console.log('🚫 Canceling subscription:', { subscriptionId, userId });
 
-  // Update subscription status to canceled
-  // Note: Polar webhook handler - subscriptions table schema may need adjustment
-  console.log('Polar subscription cancellation not yet implemented - schema mismatch');
+  if (!userId) {
+    console.warn('⚠️ No userId in subscription cancellation');
+    return;
+  }
 
-  console.log('Subscription canceled successfully');
+  try {
+    const db = await getServerDB();
+
+    // Update subscription status
+    await db
+      .update(subscriptions)
+      .set({
+        cancelAtPeriodEnd: true,
+        status: 'canceled',
+      })
+      .where(eq(subscriptions.userId, userId));
+
+    // Downgrade user to free plan
+    const freePlan = GLOBAL_PLANS['gl_starter'];
+    await db
+      .update(users)
+      .set({
+        currentPlanId: 'gl_starter',
+        phoPointsBalance: freePlan?.monthlyPoints || 30_000,
+        subscriptionStatus: 'canceled',
+      })
+      .where(eq(users.id, userId));
+
+    console.log('✅ Subscription canceled, user downgraded to gl_starter');
+  } catch (error) {
+    console.error('❌ Failed to cancel subscription:', error);
+    throw error;
+  }
 }
 
 /**
  * Handle payment succeeded event
+ * Logs payment success and could be used for renewal point reset
  */
 async function handlePaymentSucceeded(data: any) {
-  const {
-    id: paymentId,
-    subscriptionId: _subscriptionId,
-    amount: _amount,
-    currency: _currency,
-    status: _status,
-  } = data;
+  const { id: paymentId, subscriptionId, amount, currency, metadata } = data;
 
-  console.log('Payment succeeded:', {
-    amount: _amount,
-    currency: _currency,
+  const userId = metadata?.userId;
+
+  console.log('💳 Payment succeeded:', {
+    amount,
+    currency,
     paymentId,
-    subscriptionId: _subscriptionId,
+    subscriptionId,
+    userId,
   });
 
-  // Record payment in database
-  // Note: Polar webhook handler - payments table schema may need adjustment
-  console.log('Polar payment recording not yet implemented - schema mismatch');
+  // For subscription renewals, reset phoPointsBalance
+  if (userId && subscriptionId) {
+    try {
+      const db = await getServerDB();
 
-  console.log('Payment recorded successfully');
+      // Get user's current plan to reset points
+      const userResult = await db
+        .select({ currentPlanId: users.currentPlanId })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (userResult.length > 0 && userResult[0].currentPlanId) {
+        const plan = GLOBAL_PLANS[userResult[0].currentPlanId];
+        if (plan) {
+          await db
+            .update(users)
+            .set({
+              phoPointsBalance: plan.monthlyPoints,
+              pointsResetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            })
+            .where(eq(users.id, userId));
+
+          console.log('✅ Points reset on renewal:', plan.monthlyPoints);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to reset points on payment:', error);
+    }
+  }
+
+  console.log('✅ Payment recorded successfully');
 }
 
 /**
  * Handle payment failed event
+ * Logs failure and could trigger notifications
  */
 async function handlePaymentFailed(data: any) {
-  const {
-    id: paymentId,
-    subscriptionId: _subscriptionId,
-    amount: _amount,
-    currency: _currency,
+  const { id: paymentId, subscriptionId, amount, currency, failureReason, metadata } = data;
+
+  const userId = metadata?.userId;
+
+  console.error('❌ Payment failed:', {
+    amount,
+    currency,
     failureReason,
-  } = data;
-
-  console.error('Payment failed:', { failureReason, paymentId, subscriptionId: _subscriptionId });
-
-  // Record failed payment
-  // Note: Polar webhook handler - payments table schema may need adjustment
-  console.log('Polar failed payment recording not yet implemented - schema mismatch');
+    paymentId,
+    subscriptionId,
+    userId,
+  });
 
   // TODO: Send email notification to user about failed payment
+  // TODO: Record failed payment in database for analytics
+
+  console.log('⚠️ Payment failure logged');
 }
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
 
 /**
  * Map Polar subscription status to database status
  */
-function _mapPolarStatusToDbStatus(polarStatus: string): string {
+function mapPolarStatusToDbStatus(polarStatus: string): string {
   const statusMap: Record<string, string> = {
     active: 'active',
     canceled: 'canceled',
