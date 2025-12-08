@@ -46,40 +46,43 @@ describe('Message Calculator', () => {
   });
 
   describe('calculateMessagesForPlan', () => {
-    it('should calculate correct messages for Starter plan', () => {
-      const messages = calculateMessagesForPlan('starter');
+    it('should calculate correct messages for vn_free plan (Phở Points system)', () => {
+      const messages = calculateMessagesForPlan('vn_free');
 
       // Find GPT-4o mini in results
       const gpt4oMini = messages.find((m) => m.model === 'gpt-4o-mini');
       expect(gpt4oMini).toBeDefined();
 
-      // Starter budget: $1.61, GPT-4o mini cost: $0.000195/message
-      // Expected: 1.61 / 0.000195 ≈ 8,256 messages
-      expect(gpt4oMini!.messageCount).toBeCloseTo(8256, -2); // Within 100 messages
+      // vn_free has 50,000 Phở Points
+      // GPT-4o mini cost: $0.000195/message * 1000 = 0.195 points per message
+      // Expected: 50000 / 0.195 ≈ 256,410 messages
+      expect(gpt4oMini!.messageCount).toBeGreaterThan(200_000);
     });
 
-    it('should calculate correct messages for Premium plan', () => {
-      const messages = calculateMessagesForPlan('premium');
+    it('should calculate correct messages for vn_basic plan (Phở Points system)', () => {
+      const messages = calculateMessagesForPlan('vn_basic');
 
       // Find Gemini 1.5 Flash in results
       const geminiFlash = messages.find((m) => m.model === 'gemini-1.5-flash');
       expect(geminiFlash).toBeDefined();
 
-      // Premium budget: $5.34, Gemini Flash cost: $0.0000975/message
-      // Expected: 5.34 / 0.0000975 ≈ 54,769 messages
-      expect(geminiFlash!.messageCount).toBeCloseTo(54769, -2);
+      // vn_basic has 300,000 Phở Points
+      // Gemini Flash cost: $0.0000975/message * 1000 = 0.0975 points per message
+      // Expected: 300000 / 0.0975 ≈ 3,076,923 messages
+      expect(geminiFlash!.messageCount).toBeGreaterThan(3_000_000);
     });
 
-    it('should calculate correct messages for Ultimate plan', () => {
-      const messages = calculateMessagesForPlan('ultimate');
+    it('should calculate correct messages for vn_pro plan (Phở Points system)', () => {
+      const messages = calculateMessagesForPlan('vn_pro');
 
       // Find Claude 3.5 Sonnet in results
       const claudeSonnet = messages.find((m) => m.model === 'claude-3-sonnet');
       expect(claudeSonnet).toBeDefined();
 
-      // Ultimate budget: $14.44, Claude Sonnet cost: $0.0048/message
-      // Expected: 14.44 / 0.0048 ≈ 3,008 messages
-      expect(claudeSonnet!.messageCount).toBeCloseTo(3008, -1);
+      // vn_pro has 2,000,000 Phở Points
+      // Claude Sonnet cost: $0.0048/message * 1000 = 4.8 points per message
+      // Expected: 2000000 / 4.8 ≈ 416,666 messages
+      expect(claudeSonnet!.messageCount).toBeGreaterThan(400_000);
     });
 
     it('should return all supported models', () => {
@@ -268,36 +271,42 @@ describe('Message Calculator', () => {
 
   describe('Integration Tests', () => {
     it('should produce consistent results across multiple calls', () => {
-      const results1 = calculateMessagesForPlan('starter');
-      const results2 = calculateMessagesForPlan('starter');
+      const results1 = calculateMessagesForPlan('vn_free');
+      const results2 = calculateMessagesForPlan('vn_free');
 
       expect(results1).toEqual(results2);
     });
 
     it('should handle all plan types without errors', () => {
+      expect(() => calculateMessagesForPlan('vn_free')).not.toThrow();
+      expect(() => calculateMessagesForPlan('vn_basic')).not.toThrow();
+      expect(() => calculateMessagesForPlan('vn_pro')).not.toThrow();
+      // Legacy plans should also work
       expect(() => calculateMessagesForPlan('starter')).not.toThrow();
       expect(() => calculateMessagesForPlan('premium')).not.toThrow();
       expect(() => calculateMessagesForPlan('ultimate')).not.toThrow();
     });
 
-    it('should maintain reasonable ratios between plans', () => {
-      const starter = calculateMessagesForPlan('starter');
-      const premium = calculateMessagesForPlan('premium');
-      const ultimate = calculateMessagesForPlan('ultimate');
+    it('should maintain reasonable ratios between plans (Phở Points system)', () => {
+      const vnFree = calculateMessagesForPlan('vn_free');
+      const vnBasic = calculateMessagesForPlan('vn_basic');
+      const vnPro = calculateMessagesForPlan('vn_pro');
 
-      // Premium should have roughly 3x more messages than Starter
-      const starterGPT = starter.find((m) => m.model === 'gpt-4o-mini')!;
-      const premiumGPT = premium.find((m) => m.model === 'gpt-4o-mini')!;
-      const ultimateGPT = ultimate.find((m) => m.model === 'gpt-4o-mini')!;
+      // vn_basic should have 6x more points than vn_free (300k vs 50k)
+      const freeGPT = vnFree.find((m) => m.model === 'gpt-4o-mini')!;
+      const basicGPT = vnBasic.find((m) => m.model === 'gpt-4o-mini')!;
+      const proGPT = vnPro.find((m) => m.model === 'gpt-4o-mini')!;
 
-      const premiumRatio = premiumGPT.messageCount / starterGPT.messageCount;
-      const ultimateRatio = ultimateGPT.messageCount / starterGPT.messageCount;
+      const basicRatio = basicGPT.messageCount / freeGPT.messageCount;
+      const proRatio = proGPT.messageCount / freeGPT.messageCount;
 
-      expect(premiumRatio).toBeGreaterThan(2.5);
-      expect(premiumRatio).toBeLessThan(4.0);
+      // vn_basic has 6x more points than vn_free
+      expect(basicRatio).toBeGreaterThan(5.5);
+      expect(basicRatio).toBeLessThan(6.5);
 
-      expect(ultimateRatio).toBeGreaterThan(7.0);
-      expect(ultimateRatio).toBeLessThan(10.0);
+      // vn_pro has 40x more points than vn_free (2M vs 50k)
+      expect(proRatio).toBeGreaterThan(38);
+      expect(proRatio).toBeLessThan(42);
     });
   });
 });

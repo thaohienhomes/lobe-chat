@@ -10,50 +10,90 @@ import {
 
 describe('proration utilities', () => {
   describe('PLAN_PRICING', () => {
-    it('should have correct pricing for all plans', () => {
-      expect(PLAN_PRICING.free).toEqual({ monthly: 0, yearly: 0 });
-      expect(PLAN_PRICING.starter).toEqual({ monthly: 39_000, yearly: 390_000 });
-      expect(PLAN_PRICING.premium).toEqual({ monthly: 129_000, yearly: 1_290_000 });
-      expect(PLAN_PRICING.ultimate).toEqual({ monthly: 349_000, yearly: 3_490_000 });
+    it('should have correct pricing for all plans (Phở Points system)', () => {
+      // Free/Starter tier (legacy mapping)
+      expect(PLAN_PRICING.free).toEqual({ monthly: 0, monthlyPoints: 50_000, yearly: 0 });
+      expect(PLAN_PRICING.starter).toEqual({ monthly: 0, monthlyPoints: 50_000, yearly: 0 });
+
+      // Premium tier (maps to vn_basic)
+      expect(PLAN_PRICING.premium).toEqual({
+        monthly: 69_000,
+        monthlyPoints: 300_000,
+        yearly: 690_000,
+      });
+
+      // Ultimate tier (maps to vn_pro)
+      expect(PLAN_PRICING.ultimate).toEqual({
+        monthly: 199_000,
+        monthlyPoints: 2_000_000,
+        yearly: 1_990_000,
+      });
+
+      // Vietnam Plans
+      expect(PLAN_PRICING.vn_free).toEqual({ monthly: 0, monthlyPoints: 50_000, yearly: 0 });
+      expect(PLAN_PRICING.vn_basic).toEqual({
+        monthly: 69_000,
+        monthlyPoints: 300_000,
+        yearly: 690_000,
+      });
+      expect(PLAN_PRICING.vn_pro).toEqual({
+        monthly: 199_000,
+        monthlyPoints: 2_000_000,
+        yearly: 1_990_000,
+      });
     });
   });
 
   describe('PLAN_TIERS', () => {
-    it('should have correct tier hierarchy', () => {
+    it('should have correct tier hierarchy (Phở Points system)', () => {
+      // Legacy mappings
       expect(PLAN_TIERS.free).toBe(0);
-      expect(PLAN_TIERS.starter).toBe(1);
-      expect(PLAN_TIERS.premium).toBe(2);
-      expect(PLAN_TIERS.ultimate).toBe(3);
+      expect(PLAN_TIERS.starter).toBe(0); // Starter maps to free tier
+      expect(PLAN_TIERS.premium).toBe(1); // Premium maps to vn_basic
+      expect(PLAN_TIERS.ultimate).toBe(2); // Ultimate maps to vn_pro
+
+      // Vietnam Plans
+      expect(PLAN_TIERS.vn_free).toBe(0);
+      expect(PLAN_TIERS.vn_basic).toBe(1);
+      expect(PLAN_TIERS.vn_pro).toBe(2);
+      expect(PLAN_TIERS.vn_team).toBe(3);
     });
   });
 
   describe('getPlanChangeType', () => {
-    it('should detect upgrade from free to starter', () => {
-      const result = getPlanChangeType('free', 'starter');
+    it('should detect upgrade from vn_free to vn_basic', () => {
+      const result = getPlanChangeType('vn_free', 'vn_basic');
       expect(result.isUpgrade).toBe(true);
       expect(result.isDowngrade).toBe(false);
     });
 
-    it('should detect upgrade from starter to premium', () => {
-      const result = getPlanChangeType('starter', 'premium');
+    it('should detect upgrade from vn_basic to vn_pro', () => {
+      const result = getPlanChangeType('vn_basic', 'vn_pro');
       expect(result.isUpgrade).toBe(true);
       expect(result.isDowngrade).toBe(false);
     });
 
-    it('should detect downgrade from premium to starter', () => {
-      const result = getPlanChangeType('premium', 'starter');
+    it('should detect downgrade from vn_pro to vn_basic', () => {
+      const result = getPlanChangeType('vn_pro', 'vn_basic');
       expect(result.isUpgrade).toBe(false);
       expect(result.isDowngrade).toBe(true);
     });
 
-    it('should detect downgrade from ultimate to free', () => {
-      const result = getPlanChangeType('ultimate', 'free');
+    it('should detect downgrade from vn_pro to vn_free', () => {
+      const result = getPlanChangeType('vn_pro', 'vn_free');
       expect(result.isUpgrade).toBe(false);
       expect(result.isDowngrade).toBe(true);
     });
 
     it('should handle same plan (no change)', () => {
-      const result = getPlanChangeType('premium', 'premium');
+      const result = getPlanChangeType('vn_basic', 'vn_basic');
+      expect(result.isUpgrade).toBe(false);
+      expect(result.isDowngrade).toBe(false);
+    });
+
+    it('should handle legacy plan mappings', () => {
+      // free and starter are both tier 0
+      const result = getPlanChangeType('free', 'starter');
       expect(result.isUpgrade).toBe(false);
       expect(result.isDowngrade).toBe(false);
     });
@@ -78,62 +118,73 @@ describe('proration utilities', () => {
     const periodEnd15Days = new Date('2025-01-30'); // 15 days remaining
 
     it('should charge full price when upgrading from free plan (monthly)', () => {
-      const amount = calculateProratedAmount('free', 'starter', 'monthly', periodEnd15Days, now);
-      expect(amount).toBe(39_000); // Full starter monthly price
+      const amount = calculateProratedAmount('free', 'vn_basic', 'monthly', periodEnd15Days, now);
+      expect(amount).toBe(69_000); // Full vn_basic monthly price
     });
 
     it('should charge full price when upgrading from free plan (yearly)', () => {
-      const amount = calculateProratedAmount('free', 'premium', 'yearly', periodEnd15Days, now);
-      expect(amount).toBe(1_290_000); // Full premium yearly price
+      const amount = calculateProratedAmount('free', 'vn_pro', 'yearly', periodEnd15Days, now);
+      expect(amount).toBe(1_990_000); // Full vn_pro yearly price
     });
 
-    it('should calculate positive proration for upgrade (starter to premium)', () => {
+    it('should calculate positive proration for upgrade (vn_basic to vn_pro)', () => {
       // 15 days remaining out of 30
-      // Starter daily: 39000/30 = 1300
-      // Premium daily: 129000/30 = 4300
-      // Credit: 1300 * 15 = 19500
-      // Charge: 4300 * 15 = 64500
-      // Prorated: 64500 - 19500 = 45000
-      const amount = calculateProratedAmount('starter', 'premium', 'monthly', periodEnd15Days, now);
-      expect(amount).toBe(45_000);
+      // vn_basic daily: 69000/30 = 2300
+      // vn_pro daily: 199000/30 = 6633.33
+      // Credit: 2300 * 15 = 34500
+      // Charge: 6633.33 * 15 = 99500
+      // Prorated: 99500 - 34500 = 65000
+      const amount = calculateProratedAmount('vn_basic', 'vn_pro', 'monthly', periodEnd15Days, now);
+      expect(amount).toBe(65_000);
     });
 
-    it('should calculate negative proration for downgrade (premium to starter)', () => {
+    it('should calculate negative proration for downgrade (vn_pro to vn_basic)', () => {
       // 15 days remaining out of 30
-      // Premium daily: 129000/30 = 4300
-      // Starter daily: 39000/30 = 1300
-      // Credit: 4300 * 15 = 64500
-      // Charge: 1300 * 15 = 19500
-      // Prorated: 19500 - 64500 = -45000
-      const amount = calculateProratedAmount('premium', 'starter', 'monthly', periodEnd15Days, now);
-      expect(amount).toBe(-45_000);
+      // vn_pro daily: 199000/30 = 6633.33
+      // vn_basic daily: 69000/30 = 2300
+      // Credit: 6633.33 * 15 = 99500
+      // Charge: 2300 * 15 = 34500
+      // Prorated: 34500 - 99500 = -65000
+      const amount = calculateProratedAmount('vn_pro', 'vn_basic', 'monthly', periodEnd15Days, now);
+      expect(amount).toBe(-65_000);
     });
 
     it('should return 0 for same plan', () => {
-      const amount = calculateProratedAmount('premium', 'premium', 'monthly', periodEnd15Days, now);
+      const amount = calculateProratedAmount(
+        'vn_basic',
+        'vn_basic',
+        'monthly',
+        periodEnd15Days,
+        now,
+      );
       expect(amount).toBe(0);
     });
 
     it('should handle yearly billing cycle', () => {
       const periodEnd100Days = new Date('2025-04-25'); // ~100 days from Jan 15
-      // Starter yearly: 390000/365 ≈ 1068.49
-      // Premium yearly: 1290000/365 ≈ 3534.25
+      // vn_basic yearly: 690000/365 ≈ 1890.41
+      // vn_pro yearly: 1990000/365 ≈ 5452.05
       // 100 days remaining
-      // Credit: 1068.49 * 100 ≈ 106849
-      // Charge: 3534.25 * 100 ≈ 353425
-      // Prorated: 353425 - 106849 ≈ 246576
-      const amount = calculateProratedAmount('starter', 'premium', 'yearly', periodEnd100Days, now);
-      expect(amount).toBeGreaterThan(240_000);
-      expect(amount).toBeLessThan(250_000);
+      // Credit: 1890.41 * 100 ≈ 189041
+      // Charge: 5452.05 * 100 ≈ 545205
+      // Prorated: 545205 - 189041 ≈ 356164
+      const amount = calculateProratedAmount('vn_basic', 'vn_pro', 'yearly', periodEnd100Days, now);
+      expect(amount).toBeGreaterThan(350_000);
+      expect(amount).toBeLessThan(360_000);
     });
 
     it('should handle unknown plan as free (0 cost)', () => {
-      const amount = calculateProratedAmount('unknown_plan', 'starter', 'monthly', periodEnd15Days, now);
-      // Unknown plan treated as 0 cost, so charge full prorated starter
-      // Starter daily: 39000/30 = 1300
-      // Charge: 1300 * 15 = 19500
-      expect(amount).toBe(19_500);
+      const amount = calculateProratedAmount(
+        'unknown_plan',
+        'vn_basic',
+        'monthly',
+        periodEnd15Days,
+        now,
+      );
+      // Unknown plan treated as 0 cost, so charge full prorated vn_basic
+      // vn_basic daily: 69000/30 = 2300
+      // Charge: 2300 * 15 = 34500
+      expect(amount).toBe(34_500);
     });
   });
 });
-
