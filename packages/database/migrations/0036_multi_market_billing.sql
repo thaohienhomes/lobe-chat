@@ -1,12 +1,3 @@
--- Migration: Multi-Market Billing System
--- Description: Add PPP pricing and payment gateway configuration tables
--- Date: 2025-01-11
--- Related to: International expansion and multi-market support
-
--- ============================================================================
--- 1. Create PPP Pricing Table
--- ============================================================================
-
 CREATE TABLE IF NOT EXISTS "ppp_pricing" (
 	"id" text PRIMARY KEY NOT NULL,
 	"country_code" varchar(2) NOT NULL,
@@ -28,11 +19,7 @@ CREATE TABLE IF NOT EXISTS "ppp_pricing" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
-
--- ============================================================================
--- 2. Create Payment Gateway Configs Table
--- ============================================================================
-
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "payment_gateway_configs" (
 	"id" text PRIMARY KEY NOT NULL,
 	"gateway_name" varchar(50) NOT NULL,
@@ -45,22 +32,7 @@ CREATE TABLE IF NOT EXISTS "payment_gateway_configs" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
-
--- ============================================================================
--- 3. Create Indexes
--- ============================================================================
-
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "ppp_pricing_country_code_key" ON "ppp_pricing"("country_code");
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "payment_gateway_configs_gateway_country_key" ON "payment_gateway_configs"("gateway_name","country_code");
-
--- ============================================================================
--- 4. Add Comments
--- ============================================================================
-
-COMMENT ON TABLE "ppp_pricing" IS 'PPP (Purchasing Power Parity) pricing for different countries';
-COMMENT ON TABLE "payment_gateway_configs" IS 'Payment gateway configurations by country';
-
-COMMENT ON COLUMN "ppp_pricing"."ppp_multiplier" IS 'PPP multiplier relative to US pricing (e.g., 0.35 for India)';
-COMMENT ON COLUMN "ppp_pricing"."available_payment_methods" IS 'JSON array of available payment methods for this country';
-COMMENT ON COLUMN "payment_gateway_configs"."config" IS 'Gateway-specific configuration (API keys, webhook URLs, etc.)';
-COMMENT ON COLUMN "payment_gateway_configs"."priority" IS 'Gateway priority (lower number = higher priority)';
