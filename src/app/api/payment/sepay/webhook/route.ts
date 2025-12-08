@@ -1,12 +1,14 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { sepayPayments, subscriptions } from '@/database/schemas';
+import { sepayPayments, subscriptions, users } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
 import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
 import { sendTikTokServerEvent } from '@/libs/tiktok-events-api';
-import { getPaymentByOrderId } from '@/server/services/billing/sepay';
+import {
+  getPaymentByOrderId,
+} from '@/server/services/billing/sepay';
 
 /**
  * GET endpoint to test webhook accessibility
@@ -86,82 +88,100 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         throw new Error('Payment record incomplete - cannot activate subscription');
       }
 
-      // Step 4: Activate subscription (upsert behavior)
-      console.log('🎯 Activating subscription for user:', {
-        billingCycle: payment.billingCycle,
-        planId: payment.planId,
+      // Step 4: Add Pho Credits (1 VND = 1 Credit)
+      console.log('💰 Adding Phở Points for user:', {
+        amount: webhookData.amount,
         userId: payment.userId,
       });
 
-      // Detect if this is an upgrade payment (orderId starts with PHO_UPG)
-      const isUpgradePayment = webhookData.orderId.startsWith('PHO_UPG');
-      console.log('Payment type:', isUpgradePayment ? 'UPGRADE' : 'NEW_SUBSCRIPTION');
+      await tx
+        .update(users)
+        .set({
+          lifetimeSpent: sql`${users.lifetimeSpent} + ${webhookData.amount}`,
+          phoPointsBalance: sql`${users.phoPointsBalance} + ${webhookData.amount}`,
+        })
+        .where(eq(users.id, payment.userId));
 
-      // Check if user already has a subscription
-      const existing = await tx
-        .select()
-        .from(subscriptions)
-        .where(eq(subscriptions.userId, payment.userId));
-
-      if (isUpgradePayment && existing.length > 0) {
-        // UPGRADE PAYMENT: Preserve existing period dates, only update plan
-        const existingSubscription = existing[0];
-        console.log('🔄 Processing upgrade - preserving existing period:', {
-          currentPeriodEnd: existingSubscription.currentPeriodEnd,
-          currentPeriodStart: existingSubscription.currentPeriodStart,
-          newPlanId: payment.planId,
-          oldPlanId: existingSubscription.planId,
+      // Step 5: Activate subscription (upsert behavior) if not one-time
+      if (payment.billingCycle && payment.billingCycle !== 'one_time') {
+        console.log('🎯 Activating subscription for user:', {
+          billingCycle: payment.billingCycle,
+          planId: payment.planId,
+          userId: payment.userId,
         });
 
-        await tx
-          .update(subscriptions)
-          .set({
-            billingCycle: payment.billingCycle,
-            // Preserve existing period dates for upgrades
+        // ... (Rest of subscription logic follows)
+
+        // Detect if this is an upgrade payment (orderId starts with PHO_UPG)
+        const isUpgradePayment = webhookData.orderId.startsWith('PHO_UPG');
+        console.log('Payment type:', isUpgradePayment ? 'UPGRADE' : 'NEW_SUBSCRIPTION');
+
+        // Check if user already has a subscription
+        const existing = await tx
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.userId, payment.userId));
+
+        if (isUpgradePayment && existing.length > 0) {
+          // UPGRADE PAYMENT: Preserve existing period dates, only update plan
+          const existingSubscription = existing[0];
+          console.log('🔄 Processing upgrade - preserving existing period:', {
             currentPeriodEnd: existingSubscription.currentPeriodEnd,
             currentPeriodStart: existingSubscription.currentPeriodStart,
-            paymentProvider: 'sepay',
-            planId: payment.planId,
-            status: 'active',
-          })
-          .where(eq(subscriptions.userId, payment.userId));
-        console.log('✅ Subscription upgraded successfully for user:', payment.userId);
-      } else {
-        // NEW SUBSCRIPTION or RENEWAL: Create new billing period
-        const start = new Date();
-        const end = new Date(start);
-        end.setDate(end.getDate() + (payment.billingCycle === 'yearly' ? 365 : 30));
+            newPlanId: payment.planId,
+            oldPlanId: existingSubscription.planId,
+          });
 
-        console.log('📅 Creating new billing period:', {
-          currentPeriodEnd: end,
-          currentPeriodStart: start,
-        });
-
-        if (existing.length > 0) {
-          // Update existing subscription with new period
           await tx
             .update(subscriptions)
             .set({
               billingCycle: payment.billingCycle,
-              currentPeriodEnd: end,
-              currentPeriodStart: start,
+              // Preserve existing period dates for upgrades
+              currentPeriodEnd: existingSubscription.currentPeriodEnd,
+              currentPeriodStart: existingSubscription.currentPeriodStart,
               paymentProvider: 'sepay',
               planId: payment.planId,
               status: 'active',
             })
             .where(eq(subscriptions.userId, payment.userId));
-          console.log('✅ Subscription renewed successfully for user:', payment.userId);
+          console.log('✅ Subscription upgraded successfully for user:', payment.userId);
         } else {
-          // Create new subscription
-          await tx.insert(subscriptions).values({
-            billingCycle: payment.billingCycle,
+          // NEW SUBSCRIPTION or RENEWAL: Create new billing period
+          const start = new Date();
+          const end = new Date(start);
+          end.setDate(end.getDate() + (payment.billingCycle === 'yearly' ? 365 : 30));
+
+          console.log('📅 Creating new billing period:', {
             currentPeriodEnd: end,
             currentPeriodStart: start,
-            planId: payment.planId,
-            status: 'active',
-            userId: payment.userId,
           });
-          console.log('✅ Subscription created successfully for user:', payment.userId);
+
+          if (existing.length > 0) {
+            // Update existing subscription with new period
+            await tx
+              .update(subscriptions)
+              .set({
+                billingCycle: payment.billingCycle,
+                currentPeriodEnd: end,
+                currentPeriodStart: start,
+                paymentProvider: 'sepay',
+                planId: payment.planId,
+                status: 'active',
+              })
+              .where(eq(subscriptions.userId, payment.userId));
+            console.log('✅ Subscription renewed successfully for user:', payment.userId);
+          } else {
+            // Create new subscription
+            await tx.insert(subscriptions).values({
+              billingCycle: payment.billingCycle,
+              currentPeriodEnd: end,
+              currentPeriodStart: start,
+              planId: payment.planId,
+              status: 'active',
+              userId: payment.userId,
+            });
+            console.log('✅ Subscription created successfully for user:', payment.userId);
+          }
         }
       }
 

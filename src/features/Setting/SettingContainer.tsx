@@ -21,6 +21,7 @@ const SettingContainer = memo<PropsWithChildren<SettingContainerProps>>(
         style={{
           background:
             variant === 'secondary' ? theme.colorBgContainerSecondary : theme.colorBgContainer,
+          color: theme.colorText,
           overflowX: 'hidden',
           overflowY: 'auto',
           ...style,

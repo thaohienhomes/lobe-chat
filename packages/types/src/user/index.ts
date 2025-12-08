@@ -12,6 +12,8 @@ export interface LobeUser {
   fullName?: string | null;
   id: string;
   latestName?: string | null;
+  lifetimeSpent?: number;
+  phoCreditBalance?: number;
   username?: string | null;
 }
 
@@ -55,6 +57,8 @@ export interface UserInitializationState {
   hasConversation?: boolean;
   isOnboard?: boolean;
   lastName?: string;
+  lifetimeSpent?: number;
+  phoCreditBalance?: number;
   preference: UserPreference;
   settings: PartialDeep<UserSettings>;
   subscriptionPlan?: Plans;

@@ -1,77 +1,149 @@
 /**
- * Cost Optimization System for Vietnamese Market
- * Target: 29,000 VND/month (~$1.20 USD) subscription tier
+ * Cost Optimization System for Phở Chat
+ * Based on PRICING_MASTERPLAN.md.md
+ *
+ * Uses "Phở Points" hidden credit system for usage tracking
  */
 
 
-// Cost per 1K tokens in USD (as of 2024)
+
+// Re-export for backward compatibility
+
+
+/* eslint-disable sort-keys-fix/sort-keys-fix */
+// Cost per 1K tokens in USD (for internal cost tracking)
+// Keys are grouped by tier for readability
 export const MODEL_COSTS = {
+  // Tier 1: Budget models (5 points/msg)
+  'claude-3-haiku': { input: 0.000_25, output: 0.001_25, tier: 1 },
+  'deepseek-chat': { input: 0.000_14, output: 0.000_28, tier: 1 },
+  'gemini-1.5-flash': { input: 0.000_075, output: 0.0003, tier: 1 },
+  'gemini-2.0-flash': { input: 0.0001, output: 0.0004, tier: 1 },
+  'gpt-4o-mini': { input: 0.000_15, output: 0.0006, tier: 1 },
+  'qwen-turbo': { input: 0.0001, output: 0.0003, tier: 1 },
 
-  'claude-3-haiku': { input: 0.000_25, output: 0.001_25 },
+  // Tier 2: Standard models (150 points/msg)
+  'claude-3-5-sonnet': { input: 0.003, output: 0.015, tier: 2 },
+  'claude-3-sonnet': { input: 0.003, output: 0.015, tier: 2 },
+  'deepseek-reasoner': { input: 0.0014, output: 0.0028, tier: 2 },
+  'gemini-1.5-pro': { input: 0.001_25, output: 0.005, tier: 2 },
+  'gemini-2.5-pro': { input: 0.001_25, output: 0.01, tier: 2 },
+  'gpt-4.1': { input: 0.002, output: 0.008, tier: 2 },
+  'gpt-4o': { input: 0.0025, output: 0.01, tier: 2 },
 
-  'claude-3-opus': { input: 0.015, output: 0.075 },
+  // Tier 3: Premium models (1000 points/msg)
+  'claude-3-opus': { input: 0.015, output: 0.075, tier: 3 },
+  'gpt-4-turbo': { input: 0.01, output: 0.03, tier: 3 },
+  'o1': { input: 0.015, output: 0.06, tier: 3 },
+  'o1-pro': { input: 0.15, output: 0.6, tier: 3 },
+  'o3': { input: 0.02, output: 0.08, tier: 3 },
+} as const;
+/* eslint-enable sort-keys-fix/sort-keys-fix */
 
-  'claude-3-sonnet': { input: 0.003, output: 0.015 },
+/**
+ * Vietnam Plans Pricing (Phở Points system)
+ * Based on PRICING_MASTERPLAN.md.md
+ */
+export const VND_PRICING_TIERS = {
+  
+  
+// Legacy mappings (for backward compatibility)
+premium: {
+    dailyTier2Limit: 30,
+    dailyTier3Limit: 0,
+    displayName: 'Phở Tái',
+    monthlyPoints: 300_000,
+    monthlyVND: 69_000,
+  },
+  
+  
 
 
-
-  'gemini-1.5-flash': { input: 0.000_075, output: 0.0003 },
-
-
-  'gemini-1.5-pro': { input: 0.001_25, output: 0.005 },
-
-
-  // Premium models for specialized tasks
-  'gpt-4-turbo': { input: 0.01, output: 0.03 },
-
-
+starter: {
+    dailyTier2Limit: 0,
+    dailyTier3Limit: 0,
+    displayName: 'Phở Không Người Lái',
+    monthlyPoints: 50_000,
+    monthlyVND: 0,
+  },
+  
+  
 
 
+ultimate: {
+    dailyTier2Limit: -1,
+    dailyTier3Limit: 50,
+    displayName: 'Phở Đặc Biệt',
+    monthlyPoints: 2_000_000,
+    monthlyVND: 199_000,
+  },
+  
+  
 
-  // Mid-tier models for complex queries
-  'gpt-4o': { input: 0.0025, output: 0.01 },
 
+// Basic tier (Student)
+vn_basic: {
+    dailyTier2Limit: 30,
+    dailyTier3Limit: 0,
+    displayName: 'Phở Tái',
+    monthlyPoints: 300_000,
+    monthlyVND: 69_000,
+  },
 
-  // Ultra-cheap models for basic queries
-  'gpt-4o-mini': { input: 0.000_15, output: 0.0006 },
+  
+  
+
+// Free tier
+vn_free: {
+    dailyTier2Limit: 0,
+    dailyTier3Limit: 0,
+    displayName: 'Phở Không Người Lái',
+    monthlyPoints: 50_000,
+    monthlyVND: 0,
+  },
+  
+// Pro tier
+vn_pro: {
+    dailyTier2Limit: -1, // Unlimited
+    dailyTier3Limit: 50,
+    displayName: 'Phở Đặc Biệt',
+    monthlyPoints: 2_000_000,
+    monthlyVND: 199_000,
+  },
+  // Team tier
+vn_team: {
+    dailyTier2Limit: -1,
+    dailyTier3Limit: -1,
+    displayName: 'Lẩu Phở (Team)',
+    monthlyPoints: 0, // Pooled
+    monthlyVND: 149_000, // per user
+  },
 } as const;
 
-// Vietnamese market pricing strategy
-// Updated 2025-01-08: Price increase to cover operational costs and prepare for advanced features
-export const VND_PRICING_TIERS = {
-  premium: {
-
-    // 15M tokens/month
-    dailyBudget: 500_000,
-
-    // ~$5.34 USD (updated from $4.00)
-    monthlyUSD: 5.34,
-
-    monthlyVND: 129_000, // Updated: +30.3% from 99,000 VND
-    tokenBudget: 15_000_000, // ~500K tokens/day
+/**
+ * Global Plans Pricing (USD via Polar.sh)
+ */
+export const USD_PRICING_TIERS = {
+  gl_lifetime: {
+    displayName: 'Lifetime Deal',
+    monthlyPoints: 500_000,
+    monthlyUSD: 149, // One-time
   },
-  starter: {
-
-    // 5M tokens/month
-    dailyBudget: 166_667,
-
-    // ~$1.61 USD (updated from $1.20)
-    monthlyUSD: 1.61,
-
-    monthlyVND: 39_000, // Updated: +34.5% from 29,000 VND
-    tokenBudget: 5_000_000, // ~167K tokens/day
+  gl_premium: {
+    displayName: 'Premium',
+    monthlyPoints: 2_000_000,
+    monthlyUSD: 19.9,
   },
-  ultimate: {
-
-    // 35M tokens/month
-    dailyBudget: 1_166_667,
-
-    // ~$14.44 USD (updated from $11.60)
-    monthlyUSD: 14.44,
-
-    monthlyVND: 349_000, // Updated: +20.8% from 289,000 VND
-    tokenBudget: 35_000_000, // ~1.17M tokens/day
-  }
+  gl_standard: {
+    displayName: 'Standard',
+    monthlyPoints: 500_000,
+    monthlyUSD: 9.9,
+  },
+  gl_starter: {
+    displayName: 'Starter',
+    monthlyPoints: 30_000,
+    monthlyUSD: 0,
+  },
 } as const;
 
 export interface CostCalculationRequest {
@@ -114,7 +186,7 @@ export class CostOptimizationEngine {
   async selectOptimalModel(
     query: string,
     userId: string,
-    remainingBudgetVND: number
+    remainingBudgetVND: number,
   ): Promise<CostOptimizationResult> {
     const complexity = this.analyzeQueryComplexity(query);
     // const remainingBudgetUSD = remainingBudgetVND / this.USD_TO_VND_RATE;
@@ -139,7 +211,10 @@ export class CostOptimizationEngine {
 
       if (costVND <= remainingBudgetVND) {
         return {
-          budgetWarning: this.generateBudgetWarning(remainingBudgetVND - costVND, remainingBudgetVND),
+          budgetWarning: this.generateBudgetWarning(
+            remainingBudgetVND - costVND,
+            remainingBudgetVND,
+          ),
           estimatedCostUSD: cost,
           estimatedCostVND: costVND,
           recommendedModel: model,
@@ -163,7 +238,7 @@ export class CostOptimizationEngine {
       estimatedCostUSD: cost,
       estimatedCostVND: cost * this.USD_TO_VND_RATE,
       recommendedModel: cheapestModel,
-      remainingBudgetVND: remainingBudgetVND - (cost * this.USD_TO_VND_RATE),
+      remainingBudgetVND: remainingBudgetVND - cost * this.USD_TO_VND_RATE,
     };
   }
 
@@ -180,12 +255,12 @@ export class CostOptimizationEngine {
     const lowerQuery = query.toLowerCase();
 
     // Check for complex indicators first
-    if (indicators.complex.some(word => lowerQuery.includes(word))) {
+    if (indicators.complex.some((word) => lowerQuery.includes(word))) {
       return 'complex';
     }
 
     // Check for medium complexity
-    if (indicators.medium.some(word => lowerQuery.includes(word)) || query.length > 200) {
+    if (indicators.medium.some((word) => lowerQuery.includes(word)) || query.length > 200) {
       return 'medium';
     }
 
@@ -217,16 +292,18 @@ export class CostOptimizationEngine {
    */
   private estimateOutputTokens(complexity: string, inputTokens: number): number {
     const multipliers = {
-
       // Detailed responses
       complex: 3,
 
       // Short responses
       medium: 1.5,
-      simple: 0.5,  // Comprehensive responses
+      simple: 0.5, // Comprehensive responses
     };
 
-    const baseTokens = Math.max(50, inputTokens * multipliers[complexity as keyof typeof multipliers]);
+    const baseTokens = Math.max(
+      50,
+      inputTokens * multipliers[complexity as keyof typeof multipliers],
+    );
     return Math.min(baseTokens, 4000); // Cap at 4K tokens
   }
 
@@ -299,7 +376,10 @@ export class CostOptimizationEngine {
  * Usage tracking middleware for tRPC integration
  */
 export class UsageTracker {
-  constructor(private db: any, private userId: string) {}
+  constructor(
+    private db: any,
+    private userId: string,
+  ) {}
 
   async trackUsage(request: {
     costUSD: number;
@@ -317,17 +397,14 @@ export class UsageTracker {
     const { usageLogs } = await import('@/database/schemas/usage');
 
     await this.db.insert(usageLogs).values({
-      
-costUSD: request.costUSD,
-      
+      costUSD: request.costUSD,
 
-costVND: costVND,
-      
+      costVND: costVND,
 
-createdAt: new Date(),
-      
-// Use provided provider or default to openai
-inputTokens: request.inputTokens, 
+      createdAt: new Date(),
+
+      // Use provided provider or default to openai
+      inputTokens: request.inputTokens,
       model: request.model,
       outputTokens: request.outputTokens,
       provider: request.provider || 'openai',
@@ -381,3 +458,5 @@ inputTokens: request.inputTokens,
       });
   }
 }
+
+export {GLOBAL_PLANS, MODEL_TIERS, VN_PLANS} from '@/config/pricing';

@@ -66,66 +66,74 @@ interface CurrentSubscription {
   planId: 'starter' | 'premium' | 'ultimate';
 }
 
+/**
+ * Plan interface based on PRICING_MASTERPLAN.md.md
+ */
 interface Plan {
+  code: string;
   description: string;
   features: string[];
-  id: 'starter' | 'premium' | 'ultimate';
+  id: 'vn_free' | 'vn_basic' | 'vn_pro' | 'starter' | 'premium' | 'ultimate';
+  monthlyPoints: number;
   monthlyPrice: number;
   name: string;
   yearlyPrice: number;
 }
 
+/**
+ * Vietnam Plans based on PRICING_MASTERPLAN.md.md
+ * Uses Phở Points system with tiered model access
+ */
 const plans: Plan[] = [
   {
-    description: 'Perfect for occasional AI users and students',
+    code: 'vn_free',
+    description: 'Trải nghiệm miễn phí với Tier 1 models',
     features: [
-      'Access to popular AI models',
-      '5M compute credits per month',
-      'Standard support',
-      'Basic conversation features',
-      'File upload (limited)',
-      'Pre-built AI assistants',
-      'No ads',
+      'Tier 1 models only (GPT-4o-mini, Gemini Flash)',
+      '50,000 Phở Points/month',
+      'Không lưu lịch sử',
     ],
-    id: 'starter',
-    monthlyPrice: 39_000,
-    name: 'Starter',
-    yearlyPrice: 390_000,
+    id: 'vn_free',
+    monthlyPoints: 50_000,
+    monthlyPrice: 0,
+    name: 'Phở Không Người Lái',
+    yearlyPrice: 0,
   },
   {
-    description: 'Designed for professional users and content creators',
+    code: 'vn_basic',
+    description: 'Dành cho sinh viên và người dùng cá nhân',
     features: [
-      'Access to all AI models',
-      '15M compute credits per month',
-      'Priority support response',
-      'Advanced conversation features',
-      'File upload and analysis',
-      'Custom AI assistants',
-      'Export conversation history',
-      'No ads',
+      'Unlimited Tier 1 models (GPT-4o-mini, Gemini Flash)',
+      '30 Tier 2 messages/day (GPT-4o, Claude Sonnet)',
+      '300,000 Phở Points/month',
+      'Lưu trữ lịch sử hội thoại',
+      'Upload file',
+      'Không quảng cáo',
     ],
-    id: 'premium',
-    monthlyPrice: 129_000,
-    name: 'Premium',
-    yearlyPrice: 1_290_000,
+    id: 'vn_basic',
+    monthlyPoints: 300_000,
+    monthlyPrice: 69_000,
+    name: 'Phở Tái',
+    yearlyPrice: 690_000,
   },
   {
-    description: 'For enterprises, developers, and AI researchers',
+    code: 'vn_pro',
+    description: 'Cho người dùng chuyên nghiệp và doanh nghiệp',
     features: [
-      'Access to all AI models including latest releases',
-      '35M compute credits per month',
-      'Priority support with dedicated channel',
-      'Advanced API access',
-      'Unlimited file uploads and analysis',
-      'Custom AI assistants with fine-tuning',
-      'Team collaboration features',
-      'Advanced analytics and insights',
-      'No ads',
+      'Unlimited Tier 1 & 2 models',
+      '50 Tier 3 messages/day (Claude Opus, GPT-4 Turbo)',
+      '2,000,000 Phở Points/month',
+      'Priority support',
+      'Advanced features',
+      'Team collaboration',
+      'Export & backup',
+      'Không quảng cáo',
     ],
-    id: 'ultimate',
-    monthlyPrice: 349_000,
-    name: 'Ultimate',
-    yearlyPrice: 3_490_000,
+    id: 'vn_pro',
+    monthlyPoints: 2_000_000,
+    monthlyPrice: 199_000,
+    name: 'Phở Đặc Biệt',
+    yearlyPrice: 1_990_000,
   },
 ];
 
@@ -135,7 +143,7 @@ export default function UpgradeClient() {
   const { styles } = useStyles();
 
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'premium' | 'ultimate' | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);

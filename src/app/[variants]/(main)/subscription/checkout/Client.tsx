@@ -166,59 +166,113 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 }));
 
-// Updated pricing (2025-01-08): Aligned with new subscription tiers
+/**
+ * Vietnam Plans based on PRICING_MASTERPLAN.md.md
+ * Uses Phở Points system with tiered model access
+ */
 const plans = {
-  premium: {
-    computeCredits: '15,000,000 / Month',
-    description: 'Designed for professional users and content creators',
+  
+  // Legacy mappings (for backward compatibility with existing URLs)
+premium: {
+    code: 'vn_basic',
+    description: 'Dành cho sinh viên và người dùng cá nhân',
     features: [
-      'Access to all AI models (GPT-4, Claude, Gemini, etc.)',
-      '15M compute credits per month',
-      'Priority support response',
-      'Advanced conversation features',
-      'File upload and analysis',
-      'Custom AI assistants',
-      'Export conversation history',
-      'No ads',
+      'Unlimited Tier 1 models',
+      '30 Tier 2 messages/day',
+      '300,000 Phở Points/month',
+      'Lưu trữ lịch sử hội thoại',
+      'Upload file',
+      'Không quảng cáo',
     ],
-    monthlyPriceVND: 129_000,
-    name: 'Premium',
-    yearlyPriceVND: 1_290_000,
+    monthlyPoints: 300_000,
+    monthlyPriceVND: 69_000,
+    name: 'Phở Tái',
+    yearlyPriceVND: 690_000,
   },
-  starter: {
-    computeCredits: '5,000,000 / Month',
-    description: 'Perfect for occasional AI users and students',
-    features: [
-      'Access to popular AI models',
-      '5M compute credits per month',
-      'Standard support',
-      'Basic conversation features',
-      'File upload (limited)',
-      'Pre-built AI assistants',
-      'No ads',
-    ],
-    monthlyPriceVND: 39_000,
-    name: 'Starter',
-    yearlyPriceVND: 390_000,
+  
+  
+
+starter: {
+    code: 'vn_free',
+    description: 'Trải nghiệm miễn phí',
+    features: ['Tier 1 models only', '50,000 Phở Points/month'],
+    monthlyPoints: 50_000,
+    monthlyPriceVND: 0,
+    name: 'Phở Không Người Lái',
+    yearlyPriceVND: 0,
   },
-  ultimate: {
-    computeCredits: '35,000,000 / Month',
-    description: 'For enterprises, developers, and AI researchers',
+  
+  
+
+
+ultimate: {
+    code: 'vn_pro',
+    description: 'Cho người dùng chuyên nghiệp',
     features: [
-      'Access to all AI models including latest releases',
-      '35M compute credits per month',
-      'Priority support with dedicated channel',
-      'Advanced API access',
-      'Unlimited file uploads and analysis',
-      'Custom AI assistants with fine-tuning',
-      'Team collaboration features',
-      'Advanced analytics and insights',
-      'Export and backup options',
-      'No ads',
+      'Unlimited Tier 1 & 2 models',
+      '50 Tier 3 messages/day',
+      '2,000,000 Phở Points/month',
+      'Priority support',
     ],
-    monthlyPriceVND: 349_000,
-    name: 'Ultimate',
-    yearlyPriceVND: 3_490_000,
+    monthlyPoints: 2_000_000,
+    monthlyPriceVND: 199_000,
+    name: 'Phở Đặc Biệt',
+    yearlyPriceVND: 1_990_000,
+  },
+
+  
+  
+
+// Basic tier (Student) - vn_basic
+vn_basic: {
+    code: 'vn_basic',
+    description: 'Dành cho sinh viên và người dùng cá nhân',
+    features: [
+      'Unlimited Tier 1 models (GPT-4o-mini, Gemini Flash)',
+      '30 Tier 2 messages/day (GPT-4o, Claude Sonnet)',
+      '300,000 Phở Points/month',
+      'Lưu trữ lịch sử hội thoại',
+      'Upload file',
+      'Không quảng cáo',
+    ],
+    monthlyPoints: 300_000,
+    monthlyPriceVND: 69_000,
+    name: 'Phở Tái',
+    yearlyPriceVND: 690_000,
+  },
+  
+// Free tier - vn_free (for reference, not purchasable)
+vn_free: {
+    code: 'vn_free',
+    description: 'Trải nghiệm miễn phí với Tier 1 models',
+    features: [
+      'Tier 1 models only (GPT-4o-mini, Gemini Flash)',
+      '50,000 Phở Points/month',
+      'Không lưu lịch sử',
+    ],
+    monthlyPoints: 50_000,
+    monthlyPriceVND: 0,
+    name: 'Phở Không Người Lái',
+    yearlyPriceVND: 0,
+  },
+  // Pro tier - vn_pro
+vn_pro: {
+    code: 'vn_pro',
+    description: 'Cho người dùng chuyên nghiệp và doanh nghiệp',
+    features: [
+      'Unlimited Tier 1 & 2 models',
+      '50 Tier 3 messages/day (Claude Opus, GPT-4 Turbo)',
+      '2,000,000 Phở Points/month',
+      'Priority support',
+      'Advanced features',
+      'Team collaboration',
+      'Export & backup',
+      'Không quảng cáo',
+    ],
+    monthlyPoints: 2_000_000,
+    monthlyPriceVND: 199_000,
+    name: 'Phở Đặc Biệt',
+    yearlyPriceVND: 1_990_000,
   },
 };
 

@@ -15,15 +15,21 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 
   compareTable: css`
+    color: ${token.colorText};
+    background: ${token.colorBgContainer};
+
     .ant-table-thead > tr > th {
       font-weight: 600;
+      color: ${token.colorText};
       text-align: center;
-      background: ${token.colorFillAlter};
+      background: ${token.colorBgElevated};
     }
 
     .ant-table-tbody > tr > td {
+      color: ${token.colorText};
       text-align: center;
       vertical-align: middle;
+      background: ${token.colorBgContainer};
     }
 
     .ant-table-tbody > tr > td:first-child {
@@ -43,7 +49,7 @@ interface CompareSectionProps {
 
 const CompareSection = memo<CompareSectionProps>(({ mobile }) => {
   const { t } = useTranslation('setting');
-  const { styles } = useStyles();
+  const { styles, theme: token } = useStyles();
 
   const compareData = [
     {
@@ -170,7 +176,9 @@ const CompareSection = memo<CompareSectionProps>(({ mobile }) => {
 
   return (
     <Flexbox gap={16}>
-      <Title level={4}>{t('subscription.compare.title')}</Title>
+      <Title level={4} style={{ color: token.colorText }}>
+        {t('subscription.compare.title')}
+      </Title>
       <Table
         className={styles.compareTable}
         columns={columns}

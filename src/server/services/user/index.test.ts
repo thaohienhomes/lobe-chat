@@ -36,6 +36,9 @@ vi.mock('@/database/models/user', () => {
 vi.mock('@/libs/logger', () => ({
   pino: {
     info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 

@@ -83,12 +83,30 @@ interface SubscriptionData {
   status: string;
 }
 
-// VND pricing for plans (monthly)
-const PLAN_PRICING: Record<string, number> = {
-  premium: 129_000,  // Fixed: was 149_000 VND
-  starter: 39_000,   // Fixed: was 29_000 VND
-  ultimate: 349_000, // Correct
-};
+/**
+ * VND pricing for plans (monthly) based on PRICING_MASTERPLAN.md.md
+ * Uses Phở Points system
+ */
+const PLAN_PRICING: Record<string, { displayName: string; monthlyPoints: number; price: number }> =
+  {
+    
+    // Legacy mappings (for backward compatibility)
+premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+    
+
+starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+    
+
+ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
+    
+// Vietnam Plans
+vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+
+    
+    vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+    vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
+    vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
+  };
 
 const handleManageSubscription = () => {
   // Navigate to subscription management
@@ -162,8 +180,9 @@ const BillingInfo = memo<BillingInfoProps>(({ mobile }) => {
   }
 
   // Calculate billing information from subscription data
-  const planName = subscription.planId.charAt(0).toUpperCase() + subscription.planId.slice(1);
-  const amount = PLAN_PRICING[subscription.planId] || 0;
+  const planInfo = PLAN_PRICING[subscription.planId] || PLAN_PRICING.vn_free;
+  const planName = planInfo.displayName;
+  const amount = planInfo.price;
   const nextBilling = new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
     day: '2-digit',
     month: '2-digit',

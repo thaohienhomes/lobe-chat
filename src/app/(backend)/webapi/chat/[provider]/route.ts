@@ -1,73 +1,94 @@
 import {
   AGENT_RUNTIME_ERROR_SET,
+  AgentRuntimeErrorType,
   ChatCompletionErrorPayload,
   ModelRuntime,
 } from '@lobechat/model-runtime';
 import { ChatErrorType } from '@lobechat/types';
+import console from 'node:console';
+import { eq } from 'drizzle-orm';
 
 import { checkAuth } from '@/app/(backend)/middleware/auth';
+import { modelPricing } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
-import { CostOptimizationEngine, UsageTracker } from '@/server/modules/CostOptimization';
 import { createTraceOptions, initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
 import {
   isCostOptimizationEnabled,
   isIntelligentRoutingEnabled,
   isUsageTrackingEnabled,
 } from '@/server/services/FeatureFlags';
+import { getUserCreditBalance , processModelUsage } from '@/server/services/billing/credits';
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
 import { getTracePayload } from '@/utils/trace';
 
 export const maxDuration = 300;
 
-/**
- * Track usage after completion
- */
-async function trackUsageAfterCompletion(params: {
-  costEngine: CostOptimizationEngine;
-  inputTokens: number;
-  model: string;
-  outputTokens: number;
-  provider: string;
-  responseTimeMs: number;
-  sessionId: string;
-  usageTracker: UsageTracker;
-  userId: string;
-}): Promise<void> {
+// TODO: Re-enable when usage tracking is fully implemented
+// async function trackUsageAfterCompletion(params: {
+//   costEngine: CostOptimizationEngine;
+//   inputTokens: number;
+//   model: string;
+//   outputTokens: number;
+//   provider: string;
+//   responseTimeMs: number;
+//   sessionId: string;
+//   usageTracker: UsageTracker;
+//   userId: string;
+// }): Promise<void> {
+//   try {
+//     const cost = params.costEngine.calculateCost({
+//       inputTokens: params.inputTokens,
+//       model: params.model,
+//       outputTokens: params.outputTokens,
+//       sessionId: params.sessionId,
+//       userId: params.userId,
+//     });
+//     let complexity: 'simple' | 'medium' | 'complex' = 'simple';
+//     if (params.inputTokens > 500) complexity = 'complex';
+//     else if (params.inputTokens > 100) complexity = 'medium';
+//     await params.usageTracker.trackUsage({
+//       costUSD: cost,
+//       inputTokens: params.inputTokens,
+//       model: params.model,
+//       outputTokens: params.outputTokens,
+//       provider: params.provider,
+//       queryComplexity: complexity,
+//       sessionId: params.sessionId,
+//     });
+//     console.log(`📊 Usage tracked: ${params.model} - ${cost.toFixed(6)} USD`);
+//   } catch (error) {
+//     console.error('Failed to track usage:', error);
+//   }
+// }
+
+async function getModelPricing(modelId: string) {
   try {
-    const cost = params.costEngine.calculateCost({
-      inputTokens: params.inputTokens,
-      model: params.model,
-      outputTokens: params.outputTokens,
-      sessionId: params.sessionId,
-      userId: params.userId,
+    const db = await getServerDB();
+    // Try to find exact model match
+    let pricing = await db.query.modelPricing.findFirst({
+      where: eq(modelPricing.modelId, modelId),
     });
 
-    // Determine query complexity based on input tokens
-    let complexity: 'simple' | 'medium' | 'complex' = 'simple';
-    if (params.inputTokens > 500) complexity = 'complex';
-    else if (params.inputTokens > 100) complexity = 'medium';
-
-    await params.usageTracker.trackUsage({
-      costUSD: cost,
-      inputTokens: params.inputTokens,
-      model: params.model,
-      outputTokens: params.outputTokens,
-      provider: params.provider,
-      queryComplexity: complexity,
-      sessionId: params.sessionId,
-    });
-
-    console.log(
-      `📊 Usage tracked: ${params.model} - ${cost.toFixed(6)} USD (${(cost * 24_167).toFixed(0)} VND)`,
-    );
-  } catch (error) {
-    console.error('Failed to track usage:', error);
+    // Fallback? Or return default.
+    // Ensure we handle 'gpt-4o' mapping if needed.
+    // For now assuming exact match.
+    return pricing;
+  } catch (e) {
+    console.error('Failed to get model pricing:', e);
+    return null;
   }
+}
+
+// Helper to count tokens from text
+function countTokens(text: string) {
+  return Math.ceil(text.length / 4);
 }
 
 export const POST = checkAuth(async (req: Request, { params, jwtPayload, createRuntime }) => {
   const { provider } = await params;
+
+  // ... (existing code)
 
   // 🔍 DEBUG: Log request info
   console.log('='.repeat(80));
@@ -92,25 +113,18 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       ? isUsageTrackingEnabled(jwtPayload.userId)
       : false;
 
-    let costEngine: CostOptimizationEngine | undefined;
-    let usageTracker: UsageTracker | undefined;
-    // TODO: Implement intelligent model routing
+    // TODO: Re-enable when cost optimization is fully implemented
+    // let costEngine: CostOptimizationEngine | undefined;
+    // let usageTracker: UsageTracker | undefined;
     // let modelRouter: IntelligentModelRouter | undefined;
 
     if (costOptimizationEnabled && jwtPayload.userId) {
       try {
-        const serverDB = await getServerDB();
-        costEngine = new CostOptimizationEngine();
-
-        if (usageTrackingEnabled) {
-          usageTracker = new UsageTracker(serverDB, jwtPayload.userId);
-        }
-
-        // TODO: Implement intelligent model routing
-        // if (intelligentRoutingEnabled) {
-        //   _modelRouter = new IntelligentModelRouter();
+        // const serverDB = await getServerDB();
+        // costEngine = new CostOptimizationEngine();
+        // if (usageTrackingEnabled) {
+        //   usageTracker = new UsageTracker(serverDB, jwtPayload.userId);
         // }
-
         console.log(
           `🎯 Cost optimization enabled for user ${jwtPayload.userId} (routing: ${intelligentRoutingEnabled}, tracking: ${usageTrackingEnabled})`,
         );
@@ -120,6 +134,27 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           error,
         );
       }
+    }
+
+    // ============  0.5. Credit Check (Pre-flight)   ============ //
+    // Check if user has sufficient credits to start the request
+    if (jwtPayload.userId) {
+      const creditStatus = await getUserCreditBalance(jwtPayload.userId);
+      const balance = creditStatus?.balance || 0;
+
+      // Allow small overdraft (e.g. -10k VND) to prevent cutoff mid-sentence
+      // But block if significantly negative
+      if (balance < -10_000) {
+        console.warn(
+          `🚫 Blocked request due to negative balance: ${balance} (User: ${jwtPayload.userId})`,
+        );
+        return createErrorResponse(AgentRuntimeErrorType.InsufficientQuota, {
+          error: { message: `Insufficient Pho Credits. Balance: ${balance}` },
+          provider,
+        });
+      }
+
+      console.log(`💰 Credit Check: Balance ${balance} (User: ${jwtPayload.userId})`);
     }
 
     // ============  1. init chat model   ============ //
@@ -164,32 +199,124 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     console.log(`[Chat API] ✅ Chat completion successful`);
     console.log('='.repeat(80));
 
-    // ============  4. Track Usage (for non-streaming responses)   ============ //
-    if (usageTracker && costEngine && !data.stream) {
-      try {
-        // For non-streaming responses, we can track usage immediately
-        // Note: For streaming responses, usage tracking should be handled in the stream completion
-        const inputTokens =
-          data.messages?.reduce((acc, msg) => acc + (msg.content?.length || 0), 0) || 0;
-        const estimatedInputTokens = Math.ceil(inputTokens / 4); // Rough estimate: 4 chars per token
-        const estimatedOutputTokens = 150; // Default estimate for non-streaming
+    // ============  4. Usage Tracking & Credit Deduction   ============ //
+    // Fetch pricing for this model
+    // Note: data.model might be an alias, but provider handles the real model ID.
+    // relying on data.model for pricing lookup.
+    const pricing = await getModelPricing(data.model);
 
-        await trackUsageAfterCompletion({
-          costEngine,
-          inputTokens: estimatedInputTokens,
-          model: data.model,
-          outputTokens: estimatedOutputTokens,
-          provider,
-          responseTimeMs: 0, // For non-streaming, response time is not critical
-          sessionId: (data as any).sessionId || 'unknown',
-          usageTracker,
-          userId: jwtPayload.userId!,
-        });
-      } catch (error) {
-        console.warn('⚠️ Failed to track usage for non-streaming response:', error);
+    // Default pricing if not found (FAIL SAFE - or should we hardcode?)
+    // Using 5000/15000 as a fallback baseline (same as 'gpt-4o-mini' in seed)
+    const activePricing = pricing || {
+      id: 'default',
+      inputPrice: 5000,
+      outputPrice: 15_000,
+      tier: 1,
+    };
+
+    if (!pricing) {
+      console.warn(`⚠️ No pricing found for model ${data.model}, using fallback.`);
+    }
+
+    if (data.stream && response.body) {
+      // STREAMING: Tee the stream to audit usage
+      const [stream1, stream2] = response.body.tee();
+
+      // Process audit in background (don't await)
+      (async () => {
+        try {
+          const reader = stream2.getReader();
+          let accumulatedText = '';
+          const decoder = new TextDecoder();
+
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            // Decode chunk. Note: chunks might be partial SSE events.
+            // But raw length count is decent proxy for tokens across languages?
+            // AI SDK might send 'data: "..."'.
+            // We just count everything for now as a rough "usage unit".
+            // Better: try to clean it?
+            accumulatedText += decoder.decode(value, { stream: true });
+          }
+
+          // Calculate tokens
+          const outputTokens = countTokens(accumulatedText);
+          const inputTokens =
+            data.messages?.reduce((acc, msg) => acc + countTokens(String(msg.content || '')), 0) ||
+            0;
+
+          // Calculate Cost (per 1M tokens)
+          // Cost = (Input * InputPrice + Output * OutputPrice) / 1,000,000
+          const inputPrice = activePricing.inputPrice ?? 0;
+          const outputPrice = activePricing.outputPrice ?? 0;
+          const cost = Math.ceil((inputTokens * inputPrice + outputTokens * outputPrice) / 1_000_000);
+
+          console.log(
+            `📉 Streaming Usage: ${inputTokens} in / ${outputTokens} out. Cost: ${cost} Credits.`,
+          );
+
+          if (cost > 0 && jwtPayload.userId) {
+            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1);
+          }
+        } catch (e) {
+          console.error('Failed to audits stream:', e);
+        }
+      })();
+
+      return new Response(stream1, {
+        headers: response.headers,
+        status: response.status,
+        statusText: response.statusText,
+      });
+    } else {
+      // NON-STREAMING
+      try {
+        // ... existing tracking logic ...
+        // We can reuse the logic here or keep trackUsageAfterCompletion if it's used elsewhere
+        // But we must deduct credits.
+        const responseClone = response.clone();
+        const responseData = await responseClone.json(); // May consume body
+
+        // Wait, response is returned to user. We can't consume it if we don't clone.
+        // But ModelRuntime.chat returning Response...
+        // If we access .json(), the original response is used?
+        // Actually, for non-streaming, we can just intercept.
+
+        // NOTE: The previous code didn't actually read the response for tracking!
+        // It used "150" as estimated output tokens.
+        // We should try to read it if possible, but cloning might be expensive.
+
+        // Let's stick to estimation or try to read if cheap.
+        const content = responseData.choices?.[0]?.message?.content || '';
+        const outputTokens = countTokens(content);
+        const inputTokens =
+          data.messages?.reduce((acc, msg) => acc + countTokens(String(msg.content || '')), 0) || 0;
+
+        const inputPrice = activePricing.inputPrice ?? 0;
+        const outputPrice = activePricing.outputPrice ?? 0;
+        const cost = Math.ceil((inputTokens * inputPrice + outputTokens * outputPrice) / 1_000_000);
+
+        if (cost > 0 && jwtPayload.userId) {
+          await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1);
+          console.log(`📉 Non-Streaming Usage: ${cost} Credits processed.`);
+        }
+
+        // Return a new response from the data we read, to ensure stream isn't locked?
+        // Or just return the response. Since we cloned, the original might be fine?
+        // Response.clone() creates a separate stream.
+        // So we can return `response`.
+      } catch (e) {
+        console.error('Failed to process non-streaming response for credits:', e);
       }
     }
 
+    // Return original response for non-streaming (since we cloned)
+    if (!data.stream) {
+      return response;
+    }
+
+    // Should be unreachable as we returned in stream block
     return response;
   } catch (e) {
     console.log('='.repeat(80));

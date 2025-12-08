@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
+import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
+import { addPhoCredits } from '@/server/services/billing/credits';
 import {
   activateUserSubscription,
   getPaymentByOrderId,
@@ -11,11 +12,11 @@ import {
 /**
  * Sepay Webhook Handler - Compatibility Route
  * POST /api/sepay/webhook
- * 
+ *
  * This route exists for backward compatibility with Sepay dashboard configuration.
  * The correct route is /api/payment/sepay/webhook, but Sepay may be configured
  * to send webhooks to /api/sepay/webhook.
- * 
+ *
  * This route forwards all webhook requests to the correct handler.
  */
 
@@ -69,43 +70,58 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
       userId: payment.userId,
     });
 
-    // Activate subscription
+    // Activate subscription (if not a one-time payment)
     if (payment.userId && payment.planId && payment.billingCycle) {
+      // Always add credits for the payment amount (1 VND = 1 Credit)
+      console.log('💰 [COMPAT ROUTE] Adding Pho Credits for user:', {
+        amount: webhookData.amount,
+        userId: payment.userId,
+      });
+      await addPhoCredits(payment.userId, webhookData.amount);
+
       // Detect if this is an upgrade payment (orderId starts with PHO_UPG)
       const isUpgradePayment = webhookData.orderId.startsWith('PHO_UPG');
-      console.log('🎯 [COMPAT ROUTE] Activating subscription for user:', {
-        billingCycle: payment.billingCycle,
-        isUpgrade: isUpgradePayment,
-        planId: payment.planId,
-        userId: payment.userId,
-      });
 
-      await activateUserSubscription({
-        billingCycle: payment.billingCycle as 'monthly' | 'yearly',
-        isUpgrade: isUpgradePayment,
-        planId: payment.planId,
-        userId: payment.userId,
-      });
+      // Only activate subscription if it's not a one-time payment
+      if (payment.billingCycle !== 'one_time') {
+        console.log('🎯 [COMPAT ROUTE] Activating subscription for user:', {
+          billingCycle: payment.billingCycle,
+          isUpgrade: isUpgradePayment,
+          planId: payment.planId,
+          userId: payment.userId,
+        });
 
-      console.log('✅ [COMPAT ROUTE] Subscription activated successfully for user:', payment.userId);
+        await activateUserSubscription({
+          billingCycle: payment.billingCycle as 'monthly' | 'yearly',
+          isUpgrade: isUpgradePayment,
+          planId: payment.planId,
+          userId: payment.userId,
+        });
+
+        console.log(
+          '✅ [COMPAT ROUTE] Subscription activated successfully for user:',
+          payment.userId,
+        );
+      } else {
+        console.log('ℹ️ [COMPAT ROUTE] Skipping subscription activation for one-time payment');
+      }
     } else {
       console.error('❌ [COMPAT ROUTE] Payment record incomplete - missing required fields:', {
         hasBillingCycle: !!payment.billingCycle,
         hasPlanId: !!payment.planId,
         hasUserId: !!payment.userId,
       });
-      throw new Error('Payment record incomplete - cannot activate subscription');
+      throw new Error('Payment record incomplete - cannot process payment');
     }
 
     // Record metrics
     const duration = Date.now() - startTime;
-    paymentMetricsCollector.recordWebhookProcessing(
-      webhookData.orderId,
-      'success',
-      duration,
-    );
+    paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
-    console.log('✅ [COMPAT ROUTE] Webhook processed successfully for orderId:', webhookData.orderId);
+    console.log(
+      '✅ [COMPAT ROUTE] Webhook processed successfully for orderId:',
+      webhookData.orderId,
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
@@ -154,13 +170,12 @@ async function handleFailedPayment(webhookData: SepayWebhookData): Promise<void>
 
     // Record metrics
     const duration = Date.now() - startTime;
-    paymentMetricsCollector.recordWebhookProcessing(
-      webhookData.orderId,
-      'success',
-      duration,
-    );
+    paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
-    console.log('✅ [COMPAT ROUTE] Webhook processed successfully for orderId:', webhookData.orderId);
+    console.log(
+      '✅ [COMPAT ROUTE] Webhook processed successfully for orderId:',
+      webhookData.orderId,
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
@@ -199,13 +214,12 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
     });
 
     const duration = Date.now() - startTime;
-    paymentMetricsCollector.recordWebhookProcessing(
-      webhookData.orderId,
-      'success',
-      duration,
-    );
+    paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
-    console.log('✅ [COMPAT ROUTE] Webhook processed successfully for orderId:', webhookData.orderId);
+    console.log(
+      '✅ [COMPAT ROUTE] Webhook processed successfully for orderId:',
+      webhookData.orderId,
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
@@ -236,8 +250,14 @@ async function handlePendingPayment(webhookData: SepayWebhookData): Promise<void
 export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: any;
   try {
-    console.log('🔔 [COMPAT ROUTE] Webhook received at /api/sepay/webhook from:', request.headers.get('user-agent'));
-    console.log('🔔 [COMPAT ROUTE] Request headers:', Object.fromEntries(request.headers.entries()));
+    console.log(
+      '🔔 [COMPAT ROUTE] Webhook received at /api/sepay/webhook from:',
+      request.headers.get('user-agent'),
+    );
+    console.log(
+      '🔔 [COMPAT ROUTE] Request headers:',
+      Object.fromEntries(request.headers.entries()),
+    );
 
     // Parse webhook data from Sepay (only parse once!)
     body = await request.json();
@@ -269,7 +289,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.error('❌ [COMPAT ROUTE] Missing orderId in webhook payload');
       return NextResponse.json(
         { message: 'Missing orderId in webhook payload', success: false },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -277,7 +297,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.error('❌ [COMPAT ROUTE] Missing transactionId in webhook payload');
       return NextResponse.json(
         { message: 'Missing transactionId in webhook payload', success: false },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -287,26 +307,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       if (!isValidSignature) {
         console.error('❌ [COMPAT ROUTE] Invalid webhook signature:', webhookData.orderId);
-        console.error('❌ [COMPAT ROUTE] Signature verification failed - webhook will still be processed for debugging');
+        console.error(
+          '❌ [COMPAT ROUTE] Signature verification failed - webhook will still be processed for debugging',
+        );
       }
     } else {
-      console.warn('⚠️ [COMPAT ROUTE] No signature provided in webhook - skipping signature verification');
+      console.warn(
+        '⚠️ [COMPAT ROUTE] No signature provided in webhook - skipping signature verification',
+      );
     }
 
     // Process payment based on status
     switch (webhookData.status) {
       case 'success': {
-        console.log('✅ [COMPAT ROUTE] Processing successful payment for orderId:', webhookData.orderId);
+        console.log(
+          '✅ [COMPAT ROUTE] Processing successful payment for orderId:',
+          webhookData.orderId,
+        );
         await handleSuccessfulPayment(webhookData);
         break;
       }
       case 'failed': {
-        console.log('❌ [COMPAT ROUTE] Processing failed payment for orderId:', webhookData.orderId);
+        console.log(
+          '❌ [COMPAT ROUTE] Processing failed payment for orderId:',
+          webhookData.orderId,
+        );
         await handleFailedPayment(webhookData);
         break;
       }
       case 'pending': {
-        console.log('⏳ [COMPAT ROUTE] Processing pending payment for orderId:', webhookData.orderId);
+        console.log(
+          '⏳ [COMPAT ROUTE] Processing pending payment for orderId:',
+          webhookData.orderId,
+        );
         await handlePendingPayment(webhookData);
         break;
       }
@@ -336,8 +369,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         message: 'Failed to process webhook',
         success: false,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

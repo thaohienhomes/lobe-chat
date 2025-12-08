@@ -37,8 +37,10 @@ export const mapLobeUserToAdapterUser = (lobeUser: NewUser): AdapterUser => {
     emailVerified: emailVerifiedAt ? new Date(emailVerifiedAt) : null,
     id,
     image: avatar,
+    lifetimeSpent: lobeUser.lifetimeSpent,
     name: fullName,
-  };
+    phoPointsBalance: lobeUser.phoPointsBalance,
+  } as AdapterUser & { lifetimeSpent?: number, phoPointsBalance?: number; };
 };
 
 type AuthenticatorQueryResult = {

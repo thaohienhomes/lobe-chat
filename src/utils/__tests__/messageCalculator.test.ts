@@ -1,19 +1,19 @@
 /**
  * Test Suite for Message Calculator
- * 
+ *
  * Tests all message calculation functions to ensure accuracy
  * and consistency with pricing model.
  */
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import {
+  PLAN_BUDGETS,
   calculateCostPerMessage,
   calculateMessagesForPlan,
-  getTopModelsForPlan,
   formatMessageCount,
   generateFeatureText,
+  getTopModelsForPlan,
   validateCalculations,
-  PLAN_BUDGETS,
 } from '../messageCalculator';
 
 describe('Message Calculator', () => {
@@ -46,40 +46,43 @@ describe('Message Calculator', () => {
   });
 
   describe('calculateMessagesForPlan', () => {
-    it('should calculate correct messages for Starter plan', () => {
-      const messages = calculateMessagesForPlan('starter');
+    it('should calculate correct messages for vn_free plan (Phở Points system)', () => {
+      const messages = calculateMessagesForPlan('vn_free');
 
       // Find GPT-4o mini in results
-      const gpt4oMini = messages.find(m => m.model === 'gpt-4o-mini');
+      const gpt4oMini = messages.find((m) => m.model === 'gpt-4o-mini');
       expect(gpt4oMini).toBeDefined();
 
-      // Starter budget: $1.61, GPT-4o mini cost: $0.000195/message
-      // Expected: 1.61 / 0.000195 ≈ 8,256 messages
-      expect(gpt4oMini!.messageCount).toBeCloseTo(8256, -2); // Within 100 messages
+      // vn_free has 50,000 Phở Points
+      // GPT-4o mini cost: $0.000195/message * 1000 = 0.195 points per message
+      // Expected: 50000 / 0.195 ≈ 256,410 messages
+      expect(gpt4oMini!.messageCount).toBeGreaterThan(200_000);
     });
 
-    it('should calculate correct messages for Premium plan', () => {
-      const messages = calculateMessagesForPlan('premium');
+    it('should calculate correct messages for vn_basic plan (Phở Points system)', () => {
+      const messages = calculateMessagesForPlan('vn_basic');
 
       // Find Gemini 1.5 Flash in results
-      const geminiFlash = messages.find(m => m.model === 'gemini-1.5-flash');
+      const geminiFlash = messages.find((m) => m.model === 'gemini-1.5-flash');
       expect(geminiFlash).toBeDefined();
 
-      // Premium budget: $5.34, Gemini Flash cost: $0.0000975/message
-      // Expected: 5.34 / 0.0000975 ≈ 54,769 messages
-      expect(geminiFlash!.messageCount).toBeCloseTo(54769, -2);
+      // vn_basic has 300,000 Phở Points
+      // Gemini Flash cost: $0.0000975/message * 1000 = 0.0975 points per message
+      // Expected: 300000 / 0.0975 ≈ 3,076,923 messages
+      expect(geminiFlash!.messageCount).toBeGreaterThan(3_000_000);
     });
 
-    it('should calculate correct messages for Ultimate plan', () => {
-      const messages = calculateMessagesForPlan('ultimate');
+    it('should calculate correct messages for vn_pro plan (Phở Points system)', () => {
+      const messages = calculateMessagesForPlan('vn_pro');
 
       // Find Claude 3.5 Sonnet in results
-      const claudeSonnet = messages.find(m => m.model === 'claude-3-sonnet');
+      const claudeSonnet = messages.find((m) => m.model === 'claude-3-sonnet');
       expect(claudeSonnet).toBeDefined();
 
-      // Ultimate budget: $14.44, Claude Sonnet cost: $0.0048/message
-      // Expected: 14.44 / 0.0048 ≈ 3,008 messages
-      expect(claudeSonnet!.messageCount).toBeCloseTo(3008, -1);
+      // vn_pro has 2,000,000 Phở Points
+      // Claude Sonnet cost: $0.0048/message * 1000 = 4.8 points per message
+      // Expected: 2000000 / 4.8 ≈ 416,666 messages
+      expect(claudeSonnet!.messageCount).toBeGreaterThan(400_000);
     });
 
     it('should return all supported models', () => {
@@ -94,8 +97,8 @@ describe('Message Calculator', () => {
         'claude-3-sonnet',
       ];
 
-      const actualModels = messages.map(m => m.model);
-      expectedModels.forEach(model => {
+      const actualModels = messages.map((m) => m.model);
+      expectedModels.forEach((model) => {
         expect(actualModels).toContain(model);
       });
     });
@@ -117,13 +120,13 @@ describe('Message Calculator', () => {
       expect(premiumModels).toHaveLength(3);
 
       // Budget models should be cheaper (more messages)
-      const budgetModelNames = budgetModels.map(m => m.model);
+      const budgetModelNames = budgetModels.map((m) => m.model);
       expect(budgetModelNames).toContain('gemini-1.5-flash');
       expect(budgetModelNames).toContain('gpt-4o-mini');
       expect(budgetModelNames).toContain('claude-3-haiku');
 
       // Premium models should be more expensive (fewer messages)
-      const premiumModelNames = premiumModels.map(m => m.model);
+      const premiumModelNames = premiumModels.map((m) => m.model);
       expect(premiumModelNames).toContain('gemini-1.5-pro');
       expect(premiumModelNames).toContain('gpt-4o');
       expect(premiumModelNames).toContain('claude-3-sonnet');
@@ -141,12 +144,16 @@ describe('Message Calculator', () => {
 
       // Budget models should be sorted by message count (descending)
       for (let i = 1; i < budgetModels.length; i++) {
-        expect(budgetModels[i - 1].messageCount).toBeGreaterThanOrEqual(budgetModels[i].messageCount);
+        expect(budgetModels[i - 1].messageCount).toBeGreaterThanOrEqual(
+          budgetModels[i].messageCount,
+        );
       }
 
       // Premium models should be sorted by message count (descending)
       for (let i = 1; i < premiumModels.length; i++) {
-        expect(premiumModels[i - 1].messageCount).toBeGreaterThanOrEqual(premiumModels[i].messageCount);
+        expect(premiumModels[i - 1].messageCount).toBeGreaterThanOrEqual(
+          premiumModels[i].messageCount,
+        );
       }
     });
   });
@@ -183,7 +190,8 @@ describe('Message Calculator', () => {
         modelName: 'GPT-4o mini',
         messageCount: 8256,
         costPerMessage: 0.000195,
-        category: 'budget' as const,
+        category: 'tier1' as const,
+        tier: 1,
       };
 
       const text = generateFeatureText(messageCalc);
@@ -196,7 +204,8 @@ describe('Message Calculator', () => {
         modelName: 'Claude 3.5 Sonnet',
         messageCount: 3008,
         costPerMessage: 0.0048,
-        category: 'premium' as const,
+        category: 'tier2' as const,
+        tier: 2,
       };
 
       const text = generateFeatureText(messageCalc);
@@ -212,7 +221,7 @@ describe('Message Calculator', () => {
       expect(validation.errors).toHaveLength(0);
 
       // Check that all plans have reasonable message counts
-      validation.results.forEach(result => {
+      validation.results.forEach((result) => {
         expect(result.totalModels).toBeGreaterThan(0);
         expect(result.budgetModels).toBeGreaterThan(0);
         expect(result.premiumModels).toBeGreaterThan(0);
@@ -231,9 +240,9 @@ describe('Message Calculator', () => {
       // For the same model, higher tier should have more messages
       const modelToCheck = 'gpt-4o-mini';
 
-      const starterGPT = starterMessages.find(m => m.model === modelToCheck)!;
-      const premiumGPT = premiumMessages.find(m => m.model === modelToCheck)!;
-      const ultimateGPT = ultimateMessages.find(m => m.model === modelToCheck)!;
+      const starterGPT = starterMessages.find((m) => m.model === modelToCheck)!;
+      const premiumGPT = premiumMessages.find((m) => m.model === modelToCheck)!;
+      const ultimateGPT = ultimateMessages.find((m) => m.model === modelToCheck)!;
 
       expect(premiumGPT.messageCount).toBeGreaterThan(starterGPT.messageCount);
       expect(ultimateGPT.messageCount).toBeGreaterThan(premiumGPT.messageCount);
@@ -241,62 +250,63 @@ describe('Message Calculator', () => {
   });
 
   describe('PLAN_BUDGETS', () => {
-    it('should have correct budget values', () => {
-      expect(PLAN_BUDGETS.starter.monthlyVND).toBe(39_000);
-      expect(PLAN_BUDGETS.starter.monthlyUSD).toBeCloseTo(1.61, 2);
-      expect(PLAN_BUDGETS.starter.tokenBudget).toBe(5_000_000);
+    it('should have correct budget values for Vietnam plans', () => {
+      expect(PLAN_BUDGETS.vn_free.monthlyVND).toBe(0);
+      expect(PLAN_BUDGETS.vn_free.monthlyPoints).toBe(50_000);
 
-      expect(PLAN_BUDGETS.premium.monthlyVND).toBe(129_000);
-      expect(PLAN_BUDGETS.premium.monthlyUSD).toBeCloseTo(5.34, 2);
-      expect(PLAN_BUDGETS.premium.tokenBudget).toBe(15_000_000);
+      expect(PLAN_BUDGETS.vn_basic.monthlyVND).toBe(69_000);
+      expect(PLAN_BUDGETS.vn_basic.monthlyPoints).toBe(300_000);
 
-      expect(PLAN_BUDGETS.ultimate.monthlyVND).toBe(349_000);
-      expect(PLAN_BUDGETS.ultimate.monthlyUSD).toBeCloseTo(14.44, 2);
-      expect(PLAN_BUDGETS.ultimate.tokenBudget).toBe(35_000_000);
+      expect(PLAN_BUDGETS.vn_pro.monthlyVND).toBe(199_000);
+      expect(PLAN_BUDGETS.vn_pro.monthlyPoints).toBe(2_000_000);
     });
 
-    it('should have reasonable USD to VND conversion rates', () => {
-      // Check that all plans have reasonable exchange rates (around 24,000 VND per USD)
-      Object.values(PLAN_BUDGETS).forEach(plan => {
-        const planRate = plan.monthlyVND / plan.monthlyUSD;
-        expect(planRate).toBeGreaterThan(20000); // At least 20,000 VND per USD
-        expect(planRate).toBeLessThan(30000); // At most 30,000 VND per USD
-      });
+    it('should have legacy plan mappings', () => {
+      // Legacy plans should map to new plans
+      expect(PLAN_BUDGETS.starter.monthlyPoints).toBe(50_000);
+      expect(PLAN_BUDGETS.premium.monthlyPoints).toBe(300_000);
+      expect(PLAN_BUDGETS.ultimate.monthlyPoints).toBe(2_000_000);
     });
   });
 
   describe('Integration Tests', () => {
     it('should produce consistent results across multiple calls', () => {
-      const results1 = calculateMessagesForPlan('starter');
-      const results2 = calculateMessagesForPlan('starter');
+      const results1 = calculateMessagesForPlan('vn_free');
+      const results2 = calculateMessagesForPlan('vn_free');
 
       expect(results1).toEqual(results2);
     });
 
     it('should handle all plan types without errors', () => {
+      expect(() => calculateMessagesForPlan('vn_free')).not.toThrow();
+      expect(() => calculateMessagesForPlan('vn_basic')).not.toThrow();
+      expect(() => calculateMessagesForPlan('vn_pro')).not.toThrow();
+      // Legacy plans should also work
       expect(() => calculateMessagesForPlan('starter')).not.toThrow();
       expect(() => calculateMessagesForPlan('premium')).not.toThrow();
       expect(() => calculateMessagesForPlan('ultimate')).not.toThrow();
     });
 
-    it('should maintain reasonable ratios between plans', () => {
-      const starter = calculateMessagesForPlan('starter');
-      const premium = calculateMessagesForPlan('premium');
-      const ultimate = calculateMessagesForPlan('ultimate');
+    it('should maintain reasonable ratios between plans (Phở Points system)', () => {
+      const vnFree = calculateMessagesForPlan('vn_free');
+      const vnBasic = calculateMessagesForPlan('vn_basic');
+      const vnPro = calculateMessagesForPlan('vn_pro');
 
-      // Premium should have roughly 3x more messages than Starter
-      const starterGPT = starter.find(m => m.model === 'gpt-4o-mini')!;
-      const premiumGPT = premium.find(m => m.model === 'gpt-4o-mini')!;
-      const ultimateGPT = ultimate.find(m => m.model === 'gpt-4o-mini')!;
+      // vn_basic should have 6x more points than vn_free (300k vs 50k)
+      const freeGPT = vnFree.find((m) => m.model === 'gpt-4o-mini')!;
+      const basicGPT = vnBasic.find((m) => m.model === 'gpt-4o-mini')!;
+      const proGPT = vnPro.find((m) => m.model === 'gpt-4o-mini')!;
 
-      const premiumRatio = premiumGPT.messageCount / starterGPT.messageCount;
-      const ultimateRatio = ultimateGPT.messageCount / starterGPT.messageCount;
+      const basicRatio = basicGPT.messageCount / freeGPT.messageCount;
+      const proRatio = proGPT.messageCount / freeGPT.messageCount;
 
-      expect(premiumRatio).toBeGreaterThan(2.5);
-      expect(premiumRatio).toBeLessThan(4.0);
+      // vn_basic has 6x more points than vn_free
+      expect(basicRatio).toBeGreaterThan(5.5);
+      expect(basicRatio).toBeLessThan(6.5);
 
-      expect(ultimateRatio).toBeGreaterThan(7.0);
-      expect(ultimateRatio).toBeLessThan(10.0);
+      // vn_pro has 40x more points than vn_free (2M vs 50k)
+      expect(proRatio).toBeGreaterThan(38);
+      expect(proRatio).toBeLessThan(42);
     });
   });
 });

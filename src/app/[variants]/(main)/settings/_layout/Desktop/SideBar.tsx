@@ -14,6 +14,9 @@ const useStyles = createStyles(({ token, css }) => ({
     padding-block: 0 16px;
     padding-inline: 12px;
     border-inline-end: 1px solid ${token.colorBorderSecondary};
+
+    color: ${token.colorText};
+
     background: ${token.colorBgLayout};
   `,
 }));
