@@ -156,8 +156,12 @@ const isPublicRoute = createRouteMatcher([
   '/api/auth(.*)',
   '/api/webhooks(.*)',
   '/api/healthcheck(.*)',
+  // Payment webhooks (must be public for payment providers to call)
   '/api/payment/sepay/webhook',
+  '/api/payment/polar/webhook',
   '/api/sepay/webhook',
+  // Geo-detection API (needed for pricing display before auth)
+  '/api/pricing/geo',
   '/webapi(.*)',
   '/trpc(.*)',
   // next auth
