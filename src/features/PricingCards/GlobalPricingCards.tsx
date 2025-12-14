@@ -21,6 +21,13 @@ import { GLOBAL_PLANS } from '@/config/pricing';
  * Based on PRICING_MASTERPLAN.md.md
  */
 
+/**
+ * Global Pricing Cards Component
+ * Displays USD pricing for international users via Polar.sh
+ *
+ * Based on PRICING_MASTERPLAN.md.md
+ */
+
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -153,14 +160,14 @@ const GlobalPricingCards = memo<GlobalPricingCardsProps>(
                 <Flexbox gap={4}>
                   <div>
                     <span className={styles.price}>
-                      {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                      {plan.price === 0 ? 'Free' : `$${plan.price.toFixed(2)}`}
                     </span>
                     <span className={styles.priceUnit}>
                       {plan.isLifetime ? ' one-time' : plan.price > 0 ? '/month' : ''}
                     </span>
                   </div>
                   {plan.priceYearly && (
-                    <Text type="secondary">${plan.priceYearly}/year (save 17%)</Text>
+                    <Text type="secondary">${plan.priceYearly.toFixed(2)}/year (save 17%)</Text>
                   )}
                 </Flexbox>
 

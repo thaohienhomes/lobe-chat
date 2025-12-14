@@ -196,6 +196,13 @@ export async function getCustomerPortalUrl(customerId: string): Promise<string |
  *
  * Note: Polar's new product model uses separate products for monthly and yearly billing.
  * Each product has its own pricing embedded - no separate price IDs needed.
+ *
+ * Required Environment Variables:
+ * - POLAR_PRODUCT_STARTER_MONTHLY_ID: Standard Monthly ($9.99/mo)
+ * - POLAR_PRODUCT_STARTER_YEARLY_ID: Standard Yearly ($99.99/yr)
+ * - POLAR_PRODUCT_PREMIUM_MONTHLY_ID: Premium Monthly ($19.99/mo)
+ * - POLAR_PRODUCT_PREMIUM_YEARLY_ID: Premium Yearly ($199.99/yr)
+ * - POLAR_PRODUCT_ULTIMATE_ID: Lifetime Deal ($149.99 one-time)
  */
 export const POLAR_PRODUCTS = {
   premium: {
@@ -206,9 +213,10 @@ export const POLAR_PRODUCTS = {
     monthlyProductId: process.env.POLAR_PRODUCT_STARTER_MONTHLY_ID!,
     yearlyProductId: process.env.POLAR_PRODUCT_STARTER_YEARLY_ID!,
   },
+  // Ultimate/Lifetime is a one-time purchase, same product for all
   ultimate: {
-    monthlyProductId: process.env.POLAR_PRODUCT_ULTIMATE_MONTHLY_ID!,
-    yearlyProductId: process.env.POLAR_PRODUCT_ULTIMATE_YEARLY_ID!,
+    monthlyProductId: process.env.POLAR_PRODUCT_ULTIMATE_ID!, // Same for all cycles (one-time)
+    yearlyProductId: process.env.POLAR_PRODUCT_ULTIMATE_ID!, // Same for all cycles (one-time)
   },
 } as const;
 
@@ -216,14 +224,36 @@ export const POLAR_PRODUCTS = {
  * Get product ID for a plan and billing cycle
  *
  * In Polar's new model, each billing cycle (monthly/yearly) is a separate product.
- * There are no separate price IDs - pricing is embedded in the product.
+ * Exception: Ultimate/Lifetime is a one-time purchase with a single product ID.
  */
 export function getPolarProductIds(
   planId: 'starter' | 'premium' | 'ultimate',
   billingCycle: 'monthly' | 'yearly',
 ) {
   const product = POLAR_PRODUCTS[planId];
+
+  // For ultimate/lifetime, always return the same product ID (one-time purchase)
+  if (planId === 'ultimate') {
+    const productId = process.env.POLAR_PRODUCT_ULTIMATE_ID;
+    if (!productId) {
+      throw new Error(
+        `Polar product ID for ultimate (lifetime) is not configured. Please set POLAR_PRODUCT_ULTIMATE_ID environment variable.`,
+      );
+    }
+    return {
+      priceId: undefined,
+      productId,
+    };
+  }
+
+  // For starter/premium, get the appropriate monthly or yearly product
   const productId = billingCycle === 'monthly' ? product.monthlyProductId : product.yearlyProductId;
+
+  if (!productId) {
+    throw new Error(
+      `Polar product ID for ${planId} (${billingCycle}) is not configured. Please check environment variables.`,
+    );
+  }
 
   return {
     priceId: undefined, // No longer used in new Polar model

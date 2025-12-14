@@ -114,7 +114,7 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     ],
     keyLimits: '500K points/mo (Reset). One-time payment.',
     monthlyPoints: 500_000, // Reset monthly
-    price: 149, // One-time
+    price: 149.99, // One-time - match Polar Dashboard
   },
   gl_premium: {
     code: 'gl_premium',
@@ -127,8 +127,8 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     ],
     keyLimits: 'Unlim Tier 1 & 2. 50 Tier 3 msgs/day.',
     monthlyPoints: 2_000_000,
-    price: 19.9,
-    priceYearly: 199,
+    price: 19.99, // Match Polar Dashboard
+    priceYearly: 199.99, // Match Polar Dashboard
   },
   gl_standard: {
     code: 'gl_standard',
@@ -141,8 +141,8 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     ],
     keyLimits: 'Unlim Tier 1. 30 Tier 2 msgs/day.',
     monthlyPoints: 500_000,
-    price: 9.9,
-    priceYearly: 99,
+    price: 9.99, // Match Polar Dashboard
+    priceYearly: 99.99, // Match Polar Dashboard
   },
   gl_starter: {
     code: 'gl_starter',

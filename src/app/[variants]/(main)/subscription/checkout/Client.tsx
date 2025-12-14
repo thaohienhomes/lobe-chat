@@ -172,11 +172,7 @@ const useStyles = createStyles(({ css, token }) => ({
  * Uses Phở Points system with tiered model access
  */
 const plans = {
-  
-  
-
-
-gl_lifetime: {
+  gl_lifetime: {
     code: 'gl_lifetime',
     description: 'One-time payment, lifetime access',
     features: [
@@ -187,21 +183,14 @@ gl_lifetime: {
       'No recurring payments',
     ],
     monthlyPoints: 500_000,
-    monthlyPriceUSD: 149,
+    monthlyPriceUSD: 149.99, // Match Polar Dashboard
     monthlyPriceVND: 0,
     name: 'Lifetime Deal',
-    yearlyPriceUSD: 149,
+    yearlyPriceUSD: 149.99, // Match Polar Dashboard
     yearlyPriceVND: 0, // One-time payment
   },
 
-  
-
-
-
-
-
-
-gl_premium: {
+  gl_premium: {
     code: 'gl_premium',
     description: 'For power users and professionals',
     features: [
@@ -212,21 +201,17 @@ gl_premium: {
       'Advanced features',
     ],
     monthlyPoints: 2_000_000,
-    monthlyPriceUSD: 19.9,
+    monthlyPriceUSD: 19.99, // Match Polar Dashboard
     monthlyPriceVND: 0,
     name: 'Premium',
-    yearlyPriceUSD: 199,
+    yearlyPriceUSD: 199.99, // Match Polar Dashboard
     yearlyPriceVND: 0,
   },
 
-  
-
-
-
-// ============================================================================
-// GLOBAL PLANS (USD) - For international users via Polar.sh
-// ============================================================================
-gl_standard: {
+  // ============================================================================
+  // GLOBAL PLANS (USD) - For international users via Polar.sh
+  // ============================================================================
+  gl_standard: {
     code: 'gl_standard',
     description: 'For individual users and students',
     features: [
@@ -238,19 +223,15 @@ gl_standard: {
       'No ads',
     ],
     monthlyPoints: 500_000,
-    monthlyPriceUSD: 9.9,
+    monthlyPriceUSD: 9.99, // Match Polar Dashboard
     monthlyPriceVND: 0,
     name: 'Standard',
-    yearlyPriceUSD: 99,
+    yearlyPriceUSD: 99.99, // Match Polar Dashboard
     yearlyPriceVND: 0,
   },
 
-  
-  
-
-
-// Legacy mappings (for backward compatibility with existing URLs)
-premium: {
+  // Legacy mappings (for backward compatibility with existing URLs)
+  premium: {
     code: 'vn_basic',
     description: 'Dành cho sinh viên và người dùng cá nhân',
     features: [
@@ -267,12 +248,7 @@ premium: {
     yearlyPriceVND: 690_000,
   },
 
-  
-  
-
-
-
-starter: {
+  starter: {
     code: 'vn_free',
     description: 'Trải nghiệm miễn phí',
     features: ['Tier 1 models only', '50,000 Phở Points/month'],
@@ -281,13 +257,8 @@ starter: {
     name: 'Phở Không Người Lái',
     yearlyPriceVND: 0,
   },
-  
-  
 
-
-
-
-ultimate: {
+  ultimate: {
     code: 'vn_pro',
     description: 'Cho người dùng chuyên nghiệp',
     features: [
@@ -302,13 +273,8 @@ ultimate: {
     yearlyPriceVND: 1_990_000,
   },
 
-  
-  
-  
-  
-
-// Basic tier (Student) - vn_basic
-vn_basic: {
+  // Basic tier (Student) - vn_basic
+  vn_basic: {
     code: 'vn_basic',
     description: 'Dành cho sinh viên và người dùng cá nhân',
     features: [
@@ -324,9 +290,9 @@ vn_basic: {
     name: 'Phở Tái',
     yearlyPriceVND: 690_000,
   },
-  
-// Free tier - vn_free (for reference, not purchasable)
-vn_free: {
+
+  // Free tier - vn_free (for reference, not purchasable)
+  vn_free: {
     code: 'vn_free',
     description: 'Trải nghiệm miễn phí với Tier 1 models',
     features: [
@@ -340,7 +306,7 @@ vn_free: {
     yearlyPriceVND: 0,
   },
   // Pro tier - vn_pro
-vn_pro: {
+  vn_pro: {
     code: 'vn_pro',
     description: 'Cho người dùng chuyên nghiệp và doanh nghiệp',
     features: [
