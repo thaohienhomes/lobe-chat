@@ -366,6 +366,10 @@ function CheckoutContent() {
   const isVietnamPlan =
     planId?.startsWith('vn_') || ['starter', 'premium', 'ultimate'].includes(planId);
 
+  // Determine if this is a FREE plan (no payment needed)
+  const FREE_PLAN_IDS = ['vn_free', 'gl_starter', 'starter'];
+  const isFreePlan = FREE_PLAN_IDS.includes(planId);
+
   // Auto-select payment method based on plan type and region
   // Global plans MUST use Polar (credit_card)
   // Vietnam plans MUST use Sepay (bank_transfer)
@@ -491,6 +495,54 @@ function CheckoutContent() {
     } catch (error) {
       console.error('❌ Credit card payment error:', error);
       message.error('Unable to process credit card payment. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handler for FREE plan activation (no payment needed)
+  const handleFreePlanActivation = async () => {
+    if (!plan) return;
+
+    // Validate form before proceeding
+    try {
+      await form.validateFields(['email', 'name']);
+    } catch {
+      message.error('Vui lòng điền đầy đủ thông tin liên hệ');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const values = form.getFieldsValue();
+
+      console.log('🆓 Activating FREE plan:', { planId });
+
+      const response = await fetch('/api/subscription/activate-free', {
+        body: JSON.stringify({
+          customerEmail: values.email || user?.emailAddresses?.[0]?.emailAddress,
+          customerName: values.name || user?.fullName,
+          planId,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      console.log('🆓 Free Plan Activation Response:', data);
+
+      if (data.success) {
+        message.success(data.message || 'Gói miễn phí đã được kích hoạt!');
+        // Redirect to subscription page with success message
+        router.push(data.redirectUrl || '/settings/subscription?activated=true');
+      } else {
+        console.error('❌ Free plan activation failed:', data);
+        message.error(data.message || 'Không thể kích hoạt gói miễn phí');
+      }
+    } catch (error) {
+      console.error('❌ Free plan activation error:', error);
+      message.error('Đã xảy ra lỗi. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -742,14 +794,16 @@ function CheckoutContent() {
 
                   <Divider style={{ margin: 0 }} />
 
-                  {/* Payment Method */}
+                  {/* Payment Method - Hide for free plans */}
                   <div>
-                    <Title level={4} style={{ marginBlockEnd: 12 }}>
-                      {isGlobalPlan ? 'Payment Method' : 'Phương thức thanh toán'}
-                    </Title>
+                    {!isFreePlan && (
+                      <Title level={4} style={{ marginBlockEnd: 12 }}>
+                        {isGlobalPlan ? 'Payment Method' : 'Phương thức thanh toán'}
+                      </Title>
+                    )}
 
-                    {/* Show payment method selection only for Vietnam plans */}
-                    {!isGlobalPlan && (
+                    {/* Show payment method selection only for PAID Vietnam plans */}
+                    {!isGlobalPlan && !isFreePlan && (
                       <Form.Item style={{ marginBlockEnd: 16 }}>
                         <Radio.Group
                           className={styles.radioButtonGroup}
@@ -776,8 +830,42 @@ function CheckoutContent() {
                       </Form.Item>
                     )}
 
-                    {/* Global plans: Always use Polar (credit card) */}
-                    {isGlobalPlan && (
+                    {/* FREE PLANS: Show activate button (no payment needed) */}
+                    {isFreePlan && (
+                      <div>
+                        <Alert
+                          description={
+                            isGlobalPlan
+                              ? 'This is a free plan. No payment required - just activate!'
+                              : 'Đây là gói miễn phí. Không cần thanh toán - chỉ cần kích hoạt!'
+                          }
+                          message={isGlobalPlan ? '🆓 Free Plan' : '🆓 Gói Miễn Phí'}
+                          showIcon
+                          style={{ marginBlockEnd: 16 }}
+                          type="success"
+                        />
+                        <Button
+                          block
+                          icon={<Check size={16} />}
+                          loading={loading}
+                          onClick={handleFreePlanActivation}
+                          size="large"
+                          style={{ background: '#52c41a', borderColor: '#52c41a' }}
+                          type="primary"
+                        >
+                          {loading
+                            ? isGlobalPlan
+                              ? 'Activating...'
+                              : 'Đang kích hoạt...'
+                            : isGlobalPlan
+                              ? 'Activate Free Plan'
+                              : 'Kích hoạt gói miễn phí'}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Global PAID plans: Always use Polar (credit card) */}
+                    {isGlobalPlan && !isFreePlan && (
                       <div>
                         <Alert
                           description="You will be redirected to Polar.sh secure checkout to complete your payment."
@@ -799,8 +887,8 @@ function CheckoutContent() {
                       </div>
                     )}
 
-                    {/* Vietnam plans: Show selected payment method */}
-                    {!isGlobalPlan && paymentMethod === 'bank_transfer' && (
+                    {/* Vietnam PAID plans: Show selected payment method */}
+                    {!isGlobalPlan && !isFreePlan && paymentMethod === 'bank_transfer' && (
                       <Button
                         block
                         htmlType="submit"
@@ -813,7 +901,7 @@ function CheckoutContent() {
                       </Button>
                     )}
 
-                    {!isGlobalPlan && paymentMethod === 'credit_card' && (
+                    {!isGlobalPlan && !isFreePlan && paymentMethod === 'credit_card' && (
                       <div>
                         <Alert
                           description="Bạn sẽ được chuyển hướng đến trang thanh toán an toàn của Polar.sh để hoàn tất giao dịch."
