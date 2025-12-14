@@ -674,6 +674,50 @@ table oidc_sessions {
   updated_at "timestamp with time zone" [not null, default: `now()`]
 }
 
+table daily_usage {
+  date varchar(10) [not null]
+  id text [pk, not null]
+  points_used integer [default: 0]
+  tier1_messages integer [default: 0]
+  tier2_messages integer [default: 0]
+  tier3_messages integer [default: 0]
+  user_id text [not null]
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table model_pricing {
+  id text [pk, not null]
+  input_cost_per_1m real [not null]
+  input_price real [default: 0]
+  is_active boolean [default: true]
+  model_id text [not null, unique]
+  output_cost_per_1m real [not null]
+  output_price real [default: 0]
+  per_msg_fee real [default: 0]
+  tier integer [not null, default: 1]
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table transactions {
+  amount real [not null]
+  currency varchar(10) [not null]
+  id text [pk, not null]
+  metadata text
+  plan_code varchar(50)
+  points_granted integer [default: 0]
+  provider varchar(20) [not null]
+  provider_tx_id text
+  status varchar(20) [not null, default: 'PENDING']
+  user_id text [not null]
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
 table chunks {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   text text
@@ -983,24 +1027,24 @@ table topics {
 }
 
 table monthly_usage_summary {
-  user_id text [not null]
-  month varchar(7) [not null]
-  total_queries integer [default: 0]
-  total_tokens integer [default: 0]
-  total_cost_usd real [default: 0]
-  total_cost_vnd real [default: 0]
-  simple_queries integer [default: 0]
-  medium_queries integer [default: 0]
   complex_queries integer [default: 0]
   cheap_model_usage real [default: 0]
-  mid_tier_model_usage real [default: 0]
-  premium_model_usage real [default: 0]
-  subscription_tier varchar(20)
+  month varchar(7) [not null]
+  medium_queries integer [default: 0]
+  simple_queries integer [default: 0]
   budget_limit_vnd real
-  budget_used_vnd real [default: 0]
+  total_cost_usd real [default: 0]
   budget_remaining_vnd real
+  total_queries integer [default: 0]
+  budget_used_vnd real [default: 0]
+  user_id text [not null]
   budget_warnings_sent integer [default: 0]
   last_warning_at timestamp
+  total_tokens integer [default: 0]
+  mid_tier_model_usage real [default: 0]
+  total_cost_vnd real [default: 0]
+  premium_model_usage real [default: 0]
+  subscription_tier varchar(20)
   accessed_at "timestamp with time zone" [not null, default: `now()`]
   created_at "timestamp with time zone" [not null, default: `now()`]
   updated_at "timestamp with time zone" [not null, default: `now()`]
@@ -1011,52 +1055,56 @@ table monthly_usage_summary {
 }
 
 table provider_costs {
-  id text [pk, not null]
-  provider varchar(50) [not null]
-  model varchar(100) [not null]
-  input_cost_per_1k real [not null]
-  output_cost_per_1k real [not null]
+  currency varchar(3) [default: 'USD']
   effective_from timestamp [not null]
   effective_to timestamp
-  currency varchar(3) [default: 'USD']
+  id text [pk, not null]
+  input_cost_per_1k real [not null]
+  model varchar(100) [not null]
   notes text
+  output_cost_per_1k real [not null]
+  provider varchar(50) [not null]
   accessed_at "timestamp with time zone" [not null, default: `now()`]
   created_at "timestamp with time zone" [not null, default: `now()`]
   updated_at "timestamp with time zone" [not null, default: `now()`]
 }
 
 table usage_logs {
-  id text [pk, not null]
-  user_id text [not null]
-  session_id text
-  model varchar(100) [not null]
-  provider varchar(50) [not null]
-  input_tokens integer [not null]
-  output_tokens integer [not null]
-  total_tokens integer
   cost_usd real [not null]
+  id text [pk, not null]
   cost_vnd real [not null]
-  query_complexity varchar(20)
-  query_category varchar(50)
-  response_time_ms integer
+  input_tokens integer [not null]
+  model varchar(100) [not null]
+  model_tier integer [default: 1]
+  output_tokens integer [not null]
+  points_deducted integer [default: 0]
   metadata jsonb
+  session_id text
+  provider varchar(50) [not null]
+  user_id text [not null]
+  query_category varchar(50)
+  query_complexity varchar(20)
+  response_time_ms integer
+  total_tokens integer
   accessed_at "timestamp with time zone" [not null, default: `now()`]
   created_at "timestamp with time zone" [not null, default: `now()`]
   updated_at "timestamp with time zone" [not null, default: `now()`]
 }
 
 table user_cost_settings {
-  user_id text [pk, not null]
-  monthly_budget_vnd real [default: 39000]
-  daily_budget_vnd real
-  preferred_models jsonb
   blocked_models jsonb
-  enable_cost_optimization boolean [default: true]
-  max_cost_per_query_vnd real [default: 100]
+  daily_budget_points integer
+  daily_budget_vnd real
+  budget_alert_thresholds jsonb [default: `{"critical":90,"emergency":95,"warning":75}`]
   enable_budget_alerts boolean [default: true]
-  budget_alert_thresholds jsonb [default: `{"warning":75,"critical":90,"emergency":95}`]
   email_alerts boolean [default: true]
+  enable_cost_optimization boolean [default: true]
   in_app_alerts boolean [default: true]
+  monthly_budget_points integer [default: 50000]
+  max_cost_per_query_vnd real [default: 100]
+  user_id text [pk, not null]
+  monthly_budget_vnd real [default: 0]
+  preferred_models jsonb
   accessed_at "timestamp with time zone" [not null, default: `now()`]
   created_at "timestamp with time zone" [not null, default: `now()`]
   updated_at "timestamp with time zone" [not null, default: `now()`]
@@ -1103,23 +1151,18 @@ table users {
   clerk_created_at "timestamp with time zone"
   email_verified_at "timestamp with time zone"
   preference jsonb
-  pho_credit_balance integer [default: 0]
+  pho_points_balance integer [default: 50000]
+  points_reset_date "timestamp with time zone"
   lifetime_spent integer [default: 0]
+  current_plan_id text [default: 'vn_free']
+  subscription_status text [default: 'FREE']
+  country_code text
   daily_tier1_usage integer [default: 0]
+  daily_tier2_usage integer [default: 0]
+  daily_tier3_usage integer [default: 0]
   last_usage_date "timestamp with time zone" [default: `now()`]
-  accessed_at "timestamp with time zone" [not null, default: `now()`]
-  created_at "timestamp with time zone" [not null, default: `now()`]
-  updated_at "timestamp with time zone" [not null, default: `now()`]
-}
-
-table model_pricing {
-  id text [pk, not null]
-  model_id text [not null, unique]
-  input_price real [not null]
-  output_price real [not null]
-  per_msg_fee real [default: 0]
-  tier integer [default: 1]
-  is_active boolean [default: true]
+  streak_count integer [default: 0]
+  last_active_date "timestamp with time zone"
   accessed_at "timestamp with time zone" [not null, default: `now()`]
   created_at "timestamp with time zone" [not null, default: `now()`]
   updated_at "timestamp with time zone" [not null, default: `now()`]

@@ -748,5 +748,13 @@
     "bps": true,
     "folderMillis": 1765113607943,
     "hash": "1bff02795ffc6d8ff61644522496a6d6aec3db6646e349ff8a4d6604756df5d8"
+  },
+  {
+    "sql": [
+      "ALTER TABLE \"user_cost_settings\" ALTER COLUMN \"budget_alert_thresholds\" SET DEFAULT '{\"critical\":90,\"emergency\":95,\"warning\":75}'::jsonb;"
+    ],
+    "bps": true,
+    "folderMillis": 1765704184511,
+    "hash": "36f7556577654d8a2c70db3a86a6c561a892d8bdd16b11ea26a13dcc6a03f5b7"
   }
 ]

@@ -5,10 +5,11 @@ import {
   ModelRuntime,
 } from '@lobechat/model-runtime';
 import { ChatErrorType } from '@lobechat/types';
-import console from 'node:console';
 import { eq } from 'drizzle-orm';
+import console from 'node:console';
 
 import { checkAuth } from '@/app/(backend)/middleware/auth';
+import { getModelTier } from '@/config/pricing';
 import { modelPricing } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 import { createTraceOptions, initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
@@ -17,7 +18,11 @@ import {
   isIntelligentRoutingEnabled,
   isUsageTrackingEnabled,
 } from '@/server/services/FeatureFlags';
-import { getUserCreditBalance , processModelUsage } from '@/server/services/billing/credits';
+import {
+  checkTierAccess,
+  getUserCreditBalance,
+  processModelUsage,
+} from '@/server/services/billing/credits';
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
 import { getTracePayload } from '@/utils/trace';
@@ -178,6 +183,39 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // to avoid constant-condition and unused variables lint errors.
     // See git history for the original implementation.
 
+    // ============  2.2. Tier Access Enforcement   ============ //
+    // Check if user's plan allows access to this model tier and daily limits
+    if (jwtPayload.userId) {
+      const creditStatus = await getUserCreditBalance(jwtPayload.userId);
+      const userPlanId = creditStatus?.currentPlanId || 'vn_free';
+      const modelTier = getModelTier(data.model);
+
+      console.log(`[Tier Check] Model: ${data.model}, Tier: ${modelTier}, Plan: ${userPlanId}`);
+
+      const tierAccess = await checkTierAccess(jwtPayload.userId, modelTier, userPlanId);
+
+      if (!tierAccess.allowed) {
+        console.warn(
+          `🚫 Tier access denied: ${tierAccess.reason} (User: ${jwtPayload.userId}, Model: ${data.model})`,
+        );
+        return createErrorResponse(AgentRuntimeErrorType.InsufficientQuota, {
+          dailyLimit: tierAccess.dailyLimit,
+          error: { message: tierAccess.reason || `Tier ${modelTier} access denied` },
+          provider,
+          remaining: tierAccess.remaining,
+          tier: modelTier,
+          upgradeUrl: '/settings/subscription',
+        });
+      }
+
+      // Log remaining usage for non-unlimited tiers
+      if (tierAccess.dailyLimit && tierAccess.dailyLimit !== -1) {
+        console.log(
+          `📊 Tier ${modelTier} usage: ${tierAccess.dailyLimit - (tierAccess.remaining || 0)}/${tierAccess.dailyLimit} (${tierAccess.remaining} remaining)`,
+        );
+      }
+    }
+
     const tracePayload = getTracePayload(req);
 
     let traceOptions = {};
@@ -250,7 +288,9 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           // Cost = (Input * InputPrice + Output * OutputPrice) / 1,000,000
           const inputPrice = activePricing.inputPrice ?? 0;
           const outputPrice = activePricing.outputPrice ?? 0;
-          const cost = Math.ceil((inputTokens * inputPrice + outputTokens * outputPrice) / 1_000_000);
+          const cost = Math.ceil(
+            (inputTokens * inputPrice + outputTokens * outputPrice) / 1_000_000,
+          );
 
           console.log(
             `📉 Streaming Usage: ${inputTokens} in / ${outputTokens} out. Cost: ${cost} Credits.`,

@@ -1,0 +1,1 @@
+ALTER TABLE "user_cost_settings" ALTER COLUMN "budget_alert_thresholds" SET DEFAULT '{"critical":90,"emergency":95,"warning":75}'::jsonb;
