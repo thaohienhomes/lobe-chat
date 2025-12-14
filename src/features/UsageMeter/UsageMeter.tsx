@@ -26,6 +26,13 @@ import {
  * Based on PRICING_MASTERPLAN.md.md
  */
 
+/**
+ * Usage Meter Component
+ * Displays Phở Points balance with progress bar
+ *
+ * Based on PRICING_MASTERPLAN.md.md
+ */
+
 const { Text, Title } = Typography;
 
 // Determine progress color based on usage
@@ -92,20 +99,33 @@ const UsageMeter = memo<UsageMeterProps>(({ compact }) => {
   const daysUntilReset = getDaysUntilReset(stats.pointsResetDate);
 
   if (compact) {
+    // For compact mode: show remaining balance as percentage
+    const remainingPercent = Math.max(0, Math.min(100, 100 - usagePercent));
+    const usedPoints = stats.totalMonthlyPoints - stats.phoPointsBalance;
+
     return (
       <Tooltip
-        title={`${formatPoints(stats.phoPointsBalance)} / ${formatPoints(stats.totalMonthlyPoints)} points`}
+        title={
+          <div style={{ textAlign: 'center' }}>
+            <div>Còn lại: {formatPoints(stats.phoPointsBalance)} points</div>
+            <div style={{ fontSize: 11, opacity: 0.8 }}>
+              Đã dùng: {formatPoints(usedPoints)} / {formatPoints(stats.totalMonthlyPoints)}
+            </div>
+          </div>
+        }
       >
-        <Flexbox align="center" gap={8} horizontal>
-          <Zap size={16} style={{ color: '#faad14' }} />
+        <Flexbox align="center" gap={6} horizontal style={{ padding: '4px 8px' }}>
+          <Zap size={14} style={{ color: '#faad14', flexShrink: 0 }} />
           <Progress
-            percent={100 - usagePercent}
+            percent={remainingPercent}
             showInfo={false}
             size="small"
             strokeColor={getProgressColor(usagePercent)}
-            style={{ width: 60 }}
+            style={{ flex: 1, maxWidth: 70, minWidth: 50 }}
           />
-          <Text style={{ fontSize: 12 }}>{formatPoints(stats.phoPointsBalance)}</Text>
+          <Text style={{ fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap' }}>
+            {formatPoints(stats.phoPointsBalance)}
+          </Text>
         </Flexbox>
       </Tooltip>
     );

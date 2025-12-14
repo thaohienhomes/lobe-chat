@@ -1,13 +1,8 @@
 export default {
   trialBanner: {
     accessPremium: '访问高级模型',
-    blackFriday: 'BLACK FRIDAY SALE',
-    days: '天',
-    hours: '小时',
     messagesRemaining: '剩余 {{remaining}}/{{max}} 条消息',
-    minutes: '分钟',
     pricingFrom: '起价 {{price}}/月',
-    seconds: '秒',
     title: '免费试用版',
     titleExpired: '试用已结束',
     trialExpiredMessage: '您的免费消息已用完',

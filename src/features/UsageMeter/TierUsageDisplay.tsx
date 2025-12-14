@@ -21,6 +21,13 @@ import { getTierUsagePercent, useUsageStats } from '@/hooks/useUsageStats';
  * Based on PRICING_MASTERPLAN.md.md
  */
 
+/**
+ * Tier Usage Display Component
+ * Shows daily Tier 2/Tier 3 usage limits
+ *
+ * Based on PRICING_MASTERPLAN.md.md
+ */
+
 const { Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -136,7 +143,7 @@ const TierUsageDisplay = memo<TierUsageDisplayProps>(({ showTier2 = true, showTi
               percent={100 - percent}
               showInfo={false}
               size="small"
-              strokeColor={percent > 80 ? '#ff4d4f' : percent > 50 ? '#faad14' : '#52c41a'}
+              strokeColor={percent > 80 ? '#ff4d4f' : percent > 50 ? '#faad14' : '#1890ff'}
             />
           )}
         </Flexbox>

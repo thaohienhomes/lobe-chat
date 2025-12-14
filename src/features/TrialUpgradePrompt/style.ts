@@ -44,31 +44,6 @@ export const useStyles = createStyles(({ css }) => ({
     }
   `,
 
-  // Black Friday card
-  blackFridayCard: css`
-    position: relative;
-
-    overflow: hidden;
-
-    padding: 12px;
-    border-radius: 12px;
-
-    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff8c42 100%);
-  `,
-
-  blackFridayContent: css`
-    position: relative;
-    z-index: 1;
-  `,
-
-  blackFridayText: css`
-    font-size: 12px;
-    font-weight: 700;
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 20%);
-    letter-spacing: 1px;
-  `,
-
   compact: css`
     --border-beam-size: 80px;
 
@@ -88,68 +63,6 @@ export const useStyles = createStyles(({ css }) => ({
     border-radius: 14px;
 
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  `,
-
-  // Countdown timer styles
-  countdownContainer: css`
-    margin-block-start: 4px;
-  `,
-
-  countdownItem: css`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    min-width: 40px;
-    padding-block: 6px;
-    padding-inline: 8px;
-    border-radius: 6px;
-
-    background: rgba(255, 255, 255, 20%);
-  `,
-
-  countdownItemHighlight: css`
-    background: rgba(255, 255, 0, 30%);
-  `,
-
-  countdownLabel: css`
-    margin-block-start: 2px;
-
-    font-size: 8px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 80%);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  `,
-
-  countdownNumber: css`
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1;
-    color: #fff;
-  `,
-
-  countdownSeparator: css`
-    margin-block: 0;
-    margin-inline: 2px;
-
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-
-    animation: blink 1s infinite;
-
-    @keyframes blink {
-      0%,
-      50% {
-        opacity: 1;
-      }
-
-      51%,
-      100% {
-        opacity: 0.3;
-      }
-    }
   `,
 
   // CTA Button with glow effect
@@ -232,22 +145,6 @@ export const useStyles = createStyles(({ css }) => ({
 
       100% {
         transform: scale(1.1);
-      }
-    }
-  `,
-
-  giftIcon: css`
-    color: #fff;
-    animation: float 2s ease-in-out infinite;
-
-    @keyframes float {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-3px);
       }
     }
   `,
@@ -337,28 +234,6 @@ export const useStyles = createStyles(({ css }) => ({
 
     strong {
       color: #ffd700;
-    }
-  `,
-
-  shimmerOverlay: css`
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      110deg,
-      transparent 20%,
-      rgba(255, 255, 255, 30%) 50%,
-      transparent 80%
-    );
-    animation: shimmer 2s infinite;
-
-    @keyframes shimmer {
-      0% {
-        transform: translateX(-100%);
-      }
-
-      100% {
-        transform: translateX(100%);
-      }
     }
   `,
 
