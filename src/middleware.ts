@@ -162,6 +162,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/sepay/webhook',
   // Geo-detection API (needed for pricing display before auth)
   '/api/pricing/geo',
+  // Debug endpoint (temporary - delete after getting admin user ID)
+  '/api/debug/my-user-id',
   '/webapi(.*)',
   '/trpc(.*)',
   // next auth
