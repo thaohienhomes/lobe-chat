@@ -11,13 +11,47 @@ import { z } from 'zod';
 
 import { createCheckoutSession, getPolarProductIds } from '@/libs/polar';
 
+// Valid plan IDs for Polar checkout
+// Accepts both legacy codes (starter, premium, ultimate) and new global codes (gl_*)
+const VALID_POLAR_PLAN_IDS = [
+  // Legacy codes (for backward compatibility)
+  'starter',
+  'premium',
+  'ultimate',
+  // New global plan codes (from PRICING_MASTERPLAN)
+  'gl_standard',
+  'gl_premium',
+  'gl_lifetime',
+] as const;
+
+// Map plan IDs to Polar internal codes
+const PLAN_ID_TO_POLAR_CODE: Record<string, 'starter' | 'premium' | 'ultimate'> = {
+  
+  // New global codes map to Polar codes
+gl_lifetime: 'ultimate',
+  
+
+// Lifetime maps to ultimate tier
+gl_premium: 'premium',
+  
+
+
+gl_standard: 'starter',
+  
+  
+// Legacy codes map directly
+premium: 'premium', 
+  starter: 'starter',
+  ultimate: 'ultimate', // Standard maps to starter tier
+};
+
 // Request validation schema
 const CreateCheckoutSchema = z.object({
   billingCycle: z.enum(['monthly', 'yearly']),
   cancelUrl: z.string().url().optional(),
   customerEmail: z.string().email().optional(),
   customerName: z.string().optional(),
-  planId: z.enum(['starter', 'premium', 'ultimate']),
+  planId: z.enum(VALID_POLAR_PLAN_IDS),
   successUrl: z.string().url().optional(),
 });
 
@@ -48,9 +82,28 @@ export async function POST(req: NextRequest) {
     const { planId, billingCycle, successUrl, cancelUrl, customerEmail, customerName } =
       validation.data;
 
-    // 3. Get Polar product and price IDs
-    const { productId, priceId } = getPolarProductIds(planId, billingCycle);
-    console.log('📦 Polar product IDs:', { billingCycle, planId, priceId, productId });
+    // 3. Map planId to Polar internal code
+    const polarPlanCode = PLAN_ID_TO_POLAR_CODE[planId];
+    if (!polarPlanCode) {
+      console.error('❌ Polar checkout: Invalid plan ID mapping', { planId });
+      return NextResponse.json(
+        {
+          error: 'Invalid plan',
+          message: `Plan "${planId}" is not supported for Polar checkout. Use global plans (gl_standard, gl_premium, gl_lifetime).`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // 4. Get Polar product and price IDs using mapped code
+    const { productId, priceId } = getPolarProductIds(polarPlanCode, billingCycle);
+    console.log('📦 Polar product IDs:', {
+      billingCycle,
+      planId,
+      polarPlanCode,
+      priceId,
+      productId,
+    });
 
     // Validate product ID is configured
     if (!productId) {

@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { trackAddPaymentInfo } from '@/utils/tiktok-events';
 
 const { Title, Text } = Typography;
@@ -172,7 +173,83 @@ const useStyles = createStyles(({ css, token }) => ({
  */
 const plans = {
   
-  // Legacy mappings (for backward compatibility with existing URLs)
+  
+
+
+gl_lifetime: {
+    code: 'gl_lifetime',
+    description: 'One-time payment, lifetime access',
+    features: [
+      'All Premium features forever',
+      '500,000 Phở Points/month (reset monthly)',
+      'Priority support',
+      'Early access to new features',
+      'No recurring payments',
+    ],
+    monthlyPoints: 500_000,
+    monthlyPriceUSD: 149,
+    monthlyPriceVND: 0,
+    name: 'Lifetime Deal',
+    yearlyPriceUSD: 149,
+    yearlyPriceVND: 0, // One-time payment
+  },
+
+  
+
+
+
+
+
+
+gl_premium: {
+    code: 'gl_premium',
+    description: 'For power users and professionals',
+    features: [
+      'Unlimited Tier 1 & 2 models',
+      '50 Tier 3 messages/day',
+      '2,000,000 Phở Points/month',
+      'Priority support',
+      'Advanced features',
+    ],
+    monthlyPoints: 2_000_000,
+    monthlyPriceUSD: 19.9,
+    monthlyPriceVND: 0,
+    name: 'Premium',
+    yearlyPriceUSD: 199,
+    yearlyPriceVND: 0,
+  },
+
+  
+
+
+
+// ============================================================================
+// GLOBAL PLANS (USD) - For international users via Polar.sh
+// ============================================================================
+gl_standard: {
+    code: 'gl_standard',
+    description: 'For individual users and students',
+    features: [
+      'Unlimited Tier 1 models',
+      '30 Tier 2 messages/day',
+      '500,000 Phở Points/month',
+      'Chat history',
+      'File uploads',
+      'No ads',
+    ],
+    monthlyPoints: 500_000,
+    monthlyPriceUSD: 9.9,
+    monthlyPriceVND: 0,
+    name: 'Standard',
+    yearlyPriceUSD: 99,
+    yearlyPriceVND: 0,
+  },
+
+  
+  
+
+
+// Legacy mappings (for backward compatibility with existing URLs)
 premium: {
     code: 'vn_basic',
     description: 'Dành cho sinh viên và người dùng cá nhân',
@@ -189,8 +266,11 @@ premium: {
     name: 'Phở Tái',
     yearlyPriceVND: 690_000,
   },
+
   
   
+
+
 
 starter: {
     code: 'vn_free',
@@ -203,6 +283,8 @@ starter: {
   },
   
   
+
+
 
 
 ultimate: {
@@ -220,6 +302,8 @@ ultimate: {
     yearlyPriceVND: 1_990_000,
   },
 
+  
+  
   
   
 
@@ -270,10 +354,30 @@ vn_pro: {
       'Không quảng cáo',
     ],
     monthlyPoints: 2_000_000,
+    monthlyPriceUSD: 9.9,
     monthlyPriceVND: 199_000,
     name: 'Phở Đặc Biệt',
+    yearlyPriceUSD: 99,
     yearlyPriceVND: 1_990_000,
   },
+};
+
+// Format price based on currency type - moved to outer scope for ESLint
+const formatPrice = (amount: number, isUSD: boolean) => {
+  if (isUSD) {
+    return new Intl.NumberFormat('en-US', {
+      currency: 'USD',
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      style: 'currency',
+    }).format(amount);
+  }
+  return new Intl.NumberFormat('vi-VN', {
+    currency: 'VND',
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    style: 'currency',
+  }).format(amount);
 };
 
 function CheckoutContent() {
@@ -281,17 +385,36 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoaded } = useUser();
+  usePricingGeo(); // Hook called for potential future use
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
-  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>(
-    'bank_transfer',
-  );
 
   // Normalize planId to lowercase to handle case-insensitive URLs
   const planIdRaw = searchParams.get('plan');
   const planId = planIdRaw?.toLowerCase() as keyof typeof plans;
   const plan = plans[planId];
+
+  // Determine if this is a global plan (gl_*) or Vietnam plan (vn_*)
+  const isGlobalPlan = planId?.startsWith('gl_');
+  const isVietnamPlan =
+    planId?.startsWith('vn_') || ['starter', 'premium', 'ultimate'].includes(planId);
+
+  // Auto-select payment method based on plan type and region
+  // Global plans MUST use Polar (credit_card)
+  // Vietnam plans MUST use Sepay (bank_transfer)
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'credit_card'>(
+    isGlobalPlan ? 'credit_card' : 'bank_transfer',
+  );
+
+  // Update payment method when plan type is determined
+  useEffect(() => {
+    if (isGlobalPlan) {
+      setPaymentMethod('credit_card');
+    } else if (isVietnamPlan) {
+      setPaymentMethod('bank_transfer');
+    }
+  }, [isGlobalPlan, isVietnamPlan]);
 
   useEffect(() => {
     if (!planId || !plan) {
@@ -438,12 +561,29 @@ function CheckoutContent() {
     );
   }
 
+  // Calculate prices based on plan type (VND for Vietnam, USD for Global)
+  const planWithUSD = plan as typeof plan & { monthlyPriceUSD?: number; yearlyPriceUSD?: number };
+  const isLifetimePlan = planId === 'gl_lifetime';
+
+  // For Global plans, use USD pricing
+  const currentPriceUSD = isLifetimePlan
+    ? planWithUSD.monthlyPriceUSD || 149 // Lifetime is one-time
+    : billingCycle === 'yearly'
+      ? planWithUSD.yearlyPriceUSD || 0
+      : planWithUSD.monthlyPriceUSD || 0;
+
+  // For Vietnam plans, use VND pricing
   const currentPriceVND = billingCycle === 'yearly' ? plan.yearlyPriceVND : plan.monthlyPriceVND;
   const monthlyEquivalentVND =
     billingCycle === 'yearly' ? plan.yearlyPriceVND / 12 : plan.monthlyPriceVND;
   const savingsVND =
     billingCycle === 'yearly' ? plan.monthlyPriceVND * 12 - plan.yearlyPriceVND : 0;
   const vndAmount = currentPriceVND;
+
+  // Display price based on plan type
+  const displayPrice = isGlobalPlan
+    ? formatPrice(currentPriceUSD, true)
+    : formatPrice(currentPriceVND, false);
 
   return (
     <div className={styles.container}>
@@ -477,33 +617,24 @@ function CheckoutContent() {
                       {plan.name} Plan
                     </Title>
                     <Text type="secondary">{plan.description}</Text>
+                    {isGlobalPlan && (
+                      <Text style={{ display: 'block', marginTop: 4 }} type="secondary">
+                        🌍 International Plan (USD)
+                      </Text>
+                    )}
                   </div>
 
                   <div className={styles.priceRow}>
-                    <Text>Giá gói</Text>
-                    <Text>
-                      {new Intl.NumberFormat('vi-VN', {
-                        currency: 'VND',
-                        maximumFractionDigits: 0,
-                        minimumFractionDigits: 0,
-                        style: 'currency',
-                      }).format(currentPriceVND)}
-                    </Text>
+                    <Text>{isGlobalPlan ? 'Price' : 'Giá gói'}</Text>
+                    <Text>{displayPrice}</Text>
                   </div>
 
-                  {savingsVND > 0 && (
+                  {/* Show savings for yearly billing (Vietnam plans only) */}
+                  {!isGlobalPlan && savingsVND > 0 && (
                     <>
                       <div className={styles.priceRow}>
                         <Text type="success">Giảm giá hàng năm</Text>
-                        <Text type="success">
-                          -
-                          {new Intl.NumberFormat('vi-VN', {
-                            currency: 'VND',
-                            maximumFractionDigits: 0,
-                            minimumFractionDigits: 0,
-                            style: 'currency',
-                          }).format(savingsVND)}
-                        </Text>
+                        <Text type="success">-{formatPrice(savingsVND, false)}</Text>
                       </div>
                       <div className={styles.savingsBadge}>
                         🎉 Tiết kiệm {Math.round((savingsVND / (plan.monthlyPriceVND * 12)) * 100)}%
@@ -512,16 +643,14 @@ function CheckoutContent() {
                     </>
                   )}
 
+                  {/* Show lifetime badge for lifetime plan */}
+                  {isLifetimePlan && (
+                    <div className={styles.savingsBadge}>⭐ One-time payment, lifetime access!</div>
+                  )}
+
                   <div className={styles.priceRow}>
-                    <Text strong>Tổng cộng</Text>
-                    <Text strong>
-                      {new Intl.NumberFormat('vi-VN', {
-                        currency: 'VND',
-                        maximumFractionDigits: 0,
-                        minimumFractionDigits: 0,
-                        style: 'currency',
-                      }).format(vndAmount)}
-                    </Text>
+                    <Text strong>{isGlobalPlan ? 'Total' : 'Tổng cộng'}</Text>
+                    <Text strong>{displayPrice}</Text>
                   </div>
                 </Flexbox>
               </div>
@@ -529,7 +658,7 @@ function CheckoutContent() {
               {/* Plan Features */}
               <div className={styles.planFeatures}>
                 <Title level={4} style={{ marginBlockEnd: 16 }}>
-                  Tính năng bao gồm
+                  {isGlobalPlan ? 'Features Included' : 'Tính năng bao gồm'}
                 </Title>
                 <Flexbox gap={8}>
                   {plan.features.map((feature, index) => (
@@ -551,58 +680,69 @@ function CheckoutContent() {
                 size="large"
               >
                 <Flexbox gap={24}>
-                  {/* Billing Cycle */}
-                  <div>
-                    <Title level={4} style={{ marginBlockEnd: 12 }}>
-                      Chu kỳ thanh toán
-                    </Title>
-                    <Form.Item name="billingCycle" style={{ marginBlockEnd: 0 }}>
-                      <Radio.Group
-                        className={styles.radioButtonGroup}
-                        onChange={(e) => setBillingCycle(e.target.value)}
-                        value={billingCycle}
-                      >
-                        <Radio.Button value="yearly">
-                          <div>
-                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                              Hàng năm
-                            </div>
-                            <div style={{ color: '#52c41a', fontSize: 13, marginBlockEnd: 4 }}>
-                              {new Intl.NumberFormat('vi-VN', {
-                                currency: 'VND',
-                                maximumFractionDigits: 0,
-                                minimumFractionDigits: 0,
-                                style: 'currency',
-                              }).format(monthlyEquivalentVND)}
-                              /tháng
-                            </div>
-                            <div style={{ color: '#52c41a', fontSize: 12, fontWeight: 500 }}>
-                              ✨ Tiết kiệm 17%
-                            </div>
-                          </div>
-                        </Radio.Button>
-                        <Radio.Button value="monthly">
-                          <div>
-                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                              Hàng tháng
-                            </div>
-                            <div style={{ color: '#666', fontSize: 13, marginBlockEnd: 4 }}>
-                              {new Intl.NumberFormat('vi-VN', {
-                                currency: 'VND',
-                                maximumFractionDigits: 0,
-                                minimumFractionDigits: 0,
-                                style: 'currency',
-                              }).format(plan.monthlyPriceVND)}
-                              /tháng
-                            </div>
-                            <div style={{ color: '#999', fontSize: 12 }}>Linh hoạt</div>
-                          </div>
-                        </Radio.Button>
-                      </Radio.Group>
-                    </Form.Item>
-                  </div>
+                  {/* Billing Cycle - Hide for lifetime plans */}
+                  {!isLifetimePlan && (
+                    <>
+                      <div>
+                        <Title level={4} style={{ marginBlockEnd: 12 }}>
+                          {isGlobalPlan ? 'Billing Cycle' : 'Chu kỳ thanh toán'}
+                        </Title>
+                        <Form.Item name="billingCycle" style={{ marginBlockEnd: 0 }}>
+                          <Radio.Group
+                            className={styles.radioButtonGroup}
+                            onChange={(e) => setBillingCycle(e.target.value)}
+                            value={billingCycle}
+                          >
+                            <Radio.Button value="yearly">
+                              <div>
+                                <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                                  {isGlobalPlan ? 'Yearly' : 'Hàng năm'}
+                                </div>
+                                <div style={{ color: '#52c41a', fontSize: 13, marginBlockEnd: 4 }}>
+                                  {isGlobalPlan
+                                    ? `$${(planWithUSD.yearlyPriceUSD || 0) / 12}/mo`
+                                    : `${formatPrice(monthlyEquivalentVND, false)}/tháng`}
+                                </div>
+                                <div style={{ color: '#52c41a', fontSize: 12, fontWeight: 500 }}>
+                                  ✨ {isGlobalPlan ? 'Save 17%' : 'Tiết kiệm 17%'}
+                                </div>
+                              </div>
+                            </Radio.Button>
+                            <Radio.Button value="monthly">
+                              <div>
+                                <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                                  {isGlobalPlan ? 'Monthly' : 'Hàng tháng'}
+                                </div>
+                                <div style={{ color: '#666', fontSize: 13, marginBlockEnd: 4 }}>
+                                  {isGlobalPlan
+                                    ? `$${planWithUSD.monthlyPriceUSD || 0}/mo`
+                                    : `${formatPrice(plan.monthlyPriceVND, false)}/tháng`}
+                                </div>
+                                <div style={{ color: '#999', fontSize: 12 }}>
+                                  {isGlobalPlan ? 'Flexible' : 'Linh hoạt'}
+                                </div>
+                              </div>
+                            </Radio.Button>
+                          </Radio.Group>
+                        </Form.Item>
+                      </div>
 
-                  <Divider style={{ margin: 0 }} />
+                      <Divider style={{ margin: 0 }} />
+                    </>
+                  )}
+
+                  {/* Lifetime plan notice */}
+                  {isLifetimePlan && (
+                    <>
+                      <Alert
+                        description="This is a one-time payment for lifetime access. No recurring charges."
+                        message="⭐ Lifetime Deal"
+                        showIcon
+                        type="success"
+                      />
+                      <Divider style={{ margin: 0 }} />
+                    </>
+                  )}
 
                   {/* Contact Information */}
                   <div>
@@ -639,34 +779,62 @@ function CheckoutContent() {
                   {/* Payment Method */}
                   <div>
                     <Title level={4} style={{ marginBlockEnd: 12 }}>
-                      Phương thức thanh toán
+                      {isGlobalPlan ? 'Payment Method' : 'Phương thức thanh toán'}
                     </Title>
-                    <Form.Item style={{ marginBlockEnd: 16 }}>
-                      <Radio.Group
-                        className={styles.radioButtonGroup}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        value={paymentMethod}
-                      >
-                        <Radio.Button value="bank_transfer">
-                          <div>
-                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                              Chuyển khoản
-                            </div>
-                            <div style={{ color: '#666', fontSize: 12 }}>QR Code</div>
-                          </div>
-                        </Radio.Button>
-                        <Radio.Button value="credit_card">
-                          <div>
-                            <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                              Thẻ tín dụng
-                            </div>
-                            <div style={{ color: '#666', fontSize: 12 }}>Visa/Mastercard</div>
-                          </div>
-                        </Radio.Button>
-                      </Radio.Group>
-                    </Form.Item>
 
-                    {paymentMethod === 'bank_transfer' ? (
+                    {/* Show payment method selection only for Vietnam plans */}
+                    {!isGlobalPlan && (
+                      <Form.Item style={{ marginBlockEnd: 16 }}>
+                        <Radio.Group
+                          className={styles.radioButtonGroup}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          value={paymentMethod}
+                        >
+                          <Radio.Button value="bank_transfer">
+                            <div>
+                              <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                                Chuyển khoản
+                              </div>
+                              <div style={{ color: '#666', fontSize: 12 }}>QR Code</div>
+                            </div>
+                          </Radio.Button>
+                          <Radio.Button value="credit_card">
+                            <div>
+                              <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                                Thẻ tín dụng
+                              </div>
+                              <div style={{ color: '#666', fontSize: 12 }}>Visa/Mastercard</div>
+                            </div>
+                          </Radio.Button>
+                        </Radio.Group>
+                      </Form.Item>
+                    )}
+
+                    {/* Global plans: Always use Polar (credit card) */}
+                    {isGlobalPlan && (
+                      <div>
+                        <Alert
+                          description="You will be redirected to Polar.sh secure checkout to complete your payment."
+                          message="Secure International Payment via Polar.sh"
+                          showIcon
+                          style={{ marginBlockEnd: 16 }}
+                          type="info"
+                        />
+                        <Button
+                          block
+                          icon={<Lock size={16} />}
+                          loading={loading}
+                          onClick={handleCreditCardSubmit}
+                          size="large"
+                          type="primary"
+                        >
+                          {loading ? 'Processing...' : `Pay ${displayPrice}`}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Vietnam plans: Show selected payment method */}
+                    {!isGlobalPlan && paymentMethod === 'bank_transfer' && (
                       <Button
                         block
                         htmlType="submit"
@@ -675,16 +843,11 @@ function CheckoutContent() {
                         size="large"
                         type="primary"
                       >
-                        {loading
-                          ? 'Đang xử lý...'
-                          : `Thanh toán ${new Intl.NumberFormat('vi-VN', {
-                              currency: 'VND',
-                              maximumFractionDigits: 0,
-                              minimumFractionDigits: 0,
-                              style: 'currency',
-                            }).format(vndAmount)}`}
+                        {loading ? 'Đang xử lý...' : `Thanh toán ${formatPrice(vndAmount, false)}`}
                       </Button>
-                    ) : (
+                    )}
+
+                    {!isGlobalPlan && paymentMethod === 'credit_card' && (
                       <div>
                         <Alert
                           description="Bạn sẽ được chuyển hướng đến trang thanh toán an toàn của Polar.sh để hoàn tất giao dịch."
@@ -711,9 +874,11 @@ function CheckoutContent() {
                   <div className={styles.securityNote}>
                     <Shield size={16} />
                     <Text>
-                      {paymentMethod === 'bank_transfer'
-                        ? 'Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật.'
-                        : 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'}
+                      {isGlobalPlan
+                        ? 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'
+                        : paymentMethod === 'bank_transfer'
+                          ? 'Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật.'
+                          : 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'}
                     </Text>
                   </div>
                 </Flexbox>
