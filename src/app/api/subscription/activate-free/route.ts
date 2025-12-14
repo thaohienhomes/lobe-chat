@@ -54,7 +54,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         currentPlanId: normalizedPlanId,
         phoPointsBalance: 50_000,
         // Free tier points
-pointsResetDate: new Date(now.getFullYear(), now.getMonth() + 1, 1), 
+        pointsResetDate: new Date(now.getFullYear(), now.getMonth() + 1, 1),
         subscriptionStatus: 'ACTIVE', // Next month
         updatedAt: now,
       })
@@ -80,7 +80,7 @@ pointsResetDate: new Date(now.getFullYear(), now.getMonth() + 1, 1),
     return NextResponse.json({
       message: 'Free plan activated successfully!',
       planId: normalizedPlanId,
-      redirectUrl: '/settings/subscription?activated=true',
+      redirectUrl: '/settings?active=subscription&activated=true',
       success: true,
     });
   } catch (error) {
