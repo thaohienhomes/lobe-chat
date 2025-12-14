@@ -5,9 +5,10 @@ import { Alert, Button, Card, Divider, Form, Input, Radio, Spin, Typography, mes
 import { createStyles } from 'antd-style';
 import { ArrowLeft, Check, CreditCard, Lock, Shield } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+import ConfettiCelebration from '@/components/ConfettiCelebration';
 import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { trackAddPaymentInfo } from '@/utils/tiktok-events';
 
@@ -355,11 +356,33 @@ function CheckoutContent() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Confetti completion handler - redirect after animation
+  const handleConfettiComplete = useCallback(() => {
+    setShowConfetti(false);
+  }, []);
 
   // Normalize planId to lowercase to handle case-insensitive URLs
   const planIdRaw = searchParams.get('plan');
   const planId = planIdRaw?.toLowerCase() as keyof typeof plans;
   const plan = plans[planId];
+
+  // Check if payment was successful (from Sepay callback or Polar redirect)
+  const paymentSuccess = searchParams.get('success') === 'true';
+  const activated = searchParams.get('activated') === 'true';
+
+  // 🎉 Show confetti when returning from successful payment
+  useEffect(() => {
+    if (paymentSuccess || activated) {
+      setShowConfetti(true);
+      // Redirect to subscription page after showing confetti
+      const timer = setTimeout(() => {
+        router.push('/settings?active=subscription&activated=true');
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentSuccess, activated, router]);
 
   // Determine if this is a global plan (gl_*) or Vietnam plan (vn_*)
   const isGlobalPlan = planId?.startsWith('gl_');
@@ -534,8 +557,12 @@ function CheckoutContent() {
 
       if (data.success) {
         message.success(data.message || 'Gói miễn phí đã được kích hoạt!');
-        // Redirect to subscription page with success message
-        router.push(data.redirectUrl || '/settings/subscription?activated=true');
+        // 🎉 Show confetti celebration animation
+        setShowConfetti(true);
+        // Redirect after a short delay to show confetti
+        setTimeout(() => {
+          router.push(data.redirectUrl || '/settings?active=subscription&activated=true');
+        }, 2000);
       } else {
         console.error('❌ Free plan activation failed:', data);
         message.error(data.message || 'Không thể kích hoạt gói miễn phí');
@@ -604,344 +631,362 @@ function CheckoutContent() {
     : formatPrice(currentPriceVND, false);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.content}>
-        <Flexbox gap={32}>
-          {/* Header */}
-          <div className={styles.header}>
-            <Button
-              className={styles.backButton}
-              icon={<ArrowLeft />}
-              onClick={() => router.back()}
-              type="text"
-            >
-              Back
-            </Button>
-            <Title level={1} style={{ margin: 0, marginBlockEnd: 8 }}>
-              Hoàn tất Thanh toán
-            </Title>
-            <Text type="secondary">Chọn chu kỳ thanh toán và hoàn tất đơn hàng của bạn</Text>
-          </div>
+    <>
+      {/* 🎉 Confetti celebration animation */}
+      <ConfettiCelebration
+        duration={3000}
+        onComplete={handleConfettiComplete}
+        show={showConfetti}
+      />
 
-          {/* Two Column Layout */}
-          <div className={styles.twoColumnLayout}>
-            {/* Left Column - Plan Summary & Features */}
-            <Flexbox gap={24}>
-              {/* Plan Summary */}
-              <div className={styles.planSummary}>
-                <Flexbox gap={16}>
-                  <div>
-                    <Title level={3} style={{ margin: 0, marginBlockEnd: 4 }}>
-                      {plan.name} Plan
-                    </Title>
-                    <Text type="secondary">{plan.description}</Text>
-                    {isGlobalPlan && (
-                      <Text style={{ display: 'block', marginTop: 4 }} type="secondary">
-                        🌍 International Plan (USD)
-                      </Text>
-                    )}
-                  </div>
-
-                  <div className={styles.priceRow}>
-                    <Text>{isGlobalPlan ? 'Price' : 'Giá gói'}</Text>
-                    <Text>{displayPrice}</Text>
-                  </div>
-
-                  {/* Show savings for yearly billing (Vietnam plans only) */}
-                  {!isGlobalPlan && savingsVND > 0 && (
-                    <>
-                      <div className={styles.priceRow}>
-                        <Text type="success">Giảm giá hàng năm</Text>
-                        <Text type="success">-{formatPrice(savingsVND, false)}</Text>
-                      </div>
-                      <div className={styles.savingsBadge}>
-                        🎉 Tiết kiệm {Math.round((savingsVND / (plan.monthlyPriceVND * 12)) * 100)}%
-                        khi thanh toán hàng năm
-                      </div>
-                    </>
-                  )}
-
-                  {/* Show lifetime badge for lifetime plan */}
-                  {isLifetimePlan && (
-                    <div className={styles.savingsBadge}>⭐ One-time payment, lifetime access!</div>
-                  )}
-
-                  <div className={styles.priceRow}>
-                    <Text strong>{isGlobalPlan ? 'Total' : 'Tổng cộng'}</Text>
-                    <Text strong>{displayPrice}</Text>
-                  </div>
-                </Flexbox>
-              </div>
-
-              {/* Plan Features */}
-              <div className={styles.planFeatures}>
-                <Title level={4} style={{ marginBlockEnd: 16 }}>
-                  {isGlobalPlan ? 'Features Included' : 'Tính năng bao gồm'}
-                </Title>
-                <Flexbox gap={8}>
-                  {plan.features.map((feature, index) => (
-                    <div className={styles.featureItem} key={index}>
-                      <Check size={20} />
-                      <Text>{feature}</Text>
-                    </div>
-                  ))}
-                </Flexbox>
-              </div>
-            </Flexbox>
-
-            {/* Right Column - Checkout Form */}
-            <Card className={styles.checkoutCard}>
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={paymentMethod === 'bank_transfer' ? handleBankTransferSubmit : undefined}
-                size="large"
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <Flexbox gap={32}>
+            {/* Header */}
+            <div className={styles.header}>
+              <Button
+                className={styles.backButton}
+                icon={<ArrowLeft />}
+                onClick={() => router.back()}
+                type="text"
               >
-                <Flexbox gap={24}>
-                  {/* Billing Cycle - Hide for lifetime plans */}
-                  {!isLifetimePlan && (
-                    <>
-                      <div>
+                Back
+              </Button>
+              <Title level={1} style={{ margin: 0, marginBlockEnd: 8 }}>
+                Hoàn tất Thanh toán
+              </Title>
+              <Text type="secondary">Chọn chu kỳ thanh toán và hoàn tất đơn hàng của bạn</Text>
+            </div>
+
+            {/* Two Column Layout */}
+            <div className={styles.twoColumnLayout}>
+              {/* Left Column - Plan Summary & Features */}
+              <Flexbox gap={24}>
+                {/* Plan Summary */}
+                <div className={styles.planSummary}>
+                  <Flexbox gap={16}>
+                    <div>
+                      <Title level={3} style={{ margin: 0, marginBlockEnd: 4 }}>
+                        {plan.name} Plan
+                      </Title>
+                      <Text type="secondary">{plan.description}</Text>
+                      {isGlobalPlan && (
+                        <Text style={{ display: 'block', marginTop: 4 }} type="secondary">
+                          🌍 International Plan (USD)
+                        </Text>
+                      )}
+                    </div>
+
+                    <div className={styles.priceRow}>
+                      <Text>{isGlobalPlan ? 'Price' : 'Giá gói'}</Text>
+                      <Text>{displayPrice}</Text>
+                    </div>
+
+                    {/* Show savings for yearly billing (Vietnam plans only) */}
+                    {!isGlobalPlan && savingsVND > 0 && (
+                      <>
+                        <div className={styles.priceRow}>
+                          <Text type="success">Giảm giá hàng năm</Text>
+                          <Text type="success">-{formatPrice(savingsVND, false)}</Text>
+                        </div>
+                        <div className={styles.savingsBadge}>
+                          🎉 Tiết kiệm{' '}
+                          {Math.round((savingsVND / (plan.monthlyPriceVND * 12)) * 100)}% khi thanh
+                          toán hàng năm
+                        </div>
+                      </>
+                    )}
+
+                    {/* Show lifetime badge for lifetime plan */}
+                    {isLifetimePlan && (
+                      <div className={styles.savingsBadge}>
+                        ⭐ One-time payment, lifetime access!
+                      </div>
+                    )}
+
+                    <div className={styles.priceRow}>
+                      <Text strong>{isGlobalPlan ? 'Total' : 'Tổng cộng'}</Text>
+                      <Text strong>{displayPrice}</Text>
+                    </div>
+                  </Flexbox>
+                </div>
+
+                {/* Plan Features */}
+                <div className={styles.planFeatures}>
+                  <Title level={4} style={{ marginBlockEnd: 16 }}>
+                    {isGlobalPlan ? 'Features Included' : 'Tính năng bao gồm'}
+                  </Title>
+                  <Flexbox gap={8}>
+                    {plan.features.map((feature, index) => (
+                      <div className={styles.featureItem} key={index}>
+                        <Check size={20} />
+                        <Text>{feature}</Text>
+                      </div>
+                    ))}
+                  </Flexbox>
+                </div>
+              </Flexbox>
+
+              {/* Right Column - Checkout Form */}
+              <Card className={styles.checkoutCard}>
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onFinish={
+                    paymentMethod === 'bank_transfer' ? handleBankTransferSubmit : undefined
+                  }
+                  size="large"
+                >
+                  <Flexbox gap={24}>
+                    {/* Billing Cycle - Hide for lifetime plans */}
+                    {!isLifetimePlan && (
+                      <>
+                        <div>
+                          <Title level={4} style={{ marginBlockEnd: 12 }}>
+                            {isGlobalPlan ? 'Billing Cycle' : 'Chu kỳ thanh toán'}
+                          </Title>
+                          <Form.Item name="billingCycle" style={{ marginBlockEnd: 0 }}>
+                            <Radio.Group
+                              className={styles.radioButtonGroup}
+                              onChange={(e) => setBillingCycle(e.target.value)}
+                              value={billingCycle}
+                            >
+                              <Radio.Button value="yearly">
+                                <div>
+                                  <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                                    {isGlobalPlan ? 'Yearly' : 'Hàng năm'}
+                                  </div>
+                                  <div
+                                    style={{ color: '#52c41a', fontSize: 13, marginBlockEnd: 4 }}
+                                  >
+                                    {isGlobalPlan
+                                      ? `$${(planWithUSD.yearlyPriceUSD || 0) / 12}/mo`
+                                      : `${formatPrice(monthlyEquivalentVND, false)}/tháng`}
+                                  </div>
+                                  <div style={{ color: '#52c41a', fontSize: 12, fontWeight: 500 }}>
+                                    ✨ {isGlobalPlan ? 'Save 17%' : 'Tiết kiệm 17%'}
+                                  </div>
+                                </div>
+                              </Radio.Button>
+                              <Radio.Button value="monthly">
+                                <div>
+                                  <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                                    {isGlobalPlan ? 'Monthly' : 'Hàng tháng'}
+                                  </div>
+                                  <div style={{ color: '#666', fontSize: 13, marginBlockEnd: 4 }}>
+                                    {isGlobalPlan
+                                      ? `$${planWithUSD.monthlyPriceUSD || 0}/mo`
+                                      : `${formatPrice(plan.monthlyPriceVND, false)}/tháng`}
+                                  </div>
+                                  <div style={{ color: '#999', fontSize: 12 }}>
+                                    {isGlobalPlan ? 'Flexible' : 'Linh hoạt'}
+                                  </div>
+                                </div>
+                              </Radio.Button>
+                            </Radio.Group>
+                          </Form.Item>
+                        </div>
+
+                        <Divider style={{ margin: 0 }} />
+                      </>
+                    )}
+
+                    {/* Lifetime plan notice */}
+                    {isLifetimePlan && (
+                      <>
+                        <Alert
+                          description="This is a one-time payment for lifetime access. No recurring charges."
+                          message="⭐ Lifetime Deal"
+                          showIcon
+                          type="success"
+                        />
+                        <Divider style={{ margin: 0 }} />
+                      </>
+                    )}
+
+                    {/* Contact Information */}
+                    <div>
+                      <Title level={4} style={{ marginBlockEnd: 16 }}>
+                        Thông tin liên hệ
+                      </Title>
+
+                      <Form.Item
+                        label="Địa chỉ Email"
+                        name="email"
+                        rules={[
+                          { message: 'Vui lòng nhập email', required: true },
+                          { message: 'Email không hợp lệ', type: 'email' },
+                        ]}
+                      >
+                        <Input placeholder="your@email.com" size="large" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Họ và tên"
+                        name="name"
+                        rules={[{ message: 'Vui lòng nhập họ tên', required: true }]}
+                      >
+                        <Input placeholder="Nguyễn Văn A" size="large" />
+                      </Form.Item>
+
+                      <Form.Item label="Số điện thoại (Tùy chọn)" name="phone">
+                        <Input placeholder="+84 xxx xxx xxx" size="large" />
+                      </Form.Item>
+                    </div>
+
+                    <Divider style={{ margin: 0 }} />
+
+                    {/* Payment Method - Hide for free plans */}
+                    <div>
+                      {!isFreePlan && (
                         <Title level={4} style={{ marginBlockEnd: 12 }}>
-                          {isGlobalPlan ? 'Billing Cycle' : 'Chu kỳ thanh toán'}
+                          {isGlobalPlan ? 'Payment Method' : 'Phương thức thanh toán'}
                         </Title>
-                        <Form.Item name="billingCycle" style={{ marginBlockEnd: 0 }}>
+                      )}
+
+                      {/* Show payment method selection only for PAID Vietnam plans */}
+                      {!isGlobalPlan && !isFreePlan && (
+                        <Form.Item style={{ marginBlockEnd: 16 }}>
                           <Radio.Group
                             className={styles.radioButtonGroup}
-                            onChange={(e) => setBillingCycle(e.target.value)}
-                            value={billingCycle}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                            value={paymentMethod}
                           >
-                            <Radio.Button value="yearly">
+                            <Radio.Button value="bank_transfer">
                               <div>
                                 <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                                  {isGlobalPlan ? 'Yearly' : 'Hàng năm'}
+                                  Chuyển khoản
                                 </div>
-                                <div style={{ color: '#52c41a', fontSize: 13, marginBlockEnd: 4 }}>
-                                  {isGlobalPlan
-                                    ? `$${(planWithUSD.yearlyPriceUSD || 0) / 12}/mo`
-                                    : `${formatPrice(monthlyEquivalentVND, false)}/tháng`}
-                                </div>
-                                <div style={{ color: '#52c41a', fontSize: 12, fontWeight: 500 }}>
-                                  ✨ {isGlobalPlan ? 'Save 17%' : 'Tiết kiệm 17%'}
-                                </div>
+                                <div style={{ color: '#666', fontSize: 12 }}>QR Code</div>
                               </div>
                             </Radio.Button>
-                            <Radio.Button value="monthly">
+                            <Radio.Button value="credit_card">
                               <div>
                                 <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                                  {isGlobalPlan ? 'Monthly' : 'Hàng tháng'}
+                                  Thẻ tín dụng
                                 </div>
-                                <div style={{ color: '#666', fontSize: 13, marginBlockEnd: 4 }}>
-                                  {isGlobalPlan
-                                    ? `$${planWithUSD.monthlyPriceUSD || 0}/mo`
-                                    : `${formatPrice(plan.monthlyPriceVND, false)}/tháng`}
-                                </div>
-                                <div style={{ color: '#999', fontSize: 12 }}>
-                                  {isGlobalPlan ? 'Flexible' : 'Linh hoạt'}
-                                </div>
+                                <div style={{ color: '#666', fontSize: 12 }}>Visa/Mastercard</div>
                               </div>
                             </Radio.Button>
                           </Radio.Group>
                         </Form.Item>
-                      </div>
+                      )}
 
-                      <Divider style={{ margin: 0 }} />
-                    </>
-                  )}
+                      {/* FREE PLANS: Show activate button (no payment needed) */}
+                      {isFreePlan && (
+                        <div>
+                          <Alert
+                            description={
+                              isGlobalPlan
+                                ? 'This is a free plan. No payment required - just activate!'
+                                : 'Đây là gói miễn phí. Không cần thanh toán - chỉ cần kích hoạt!'
+                            }
+                            message={isGlobalPlan ? '🆓 Free Plan' : '🆓 Gói Miễn Phí'}
+                            showIcon
+                            style={{ marginBlockEnd: 16 }}
+                            type="success"
+                          />
+                          <Button
+                            block
+                            icon={<Check size={16} />}
+                            loading={loading}
+                            onClick={handleFreePlanActivation}
+                            size="large"
+                            style={{ background: '#52c41a', borderColor: '#52c41a' }}
+                            type="primary"
+                          >
+                            {loading
+                              ? isGlobalPlan
+                                ? 'Activating...'
+                                : 'Đang kích hoạt...'
+                              : isGlobalPlan
+                                ? 'Activate Free Plan'
+                                : 'Kích hoạt gói miễn phí'}
+                          </Button>
+                        </div>
+                      )}
 
-                  {/* Lifetime plan notice */}
-                  {isLifetimePlan && (
-                    <>
-                      <Alert
-                        description="This is a one-time payment for lifetime access. No recurring charges."
-                        message="⭐ Lifetime Deal"
-                        showIcon
-                        type="success"
-                      />
-                      <Divider style={{ margin: 0 }} />
-                    </>
-                  )}
+                      {/* Global PAID plans: Always use Polar (credit card) */}
+                      {isGlobalPlan && !isFreePlan && (
+                        <div>
+                          <Alert
+                            description="You will be redirected to Polar.sh secure checkout to complete your payment."
+                            message="Secure International Payment via Polar.sh"
+                            showIcon
+                            style={{ marginBlockEnd: 16 }}
+                            type="info"
+                          />
+                          <Button
+                            block
+                            icon={<Lock size={16} />}
+                            loading={loading}
+                            onClick={handleCreditCardSubmit}
+                            size="large"
+                            type="primary"
+                          >
+                            {loading ? 'Processing...' : `Pay ${displayPrice}`}
+                          </Button>
+                        </div>
+                      )}
 
-                  {/* Contact Information */}
-                  <div>
-                    <Title level={4} style={{ marginBlockEnd: 16 }}>
-                      Thông tin liên hệ
-                    </Title>
-
-                    <Form.Item
-                      label="Địa chỉ Email"
-                      name="email"
-                      rules={[
-                        { message: 'Vui lòng nhập email', required: true },
-                        { message: 'Email không hợp lệ', type: 'email' },
-                      ]}
-                    >
-                      <Input placeholder="your@email.com" size="large" />
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Họ và tên"
-                      name="name"
-                      rules={[{ message: 'Vui lòng nhập họ tên', required: true }]}
-                    >
-                      <Input placeholder="Nguyễn Văn A" size="large" />
-                    </Form.Item>
-
-                    <Form.Item label="Số điện thoại (Tùy chọn)" name="phone">
-                      <Input placeholder="+84 xxx xxx xxx" size="large" />
-                    </Form.Item>
-                  </div>
-
-                  <Divider style={{ margin: 0 }} />
-
-                  {/* Payment Method - Hide for free plans */}
-                  <div>
-                    {!isFreePlan && (
-                      <Title level={4} style={{ marginBlockEnd: 12 }}>
-                        {isGlobalPlan ? 'Payment Method' : 'Phương thức thanh toán'}
-                      </Title>
-                    )}
-
-                    {/* Show payment method selection only for PAID Vietnam plans */}
-                    {!isGlobalPlan && !isFreePlan && (
-                      <Form.Item style={{ marginBlockEnd: 16 }}>
-                        <Radio.Group
-                          className={styles.radioButtonGroup}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          value={paymentMethod}
-                        >
-                          <Radio.Button value="bank_transfer">
-                            <div>
-                              <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                                Chuyển khoản
-                              </div>
-                              <div style={{ color: '#666', fontSize: 12 }}>QR Code</div>
-                            </div>
-                          </Radio.Button>
-                          <Radio.Button value="credit_card">
-                            <div>
-                              <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
-                                Thẻ tín dụng
-                              </div>
-                              <div style={{ color: '#666', fontSize: 12 }}>Visa/Mastercard</div>
-                            </div>
-                          </Radio.Button>
-                        </Radio.Group>
-                      </Form.Item>
-                    )}
-
-                    {/* FREE PLANS: Show activate button (no payment needed) */}
-                    {isFreePlan && (
-                      <div>
-                        <Alert
-                          description={
-                            isGlobalPlan
-                              ? 'This is a free plan. No payment required - just activate!'
-                              : 'Đây là gói miễn phí. Không cần thanh toán - chỉ cần kích hoạt!'
-                          }
-                          message={isGlobalPlan ? '🆓 Free Plan' : '🆓 Gói Miễn Phí'}
-                          showIcon
-                          style={{ marginBlockEnd: 16 }}
-                          type="success"
-                        />
+                      {/* Vietnam PAID plans: Show selected payment method */}
+                      {!isGlobalPlan && !isFreePlan && paymentMethod === 'bank_transfer' && (
                         <Button
                           block
-                          icon={<Check size={16} />}
+                          htmlType="submit"
+                          icon={<CreditCard />}
                           loading={loading}
-                          onClick={handleFreePlanActivation}
                           size="large"
-                          style={{ background: '#52c41a', borderColor: '#52c41a' }}
                           type="primary"
                         >
                           {loading
-                            ? isGlobalPlan
-                              ? 'Activating...'
-                              : 'Đang kích hoạt...'
-                            : isGlobalPlan
-                              ? 'Activate Free Plan'
-                              : 'Kích hoạt gói miễn phí'}
+                            ? 'Đang xử lý...'
+                            : `Thanh toán ${formatPrice(vndAmount, false)}`}
                         </Button>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Global PAID plans: Always use Polar (credit card) */}
-                    {isGlobalPlan && !isFreePlan && (
-                      <div>
-                        <Alert
-                          description="You will be redirected to Polar.sh secure checkout to complete your payment."
-                          message="Secure International Payment via Polar.sh"
-                          showIcon
-                          style={{ marginBlockEnd: 16 }}
-                          type="info"
-                        />
-                        <Button
-                          block
-                          icon={<Lock size={16} />}
-                          loading={loading}
-                          onClick={handleCreditCardSubmit}
-                          size="large"
-                          type="primary"
-                        >
-                          {loading ? 'Processing...' : `Pay ${displayPrice}`}
-                        </Button>
-                      </div>
-                    )}
+                      {!isGlobalPlan && !isFreePlan && paymentMethod === 'credit_card' && (
+                        <div>
+                          <Alert
+                            description="Bạn sẽ được chuyển hướng đến trang thanh toán an toàn của Polar.sh để hoàn tất giao dịch."
+                            message="Thanh toán quốc tế qua Polar.sh"
+                            showIcon
+                            style={{ marginBlockEnd: 16 }}
+                            type="info"
+                          />
+                          <Button
+                            block
+                            icon={<Lock size={16} />}
+                            loading={loading}
+                            onClick={handleCreditCardSubmit}
+                            size="large"
+                            type="primary"
+                          >
+                            {loading ? 'Đang xử lý...' : 'Tiếp tục thanh toán'}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Vietnam PAID plans: Show selected payment method */}
-                    {!isGlobalPlan && !isFreePlan && paymentMethod === 'bank_transfer' && (
-                      <Button
-                        block
-                        htmlType="submit"
-                        icon={<CreditCard />}
-                        loading={loading}
-                        size="large"
-                        type="primary"
-                      >
-                        {loading ? 'Đang xử lý...' : `Thanh toán ${formatPrice(vndAmount, false)}`}
-                      </Button>
-                    )}
-
-                    {!isGlobalPlan && !isFreePlan && paymentMethod === 'credit_card' && (
-                      <div>
-                        <Alert
-                          description="Bạn sẽ được chuyển hướng đến trang thanh toán an toàn của Polar.sh để hoàn tất giao dịch."
-                          message="Thanh toán quốc tế qua Polar.sh"
-                          showIcon
-                          style={{ marginBlockEnd: 16 }}
-                          type="info"
-                        />
-                        <Button
-                          block
-                          icon={<Lock size={16} />}
-                          loading={loading}
-                          onClick={handleCreditCardSubmit}
-                          size="large"
-                          type="primary"
-                        >
-                          {loading ? 'Đang xử lý...' : 'Tiếp tục thanh toán'}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Security Note */}
-                  <div className={styles.securityNote}>
-                    <Shield size={16} />
-                    <Text>
-                      {isGlobalPlan
-                        ? 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'
-                        : paymentMethod === 'bank_transfer'
-                          ? 'Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật.'
-                          : 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'}
-                    </Text>
-                  </div>
-                </Flexbox>
-              </Form>
-            </Card>
-          </div>
-        </Flexbox>
+                    {/* Security Note */}
+                    <div className={styles.securityNote}>
+                      <Shield size={16} />
+                      <Text>
+                        {isGlobalPlan
+                          ? 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'
+                          : paymentMethod === 'bank_transfer'
+                            ? 'Thanh toán an toàn được hỗ trợ bởi Sepay. Thông tin thanh toán của bạn được mã hóa và bảo mật.'
+                            : 'Secure payment powered by Polar.sh. Your payment information is encrypted and protected.'}
+                      </Text>
+                    </div>
+                  </Flexbox>
+                </Form>
+              </Card>
+            </div>
+          </Flexbox>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

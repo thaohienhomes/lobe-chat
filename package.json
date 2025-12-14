@@ -226,6 +226,7 @@
     "langfuse": "^3.38.5",
     "langfuse-core": "^3.38.5",
     "lodash-es": "^4.17.21",
+    "lottie-react": "^2.4.1",
     "lru-cache": "^11.2.2",
     "lucide-react": "^0.544.0",
     "mammoth": "^1.10.0",
