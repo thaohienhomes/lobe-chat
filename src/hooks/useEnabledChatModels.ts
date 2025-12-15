@@ -19,8 +19,8 @@ const useAllowedModels = () => {
       try {
         const response = await fetch('/api/subscription/models/allowed');
         if (response.ok) {
-          const data = await response.json();
-          setAllowedModels(data.models || []);
+          const result = await response.json();
+          setAllowedModels(result.data?.allowedModels || []);
         }
       } catch (error) {
         console.error('Failed to fetch allowed models:', error);

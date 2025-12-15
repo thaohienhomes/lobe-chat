@@ -1,0 +1,45 @@
+[
+  {
+    "id": "user_352STyMLHEH489zOXSfV6PtFt8T",
+    "tts": {},
+    "hotkey": {},
+    "keyVaults": null,
+    "general": {
+      "mermaidTheme": "dark",
+      "animationMode": "disabled",
+      "highlighterTheme": "github-dark"
+    },
+    "languageModel": {},
+    "systemAgent": {},
+    "defaultAgent": {},
+    "tool": {}
+  },
+  {
+    "id": "user_32Q7dtiu25Z3ZITiqPmNpQFglsW",
+    "tts": {},
+    "hotkey": {},
+    "keyVaults": null,
+    "general": {
+      "primaryColor": "",
+      "transitionMode": "smooth"
+    },
+    "languageModel": {},
+    "systemAgent": {},
+    "defaultAgent": {},
+    "tool": {}
+  },
+  {
+    "id": "user_33HKLL8pPaIpyawymwQRlz7xBE7",
+    "tts": {},
+    "hotkey": {},
+    "keyVaults": null,
+    "general": {
+      "primaryColor": "red",
+      "animationMode": "elegant"
+    },
+    "languageModel": {},
+    "systemAgent": {},
+    "defaultAgent": {},
+    "tool": {}
+  }
+]
