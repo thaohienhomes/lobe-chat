@@ -11,6 +11,9 @@ import {
   LucidePaperclip,
   ToyBrick,
   Video,
+  Zap,
+  Star,
+  Crown,
 } from 'lucide-react';
 import { ModelAbilities } from 'model-bank';
 import numeral from 'numeral';
@@ -18,10 +21,64 @@ import { FC, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
+import { getModelTier } from '@/config/pricing';
 import { AiProviderSourceType } from '@/types/aiProvider';
 import { formatTokenNumber } from '@/utils/format';
 
 export const TAG_CLASSNAME = 'lobe-model-info-tags';
+
+/**
+ * Get tier icon and color for model tier
+ */
+const getTierInfo = (tier: number) => {
+  switch (tier) {
+    case 1: {
+      return { color: '#52c41a', icon: Zap, label: 'Tier 1' };
+    } // Green for budget models
+    case 2: {
+      return { color: '#1890ff', icon: Star, label: 'Tier 2' };
+    } // Blue for standard models
+    case 3: {
+      return { color: '#faad14', icon: Crown, label: 'Tier 3' };
+    } // Gold for premium models
+    default: {
+      return { color: '#52c41a', icon: Zap, label: 'Tier 1' };
+    }
+  }
+};
+
+/**
+ * Model Tier Badge Component
+ */
+interface ModelTierBadgeProps {
+  modelId: string;
+  size?: 'small' | 'default';
+}
+
+const ModelTierBadge = memo<ModelTierBadgeProps>(({ modelId, size = 'small' }) => {
+  const tier = getModelTier(modelId);
+  const { icon: TierIcon, color, label } = getTierInfo(tier);
+
+  return (
+    <Tooltip title={`${label} - ${tier === 1 ? 'Budget' : tier === 2 ? 'Standard' : 'Premium'} model`}>
+      <Tag
+        color={color}
+        icon={<TierIcon size={12} />}
+        style={{
+          alignItems: 'center',
+          display: 'inline-flex',
+          fontSize: size === 'small' ? '10px' : '12px',
+          gap: '2px',
+          height: size === 'small' ? '18px' : '22px',
+          lineHeight: size === 'small' ? '16px' : '20px',
+          padding: size === 'small' ? '0 4px' : '2px 6px',
+        }}
+      >
+        T{tier}
+      </Tag>
+    </Tooltip>
+  );
+});
 
 const useStyles = createStyles(({ css, token }) => ({
   tag: css`
@@ -175,9 +232,14 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
 
 interface ModelItemRenderProps extends ChatModelCard {
   showInfoTag?: boolean;
+  showTierBadge?: boolean;
 }
 
-export const ModelItemRender = memo<ModelItemRenderProps>(({ showInfoTag = true, ...model }) => {
+export const ModelItemRender = memo<ModelItemRenderProps>(({
+  showInfoTag = true,
+  showTierBadge = true,
+  ...model
+}) => {
   const { mobile } = useResponsive();
   return (
     <Flexbox
@@ -202,6 +264,7 @@ export const ModelItemRender = memo<ModelItemRenderProps>(({ showInfoTag = true,
         <Text style={mobile ? { maxWidth: '60vw', overflowX: 'auto', whiteSpace: 'nowrap' } : {}}>
           {model.displayName || model.id}
         </Text>
+        {showTierBadge && <ModelTierBadge modelId={model.id} />}
       </Flexbox>
       {showInfoTag && <ModelInfoTags {...model} />}
     </Flexbox>

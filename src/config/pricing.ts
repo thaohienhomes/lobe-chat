@@ -31,6 +31,14 @@ export interface ModelTierConfig {
   tierName: string;
 }
 
+export interface PlanModelAccess {
+  allowedTiers: number[];
+  dailyLimits?: Record<string, number>;
+  defaultModel: string;
+  defaultProvider: string;
+  models: string[];
+}
+
 // ============================================================================
 // VIETNAM PLANS (VND - via Sepay/VietQR)
 // ============================================================================
@@ -151,6 +159,214 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     keyLimits: 'Tier 1 Models Only. Limited History.',
     monthlyPoints: 30_000,
     price: 0,
+  },
+} as const;
+
+// ============================================================================
+// PLAN-TO-MODELS ACCESS MAPPING
+// ============================================================================
+
+/**
+ * Defines which models are allowed for each subscription plan
+ * and sets default model selection per plan
+ */
+export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
+  
+  
+gl_lifetime: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier3: 100 },
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'anthropic',
+    models: [
+      // All models available
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-pro',
+      'o3',
+    ],
+  },
+  
+
+
+gl_premium: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier3: 50 },
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'anthropic',
+    models: [
+      // All models available
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-pro',
+      'o3',
+    ],
+  },
+  
+
+
+gl_standard: {
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: 30 },
+    defaultModel: 'gpt-4o',
+    defaultProvider: 'openai',
+    models: [
+      // Tier 1 models
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      // Tier 2 models
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+    ],
+  },
+  
+
+// Global Plans
+gl_starter: {
+    allowedTiers: [1],
+    defaultModel: 'gpt-4o-mini',
+    defaultProvider: 'openai',
+    models: [
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+    ],
+  },
+
+  
+  
+vn_basic: {
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: 30 },
+    defaultModel: 'gpt-4o',
+    defaultProvider: 'openai',
+    models: [
+      // Tier 1 models
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      // Tier 2 models
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+    ],
+  },
+  // VN Plans
+vn_free: {
+    allowedTiers: [1],
+    defaultModel: 'gpt-4o-mini',
+    defaultProvider: 'openai',
+    models: [
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+    ],
+  },
+  vn_pro: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier3: 50 },
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'anthropic',
+    models: [
+      // Tier 1 models
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      // Tier 2 models
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      // Tier 3 models
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-pro',
+      'o3',
+    ],
+  },
+  vn_team: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier3: 100 },
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'anthropic',
+    models: [
+      // All models available
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-pro',
+      'o3',
+    ],
   },
 } as const;
 
@@ -316,4 +532,143 @@ export const LEGACY_PLAN_MAPPING: Record<string, string> = {
 
 export function getLegacyPlanMapping(legacyId: string): string {
   return LEGACY_PLAN_MAPPING[legacyId] || legacyId;
+}
+
+// ============================================================================
+// PLAN MODEL ACCESS HELPERS
+// ============================================================================
+
+/**
+ * Get allowed models for a subscription plan
+ */
+export function getAllowedModelsForPlan(planCode: string): string[] {
+  const planAccess = PLAN_MODEL_ACCESS[planCode];
+  if (!planAccess) {
+    // Default to free plan models if plan not found
+    return PLAN_MODEL_ACCESS.vn_free.models;
+  }
+  return planAccess.models;
+}
+
+/**
+ * Get default model and provider for a subscription plan
+ */
+export function getDefaultModelForPlan(planCode: string): { model: string; provider: string } {
+  const planAccess = PLAN_MODEL_ACCESS[planCode];
+  if (!planAccess) {
+    return {
+      model: PLAN_MODEL_ACCESS.vn_free.defaultModel,
+      provider: PLAN_MODEL_ACCESS.vn_free.defaultProvider,
+    };
+  }
+  return {
+    model: planAccess.defaultModel,
+    provider: planAccess.defaultProvider,
+  };
+}
+
+/**
+ * Check if a plan can use a specific model
+ */
+export function canPlanUseModel(planCode: string, modelId: string): boolean {
+  const allowedModels = getAllowedModelsForPlan(planCode);
+  return allowedModels.includes(modelId);
+}
+
+/**
+ * Get required providers for a plan (based on allowed models)
+ */
+export function getRequiredProvidersForPlan(planCode: string): string[] {
+  const allowedModels = getAllowedModelsForPlan(planCode);
+
+  // Model to provider mapping
+  const modelProviderMap: Record<string, string> = {
+    
+    
+'claude-3-5-sonnet': 'anthropic',
+    
+
+// Anthropic models
+'claude-3-haiku': 'anthropic',
+    
+
+'claude-3-opus': 'anthropic',
+    
+
+'claude-3-sonnet': 'anthropic',
+    
+
+// Other models
+'deepseek-chat': 'deepseek',
+    
+
+
+'deepseek-reasoner': 'deepseek',
+    
+
+
+// Google models
+'gemini-1.5-flash': 'google',
+
+    
+    
+
+
+'gemini-1.5-pro': 'google',
+    
+
+
+'gemini-2.0-flash': 'google',
+    
+
+
+'gemini-2.5-pro': 'google',
+    
+
+
+'gpt-4-turbo': 'openai',
+
+    
+    
+
+
+'gpt-4.1': 'openai',
+    
+
+
+
+'gpt-4o': 'openai',
+    
+
+// OpenAI models
+'gpt-4o-mini': 'openai',
+    
+'o1': 'openai',
+
+    
+    'o1-pro': 'openai',
+    'o3': 'openai',
+    'qwen-turbo': 'qwen',
+  };
+
+  const providers = new Set<string>();
+  allowedModels.forEach(model => {
+    const provider = modelProviderMap[model];
+    if (provider) {
+      providers.add(provider);
+    }
+  });
+
+  return Array.from(providers);
+}
+
+/**
+ * Get allowed tiers for a subscription plan
+ */
+export function getAllowedTiersForPlan(planCode: string): number[] {
+  const planAccess = PLAN_MODEL_ACCESS[planCode];
+  if (!planAccess) {
+    return PLAN_MODEL_ACCESS.vn_free.allowedTiers;
+  }
+  return planAccess.allowedTiers;
 }

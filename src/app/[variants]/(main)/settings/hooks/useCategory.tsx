@@ -23,7 +23,7 @@ import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfi
 export const useCategory = () => {
   const { t } = useTranslation('setting');
   const mobile = useServerConfigStore((s) => s.isMobile);
-  const { showLLM, enableSTT, hideDocs } = useServerConfigStore(featureFlagsSelectors);
+  const { showLLM, showProvider, enableSTT, hideDocs } = useServerConfigStore(featureFlagsSelectors);
 
   const cateItems: MenuProps['items'] = useMemo(
     () =>
@@ -54,7 +54,7 @@ export const useCategory = () => {
                 key: SettingsTabs.LLM,
                 label: t('tab.llm'),
               }
-            : {
+            : showProvider && {
                 icon: <Icon icon={Brain} />,
                 key: SettingsTabs.Provider,
                 label: t('tab.provider'),
@@ -102,7 +102,7 @@ export const useCategory = () => {
           label: t('tab.about'),
         },
       ].filter(Boolean) as MenuProps['items'],
-    [t, showLLM],
+    [t, showLLM, showProvider],
   );
 
   return cateItems;

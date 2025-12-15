@@ -50,10 +50,10 @@ export const DEFAULT_FEATURE_FLAGS: IFeatureFlags = {
   pin_list: false,
 
   language_model_settings: true,
-  provider_settings: true,
+  provider_settings: false, // Hide AI Provider settings to prevent users from adding their own API keys
 
-  openai_api_key: true,
-  openai_proxy_url: true,
+  openai_api_key: false, // Hide OpenAI API key input
+  openai_proxy_url: false, // Hide proxy URL input
 
   api_key_manage: false,
 
