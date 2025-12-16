@@ -58,7 +58,7 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
     const { eq, and } = await import('drizzle-orm');
 
     const db = await serverDB;
-    const currentSubscription = await db
+    const allSubscriptions = await db
       .select()
       .from(subscriptions)
       .where(
@@ -66,10 +66,22 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
           eq(subscriptions.userId, userId),
           eq(subscriptions.status, 'active'),
         ),
-      )
-      .limit(1);
+      );
 
-    const planCode = currentSubscription?.[0]?.planId || 'vn_free';
+    // Prioritize paid plans over free plan
+    const freePlans = ['free', 'trial'];
+    const sortedSubscriptions = allSubscriptions.sort((a, b) => {
+      const aIsFree = freePlans.includes(a.planId?.toLowerCase() || '');
+      const bIsFree = freePlans.includes(b.planId?.toLowerCase() || '');
+      if (aIsFree && !bIsFree) return 1;
+      if (!aIsFree && bIsFree) return -1;
+      // For same priority, prefer most recent
+      const aStart = a.currentPeriodStart ? new Date(a.currentPeriodStart).getTime() : 0;
+      const bStart = b.currentPeriodStart ? new Date(b.currentPeriodStart).getTime() : 0;
+      return bStart - aStart;
+    });
+
+    const planCode = sortedSubscriptions[0]?.planId || 'vn_free';
 
     // Get plan details
     const { PLAN_MODEL_ACCESS, getAllowedTiersForPlan } = await import('@/config/pricing');

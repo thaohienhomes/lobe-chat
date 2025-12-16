@@ -1,10 +1,12 @@
 import { Select, type SelectProps, Tag, Text } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
+import { Lock } from 'lucide-react';
 import { memo, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { ModelItemRender, ProviderItemRender, TAG_CLASSNAME } from '@/components/ModelSelect';
+import { getModelTier } from '@/config/pricing';
 import { useEnabledChatModels } from '@/hooks/useEnabledChatModels';
 import { EnabledProviderWithModels } from '@/types/aiProvider';
 
@@ -30,10 +32,11 @@ interface ModelOption {
 }
 
 /**
- * Hook to check if user can access a specific model
+ * Hook to check if user can access a specific model based on subscription tier
  */
 const useModelAccess = () => {
-  const [restrictedModels, setRestrictedModels] = useState<Set<string>>(new Set());
+  const [allowedTiers, setAllowedTiers] = useState<number[]>([1, 2, 3]); // Default: allow all
+  const [planCode, setPlanCode] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,15 +44,16 @@ const useModelAccess = () => {
       try {
         const response = await fetch('/api/subscription/models/allowed');
         if (response.ok) {
-          // const data = await response.json();
-          // const allowedModels = new Set(data.models || []);
-
-          // For now, we'll assume all models not in allowed list are restricted
-          // In a real implementation, you'd fetch all available models and compare
-          setRestrictedModels(new Set()); // Will be populated based on actual logic
+          const data = await response.json();
+          if (data.success && data.data) {
+            setAllowedTiers(data.data.allowedTiers || [1]);
+            setPlanCode(data.data.planCode || 'free');
+          }
         }
       } catch (error) {
         console.error('Failed to check model access:', error);
+        // On error, default to tier 1 only for safety
+        setAllowedTiers([1]);
       } finally {
         setLoading(false);
       }
@@ -58,36 +62,50 @@ const useModelAccess = () => {
     checkModelAccess();
   }, []);
 
-  const canUseModel = (modelId: string) => !restrictedModels.has(modelId);
+  const canUseModel = (modelId: string) => {
+    const tier = getModelTier(modelId);
+    return allowedTiers.includes(tier);
+  };
 
-  return { canUseModel, loading };
+  const getModelRestrictionReason = (modelId: string): string | null => {
+    const tier = getModelTier(modelId);
+    if (allowedTiers.includes(tier)) return null;
+
+    if (tier === 2) {
+      return 'Nâng cấp lên gói Phở Không Người Lái để sử dụng model này';
+    }
+    if (tier === 3) {
+      return 'Nâng cấp lên gói Phở Đặc Biệt để sử dụng model cao cấp này';
+    }
+    return 'Nâng cấp để sử dụng model này';
+  };
+
+  return { allowedTiers, canUseModel, getModelRestrictionReason, loading, planCode };
 };
 
 /**
- * Upgrade Prompt Component for restricted models
+ * Locked Model Indicator for restricted models
  */
-const UpgradePrompt = memo<{ modelId: string }>(() => {
-  const { t } = useTranslation('common');
-  // modelId can be used for specific upgrade messaging in the future
+interface LockedModelIndicatorProps {
+  reason: string;
+}
 
+const LockedModelIndicator = memo<LockedModelIndicatorProps>(({ reason }) => {
   return (
     <Flexbox
       align="center"
-      gap={8}
+      gap={4}
       horizontal
       style={{
-        backgroundColor: '#fff7e6',
-        border: '1px solid #ffd591',
-        borderRadius: '6px',
-        padding: '8px 12px',
+        color: '#d46b08',
+        fontSize: '11px',
+        marginTop: '4px',
       }}
     >
-      <Text style={{ color: '#d46b08', fontSize: '12px' }}>
-        {t('upgradeToUseModel', { defaultValue: 'Upgrade to Premium to use this model' })}
+      <Lock size={12} />
+      <Text style={{ color: '#d46b08', fontSize: '11px' }}>
+        {reason}
       </Text>
-      <Tag color="orange" size="small">
-        {t('upgrade', { defaultValue: 'Upgrade' })}
-      </Tag>
     </Flexbox>
   );
 });
@@ -101,7 +119,7 @@ interface ModelSelectProps {
 
 const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = true }) => {
   const enabledList = useEnabledChatModels();
-  const { canUseModel, loading: accessLoading } = useModelAccess();
+  const { canUseModel, getModelRestrictionReason, loading: accessLoading } = useModelAccess();
   const { t } = useTranslation('common');
 
   const { styles } = useStyles();
@@ -110,21 +128,22 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = tru
     const getChatModels = (provider: EnabledProviderWithModels) =>
       provider.children.map((model) => {
         const canAccess = canUseModel(model.id);
+        const restrictionReason = getModelRestrictionReason(model.id);
 
         return {
           disabled: !canAccess,
           label: canAccess ? (
             <ModelItemRender {...model} {...model.abilities} showInfoTag={showAbility} />
           ) : (
-            <Flexbox gap={8}>
-              <div style={{ opacity: 0.6 }}>
+            <Flexbox gap={2}>
+              <div style={{ filter: 'grayscale(0.5)', opacity: 0.5 }}>
                 <ModelItemRender
                   {...model}
                   {...model.abilities}
                   showInfoTag={showAbility}
                 />
               </div>
-              <UpgradePrompt modelId={model.id} />
+              {restrictionReason && <LockedModelIndicator reason={restrictionReason} />}
             </Flexbox>
           ),
           provider: provider.id,
@@ -149,7 +168,7 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = tru
       ),
       options: getChatModels(provider),
     }));
-  }, [enabledList, canUseModel, showAbility]);
+  }, [enabledList, canUseModel, getModelRestrictionReason, showAbility]);
 
   // Show loading state while checking model access
   if (accessLoading) {
