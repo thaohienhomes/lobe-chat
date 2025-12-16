@@ -3,12 +3,25 @@ import { AIProviderStoreState } from '@/store/aiInfra/initialState';
 import { AiProviderRuntimeConfig } from '@/types/aiProvider';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
 
-// List
-const enabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => item.enabled).sort((a, b) => a.sort! - b.sort!);
+// ============================================================================
+// OPENROUTER-ONLY ENFORCEMENT (per SPECS_BUSINESS.md)
+// ============================================================================
+// pho.chat uses OpenRouter as the ONLY provider for all AI models.
+// This allows centralized billing, model access control, and tier enforcement.
+// All other providers are hidden from the UI to simplify user experience.
+// ============================================================================
+const ALLOWED_PROVIDER_ID = 'openrouter';
 
+// List - filtered to show ONLY OpenRouter provider
+const enabledAiProviderList = (s: AIProviderStoreState) =>
+  s.aiProviderList
+    .filter((item) => item.enabled && item.id === ALLOWED_PROVIDER_ID)
+    .sort((a, b) => a.sort! - b.sort!);
+
+// Disabled list - also filtered to only show OpenRouter if disabled
+// This prevents other providers from appearing in "Disabled" section
 const disabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => !item.enabled);
+  s.aiProviderList.filter((item) => !item.enabled && item.id === ALLOWED_PROVIDER_ID);
 
 const enabledImageModelList = (s: AIProviderStoreState) => s.enabledImageModelList || [];
 
@@ -41,11 +54,11 @@ const isActiveProviderApiKeyNotEmpty = (s: AIProviderStoreState) => {
 
 const providerConfigById =
   (id: string) =>
-  (s: AIProviderStoreState): AiProviderRuntimeConfig | undefined => {
-    if (!id) return undefined;
+    (s: AIProviderStoreState): AiProviderRuntimeConfig | undefined => {
+      if (!id) return undefined;
 
-    return s.aiProviderRuntimeConfig?.[id];
-  };
+      return s.aiProviderRuntimeConfig?.[id];
+    };
 
 const isProviderConfigUpdating = (id: string) => (s: AIProviderStoreState) =>
   s.aiProviderConfigUpdatingIds.includes(id);

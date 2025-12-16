@@ -9,6 +9,11 @@ import { useAiInfraStore } from '@/store/aiInfra';
 
 import ProviderItem from './Item';
 
+// ============================================================================
+// OPENROUTER-ONLY ENFORCEMENT (per SPECS_BUSINESS.md)
+// ============================================================================
+const ALLOWED_PROVIDER_ID = 'openrouter';
+
 const SearchResult = memo((props: { onProviderSelect?: (key: string) => void }) => {
   const { onProviderSelect = () => {} } = props;
   const { t } = useTranslation('modelProvider');
@@ -16,17 +21,19 @@ const SearchResult = memo((props: { onProviderSelect?: (key: string) => void }) 
   const searchKeyword = useAiInfraStore((s) => s.providerSearchKeyword);
   const aiProviderList = useAiInfraStore((s) => s.aiProviderList, isEqual);
 
-  // 使用 useMemo 优化过滤性能
+  // Filter providers - ONLY show OpenRouter (per SPECS_BUSINESS.md)
   const filteredProviders = useMemo(() => {
     const keyword = searchKeyword.toLowerCase().trim();
 
     return aiProviderList.filter(
       (provider) =>
-        provider.id.toLowerCase().includes(keyword) ||
-        provider.name?.toLowerCase().includes(keyword) ||
-        provider.description?.toLowerCase().includes(keyword),
+        // OPENROUTER-ONLY: Only include OpenRouter provider
+        provider.id === ALLOWED_PROVIDER_ID &&
+        (provider.id.toLowerCase().includes(keyword) ||
+          provider.name?.toLowerCase().includes(keyword) ||
+          provider.description?.toLowerCase().includes(keyword)),
     );
-  }, [searchKeyword]);
+  }, [searchKeyword, aiProviderList]);
 
   return (
     <Flexbox gap={4} padding={'0 12px'}>
