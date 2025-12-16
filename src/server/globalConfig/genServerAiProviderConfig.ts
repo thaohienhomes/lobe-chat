@@ -14,10 +14,29 @@ interface ProviderSpecificConfig {
   withDeploymentName?: boolean;
 }
 
+/**
+ * IMPORTANT: Per SPECS_BUSINESS.md, OpenRouter is the PRIMARY provider for pho.chat
+ *
+ * The system should:
+ * 1. NOT crash if OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY are missing
+ * 2. Only require OPENROUTER_API_KEY for production operation
+ * 3. Gracefully disable providers that don't have API keys configured
+ *
+ * This function generates provider configs where:
+ * - enabled = true only if the provider has an API key
+ * - Other providers are disabled by default (enabled = false)
+ */
 export const genServerAiProvidersConfig = async (
   specificConfig: Record<any, ProviderSpecificConfig>,
 ) => {
   const llmConfig = getLLMConfig() as Record<string, any>;
+
+  // Check if OpenRouter is configured (required for pho.chat)
+  if (!llmConfig.ENABLED_OPENROUTER) {
+    console.warn(
+      '⚠️ [pho.chat] OPENROUTER_API_KEY is not configured! OpenRouter is required for model access.',
+    );
+  }
 
   // 并发处理所有 providers
   const providerConfigs = await Promise.all(
@@ -25,10 +44,16 @@ export const genServerAiProvidersConfig = async (
       const providerUpperCase = provider.toUpperCase();
       const aiModels = AiModels[provider as keyof typeof AiModels] as AiFullModelCard[];
 
-      if (!aiModels)
-        throw new Error(
-          `Provider [${provider}] not found in aiModels, please make sure you have exported the provider in the \`aiModels/index.ts\``,
+      // Gracefully handle missing provider models instead of throwing
+      if (!aiModels) {
+        console.warn(
+          `[genServerAiProvidersConfig] Provider [${provider}] not found in aiModels, skipping...`,
         );
+        return {
+          config: { enabled: false, enabledModels: [], serverModelLists: [] },
+          provider,
+        };
+      }
 
       const providerConfig = specificConfig[provider as keyof typeof specificConfig] || {};
       const modelString =
@@ -45,12 +70,16 @@ export const genServerAiProvidersConfig = async (
         }),
       ]);
 
+      // Determine if provider should be enabled
+      // Priority: specificConfig.enabled > env var ENABLED_<PROVIDER>
+      const isEnabled =
+        typeof providerConfig.enabled !== 'undefined'
+          ? providerConfig.enabled
+          : llmConfig[providerConfig.enabledKey || `ENABLED_${providerUpperCase}`];
+
       return {
         config: {
-          enabled:
-            typeof providerConfig.enabled !== 'undefined'
-              ? providerConfig.enabled
-              : llmConfig[providerConfig.enabledKey || `ENABLED_${providerUpperCase}`],
+          enabled: isEnabled,
           enabledModels,
           serverModelLists,
           ...(providerConfig.fetchOnClient !== undefined && {

@@ -171,73 +171,16 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
  * and sets default model selection per plan
  */
 export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
-  
-  
-gl_lifetime: {
-    allowedTiers: [1, 2, 3],
-    dailyLimits: { tier3: 100 },
+  // ============================================================================
+  // GLOBAL PLANS - All use OpenRouter as primary provider
+  // ============================================================================
+
+  // Global Lifetime: Tier 1, 2, 3 - Behaves like PRO with 2M points monthly reset
+  gl_lifetime: {
+    allowedTiers: [1, 2], // Per SPECS: Same as PRO = Tier 1 & 2 only
+    dailyLimits: { tier2: -1 }, // Unlimited Tier 2 within monthly points cap
     defaultModel: 'claude-3-5-sonnet',
-    defaultProvider: 'anthropic',
-    models: [
-      // All models available
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-pro',
-      'o3',
-    ],
-  },
-  
-
-
-gl_premium: {
-    allowedTiers: [1, 2, 3],
-    dailyLimits: { tier3: 50 },
-    defaultModel: 'claude-3-5-sonnet',
-    defaultProvider: 'anthropic',
-    models: [
-      // All models available
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-pro',
-      'o3',
-    ],
-  },
-  
-
-
-gl_standard: {
-    allowedTiers: [1, 2],
-    dailyLimits: { tier2: 30 },
-    defaultModel: 'gpt-4o',
-    defaultProvider: 'openai',
+    defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -256,30 +199,13 @@ gl_standard: {
       'deepseek-reasoner',
     ],
   },
-  
 
-// Global Plans
-gl_starter: {
-    allowedTiers: [1],
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openai',
-    models: [
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-    ],
-  },
-
-  
-  
-vn_basic: {
-    allowedTiers: [1, 2],
-    dailyLimits: { tier2: 30 },
-    defaultModel: 'gpt-4o',
-    defaultProvider: 'openai',
+  // Global Premium (Pro): Tier 1 & 2 with 2M points cap
+  gl_premium: {
+    allowedTiers: [1, 2], // Per SPECS: PRO = Tier 1 & 2
+    dailyLimits: { tier2: -1 }, // Unlimited within monthly cap
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -298,11 +224,39 @@ vn_basic: {
       'deepseek-reasoner',
     ],
   },
-  // VN Plans
-vn_free: {
-    allowedTiers: [1],
+
+  // Global Standard: Tier 1 & 2 with daily limits
+  gl_standard: {
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: 30 },
+    defaultModel: 'gpt-4o',
+    defaultProvider: 'openrouter', // OpenRouter as primary
+    models: [
+      // Tier 1 models
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      // Tier 2 models
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+    ],
+  },
+
+
+  // Global Starter Plan: Tier 1 ONLY per SPECS_BUSINESS.md
+  // "BASIC TIER: Models: Tier 1 ONLY (Unlimited*). Strictly NO access to Tier 2 Models."
+  gl_starter: {
+    allowedTiers: [1], // Tier 1 ONLY - same as vn_basic
     defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openai',
+    defaultProvider: 'openrouter', // Use OpenRouter as primary provider
     models: [
       'gpt-4o-mini',
       'gemini-1.5-flash',
@@ -312,11 +266,50 @@ vn_free: {
       'qwen-turbo',
     ],
   },
+
+
+
+  // Vietnam Basic Plan: Tier 1 ONLY per SPECS_BUSINESS.md
+  // "BASIC TIER: Models: Tier 1 ONLY (Unlimited*). Strictly NO access to Tier 2 Models (GPT-4o, Sonnet)."
+  vn_basic: {
+    allowedTiers: [1], // CRITICAL: Tier 1 ONLY - no Tier 2 access
+    defaultModel: 'gpt-4o-mini',
+    defaultProvider: 'openrouter', // Use OpenRouter as primary provider
+    models: [
+      // Tier 1 models ONLY
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+    ],
+  },
+  // ============================================================================
+  // VIETNAM PLANS - All use OpenRouter as primary provider
+  // ============================================================================
+
+  // VN Free: Tier 1 ONLY with 50,000 points/month, no chat history/file uploads
+  vn_free: {
+    allowedTiers: [1],
+    defaultModel: 'gpt-4o-mini',
+    defaultProvider: 'openrouter', // OpenRouter as primary
+    models: [
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+    ],
+  },
+
+  // VN Pro: Tier 1 & 2 with 2M points cap per SPECS
   vn_pro: {
-    allowedTiers: [1, 2, 3],
-    dailyLimits: { tier3: 50 },
+    allowedTiers: [1, 2], // Per SPECS: PRO = Tier 1 & 2 (not Tier 3)
+    dailyLimits: { tier2: -1 }, // Unlimited within monthly cap
     defaultModel: 'claude-3-5-sonnet',
-    defaultProvider: 'anthropic',
+    defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -333,19 +326,15 @@ vn_free: {
       'gemini-1.5-pro',
       'gemini-2.5-pro',
       'deepseek-reasoner',
-      // Tier 3 models
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-pro',
-      'o3',
     ],
   },
+
+  // VN Team: All tiers (enterprise plan)
   vn_team: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier3: 100 },
     defaultModel: 'claude-3-5-sonnet',
-    defaultProvider: 'anthropic',
+    defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // All models available
       'gpt-4o-mini',
@@ -583,69 +572,69 @@ export function getRequiredProvidersForPlan(planCode: string): string[] {
 
   // Model to provider mapping
   const modelProviderMap: Record<string, string> = {
-    
-    
-'claude-3-5-sonnet': 'anthropic',
-    
-
-// Anthropic models
-'claude-3-haiku': 'anthropic',
-    
-
-'claude-3-opus': 'anthropic',
-    
-
-'claude-3-sonnet': 'anthropic',
-    
-
-// Other models
-'deepseek-chat': 'deepseek',
-    
 
 
-'deepseek-reasoner': 'deepseek',
-    
+    'claude-3-5-sonnet': 'anthropic',
 
 
-// Google models
-'gemini-1.5-flash': 'google',
-
-    
-    
+    // Anthropic models
+    'claude-3-haiku': 'anthropic',
 
 
-'gemini-1.5-pro': 'google',
-    
+    'claude-3-opus': 'anthropic',
 
 
-'gemini-2.0-flash': 'google',
-    
+    'claude-3-sonnet': 'anthropic',
 
 
-'gemini-2.5-pro': 'google',
-    
-
-
-'gpt-4-turbo': 'openai',
-
-    
-    
-
-
-'gpt-4.1': 'openai',
-    
+    // Other models
+    'deepseek-chat': 'deepseek',
 
 
 
-'gpt-4o': 'openai',
-    
+    'deepseek-reasoner': 'deepseek',
 
-// OpenAI models
-'gpt-4o-mini': 'openai',
-    
-'o1': 'openai',
 
-    
+
+    // Google models
+    'gemini-1.5-flash': 'google',
+
+
+
+
+
+    'gemini-1.5-pro': 'google',
+
+
+
+    'gemini-2.0-flash': 'google',
+
+
+
+    'gemini-2.5-pro': 'google',
+
+
+
+    'gpt-4-turbo': 'openai',
+
+
+
+
+
+    'gpt-4.1': 'openai',
+
+
+
+
+    'gpt-4o': 'openai',
+
+
+    // OpenAI models
+    'gpt-4o-mini': 'openai',
+
+    'o1': 'openai',
+
+
     'o1-pro': 'openai',
     'o3': 'openai',
     'qwen-turbo': 'qwen',
