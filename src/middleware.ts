@@ -160,6 +160,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/payment/sepay/webhook',
   '/api/payment/polar/webhook',
   '/api/sepay/webhook',
+  // Cron jobs (authenticated via CRON_SECRET header, not user session)
+  '/api/cron(.*)',
   // Geo-detection API (needed for pricing display before auth)
   '/api/pricing/geo',
   '/webapi(.*)',
