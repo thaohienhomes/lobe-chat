@@ -15,6 +15,12 @@
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/reset-lifetime-points",
+      "schedule": "0 0 1 * *"
+    }
+  ],
   "build": {
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=16384 --expose-gc",
