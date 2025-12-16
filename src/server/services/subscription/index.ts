@@ -72,16 +72,39 @@ export class SubscriptionService {
   };
 
   /**
-   * Get user's active subscription
+   * Get user's active subscription (prioritizes paid plans over free plan)
    */
   getActiveSubscription = async (userId: string) => {
     const result = await this.db
       .select()
       .from(subscriptions)
-      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')))
-      .limit(1);
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')));
 
-    return result.length > 0 ? result[0] : null;
+    if (result.length === 0) return null;
+
+    // Prioritize paid plans over free plan
+    // Sort by: paid plans first, then by most recent period start
+    const sortedResults = result.sort((a, b) => {
+      // Free plan has lowest priority
+      if (a.planId === 'free' && b.planId !== 'free') return 1;
+      if (a.planId !== 'free' && b.planId === 'free') return -1;
+
+      // For same priority, prefer more recent subscription
+      const aStart = a.currentPeriodStart ? new Date(a.currentPeriodStart).getTime() : 0;
+      const bStart = b.currentPeriodStart ? new Date(b.currentPeriodStart).getTime() : 0;
+      return bStart - aStart;
+    });
+
+    return sortedResults[0];
+  };
+
+  /**
+   * Check if a plan is a paid plan (not free)
+   * Includes both standard plans (starter, premium, ultimate) and VN plans (vn_basic, vn_pro, vn_team)
+   */
+  private isPaidPlan = (planId: string): boolean => {
+    const freePlans = ['free', 'trial'];
+    return !freePlans.includes(planId.toLowerCase());
   };
 
   /**
@@ -93,7 +116,7 @@ export class SubscriptionService {
     if (!subscription) return false;
 
     // Check if subscription is paid (not free)
-    return subscription.planId !== 'free';
+    return this.isPaidPlan(subscription.planId);
   };
 
   /**
@@ -108,8 +131,9 @@ export class SubscriptionService {
       return false;
     }
 
-    // Paid plans always have access
-    if (subscription.planId !== 'free') {
+    // Paid plans always have access (includes VN plans like vn_basic, vn_pro, vn_team)
+    if (this.isPaidPlan(subscription.planId)) {
+      pino.info({ planId: subscription.planId, userId }, 'User has paid subscription - allowing AI access');
       return true;
     }
 
@@ -120,12 +144,14 @@ export class SubscriptionService {
 
   /**
    * Check trial access for free users with detailed information
+   * Paid plans (including VN plans) bypass trial limits entirely
    */
   checkTrialAccess = async (userId: string, requestedModel?: string): Promise<TrialAccessResult> => {
     const subscription = await this.getActiveSubscription(userId);
 
-    // Paid users have full access
-    if (subscription && subscription.planId !== 'free') {
+    // Paid users have full access (includes VN plans: vn_basic, vn_pro, vn_team)
+    if (subscription && this.isPaidPlan(subscription.planId)) {
+      pino.info({ planId: subscription.planId, userId }, 'Paid subscription - bypassing trial limits');
       return {
         allowed: true,
         isTrialUser: false,
@@ -230,7 +256,7 @@ export class SubscriptionService {
 
     return {
       billingCycle: subscription.billingCycle,
-      canAccessAI: subscription.planId !== 'free',
+      canAccessAI: this.isPaidPlan(subscription.planId),
       currentPeriodEnd: subscription.currentPeriodEnd,
       planId: subscription.planId,
       status: subscription.status,
