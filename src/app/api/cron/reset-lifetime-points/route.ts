@@ -1,4 +1,4 @@
-import { and, eq, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, eq, isNull, lt, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { users } from '@/database/schemas/user';
@@ -92,36 +92,65 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Batch update all eligible users
-    const userIds = usersToReset.map((u) => u.id);
+    // =========================================================================
+    // INDIVIDUAL UPDATE APPROACH (avoiding Neon driver array serialization issue)
+    // =========================================================================
+    // The Neon serverless driver has issues with PostgreSQL array literals
+    // when using inArray() or ANY($array). Using individual updates instead.
+    // =========================================================================
 
-    const result = await serverDB
-      .update(users)
-      .set({
-        phoPointsBalance: LIFETIME_POINTS_ALLOWANCE,
-        pointsResetDate: now,
-        updatedAt: now,
-      })
-      .where(sql`${users.id} = ANY(${userIds})`);
+    let successCount = 0;
+    let failedCount = 0;
+    const successDetails: { userId: string; previousBalance: number | null }[] = [];
+    const failedDetails: { userId: string; error: string }[] = [];
 
-    console.log(`[reset-lifetime-points] Reset complete for ${usersToReset.length} users`);
-
-    // Log details for monitoring
     for (const user of usersToReset) {
-      console.log(
-        `[reset-lifetime-points] User ${user.id}: ${user.currentPoints} → ${LIFETIME_POINTS_ALLOWANCE} points`,
-      );
+      try {
+        await serverDB
+          .update(users)
+          .set({
+            phoPointsBalance: LIFETIME_POINTS_ALLOWANCE,
+            pointsResetDate: now,
+            updatedAt: now,
+          })
+          .where(eq(users.id, user.id));
+
+        successCount++;
+        successDetails.push({
+          previousBalance: user.currentPoints,
+          userId: user.id,
+        });
+
+        console.log(
+          `[reset-lifetime-points] Successfully reset points for user ${user.id}: ${user.currentPoints} → ${LIFETIME_POINTS_ALLOWANCE} points`,
+        );
+      } catch (userError) {
+        failedCount++;
+        const errorMessage = userError instanceof Error ? userError.message : 'Unknown error';
+        failedDetails.push({
+          error: errorMessage,
+          userId: user.id,
+        });
+
+        console.error(
+          `[reset-lifetime-points] Failed to reset points for user ${user.id}: ${errorMessage}`,
+        );
+      }
     }
 
+    console.log(
+      `[reset-lifetime-points] Reset complete. Success: ${successCount}, Failed: ${failedCount}`,
+    );
+
     return NextResponse.json({
-      details: usersToReset.map((u) => ({
-        previousBalance: u.currentPoints,
-        userId: u.id,
-      })),
+      details: successDetails,
+      failedCount,
+      failedDetails: failedCount > 0 ? failedDetails : undefined,
       newBalance: LIFETIME_POINTS_ALLOWANCE,
-      resetCount: usersToReset.length,
-      success: true,
+      resetCount: successCount,
+      success: failedCount === 0,
       timestamp: now.toISOString(),
+      totalProcessed: usersToReset.length,
     });
   } catch (error) {
     console.error('[reset-lifetime-points] Database error:', error);
