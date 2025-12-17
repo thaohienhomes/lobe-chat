@@ -33,25 +33,46 @@ interface ModelOption {
 
 /**
  * Hook to check if user can access a specific model based on subscription tier
+ *
+ * IMPORTANT: Per SPECS_BUSINESS.md:
+ * - FREE/BASIC: Tier 1 only (allowedTiers: [1])
+ * - PRO/LIFETIME: Tier 1 & 2 (allowedTiers: [1, 2])
+ *
+ * Guest users (unauthenticated) are treated as FREE tier = Tier 1 only
  */
 const useModelAccess = () => {
-  const [allowedTiers, setAllowedTiers] = useState<number[]>([1, 2, 3]); // Default: allow all
-  const [planCode, setPlanCode] = useState<string>('');
+  // Default: Tier 1 only for guest/free users
+  const [allowedTiers, setAllowedTiers] = useState<number[]>([1]);
+  const [planCode, setPlanCode] = useState<string>('vn_free');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkModelAccess = async () => {
       try {
         const response = await fetch('/api/subscription/models/allowed');
+
+        // Handle 401 (unauthenticated) - treat as free tier
+        if (response.status === 401) {
+          console.log('[ModelAccess] Guest user - defaulting to Tier 1 only');
+          setAllowedTiers([1]);
+          setPlanCode('vn_free');
+          setLoading(false);
+          return;
+        }
+
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
             setAllowedTiers(data.data.allowedTiers || [1]);
-            setPlanCode(data.data.planCode || 'free');
+            setPlanCode(data.data.planCode || 'vn_free');
           }
+        } else {
+          // Other errors - default to tier 1 for safety
+          console.warn('[ModelAccess] API error, defaulting to Tier 1');
+          setAllowedTiers([1]);
         }
       } catch (error) {
-        console.error('Failed to check model access:', error);
+        console.error('[ModelAccess] Failed to check model access:', error);
         // On error, default to tier 1 only for safety
         setAllowedTiers([1]);
       } finally {
@@ -72,10 +93,10 @@ const useModelAccess = () => {
     if (allowedTiers.includes(tier)) return null;
 
     if (tier === 2) {
-      return 'Nâng cấp lên gói Phở Không Người Lái để sử dụng model này';
+      return 'Nâng cấp lên gói PRO để sử dụng model này';
     }
     if (tier === 3) {
-      return 'Nâng cấp lên gói Phở Đặc Biệt để sử dụng model cao cấp này';
+      return 'Nâng cấp lên gói TEAM để sử dụng model cao cấp này';
     }
     return 'Nâng cấp để sử dụng model này';
   };
