@@ -1,7 +1,6 @@
 import type { PartialDeep } from 'type-fest';
 import { z } from 'zod';
 
-import { Plans } from '../subscription';
 import { TopicDisplayMode } from '../topic';
 import { UserSettings } from '../user/settings';
 
@@ -58,10 +57,14 @@ export interface UserInitializationState {
   isOnboard?: boolean;
   lastName?: string;
   lifetimeSpent?: number;
-  phoCreditBalance?: number;
+  phoPointsBalance?: number;
   preference: UserPreference;
   settings: PartialDeep<UserSettings>;
-  subscriptionPlan?: Plans;
+  /**
+   * Subscription plan code (e.g., 'vn_free', 'vn_pro', 'gl_lifetime')
+   * Used for UI display and tier access control
+   */
+  subscriptionPlan?: string;
   userId?: string;
   username?: string;
 }

@@ -45,44 +45,44 @@ export const MODEL_COSTS = {
  * Based on PRICING_MASTERPLAN.md.md
  */
 export const VND_PRICING_TIERS = {
-  
-  
-// Legacy mappings (for backward compatibility)
-premium: {
+
+
+  // Legacy mappings (for backward compatibility)
+  premium: {
     dailyTier2Limit: 30,
     dailyTier3Limit: 0,
     displayName: 'Phở Tái',
     monthlyPoints: 300_000,
     monthlyVND: 69_000,
   },
-  
-  
 
 
-starter: {
+
+
+  starter: {
     dailyTier2Limit: 0,
     dailyTier3Limit: 0,
     displayName: 'Phở Không Người Lái',
     monthlyPoints: 50_000,
     monthlyVND: 0,
   },
-  
-  
 
 
-ultimate: {
+
+
+  ultimate: {
     dailyTier2Limit: -1,
     dailyTier3Limit: 50,
     displayName: 'Phở Đặc Biệt',
     monthlyPoints: 2_000_000,
     monthlyVND: 199_000,
   },
-  
-  
 
 
-// Basic tier (Student)
-vn_basic: {
+
+
+  // Basic tier (Student)
+  vn_basic: {
     dailyTier2Limit: 30,
     dailyTier3Limit: 0,
     displayName: 'Phở Tái',
@@ -90,20 +90,20 @@ vn_basic: {
     monthlyVND: 69_000,
   },
 
-  
-  
 
-// Free tier
-vn_free: {
+
+
+  // Free tier
+  vn_free: {
     dailyTier2Limit: 0,
     dailyTier3Limit: 0,
     displayName: 'Phở Không Người Lái',
     monthlyPoints: 50_000,
     monthlyVND: 0,
   },
-  
-// Pro tier
-vn_pro: {
+
+  // Pro tier
+  vn_pro: {
     dailyTier2Limit: -1, // Unlimited
     dailyTier3Limit: 50,
     displayName: 'Phở Đặc Biệt',
@@ -111,7 +111,7 @@ vn_pro: {
     monthlyVND: 199_000,
   },
   // Team tier
-vn_team: {
+  vn_team: {
     dailyTier2Limit: -1,
     dailyTier3Limit: -1,
     displayName: 'Lẩu Phở (Team)',
@@ -125,8 +125,8 @@ vn_team: {
  */
 export const USD_PRICING_TIERS = {
   gl_lifetime: {
-    displayName: 'Lifetime Deal',
-    monthlyPoints: 500_000,
+    displayName: 'Founding Member (Lifetime)',
+    monthlyPoints: 2_000_000, // Reset monthly via cron job
     monthlyUSD: 149, // One-time
   },
   gl_premium: {
@@ -459,4 +459,4 @@ export class UsageTracker {
   }
 }
 
-export {GLOBAL_PLANS, MODEL_TIERS, VN_PLANS} from '@/config/pricing';
+export { GLOBAL_PLANS, MODEL_TIERS, VN_PLANS } from '@/config/pricing';

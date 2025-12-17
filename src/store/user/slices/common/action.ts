@@ -92,14 +92,14 @@ export const createCommonSlice: StateCreator<
             const user =
               data.avatar || data.userId
                 ? merge(get().user, {
-                    avatar: data.avatar,
-                    email: data.email,
-                    firstName: data.firstName,
-                    fullName: data.fullName,
-                    id: data.userId,
-                    latestName: data.lastName,
-                    username: data.username,
-                  } as LobeUser)
+                  avatar: data.avatar,
+                  email: data.email,
+                  firstName: data.firstName,
+                  fullName: data.fullName,
+                  id: data.userId,
+                  latestName: data.lastName,
+                  username: data.username,
+                } as LobeUser)
                 : get().user;
 
             set(
@@ -110,6 +110,7 @@ export const createCommonSlice: StateCreator<
                 isUserCanEnableTrace: data.canEnableTrace,
                 isUserHasConversation: data.hasConversation,
                 isUserStateInit: true,
+                phoPointsBalance: data.phoPointsBalance,
                 preference,
                 serverLanguageModel: serverConfig.languageModel,
                 settings: data.settings || {},

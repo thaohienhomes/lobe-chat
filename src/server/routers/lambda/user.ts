@@ -117,8 +117,12 @@ export const userRouter = router({
       // always return true for community version
       isOnboard: state.isOnboarded || true,
       lastName: state.lastName,
+      lifetimeSpent: state.lifetimeSpent,
+      phoPointsBalance: state.phoPointsBalance,
       preference: state.preference as UserPreference,
       settings: state.settings,
+      // Subscription plan code (e.g., 'vn_free', 'gl_lifetime')
+      subscriptionPlan: state.currentPlanId,
       userId: ctx.userId,
       username: state.username,
     } satisfies UserInitializationState;

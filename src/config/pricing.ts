@@ -113,15 +113,16 @@ export const VN_PLANS: Record<string, PlanConfig> = {
 export const GLOBAL_PLANS: Record<string, PlanConfig> = {
   gl_lifetime: {
     code: 'gl_lifetime',
-    displayName: 'Lifetime Deal',
+    displayName: 'Founding Member (Lifetime)',
     features: [
       'All Premium features forever',
-      '500K points/month (reset monthly)',
+      '2M Phở Points/month (reset monthly)',
+      'Tier 1 & 2 model access',
       'Priority support',
       'Early access to new features',
     ],
-    keyLimits: '500K points/mo (Reset). One-time payment.',
-    monthlyPoints: 500_000, // Reset monthly
+    keyLimits: '2M points/mo (Reset). One-time payment.',
+    monthlyPoints: 2_000_000, // Reset monthly via cron job
     price: 149.99, // One-time - match Polar Dashboard
   },
   gl_premium: {

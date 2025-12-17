@@ -21,17 +21,6 @@ import { getServerDB } from '@/database/server';
 const LIFETIME_POINTS_ALLOWANCE = 2_000_000; // 2M points per month
 const LIFETIME_PLAN_ID = 'gl_lifetime';
 
-/**
- * Check if a date is in the current month
- */
-function isCurrentMonth(date: Date | null): boolean {
-  if (!date) return false;
-  const now = new Date();
-  return (
-    date.getUTCFullYear() === now.getUTCFullYear() && date.getUTCMonth() === now.getUTCMonth()
-  );
-}
-
 export async function GET(request: NextRequest) {
   console.log('[reset-lifetime-points] Cron job started');
 
@@ -101,8 +90,8 @@ export async function GET(request: NextRequest) {
 
     let successCount = 0;
     let failedCount = 0;
-    const successDetails: { userId: string; previousBalance: number | null }[] = [];
-    const failedDetails: { userId: string; error: string }[] = [];
+    const successDetails: { previousBalance: number | null, userId: string; }[] = [];
+    const failedDetails: { error: string, userId: string; }[] = [];
 
     for (const user of usersToReset) {
       try {

@@ -8,14 +8,16 @@ import urlJoin from 'url-join';
 import { OFFICIAL_URL } from '@/const/url';
 import { isDesktop } from '@/const/version';
 import PlanIcon from '@/features/PlanIcon';
-import { Plans } from '@/types/subscription';
 
 export enum PlanType {
   Preview = 'preview',
 }
 
 export interface PlanTagProps {
-  type?: PlanType | Plans;
+  /**
+   * Plan code (e.g., 'vn_free', 'vn_pro', 'gl_lifetime') or PlanType.Preview
+   */
+  type?: PlanType | string;
 }
 
 const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
@@ -33,7 +35,7 @@ const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
     );
   }
 
-  const isFree = type === Plans.Free;
+  const isFree = type === 'free' || type === 'vn_free';
 
   return (
     <Link

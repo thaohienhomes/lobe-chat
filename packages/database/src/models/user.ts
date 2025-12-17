@@ -63,11 +63,14 @@ export class UserModel {
     const result = await this.db
       .select({
         avatar: users.avatar,
+        currentPlanId: users.currentPlanId,
         email: users.email,
         firstName: users.firstName,
         fullName: users.fullName,
         isOnboarded: users.isOnboarded,
         lastName: users.lastName,
+        lifetimeSpent: users.lifetimeSpent,
+        phoPointsBalance: users.phoPointsBalance,
         preference: users.preference,
         settingsDefaultAgent: userSettings.defaultAgent,
 
@@ -112,11 +115,14 @@ export class UserModel {
 
     return {
       avatar: state.avatar || undefined,
+      currentPlanId: state.currentPlanId || 'vn_free',
       email: state.email || undefined,
       firstName: state.firstName || undefined,
       fullName: state.fullName || undefined,
       isOnboarded: state.isOnboarded,
       lastName: state.lastName || undefined,
+      lifetimeSpent: state.lifetimeSpent || 0,
+      phoPointsBalance: state.phoPointsBalance || 0,
       preference: state.preference as UserPreference,
       settings,
       userId: this.userId,

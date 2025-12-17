@@ -54,10 +54,10 @@ async function activateModelsForAllUsers(options: ActivationOptions) {
     // Get all users with their subscription plans
     const allUsers = await db
       .select({
-        userId: users.id,
         email: users.email,
-        planCode: subscriptions.planCode,
+        planCode: subscriptions.planId,
         status: subscriptions.status,
+        userId: users.id,
       })
       .from(users)
       .leftJoin(subscriptions, eq(users.id, subscriptions.userId));

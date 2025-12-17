@@ -26,11 +26,11 @@ export interface MigrationMetrics {
   // User Behavior Metrics
   modelSelectionChanges: number;
   subscriptionUpgrades: number;
+  timestamp: Date;
   totalUsers: number;
   upgradePromptClicks: number;
-  userComplaints: number;
 
-  timestamp: Date;
+  userComplaints: number;
 }
 
 export interface MigrationAlert {
@@ -112,11 +112,11 @@ export class MigrationMonitoringService {
         // User Behavior Metrics
         modelSelectionChanges: await this.getModelSelectionChanges(),
         subscriptionUpgrades: await this.getSubscriptionUpgrades(),
+        timestamp: new Date(),
         totalUsers: await this.getTotalUsers(),
         upgradePromptClicks: await this.getUpgradePromptClicks(),
-        userComplaints: await this.getUserComplaints(),
 
-        timestamp: new Date(),
+        userComplaints: await this.getUserComplaints(),
       };
 
       // Calculate migration progress
@@ -176,7 +176,7 @@ export class MigrationMonitoringService {
   private createAlert(type: MigrationAlert['type'], message: string, details?: any): void {
     const alert: MigrationAlert = {
       details,
-      id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `alert_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       message,
       resolved: false,
       timestamp: new Date(),
@@ -202,7 +202,7 @@ export class MigrationMonitoringService {
    * Get latest metrics
    */
   public getLatestMetrics(): MigrationMetrics | null {
-    return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] : null;
+    return this.metrics.length > 0 ? (this.metrics.at(-1) ?? null) : null;
   }
 
   /**

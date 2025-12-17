@@ -1,4 +1,4 @@
-import { Select, type SelectProps, Tag, Text } from '@lobehub/ui';
+import { Select, type SelectProps, Text } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { Lock } from 'lucide-react';
 import { memo, useMemo, useState, useEffect } from 'react';

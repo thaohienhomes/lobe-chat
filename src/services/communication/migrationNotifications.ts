@@ -280,12 +280,13 @@ export class MigrationNotificationService {
     templateId: string,
     audience: string,
     scheduleDate: Date,
-    _variables?: Record<string, string>
+    variables?: Record<string, string>
   ): void {
     console.log(`Scheduling notification campaign:`);
     console.log(`  Template: ${templateId}`);
     console.log(`  Audience: ${audience}`);
     console.log(`  Schedule: ${scheduleDate.toISOString()}`);
+    console.log(`  Variables: ${JSON.stringify(variables || {})}`);
 
     // In production, would use job scheduler like:
     // - Bull Queue with Redis

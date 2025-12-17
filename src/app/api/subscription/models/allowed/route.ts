@@ -69,10 +69,10 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
       );
 
     // Prioritize paid plans over free plan
-    const freePlans = ['free', 'trial'];
+    const freePlans = new Set(['free', 'trial']);
     const sortedSubscriptions = allSubscriptions.sort((a, b) => {
-      const aIsFree = freePlans.includes(a.planId?.toLowerCase() || '');
-      const bIsFree = freePlans.includes(b.planId?.toLowerCase() || '');
+      const aIsFree = freePlans.has(a.planId?.toLowerCase() || '');
+      const bIsFree = freePlans.has(b.planId?.toLowerCase() || '');
       if (aIsFree && !bIsFree) return 1;
       if (!aIsFree && bIsFree) return -1;
       // For same priority, prefer most recent

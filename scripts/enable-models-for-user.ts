@@ -5,6 +5,8 @@
  */
 
 import * as dotenv from 'dotenv';
+import { sql } from 'drizzle-orm';
+
 import { getServerDB } from '../packages/database/src/core/db-adaptor';
 import { getAllowedModelsForPlan } from '../src/config/pricing';
 
@@ -24,11 +26,11 @@ async function enableModelsForUser(userId: string, planId: string) {
     console.log(`[${new Date().toISOString()}] INFO: Allowed models for ${planId}:`, allowedModels);
 
     // Check current enabled models for user
-    const currentModels = await db.execute(`
+    const currentModels = await db.execute(sql`
       SELECT id, enabled
       FROM ai_models
-      WHERE user_id = $1
-    `, [userId]);
+      WHERE user_id = ${userId}
+    `);
 
     console.log(`[${new Date().toISOString()}] INFO: Current models for user:`, currentModels.rows);
 
@@ -37,20 +39,20 @@ async function enableModelsForUser(userId: string, planId: string) {
       console.log(`[${new Date().toISOString()}] INFO: Enabling model ${modelId} for user ${userId}...`);
 
       // Insert or update model for user
-      await db.execute(`
+      await db.execute(sql`
         INSERT INTO ai_models (user_id, id, provider_id, enabled, created_at, updated_at)
-        VALUES ($1, $2, 'openai', true, NOW(), NOW())
+        VALUES (${userId}, ${modelId}, 'openai', true, NOW(), NOW())
         ON CONFLICT (id, provider_id, user_id)
         DO UPDATE SET enabled = true, updated_at = NOW()
-      `, [userId, modelId]);
+      `);
     }
 
     // Check final state
-    const finalModels = await db.execute(`
+    const finalModels = await db.execute(sql`
       SELECT id, enabled
       FROM ai_models
-      WHERE user_id = $1 AND enabled = true
-    `, [userId]);
+      WHERE user_id = ${userId} AND enabled = true
+    `);
 
     console.log(`[${new Date().toISOString()}] INFO: Final enabled models:`, finalModels.rows);
     console.log('\n✅ Models enabled successfully!');

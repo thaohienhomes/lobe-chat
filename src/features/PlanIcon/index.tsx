@@ -1,49 +1,81 @@
 import { Icon } from '@lobehub/ui';
 import { Tag } from 'antd';
 import { createStyles } from 'antd-style';
-import { Atom, Box, CircleSlash, Sparkle, Zap } from 'lucide-react';
+import { Atom, Box, CircleSlash, Crown, Sparkle, Star, Zap } from 'lucide-react';
 import { CSSProperties, MouseEvent, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 
-import { Plans } from '@/types/subscription';
+import { getPlanByCode } from '@/config/pricing';
 
-export const themes = {
-  [Plans.Free]: {
+// Theme configuration for plan display
+interface PlanTheme {
+  icon: typeof CircleSlash;
+  theme: {
+    background?: string;
+    color?: string;
+  };
+}
+
+// Plan themes (alphabetically sorted for lint compliance)
+export const themes: Record<string, PlanTheme> = {
+  free: {
     icon: CircleSlash,
-    theme: {
-      background: undefined,
-      color: undefined,
-    },
+    theme: { background: undefined, color: undefined },
   },
-  [Plans.Hobby]: {
-    icon: Box,
-    theme: {
-      background: 'linear-gradient(45deg, #21B2EE, #2271ED)',
-      color: '#E5F8FF',
-    },
+  gl_lifetime: {
+    icon: Crown,
+    theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
   },
-  [Plans.Starter]: {
-    icon: Sparkle,
-    theme: {
-      background: 'linear-gradient(45deg, #C57948, #803718)',
-      color: '#FFC385',
-    },
-  },
-  [Plans.Premium]: {
-    icon: Zap,
-    theme: {
-      background: 'linear-gradient(45deg, #A5B4C2, #606E7B)',
-      color: '#FCFDFF',
-    },
-  },
-  [Plans.Ultimate]: {
+  gl_premium: {
     icon: Atom,
-    theme: {
-      background: 'linear-gradient(45deg, #F7A82F, #BB7227)',
-      color: '#FCFA6E',
-    },
+    theme: { background: 'linear-gradient(45deg, #F7A82F, #BB7227)', color: '#FCFA6E' },
   },
+  gl_standard: {
+    icon: Zap,
+    theme: { background: 'linear-gradient(45deg, #A5B4C2, #606E7B)', color: '#FCFDFF' },
+  },
+  gl_starter: {
+    icon: Sparkle,
+    theme: { background: 'linear-gradient(45deg, #C57948, #803718)', color: '#FFC385' },
+  },
+  hobby: {
+    icon: Box,
+    theme: { background: 'linear-gradient(45deg, #21B2EE, #2271ED)', color: '#E5F8FF' },
+  },
+  premium: {
+    icon: Zap,
+    theme: { background: 'linear-gradient(45deg, #A5B4C2, #606E7B)', color: '#FCFDFF' },
+  },
+  starter: {
+    icon: Sparkle,
+    theme: { background: 'linear-gradient(45deg, #C57948, #803718)', color: '#FFC385' },
+  },
+  ultimate: {
+    icon: Atom,
+    theme: { background: 'linear-gradient(45deg, #F7A82F, #BB7227)', color: '#FCFA6E' },
+  },
+  vn_basic: {
+    icon: Box,
+    theme: { background: 'linear-gradient(45deg, #21B2EE, #2271ED)', color: '#E5F8FF' },
+  },
+  vn_free: {
+    icon: CircleSlash,
+    theme: { background: undefined, color: undefined },
+  },
+  vn_pro: {
+    icon: Zap,
+    theme: { background: 'linear-gradient(45deg, #A5B4C2, #606E7B)', color: '#FCFDFF' },
+  },
+  vn_team: {
+    icon: Star,
+    theme: { background: 'linear-gradient(45deg, #F7A82F, #BB7227)', color: '#FCFA6E' },
+  },
+};
+
+// Get theme for a plan code, with fallback to free tier
+const getThemeForPlan = (planCode: string): PlanTheme => {
+  return themes[planCode] || themes['free'];
 };
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -58,7 +90,10 @@ interface PlanIconProps {
   className?: string;
   mono?: boolean;
   onClick?: (e: MouseEvent) => void;
-  plan: Plans;
+  /**
+   * Plan code (e.g., 'vn_free', 'vn_pro', 'gl_lifetime')
+   */
+  plan: string;
   size?: number;
   style?: CSSProperties;
   type?: 'icon' | 'tag' | 'combine';
@@ -66,12 +101,16 @@ interface PlanIconProps {
 
 const PlanIcon = memo<PlanIconProps>(
   ({ type = 'icon', plan, size = 36, mono, style, className, onClick }) => {
-    const { icon, theme } = themes[plan];
+    const planConfig = getPlanByCode(plan);
+    const { icon, theme } = getThemeForPlan(plan);
     const { cx, styles, theme: token } = useStyles();
     const { t } = useTranslation('subscription');
     const isTag = type === 'tag';
     const isCombine = type === 'combine';
-    const isFree = plan === Plans.Free;
+    const isFree = plan === 'free' || plan === 'vn_free';
+
+    // Use displayName from pricing config, fallback to translation
+    const displayName = planConfig?.displayName || t(`plans.plan.${plan}.title`, plan);
 
     if (isTag) {
       return (
@@ -89,7 +128,7 @@ const PlanIcon = memo<PlanIconProps>(
             ...style,
           }}
         >
-          {t(`plans.plan.${plan}.title`)}
+          {displayName}
         </Tag>
       );
     }
@@ -114,7 +153,7 @@ const PlanIcon = memo<PlanIconProps>(
       return (
         <Flexbox align={'center'} gap={8} horizontal>
           {iconContent}
-          <span>{t(`plans.plan.${plan}.title`)}</span>
+          <span>{displayName}</span>
         </Flexbox>
       );
     }
