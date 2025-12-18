@@ -37,12 +37,12 @@ const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
 
   const isFree = type === 'free' || type === 'vn_free';
 
+  // Fix: Navigate to correct settings page with usage tab active
+  const href = isFree ? '/subscription/plans' : '/settings?active=usage';
+
   return (
     <Link
-      href={urlJoin(
-        isDesktop ? OFFICIAL_URL : '/',
-        isFree ? '/subscription/plans' : '/subscription/usage',
-      )}
+      href={urlJoin(isDesktop ? OFFICIAL_URL : '/', href)}
       style={{ cursor: 'pointer' }}
       target={isDesktop ? '_blank' : undefined}
     >

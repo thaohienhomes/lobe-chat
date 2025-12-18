@@ -84,25 +84,22 @@ interface SubscriptionData {
 }
 
 /**
- * VND pricing for plans (monthly) based on PRICING_MASTERPLAN.md.md
+ * Plan pricing for billing display based on PRICING_MASTERPLAN.md
  * Uses Phở Points system
  */
 const PLAN_PRICING: Record<string, { displayName: string; monthlyPoints: number; price: number }> =
   {
-    
+    // Global Plans (USD via Polar.sh)
+    gl_lifetime: { displayName: 'Founding Member (Lifetime)', monthlyPoints: 2_000_000, price: 0 },
+    gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
+    gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
+    gl_starter: { displayName: 'Starter', monthlyPoints: 200_000, price: 0 },
     // Legacy mappings (for backward compatibility)
-premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
-    
-
-starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-    
-
-ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
-    
-// Vietnam Plans
-vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
-
-    
+    premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+    starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+    ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
+    // Vietnam Plans
+    vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
     vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
     vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
     vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
