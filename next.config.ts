@@ -41,6 +41,8 @@ const nextConfig: NextConfig = {
       '@icons-pack/react-simple-icons',
       '@lobehub/ui',
       '@lobehub/icons',
+      '@ant-design/icons',
+      'lucide-react',
       'gpt-tokenizer',
     ],
     // oidc provider depend on constructor.name

@@ -1,14 +1,25 @@
 'use client';
 
-import DocViewer from '@cyntler/react-doc-viewer';
 import { css, cx } from 'antd-style';
+import dynamic from 'next/dynamic';
 import { CSSProperties, memo } from 'react';
 
+import CircleLoading from '@/components/Loading/CircleLoading';
 import { FileListItem } from '@/types/files';
 
 import NotSupport from './NotSupport';
 import { FileViewRenderers } from './Renderer';
-import PDFRenderer from './Renderer/PDF';
+
+// Lazy load heavy components for better bundle size
+const PDFRenderer = dynamic(() => import('./Renderer/PDF'), {
+  loading: () => <CircleLoading />,
+  ssr: false,
+});
+
+const DocViewer = dynamic(() => import('@cyntler/react-doc-viewer'), {
+  loading: () => <CircleLoading />,
+  ssr: false,
+});
 
 const container = css`
   background: transparent !important;

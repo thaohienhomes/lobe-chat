@@ -17,31 +17,20 @@ import { PLAN_TIERS, calculateProratedAmount } from '@/server/services/billing/p
  * Plan pricing based on PRICING_MASTERPLAN.md.md
  * Uses Phở Points system
  */
-export const PLAN_PRICING = {
-  
+const PLAN_PRICING = {
   // per user
-// Legacy mappings (for backward compatibility)
-premium: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
-  
-
-
-starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
-  
-
-
-ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
-  
-
-// Vietnam Plans
-vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 }, 
-
-  
+  // Legacy mappings (for backward compatibility)
+  premium: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
+  starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
+  ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
+  // Vietnam Plans
+  vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
   vn_free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
   vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
   vn_team: { monthly: 149_000, monthlyPoints: 0, yearly: 1_490_000 },
 } as const;
 
-export type PlanId = keyof typeof PLAN_PRICING;
+type PlanId = keyof typeof PLAN_PRICING;
 
 // Valid plan IDs (both new and legacy)
 const VALID_PLAN_IDS = new Set<PlanId>([

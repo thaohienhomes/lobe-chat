@@ -301,6 +301,7 @@ export default {
   send: '发送',
   setting: '设置',
   share: '分享',
+  sourceCode: '源代码',
   stop: '停止',
   sync: {
     actions: { settings: '同步设置', sync: '立即同步' },

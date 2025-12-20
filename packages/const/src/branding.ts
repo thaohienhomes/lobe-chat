@@ -1,7 +1,6 @@
 // the code below can only be modified with commercial license
 // if you want to use it in the commercial usage
-// please contact us for more information: hello@lobehub.com
-
+// please contact us for more information: hello@pho.chat
 import { BRANDING_CONFIG } from '@/config/customizations';
 
 // Use centralized config as source of truth

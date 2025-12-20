@@ -1,19 +1,19 @@
-name: lobe-chat-development
+name: pho-chat-development
 services:
   network-service:
     image: alpine
-    container_name: lobe-network
+    container_name: pho-network
     restart: always
     ports:
-      - '${MINIO_PORT}:${MINIO_PORT}' # MinIO API
-      - '9001:9001' # MinIO Console
-      - '${CASDOOR_PORT}:${CASDOOR_PORT}' # Casdoor
-      - '3000:3000' # Grafana
-      - '4318:4318' # otel-collector HTTP
-      - '4317:4317' # otel-collector gRPC
+      - "${MINIO_PORT}:${MINIO_PORT}" # MinIO API
+      - "9001:9001" # MinIO Console
+      - "${CASDOOR_PORT}:${CASDOOR_PORT}" # Casdoor
+      - "3000:3000" # Grafana
+      - "4318:4318" # otel-collector HTTP
+      - "4317:4317" # otel-collector gRPC
     command: tail -f /dev/null
     networks:
-      - lobe-network
+      - pho-network
 
   postgresql:
     extends:

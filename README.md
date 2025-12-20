@@ -11,7 +11,7 @@ One-click **FREE** deployment of your private OpenAI ChatGPT/Claude/Gemini/Groq/
 **English** · [简体中文](./README.zh-CN.md) · [Official Site][official-site] · [Changelog][changelog] · [Documents][docs] · [Blog][blog] · [Feedback][github-issues-link]
 **pho.chat rebranding**
 
-pho.chat is a global, performance-oriented deployment and customization of the open-source [LobeChat](https://github.com/lobehub/lobe-chat) project, focused on fast, convenient and affordable AI agents.
+pho.chat is a Vietnam-focused deployment and customization of the open-source [pho.chat](https://github.com/thaohienhomes/lobe-chat) project.
 This repository keeps the upstream feature documentation, but the actual product branding, domain, and configuration are adapted for pho.chat.
 
 <!-- SHIELD GROUP -->
@@ -100,7 +100,7 @@ This repository keeps the upstream feature documentation, but the actual product
 We are a group of e/acc design-engineers, hoping to provide modern design components and tools for AIGC.
 By adopting the Bootstrapping approach, we aim to provide developers and users with a more open, transparent, and user-friendly product ecosystem.
 
-Whether for individual creators, teams, or power users, **pho.chat** is your fast, convenient and affordable AI agent playground, built on the powerful open-source LobeChat project, which is under active development and welcoming feedback for any [issues][issues-link] encountered.
+Whether for individual creators, teams, or power users, **pho.chat** is your fast, convenient and affordable AI agent playground, built on the powerful open-source pho.chat project, which is under active development and welcoming feedback for any [issues][issues-link] encountered.
 
 | [![][vercel-shield-badge]][vercel-link]   | No installation or registration necessary! Visit our website to experience it firsthand.                           |
 | :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
@@ -579,11 +579,11 @@ Beside these features, LobeChat also have much better basic technique undergroun
 
 ## 🛳 Self Hosting
 
-LobeChat provides Self-Hosted Version with Vercel, Alibaba Cloud, and [Docker Image][docker-release-link]. This allows you to deploy your own chatbot within a few minutes without any prior knowledge.
+pho.chat provides Self-Hosted Version with Vercel, Alibaba Cloud, and [Docker Image][docker-release-link]. This allows you to deploy your own chatbot within a few minutes without any prior knowledge.
 
 > \[!TIP]
 >
-> Learn more about [📘 Build your own LobeChat][docs-self-hosting] by checking it out.
+> Learn more about [📘 Build your own pho.chat][docs-self-hosting] by checking it out.
 
 ### `A` Deploying with Vercel, Zeabur , Sealos or Alibaba Cloud
 
@@ -622,7 +622,7 @@ If you have deployed your own project following the one-click deployment steps i
 [![][docker-size-shield]][docker-size-link]
 [![][docker-pulls-shield]][docker-pulls-link]
 
-We provide a Docker image for deploying the LobeChat service on your own private device. Use the following command to start the LobeChat service:
+We provide a Docker image for deploying the pho.chat service on your own private device. Use the following command to start the pho.chat service:
 
 1. create a folder to for storage files
 
@@ -688,10 +688,10 @@ This project provides some additional configuration items set with environment v
 
 Plugins provide a means to extend the [Function Calling][docs-function-call] capabilities of LobeChat. They can be used to introduce new function calls and even new ways to render message results. If you are interested in plugin development, please refer to our [📘 Plugin Development Guide][docs-plugin-dev] in the Wiki.
 
-- [lobe-chat-plugins][lobe-chat-plugins]: This is the plugin index for LobeChat. It accesses index.json from this repository to display a list of available plugins for LobeChat to the user.
-- [chat-plugin-template][chat-plugin-template]: This is the plugin template for LobeChat plugin development.
-- [@lobehub/chat-plugin-sdk][chat-plugin-sdk]: The LobeChat Plugin SDK assists you in creating exceptional chat plugins for Lobe Chat.
-- [@lobehub/chat-plugins-gateway][chat-plugins-gateway]: The LobeChat Plugins Gateway is a backend service that provides a gateway for LobeChat plugins. We deploy this service using Vercel. The primary API POST /api/v1/runner is deployed as an Edge Function.
+- [lobe-chat-plugins][lobe-chat-plugins]: This is the plugin index for pho.chat. It accesses index.json from this repository to display a list of available plugins for pho.chat to the user.
+- [chat-plugin-template][chat-plugin-template]: This is the plugin template for pho.chat plugin development.
+- [@lobehub/chat-plugin-sdk][chat-plugin-sdk]: The pho.chat Plugin SDK assists you in creating exceptional chat plugins for pho.chat.
+- [@lobehub/chat-plugins-gateway][chat-plugins-gateway]: The pho.chat Plugins Gateway is a backend service that provides a gateway for pho.chat plugins. We deploy this service using Vercel. The primary API POST /api/v1/runner is deployed as an Edge Function.
 
 > \[!NOTE]
 >

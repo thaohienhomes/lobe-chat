@@ -130,6 +130,11 @@ const Page = memo<{ mobile?: boolean }>(({ mobile }) => {
                 label: t('privacy'),
                 value: 'privacy',
               },
+              {
+                href: '/settings/about/license',
+                label: t('sourceCode'),
+                value: 'sourceCode',
+              },
             ]}
           />
         </Flexbox>

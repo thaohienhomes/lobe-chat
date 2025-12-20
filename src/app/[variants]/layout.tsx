@@ -38,6 +38,8 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
   return (
     <html dir={direction} lang={locale}>
       <head>
+        {/* Google Site Verification - Replace PLACEHOLDER_REPLACE_WITH_ACTUAL_CODE with actual verification code from Google Search Console */}
+        <meta content="PLACEHOLDER_REPLACE_WITH_ACTUAL_CODE" name="google-site-verification" />
         {process.env.DEBUG_REACT_SCAN === '1' && (
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script crossOrigin="anonymous" src="https://unpkg.com/react-scan/dist/auto.global.js" />
