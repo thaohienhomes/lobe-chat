@@ -4,14 +4,16 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { memo, useMemo } from 'react';
 
-import { analyticsEnv } from '@/envs/analytics';
-
 // Lazy load heavy analytics components
 const TikTok = dynamic(() => import('./TikTok'));
 const TikTokProvider = dynamic(() => import('./TikTokProvider'));
-const Clarity = dynamic(() => import('./Clarity'));
-const Plausible = dynamic(() => import('./Plausible'));
-const Umami = dynamic(() => import('./Umami'));
+
+/**
+ * Client-side environment variables for analytics
+ * Only NEXT_PUBLIC_* variables are accessible in client components
+ */
+const TIKTOK_PIXEL_ID = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID;
+const ENABLED_TIKTOK_PIXEL = !!TIKTOK_PIXEL_ID;
 
 /**
  * Routes where marketing analytics (TikTok, etc.) should be loaded
@@ -66,56 +68,37 @@ const isPerformanceCriticalRoute = (pathname: string): boolean => {
 /**
  * Route-aware analytics component that only loads heavy marketing analytics
  * on marketing pages, keeping /chat and other core pages fast
+ *
+ * NOTE: This component only handles TikTok Pixel which uses NEXT_PUBLIC_ env var.
+ * Other analytics (Clarity, Plausible, Umami) use server-side env vars and are
+ * handled by the parent Analytics component which can access analyticsEnv.
  */
 const RouteAwareAnalytics = memo(() => {
   const pathname = usePathname();
 
-  // Determine which analytics to load based on current route
-  const { shouldLoadTikTok, shouldLoadMarketingAnalytics } = useMemo(() => {
-    // Skip heavy analytics on performance-critical routes
+  // Determine if we should load TikTok based on current route
+  const shouldLoadTikTok = useMemo(() => {
+    // Skip on performance-critical routes
     if (isPerformanceCriticalRoute(pathname)) {
-      return {
-        shouldLoadMarketingAnalytics: false,
-        shouldLoadTikTok: false,
-      };
+      return false;
     }
 
-    // Load marketing analytics on marketing routes
-    const isMarketing = isMarketingRoute(pathname);
-    return {
-      shouldLoadMarketingAnalytics: isMarketing,
-      shouldLoadTikTok: isMarketing && analyticsEnv.ENABLED_TIKTOK_PIXEL,
-    };
+    // Load TikTok only on marketing routes and if enabled
+    return isMarketingRoute(pathname) && ENABLED_TIKTOK_PIXEL;
   }, [pathname]);
+
+  // Early return if TikTok is not enabled globally
+  if (!ENABLED_TIKTOK_PIXEL) {
+    return null;
+  }
 
   return (
     <>
       {/* TikTok Pixel - Only on marketing routes */}
       {shouldLoadTikTok && (
         <TikTokProvider>
-          <TikTok pixelId={analyticsEnv.TIKTOK_PIXEL_ID} />
+          <TikTok pixelId={TIKTOK_PIXEL_ID} />
         </TikTokProvider>
-      )}
-
-      {/* Clarity - Only on marketing routes (session recording is heavy) */}
-      {shouldLoadMarketingAnalytics && analyticsEnv.ENABLED_CLARITY_ANALYTICS && (
-        <Clarity projectId={analyticsEnv.CLARITY_PROJECT_ID} />
-      )}
-
-      {/* Plausible - Lightweight, can load on all routes */}
-      {analyticsEnv.ENABLED_PLAUSIBLE_ANALYTICS && (
-        <Plausible
-          domain={analyticsEnv.PLAUSIBLE_DOMAIN}
-          scriptBaseUrl={analyticsEnv.PLAUSIBLE_SCRIPT_BASE_URL}
-        />
-      )}
-
-      {/* Umami - Lightweight, can load on all routes */}
-      {analyticsEnv.ENABLED_UMAMI_ANALYTICS && (
-        <Umami
-          scriptUrl={analyticsEnv.UMAMI_SCRIPT_URL}
-          websiteId={analyticsEnv.UMAMI_WEBSITE_ID}
-        />
       )}
     </>
   );
