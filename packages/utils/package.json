@@ -14,10 +14,12 @@
   "dependencies": {
     "@lobechat/const": "workspace:*",
     "@lobechat/types": "workspace:*",
+    "chroma-js": "^3.2.0",
     "dayjs": "^1.11.18",
     "dompurify": "^3.2.7"
   },
   "devDependencies": {
+    "@types/chroma-js": "^2.4.4",
     "@types/dompurify": "^3.2.0",
     "vitest-canvas-mock": "^0.3.3"
   }
