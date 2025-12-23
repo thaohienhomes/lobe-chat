@@ -113,6 +113,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
 export const GLOBAL_PLANS: Record<string, PlanConfig> = {
   gl_lifetime: {
     code: 'gl_lifetime',
+    dailyTier2Limit: -1, // Unlimited Tier 2 within monthly points cap
     displayName: 'Founding Member (Lifetime)',
     features: [
       'All Premium features forever',
@@ -127,6 +128,8 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
   },
   gl_premium: {
     code: 'gl_premium',
+    dailyTier2Limit: -1, // Unlimited Tier 2
+    dailyTier3Limit: 50, // 50 Tier 3 messages/day
     displayName: 'Premium',
     features: [
       'Unlimited Tier 1 & 2 models',
@@ -141,6 +144,7 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
   },
   gl_standard: {
     code: 'gl_standard',
+    dailyTier2Limit: 30, // 30 Tier 2 messages/day
     displayName: 'Standard',
     features: [
       'Unlimited Tier 1 models',
@@ -472,21 +476,24 @@ export function getPlanByCode(code: string): PlanConfig | undefined {
 
 /**
  * Check if user can use a model tier based on their plan
+ * Uses PLAN_MODEL_ACCESS.allowedTiers for accurate tier checking
  */
 export function canUseTier(planCode: string, tier: number): boolean {
+  // Use PLAN_MODEL_ACCESS as the source of truth
+  const planAccess = PLAN_MODEL_ACCESS[planCode];
+  if (planAccess?.allowedTiers) {
+    return planAccess.allowedTiers.includes(tier);
+  }
+
+  // Fallback: check plan config
   const plan = getPlanByCode(planCode);
   if (!plan) return tier === 1;
 
   // Free plans: Tier 1 only
-  if (plan.price === 0) return tier === 1;
+  if (plan.price === 0 && !planCode.includes('lifetime')) return tier === 1;
 
-  // Basic/Standard plans: Tier 1 & 2 (with daily limit for Tier 2)
-  if (planCode === 'vn_basic' || planCode === 'gl_standard') {
-    return tier <= 2;
-  }
-
-  // Pro/Premium plans: All tiers (with daily limit for Tier 3)
-  return true;
+  // Default: allow tier 1 only for unknown plans
+  return tier === 1;
 }
 
 /**
