@@ -89,21 +89,86 @@ interface SubscriptionData {
  */
 const PLAN_PRICING: Record<string, { displayName: string; monthlyPoints: number; price: number }> =
   {
+    
+    founding_member: {
+      displayName: 'Lifetime Founding Member',
+      monthlyPoints: 2_000_000,
+      price: 0,
+    },
+
+    
+    // Free Plan (default for new users)
+free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+    // Lifetime Founding Member Plans (all variations)
+gl_lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
     // Global Plans (USD via Polar.sh)
-    gl_lifetime: { displayName: 'Founding Member (Lifetime)', monthlyPoints: 2_000_000, price: 0 },
-    gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
-    gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
-    gl_starter: { displayName: 'Starter', monthlyPoints: 200_000, price: 0 },
+gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
+    
+gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
+    
+gl_starter: { displayName: 'Starter', monthlyPoints: 200_000, price: 0 },
+
+    
+    lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
+    lifetime_founding_member: {
+      displayName: 'Lifetime Founding Member',
+      monthlyPoints: 2_000_000,
+      price: 0,
+    },
     // Legacy mappings (for backward compatibility)
-    premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+
+    
     starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
     ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
     // Vietnam Plans
-    vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+
+    
     vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+    vn_lifetime: {
+      displayName: 'Thành Viên Sáng Lập (Trọn Đời)',
+      monthlyPoints: 2_000_000,
+      price: 0,
+    },
     vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
     vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
   };
+
+/**
+ * Get plan info from planId with intelligent fallback detection
+ * Handles unknown planIds by detecting keywords like 'lifetime', 'founding', etc.
+ */
+const getPlanInfo = (
+  planId: string,
+): { displayName: string; monthlyPoints: number; price: number } => {
+  // Check direct mapping first
+  if (PLAN_PRICING[planId]) {
+    return PLAN_PRICING[planId];
+  }
+
+  // Intelligent fallback based on planId keywords
+  const lowerPlanId = planId.toLowerCase();
+
+  // Detect lifetime/founding member plans
+  if (lowerPlanId.includes('lifetime') || lowerPlanId.includes('founding')) {
+    return { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 };
+  }
+
+  // Detect premium/pro plans
+  if (lowerPlanId.includes('premium') || lowerPlanId.includes('pro')) {
+    return { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 };
+  }
+
+  // Detect ultimate plans
+  if (lowerPlanId.includes('ultimate')) {
+    return { displayName: 'Ultimate', monthlyPoints: 2_000_000, price: 0 };
+  }
+
+  // Default to free plan for unknown planIds
+  console.warn(`Unknown planId: ${planId}, defaulting to free plan display`);
+  return PLAN_PRICING.free;
+};
 
 const handleManageSubscription = () => {
   // Navigate to subscription management
@@ -177,7 +242,8 @@ const BillingInfo = memo<BillingInfoProps>(({ mobile }) => {
   }
 
   // Calculate billing information from subscription data
-  const planInfo = PLAN_PRICING[subscription.planId] || PLAN_PRICING.vn_free;
+  // Use getPlanInfo for intelligent fallback detection of unknown planIds
+  const planInfo = getPlanInfo(subscription.planId);
   const planName = planInfo.displayName;
   const amount = planInfo.price;
   const nextBilling = new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
