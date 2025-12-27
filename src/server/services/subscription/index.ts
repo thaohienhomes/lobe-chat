@@ -2,9 +2,17 @@ import { LobeChatDatabase } from '@lobechat/database';
 import { subscriptions, usageLogs } from '@lobechat/database/schemas';
 import { and, eq, sql } from 'drizzle-orm';
 
+import {
+  canPlanUseModel,
+  getAllowedModelsForPlan,
+  getAllowedTiersForPlan,
+  getDefaultModelForPlan,
+  getModelTier,
+} from '@/config/pricing';
 import { pino } from '@/libs/logger';
 
-import { TRIAL_CONFIG, FREE_TIER_MODELS, isModelAllowedForTrial, getTrialFallbackModel } from '../trial/config';
+// Legacy imports for backward compatibility
+import { FREE_TIER_MODELS, TRIAL_CONFIG } from '../trial/config';
 
 export interface CreateSubscriptionParams {
   billingCycle?: 'monthly' | 'yearly';
@@ -15,11 +23,17 @@ export interface CreateSubscriptionParams {
 
 export interface TrialAccessResult {
   allowed: boolean;
+  /** Tiers user can access based on their plan */
+  allowedTiers?: number[];
   isTrialUser: boolean;
+  /** @deprecated Use allowedTiers instead */
   messagesRemaining?: number;
   model?: string;
   modelAdjusted?: boolean;
+  /** User's plan code for tier-based access */
+  planCode?: string;
   reason?: string;
+  /** @deprecated Use allowedTiers instead */
   tokensRemaining?: number;
 }
 
@@ -143,67 +157,81 @@ export class SubscriptionService {
   };
 
   /**
-   * Check trial access for free users with detailed information
-   * Paid plans (including VN plans) bypass trial limits entirely
+   * Check subscription access with tier-based model restrictions
+   *
+   * Access is determined by:
+   * 1. User's subscription plan (vn_free, vn_basic, vn_pro, etc.)
+   * 2. Plan's allowed tiers from PLAN_MODEL_ACCESS
+   * 3. Requested model's tier from MODEL_TIERS
+   *
+   * Free tier (vn_free) = Tier 1 only
+   * Basic tier (vn_basic) = Tier 1 only (unlimited within points)
+   * Pro tier (vn_pro) = Tier 1 & 2
    */
   checkTrialAccess = async (userId: string, requestedModel?: string): Promise<TrialAccessResult> => {
     const subscription = await this.getActiveSubscription(userId);
+    const planCode = subscription?.planId || 'vn_free';
 
-    // Paid users have full access (includes VN plans: vn_basic, vn_pro, vn_team)
-    if (subscription && this.isPaidPlan(subscription.planId)) {
-      pino.info({ planId: subscription.planId, userId }, 'Paid subscription - bypassing trial limits');
-      return {
-        allowed: true,
-        isTrialUser: false,
-        model: requestedModel,
-      };
-    }
+    // Get allowed tiers for this plan
+    const allowedTiers = getAllowedTiersForPlan(planCode);
+    const isFreePlan = planCode === 'vn_free' || planCode === 'gl_starter' || planCode === 'free';
 
-    // Get trial usage for free users
-    const usage = await this.getTrialUsage(userId);
-    const messagesRemaining = Math.max(0, TRIAL_CONFIG.maxMessages - usage.messageCount);
-    const tokensRemaining = Math.max(0, TRIAL_CONFIG.maxTokens - usage.totalTokens);
-
-    // Check if trial is expired
-    if (messagesRemaining <= 0) {
-      pino.warn({ messagesUsed: usage.messageCount, userId }, 'Trial message limit reached');
-      return {
-        allowed: false,
-        isTrialUser: true,
-        messagesRemaining: 0,
-        reason: 'Bạn đã sử dụng hết 10 tin nhắn miễn phí. Nâng cấp để tiếp tục chat với AI.',
-        tokensRemaining,
-      };
-    }
-
-    if (tokensRemaining <= 0) {
-      pino.warn({ tokensUsed: usage.totalTokens, userId }, 'Trial token limit reached');
-      return {
-        allowed: false,
-        isTrialUser: true,
-        messagesRemaining,
-        reason: 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat với AI.',
-        tokensRemaining: 0,
-      };
-    }
-
-    // Validate model for trial users
+    // Check if requested model is allowed for this plan
     let finalModel = requestedModel;
     let modelAdjusted = false;
 
-    if (requestedModel && !isModelAllowedForTrial(requestedModel)) {
-      finalModel = getTrialFallbackModel();
-      modelAdjusted = true;
-      pino.info({ originalModel: requestedModel, userId }, 'Model adjusted for trial user');
+    if (requestedModel) {
+      const modelTier = getModelTier(requestedModel);
+
+      if (!allowedTiers.includes(modelTier)) {
+        // Model not allowed for this tier - use fallback
+        const defaultModel = getDefaultModelForPlan(planCode);
+        finalModel = defaultModel.model;
+        modelAdjusted = true;
+
+        pino.info(
+          {
+            allowedTiers,
+            modelTier,
+            originalModel: requestedModel,
+            planCode,
+            userId,
+          },
+          'Model tier not allowed for plan - using default model',
+        );
+      }
     }
 
+    // For free plans, check points/usage limits (legacy behavior)
+    if (isFreePlan) {
+      const usage = await this.getTrialUsage(userId);
+
+      // Legacy: Check message limit only if TRIAL_CONFIG.maxMessages > 0
+      if (TRIAL_CONFIG.maxMessages > 0) {
+        const messagesRemaining = Math.max(0, TRIAL_CONFIG.maxMessages - usage.messageCount);
+
+        if (messagesRemaining <= 0) {
+          pino.warn({ messagesUsed: usage.messageCount, planCode, userId }, 'Free tier limit reached');
+          return {
+            allowed: false,
+            allowedTiers,
+            isTrialUser: true,
+            messagesRemaining: 0,
+            planCode,
+            reason: 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat với AI.',
+          };
+        }
+      }
+    }
+
+    // Paid plans always have access (within their tier restrictions)
     return {
       allowed: true,
-      isTrialUser: true,
-      messagesRemaining,
+      allowedTiers,
+      isTrialUser: isFreePlan,
       model: finalModel,
       modelAdjusted,
-      tokensRemaining,
+      planCode,
     };
   };
 
@@ -234,10 +262,29 @@ export class SubscriptionService {
   };
 
   /**
-   * Get allowed models for trial users
+   * Get allowed models for a user based on their subscription plan
+   * @deprecated Use getAllowedModelsForUser instead
    */
   getAllowedTrialModels = (): readonly string[] => {
     return FREE_TIER_MODELS;
+  };
+
+  /**
+   * Get allowed models for a user based on their subscription plan
+   */
+  getAllowedModelsForUser = async (userId: string): Promise<string[]> => {
+    const subscription = await this.getActiveSubscription(userId);
+    const planCode = subscription?.planId || 'vn_free';
+    return getAllowedModelsForPlan(planCode);
+  };
+
+  /**
+   * Check if a user can use a specific model
+   */
+  canUserUseModel = async (userId: string, modelId: string): Promise<boolean> => {
+    const subscription = await this.getActiveSubscription(userId);
+    const planCode = subscription?.planId || 'vn_free';
+    return canPlanUseModel(planCode, modelId);
   };
 
   /**
@@ -248,15 +295,19 @@ export class SubscriptionService {
 
     if (!subscription) {
       return {
-        canAccessAI: false,
-        planId: 'free',
+        allowedTiers: [1], // Free tier = Tier 1 only
+        canAccessAI: true, // Free tier can still use AI within limits
+        planId: 'vn_free',
         status: 'none',
       };
     }
 
+    const allowedTiers = getAllowedTiersForPlan(subscription.planId);
+
     return {
+      allowedTiers,
       billingCycle: subscription.billingCycle,
-      canAccessAI: this.isPaidPlan(subscription.planId),
+      canAccessAI: true, // All plans can access AI within their tier limits
       currentPeriodEnd: subscription.currentPeriodEnd,
       planId: subscription.planId,
       status: subscription.status,

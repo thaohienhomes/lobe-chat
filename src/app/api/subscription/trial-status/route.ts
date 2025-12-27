@@ -1,30 +1,64 @@
 /**
- * Get Trial Status Endpoint
- * Returns the user's trial status including remaining messages/tokens
- * 
+ * Get Subscription Status Endpoint
+ * Returns the user's subscription status including points balance and tier access
+ *
  * GET /api/subscription/trial-status
+ *
+ * Note: This endpoint is named "trial-status" for backward compatibility,
+ * but now returns points-based subscription status instead of message limits.
  */
 
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
+import {
+  getAllowedTiersForPlan,
+  getPlanByCode,
+  PLAN_MODEL_ACCESS,
+  VN_PLANS,
+} from '@/config/pricing';
 import { getServerDB } from '@/database/server';
 import { pino } from '@/libs/logger';
 import { SubscriptionService } from '@/server/services/subscription';
-import { TRIAL_CONFIG, PLAN_PRICING, FREE_TIER_MODELS } from '@/server/services/trial/config';
 
+/**
+ * Updated response using points-based system
+ * Legacy fields are kept for backward compatibility but deprecated
+ */
 export interface TrialStatusResponse {
-  allowedModels: readonly string[];
+  /** @deprecated Use allowedTiers instead */
+  allowedModels: string[];
+  /** Tiers user can access (1, 2, or 3) */
+  allowedTiers: number[];
+  /** Whether user can use AI features */
   canUseAI: boolean;
+  /** @deprecated Free tier now uses points, not trial */
   isTrialUser: boolean;
+  /** @deprecated Use pointsRemaining instead - now returns -1 (unlimited within points) */
   maxMessages: number;
+  /** Maximum points per month for this plan */
+  maxPoints: number;
+  /** @deprecated Use pointsRemaining instead - now returns -1 (unlimited within points) */
   maxTokens: number;
+  /** @deprecated Use pointsRemaining instead */
   messagesRemaining: number;
+  /** @deprecated Use pointsUsed instead */
   messagesUsed: number;
-  planId: string;
-  planPricing: typeof PLAN_PRICING;
+  /** User's current plan code (e.g., 'vn_free', 'vn_basic', 'vn_pro') */
+  planCode: string;
+  /** Plan display name */
+  planDisplayName: string;
+  /** @deprecated Pricing now in src/config/pricing.ts */
+  planPricing: Record<string, number>;
+  /** Points remaining this month */
+  pointsRemaining: number;
+  /** Points used this month */
+  pointsUsed: number;
+  /** @deprecated Use pointsRemaining instead */
   tokensRemaining: number;
+  /** @deprecated Use pointsUsed instead */
   tokensUsed: number;
+  /** @deprecated Free tier doesn't expire, uses points */
   trialExpired: boolean;
 }
 
@@ -40,37 +74,76 @@ export async function GET(): Promise<NextResponse<TrialStatusResponse | { error:
     const db = await getServerDB();
     const subscriptionService = new SubscriptionService(db);
 
-    // Get trial access status
-    const trialAccess = await subscriptionService.checkTrialAccess(userId);
+    // Get subscription plan
     const plan = await subscriptionService.getSubscriptionPlan(userId);
+    const planCode = plan.planId || 'vn_free';
 
-    // Calculate usage
-    const messagesUsed = TRIAL_CONFIG.maxMessages - (trialAccess.messagesRemaining ?? TRIAL_CONFIG.maxMessages);
-    const tokensUsed = TRIAL_CONFIG.maxTokens - (trialAccess.tokensRemaining ?? TRIAL_CONFIG.maxTokens);
+    // Get plan config from centralized pricing
+    const planConfig = getPlanByCode(planCode);
+    const planAccess = PLAN_MODEL_ACCESS[planCode] || PLAN_MODEL_ACCESS.vn_free;
+    const allowedTiers = getAllowedTiersForPlan(planCode);
+
+    // Get points usage (if available)
+    // TODO: Integrate with actual points tracking system
+    const maxPoints = planConfig?.monthlyPoints || VN_PLANS.vn_free.monthlyPoints;
+    const pointsUsed = 0; // TODO: Get from usage tracking
+    const pointsRemaining = maxPoints - pointsUsed;
+
+    // Determine if user can use AI
+    const canUseAI = pointsRemaining > 0;
 
     const response: TrialStatusResponse = {
-      allowedModels: FREE_TIER_MODELS,
-      canUseAI: trialAccess.allowed,
-      isTrialUser: trialAccess.isTrialUser,
-      maxMessages: TRIAL_CONFIG.maxMessages,
-      maxTokens: TRIAL_CONFIG.maxTokens,
-      messagesRemaining: trialAccess.messagesRemaining ?? 0,
-      messagesUsed: Math.max(0, messagesUsed),
-      planId: plan.planId,
-      planPricing: PLAN_PRICING,
-      tokensRemaining: trialAccess.tokensRemaining ?? 0,
-      tokensUsed: Math.max(0, tokensUsed),
-      trialExpired: !trialAccess.allowed && trialAccess.isTrialUser,
+      
+      // Legacy fields for backward compatibility (deprecated)
+allowedModels: [...planAccess.models],
+      
+// New points-based fields
+allowedTiers,
+      
+canUseAI,
+      
+isTrialUser: planCode === 'vn_free' || planCode === 'gl_starter',
+      
+maxMessages: -1,
+      
+maxPoints,
+      
+// Unlimited within points budget
+maxTokens: -1,
+
+      
+      
+// Unlimited within points budget
+messagesRemaining: -1,
+      
+
+messagesUsed: 0,
+      
+
+planCode, 
+      
+planDisplayName: planConfig?.displayName || 'Phở Không Người Lái', 
+      planPricing: {
+        premium: VN_PLANS.vn_pro.price,
+        starter: VN_PLANS.vn_basic.price,
+        ultimate: VN_PLANS.vn_team.price,
+      },
+      pointsRemaining,
+      pointsUsed,
+      tokensRemaining: -1,
+      tokensUsed: 0,
+      trialExpired: false, // Points-based system doesn't expire
     };
 
     pino.info(
       {
-        isTrialUser: response.isTrialUser,
-        messagesRemaining: response.messagesRemaining,
-        planId: response.planId,
+        allowedTiers,
+        canUseAI: response.canUseAI,
+        planCode,
+        pointsRemaining,
         userId,
       },
-      'Trial status retrieved',
+      'Subscription status retrieved',
     );
 
     return NextResponse.json(response);
@@ -81,11 +154,11 @@ export async function GET(): Promise<NextResponse<TrialStatusResponse | { error:
       {
         error: errorMessage,
       },
-      'Failed to retrieve trial status',
+      'Failed to retrieve subscription status',
     );
 
     return NextResponse.json(
-      { error: 'Failed to retrieve trial status' },
+      { error: 'Failed to retrieve subscription status' },
       { status: 500 },
     );
   }

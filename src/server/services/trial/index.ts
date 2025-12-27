@@ -2,88 +2,80 @@ import { LobeChatDatabase } from '@lobechat/database';
 import { usageLogs } from '@lobechat/database/schemas';
 import { eq, sql } from 'drizzle-orm';
 
+import { getAllowedTiersForPlan, VN_PLANS } from '@/config/pricing';
 import { pino } from '@/libs/logger';
 
 import { SubscriptionService } from '../subscription';
-import { 
-  TRIAL_CONFIG, 
-  TrialStatus, 
-  isModelAllowedForTrial, 
-  getTrialFallbackModel,
-  FREE_TIER_MODELS,
+import {
   DEFAULT_FREE_MODEL,
+  FREE_TIER_MODELS,
+  getTrialFallbackModel,
+  isModelAllowedForTrial,
+  TrialStatus,
 } from './config';
 
 export class TrialService {
   private db: LobeChatDatabase;
   private subscriptionService: SubscriptionService;
-  
+
   constructor(db: LobeChatDatabase) {
     this.db = db;
     this.subscriptionService = new SubscriptionService(db);
   }
-  
+
   /**
-   * Get trial status for a free user
+   * Get subscription status for a user (points-based system)
+   *
+   * Note: This replaces the old "trial" concept with a points-based system
+   * where free tier has limited points, not message counts.
    */
   async getTrialStatus(userId: string): Promise<TrialStatus> {
     const subscription = await this.subscriptionService.getActiveSubscription(userId);
-    
-    // If user has a paid subscription, they're not on trial
-    if (subscription && subscription.planId !== 'free') {
-      return {
-        canUseAI: true,
-        isOnTrial: false,
-        messagesRemaining: -1, // unlimited
-        messagesUsed: 0,
-        planId: subscription.planId as TrialStatus['planId'],
-        tokensRemaining: -1, // unlimited
-        tokensUsed: 0,
-        trialExpired: false,
-      };
-    }
-    
-    // Get usage stats for free users
+    const planCode = subscription?.planId || 'vn_free';
+    const allowedTiers = getAllowedTiersForPlan(planCode);
+
+    // Check if free plan
+    const isFreePlan = planCode === 'vn_free' || planCode === 'gl_starter' || planCode === 'free';
+
+    // Get usage stats
     const usage = await this.getTrialUsage(userId);
-    
-    const messagesRemaining = Math.max(0, TRIAL_CONFIG.maxMessages - usage.messageCount);
-    const tokensRemaining = Math.max(0, TRIAL_CONFIG.maxTokens - usage.totalTokens);
-    const trialExpired = messagesRemaining <= 0 || tokensRemaining <= 0;
-    
+
+    // Get max points for plan
+    const maxPoints = VN_PLANS[planCode]?.monthlyPoints || VN_PLANS.vn_free.monthlyPoints;
+    const pointsUsed = usage.totalTokens; // Simplified: 1 token = 1 point
+    const pointsRemaining = Math.max(0, maxPoints - pointsUsed);
+
     return {
-      canUseAI: !trialExpired,
-      isOnTrial: true,
-      messagesRemaining,
-      messagesUsed: usage.messageCount,
-      planId: 'free',
-      tokensRemaining,
-      tokensUsed: usage.totalTokens,
-      trialExpired,
+      allowedTiers,
+      canUseAI: pointsRemaining > 0,
+      isOnTrial: isFreePlan,
+      planId: planCode,
+      pointsRemaining,
+      pointsUsed,
     };
   }
-  
+
   /**
-   * Check if a free user can send a message
+   * Check if a user can send a message based on points
    */
   async canSendMessage(userId: string): Promise<{ allowed: boolean; reason?: string }> {
     const status = await this.getTrialStatus(userId);
-    
+
     if (!status.isOnTrial) {
+      // Paid users always allowed (within tier restrictions)
       return { allowed: true };
     }
-    
-    if (status.trialExpired) {
+
+    if (status.pointsRemaining <= 0) {
       return {
         allowed: false,
-        reason: status.messagesRemaining <= 0
-          ? 'Bạn đã sử dụng hết số tin nhắn miễn phí. Nâng cấp để tiếp tục chat.'
-          : 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat.',
+        reason: 'Bạn đã sử dụng hết Phở Points miễn phí. Nâng cấp để tiếp tục chat.',
       };
     }
-    
+
     return { allowed: true };
   }
-  
+
   /**
    * Get usage statistics for trial period
    */
@@ -99,7 +91,7 @@ export class TrialService {
         })
         .from(usageLogs)
         .where(eq(usageLogs.userId, userId));
-      
+
       return {
         messageCount: result[0]?.messageCount || 0,
         totalTokens: result[0]?.totalTokens || 0,
@@ -109,7 +101,7 @@ export class TrialService {
       return { messageCount: 0, totalTokens: 0 };
     }
   }
-  
+
   /**
    * Validate and potentially adjust the model for trial users
    */
@@ -120,11 +112,11 @@ export class TrialService {
     if (!isTrialUser) {
       return { allowed: true, model };
     }
-    
+
     if (isModelAllowedForTrial(model)) {
       return { allowed: true, model };
     }
-    
+
     // Return fallback model for trial users
     return {
       allowed: false,
@@ -132,7 +124,7 @@ export class TrialService {
       reason: `Model ${model} không khả dụng cho bản dùng thử. Đang sử dụng ${DEFAULT_FREE_MODEL}.`,
     };
   }
-  
+
   /**
    * Get list of allowed models for trial users
    */
@@ -142,5 +134,5 @@ export class TrialService {
 }
 
 export type { TrialStatus } from './config';
-export { DEFAULT_FREE_MODEL, FREE_TIER_MODELS, PLAN_PRICING,TRIAL_CONFIG } from './config';
+export { DEFAULT_FREE_MODEL, FREE_TIER_MODELS, PLAN_PRICING, TRIAL_CONFIG } from './config';
 
