@@ -42,7 +42,7 @@ const EXPECTED_ERROR_MESSAGES = [
 if (ENABLE_SENTRY && SENTRY_DSN) {
   Sentry.init({
     // Filter out noise errors before sending to Sentry
-beforeSend(event, hint) {
+    beforeSend(event, hint) {
       const error = hint.originalException;
       const errorMessage = error instanceof Error ? error.message : String(error || '');
 
@@ -71,17 +71,15 @@ beforeSend(event, hint) {
 
       return event;
     },
-    
-debug: false,
-    
-dsn: SENTRY_DSN, 
-    
-// Disabled for production
-enabled: ENABLE_SENTRY,
 
-    
-    
-environment: process.env.NODE_ENV,
+    debug: false,
+
+    dsn: SENTRY_DSN,
+
+    // Disabled for production
+    enabled: ENABLE_SENTRY,
+
+    environment: process.env.NODE_ENV,
 
     // Additional ignore patterns for error titles
     ignoreErrors: [
@@ -106,20 +104,19 @@ environment: process.env.NODE_ENV,
       }),
     ],
 
-    
-    
-replaysOnErrorSampleRate: 1,
+    replaysOnErrorSampleRate: 1,
 
-    
-    
-// Session Replay: 10% of sessions, 100% of sessions with errors
-replaysSessionSampleRate: 0.1,
-    
-// Distributed tracing targets
-tracePropagationTargets: ['localhost', /^\//],
+    // Session Replay: 10% of sessions, 100% of sessions with errors
+    replaysSessionSampleRate: 0.1,
 
-    
+    // Distributed tracing targets
+    tracePropagationTargets: ['localhost', /^\//],
+
     // Performance monitoring: 10% in production, 100% in development
-tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1,
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1,
   });
 }
+
+// Export for Next.js navigation instrumentation (required by Sentry)
+// This captures router transitions for performance monitoring
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
