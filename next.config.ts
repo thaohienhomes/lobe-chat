@@ -52,12 +52,6 @@ const nextConfig: NextConfig = {
     serverMinification: false,
     webVitalsAttribution: ['CLS', 'LCP'],
     webpackMemoryOptimizations: true,
-    // Additional memory optimizations for Vercel builds
-    ...(process.env.VERCEL && {
-      turbo: {
-        memoryLimit: 6144,
-      },
-    }),
   },
 
   async headers() {
