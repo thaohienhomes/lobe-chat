@@ -20,7 +20,7 @@
 -- 	"accessed_at" timestamp DEFAULT now()
 -- );
 -- --> statement-breakpoint
-CREATE TABLE "model_pricing" (
+CREATE TABLE IF NOT EXISTS "model_pricing" (
 	"id" text PRIMARY KEY NOT NULL,
 	"model_id" text NOT NULL,
 	"input_price" real NOT NULL,
@@ -30,9 +30,14 @@ CREATE TABLE "model_pricing" (
 	"is_active" boolean DEFAULT true,
 	"accessed_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "model_pricing_model_id_unique" UNIQUE("model_id")
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+--> statement-breakpoint
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'model_pricing_model_id_unique') THEN
+		ALTER TABLE "model_pricing" ADD CONSTRAINT "model_pricing_model_id_unique" UNIQUE("model_id");
+	END IF;
+END $$;
 --> statement-breakpoint
 -- ALTER TABLE "payments" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
 -- ALTER TABLE "subscriptions_multi_market" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
@@ -59,10 +64,30 @@ CREATE TABLE "model_pricing" (
 -- ALTER TABLE "payment_gateway_configs" ADD COLUMN "is_enabled" boolean DEFAULT true;--> statement-breakpoint
 -- ALTER TABLE "payment_gateway_configs" ADD COLUMN "fixed_fee" numeric(8, 2) DEFAULT '0';--> statement-breakpoint
 -- ALTER TABLE "payment_gateway_configs" ADD COLUMN "percentage_fee" numeric(5, 3) DEFAULT '0';--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "pho_credit_balance" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "lifetime_spent" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "daily_tier1_usage" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "last_usage_date" timestamp with time zone DEFAULT now();--> statement-breakpoint
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'pho_credit_balance') THEN
+		ALTER TABLE "users" ADD COLUMN "pho_credit_balance" integer DEFAULT 0;
+	END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'lifetime_spent') THEN
+		ALTER TABLE "users" ADD COLUMN "lifetime_spent" integer DEFAULT 0;
+	END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'daily_tier1_usage') THEN
+		ALTER TABLE "users" ADD COLUMN "daily_tier1_usage" integer DEFAULT 0;
+	END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'last_usage_date') THEN
+		ALTER TABLE "users" ADD COLUMN "last_usage_date" timestamp with time zone DEFAULT now();
+	END IF;
+END $$;
+-- --> statement-breakpoint
 -- CREATE UNIQUE INDEX "payment_gateway_configs_gateway_country_key" ON "payment_gateway_configs" USING btree ("gateway_name","country_code");--> statement-breakpoint
 -- CREATE UNIQUE INDEX "ppp_pricing_country_code_key" ON "ppp_pricing" USING btree ("country_code");--> statement-breakpoint
 -- ALTER TABLE "payment_gateway_configs" DROP COLUMN "provider";--> statement-breakpoint
