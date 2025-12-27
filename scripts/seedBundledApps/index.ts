@@ -323,9 +323,12 @@ const runSeed = async () => {
 };
 
 // Only run if DATABASE_URL is available
-// eslint-disable-next-line unicorn/prefer-top-level-await
 if (process.env.DATABASE_URL) {
-  await runSeed();
+  try {
+    await runSeed();
+  } catch (error) {
+    console.error(error);
+  }
 } else {
   console.log('🟢 DATABASE_URL not found, seed skipped');
 }

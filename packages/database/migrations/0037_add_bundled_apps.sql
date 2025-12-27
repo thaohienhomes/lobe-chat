@@ -1,4 +1,4 @@
-CREATE TABLE "bundled_apps" (
+CREATE TABLE IF NOT EXISTS "bundled_apps" (
 	"id" varchar(100) PRIMARY KEY NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" text,

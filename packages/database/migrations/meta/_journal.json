@@ -287,6 +287,13 @@
       "when": 1765704184511,
       "tag": "0040_silky_payback",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1767000000000,
+      "tag": "0041_ensure_shared_conversations",
+      "breakpoints": true
     }
   ],
   "version": "6"
