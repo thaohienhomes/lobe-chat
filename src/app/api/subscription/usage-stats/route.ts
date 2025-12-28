@@ -5,6 +5,9 @@
  *
  * Returns user's current Phở Points balance and daily tier usage
  * Based on PRICING_MASTERPLAN.md.md
+ *
+ * IMPORTANT: Plan detection logic must be consistent with /api/subscription/current
+ * to avoid displaying different plans in different parts of the UI.
  */
 import { auth } from '@clerk/nextjs/server';
 import { and, eq, gte, sql } from 'drizzle-orm';
@@ -12,7 +15,59 @@ import { NextResponse } from 'next/server';
 
 import { GLOBAL_PLANS, VN_PLANS } from '@/config/pricing';
 import { usageLogs, users } from '@/database/schemas';
+import { subscriptions } from '@/database/schemas/billing';
 import { getServerDB } from '@/database/server';
+
+// Constants for plan prioritization (same as in /api/subscription/current)
+const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter', 'vn_free', 'gl_starter']);
+const LIFETIME_KEYWORDS = ['lifetime', 'founding'];
+
+/**
+ * Get the user's effective plan ID by checking subscriptions table first
+ * This ensures consistency with /api/subscription/current (BillingInfo)
+ */
+async function getEffectivePlanId(
+  db: ReturnType<typeof getServerDB> extends Promise<infer T> ? T : never,
+  userId: string,
+  fallbackPlanId: string,
+): Promise<string> {
+  // Get ALL active subscriptions for the user (to properly prioritize)
+  const activeSubscriptions = await db
+    .select({
+      currentPeriodStart: subscriptions.currentPeriodStart,
+      planId: subscriptions.planId,
+    })
+    .from(subscriptions)
+    .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')));
+
+  if (!activeSubscriptions || activeSubscriptions.length === 0) {
+    // No active subscription in subscriptions table, use fallback from users table
+    return fallbackPlanId;
+  }
+
+  // Prioritize paid/lifetime plans over free plan (same logic as /api/subscription/current)
+  const sortedSubscriptions = activeSubscriptions.sort((a, b) => {
+    const aIsLifetime = LIFETIME_KEYWORDS.some((kw) => a.planId.toLowerCase().includes(kw));
+    const bIsLifetime = LIFETIME_KEYWORDS.some((kw) => b.planId.toLowerCase().includes(kw));
+    const aIsFree = FREE_PLAN_IDS.has(a.planId.toLowerCase());
+    const bIsFree = FREE_PLAN_IDS.has(b.planId.toLowerCase());
+
+    // Lifetime plans have highest priority
+    if (aIsLifetime && !bIsLifetime) return -1;
+    if (!aIsLifetime && bIsLifetime) return 1;
+
+    // Free plans have lowest priority
+    if (aIsFree && !bIsFree) return 1;
+    if (!aIsFree && bIsFree) return -1;
+
+    // For same priority, prefer more recent subscription
+    const aStart = a.currentPeriodStart ? new Date(a.currentPeriodStart).getTime() : 0;
+    const bStart = b.currentPeriodStart ? new Date(b.currentPeriodStart).getTime() : 0;
+    return bStart - aStart;
+  });
+
+  return sortedSubscriptions[0].planId;
+}
 
 export async function GET() {
   try {
@@ -41,7 +96,10 @@ export async function GET() {
     }
 
     const user = userResult[0];
-    const planId = user.currentPlanId || 'vn_free';
+
+    // Get effective plan ID - prioritizes subscriptions table for consistency with BillingInfo
+    const fallbackPlanId = user.currentPlanId || 'vn_free';
+    const planId = await getEffectivePlanId(db, userId, fallbackPlanId);
 
     // Get plan config
     const plan = VN_PLANS[planId] || GLOBAL_PLANS[planId] || VN_PLANS.vn_free;

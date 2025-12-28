@@ -1,4 +1,5 @@
 import { UserJSON } from '@clerk/backend';
+import { and, eq } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
@@ -7,6 +8,7 @@ import { isDesktop } from '@/const/version';
 import { MessageModel } from '@/database/models/message';
 import { SessionModel } from '@/database/models/session';
 import { UserModel, UserNotFoundError } from '@/database/models/user';
+import { subscriptions } from '@/database/schemas/billing';
 import { ClerkAuth } from '@/libs/clerk-auth';
 import { pino } from '@/libs/logger';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
@@ -23,6 +25,10 @@ import {
   UserPreference,
 } from '@/types/user';
 import { UserSettings } from '@/types/user/settings';
+
+// Constants for plan prioritization (consistent with /api/subscription/current)
+const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter', 'vn_free', 'gl_starter']);
+const LIFETIME_KEYWORDS = ['lifetime', 'founding'];
 
 const userProcedure = authedProcedure.use(serverDatabase).use(async ({ ctx, next }) => {
   return next({
@@ -103,6 +109,48 @@ export const userRouter = router({
     const hasAnyMessages = await messageModel.hasMoreThanN(0);
     const hasExtraSession = await sessionModel.hasMoreThanN(1);
 
+    // Get effective plan from subscriptions table (same logic as /api/subscription/current)
+    // This ensures consistency between sidebar plan badge and BillingInfo
+    let effectivePlanId = state.currentPlanId || 'vn_free';
+
+    try {
+      const activeSubscriptions = await ctx.serverDB
+        .select({
+          currentPeriodStart: subscriptions.currentPeriodStart,
+          planId: subscriptions.planId,
+        })
+        .from(subscriptions)
+        .where(and(eq(subscriptions.userId, ctx.userId), eq(subscriptions.status, 'active')));
+
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        // Prioritize paid/lifetime plans over free plan
+        const sortedSubscriptions = activeSubscriptions.sort((a, b) => {
+          const aIsLifetime = LIFETIME_KEYWORDS.some((kw) => a.planId.toLowerCase().includes(kw));
+          const bIsLifetime = LIFETIME_KEYWORDS.some((kw) => b.planId.toLowerCase().includes(kw));
+          const aIsFree = FREE_PLAN_IDS.has(a.planId.toLowerCase());
+          const bIsFree = FREE_PLAN_IDS.has(b.planId.toLowerCase());
+
+          // Lifetime plans have highest priority
+          if (aIsLifetime && !bIsLifetime) return -1;
+          if (!aIsLifetime && bIsLifetime) return 1;
+
+          // Free plans have lowest priority
+          if (aIsFree && !bIsFree) return 1;
+          if (!aIsFree && bIsFree) return -1;
+
+          // For same priority, prefer more recent subscription
+          const aStart = a.currentPeriodStart ? new Date(a.currentPeriodStart).getTime() : 0;
+          const bStart = b.currentPeriodStart ? new Date(b.currentPeriodStart).getTime() : 0;
+          return bStart - aStart;
+        });
+
+        effectivePlanId = sortedSubscriptions[0].planId;
+      }
+    } catch (error) {
+      // If subscription query fails, fall back to users.currentPlanId
+      pino.warn({ error, userId: ctx.userId }, 'Failed to get effective plan from subscriptions');
+    }
+
     return {
       avatar: state.avatar,
       canEnablePWAGuide: hasMoreThan4Messages,
@@ -121,8 +169,8 @@ export const userRouter = router({
       phoPointsBalance: state.phoPointsBalance,
       preference: state.preference as UserPreference,
       settings: state.settings,
-      // Subscription plan code (e.g., 'vn_free', 'gl_lifetime')
-      subscriptionPlan: state.currentPlanId,
+      // Subscription plan code - now uses effective plan from subscriptions table
+      subscriptionPlan: effectivePlanId,
       userId: ctx.userId,
       username: state.username,
     } satisfies UserInitializationState;
