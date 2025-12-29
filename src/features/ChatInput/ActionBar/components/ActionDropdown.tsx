@@ -6,14 +6,42 @@ import { memo } from 'react';
 
 import { useIsMobile } from '@/hooks/useIsMobile';
 
-const useStyles = createStyles(({ css, prefixCls }) => ({
+const useStyles = createStyles(({ css, prefixCls, token }) => ({
   dropdownMenu: css`
     &.${prefixCls}-dropdown-menu {
+      border: 1px solid ${token.colorBorderSecondary};
+      border-radius: 12px;
+
+      /* Dark theme for dropdown */
+      background: ${token.colorBgElevated} !important;
+      box-shadow:
+        0 6px 16px 0 rgba(0, 0, 0, 20%),
+        0 3px 6px -4px rgba(0, 0, 0, 12%),
+        0 9px 28px 8px rgba(0, 0, 0, 5%);
+
       .${prefixCls}-dropdown-menu-item-group-list {
         margin: 0;
       }
       .${prefixCls}-avatar {
         margin-inline-end: var(--ant-margin-xs);
+      }
+
+      /* Ensure menu items have proper dark theme text color */
+      .${prefixCls}-dropdown-menu-item, .${prefixCls}-dropdown-menu-item-group-title {
+        color: ${token.colorText} !important;
+      }
+
+      .${prefixCls}-dropdown-menu-item:hover:not(.${prefixCls}-dropdown-menu-item-disabled) {
+        background: ${token.colorBgTextHover} !important;
+      }
+
+      .${prefixCls}-dropdown-menu-item-disabled {
+        cursor: not-allowed;
+        color: ${token.colorTextQuaternary} !important;
+      }
+
+      .${prefixCls}-dropdown-menu-item-divider {
+        background: ${token.colorBorderSecondary};
       }
     }
   `,

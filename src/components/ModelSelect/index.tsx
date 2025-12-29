@@ -5,15 +5,15 @@ import { createStyles, useResponsive } from 'antd-style';
 import {
   Infinity,
   AtomIcon,
+  Crown,
+  Lock,
   LucideEye,
   LucideGlobe,
   LucideImage,
   LucidePaperclip,
+  Sparkles,
   ToyBrick,
   Video,
-  Zap,
-  Star,
-  Crown,
 } from 'lucide-react';
 import { ModelAbilities } from 'model-bank';
 import numeral from 'numeral';
@@ -28,58 +28,107 @@ import { formatTokenNumber } from '@/utils/format';
 export const TAG_CLASSNAME = 'lobe-model-info-tags';
 
 /**
- * Get tier icon and color for model tier
+ * Get tier info with T3.chat-inspired styling
+ * - Tier 1 (Free): Green - available to all
+ * - Tier 2 (Pro): Gradient pink/purple - requires Phở Tái
+ * - Tier 3 (Premium): Gold gradient - requires Phở Đặc Biệt
  */
 const getTierInfo = (tier: number) => {
   switch (tier) {
     case 1: {
-      return { color: '#52c41a', icon: Zap, label: 'Tier 1' };
-    } // Green for budget models
+      return {
+        bgColor: 'rgba(82, 196, 26, 0.15)',
+        borderColor: 'transparent',
+        color: '#52c41a',
+        icon: Sparkles,
+        label: 'Free',
+        textColor: '#52c41a',
+      };
+    }
     case 2: {
-      return { color: '#1890ff', icon: Star, label: 'Tier 2' };
-    } // Blue for standard models
+      return {
+        bgColor:
+          'linear-gradient(135deg, rgba(255, 64, 129, 0.2) 0%, rgba(156, 39, 176, 0.2) 100%)',
+        borderColor: 'rgba(255, 64, 129, 0.3)',
+        color: '#ff4081',
+        icon: Sparkles,
+        label: 'PRO',
+        textColor: '#ff4081',
+      };
+    }
     case 3: {
-      return { color: '#faad14', icon: Crown, label: 'Tier 3' };
-    } // Gold for premium models
+      return {
+        bgColor: 'linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 152, 0, 0.2) 100%)',
+        borderColor: 'rgba(255, 193, 7, 0.3)',
+        color: '#ffc107',
+        icon: Crown,
+        label: 'MAX',
+        textColor: '#ffc107',
+      };
+    }
     default: {
-      return { color: '#52c41a', icon: Zap, label: 'Tier 1' };
+      return {
+        bgColor: 'rgba(82, 196, 26, 0.15)',
+        borderColor: 'transparent',
+        color: '#52c41a',
+        icon: Sparkles,
+        label: 'Free',
+        textColor: '#52c41a',
+      };
     }
   }
 };
 
 /**
- * Model Tier Badge Component
+ * Model Tier Badge Component - T3.chat inspired
  */
 interface ModelTierBadgeProps {
   modelId: string;
   size?: 'small' | 'default';
 }
 
-const ModelTierBadge = memo<ModelTierBadgeProps>(({ modelId, size = 'small' }) => {
+export const ModelTierBadge = memo<ModelTierBadgeProps>(({ modelId, size = 'small' }) => {
   const tier = getModelTier(modelId);
-  const { icon: TierIcon, color, label } = getTierInfo(tier);
+  const { icon: TierIcon, label, bgColor, borderColor, textColor } = getTierInfo(tier);
+
+  // Don't show badge for Tier 1 (free) models to reduce visual clutter
+  if (tier === 1) {
+    return null;
+  }
+
+  const tierDescriptions: Record<number, string> = {
+    1: 'Miễn phí - Có sẵn cho tất cả',
+    2: 'PRO - Yêu cầu gói Phở Tái',
+    3: 'MAX - Yêu cầu gói Phở Đặc Biệt',
+  };
 
   return (
-    <Tooltip title={`${label} - ${tier === 1 ? 'Budget' : tier === 2 ? 'Standard' : 'Premium'} model`}>
-      <Tag
-        color={color}
-        icon={<TierIcon size={12} />}
+    <Tooltip title={tierDescriptions[tier] || ''}>
+      <div
         style={{
           alignItems: 'center',
+          background: bgColor,
+          border: `1px solid ${borderColor}`,
+          borderRadius: '4px',
+          color: textColor,
           display: 'inline-flex',
-          fontSize: size === 'small' ? '10px' : '12px',
-          gap: '2px',
-          height: size === 'small' ? '18px' : '22px',
-          lineHeight: size === 'small' ? '16px' : '20px',
-          padding: size === 'small' ? '0 4px' : '2px 6px',
+          fontSize: size === 'small' ? '10px' : '11px',
+          fontWeight: 600,
+          gap: '3px',
+          height: size === 'small' ? '18px' : '20px',
+          padding: size === 'small' ? '0 5px' : '0 6px',
         }}
       >
-        T{tier}
-      </Tag>
+        <TierIcon size={size === 'small' ? 10 : 12} />
+        {label}
+      </div>
     </Tooltip>
   );
 });
 
+/**
+ * Locked Badge for disabled models
+ */
 const useStyles = createStyles(({ css, token }) => ({
   tag: css`
     cursor: default;
@@ -105,23 +154,52 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 }));
 
+export const LockedBadge = memo(() => {
+  const { theme } = useStyles();
+
+  return (
+    <div
+      style={{
+        alignItems: 'center',
+        background: theme.colorFillTertiary,
+        border: `1px solid ${theme.colorBorderSecondary}`,
+        borderRadius: '4px',
+        color: theme.colorTextQuaternary,
+        display: 'inline-flex',
+        fontSize: '10px',
+        fontWeight: 500,
+        gap: '2px',
+        height: '18px',
+        padding: '0 5px',
+      }}
+    >
+      <Lock size={10} />
+    </div>
+  );
+});
+
 interface ModelInfoTagsProps extends ModelAbilities {
   contextWindowTokens?: number | null;
   directionReverse?: boolean;
   isCustom?: boolean;
+  isLocked?: boolean;
   placement?: 'top' | 'right';
 }
 
 export const ModelInfoTags = memo<ModelInfoTagsProps>(
-  ({ directionReverse, placement = 'right', ...model }) => {
+  ({ directionReverse, placement = 'right', isLocked = false, ...model }) => {
     const { t } = useTranslation('components');
     const { styles } = useStyles();
+
+    // Reduce opacity for locked models
+    const style = isLocked ? { opacity: 0.4 } : {};
 
     return (
       <Flexbox
         className={TAG_CLASSNAME}
         direction={directionReverse ? 'horizontal-reverse' : 'horizontal'}
         gap={4}
+        style={style}
         width={'fit-content'}
       >
         {model.files && (
@@ -231,45 +309,62 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
 );
 
 interface ModelItemRenderProps extends ChatModelCard {
+  isLocked?: boolean;
   showInfoTag?: boolean;
   showTierBadge?: boolean;
 }
 
-export const ModelItemRender = memo<ModelItemRenderProps>(({
-  showInfoTag = true,
-  showTierBadge = true,
-  ...model
-}) => {
-  const { mobile } = useResponsive();
-  return (
-    <Flexbox
-      align={'center'}
-      gap={32}
-      horizontal
-      justify={'space-between'}
-      style={{
-        minWidth: mobile ? '100%' : undefined,
-        overflow: 'hidden',
-        position: 'relative',
-        width: mobile ? '80vw' : 'auto',
-      }}
-    >
+export const ModelItemRender = memo<ModelItemRenderProps>(
+  ({ showInfoTag = true, showTierBadge = true, isLocked = false, ...model }) => {
+    const { mobile } = useResponsive();
+    const { theme } = useStyles();
+
+    return (
       <Flexbox
         align={'center'}
-        gap={8}
+        gap={32}
         horizontal
-        style={{ flexShrink: 1, minWidth: 0, overflow: 'hidden' }}
+        justify={'space-between'}
+        style={{
+          cursor: isLocked ? 'not-allowed' : 'pointer',
+          minWidth: mobile ? '100%' : undefined,
+          // Parent controls opacity for disabled items to avoid double dimming
+          opacity: 1,
+          overflow: 'hidden',
+          position: 'relative',
+          width: mobile ? '80vw' : 'auto',
+        }}
       >
-        <ModelIcon model={model.id} size={20} />
-        <Text style={mobile ? { maxWidth: '60vw', overflowX: 'auto', whiteSpace: 'nowrap' } : {}}>
-          {model.displayName || model.id}
-        </Text>
-        {showTierBadge && <ModelTierBadge modelId={model.id} />}
+        <Flexbox
+          align={'center'}
+          gap={8}
+          horizontal
+          style={{
+            // Parent controls filter for disabled items
+            filter: 'none',
+            flexShrink: 1,
+            minWidth: 0,
+            overflow: 'hidden',
+          }}
+        >
+          <ModelIcon model={model.id} size={20} />
+          <Text
+            style={{
+              color: isLocked ? theme.colorTextDisabled : 'inherit',
+              fontWeight: isLocked ? 400 : 500,
+              ...(mobile ? { maxWidth: '60vw', overflowX: 'auto', whiteSpace: 'nowrap' } : {}),
+            }}
+          >
+            {model.displayName || model.id}
+          </Text>
+          {showTierBadge && <ModelTierBadge modelId={model.id} />}
+          {isLocked && <LockedBadge />}
+        </Flexbox>
+        {showInfoTag && <ModelInfoTags {...model} isLocked={isLocked} />}
       </Flexbox>
-      {showInfoTag && <ModelInfoTags {...model} />}
-    </Flexbox>
-  );
-});
+    );
+  },
+);
 
 interface ProviderItemRenderProps {
   logo?: string;

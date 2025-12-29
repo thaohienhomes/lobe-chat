@@ -15,7 +15,7 @@ import AddButton from './AddButton';
 import AgentsSuggest from './AgentsSuggest';
 import QuestionSuggest from './QuestionSuggest';
 
-const useStyles = createStyles(({ css, responsive }) => ({
+const useStyles = createStyles(({ css, responsive, token }) => ({
   container: css`
     align-items: center;
     ${responsive.mobile} {
@@ -24,6 +24,7 @@ const useStyles = createStyles(({ css, responsive }) => ({
   `,
   desc: css`
     font-size: 14px;
+    color: ${token.colorTextSecondary};
     text-align: center;
     ${responsive.mobile} {
       text-align: start;
@@ -31,9 +32,11 @@ const useStyles = createStyles(({ css, responsive }) => ({
   `,
   title: css`
     margin-block: 0.2em 0;
+
     font-size: 32px;
     font-weight: bolder;
     line-height: 1;
+    color: ${token.colorText};
     ${responsive.mobile} {
       font-size: 24px;
     }

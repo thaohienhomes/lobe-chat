@@ -10,11 +10,17 @@ import PanelContent from './PanelContent';
 import UpgradeBadge from './UpgradeBadge';
 import { useNewVersion } from './useNewVersion';
 
-const useStyles = createStyles(({ css }) => {
+const useStyles = createStyles(({ css, token }) => {
   return {
     popover: css`
       inset-block-start: ${isDesktop ? 32 : 8}px !important;
       inset-inline-start: 8px !important;
+
+      .ant-popover-inner {
+        border: 1px solid ${token.colorBorderSecondary};
+        background: ${token.colorBgElevated};
+        box-shadow: ${token.boxShadowSecondary};
+      }
     `,
   };
 });

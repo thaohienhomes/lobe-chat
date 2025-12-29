@@ -255,7 +255,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     ],
   },
 
-
   // Global Starter Plan: Tier 1 ONLY per SPECS_BUSINESS.md
   // "BASIC TIER: Models: Tier 1 ONLY (Unlimited*). Strictly NO access to Tier 2 Models."
   gl_starter: {
@@ -272,22 +271,29 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     ],
   },
 
-
-
-  // Vietnam Basic Plan: Tier 1 ONLY per SPECS_BUSINESS.md
-  // "BASIC TIER: Models: Tier 1 ONLY (Unlimited*). Strictly NO access to Tier 2 Models (GPT-4o, Sonnet)."
+  // Vietnam Basic Plan (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
+  // Per VN_PLANS config: dailyTier2Limit: 30
   vn_basic: {
-    allowedTiers: [1], // CRITICAL: Tier 1 ONLY - no Tier 2 access
-    defaultModel: 'gpt-4o-mini',
+    allowedTiers: [1, 2], // Phở Tái allows Tier 1 & 2
+    dailyLimits: { tier2: 30 }, // 30 Tier 2 messages/day
+    defaultModel: 'gpt-4o',
     defaultProvider: 'openrouter', // Use OpenRouter as primary provider
     models: [
-      // Tier 1 models ONLY
+      // Tier 1 models
       'gpt-4o-mini',
       'gemini-1.5-flash',
       'gemini-2.0-flash',
       'claude-3-haiku',
       'deepseek-chat',
       'qwen-turbo',
+      // Tier 2 models (30 msg/day limit)
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
     ],
   },
   // ============================================================================
@@ -309,10 +315,11 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     ],
   },
 
-  // VN Pro: Tier 1 & 2 with 2M points cap per SPECS
+  // VN Pro (Phở Đặc Biệt): Tier 1, 2 & 3 with 50 Tier 3 messages/day limit
+  // Per VN_PLANS config: dailyTier2Limit: -1 (unlimited), dailyTier3Limit: 50
   vn_pro: {
-    allowedTiers: [1, 2], // Per SPECS: PRO = Tier 1 & 2 (not Tier 3)
-    dailyLimits: { tier2: -1 }, // Unlimited within monthly cap
+    allowedTiers: [1, 2, 3], // Phở Đặc Biệt allows all tiers
+    dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3 messages/day
     defaultModel: 'claude-3-5-sonnet',
     defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
@@ -323,7 +330,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
       'claude-3-haiku',
       'deepseek-chat',
       'qwen-turbo',
-      // Tier 2 models
+      // Tier 2 models (unlimited)
       'gpt-4o',
       'gpt-4.1',
       'claude-3-5-sonnet',
@@ -331,6 +338,11 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
       'gemini-1.5-pro',
       'gemini-2.5-pro',
       'deepseek-reasoner',
+      // Tier 3 models (50 msg/day limit)
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-preview',
     ],
   },
 
@@ -368,16 +380,46 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
 // MODEL TIERS (Points-based pricing)
 // ============================================================================
 
+/**
+ * Model tier mapping with comprehensive model IDs
+ * Includes both short names and full OpenRouter-style IDs
+ *
+ * Tier 1: Budget models - Available to FREE/BASIC plans
+ * Tier 2: Standard models - Available to PRO plans (Phở Tái, Standard)
+ * Tier 3: Premium models - Available to TEAM/Enterprise plans (Phở Đặc Biệt)
+ */
 export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   1: {
     inputCostPer1M: 5,
     models: [
+      // OpenAI budget models
       'gpt-4o-mini',
+      'openai/gpt-4o-mini',
+      // Google budget models
       'gemini-1.5-flash',
       'gemini-2.0-flash',
+      'gemini-flash-1.5',
+      'gemini-2.0-flash-001',
+      'google/gemini-flash-1.5',
+      'google/gemini-2.0-flash-001',
+      'google/gemma-2-9b-it',
+      'google/gemma-2-9b-it:free',
+      // Anthropic budget models
       'claude-3-haiku',
+      'claude-3.5-haiku',
+      'anthropic/claude-3-haiku',
+      'anthropic/claude-3.5-haiku',
+      // DeepSeek budget models
       'deepseek-chat',
+      'deepseek/deepseek-chat',
+      'deepseek/deepseek-r1:free',
+      // Qwen budget models
       'qwen-turbo',
+      'qwen/qwen-2-7b-instruct:free',
+      // Meta LLaMA models (free tier)
+      'meta-llama/llama-3.1-8b-instruct:free',
+      'meta-llama/llama-3.2-11b-vision-instruct',
+      'meta-llama/llama-3.3-70b-instruct:free',
     ],
     outputCostPer1M: 15,
     pointsPerMessage: 5,
@@ -387,13 +429,30 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   2: {
     inputCostPer1M: 100,
     models: [
+      // OpenAI standard models
       'gpt-4o',
+      'openai/gpt-4o',
       'gpt-4.1',
+      // Anthropic standard models
+      'claude-3.5-sonnet',
       'claude-3-5-sonnet',
       'claude-3-sonnet',
+      'anthropic/claude-3.5-sonnet',
+      // Google standard models
       'gemini-1.5-pro',
       'gemini-2.5-pro',
+      'gemini-pro-1.5',
+      'google/gemini-pro-1.5',
+      'google/gemini-2.0-pro-exp-02-05:free',
+      // DeepSeek premium models
       'deepseek-reasoner',
+      'deepseek-r1',
+      'deepseek/deepseek-r1',
+      // Meta LLaMA premium models
+      'meta-llama/llama-3.2-90b-vision-instruct',
+      'meta-llama/llama-3.3-70b-instruct',
+      // Auto model - maps to Tier 2 by default since it routes to best model
+      'openrouter/auto',
     ],
     outputCostPer1M: 300,
     pointsPerMessage: 150,
@@ -402,7 +461,21 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   },
   3: {
     inputCostPer1M: 500,
-    models: ['gpt-4-turbo', 'claude-3-opus', 'o1', 'o1-pro', 'o3'],
+    models: [
+      // OpenAI premium models (O-series)
+      'gpt-4-turbo',
+      'o1',
+      'o1-mini',
+      'o1-preview',
+      'o1-pro',
+      'o3',
+      'openai/o1',
+      'openai/o1-mini',
+      'openai/o1-preview',
+      // Anthropic premium models
+      'claude-3-opus',
+      'anthropic/claude-3-opus',
+    ],
     outputCostPer1M: 1500,
     pointsPerMessage: 1000,
     tier: 3,
@@ -426,17 +499,43 @@ export const POLAR_PRODUCT_IDS = {
 
 /**
  * Get model tier by model name
+ * Supports both full OpenRouter-style IDs (e.g., 'openai/gpt-4o-mini')
+ * and short model names (e.g., 'gpt-4o-mini')
+ *
+ * Matching priority:
+ * 1. Exact match with the full model ID
+ * 2. Exact match with model ID without :free suffix
+ * 3. Partial match (model name contains the tier model)
  */
 export function getModelTier(modelName: string): number {
   const normalizedName = modelName.toLowerCase();
+  // Remove :free suffix for matching (free variants inherit tier from base model)
+  const nameWithoutFreeSuffix = normalizedName.replace(/:free$/, '');
 
+  // Priority 1: Check for exact match first
   for (const [tier, config] of Object.entries(MODEL_TIERS)) {
-    if (config.models.some((m) => normalizedName.includes(m.toLowerCase()))) {
+    if (
+      config.models.some(
+        (m) => normalizedName === m.toLowerCase() || nameWithoutFreeSuffix === m.toLowerCase(),
+      )
+    ) {
       return Number(tier);
     }
   }
 
-  // Default to Tier 2 for unknown models
+  // Priority 2: Check if model name contains any tier model (partial match)
+  // This handles cases where the model ID might have extra prefixes/suffixes
+  for (const [tier, config] of Object.entries(MODEL_TIERS)) {
+    if (
+      config.models.some(
+        (m) => normalizedName.includes(m.toLowerCase()) || m.toLowerCase().includes(normalizedName),
+      )
+    ) {
+      return Number(tier);
+    }
+  }
+
+  // Default to Tier 2 for unknown models (safer default - requires paid plan)
   return 2;
 }
 
@@ -580,68 +679,39 @@ export function getRequiredProvidersForPlan(planCode: string): string[] {
 
   // Model to provider mapping
   const modelProviderMap: Record<string, string> = {
-
-
     'claude-3-5-sonnet': 'anthropic',
-
 
     // Anthropic models
     'claude-3-haiku': 'anthropic',
 
-
     'claude-3-opus': 'anthropic',
 
-
     'claude-3-sonnet': 'anthropic',
-
 
     // Other models
     'deepseek-chat': 'deepseek',
 
-
-
     'deepseek-reasoner': 'deepseek',
-
-
 
     // Google models
     'gemini-1.5-flash': 'google',
 
-
-
-
-
     'gemini-1.5-pro': 'google',
-
-
 
     'gemini-2.0-flash': 'google',
 
-
-
     'gemini-2.5-pro': 'google',
-
-
 
     'gpt-4-turbo': 'openai',
 
-
-
-
-
     'gpt-4.1': 'openai',
 
-
-
-
     'gpt-4o': 'openai',
-
 
     // OpenAI models
     'gpt-4o-mini': 'openai',
 
     'o1': 'openai',
-
 
     'o1-pro': 'openai',
     'o3': 'openai',
@@ -649,7 +719,7 @@ export function getRequiredProvidersForPlan(planCode: string): string[] {
   };
 
   const providers = new Set<string>();
-  allowedModels.forEach(model => {
+  allowedModels.forEach((model) => {
     const provider = modelProviderMap[model];
     if (provider) {
       providers.add(provider);

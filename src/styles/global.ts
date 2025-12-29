@@ -52,4 +52,53 @@ export default ({ token }: { prefixCls: string; token: Theme }) => css`
       background-color: transparent;
     }
   }
+
+  /* ============================================
+   * Dark Mode Text Visibility Improvements
+   * ============================================ */
+
+  /* Improve placeholder visibility in dark mode */
+  ::placeholder {
+    color: ${token.colorTextQuaternary} !important;
+    opacity: 0.8 !important;
+  }
+
+  /* Guide card descriptions - make more visible */
+  [class*='GuideCard'] [class*='desc'],
+  [class*='guide'] [class*='desc'] {
+    color: ${token.colorTextSecondary} !important;
+  }
+
+  /* Assistant card descriptions in welcome screen */
+  [class*='AssistantCard'] p,
+  [class*='assistant'] [class*='description'],
+  [class*='WelcomeCard'] [class*='content'] {
+    color: ${token.colorTextSecondary} !important;
+  }
+
+  /* Topic sidebar guide text */
+  [class*='topic'] [class*='guide'],
+  [class*='TopicList'] [class*='desc'] {
+    color: ${token.colorTextSecondary} !important;
+  }
+
+  /* Improve disabled/muted text visibility */
+  [class*='disabled'] span,
+  [class*='muted'],
+  [aria-disabled='true'] span {
+    color: ${token.colorTextTertiary} !important;
+  }
+
+  /* Ensure input labels and helpers are visible */
+  label,
+  .ant-form-item-label > label {
+    color: ${token.colorText} !important;
+  }
+
+  /* Secondary text improvements */
+  [class*='secondary'],
+  [class*='tertiary'],
+  [class*='caption'] {
+    color: ${token.colorTextSecondary} !important;
+  }
 `;
