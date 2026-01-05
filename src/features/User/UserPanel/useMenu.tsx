@@ -142,7 +142,7 @@ export const useMenu = () => {
     {
       icon: <Icon icon={FileText} />,
       key: 'legal',
-      label: <Link href={'/legal'}>{t('userPanel.legal')}</Link>,
+      label: <Link href={'/index/legal'}>{t('userPanel.legal')}</Link>,
     },
     {
       children: [
