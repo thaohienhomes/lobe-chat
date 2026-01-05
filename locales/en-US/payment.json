@@ -1,18 +1,4 @@
 {
-  "trialBanner": {
-    "accessPremium": "Access to premium AI models",
-    "blackFriday": "BLACK FRIDAY SALE",
-    "days": "DAYS",
-    "hours": "HRS",
-    "messagesRemaining": "{{remaining}}/{{max}} messages remaining",
-    "minutes": "MIN",
-    "pricingFrom": "From {{price}}/month",
-    "seconds": "SEC",
-    "title": "Free Trial",
-    "titleExpired": "Trial Expired",
-    "trialExpiredMessage": "You have used all your free messages",
-    "upgradeNow": "Upgrade Now"
-  },
   "waiting": {
     "actions": {
       "alreadyPaid": "Already paid?",

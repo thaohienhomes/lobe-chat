@@ -460,8 +460,7 @@
     "releasedAt": "{{createdAt}}에 출시됨",
     "tabs": {
       "installed": "설치됨",
-      "mcp": "MCP 플러그인",
-      "old": "LobeChat 플러그인"
+      "mcp": "MCP 플러그인"
     },
     "title": "플러그인 스토어"
   },

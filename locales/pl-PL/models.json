@@ -1688,9 +1688,6 @@
   "gpt-oss:120b": {
     "description": "GPT-OSS 120B to duży otwarty model językowy wydany przez OpenAI, wykorzystujący technologię kwantyzacji MXFP4, przeznaczony jako model flagowy. Wymaga środowiska wielo-GPU lub wysokowydajnej stacji roboczej, oferując znakomitą wydajność w złożonym wnioskowaniu, generowaniu kodu oraz przetwarzaniu wielojęzycznym, wspierając zaawansowane wywołania funkcji i integrację narzędzi."
   },
-  "grok-2-1212": {
-    "description": "Model ten poprawił dokładność, przestrzeganie instrukcji oraz zdolności wielojęzyczne."
-  },
   "grok-2-image-1212": {
     "description": "Nasz najnowszy model generowania obrazów potrafi tworzyć żywe i realistyczne obrazy na podstawie tekstowych wskazówek. Sprawdza się doskonale w marketingu, mediach społecznościowych i rozrywce."
   },
@@ -1700,13 +1697,7 @@
   "grok-3": {
     "description": "Flagowy model, specjalizujący się w ekstrakcji danych, programowaniu i streszczaniu tekstów na poziomie korporacyjnym, z głęboką wiedzą w dziedzinach finansów, medycyny, prawa i nauki."
   },
-  "grok-3-fast": {
-    "description": "Flagowy model, specjalizujący się w ekstrakcji danych, programowaniu i streszczaniu tekstów na poziomie korporacyjnym, z głęboką wiedzą w dziedzinach finansów, medycyny, prawa i nauki."
-  },
   "grok-3-mini": {
-    "description": "Lekki model, który najpierw analizuje przed rozmową. Działa szybko i inteligentnie, odpowiedni do zadań logicznych nie wymagających głębokiej wiedzy dziedzinowej, z możliwością śledzenia pierwotnego toku myślenia."
-  },
-  "grok-3-mini-fast": {
     "description": "Lekki model, który najpierw analizuje przed rozmową. Działa szybko i inteligentnie, odpowiedni do zadań logicznych nie wymagających głębokiej wiedzy dziedzinowej, z możliwością śledzenia pierwotnego toku myślenia."
   },
   "grok-4": {
@@ -1783,9 +1774,6 @@
   },
   "hunyuan-t1-vision": {
     "description": "Model głębokiego myślenia multimodalnego Hunyuan, obsługujący natywne łańcuchy myślowe multimodalne, doskonały w różnych scenariuszach wnioskowania obrazowego, z wyraźną przewagą nad modelami szybkiego myślenia w rozwiązywaniu problemów ścisłych."
-  },
-  "hunyuan-t1-vision-20250619": {
-    "description": "Najnowszy model wielomodalny t1-vision Hunyuan z głębokim rozumowaniem, obsługujący natywne łańcuchy myślowe wielomodalne, z kompleksową poprawą w stosunku do poprzedniej domyślnej wersji modelu."
   },
   "hunyuan-turbo": {
     "description": "Hunyuan to nowa generacja dużego modelu językowego w wersji próbnej, wykorzystująca nową strukturę modelu mieszanych ekspertów (MoE), która w porównaniu do hunyuan-pro charakteryzuje się szybszą efektywnością wnioskowania i lepszymi wynikami."

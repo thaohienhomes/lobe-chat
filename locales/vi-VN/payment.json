@@ -1,18 +1,4 @@
 {
-  "trialBanner": {
-    "accessPremium": "Quyền truy cập mô hình cao cấp",
-    "blackFriday": "BLACK FRIDAY SALE",
-    "days": "NGÀY",
-    "hours": "GIỜ",
-    "messagesRemaining": "Còn {{remaining}}/{{max}} tin nhắn",
-    "minutes": "PHÚT",
-    "pricingFrom": "Chỉ từ {{price}}/tháng",
-    "seconds": "GIÂY",
-    "title": "Bản dùng thử miễn phí",
-    "titleExpired": "Dùng thử đã hết",
-    "trialExpiredMessage": "Bạn đã sử dụng hết tin nhắn miễn phí",
-    "upgradeNow": "Nâng cấp ngay"
-  },
   "waiting": {
     "actions": {
       "alreadyPaid": "Đã thanh toán?",

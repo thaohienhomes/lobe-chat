@@ -460,8 +460,7 @@
     "releasedAt": "Публикуван на {{createdAt}}",
     "tabs": {
       "installed": "Инсталирани",
-      "mcp": "MCP плъгини",
-      "old": "LobeChat плъгини"
+      "mcp": "MCP плъгини"
     },
     "title": "Магазин за плъгини"
   },

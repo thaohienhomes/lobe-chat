@@ -44,7 +44,6 @@
   "remoteServer": {
     "authError": "Autorisatiefout: {{error}}",
     "authPending": "Voltooi de autorisatie in de browser",
-    "configDesc": "Verbind met de externe LobeChat-server om gegevenssynchronisatie in te schakelen",
     "configError": "Configuratiefout",
     "configTitle": "Cloud-synchronisatie configureren",
     "connect": "Verbinden en autoriseren",

@@ -1688,9 +1688,6 @@
   "gpt-oss:120b": {
     "description": "GPT-OSS 120B là mô hình ngôn ngữ lớn mã nguồn mở do OpenAI phát hành, sử dụng công nghệ lượng tử hóa MXFP4, thuộc dòng mô hình hàng đầu. Cần môi trường đa GPU hoặc máy trạm hiệu năng cao để vận hành, có hiệu suất vượt trội trong suy luận phức tạp, tạo mã và xử lý đa ngôn ngữ, hỗ trợ gọi hàm nâng cao và tích hợp bộ công cụ."
   },
-  "grok-2-1212": {
-    "description": "Mô hình này đã được cải thiện về độ chính xác, khả năng tuân thủ hướng dẫn và khả năng đa ngôn ngữ."
-  },
   "grok-2-image-1212": {
     "description": "Mô hình tạo hình ảnh mới nhất của chúng tôi có thể tạo ra hình ảnh sống động và chân thực dựa trên gợi ý văn bản. Nó thể hiện xuất sắc trong các lĩnh vực marketing, mạng xã hội và giải trí."
   },
@@ -1700,13 +1697,7 @@
   "grok-3": {
     "description": "Mô hình chủ lực, xuất sắc trong trích xuất dữ liệu, lập trình và tóm tắt văn bản cho các ứng dụng doanh nghiệp, sở hữu kiến thức sâu rộng trong các lĩnh vực tài chính, y tế, pháp lý và khoa học."
   },
-  "grok-3-fast": {
-    "description": "Mô hình chủ lực, xuất sắc trong trích xuất dữ liệu, lập trình và tóm tắt văn bản cho các ứng dụng doanh nghiệp, sở hữu kiến thức sâu rộng trong các lĩnh vực tài chính, y tế, pháp lý và khoa học."
-  },
   "grok-3-mini": {
-    "description": "Mô hình nhẹ, suy nghĩ trước khi trả lời. Chạy nhanh, thông minh, phù hợp cho các nhiệm vụ logic không đòi hỏi kiến thức chuyên sâu và có thể truy xuất được chuỗi suy nghĩ gốc."
-  },
-  "grok-3-mini-fast": {
     "description": "Mô hình nhẹ, suy nghĩ trước khi trả lời. Chạy nhanh, thông minh, phù hợp cho các nhiệm vụ logic không đòi hỏi kiến thức chuyên sâu và có thể truy xuất được chuỗi suy nghĩ gốc."
   },
   "grok-4": {
@@ -1783,9 +1774,6 @@
   },
   "hunyuan-t1-vision": {
     "description": "Mô hình suy nghĩ sâu đa phương thức Hunyuan, hỗ trợ chuỗi suy nghĩ dài nguyên bản đa phương thức, xuất sắc trong các tình huống suy luận hình ảnh đa dạng, cải thiện toàn diện so với mô hình suy nghĩ nhanh trong các bài toán khoa học tự nhiên."
-  },
-  "hunyuan-t1-vision-20250619": {
-    "description": "Phiên bản mới nhất của Hunyuan t1-vision là mô hình suy nghĩ sâu đa phương thức, hỗ trợ chuỗi tư duy dài nguyên bản đa phương thức, cải thiện toàn diện so với phiên bản mặc định thế hệ trước."
   },
   "hunyuan-turbo": {
     "description": "Phiên bản xem trước của thế hệ mới mô hình ngôn ngữ lớn Hunyuan, sử dụng cấu trúc mô hình chuyên gia hỗn hợp (MoE) hoàn toàn mới, so với hunyuan-pro, hiệu suất suy diễn nhanh hơn và hiệu quả mạnh mẽ hơn."

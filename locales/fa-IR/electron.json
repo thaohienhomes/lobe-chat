@@ -44,7 +44,6 @@
   "remoteServer": {
     "authError": "خطای مجوز: {{error}}",
     "authPending": "لطفاً مجوز را در مرورگر کامل کنید",
-    "configDesc": "اتصال به سرور LobeChat از راه دور، فعال‌سازی همگام‌سازی داده‌ها",
     "configError": "خطا در پیکربندی",
     "configTitle": "پیکربندی همگام‌سازی ابری",
     "connect": "اتصال و مجوز",

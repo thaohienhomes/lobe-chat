@@ -460,8 +460,7 @@
     "releasedAt": "نُشر في {{createdAt}}",
     "tabs": {
       "installed": "مثبت",
-      "mcp": "إضافات MCP",
-      "old": "إضافات LobeChat"
+      "mcp": "إضافات MCP"
     },
     "title": "متجر الإضافات"
   },

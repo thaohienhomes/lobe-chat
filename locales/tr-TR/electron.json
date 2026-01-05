@@ -44,7 +44,6 @@
   "remoteServer": {
     "authError": "Yetkilendirme hatası: {{error}}",
     "authPending": "Yetkilendirmeyi tarayıcıda tamamlayın",
-    "configDesc": "Uzak LobeChat sunucusuna bağlanın, veri senkronizasyonunu etkinleştirin",
     "configError": "Yapılandırma hatası",
     "configTitle": "Bulut Senkronizasyonunu Yapılandır",
     "connect": "Bağlan ve yetkilendir",

@@ -460,8 +460,7 @@
     "releasedAt": "منتشر شده در {{createdAt}}",
     "tabs": {
       "installed": "نصب شده",
-      "mcp": "افزونه MCP",
-      "old": "افزونه LobeChat"
+      "mcp": "افزونه MCP"
     },
     "title": "فروشگاه افزونه"
   },

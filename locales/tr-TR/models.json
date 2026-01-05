@@ -1688,9 +1688,6 @@
   "gpt-oss:120b": {
     "description": "GPT-OSS 120B, OpenAI tarafından yayımlanan büyük ölçekli açık kaynak dil modelidir ve MXFP4 kuantizasyon teknolojisini kullanır. Amiral gemisi model olarak çoklu GPU veya yüksek performanslı iş istasyonu ortamlarında çalıştırılması gerekmektedir. Karmaşık çıkarım, kod üretimi ve çok dilli işleme konularında üstün performans sunar ve gelişmiş fonksiyon çağrıları ile araç entegrasyonunu destekler."
   },
-  "grok-2-1212": {
-    "description": "Bu model, doğruluk, talimat takibi ve çok dilli yetenekler açısından geliştirilmiştir."
-  },
   "grok-2-image-1212": {
     "description": "En yeni görüntü oluşturma modelimiz, metin istemlerine dayanarak canlı ve gerçekçi görüntüler oluşturabilir. Pazarlama, sosyal medya ve eğlence gibi alanlarda görüntü üretiminde mükemmel performans sergiler."
   },
@@ -1700,13 +1697,7 @@
   "grok-3": {
     "description": "Amiral gemisi model olup, veri çıkarımı, programlama ve metin özetleme gibi kurumsal uygulamalarda uzmandır; finans, sağlık, hukuk ve bilim alanlarında derin bilgiye sahiptir."
   },
-  "grok-3-fast": {
-    "description": "Amiral gemisi model olup, veri çıkarımı, programlama ve metin özetleme gibi kurumsal uygulamalarda uzmandır; finans, sağlık, hukuk ve bilim alanlarında derin bilgiye sahiptir."
-  },
   "grok-3-mini": {
-    "description": "Hafif model olup, konuşma öncesi düşünür. Hızlı ve akıllı çalışır, derin alan bilgisi gerektirmeyen mantıksal görevler için uygundur ve orijinal düşünce izlerini elde edebilir."
-  },
-  "grok-3-mini-fast": {
     "description": "Hafif model olup, konuşma öncesi düşünür. Hızlı ve akıllı çalışır, derin alan bilgisi gerektirmeyen mantıksal görevler için uygundur ve orijinal düşünce izlerini elde edebilir."
   },
   "grok-4": {
@@ -1783,9 +1774,6 @@
   },
   "hunyuan-t1-vision": {
     "description": "Hunyuan çok modlu anlayış derin düşünme modeli, çok modlu doğal uzun düşünce zincirini destekler, çeşitli görsel çıkarım senaryolarında uzmandır ve fen bilimleri problemlerinde hızlı düşünme modellerine kıyasla kapsamlı iyileşme sağlar."
-  },
-  "hunyuan-t1-vision-20250619": {
-    "description": "Hunyuan'ın en yeni t1-vision çok modlu anlama derin düşünme modeli, çok modlu doğal düşünce zincirini destekler ve önceki nesil varsayılan modele kıyasla kapsamlı iyileştirmeler sunar."
   },
   "hunyuan-turbo": {
     "description": "Hunyuan'ın yeni nesil büyük dil modelinin önizleme sürümü, tamamen yeni bir karma uzman modeli (MoE) yapısı kullanır ve hunyuan-pro'ya kıyasla daha hızlı çıkarım verimliliği ve daha güçlü performans sunar."

@@ -460,8 +460,7 @@
     "releasedAt": "Uitgebracht op {{createdAt}}",
     "tabs": {
       "installed": "Geïnstalleerd",
-      "mcp": "MCP-plugins",
-      "old": "LobeChat-plugins"
+      "mcp": "MCP-plugins"
     },
     "title": "Pluginwinkel"
   },

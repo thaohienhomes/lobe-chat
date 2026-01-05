@@ -460,8 +460,7 @@
     "releasedAt": "Pubblicato il {{createdAt}}",
     "tabs": {
       "installed": "Installati",
-      "mcp": "Plugin MCP",
-      "old": "Plugin LobeChat"
+      "mcp": "Plugin MCP"
     },
     "title": "Marketplace plugin"
   },

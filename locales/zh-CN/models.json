@@ -677,6 +677,9 @@
   "anthropic/claude-sonnet-4": {
     "description": "Claude Sonnet 4 在 Sonnet 3.7 的行业领先能力基础上进行了显著改进，在编码方面表现出色，在 SWE-bench 上达到了最先进的 72.7%。该模型在性能和效率之间取得了平衡，适用于内部和外部用例，并通过增强的可控性实现对实现的更大控制。"
   },
+  "anthropic/claude-sonnet-4.5": {
+    "description": "Claude Sonnet 4.5 是 Anthropic 迄今为止最智能的模型。"
+  },
   "ascend-tribe/pangu-pro-moe": {
     "description": "Pangu-Pro-MoE 72B-A16B 是一款 720 亿参数、激活 160 亿参的稀疏大语言模型，它基于分组混合专家（MoGE）架构，它在专家选择阶段对专家进行分组，并约束 token 在每个组内激活等量专家，从而实现专家负载均衡，显著提升模型在昇腾平台的部署效率。"
   },
@@ -769,6 +772,9 @@
   },
   "claude-sonnet-4-20250514-thinking": {
     "description": "Claude Sonnet 4 思考模型可以产生近乎即时的响应或延长的逐步思考，用户可以清晰地看到这些过程。"
+  },
+  "claude-sonnet-4-5-20250929": {
+    "description": "Claude Sonnet 4.5 是 Anthropic 迄今为止最智能的模型。"
   },
   "codegeex-4": {
     "description": "CodeGeeX-4 是强大的AI编程助手，支持多种编程语言的智能问答与代码补全，提升开发效率。"
@@ -1006,6 +1012,9 @@
   },
   "deepseek-v3.1": {
     "description": "DeepSeek-V3.1 是深度求索全新推出的混合推理模型，支持思考与非思考2种推理模式，较 DeepSeek-R1-0528 思考效率更高。经 Post-Training 优化，Agent 工具使用与智能体任务表现大幅提升。支持 128k 上下文窗口，输出长度支持最大 64k tokens。"
+  },
+  "deepseek-v3.1:671b": {
+    "description": "DeepSeek V3.1：下一代推理模型，提升了复杂推理与链路思考能力，适合需要深入分析的任务。"
   },
   "deepseek/deepseek-chat-v3-0324": {
     "description": "DeepSeek V3 是一个 685B 参数的专家混合模型，是 DeepSeek 团队旗舰聊天模型系列的最新迭代。\n\n它继承了 [DeepSeek V3](/deepseek/deepseek-chat-v3) 模型，并在各种任务上表现出色。"
@@ -1478,6 +1487,9 @@
   "glm-zero-preview": {
     "description": "GLM-Zero-Preview具备强大的复杂推理能力，在逻辑推理、数学、编程等领域表现优异。"
   },
+  "glm4.6:355b": {
+    "description": "智谱最新旗舰模型 GLM-4.6 (355B) 在高级编码、长文本处理、推理与智能体能力上全面超越前代，尤其在编程能力上对齐 Claude Sonnet 4，成为国内顶尖的 Coding 模型。"
+  },
   "google/gemini-2.0-flash": {
     "description": "Gemini 2.0 Flash 提供下一代功能和改进的功能，包括卓越的速度、内置工具使用、多模态生成和 100 万 token 的上下文窗口。"
   },
@@ -1688,8 +1700,8 @@
   "gpt-oss:120b": {
     "description": "GPT-OSS 120B 是 OpenAI 发布的大型开源语言模型，采用 MXFP4 量化技术，为旗舰级模型。需要多GPU或高性能工作站环境运行，在复杂推理、代码生成和多语言处理方面具备卓越性能，支持高级函数调用和工具集成。"
   },
-  "grok-2-1212": {
-    "description": "该模型在准确性、指令遵循和多语言能力方面有所改进。"
+  "gpt-oss:20b": {
+    "description": "GPT-OSS 20B 是 OpenAI 发布的开源大语言模型，采用 MXFP4 量化技术，适合在高端消费级GPU或Apple Silicon Mac上运行。该模型在对话生成、代码编写和推理任务方面表现出色，支持函数调用和工具使用。"
   },
   "grok-2-image-1212": {
     "description": "我们最新的图像生成模型可以根据文本提示生成生动逼真的图像。它在营销、社交媒体和娱乐等领域的图像生成方面表现出色。"
@@ -1700,13 +1712,7 @@
   "grok-3": {
     "description": "旗舰级模型，擅长数据提取、编程和文本摘要等企业级应用，拥有金融、医疗、法律和科学等领域的深厚知识。"
   },
-  "grok-3-fast": {
-    "description": "旗舰级模型，擅长数据提取、编程和文本摘要等企业级应用，拥有金融、医疗、法律和科学等领域的深厚知识。"
-  },
   "grok-3-mini": {
-    "description": "轻量级模型，回话前会先思考。运行快速、智能，适用于不需要深层领域知识的逻辑任务，并能获取原始的思维轨迹。"
-  },
-  "grok-3-mini-fast": {
     "description": "轻量级模型，回话前会先思考。运行快速、智能，适用于不需要深层领域知识的逻辑任务，并能获取原始的思维轨迹。"
   },
   "grok-4": {
@@ -1784,8 +1790,8 @@
   "hunyuan-t1-vision": {
     "description": "混元多模态理解深度思考模型，支持多模态原生长思维链，擅长处理各种图片推理场景，在理科难题上相比快思考模型全面提升。"
   },
-  "hunyuan-t1-vision-20250619": {
-    "description": "混元最新版t1-vision多模态理解深度思考模型，支持多模态原生长思维链，相比上一代默认版本模型全面提升。"
+  "hunyuan-t1-vision-20250916": {
+    "description": "混元最新版 t1-vision 视觉深度思考模型，相比上一版模型在通用图文问答、视觉定位、OCR、图表、拍题解题、看图创作等任务上全面提升，显著优化了英文和小语种能力。"
   },
   "hunyuan-turbo": {
     "description": "混元全新一代大语言模型的预览版，采用全新的混合专家模型（MoE）结构，相比hunyuan-pro推理效率更快，效果表现更强。"
@@ -1892,6 +1898,9 @@
   "kimi-k2-turbo-preview": {
     "description": "kimi-k2 是一款具备超强代码和 Agent 能力的 MoE 架构基础模型，总参数 1T，激活参数 32B。在通用知识推理、编程、数学、Agent 等主要类别的基准性能测试中，K2 模型的性能超过其他主流开源模型。"
   },
+  "kimi-k2:1t": {
+    "description": "Kimi K2 是由月之暗面 AI 开发的大规模混合专家 (MoE) 语言模型，具有 1 万亿总参数和每次前向传递 320 亿激活参数。它针对代理能力进行了优化，包括高级工具使用、推理和代码合成。"
+  },
   "kimi-latest": {
     "description": "Kimi 智能助手产品使用最新的 Kimi 大模型，可能包含尚未稳定的特性。支持图片理解，同时会自动根据请求的上下文长度选择 8k/32k/128k 模型作为计费模型"
   },
@@ -1934,6 +1943,9 @@
   "llama-3.2-vision-instruct": {
     "description": "Llama 3.2-Vision 指令微调模型针对视觉识别、图像推理、图像描述和回答与图像相关的常规问题进行了优化。"
   },
+  "llama-3.3-70b": {
+    "description": "Llama 3.3 70B：中大型 Llama 模型，兼顾推理能力与吞吐。"
+  },
   "llama-3.3-70b-instruct": {
     "description": "Meta 发布的 LLaMA 3.3 多语言大规模语言模型（LLMs）是一个经过预训练和指令微调的生成模型，提供 70B 规模（文本输入/文本输出）。该模型使用超过 15T 的数据进行训练，支持英语、德语、法语、意大利语、葡萄牙语、印地语、西班牙语和泰语，知识更新截止于 2023 年 12 月。"
   },
@@ -1942,6 +1954,12 @@
   },
   "llama-3.3-instruct": {
     "description": "Llama 3.3 指令微调模型针对对话场景进行了优化，在常见的行业基准测试中，超越了许多现有的开源聊天模型。"
+  },
+  "llama-4-maverick-17b-128e-instruct": {
+    "description": "Llama 4 Maverick：高性能的 Llama 系列模型，适合高级推理、复杂问题解决和指令跟随任务。"
+  },
+  "llama-4-scout-17b-16e-instruct": {
+    "description": "Llama 4 Scout：高性能的 Llama 系列模型，适合需高吞吐与低延迟的场景。"
   },
   "llama3-70b-8192": {
     "description": "Meta Llama 3 70B 提供无与伦比的复杂性处理能力，为高要求项目量身定制。"
@@ -1957,6 +1975,9 @@
   },
   "llama3.1": {
     "description": "Llama 3.1 是 Meta 推出的领先模型，支持高达 405B 参数，可应用于复杂对话、多语言翻译和数据分析领域。"
+  },
+  "llama3.1-8b": {
+    "description": "Llama 3.1 8B：小体量、低延迟的 Llama 变体，适合轻量在线推理与交互场景。"
   },
   "llama3.1:405b": {
     "description": "Llama 3.1 是 Meta 推出的领先模型，支持高达 405B 参数，可应用于复杂对话、多语言翻译和数据分析领域。"
@@ -2558,6 +2579,12 @@
   "qvq-plus": {
     "description": "视觉推理模型。支持视觉输入及思维链输出，继qvq-max模型后推出的plus版本，相较于qvq-max模型，qvq-plus系列模型推理速度更快，效果和成本更均衡。"
   },
+  "qwen-3-32b": {
+    "description": "Qwen 3 32B：Qwen 系列在多语言与编码任务上表现优良，适合中等规模生产化使用。"
+  },
+  "qwen-3-coder-480b": {
+    "description": "Qwen 3 Coder 480B：面向代码生成与复杂编程任务的长上下文模型。"
+  },
   "qwen-coder-plus": {
     "description": "通义千问代码模型。"
   },
@@ -2809,6 +2836,9 @@
   },
   "qwen3-coder-plus": {
     "description": "通义千问代码模型。最新的 Qwen3-Coder 系列模型是基于 Qwen3 的代码生成模型，具有强大的Coding Agent能力，擅长工具调用和环境交互，能够实现自主编程，代码能力卓越的同时兼具通用能力。"
+  },
+  "qwen3-coder:480b": {
+    "description": "阿里巴巴针对代理和编码任务的高性能长上下文模型。"
   },
   "qwen3-max-preview": {
     "description": "通义千问3系列Max模型Preview版本，相较2.5系列整体通用能力有大幅度提升，中英文通用文本理解能力、复杂指令遵循能力、主观开放任务能力、多语言能力、工具调用能力均显著增强；模型知识幻觉更少。"

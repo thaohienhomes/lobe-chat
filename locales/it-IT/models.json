@@ -1688,9 +1688,6 @@
   "gpt-oss:120b": {
     "description": "GPT-OSS 120B è un modello linguistico open source di grandi dimensioni rilasciato da OpenAI, che utilizza la tecnologia di quantizzazione MXFP4, rappresentando un modello di punta. Richiede un ambiente con più GPU o una workstation ad alte prestazioni per l'esecuzione, offrendo prestazioni eccellenti in ragionamenti complessi, generazione di codice e gestione multilingue, supportando chiamate di funzione avanzate e integrazione di strumenti."
   },
-  "grok-2-1212": {
-    "description": "Questo modello ha migliorato l'accuratezza, il rispetto delle istruzioni e le capacità multilingue."
-  },
   "grok-2-image-1212": {
     "description": "Il nostro ultimo modello di generazione immagini può creare immagini vivide e realistiche basate su prompt testuali. Eccelle nella generazione di immagini per marketing, social media e intrattenimento."
   },
@@ -1700,13 +1697,7 @@
   "grok-3": {
     "description": "Modello di punta, eccelle in estrazione dati, programmazione e sintesi testuale per applicazioni aziendali, con profonda conoscenza nei settori finanziario, medico, legale e scientifico."
   },
-  "grok-3-fast": {
-    "description": "Modello di punta, eccelle in estrazione dati, programmazione e sintesi testuale per applicazioni aziendali, con profonda conoscenza nei settori finanziario, medico, legale e scientifico."
-  },
   "grok-3-mini": {
-    "description": "Modello leggero che riflette prima di rispondere. Veloce e intelligente, adatto a compiti logici che non richiedono conoscenze di dominio profonde, con tracciamento del processo di pensiero originale."
-  },
-  "grok-3-mini-fast": {
     "description": "Modello leggero che riflette prima di rispondere. Veloce e intelligente, adatto a compiti logici che non richiedono conoscenze di dominio profonde, con tracciamento del processo di pensiero originale."
   },
   "grok-4": {
@@ -1783,9 +1774,6 @@
   },
   "hunyuan-t1-vision": {
     "description": "Modello di comprensione multimodale profonda Hunyuan, supporta catene di pensiero native multimodali, eccelle in vari scenari di ragionamento visivo e migliora significativamente rispetto ai modelli di pensiero rapido nei problemi scientifici."
-  },
-  "hunyuan-t1-vision-20250619": {
-    "description": "L'ultima versione del modello di pensiero profondo multimodale t1-vision di Hunyuan, supporta catene di pensiero native multimodali e presenta miglioramenti completi rispetto alla versione predefinita della generazione precedente."
   },
   "hunyuan-turbo": {
     "description": "Anteprima della nuova generazione di modelli di linguaggio di Hunyuan, utilizza una nuova struttura di modello ibrido di esperti (MoE), con una maggiore efficienza di inferenza e prestazioni superiori rispetto a hunyuan-pro."

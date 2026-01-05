@@ -460,8 +460,7 @@
     "releasedAt": "Phát hành vào {{createdAt}}",
     "tabs": {
       "installed": "Đã cài đặt",
-      "mcp": "Plugin MCP",
-      "old": "Plugin LobeChat"
+      "mcp": "Plugin MCP"
     },
     "title": "Cửa hàng plugin"
   },

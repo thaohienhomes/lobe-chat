@@ -460,8 +460,7 @@
     "releasedAt": "Opublikowano {{createdAt}}",
     "tabs": {
       "installed": "Zainstalowane",
-      "mcp": "Wtyczki MCP",
-      "old": "Wtyczki LobeChat"
+      "mcp": "Wtyczki MCP"
     },
     "title": "Sklep z wtyczkami"
   },

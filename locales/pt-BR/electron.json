@@ -44,7 +44,6 @@
   "remoteServer": {
     "authError": "Erro de autorização: {{error}}",
     "authPending": "Por favor, complete a autorização no navegador",
-    "configDesc": "Conecte-se ao servidor LobeChat remoto para habilitar a sincronização de dados",
     "configError": "Erro na configuração",
     "configTitle": "Configurar sincronização na nuvem",
     "connect": "Conectar e autorizar",

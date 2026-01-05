@@ -1688,9 +1688,6 @@
   "gpt-oss:120b": {
     "description": "GPT-OSS 120B is a large open-source language model released by OpenAI, employing MXFP4 quantization technology as a flagship model. It requires multi-GPU or high-performance workstation environments to operate and delivers outstanding performance in complex reasoning, code generation, and multilingual processing, supporting advanced function calls and tool integration."
   },
-  "grok-2-1212": {
-    "description": "This model has improved in accuracy, instruction adherence, and multilingual capabilities."
-  },
   "grok-2-image-1212": {
     "description": "Our latest image generation model can create vivid and realistic images based on text prompts. It performs excellently in image generation for marketing, social media, and entertainment."
   },
@@ -1700,13 +1697,7 @@
   "grok-3": {
     "description": "A flagship model skilled in data extraction, programming, and text summarization for enterprise applications, with deep knowledge in finance, healthcare, law, and science."
   },
-  "grok-3-fast": {
-    "description": "A flagship model skilled in data extraction, programming, and text summarization for enterprise applications, with deep knowledge in finance, healthcare, law, and science."
-  },
   "grok-3-mini": {
-    "description": "A lightweight model that thinks before responding. It runs fast and intelligently, suitable for logical tasks that do not require deep domain knowledge, and can provide raw thought trajectories."
-  },
-  "grok-3-mini-fast": {
     "description": "A lightweight model that thinks before responding. It runs fast and intelligently, suitable for logical tasks that do not require deep domain knowledge, and can provide raw thought trajectories."
   },
   "grok-4": {
@@ -1783,9 +1774,6 @@
   },
   "hunyuan-t1-vision": {
     "description": "Hunyuan is a multimodal deep thinking model supporting native multimodal chain-of-thought reasoning, excelling in various image reasoning scenarios and significantly outperforming fast-thinking models on science problems."
-  },
-  "hunyuan-t1-vision-20250619": {
-    "description": "The latest Hunyuan t1-vision multimodal deep thinking model supports native long Chain-of-Thought reasoning across modalities, comprehensively improving over the previous default version."
   },
   "hunyuan-turbo": {
     "description": "The preview version of the next-generation Hunyuan large language model, featuring a brand-new mixed expert model (MoE) structure, which offers faster inference efficiency and stronger performance compared to Hunyuan Pro."

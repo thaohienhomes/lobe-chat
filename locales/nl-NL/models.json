@@ -1688,9 +1688,6 @@
   "gpt-oss:120b": {
     "description": "GPT-OSS 120B is een groot open-source taalmodel uitgebracht door OpenAI, dat gebruikmaakt van MXFP4-kwantisatietechnologie en als vlaggenschipmodel fungeert. Het vereist een multi-gpu- of high-performance workstation-omgeving en levert uitstekende prestaties bij complexe redenering, codegeneratie en meertalige verwerking, met ondersteuning voor geavanceerde functieverzoeken en toolintegratie."
   },
-  "grok-2-1212": {
-    "description": "Dit model heeft verbeteringen aangebracht in nauwkeurigheid, instructievolging en meertalige capaciteiten."
-  },
   "grok-2-image-1212": {
     "description": "Ons nieuwste beeldgeneratiemodel kan levendige en realistische beelden genereren op basis van tekstprompts. Het presteert uitstekend in beeldgeneratie voor marketing, sociale media en entertainment."
   },
@@ -1700,13 +1697,7 @@
   "grok-3": {
     "description": "Vlaggenschipmodel, gespecialiseerd in data-extractie, programmeren en tekstsamenvatting voor bedrijfsapplicaties, met diepgaande kennis in financiën, gezondheidszorg, recht en wetenschap."
   },
-  "grok-3-fast": {
-    "description": "Vlaggenschipmodel, gespecialiseerd in data-extractie, programmeren en tekstsamenvatting voor bedrijfsapplicaties, met diepgaande kennis in financiën, gezondheidszorg, recht en wetenschap."
-  },
   "grok-3-mini": {
-    "description": "Lichtgewicht model dat eerst nadenkt voor het reageren. Snel en intelligent, geschikt voor logische taken zonder diepgaande domeinkennis en kan de oorspronkelijke denkprocessen vastleggen."
-  },
-  "grok-3-mini-fast": {
     "description": "Lichtgewicht model dat eerst nadenkt voor het reageren. Snel en intelligent, geschikt voor logische taken zonder diepgaande domeinkennis en kan de oorspronkelijke denkprocessen vastleggen."
   },
   "grok-4": {
@@ -1783,9 +1774,6 @@
   },
   "hunyuan-t1-vision": {
     "description": "Hunyuan multimodaal begrip en diepdenkend model, ondersteunt native multimodale lange-denk-ketens, excelleert in diverse beeldredeneerscenario's en verbetert aanzienlijk ten opzichte van snelle denkers bij exacte wetenschappen."
-  },
-  "hunyuan-t1-vision-20250619": {
-    "description": "De nieuwste versie van Hunyuan's t1-vision multimodale diepdenkende model, ondersteunt native lange chain-of-thought in multimodale contexten en biedt een algehele verbetering ten opzichte van de vorige standaardversie."
   },
   "hunyuan-turbo": {
     "description": "Een previewversie van het nieuwe generatie grote taalmodel van Hunyuan, met een nieuwe hybride expertmodel (MoE) structuur, die sneller inferentie-efficiëntie biedt en betere prestaties levert dan hunyan-pro."

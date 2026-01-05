@@ -460,8 +460,7 @@
     "releasedAt": "Опубликовано {{createdAt}}",
     "tabs": {
       "installed": "Установленные",
-      "mcp": "MCP плагины",
-      "old": "LobeChat плагины"
+      "mcp": "MCP плагины"
     },
     "title": "Магазин плагинов"
   },

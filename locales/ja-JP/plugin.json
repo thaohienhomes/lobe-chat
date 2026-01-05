@@ -460,8 +460,7 @@
     "releasedAt": "{{createdAt}} に公開",
     "tabs": {
       "installed": "インストール済み",
-      "mcp": "MCPプラグイン",
-      "old": "LobeChatプラグイン"
+      "mcp": "MCPプラグイン"
     },
     "title": "プラグインストア"
   },

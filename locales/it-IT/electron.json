@@ -44,7 +44,6 @@
   "remoteServer": {
     "authError": "Autenticazione fallita: {{error}}",
     "authPending": "Completa l'autenticazione nel browser",
-    "configDesc": "Collegati al server LobeChat remoto per abilitare la sincronizzazione dei dati",
     "configError": "Errore di configurazione",
     "configTitle": "Configura la sincronizzazione cloud",
     "connect": "Collegati e autorizza",

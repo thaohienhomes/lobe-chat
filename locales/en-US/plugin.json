@@ -460,8 +460,7 @@
     "releasedAt": "Released on {{createdAt}}",
     "tabs": {
       "installed": "Installed",
-      "mcp": "MCP Plugins",
-      "old": "pho.chat Plugins"
+      "mcp": "MCP Plugins"
     },
     "title": "Plugin Store"
   },

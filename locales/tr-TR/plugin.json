@@ -460,8 +460,7 @@
     "releasedAt": "{{createdAt}} tarihinde yayınlandı",
     "tabs": {
       "installed": "Yüklü",
-      "mcp": "MCP Eklentileri",
-      "old": "LobeChat Eklentileri"
+      "mcp": "MCP Eklentileri"
     },
     "title": "Eklenti Mağazası"
   },
