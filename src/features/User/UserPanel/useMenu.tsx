@@ -7,8 +7,7 @@ import {
   CircleUserRound,
   Cloudy,
   Download,
-  Feather,
-  FileClockIcon,
+  FileText,
   HardDriveDownload,
   LifeBuoy,
   LogOut,
@@ -120,15 +119,15 @@ export const useMenu = () => {
   const data = !isLogin
     ? []
     : ([
-        {
-          icon: <Icon icon={HardDriveDownload} />,
-          key: 'import',
-          label: <DataImporter>{t('importData')}</DataImporter>,
-        },
-        {
-          type: 'divider',
-        },
-      ].filter(Boolean) as ItemType[]);
+      {
+        icon: <Icon icon={HardDriveDownload} />,
+        key: 'import',
+        label: <DataImporter>{t('importData')}</DataImporter>,
+      },
+      {
+        type: 'divider',
+      },
+    ].filter(Boolean) as ItemType[]);
 
   const helps: MenuProps['items'] = [
     showCloudPromotion && {
@@ -141,9 +140,9 @@ export const useMenu = () => {
       ),
     },
     {
-      icon: <Icon icon={FileClockIcon} />,
-      key: 'changelog',
-      label: <Link href={isDesktop ? CHANGELOG : '/changelog/modal'}>{t('changelog')}</Link>,
+      icon: <Icon icon={FileText} />,
+      key: 'legal',
+      label: <Link href={'/legal'}>{t('userPanel.legal')}</Link>,
     },
     {
       children: [
@@ -153,15 +152,6 @@ export const useMenu = () => {
           label: (
             <Link href={DOCUMENTS_REFER_URL} target={'_blank'}>
               {t('userPanel.docs')}
-            </Link>
-          ),
-        },
-        {
-          icon: <Icon icon={Feather} />,
-          key: 'feedback',
-          label: (
-            <Link href={GITHUB_ISSUES} target={'_blank'}>
-              {t('userPanel.feedback')}
             </Link>
           ),
         },
@@ -209,12 +199,12 @@ export const useMenu = () => {
 
   const logoutItems: MenuProps['items'] = isLoginWithAuth
     ? [
-        {
-          icon: <Icon icon={LogOut} />,
-          key: 'logout',
-          label: <span>{t('signout', { ns: 'auth' })}</span>,
-        },
-      ]
+      {
+        icon: <Icon icon={LogOut} />,
+        key: 'logout',
+        label: <span>{t('signout', { ns: 'auth' })}</span>,
+      },
+    ]
     : [];
 
   return { logoutItems, mainItems };

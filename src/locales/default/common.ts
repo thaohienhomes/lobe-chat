@@ -364,6 +364,7 @@ export default {
     email: '邮件支持',
     feedback: '反馈与建议',
     help: '帮助中心',
+    legal: '条款与政策',
     moveGuide: '设置按钮搬到这里啦',
     plans: '订阅方案',
     profile: '账户管理',
