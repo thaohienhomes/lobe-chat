@@ -9,7 +9,7 @@ services:
       - './data:/var/lib/postgresql/data'
     environment:
       - 'POSTGRES_DB=lobe'
-      - 'POSTGRES_PASSWORD=uWNZugjBqixf8dxC'
+      - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
@@ -26,8 +26,8 @@ services:
     volumes:
       - './s3_data:/etc/minio/data'
     environment:
-      - 'MINIO_ROOT_USER=YOUR_MINIO_USER'
-      - 'MINIO_ROOT_PASSWORD=YOUR_MINIO_PASSWORD'
+      - 'MINIO_ROOT_USER=${MINIO_ROOT_USER}'
+      - 'MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}'
       - 'MINIO_DOMAIN=lobe-s3-api.example.com'
       - 'MINIO_API_CORS_ALLOW_ORIGIN=https://lobe.example.com' # Your LobeChat's domain name.
     restart: always
@@ -39,7 +39,7 @@ services:
     restart: always
     image: ghcr.io/zitadel/zitadel:latest
     container_name: lobe-zitadel
-    command: start-from-init --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml --masterkey "cft3Tekr/rQBOqwoQSCPoncA9BHbn7QJ" --tlsMode external #MasterkeyNeedsToHave32Characters
+    command: start-from-init --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml --masterkey "${ZITADEL_MASTER_KEY}" --tlsMode external #MasterkeyNeedsToHave32Characters
     ports:
       - 8080:8080
     volumes:

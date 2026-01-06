@@ -36,11 +36,8 @@ tmp/
 .cache/
 
 # Environment files
-.env
-.env.local
-.env*.local
-.env.development
-.env.vercel.production
+.env*
+!.env.example*
 venv/
 .venv/
 
