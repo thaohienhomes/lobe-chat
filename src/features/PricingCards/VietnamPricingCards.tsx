@@ -60,10 +60,10 @@ const useStyles = createStyles(({ css, token }) => ({
 
     font-size: 12px;
     font-weight: 600;
-    color: white;
+    color: ${token.colorBgContainer};
 
-    background: ${token.colorPrimary};
-    box-shadow: 0 4px 10px ${token.colorPrimaryBg};
+    background: ${token.colorText};
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   `,
   price: css`
     font-size: 32px;
