@@ -23,6 +23,13 @@ If you don't have it, please run \`openssl rand -base64 32\` to create one.
 
   let connectionString = serverDBEnv.DATABASE_URL;
 
+  // Resolve: [TRPCError]: Failed query: select count("id") from "sessions" where "sessions"."user_id" = $1
+  // This error occurs when the user copies the full psql command into the DATABASE_URL environment variable.
+  // We sanitize the string to ensure it is a valid URL.
+  if (connectionString?.startsWith('psql')) {
+    connectionString = connectionString.replace(/^psql\s+/, '').replaceAll(/^["']|["']$/g, '');
+  }
+
   if (!connectionString) {
     throw new Error(`You are try to use database, but "DATABASE_URL" is not set correctly`);
   }

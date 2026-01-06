@@ -32,6 +32,11 @@ const runMigrations = async () => {
 
 let connectionString = process.env.DATABASE_URL;
 
+if (connectionString?.startsWith('psql')) {
+  connectionString = connectionString.replace(/^psql\s+/, '').replaceAll(/^["']|["']$/g, '');
+  process.env.DATABASE_URL = connectionString;
+}
+
 // only migrate database if the connection string is available
 if (!isDesktop && connectionString) {
   // Prefer Neon driver when using Neon connection string,

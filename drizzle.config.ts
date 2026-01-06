@@ -9,6 +9,10 @@ dotenv.config();
 
 let connectionString = process.env.DATABASE_URL;
 
+if (connectionString?.startsWith('psql')) {
+  connectionString = connectionString.replace(/^psql\s+/, '').replaceAll(/^["']|["']$/g, '');
+}
+
 if (process.env.NODE_ENV === 'test') {
   console.log('current ENV:', process.env.NODE_ENV);
   connectionString = process.env.DATABASE_TEST_URL;

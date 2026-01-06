@@ -3,6 +3,13 @@ import { Pool } from 'pg';
 
 dotenv.config();
 
+if (process.env.DATABASE_URL?.startsWith('psql')) {
+  process.env.DATABASE_URL = process.env.DATABASE_URL.replace(/^psql\s+/, '').replaceAll(
+    /^["']|["']$/g,
+    '',
+  );
+}
+
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function main() {
