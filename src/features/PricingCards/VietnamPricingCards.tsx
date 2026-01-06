@@ -6,7 +6,7 @@
  */
 'use client';
 
-import { Badge, Button, Card, Divider, Typography } from 'antd';
+import { Button, Card, Divider, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import { Check } from 'lucide-react';
 import { memo } from 'react';
@@ -28,10 +28,12 @@ const useStyles = createStyles(({ css, token }) => ({
     position: relative;
     border-radius: 16px;
     transition: all 0.3s ease;
+    border: 1px solid ${token.colorBorder};
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 10%);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      border-color: ${token.colorPrimary};
     }
 
     &.popular {
@@ -61,6 +63,7 @@ const useStyles = createStyles(({ css, token }) => ({
     color: white;
 
     background: ${token.colorPrimary};
+    box-shadow: 0 4px 10px ${token.colorPrimaryBg};
   `,
   price: css`
     font-size: 32px;
@@ -96,7 +99,6 @@ const VietnamPricingCards = memo<VietnamPricingCardsProps>(
           <Title level={3} style={{ margin: 0 }}>
             Bảng Giá Phở Chat
           </Title>
-          <Badge count="🇻🇳 Vietnam" style={{ backgroundColor: '#da251d' }} />
         </Flexbox>
 
         <div

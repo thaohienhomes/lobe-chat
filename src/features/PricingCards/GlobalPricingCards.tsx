@@ -6,7 +6,7 @@
  */
 'use client';
 
-import { Badge, Button, Card, Divider, Typography } from 'antd';
+import { Button, Card, Divider, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import { Check, Sparkles } from 'lucide-react';
 import { memo } from 'react';
@@ -21,33 +21,33 @@ import { GLOBAL_PLANS } from '@/config/pricing';
  * Based on PRICING_MASTERPLAN.md.md
  */
 
-/**
- * Global Pricing Cards Component
- * Displays USD pricing for international users via Polar.sh
- *
- * Based on PRICING_MASTERPLAN.md.md
- */
-
 const { Title, Text } = Typography;
 
-const useStyles = createStyles(({ css, token }) => ({
+const useStyles = createStyles(({ css, token, isDarkMode }) => ({
   card: css`
     position: relative;
     border-radius: 16px;
     transition: all 0.3s ease;
+    border: 1px solid ${token.colorBorder};
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 10%);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      border-color: ${token.colorPrimary};
     }
 
     &.popular {
       border: 2px solid ${token.colorPrimary};
+      background: ${isDarkMode ? token.colorFillQuaternary : token.colorBgContainer};
     }
 
     &.lifetime {
-      border: 2px solid #faad14;
-      background: linear-gradient(135deg, #fffbe6 0%, #fff 100%);
+      border: 2px solid ${token.colorWarning};
+      /* Dark gold/amber gradient that works in both modes but optimized for dark */
+      background: ${isDarkMode
+      ? `linear-gradient(135deg, ${token.colorWarningBg} 0%, ${token.colorBgContainer} 100%)`
+      : `linear-gradient(135deg, ${token.colorWarningBgHover} 0%, #fff 100%)`
+    };
     }
   `,
   feature: css`
@@ -70,9 +70,10 @@ const useStyles = createStyles(({ css, token }) => ({
 
     font-size: 12px;
     font-weight: 600;
-    color: white;
+    color: ${token.colorTextLightSolid};
 
-    background: linear-gradient(135deg, #faad14 0%, #fa8c16 100%);
+    background: linear-gradient(135deg, ${token.colorWarning} 0%, ${token.colorWarningActive} 100%);
+    box-shadow: 0 4px 10px rgba(250, 173, 20, 0.3);
   `,
   popularBadge: css`
     position: absolute;
@@ -89,6 +90,7 @@ const useStyles = createStyles(({ css, token }) => ({
     color: white;
 
     background: ${token.colorPrimary};
+    box-shadow: 0 4px 10px ${token.colorPrimaryBg};
   `,
   price: css`
     font-size: 32px;
@@ -125,14 +127,15 @@ const GlobalPricingCards = memo<GlobalPricingCardsProps>(
           <Title level={3} style={{ margin: 0 }}>
             Pricing Plans
           </Title>
-          <Badge count="🌍 Global" style={{ backgroundColor: '#1890ff' }} />
         </Flexbox>
 
         <div
           style={{
             display: 'grid',
-            gap: mobile ? 16 : 24,
-            gridTemplateColumns: mobile ? '1fr' : 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: mobile ? 16 : 16, // Reduce gap slightly to help fit 4 columns
+            // Use 220px minmax to help fit 4 cards on standard laptop screens (e.g. 1024px width)
+            // 220 * 4 + 16 * 3 = 880 + 48 = 928px < 1024px.
+            gridTemplateColumns: mobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))',
           }}
         >
           {plans.map((plan) => (

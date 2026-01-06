@@ -6,8 +6,8 @@
  */
 'use client';
 
-import { Skeleton, Switch, Typography } from 'antd';
-import { memo, useState } from 'react';
+import { Skeleton } from 'antd';
+import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { usePricingGeo } from '@/hooks/usePricingGeo';
@@ -22,8 +22,6 @@ import VietnamPricingCards from './VietnamPricingCards';
  * Based on PRICING_MASTERPLAN.md.md geo-fencing requirements
  */
 
-const { Text } = Typography;
-
 interface GeoAwarePricingSectionProps {
   currentPlanId?: string;
   mobile?: boolean;
@@ -37,18 +35,12 @@ interface GeoAwarePricingSectionProps {
  * - Auto-detects user's region via CF-IPCountry header
  * - Shows Vietnam pricing (VND) for Vietnamese users
  * - Shows Global pricing (USD) for international users
- * - Allows manual toggle between regions
+ * - Automatic detection only (no manual toggle)
  * - Loading skeleton while detecting
  */
 const GeoAwarePricingSection = memo<GeoAwarePricingSectionProps>(
   ({ mobile, onSelectPlan, currentPlanId }) => {
-    const { isVietnam, isLoading, countryCode } = usePricingGeo();
-
-    // Allow manual override of region
-    const [showVietnam, setShowVietnam] = useState<boolean | null>(null);
-
-    // Use detected region unless manually overridden
-    const displayVietnam = showVietnam !== null ? showVietnam : isVietnam;
+    const { isVietnam, isLoading } = usePricingGeo();
 
     if (isLoading) {
       return (
@@ -71,20 +63,8 @@ const GeoAwarePricingSection = memo<GeoAwarePricingSectionProps>(
 
     return (
       <Flexbox gap={24} width="100%">
-        {/* Region Toggle */}
-        <Flexbox align="center" gap={16} horizontal justify="flex-end">
-          <Text type="secondary">
-            Detected: {countryCode} ({isVietnam ? 'Vietnam' : 'Global'})
-          </Text>
-          <Flexbox align="center" gap={8} horizontal>
-            <Text type={displayVietnam ? 'secondary' : undefined}>USD 🌍</Text>
-            <Switch checked={displayVietnam} onChange={(checked) => setShowVietnam(checked)} />
-            <Text type={displayVietnam ? undefined : 'secondary'}>VND 🇻🇳</Text>
-          </Flexbox>
-        </Flexbox>
-
         {/* Pricing Cards */}
-        {displayVietnam ? (
+        {isVietnam ? (
           <VietnamPricingCards
             currentPlanId={currentPlanId}
             mobile={mobile}
