@@ -485,7 +485,11 @@ function CheckoutContent() {
     try {
       await form.validateFields(['email', 'name']);
     } catch {
-      message.error('Vui lòng điền đầy đủ thông tin liên hệ');
+      message.error(
+        isGlobalPlan
+          ? 'Please fill in all contact information'
+          : 'Vui lòng điền đầy đủ thông tin liên hệ',
+      );
       return;
     }
 
@@ -542,7 +546,11 @@ function CheckoutContent() {
     try {
       await form.validateFields(['email', 'name']);
     } catch {
-      message.error('Vui lòng điền đầy đủ thông tin liên hệ');
+      message.error(
+        isGlobalPlan
+          ? 'Please fill in all contact information'
+          : 'Vui lòng điền đầy đủ thông tin liên hệ',
+      );
       return;
     }
 
@@ -567,7 +575,10 @@ function CheckoutContent() {
       console.log('🆓 Free Plan Activation Response:', data);
 
       if (data.success) {
-        message.success(data.message || 'Gói miễn phí đã được kích hoạt!');
+        message.success(
+          data.message ||
+            (isGlobalPlan ? 'Free plan activated!' : 'Gói miễn phí đã được kích hoạt!'),
+        );
         // 🎉 Show confetti celebration animation
         setShowConfetti(true);
         // Redirect after a short delay to show confetti
@@ -576,11 +587,16 @@ function CheckoutContent() {
         }, 2000);
       } else {
         console.error('❌ Free plan activation failed:', data);
-        message.error(data.message || 'Không thể kích hoạt gói miễn phí');
+        message.error(
+          data.message ||
+            (isGlobalPlan ? 'Failed to activate free plan' : 'Không thể kích hoạt gói miễn phí'),
+        );
       }
     } catch (error) {
       console.error('❌ Free plan activation error:', error);
-      message.error('Đã xảy ra lỗi. Vui lòng thử lại.');
+      message.error(
+        isGlobalPlan ? 'An error occurred. Please try again.' : 'Đã xảy ra lỗi. Vui lòng thử lại.',
+      );
     } finally {
       setLoading(false);
     }
@@ -664,9 +680,13 @@ function CheckoutContent() {
                 Back
               </Button>
               <Title level={1} style={{ margin: 0, marginBlockEnd: 8 }}>
-                Hoàn tất Thanh toán
+                {isGlobalPlan ? 'Complete Checkout' : 'Hoàn tất Thanh toán'}
               </Title>
-              <Text type="secondary">Chọn chu kỳ thanh toán và hoàn tất đơn hàng của bạn</Text>
+              <Text type="secondary">
+                {isGlobalPlan
+                  ? 'Choose your billing cycle and complete your order'
+                  : 'Chọn chu kỳ thanh toán và hoàn tất đơn hàng của bạn'}
+              </Text>
             </div>
 
             {/* Two Column Layout */}
@@ -818,29 +838,51 @@ function CheckoutContent() {
                     {/* Contact Information */}
                     <div>
                       <Title level={4} style={{ marginBlockEnd: 16 }}>
-                        Thông tin liên hệ
+                        {isGlobalPlan ? 'Contact Information' : 'Thông tin liên hệ'}
                       </Title>
-
                       <Form.Item
-                        label="Địa chỉ Email"
+                        label={isGlobalPlan ? 'Email Address' : 'Địa chỉ Email'}
                         name="email"
                         rules={[
-                          { message: 'Vui lòng nhập email', required: true },
-                          { message: 'Email không hợp lệ', type: 'email' },
+                          {
+                            message: isGlobalPlan
+                              ? 'Please enter your email'
+                              : 'Vui lòng nhập email',
+                            required: true,
+                          },
+                          {
+                            message: isGlobalPlan ? 'Invalid email' : 'Email không hợp lệ',
+                            type: 'email',
+                          },
                         ]}
                       >
                         <Input placeholder="your@email.com" size="large" />
                       </Form.Item>
 
                       <Form.Item
-                        label="Họ và tên"
+                        label={isGlobalPlan ? 'Full Name' : 'Họ và tên'}
                         name="name"
-                        rules={[{ message: 'Vui lòng nhập họ tên', required: true }]}
+                        rules={[
+                          {
+                            message: isGlobalPlan
+                              ? 'Please enter your name'
+                              : 'Vui lòng nhập họ tên',
+                            required: true,
+                          },
+                        ]}
                       >
-                        <Input placeholder="Nguyễn Văn A" size="large" />
+                        <Input
+                          placeholder={isGlobalPlan ? 'John Doe' : 'Nguyễn Văn A'}
+                          size="large"
+                        />
                       </Form.Item>
 
-                      <Form.Item label="Số điện thoại (Tùy chọn)" name="phone">
+                      <Form.Item
+                        label={
+                          isGlobalPlan ? 'Phone Number (Optional)' : 'Số điện thoại (Tùy chọn)'
+                        }
+                        name="phone"
+                      >
                         <Input placeholder="+84 xxx xxx xxx" size="large" />
                       </Form.Item>
                     </div>
