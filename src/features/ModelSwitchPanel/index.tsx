@@ -13,8 +13,10 @@ import { getModelTier } from '@/config/pricing';
 import { isDeprecatedEdition } from '@/const/version';
 import ActionDropdown from '@/features/ChatInput/ActionBar/components/ActionDropdown';
 import { useEnabledChatModels } from '@/hooks/useEnabledChatModels';
+import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
+import { useUserStore } from '@/store/user';
 import { EnabledProviderWithModels } from '@/types/aiProvider';
 
 const useStyles = createStyles(({ css, prefixCls, token }) => ({
@@ -193,12 +195,26 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
   const router = useRouter();
   const enabledList = useEnabledChatModels();
   const { canUseModel, needsUpgrade } = useModelAccess();
+  const { isVietnam } = usePricingGeo();
+  const subscriptionPlan = useUserStore((s) => s.subscriptionPlan);
+
+  const isFreePlan = useMemo(() => {
+    const FREE_PLAN_IDS = ['vn_free', 'gl_starter', 'starter'];
+    return !subscriptionPlan || FREE_PLAN_IDS.includes(subscriptionPlan);
+  }, [subscriptionPlan]);
+
+  const shouldShowUpgradeBanner = needsUpgrade && isFreePlan;
 
   const items = useMemo<ItemType[]>(() => {
     const result: ItemType[] = [];
 
-    // Add upgrade banner as first item if user needs upgrade
-    if (needsUpgrade) {
+    // Add upgrade banner as first item if user needs upgrade and is on free plan
+    if (shouldShowUpgradeBanner) {
+      const upgradePrice = isVietnam ? '69K' : '$9.99';
+      const upgradeUnit = isVietnam ? '/tháng' : '/mo';
+      const upgradeText = isVietnam ? 'Mở khóa tất cả models' : 'Unlock all models';
+      const upgradeButtonText = isVietnam ? 'Nâng cấp' : 'Upgrade';
+
       result.push(
         {
           key: 'upgrade-banner',
@@ -212,15 +228,15 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
                 <Flexbox gap={1}>
                   <Flexbox align="center" gap={5} horizontal>
                     <Sparkles size={14} style={{ color: '#ff4081' }} />
-                    <span className={styles.upgradeText}>Mở khóa tất cả models</span>
+                    <span className={styles.upgradeText}>{upgradeText}</span>
                   </Flexbox>
                   <Flexbox align="baseline" gap={2} horizontal>
-                    <span className={styles.upgradePrice}>69K</span>
-                    <span className={styles.upgradePriceUnit}>/tháng</span>
+                    <span className={styles.upgradePrice}>{upgradePrice}</span>
+                    <span className={styles.upgradePriceUnit}>{upgradeUnit}</span>
                   </Flexbox>
                 </Flexbox>
                 <button className={styles.upgradeButton} type="button">
-                  Nâng cấp
+                  {upgradeButtonText}
                   <ArrowUpRight size={12} />
                 </button>
               </Flexbox>
@@ -331,6 +347,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
     enabledList,
     canUseModel,
     needsUpgrade,
+    isVietnam,
     styles.disabledItem,
     styles.upgradeBanner,
     styles.upgradeText,

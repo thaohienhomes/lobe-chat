@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { getModelTier } from '@/config/pricing';
+import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { AiProviderSourceType } from '@/types/aiProvider';
 import { formatTokenNumber } from '@/utils/format';
 
@@ -90,17 +91,24 @@ interface ModelTierBadgeProps {
 export const ModelTierBadge = memo<ModelTierBadgeProps>(({ modelId, size = 'small' }) => {
   const tier = getModelTier(modelId);
   const { icon: TierIcon, label, bgColor, borderColor, textColor } = getTierInfo(tier);
+  const { isVietnam } = usePricingGeo();
 
   // Don't show badge for Tier 1 (free) models to reduce visual clutter
   if (tier === 1) {
     return null;
   }
 
-  const tierDescriptions: Record<number, string> = {
-    1: 'Miễn phí - Có sẵn cho tất cả',
-    2: 'PRO - Yêu cầu gói Phở Tái',
-    3: 'MAX - Yêu cầu gói Phở Đặc Biệt',
-  };
+  const tierDescriptions: Record<number, string> = isVietnam
+    ? {
+        1: 'Miễn phí - Có sẵn cho tất cả',
+        2: 'PRO - Yêu cầu gói Phở Tái',
+        3: 'MAX - Yêu cầu gói Phở Đặc Biệt',
+      }
+    : {
+        1: 'Free - Available to all',
+        2: 'PRO - Requires Starter plan',
+        3: 'MAX - Requires Premium plan',
+      };
 
   return (
     <Tooltip title={tierDescriptions[tier] || ''}>

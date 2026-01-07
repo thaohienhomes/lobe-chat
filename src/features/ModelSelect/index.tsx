@@ -9,6 +9,8 @@ import { Flexbox } from 'react-layout-kit';
 import { ModelItemRender, ProviderItemRender, TAG_CLASSNAME } from '@/components/ModelSelect';
 import { getModelTier } from '@/config/pricing';
 import { useEnabledChatModels } from '@/hooks/useEnabledChatModels';
+import { usePricingGeo } from '@/hooks/usePricingGeo';
+import { useUserStore } from '@/store/user';
 import { EnabledProviderWithModels } from '@/types/aiProvider';
 
 const useStyles = createStyles(({ css, prefixCls }) => ({
@@ -68,11 +70,7 @@ const useStyles = createStyles(({ css, prefixCls }) => ({
     &:hover {
       transform: translateY(-1px);
       border-color: rgba(255, 64, 129, 50%);
-      background: linear-gradient(
-        135deg,
-        rgba(255, 64, 129, 25%) 0%,
-        rgba(156, 39, 176, 25%) 100%
-      );
+      background: linear-gradient(135deg, rgba(255, 64, 129, 25%) 0%, rgba(156, 39, 176, 25%) 100%);
     }
   `,
   upgradeButton: css`
@@ -128,19 +126,9 @@ interface ModelOption {
 
 /**
  * Hook to check if user can access a specific model based on subscription tier
- *
- * IMPORTANT: Per SPECS_BUSINESS.md:
- * - FREE/BASIC: Tier 1 only (allowedTiers: [1])
- * - Phở Tái (vn_basic) / Standard: Tier 1 & 2 (allowedTiers: [1, 2])
- * - Phở Đặc Biệt (vn_pro) / Premium: Tier 1, 2 & 3 (allowedTiers: [1, 2, 3])
- *
- * Guest users (unauthenticated) are treated as FREE tier = Tier 1 only
  */
 const useModelAccess = () => {
-  // Default: Tier 1 only for guest/free users
   const [allowedTiers, setAllowedTiers] = useState<number[]>([1]);
-  const [planCode, setPlanCode] = useState<string>('vn_free');
-  const [planDisplayName, setPlanDisplayName] = useState<string>('Free');
   const [loading, setLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
 
@@ -149,12 +137,8 @@ const useModelAccess = () => {
       try {
         const response = await fetch('/api/subscription/models/allowed');
 
-        // Handle 401 (unauthenticated) - treat as free tier
         if (response.status === 401) {
-          console.log('[ModelAccess] Guest user - defaulting to Tier 1 only');
           setAllowedTiers([1]);
-          setPlanCode('vn_free');
-          setPlanDisplayName('Free');
           setIsGuest(true);
           setLoading(false);
           return;
@@ -164,30 +148,13 @@ const useModelAccess = () => {
           const data = await response.json();
           if (data.success && data.data) {
             setAllowedTiers(data.data.allowedTiers || [1]);
-            setPlanCode(data.data.planCode || 'vn_free');
-            // Set display name based on plan code
-            const displayNames: Record<string, string> = {
-              gl_lifetime: 'Lifetime',
-              gl_premium: 'Premium',
-              gl_standard: 'Standard',
-              gl_starter: 'Starter',
-              vn_basic: 'Phở Tái',
-              vn_free: 'Free',
-              vn_pro: 'Phở Đặc Biệt',
-              vn_team: 'Lẩu Phở (Team)',
-            };
-            setPlanDisplayName(displayNames[data.data.planCode] || 'Free');
             setIsGuest(false);
           }
         } else {
-          // Other errors - default to tier 1 for safety
-          console.warn('[ModelAccess] API error, defaulting to Tier 1');
           setAllowedTiers([1]);
           setIsGuest(true);
         }
-      } catch (error) {
-        console.error('[ModelAccess] Failed to check model access:', error);
-        // On error, default to tier 1 only for safety
+      } catch {
         setAllowedTiers([1]);
         setIsGuest(true);
       } finally {
@@ -200,12 +167,9 @@ const useModelAccess = () => {
 
   const canUseModel = useCallback(
     (modelId: string) => {
-      // Auto model is special - it's available based on what the user's plan allows
-      // If user has Tier 2 access, Auto model is available (it routes to appropriate model)
       if (modelId.toLowerCase().includes('auto')) {
         return allowedTiers.includes(2);
       }
-
       const tier = getModelTier(modelId);
       return allowedTiers.includes(tier);
     },
@@ -213,18 +177,25 @@ const useModelAccess = () => {
   );
 
   const needsUpgrade = useMemo(() => {
-    // User needs upgrade if they only have Tier 1 access OR they are a guest
     return isGuest || (allowedTiers.length === 1 && allowedTiers[0] === 1);
   }, [allowedTiers, isGuest]);
 
-  return { allowedTiers, canUseModel, isGuest, loading, needsUpgrade, planCode, planDisplayName };
+  return { allowedTiers, canUseModel, isGuest, loading, needsUpgrade };
 };
 
 /**
- * Upgrade Banner Component - T3.chat inspired
+ * Upgrade Banner Component
  */
 const UpgradeBanner = memo(() => {
   const { styles } = useStyles();
+  const { isVietnam } = usePricingGeo();
+
+  const upgradePrice = isVietnam ? '69K' : '$9.99';
+  const upgradeUnit = isVietnam ? '/tháng' : '/mo';
+  const upgradeText = isVietnam
+    ? 'Mở khóa tất cả models + giới hạn cao hơn'
+    : 'Unlock all models + higher limits';
+  const upgradeButtonText = isVietnam ? 'Nâng cấp' : 'Upgrade';
 
   return (
     <Link className={styles.upgradeBanner} href="/subscription/upgrade">
@@ -232,15 +203,15 @@ const UpgradeBanner = memo(() => {
         <Flexbox gap={2}>
           <Flexbox align="center" gap={6} horizontal>
             <Sparkles size={16} style={{ color: '#ff4081' }} />
-            <span className={styles.upgradeText}>Mở khóa tất cả models + giới hạn cao hơn</span>
+            <span className={styles.upgradeText}>{upgradeText}</span>
           </Flexbox>
           <Flexbox align="baseline" gap={2} horizontal>
-            <span className={styles.upgradePrice}>69K</span>
-            <span className={styles.upgradePriceUnit}>/tháng</span>
+            <span className={styles.upgradePrice}>{upgradePrice}</span>
+            <span className={styles.upgradePriceUnit}>{upgradeUnit}</span>
           </Flexbox>
         </Flexbox>
         <button className={styles.upgradeButton} type="button">
-          Nâng cấp
+          {upgradeButtonText}
           <ArrowUpRight size={14} />
         </button>
       </Flexbox>
@@ -258,12 +229,20 @@ interface ModelSelectProps {
 const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = true }) => {
   const enabledList = useEnabledChatModels();
   const { canUseModel, loading: accessLoading, needsUpgrade } = useModelAccess();
+  const subscriptionPlan = useUserStore((s) => s.subscriptionPlan);
+
+  const isFreePlan = useMemo(() => {
+    const FREE_PLAN_IDS = ['vn_free', 'gl_starter', 'starter'];
+    return !subscriptionPlan || FREE_PLAN_IDS.includes(subscriptionPlan);
+  }, [subscriptionPlan]);
+
+  const shouldShowUpgradeBanner = needsUpgrade && isFreePlan;
+
   const { t } = useTranslation('common');
   const [internalValue, setInternalValue] = useState<string | undefined>();
 
   const { styles } = useStyles();
 
-  // Sync internal value with external value
   useEffect(() => {
     if (value?.provider && value?.model) {
       setInternalValue(`${value.provider}/${value.model}`);
@@ -308,7 +287,6 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = tru
     }));
   }, [enabledList, canUseModel, showAbility]);
 
-  // Show loading state while checking model access
   if (accessLoading) {
     return (
       <Select
@@ -320,16 +298,9 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = tru
     );
   }
 
-  // Handle selection with proper blocking of disabled models
   const handleChange = (selectedValue: string, option: any) => {
     const opt = option as ModelOption;
-
-    // CRITICAL: Block selection of disabled models
-    if (opt?.disabled) {
-      console.log('[ModelSelect] Blocked selection of disabled model:', selectedValue);
-      // Don't update internal value or call onChange
-      return;
-    }
+    if (opt?.disabled) return;
 
     setInternalValue(selectedValue);
     const model = selectedValue.split('/').slice(1).join('/');
@@ -345,7 +316,7 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = tru
       defaultValue={`${value?.provider}/${value?.model}`}
       dropdownRender={(menu) => (
         <>
-          {needsUpgrade && <UpgradeBanner />}
+          {shouldShowUpgradeBanner && <UpgradeBanner />}
           {menu}
         </>
       )}
