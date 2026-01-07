@@ -11,15 +11,24 @@
 // ============================================================================
 
 export interface PlanConfig {
+  advancedAI: boolean;
   code: string;
   dailyTier2Limit?: number;
   dailyTier3Limit?: number;
   displayName: string;
+  enableCustomAPI: boolean;
+  enableKnowledgeBase: boolean;
   features: string[];
+  // Legacy descriptive features
   keyLimits: string;
+
   monthlyPoints: number;
   price: number;
   priceYearly?: number;
+  prioritySupport: boolean;
+  // New Feature Flags & Limits (matching Plan Comparison)
+  storageGB: number;
+  vectorEntries: number;
 }
 
 export interface ModelTierConfig {
@@ -45,9 +54,12 @@ export interface PlanModelAccess {
 
 export const VN_PLANS: Record<string, PlanConfig> = {
   vn_basic: {
+    advancedAI: false,
     code: 'vn_basic',
     dailyTier2Limit: 30,
-    displayName: 'Phở Tái',
+    displayName: 'Phở Tái (Starter)',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
     features: [
       'Unlimited Tier 1 models',
       '30 Tier 2 messages/day',
@@ -55,28 +67,53 @@ export const VN_PLANS: Record<string, PlanConfig> = {
       'File upload support',
       'No ads',
     ],
+
     keyLimits: 'Unlim Tier 1. 30 Tier 2 msgs/day.',
+
     monthlyPoints: 300_000,
+
+    // Matched to Plan Comparison "Starter"
     price: 69_000,
-    priceYearly: 690_000, // ~17% discount
+
+    priceYearly: 690_000,
+
+    prioritySupport: false,
+    // New Features
+    storageGB: 1,
+    vectorEntries: 5000,
   },
   vn_free: {
+    advancedAI: false,
     code: 'vn_free',
-    displayName: 'Phở Không Người Lái',
+    displayName: 'Phở Không Người Lái (Free)',
+    enableCustomAPI: false,
+    enableKnowledgeBase: false,
     features: [
       'Tier 1 models only (GPT-4o-mini, Gemini Flash)',
       'Basic conversation',
       'No history saving',
     ],
+
     keyLimits: 'Tier 1 Models Only. No History.',
+
     monthlyPoints: 50_000,
+
+    // Slight bump for Free
     price: 0,
+
+    prioritySupport: false,
+    // New Features
+    storageGB: 0.5,
+    vectorEntries: 0,
   },
   vn_pro: {
+    advancedAI: false,
     code: 'vn_pro',
     dailyTier2Limit: -1, // Unlimited
     dailyTier3Limit: 50,
-    displayName: 'Phở Đặc Biệt',
+    displayName: 'Phở Đặc Biệt (Premium)',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
     features: [
       'Unlimited Tier 1 & 2 models',
       '50 Tier 3 messages/day (Claude Opus, GPT-4 Turbo)',
@@ -88,21 +125,32 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     keyLimits: 'Unlim Tier 1 & 2. 50 Tier 3 msgs/day.',
     monthlyPoints: 2_000_000,
     price: 199_000,
-    priceYearly: 1_990_000, // ~17% discount
+    priceYearly: 1_990_000,
+    prioritySupport: true,
+    // New Features
+    storageGB: 2,
+    vectorEntries: 10_000,
   },
   vn_team: {
+    advancedAI: true,
     code: 'vn_team',
-    displayName: 'Lẩu Phở (Team)',
+    displayName: 'Lẩu Phở (Ultimate)',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
     features: [
-      'All Pro features',
+      'All Premium features',
       'Admin Dashboard',
       'Pooled points for team',
       'User management',
       'Usage analytics',
     ],
     keyLimits: 'Min 3 users. Admin Dashboard.',
-    monthlyPoints: 0, // Pooled
-    price: 149_000, // per user
+    monthlyPoints: 2_000_000, // Pooled - set to same as Pro per spec interaction
+    price: 299_000,
+    prioritySupport: true,
+    // New Features
+    storageGB: 4,
+    vectorEntries: 20_000,
   },
 } as const;
 
@@ -112,25 +160,35 @@ export const VN_PLANS: Record<string, PlanConfig> = {
 
 export const GLOBAL_PLANS: Record<string, PlanConfig> = {
   gl_lifetime: {
+    advancedAI: true,
     code: 'gl_lifetime',
     dailyTier2Limit: -1, // Unlimited Tier 2 within monthly points cap
-    displayName: 'Founding Member (Lifetime)',
+    displayName: 'Founding Member (Ultimate)',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
     features: [
       'All Premium features forever',
-      '2M Phở Points/month (reset monthly)',
+      '2M Phở Points/month (reset monthly)', // Reverted
       'Tier 1 & 2 model access',
       'Priority support',
       'Early access to new features',
     ],
     keyLimits: '2M points/mo (Reset). One-time payment.',
-    monthlyPoints: 2_000_000, // Reset monthly via cron job
-    price: 149.99, // One-time - match Polar Dashboard
+    monthlyPoints: 2_000_000,
+    price: 149.99,
+    prioritySupport: true,
+    // New Features
+    storageGB: 4,
+    vectorEntries: 20_000,
   },
   gl_premium: {
+    advancedAI: false,
     code: 'gl_premium',
     dailyTier2Limit: -1, // Unlimited Tier 2
     dailyTier3Limit: 50, // 50 Tier 3 messages/day
     displayName: 'Premium',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
     features: [
       'Unlimited Tier 1 & 2 models',
       '50 Tier 3 messages/day',
@@ -139,13 +197,20 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     ],
     keyLimits: 'Unlim Tier 1 & 2. 50 Tier 3 msgs/day.',
     monthlyPoints: 2_000_000,
-    price: 19.99, // Match Polar Dashboard
-    priceYearly: 199.99, // Match Polar Dashboard
+    price: 19.99,
+    priceYearly: 199.99,
+    prioritySupport: true,
+    // New Features
+    storageGB: 2,
+    vectorEntries: 10_000,
   },
   gl_standard: {
+    advancedAI: false,
     code: 'gl_standard',
     dailyTier2Limit: 30, // 30 Tier 2 messages/day
-    displayName: 'Standard',
+    displayName: 'Starter',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
     features: [
       'Unlimited Tier 1 models',
       '30 Tier 2 messages/day',
@@ -153,17 +218,28 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
       'File upload support',
     ],
     keyLimits: 'Unlim Tier 1. 30 Tier 2 msgs/day.',
-    monthlyPoints: 500_000,
-    price: 9.99, // Match Polar Dashboard
-    priceYearly: 99.99, // Match Polar Dashboard
+    monthlyPoints: 300_000,
+    price: 9.99,
+    priceYearly: 99.99,
+    prioritySupport: false,
+    // New Features
+    storageGB: 1,
+    vectorEntries: 5000,
   },
   gl_starter: {
+    advancedAI: false,
     code: 'gl_starter',
-    displayName: 'Starter',
+    displayName: 'Free',
+    enableCustomAPI: false,
+    enableKnowledgeBase: false,
     features: ['Tier 1 models only', 'Basic conversation', 'Limited history'],
     keyLimits: 'Tier 1 Models Only. Limited History.',
-    monthlyPoints: 30_000,
+    monthlyPoints: 50_000,
     price: 0,
+    prioritySupport: false,
+    // New Features
+    storageGB: 0.5,
+    vectorEntries: 0,
   },
 } as const;
 
@@ -421,8 +497,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'meta-llama/llama-3.2-11b-vision-instruct',
       'meta-llama/llama-3.3-70b-instruct:free',
     ],
-    outputCostPer1M: 15,
-    pointsPerMessage: 5,
+    outputCostPer1M: 15, // Cost per 1M output tokens
+    pointsPerMessage: 5, // ~15-20 points per typical message
     tier: 1,
     tierName: 'Cheap (Budget)',
   },

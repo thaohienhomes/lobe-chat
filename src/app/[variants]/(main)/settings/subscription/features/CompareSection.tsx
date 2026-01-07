@@ -53,25 +53,25 @@ const CompareSection = memo<CompareSectionProps>(({ mobile }) => {
 
   const compareData = [
     {
-      feature: 'Compute Credits',
+      feature: 'Phở Points / Credits',
       key: 'compute-credits',
-      premium: '15,000,000 / Month',
-      starter: '5,000,000 / Month',
-      ultimate: '35,000,000 / Month',
+      premium: '300,000 / Month',
+      starter: '50,000 / Month',
+      ultimate: '2,000,000 / Month',
     },
     {
       feature: 'GPT-4o mini Messages',
       key: 'gpt4o-mini',
-      premium: '~21,100',
-      starter: '~7,000',
-      ultimate: '~49,100',
+      premium: '~60,000',
+      starter: '~10,000',
+      ultimate: '~400,000',
     },
     {
       feature: 'DeepSeek R1 Messages',
       key: 'deepseek-r1',
-      premium: '~5,800',
-      starter: '~1,900',
-      ultimate: '~13,400',
+      premium: '~2,000',
+      starter: '0',
+      ultimate: '~13,300',
     },
     {
       feature: 'File Storage',

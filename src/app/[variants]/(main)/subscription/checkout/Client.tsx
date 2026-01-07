@@ -178,12 +178,12 @@ const plans = {
     description: 'One-time payment, lifetime access',
     features: [
       'All Premium features forever',
-      '500,000 Phở Points/month (reset monthly)',
+      '2,000,000 Phở Points/month (reset monthly)',
       'Priority support',
       'Early access to new features',
       'No recurring payments',
     ],
-    monthlyPoints: 500_000,
+    monthlyPoints: 2_000_000,
     monthlyPriceUSD: 149.99, // Match Polar Dashboard
     monthlyPriceVND: 0,
     name: 'Lifetime Deal',
@@ -218,16 +218,27 @@ const plans = {
     features: [
       'Unlimited Tier 1 models',
       '30 Tier 2 messages/day',
-      '500,000 Phở Points/month',
+      '300,000 Phở Points/month',
       'Chat history',
       'File uploads',
       'No ads',
     ],
-    monthlyPoints: 500_000,
+    monthlyPoints: 300_000,
     monthlyPriceUSD: 9.99, // Match Polar Dashboard
     monthlyPriceVND: 0,
     name: 'Standard',
     yearlyPriceUSD: 99.99, // Match Polar Dashboard
+    yearlyPriceVND: 0,
+  },
+  gl_starter: {
+    code: 'gl_starter',
+    description: 'Free experience with Tier 1 models',
+    features: ['Tier 1 models only', 'Basic conversation', 'Limited history'],
+    monthlyPoints: 50_000,
+    monthlyPriceUSD: 0,
+    monthlyPriceVND: 0,
+    name: 'Free',
+    yearlyPriceUSD: 0,
     yearlyPriceVND: 0,
   },
 
