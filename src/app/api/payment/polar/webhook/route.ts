@@ -1,6 +1,6 @@
+
 import { NextResponse } from 'next/server';
 import { getServerDB } from '@/database/server';
-import { subscriptions } from '@lobechat/database/schemas';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
@@ -28,26 +28,23 @@ export async function POST(req: Request) {
       switch (product_id) {
         case '85158f39-dd9d-4ed9-b344-9afa5eba5080': {
           planId = 'lifetime_early_bird';
-
           break;
         }
         case '01faa30d-bfb7-4699-8916-4288591d3fa6': {
           planId = 'lifetime_standard';
-
           break;
         }
         case '646af452-89ad-439b-9109-8840320e2485': {
           planId = 'lifetime_last_call';
-
           break;
         }
-        // No default
       }
 
-      const db = getServerDB();
+      const db: any = await getServerDB();
+      const schemas: any = await import('@lobechat/database/schemas');
+      const { users, subscriptions } = schemas;
 
       // Find user by email
-      const { users } = await import('@lobechat/database/schemas');
       const [user] = await db.select().from(users).where(eq(users.email, customer_email)).limit(1);
 
       if (!user) {
@@ -116,8 +113,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'No customer email' }, { status: 400 });
       }
 
-      const db = getServerDB();
-      const { users } = await import('@lobechat/database/schemas');
+      const db: any = await getServerDB();
+      const schemas: any = await import('@lobechat/database/schemas');
+      const { users, subscriptions } = schemas;
+
       const [user] = await db.select().from(users).where(eq(users.email, customer_email)).limit(1);
 
       if (user) {
@@ -156,7 +155,10 @@ export async function POST(req: Request) {
  */
 async function allocateLifetimePoints(db: any, userId: string, planId: string) {
   try {
-    const { phoPointsBalances } = await import('@lobechat/database/schemas');
+    const schemas: any = await import('@lobechat/database/schemas');
+    const { phoPointsBalances } = schemas;
+
+    // Dynamic import config to avoid circular deps if needed, though type import is safe
     const { USD_PRICING_TIERS } = await import('@/server/modules/CostOptimization');
 
     const tierConfig = USD_PRICING_TIERS[planId as keyof typeof USD_PRICING_TIERS];

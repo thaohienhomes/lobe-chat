@@ -188,6 +188,13 @@ const isPublicRoute = createRouteMatcher([
   // discover page - public browsing
   '/discover',
   '/discover(.*)',
+  // Lifetime deal pages
+  '/lifetime',
+  '/lifetime(.*)',
+  // Subscription APIs - allow public access for checking allowed models
+  '/api/subscription(.*)',
+  // Payment checkout
+  '/api/payment(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([

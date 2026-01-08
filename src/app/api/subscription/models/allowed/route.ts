@@ -34,11 +34,23 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
   try {
     // Verify authentication
     const { userId } = await auth();
+
+    // If no user, return default free tier models
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized', success: false },
-        { status: 401 },
-      );
+      const { PLAN_MODEL_ACCESS, getAllowedTiersForPlan } = await import('@/config/pricing');
+      const planCode = 'vn_free';
+
+      return NextResponse.json({
+        data: {
+          allowedModels: PLAN_MODEL_ACCESS.vn_free.models,
+          allowedTiers: getAllowedTiersForPlan(planCode),
+          defaultModel: PLAN_MODEL_ACCESS.vn_free.defaultModel,
+          defaultProvider: PLAN_MODEL_ACCESS.vn_free.defaultProvider,
+          planCode,
+          dailyLimits: PLAN_MODEL_ACCESS.vn_free.dailyLimits,
+        },
+        success: true,
+      });
     }
 
     pino.info(
