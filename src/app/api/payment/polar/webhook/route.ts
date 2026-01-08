@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getServerDB } from '@/database/server';
+import { subscriptions } from '@lobechat/database/schemas';
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   try {
@@ -6,17 +9,190 @@ export async function POST(req: Request) {
     const event = JSON.parse(body);
 
     console.log('📥 Polar Webhook Event:', {
-      data: event.data,
+      email: event.data?.customer_email,
+      productId: event.data?.product_id,
       type: event.type,
     });
 
-    // TODO: Implement user activation logic
-    // For now, just log the event and return success
-    // User will need to manually activate users or implement this later
+    // Handle successful payment
+    if (event.type === 'checkout.completed' || event.type === 'order.created') {
+      const { customer_email, product_id } = event.data;
 
+      if (!customer_email) {
+        console.error('❌ No customer email in webhook data');
+        return NextResponse.json({ error: 'No customer email' }, { status: 400 });
+      }
+
+      // Map Product ID → Plan ID
+      let planId = 'lifetime_last_call'; // Default
+      switch (product_id) {
+        case '85158f39-dd9d-4ed9-b344-9afa5eba5080': {
+          planId = 'lifetime_early_bird';
+
+          break;
+        }
+        case '01faa30d-bfb7-4699-8916-4288591d3fa6': {
+          planId = 'lifetime_standard';
+
+          break;
+        }
+        case '646af452-89ad-439b-9109-8840320e2485': {
+          planId = 'lifetime_last_call';
+
+          break;
+        }
+        // No default
+      }
+
+      const db = getServerDB();
+
+      // Find user by email
+      const { users } = await import('@lobechat/database/schemas');
+      const [user] = await db.select().from(users).where(eq(users.email, customer_email)).limit(1);
+
+      if (!user) {
+        console.error('❌ User not found:', customer_email);
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      }
+
+      // Create/Update subscription
+      const start = new Date();
+      const end = new Date('2099-12-31'); // Lifetime
+
+      // Check if subscription exists
+      const [existing] = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, user.id))
+        .limit(1);
+
+      if (existing) {
+        // Update existing subscription
+        await db
+          .update(subscriptions)
+          .set({
+            billingCycle: 'lifetime',
+            cancelAtPeriodEnd: false,
+            currentPeriodEnd: end,
+            currentPeriodStart: start,
+            paymentProvider: 'polar',
+            planId,
+            status: 'active',
+            updatedAt: new Date(),
+          })
+          .where(eq(subscriptions.userId, user.id));
+      } else {
+        // Create new subscription
+        await db.insert(subscriptions).values({
+          billingCycle: 'lifetime',
+          cancelAtPeriodEnd: false,
+          currentPeriodEnd: end,
+          currentPeriodStart: start,
+          paymentProvider: 'polar',
+          planId,
+          status: 'active',
+          userId: user.id,
+        });
+      }
+
+      // Allocate Phở Points
+      await allocateLifetimePoints(db, user.id, planId);
+
+      console.log('✅ User activated:', {
+        email: customer_email,
+        planId,
+        productId: product_id,
+        userId: user.id,
+      });
+
+      return NextResponse.json({ planId, success: true, userId: user.id });
+    }
+
+    // Handle refund
+    if (event.type === 'order.refunded') {
+      const { customer_email } = event.data;
+
+      if (!customer_email) {
+        return NextResponse.json({ error: 'No customer email' }, { status: 400 });
+      }
+
+      const db = getServerDB();
+      const { users } = await import('@lobechat/database/schemas');
+      const [user] = await db.select().from(users).where(eq(users.email, customer_email)).limit(1);
+
+      if (user) {
+        // Revoke subscription
+        await db
+          .update(subscriptions)
+          .set({
+            planId: 'gl_starter', // Downgrade to free
+            status: 'canceled',
+            updatedAt: new Date(),
+          })
+          .where(eq(subscriptions.userId, user.id));
+
+        console.log('⚠️ User plan revoked due to refund:', customer_email);
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
+    // Other events - just acknowledge
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('❌ Webhook error:', error);
-    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
+    return NextResponse.json(
+      {
+        details: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Webhook processing failed',
+      },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * Allocate Phở Points for lifetime members
+ */
+async function allocateLifetimePoints(db: any, userId: string, planId: string) {
+  try {
+    const { phoPointsBalances } = await import('@lobechat/database/schemas');
+    const { USD_PRICING_TIERS } = await import('@/server/modules/CostOptimization');
+
+    const tierConfig = USD_PRICING_TIERS[planId as keyof typeof USD_PRICING_TIERS];
+    const points = tierConfig?.monthlyPoints || 2_000_000;
+
+    // Check if balance exists
+    const [existing] = await db
+      .select()
+      .from(phoPointsBalances)
+      .where(eq(phoPointsBalances.userId, userId))
+      .limit(1);
+
+    if (existing) {
+      // Update existing balance
+      await db
+        .update(phoPointsBalances)
+        .set({
+          balance: points,
+          lastResetAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(phoPointsBalances.userId, userId));
+    } else {
+      // Create new balance
+      await db.insert(phoPointsBalances).values({
+        balance: points,
+        createdAt: new Date(),
+        lastResetAt: new Date(),
+        updatedAt: new Date(),
+        userId,
+      });
+    }
+
+    console.log(`✅ Allocated ${points.toLocaleString()} Phở Points to user ${userId}`);
+  } catch (error) {
+    console.error('❌ Failed to allocate points:', error);
+    // Don't throw - subscription is already created
   }
 }

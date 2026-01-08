@@ -347,6 +347,100 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     ],
   },
 
+  // ============================================================================
+  // LIFETIME DEAL PLANS - All tiers with 2M points/month
+  // ============================================================================
+
+  // Lifetime Early Bird: All tiers (Tier 1, 2, 3) with 50 Tier 3 messages/day
+  lifetime_early_bird: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3/day
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'openrouter',
+    models: [
+      // Tier 1 models
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      // Tier 2 models
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      // Tier 3 models
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-preview',
+    ],
+  },
+
+
+  // Lifetime Last Call: Same as Early Bird and Standard
+  lifetime_last_call: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier2: -1, tier3: 50 },
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'openrouter',
+    models: [
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-preview',
+    ],
+  },
+
+
+  // Lifetime Standard: Same as Early Bird
+  lifetime_standard: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier2: -1, tier3: 50 },
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'openrouter',
+    models: [
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-preview',
+    ],
+  },
+
+  // ============================================================================
+  // VIETNAM PLANS - All use OpenRouter as primary provider
+  // ============================================================================
+
   // Vietnam Basic Plan (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
   // Per VN_PLANS config: dailyTier2Limit: 30
   vn_basic: {
