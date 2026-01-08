@@ -44,6 +44,18 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script crossOrigin="anonymous" src="https://unpkg.com/react-scan/dist/auto.global.js" />
         )}
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17766075190" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17766075190');
+            `,
+          }}
+        />
       </head>
       <body>
         <SentryErrorBoundary>
