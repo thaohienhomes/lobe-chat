@@ -7,6 +7,7 @@ import {
   Feather,
   FileClockIcon,
   Settings2,
+  CreditCard,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +40,12 @@ export const useCategory = () => {
       key: 'profile',
       label: t('userPanel.profile'),
       onClick: () => router.push('/me/profile'),
+    },
+    {
+      icon: CreditCard,
+      key: 'subscription',
+      label: t('userPanel.subscription'),
+      onClick: () => router.push('/settings?active=subscription'),
     },
   ];
 

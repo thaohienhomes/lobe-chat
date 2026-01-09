@@ -3,7 +3,6 @@ import {
   BarChart3,
   Bot,
   Brain,
-  CreditCard,
   Database,
   EthernetPort,
   Info,
@@ -47,18 +46,18 @@ export const useCategory = () => {
           type: 'divider',
         },
         showLLM &&
-          // TODO: Remove /llm when v2.0
-          (isDeprecatedEdition
-            ? {
-                icon: <Icon icon={Brain} />,
-                key: SettingsTabs.LLM,
-                label: t('tab.llm'),
-              }
-            : showProvider && {
-                icon: <Icon icon={Brain} />,
-                key: SettingsTabs.Provider,
-                label: t('tab.provider'),
-              }),
+        // TODO: Remove /llm when v2.0
+        (isDeprecatedEdition
+          ? {
+            icon: <Icon icon={Brain} />,
+            key: SettingsTabs.LLM,
+            label: t('tab.llm'),
+          }
+          : showProvider && {
+            icon: <Icon icon={Brain} />,
+            key: SettingsTabs.Provider,
+            label: t('tab.provider'),
+          }),
 
         enableSTT && {
           icon: <Icon icon={Mic2} />,
@@ -73,11 +72,7 @@ export const useCategory = () => {
         {
           type: 'divider',
         },
-        {
-          icon: <Icon icon={CreditCard} />,
-          key: SettingsTabs.Subscription,
-          label: t('tab.subscription'),
-        },
+
         {
           icon: <Icon icon={BarChart3} />,
           key: SettingsTabs.Usage,

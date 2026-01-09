@@ -1,4 +1,4 @@
-import { Bot, Brain, CreditCard, Info, Mic2, Settings2, Sparkles } from 'lucide-react';
+import { Bot, Brain, Info, Mic2, Settings2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 
@@ -24,28 +24,24 @@ export const useCategory = () => {
       label: t('tab.system-agent'),
     },
     showLLM &&
-      (isDeprecatedEdition
-        ? {
-            icon: Brain,
-            key: SettingsTabs.LLM,
-            label: t('tab.llm'),
-          }
-        : {
-            icon: Brain,
-            key: SettingsTabs.Provider,
-            label: t('tab.provider'),
-          }),
+    (isDeprecatedEdition
+      ? {
+        icon: Brain,
+        key: SettingsTabs.LLM,
+        label: t('tab.llm'),
+      }
+      : {
+        icon: Brain,
+        key: SettingsTabs.Provider,
+        label: t('tab.provider'),
+      }),
     { icon: Mic2, key: SettingsTabs.TTS, label: t('tab.tts') },
     {
       icon: Bot,
       key: SettingsTabs.Agent,
       label: t('tab.agent'),
     },
-    {
-      icon: CreditCard,
-      key: SettingsTabs.Subscription,
-      label: t('tab.subscription'),
-    },
+
     {
       icon: Info,
       key: SettingsTabs.About,
