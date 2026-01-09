@@ -13,6 +13,7 @@ import {
   LogOut,
   Mail,
   Settings2,
+  CreditCard,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PropsWithChildren, memo } from 'react';
@@ -77,6 +78,13 @@ export const useMenu = () => {
       icon: <Icon icon={CircleUserRound} />,
       key: 'profile',
       label: <Link href={'/profile'}>{t('userPanel.profile')}</Link>,
+    },
+    {
+      icon: <Icon icon={CreditCard} />,
+      key: 'subscription',
+      label: (
+        <Link href={'/settings?active=subscription'}>{t('userPanel.subscription')}</Link>
+      ),
     },
   ];
 

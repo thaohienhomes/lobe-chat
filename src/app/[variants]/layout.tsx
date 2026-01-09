@@ -75,7 +75,7 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
                 {!isMobile && modal}
               </AuthProvider>
               <PWAInstall />
-              {!isMobile && <NewYearLifetimeBanner />}
+              <NewYearLifetimeBanner />
             </GlobalProvider>
           </NuqsAdapter>
         </SentryErrorBoundary>
