@@ -5,6 +5,8 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { ReactNode } from 'react';
 import { isRtlLang } from 'rtl-detect';
 
+import NewYearLifetimeBanner from '@/features/PromotionBanner/NewYearLifetimeBanner';
+
 import Analytics from '@/components/Analytics';
 import SentryErrorBoundary from '@/components/SentryErrorBoundary';
 import { DEFAULT_LANG } from '@/const/locale';
@@ -73,6 +75,7 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
                 {!isMobile && modal}
               </AuthProvider>
               <PWAInstall />
+              {!isMobile && <NewYearLifetimeBanner />}
             </GlobalProvider>
           </NuqsAdapter>
         </SentryErrorBoundary>
