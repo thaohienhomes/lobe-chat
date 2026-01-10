@@ -11,7 +11,6 @@ import SocialProof from './features/SocialProof';
 // Lazy load Testimonials for better PageSpeed
 const Testimonials = dynamic(() => import('./features/Testimonials'), {
   loading: () => <div style={{ minHeight: 400 }} />,
-  ssr: false,
 });
 
 export const metadata: Metadata = {
