@@ -272,6 +272,7 @@
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "request-filtering-agent": "^3.2.0",
+    "resend": "^6.7.0",
     "resolve-accept-language": "^3.1.15",
     "rtl-detect": "^1.1.2",
     "shiki": "^3.12.2",

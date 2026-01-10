@@ -3,17 +3,26 @@
 import { Button } from 'antd';
 import { createStyles } from 'antd-style';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Script from 'next/script';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
-const useStyles = createStyles(({ css }) => ({
+const useStyles = createStyles(({ css, responsive }) => ({
   button: css`
-    height: 48px;
-    font-size: 16px;
+    min-width: 200px;
+    height: 56px;
+    border-radius: 14px;
+
+    font-size: 17px;
     font-weight: 600;
+
+    ${responsive.mobile} {
+      width: 100%;
+      height: 52px;
+      font-size: 16px;
+    }
   `,
   container: css`
     display: flex;
@@ -23,38 +32,104 @@ const useStyles = createStyles(({ css }) => ({
     min-height: 100vh;
     padding: 24px;
 
-    background: #000;
+    background: #0b0e14;
   `,
   content: css`
-    max-width: 600px;
+    max-width: 560px;
     text-align: center;
   `,
   description: css`
-    margin-block: 24px 48px;
+    margin-block: 24px 40px;
     margin-inline: 0;
 
     font-size: 18px;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 70%);
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 65%);
+
+    ${responsive.mobile} {
+      margin-block: 20px 32px;
+      font-size: 16px;
+    }
+  `,
+  emailNote: css`
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+
+    margin-block-start: 24px;
+    padding-block: 14px;
+    padding-inline: 20px;
+    border: 1px solid rgba(34, 197, 94, 20%);
+    border-radius: 12px;
+
+    font-size: 14px;
+    color: rgba(255, 255, 255, 60%);
+
+    background: rgba(34, 197, 94, 8%);
+
+    ${responsive.mobile} {
+      padding-block: 12px;
+      padding-inline: 16px;
+      font-size: 13px;
+    }
   `,
   icon: css`
     margin-block-end: 24px;
-    color: #52c41a;
+    color: #22c55e;
+
+    ${responsive.mobile} {
+      margin-block-end: 20px;
+    }
   `,
   title: css`
     margin: 0;
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 800;
     color: #fff;
+
+    ${responsive.mobile} {
+      font-size: 32px;
+    }
   `,
 }));
 
 const SuccessContent = () => {
   const { styles } = useStyles();
   const searchParams = useSearchParams();
+  const [emailSent, setEmailSent] = useState(false);
 
-  // Extract amount from URL params, default to 149.99
+  // Extract params from URL
   const amount = parseFloat(searchParams.get('amount') || '149.99');
+  const checkoutId = searchParams.get('checkout_id') || searchParams.get('session_id');
+  const email = searchParams.get('email');
+
+  // Trigger welcome email on mount
+  useEffect(() => {
+    const sendWelcomeEmail = async () => {
+      if (!email || emailSent) return;
+
+      try {
+        const response = await fetch('/api/lifetime/welcome-email', {
+          body: JSON.stringify({
+            checkout_id: checkoutId,
+            email: decodeURIComponent(email),
+          }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          setEmailSent(true);
+          console.log('[Success] Welcome email triggered');
+        }
+      } catch (error) {
+        console.error('[Success] Failed to trigger welcome email:', error);
+      }
+    };
+
+    sendWelcomeEmail();
+  }, [email, checkoutId, emailSent]);
 
   return (
     <div className={styles.container}>
@@ -78,15 +153,14 @@ const SuccessContent = () => {
         initial={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.5 }}
       >
-        <CheckCircle className={styles.icon} size={80} />
+        <CheckCircle className={styles.icon} size={72} strokeWidth={1.5} />
 
         <h1 className={styles.title}>Payment Successful! 🎉</h1>
 
         <p className={styles.description}>
-          Thank you for your purchase! Your lifetime access to Pho.chat has been activated.
+          Thank you for joining the Pho.chat Lifetime Club!
           <br />
-          <br />
-          You can now enjoy unlimited AI conversations with all available models.
+          Your premium access is now active with all AI models unlocked.
         </p>
 
         <Link href="/chat">
@@ -100,6 +174,15 @@ const SuccessContent = () => {
             Start Chatting
           </Button>
         </Link>
+
+        {email && (
+          <div className={styles.emailNote}>
+            <Mail color="#22c55e" size={18} />
+            <span>
+              Confirmation email sent to <strong>{decodeURIComponent(email)}</strong>
+            </span>
+          </div>
+        )}
       </motion.div>
     </div>
   );
@@ -107,7 +190,7 @@ const SuccessContent = () => {
 
 const SuccessPage = () => {
   return (
-    <Suspense fallback={<div style={{ background: '#000', minHeight: '100vh' }} />}>
+    <Suspense fallback={<div style={{ background: '#0b0e14', minHeight: '100vh' }} />}>
       <SuccessContent />
     </Suspense>
   );
