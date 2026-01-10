@@ -529,6 +529,126 @@ const Pricing = () => {
           </Button>
         </motion.div>
       </div>
+
+      {/* Trust Badges Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 24,
+          marginBlockStart: 48,
+        }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+        viewport={{ once: true }}
+        whileInView={{ opacity: 1, y: 0 }}
+      >
+        {/* Payment Logos */}
+        <div
+          style={{
+            alignItems: 'center',
+            display: 'flex',
+            gap: 24,
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              alignItems: 'center',
+              color: 'rgba(255,255,255,0.4)',
+              display: 'flex',
+              fontSize: 28,
+              fontWeight: 700,
+              gap: 8,
+              letterSpacing: '-0.02em',
+              opacity: 0.6,
+            }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 500, letterSpacing: '0.05em' }}>STRIPE</span>
+          </div>
+          <div
+            style={{
+              alignItems: 'center',
+              color: 'rgba(255,255,255,0.4)',
+              display: 'flex',
+              fontSize: 14,
+              fontWeight: 600,
+              gap: 4,
+              opacity: 0.6,
+            }}
+          >
+            <span>VISA</span>
+          </div>
+          <div
+            style={{
+              alignItems: 'center',
+              color: 'rgba(255,255,255,0.4)',
+              display: 'flex',
+              fontSize: 14,
+              fontWeight: 600,
+              opacity: 0.6,
+            }}
+          >
+            <span>Mastercard</span>
+          </div>
+        </div>
+
+        {/* SSL Security */}
+        <div
+          style={{
+            alignItems: 'center',
+            color: 'rgba(255,255,255,0.5)',
+            display: 'flex',
+            fontSize: 13,
+            gap: 8,
+          }}
+        >
+          <svg
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="16"
+          >
+            <rect height="11" rx="2" ry="2" width="18" x="3" y="11" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <span>Secure SSL Encrypted Payment via Polar.sh</span>
+        </div>
+
+        {/* 14-Day Guarantee Badge */}
+        <div
+          style={{
+            alignItems: 'center',
+            background: 'rgba(34, 197, 94, 0.1)',
+            border: '1px solid rgba(34, 197, 94, 0.25)',
+            borderRadius: 12,
+            display: 'flex',
+            gap: 10,
+            padding: '12px 20px',
+          }}
+        >
+          <svg
+            fill="none"
+            height="20"
+            stroke="#22c55e"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="20"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <span style={{ color: '#22c55e', fontSize: 14, fontWeight: 600 }}>
+            14-Day Money-Back Guarantee
+          </span>
+        </div>
+      </motion.div>
     </section>
   );
 };
