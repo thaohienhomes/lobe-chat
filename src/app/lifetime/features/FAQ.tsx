@@ -142,33 +142,39 @@ const FAQ = () => {
   const faqItems = [
     {
       children:
-        "It means you pay once and get access to Pho.chat's premium features for as long as the platform is online. No monthly subscriptions, no renewal fees — ever.",
+        'It means you pay once and enjoy premium access to Pho.chat for the lifetime of the product. No monthly subscriptions, no recurring bills. Your account will remain active as long as the platform is operational. We are committed to long-term sustainability and growth.',
       key: '1',
-      label: 'What exactly does "Lifetime" mean?',
+      label: 'What exactly does "Lifetime Access" mean?',
     },
     {
       children:
-        'Yes. To keep the service fast for everyone and cover API costs, we implement a generous monthly usage cap (Fair Use Policy). Your credits reset automatically each month, and you can track usage in your dashboard.',
+        'To ensure high performance for all users and manage API costs, we implement a Fair Usage Policy (FUP). Your account will be granted a generous amount of credits that reset automatically every month. This limit is designed to be more than enough for professional daily use while preventing system abuse.',
       key: '2',
-      label: 'Are there any usage limits?',
+      label: 'Are there any usage limits or monthly credits?',
     },
     {
       children:
-        "Yes! You get access to GPT-4, Claude, Gemini, and all our integrated AI models. As we add new models, you'll get access to them too — at no extra cost.",
+        "You get access to the world's most powerful models, including GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, and more. As the AI landscape evolves, we continuously update our platform to include the latest and most efficient models available.",
       key: '3',
-      label: 'Does this include GPT-4, Claude, and Gemini?',
+      label: 'Which AI models are included in this deal?',
     },
     {
       children:
-        'Absolutely. We offer a 14-day "No Questions Asked" refund guarantee through Polar.sh. If you\'re not completely satisfied, contact us within 14 days for a full refund.',
+        'Yes! This Lifetime Deal includes all future standard platform updates. For extremely high-cost "Next-Gen" models that may be released in the future (e.g., GPT-5), we aim to include them or provide them at a highly subsidized rate for our LTD members.',
       key: '4',
-      label: 'What is the refund policy?',
+      label: 'Will I get access to future updates and new models?',
     },
     {
       children:
-        'LTD slots are limited by quantity. You can upgrade to a higher tier only if slots are still available. Once sold out, tiers close permanently.',
+        'We offer a 14-day "No Questions Asked" Money-Back Guarantee. If Pho.chat doesn\'t meet your expectations, simply contact our support within 14 days of purchase for a full refund. Your satisfaction is our priority.',
       key: '5',
-      label: 'Can I upgrade my tier later?',
+      label: 'What is your refund policy?',
+    },
+    {
+      children:
+        'Absolutely. We do not use your personal chats or data to train AI models. Your privacy is paramount, and all conversations are encrypted and handled with strict security protocols.',
+      key: '6',
+      label: 'Is my data private and secure?',
     },
   ];
 
