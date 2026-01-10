@@ -16,6 +16,11 @@ const LifetimeRootLayout = ({ children }: PropsWithChildren) => {
   return (
     <html lang="en">
       <head>
+        {/* Google Fonts - Inter */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
         {/* Google tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17766075190" />
         <script
@@ -29,10 +34,16 @@ const LifetimeRootLayout = ({ children }: PropsWithChildren) => {
           }}
         />
       </head>
-      <body style={{ margin: 0, padding: 0 }}>
+      <body
+        style={{
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          margin: 0,
+          padding: 0,
+        }}
+      >
         <div
           style={{
-            background: '#000',
+            background: '#0a0a0a',
             color: '#fff',
             minHeight: '100vh',
             overflow: 'hidden',

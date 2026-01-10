@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 
+import Comparison from './features/Comparison';
 import FAQ from './features/FAQ';
 import Features from './features/Features';
 import Hero from './features/Hero';
@@ -15,6 +16,7 @@ const LifetimeDealPage = () => {
   return (
     <>
       <Hero />
+      <Comparison />
       <Features />
       <Pricing />
       <FAQ />

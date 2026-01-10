@@ -5,68 +5,70 @@ import { createStyles } from 'antd-style';
 import { memo } from 'react';
 import Marquee from 'react-fast-marquee';
 
-const useStyles = createStyles(({ css, token }) => ({
+const useStyles = createStyles(({ css }) => ({
   container: css`
     position: relative;
 
     width: 100%;
+    max-width: 900px;
+    margin-block-start: 64px;
+    margin-inline: auto;
 
-    /* Center and constrain width */
-    max-width: 800px;
-    margin-block-start: 48px;
-    margin-inline: auto auto;
-
-    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   `,
   label: css`
-    margin-block-end: 24px;
+    margin-block-end: 28px;
 
-    font-size: 14px;
-    color: ${token.colorTextSecondary};
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 40%);
     text-align: center;
-
-    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
   `,
   logoWrapper: css`
     display: flex;
     gap: 12px;
     align-items: center;
 
-    margin-block: 0; margin-inline: 16px; /* Reduced margin from 32px */
+    margin-block: 0;
+    margin-inline: 24px;
+    padding-block: 12px;
+    padding-inline: 20px;
+    border: 1px solid transparent;
+    border-radius: 12px;
 
     opacity: 0.5;
     filter: grayscale(100%);
 
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 
     &:hover {
+      border-color: rgba(255, 255, 255, 10%);
       opacity: 1;
+      background: rgba(255, 255, 255, 5%);
       filter: grayscale(0%);
     }
 
     svg {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
     }
 
     span {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
-      color: ${token.colorTextSecondary};
+      color: rgba(255, 255, 255, 70%);
     }
   `,
 }));
 
 const techLogos = [
-  { provider: 'openai', title: 'ChatGPT' },
+  { provider: 'openai', title: 'OpenAI' },
   { provider: 'anthropic', title: 'Claude' },
   { provider: 'google', title: 'Gemini' },
   { provider: 'deepseek', title: 'DeepSeek' },
-  // 'meta' or 'llama' might be the provider id for Llama models. Trying 'meta' as it's common.
-  // Checking typical lobe-chat provider ids.
   { provider: 'meta', title: 'Llama' },
-  { provider: 'ollama', title: 'Ollama' },
-  // 'xai' or 'grok'.
   { provider: 'xai', title: 'Grok' },
 ];
 
@@ -76,10 +78,10 @@ const LogoLoop = memo(() => {
   return (
     <div className={styles.container}>
       <div className={styles.label}>Powered by world-class AI models</div>
-      <Marquee gradient={false} pauseOnHover speed={40}>
+      <Marquee gradient={false} pauseOnHover speed={35}>
         {techLogos.map((item) => (
           <div className={styles.logoWrapper} key={item.provider}>
-            <ProviderIcon provider={item.provider} size={32} />
+            <ProviderIcon provider={item.provider} size={28} />
             <span>{item.title}</span>
           </div>
         ))}

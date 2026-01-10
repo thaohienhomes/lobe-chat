@@ -3,7 +3,7 @@
 import { Button } from 'antd';
 import { createStyles } from 'antd-style';
 import { motion } from 'framer-motion';
-import { Check, Star } from 'lucide-react';
+import { Check, Crown, Star, Zap } from 'lucide-react';
 
 // Tier configuration - set soldOut to true to mark a tier as sold out
 const TIER_CONFIG = {
@@ -31,12 +31,12 @@ const POLAR_CHECKOUT_URL =
 const useStyles = createStyles(({ css, responsive }) => ({
   badge: css`
     position: absolute;
-    inset-block-start: -12px;
+    inset-block-start: -14px;
     inset-inline-start: 50%;
     transform: translateX(-50%);
 
-    padding-block: 4px;
-    padding-inline: 12px;
+    padding-block: 6px;
+    padding-inline: 16px;
     border-radius: 999px;
 
     font-size: 12px;
@@ -44,13 +44,59 @@ const useStyles = createStyles(({ css, responsive }) => ({
     color: #fff;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    white-space: nowrap;
 
-    background: #7877c6;
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  `,
+  bestValueBadge: css`
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 30%);
   `,
   button: css`
     width: 100%;
-    height: 48px;
+    height: 52px;
+    border: none;
+    border-radius: 12px;
+
+    font-size: 16px;
     font-weight: 600;
+
+    transition: all 0.3s ease;
+  `,
+  buttonHighlight: css`
+    color: #000;
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 30%);
+
+    &:hover {
+      transform: translateY(-2px);
+      color: #000;
+      background: linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%);
+      box-shadow: 0 6px 24px rgba(245, 158, 11, 40%);
+    }
+  `,
+  buttonPrimary: css`
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 25%);
+
+    &:hover {
+      transform: translateY(-2px);
+      color: #fff;
+      background: linear-gradient(135deg, #8b5cf6 0%, #c084fc 100%);
+      box-shadow: 0 6px 24px rgba(124, 58, 237, 35%);
+    }
+  `,
+  buttonSecondary: css`
+    border: 1px solid rgba(255, 255, 255, 15%);
+    color: #fff;
+    background: rgba(255, 255, 255, 10%);
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 25%);
+      background: rgba(255, 255, 255, 15%);
+    }
   `,
   card: css`
     position: relative;
@@ -58,17 +104,33 @@ const useStyles = createStyles(({ css, responsive }) => ({
     display: flex;
     flex-direction: column;
 
-    padding: 32px;
+    padding-block: 36px;
+    padding-inline: 28px;
     border: 1px solid rgba(255, 255, 255, 8%);
     border-radius: 24px;
 
-    background: rgba(255, 255, 255, 3%);
+    background: #141414;
 
-    transition: all 0.3s ease;
+    transition: all 0.4s ease;
 
     &:hover {
-      transform: translateY(-4px);
-      border-color: rgba(255, 255, 255, 20%);
+      transform: translateY(-8px);
+      border-color: rgba(255, 255, 255, 15%);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 50%);
+    }
+  `,
+  cardHighlight: css`
+    border-color: rgba(245, 158, 11, 30%);
+    background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+    box-shadow:
+      0 0 0 1px rgba(245, 158, 11, 15%),
+      0 8px 40px rgba(245, 158, 11, 8%);
+
+    &:hover {
+      border-color: rgba(245, 158, 11, 50%);
+      box-shadow:
+        0 0 0 1px rgba(245, 158, 11, 30%),
+        0 24px 64px rgba(245, 158, 11, 15%);
     }
   `,
   featureItem: css`
@@ -76,69 +138,75 @@ const useStyles = createStyles(({ css, responsive }) => ({
     gap: 12px;
     align-items: center;
 
-    margin-block-end: 16px;
+    margin-block-end: 14px;
 
     font-size: 15px;
-    color: rgba(255, 255, 255, 80%);
+    color: rgba(255, 255, 255, 75%);
 
     svg {
       min-width: 18px;
-      color: #fff;
+      color: #22c55e;
     }
   `,
   features: css`
     flex-grow: 1;
-    margin-block: 32px;
+    margin-block: 28px;
     margin-inline: 0;
   `,
   grid: css`
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
+    gap: 24px;
 
     ${responsive.mobile} {
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 32px;
     }
   `,
   header: css`
-    margin-block-end: 24px;
+    margin-block-end: 48px;
+    text-align: center;
+
+    h2 {
+      margin: 0;
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    p {
+      margin-block: 12px 0;
+      margin-inline: 0;
+      font-size: 18px;
+      color: rgba(255, 255, 255, 50%);
+    }
   `,
   limitedBadge: css`
-    background: #ff4d4f;
+    background: #ef4444;
   `,
   originalPrice: css`
+    display: inline;
+
+    margin-inline-start: 8px;
+
+    font-size: 16px;
+    color: rgba(255, 255, 255, 40%);
+    text-decoration: line-through;
+  `,
+  price: css`
+    font-size: 52px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+  `,
+  priceLabel: css`
     display: block;
 
     margin-block-start: 4px;
 
-    font-size: 16px;
-    color: rgba(255, 255, 255, 50%);
-    text-decoration: line-through;
-
-    opacity: 0.7;
-  `,
-  popularCard: css`
-    border-color: rgba(120, 119, 198, 30%);
-    background: rgba(255, 255, 255, 5%);
-    box-shadow: 0 0 40px rgba(120, 119, 198, 10%);
-
-    &:hover {
-      border-color: rgba(120, 119, 198, 50%);
-    }
-  `,
-  price: css`
-    font-size: 48px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.02em;
-
-    span {
-      margin-inline-start: 4px;
-      font-size: 18px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 60%);
-    }
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 45%);
   `,
   progressBar: css`
     overflow: hidden;
@@ -147,29 +215,26 @@ const useStyles = createStyles(({ css, responsive }) => ({
     margin-block-end: 8px;
     border-radius: 999px;
 
-    background: rgba(255, 255, 255, 10%);
+    background: rgba(255, 255, 255, 8%);
   `,
   progressBarContainer: css`
-    margin-block: 24px;
+    margin-block: 20px;
     margin-inline: 0;
   `,
   progressFill: css`
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #7877c6, #bcacf7);
+    background: linear-gradient(90deg, #7c3aed, #a855f7);
     animation: pulse 2s infinite;
 
     @keyframes pulse {
-      0% {
+      0%,
+      100% {
         opacity: 1;
       }
 
       50% {
-        opacity: 0.7;
-      }
-
-      100% {
-        opacity: 1;
+        opacity: 0.6;
       }
     }
   `,
@@ -177,16 +242,16 @@ const useStyles = createStyles(({ css, responsive }) => ({
     display: flex;
     justify-content: space-between;
 
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 60%);
+    color: rgba(255, 255, 255, 55%);
 
     strong {
-      color: #7877c6;
+      color: #a855f7;
     }
   `,
   section: css`
-    max-width: 1200px;
+    max-width: 1100px;
     margin-block: 0;
     margin-inline: auto;
     padding-block: 80px;
@@ -194,7 +259,7 @@ const useStyles = createStyles(({ css, responsive }) => ({
   `,
   soldOutCard: css`
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.5;
     filter: grayscale(100%);
 
     &:hover {
@@ -212,30 +277,42 @@ const useStyles = createStyles(({ css, responsive }) => ({
 
     border-radius: 24px;
 
-    background: rgba(0, 0, 0, 50%);
+    background: rgba(0, 0, 0, 60%);
   `,
   soldOutText: css`
     transform: rotate(-12deg);
 
     padding-block: 12px;
     padding-inline: 32px;
-    border: 2px solid #ff4d4f;
+    border: 2px solid #ef4444;
     border-radius: 8px;
 
     font-size: 24px;
     font-weight: 800;
-    color: #ff4d4f;
+    color: #ef4444;
     letter-spacing: 0.1em;
 
     background: rgba(0, 0, 0, 80%);
   `,
+  tierIcon: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+    margin-block-end: 16px;
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 5%);
+  `,
   title: css`
-    margin-block: 0 8px;
+    margin-block: 0 4px;
     margin-inline: 0;
 
-    font-size: 20px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 80%);
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
   `,
 }));
 
@@ -244,12 +321,23 @@ const Pricing = () => {
 
   return (
     <section className={styles.section} id="pricing">
+      <motion.div
+        className={styles.header}
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        whileInView={{ opacity: 1, y: 0 }}
+      >
+        <h2>Choose Your Plan</h2>
+        <p>One payment. Lifetime access. No strings attached.</p>
+      </motion.div>
+
       <div className={styles.grid}>
         {/* Early Bird */}
         <motion.div
           className={cx(styles.card, TIER_CONFIG.earlyBird.soldOut && styles.soldOutCard)}
-          initial={{ opacity: 0, y: 20 }}
-          transition={{ delay: 0.1 }}
+          initial={{ opacity: 0, y: 30 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
         >
@@ -258,31 +346,33 @@ const Pricing = () => {
               <span className={styles.soldOutText}>SOLD OUT</span>
             </div>
           )}
-          <div className={cx(styles.badge, styles.limitedBadge)}>Limited</div>
-          <div className={styles.header}>
-            <h3 className={styles.title}>Early Bird</h3>
-            <div className={styles.price}>
-              ${TIER_CONFIG.earlyBird.price}
-              <span>/ one-time</span>
-            </div>
+          <div className={cx(styles.badge, styles.limitedBadge)}>Limited Slots</div>
+
+          <div className={styles.tierIcon}>
+            <Zap color="#a855f7" size={24} />
           </div>
+
+          <h3 className={styles.title}>Early Bird</h3>
 
           <div className={styles.progressBarContainer}>
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}
                 style={{
-                  background: '#ff4d4f',
+                  background: 'linear-gradient(90deg, #ef4444, #f87171)',
                   width: `${(TIER_CONFIG.earlyBird.claimed / TIER_CONFIG.earlyBird.total) * 100}%`,
                 }}
               />
             </div>
             <div className={styles.scarcityText}>
-              <span>
-                {TIER_CONFIG.earlyBird.claimed}/{TIER_CONFIG.earlyBird.total} claimed
-              </span>
-              <strong style={{ color: '#ff4d4f' }}>Selling Fast</strong>
+              <span>{TIER_CONFIG.earlyBird.total - TIER_CONFIG.earlyBird.claimed} slots left</span>
+              <strong style={{ color: '#ef4444' }}>Selling Fast</strong>
             </div>
+          </div>
+
+          <div className={styles.price}>
+            ${TIER_CONFIG.earlyBird.price}
+            <span className={styles.priceLabel}>one-time payment</span>
           </div>
 
           <div className={styles.features}>
@@ -290,7 +380,7 @@ const Pricing = () => {
               <Check size={18} /> Lifetime Updates
             </div>
             <div className={styles.featureItem}>
-              <Check size={18} /> 2 Device Synced
+              <Check size={18} /> 2 Devices Synced
             </div>
             <div className={styles.featureItem}>
               <Check size={18} /> Priority Support
@@ -298,25 +388,23 @@ const Pricing = () => {
           </div>
 
           <Button
-            className={styles.button}
+            className={cx(styles.button, styles.buttonSecondary)}
             disabled={TIER_CONFIG.earlyBird.soldOut}
             href={`${POLAR_CHECKOUT_URL}?amount=${TIER_CONFIG.earlyBird.price}`}
-            size="large"
-            type="primary"
           >
-            {TIER_CONFIG.earlyBird.soldOut ? 'Sold Out' : 'Claim Early Bird'}
+            {TIER_CONFIG.earlyBird.soldOut ? 'Sold Out' : 'Get Early Bird'}
           </Button>
         </motion.div>
 
-        {/* Standard */}
+        {/* Standard - Best Value */}
         <motion.div
           className={cx(
             styles.card,
-            styles.popularCard,
+            styles.cardHighlight,
             TIER_CONFIG.standard.soldOut && styles.soldOutCard,
           )}
-          initial={{ opacity: 0, y: 20 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 0, y: 30 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
         >
@@ -325,36 +413,39 @@ const Pricing = () => {
               <span className={styles.soldOutText}>SOLD OUT</span>
             </div>
           )}
-          <div className={styles.badge}>Most Popular</div>
-          <div className={styles.header}>
-            <h3 className={styles.title}>Standard</h3>
-            <div className={styles.price}>
-              ${TIER_CONFIG.standard.price}
-              <span>/ one-time</span>
-            </div>
-            <span className={styles.originalPrice}>$199</span>
+          <div className={cx(styles.badge, styles.bestValueBadge)}>⭐ Best Value</div>
+
+          <div className={styles.tierIcon} style={{ background: 'rgba(245, 158, 11, 15%)' }}>
+            <Crown color="#f59e0b" size={24} />
           </div>
+
+          <h3 className={styles.title}>Standard</h3>
 
           <div className={styles.progressBarContainer}>
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}
                 style={{
+                  background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
                   width: `${(TIER_CONFIG.standard.claimed / TIER_CONFIG.standard.total) * 100}%`,
                 }}
               />
             </div>
             <div className={styles.scarcityText}>
-              <span>
-                {TIER_CONFIG.standard.claimed}/{TIER_CONFIG.standard.total} claimed
-              </span>
-              <strong>High Demand</strong>
+              <span>{TIER_CONFIG.standard.total - TIER_CONFIG.standard.claimed} slots left</span>
+              <strong style={{ color: '#f59e0b' }}>High Demand</strong>
             </div>
+          </div>
+
+          <div className={styles.price}>
+            ${TIER_CONFIG.standard.price}
+            <span className={styles.originalPrice}>$199</span>
+            <span className={styles.priceLabel}>one-time payment</span>
           </div>
 
           <div className={styles.features}>
             <div className={styles.featureItem}>
-              <Star size={18} /> <strong>Everything in Early Bird</strong>
+              <Star color="#f59e0b" size={18} /> <strong>Everything in Early Bird</strong>
             </div>
             <div className={styles.featureItem}>
               <Check size={18} /> Unlimited Devices
@@ -368,22 +459,19 @@ const Pricing = () => {
           </div>
 
           <Button
-            className={styles.button}
+            className={cx(styles.button, styles.buttonHighlight)}
             disabled={TIER_CONFIG.standard.soldOut}
             href={`${POLAR_CHECKOUT_URL}?amount=${TIER_CONFIG.standard.price}`}
-            size="large"
-            style={{ background: '#fff', color: '#000' }}
-            type="primary"
           >
-            {TIER_CONFIG.standard.soldOut ? 'Sold Out' : 'Get Standard'}
+            {TIER_CONFIG.standard.soldOut ? 'Sold Out' : 'Get Best Value'}
           </Button>
         </motion.div>
 
         {/* Last Call */}
         <motion.div
           className={cx(styles.card, TIER_CONFIG.lastCall.soldOut && styles.soldOutCard)}
-          initial={{ opacity: 0, y: 20 }}
-          transition={{ delay: 0.3 }}
+          initial={{ opacity: 0, y: 30 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
         >
@@ -392,25 +480,32 @@ const Pricing = () => {
               <span className={styles.soldOutText}>SOLD OUT</span>
             </div>
           )}
-          <div className={styles.header}>
-            <h3 className={styles.title}>Last Call</h3>
-            <div className={styles.price}>
-              ${TIER_CONFIG.lastCall.price}
-              <span>/ one-time</span>
-            </div>
+
+          <div className={styles.tierIcon}>
+            <Star color="#a855f7" size={24} />
           </div>
+
+          <h3 className={styles.title}>Last Call</h3>
 
           <div className={styles.progressBarContainer}>
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}
-                style={{ background: '#faad14', width: '90%' }}
+                style={{
+                  background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+                  width: '90%',
+                }}
               />
             </div>
             <div className={styles.scarcityText}>
-              <span>Final Remaining Slots</span>
-              <strong style={{ color: '#faad14' }}>Ending Soon</strong>
+              <span>Final slots remaining</span>
+              <strong style={{ color: '#f59e0b' }}>Ending Soon</strong>
             </div>
+          </div>
+
+          <div className={styles.price}>
+            ${TIER_CONFIG.lastCall.price}
+            <span className={styles.priceLabel}>one-time payment</span>
           </div>
 
           <div className={styles.features}>
@@ -426,10 +521,9 @@ const Pricing = () => {
           </div>
 
           <Button
-            className={styles.button}
+            className={cx(styles.button, styles.buttonPrimary)}
             disabled={TIER_CONFIG.lastCall.soldOut}
             href={`${POLAR_CHECKOUT_URL}?amount=${TIER_CONFIG.lastCall.price}`}
-            size="large"
           >
             {TIER_CONFIG.lastCall.soldOut ? 'Sold Out' : 'Buy Now'}
           </Button>
