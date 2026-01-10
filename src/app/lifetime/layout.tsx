@@ -2,13 +2,14 @@ import { Metadata } from 'next';
 import { PropsWithChildren } from 'react';
 
 export const metadata: Metadata = {
-  description: 'Own Pho.chat Forever. Zero Subscriptions. Lifetime access to all AI models.',
+  description:
+    'No more monthly subscriptions for AI chat. Pay once, own Pho.chat forever with lifetime access to all premium AI models including GPT-4, Claude, and more.',
   icons: {
     apple: '/apple-touch-icon.png',
     icon: '/favicon.ico',
     shortcut: '/favicon-32x32.ico',
   },
-  title: 'Lifetime Deal - Pho.chat',
+  title: 'Lifetime Deal | Pho.chat - Own Your AI Forever',
 };
 
 const LifetimeRootLayout = ({ children }: PropsWithChildren) => {

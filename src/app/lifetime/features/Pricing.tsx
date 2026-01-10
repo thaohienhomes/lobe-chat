@@ -5,6 +5,29 @@ import { createStyles } from 'antd-style';
 import { motion } from 'framer-motion';
 import { Check, Star } from 'lucide-react';
 
+// Tier configuration - set soldOut to true to mark a tier as sold out
+const TIER_CONFIG = {
+  earlyBird: {
+    claimed: 24,
+    price: 89,
+    soldOut: false,
+    total: 30,
+  },
+  lastCall: {
+    price: 149.99,
+    soldOut: false,
+  },
+  standard: {
+    claimed: 38,
+    price: 119,
+    soldOut: false,
+    total: 50,
+  },
+};
+
+const POLAR_CHECKOUT_URL =
+  'https://buy.polar.sh/polar_cl_U5LLNacuWmn6wASqcabNRTSHvzfJlGAzPG5Hq0v1OoC';
+
 const useStyles = createStyles(({ css, responsive }) => ({
   badge: css`
     position: absolute;
@@ -169,6 +192,43 @@ const useStyles = createStyles(({ css, responsive }) => ({
     padding-block: 80px;
     padding-inline: 24px;
   `,
+  soldOutCard: css`
+    pointer-events: none;
+    opacity: 0.6;
+    filter: grayscale(100%);
+
+    &:hover {
+      transform: none;
+    }
+  `,
+  soldOutOverlay: css`
+    position: absolute;
+    z-index: 10;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 24px;
+
+    background: rgba(0, 0, 0, 50%);
+  `,
+  soldOutText: css`
+    transform: rotate(-12deg);
+
+    padding-block: 12px;
+    padding-inline: 32px;
+    border: 2px solid #ff4d4f;
+    border-radius: 8px;
+
+    font-size: 24px;
+    font-weight: 800;
+    color: #ff4d4f;
+    letter-spacing: 0.1em;
+
+    background: rgba(0, 0, 0, 80%);
+  `,
   title: css`
     margin-block: 0 8px;
     margin-inline: 0;
@@ -187,17 +247,23 @@ const Pricing = () => {
       <div className={styles.grid}>
         {/* Early Bird */}
         <motion.div
-          className={styles.card}
+          className={cx(styles.card, TIER_CONFIG.earlyBird.soldOut && styles.soldOutCard)}
           initial={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.1 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
         >
+          {TIER_CONFIG.earlyBird.soldOut && (
+            <div className={styles.soldOutOverlay}>
+              <span className={styles.soldOutText}>SOLD OUT</span>
+            </div>
+          )}
           <div className={cx(styles.badge, styles.limitedBadge)}>Limited</div>
           <div className={styles.header}>
             <h3 className={styles.title}>Early Bird</h3>
             <div className={styles.price}>
-              $89<span>/ one-time</span>
+              ${TIER_CONFIG.earlyBird.price}
+              <span>/ one-time</span>
             </div>
           </div>
 
@@ -205,11 +271,16 @@ const Pricing = () => {
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}
-                style={{ background: '#ff4d4f', width: '40%' }}
+                style={{
+                  background: '#ff4d4f',
+                  width: `${(TIER_CONFIG.earlyBird.claimed / TIER_CONFIG.earlyBird.total) * 100}%`,
+                }}
               />
             </div>
             <div className={styles.scarcityText}>
-              <span>12/30 claimed</span>
+              <span>
+                {TIER_CONFIG.earlyBird.claimed}/{TIER_CONFIG.earlyBird.total} claimed
+              </span>
               <strong style={{ color: '#ff4d4f' }}>Selling Fast</strong>
             </div>
           </div>
@@ -228,37 +299,55 @@ const Pricing = () => {
 
           <Button
             className={styles.button}
-            href="https://buy.polar.sh/polar_cl_U5LLNacuWmn6wASqcabNRTSHvzfJlGAzPG5Hq0v1OoC"
+            disabled={TIER_CONFIG.earlyBird.soldOut}
+            href={`${POLAR_CHECKOUT_URL}?amount=${TIER_CONFIG.earlyBird.price}`}
             size="large"
             type="primary"
           >
-            Claim Early Bird
+            {TIER_CONFIG.earlyBird.soldOut ? 'Sold Out' : 'Claim Early Bird'}
           </Button>
         </motion.div>
 
         {/* Standard */}
         <motion.div
-          className={cx(styles.card, styles.popularCard)}
+          className={cx(
+            styles.card,
+            styles.popularCard,
+            TIER_CONFIG.standard.soldOut && styles.soldOutCard,
+          )}
           initial={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.2 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
         >
+          {TIER_CONFIG.standard.soldOut && (
+            <div className={styles.soldOutOverlay}>
+              <span className={styles.soldOutText}>SOLD OUT</span>
+            </div>
+          )}
           <div className={styles.badge}>Most Popular</div>
           <div className={styles.header}>
             <h3 className={styles.title}>Standard</h3>
             <div className={styles.price}>
-              $119<span>/ one-time</span>
+              ${TIER_CONFIG.standard.price}
+              <span>/ one-time</span>
             </div>
             <span className={styles.originalPrice}>$199</span>
           </div>
 
           <div className={styles.progressBarContainer}>
             <div className={styles.progressBar}>
-              <div className={styles.progressFill} style={{ width: '75%' }} />
+              <div
+                className={styles.progressFill}
+                style={{
+                  width: `${(TIER_CONFIG.standard.claimed / TIER_CONFIG.standard.total) * 100}%`,
+                }}
+              />
             </div>
             <div className={styles.scarcityText}>
-              <span>38/50 claimed</span>
+              <span>
+                {TIER_CONFIG.standard.claimed}/{TIER_CONFIG.standard.total} claimed
+              </span>
               <strong>High Demand</strong>
             </div>
           </div>
@@ -280,27 +369,34 @@ const Pricing = () => {
 
           <Button
             className={styles.button}
-            href="https://buy.polar.sh/polar_cl_U5LLNacuWmn6wASqcabNRTSHvzfJlGAzPG5Hq0v1OoC"
+            disabled={TIER_CONFIG.standard.soldOut}
+            href={`${POLAR_CHECKOUT_URL}?amount=${TIER_CONFIG.standard.price}`}
             size="large"
             style={{ background: '#fff', color: '#000' }}
             type="primary"
           >
-            Get Standard
+            {TIER_CONFIG.standard.soldOut ? 'Sold Out' : 'Get Standard'}
           </Button>
         </motion.div>
 
         {/* Last Call */}
         <motion.div
-          className={styles.card}
+          className={cx(styles.card, TIER_CONFIG.lastCall.soldOut && styles.soldOutCard)}
           initial={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.3 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
         >
+          {TIER_CONFIG.lastCall.soldOut && (
+            <div className={styles.soldOutOverlay}>
+              <span className={styles.soldOutText}>SOLD OUT</span>
+            </div>
+          )}
           <div className={styles.header}>
             <h3 className={styles.title}>Last Call</h3>
             <div className={styles.price}>
-              $149.99<span>/ one-time</span>
+              ${TIER_CONFIG.lastCall.price}
+              <span>/ one-time</span>
             </div>
           </div>
 
@@ -325,16 +421,17 @@ const Pricing = () => {
               <Check size={18} /> Priority Onboarding
             </div>
             <div className={styles.featureItem}>
-              <Check size={18} /> Found Badge Profile
+              <Check size={18} /> Founder Badge Profile
             </div>
           </div>
 
           <Button
             className={styles.button}
-            href="https://buy.polar.sh/polar_cl_U5LLNacuWmn6wASqcabNRTSHvzfJlGAzPG5Hq0v1OoC"
+            disabled={TIER_CONFIG.lastCall.soldOut}
+            href={`${POLAR_CHECKOUT_URL}?amount=${TIER_CONFIG.lastCall.price}`}
             size="large"
           >
-            Buy Now
+            {TIER_CONFIG.lastCall.soldOut ? 'Sold Out' : 'Buy Now'}
           </Button>
         </motion.div>
       </div>

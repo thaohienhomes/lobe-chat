@@ -5,7 +5,9 @@ import { createStyles } from 'antd-style';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import Script from 'next/script';
+import { Suspense } from 'react';
 
 const useStyles = createStyles(({ css }) => ({
   button: css`
@@ -47,18 +49,22 @@ const useStyles = createStyles(({ css }) => ({
   `,
 }));
 
-const SuccessPage = () => {
+const SuccessContent = () => {
   const { styles } = useStyles();
+  const searchParams = useSearchParams();
+
+  // Extract amount from URL params, default to 149.99
+  const amount = parseFloat(searchParams.get('amount') || '149.99');
 
   return (
     <div className={styles.container}>
-      {/* Google Ads Conversion Event */}
+      {/* Google Ads Conversion Event with Dynamic Amount */}
       <Script
         dangerouslySetInnerHTML={{
           __html: `
             gtag('event', 'conversion', {
               'send_to': 'AW-17766075190/LvQ5CPv3ieABeLaWw5dC',
-              'value': 149.99,
+              'value': ${amount},
               'currency': 'USD'
             });
           `,
@@ -96,6 +102,14 @@ const SuccessPage = () => {
         </Link>
       </motion.div>
     </div>
+  );
+};
+
+const SuccessPage = () => {
+  return (
+    <Suspense fallback={<div style={{ background: '#000', minHeight: '100vh' }} />}>
+      <SuccessContent />
+    </Suspense>
   );
 };
 
