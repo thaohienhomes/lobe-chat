@@ -5,6 +5,7 @@ import { createStyles } from 'antd-style';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import Script from 'next/script';
 
 const useStyles = createStyles(({ css }) => ({
   button: css`
@@ -51,6 +52,20 @@ const SuccessPage = () => {
 
   return (
     <div className={styles.container}>
+      {/* Google Ads Conversion Event */}
+      <Script
+        dangerouslySetInnerHTML={{
+          __html: `
+            gtag('event', 'conversion', {
+              'send_to': 'AW-17766075190/LvQ5CPv3ieABeLaWw5dC',
+              'value': 149.99,
+              'currency': 'USD'
+            });
+          `,
+        }}
+        id="google-ads-conversion"
+        strategy="afterInteractive"
+      />
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className={styles.content}

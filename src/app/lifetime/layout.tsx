@@ -14,7 +14,20 @@ export const metadata: Metadata = {
 const LifetimeRootLayout = ({ children }: PropsWithChildren) => {
   return (
     <html lang="en">
-      <head />
+      <head>
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17766075190" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17766075190');
+            `,
+          }}
+        />
+      </head>
       <body style={{ margin: 0, padding: 0 }}>
         <div
           style={{

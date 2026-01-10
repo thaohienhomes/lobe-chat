@@ -128,7 +128,7 @@ const useStyles = createStyles(({ css, responsive }) => ({
   `,
   progressBarContainer: css`
     margin-block: 24px;
-margin-inline: 0;
+    margin-inline: 0;
   `,
   progressFill: css`
     height: 100%;
@@ -228,7 +228,7 @@ const Pricing = () => {
 
           <Button
             className={styles.button}
-            href="/api/payment/polar/checkout?productId=85158f39-dd9d-4ed9-b344-9afa5eba5080"
+            href="https://buy.polar.sh/polar_cl_U5LLNacuWmn6wASqcabNRTSHvzfJlGAzPG5Hq0v1OoC"
             size="large"
             type="primary"
           >
@@ -280,7 +280,7 @@ const Pricing = () => {
 
           <Button
             className={styles.button}
-            href="/api/payment/polar/checkout?productId=01faa30d-bfb7-4699-8916-4288591d3fa6"
+            href="https://buy.polar.sh/polar_cl_U5LLNacuWmn6wASqcabNRTSHvzfJlGAzPG5Hq0v1OoC"
             size="large"
             style={{ background: '#fff', color: '#000' }}
             type="primary"
@@ -331,7 +331,7 @@ const Pricing = () => {
 
           <Button
             className={styles.button}
-            href="/api/payment/polar/checkout?productId=646af452-89ad-439b-9109-8840320e2485"
+            href="https://buy.polar.sh/polar_cl_U5LLNacuWmn6wASqcabNRTSHvzfJlGAzPG5Hq0v1OoC"
             size="large"
           >
             Buy Now
