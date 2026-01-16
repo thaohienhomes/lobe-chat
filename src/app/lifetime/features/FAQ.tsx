@@ -59,6 +59,10 @@ const useStyles = createStyles(({ css }) => ({
     border-radius: 24px;
 
     background: #141414;
+
+    @media (max-width: 640px) {
+      padding: 20px;
+    }
   `,
   header: css`
     margin-block-end: 48px;
@@ -69,6 +73,10 @@ const useStyles = createStyles(({ css }) => ({
       font-size: 36px;
       font-weight: 700;
       color: #fff;
+
+      @media (max-width: 640px) {
+        font-size: 28px;
+      }
     }
 
     p {
@@ -76,6 +84,10 @@ const useStyles = createStyles(({ css }) => ({
       margin-inline: 0;
       font-size: 18px;
       color: rgba(255, 255, 255, 50%);
+
+      @media (max-width: 640px) {
+        font-size: 16px;
+      }
     }
   `,
   refundBadge: css`
@@ -100,6 +112,11 @@ const useStyles = createStyles(({ css }) => ({
       border-color: rgba(34, 197, 94, 40%);
       box-shadow: 0 8px 32px rgba(34, 197, 94, 10%);
     }
+
+    @media (max-width: 640px) {
+      margin-block: 48px 0;
+      padding: 16px;
+    }
   `,
   refundIcon: css`
     display: flex;
@@ -111,6 +128,11 @@ const useStyles = createStyles(({ css }) => ({
     border-radius: 12px;
 
     background: rgba(34, 197, 94, 15%);
+
+    @media (max-width: 640px) {
+      width: 40px;
+      height: 40px;
+    }
   `,
   refundText: css`
     h4 {
@@ -118,6 +140,10 @@ const useStyles = createStyles(({ css }) => ({
       font-size: 16px;
       font-weight: 600;
       color: #22c55e;
+
+      @media (max-width: 640px) {
+        font-size: 15px;
+      }
     }
 
     p {
@@ -125,6 +151,10 @@ const useStyles = createStyles(({ css }) => ({
       margin-inline: 0;
       font-size: 14px;
       color: rgba(255, 255, 255, 55%);
+
+      @media (max-width: 640px) {
+        font-size: 13px;
+      }
     }
   `,
   section: css`
@@ -133,6 +163,11 @@ const useStyles = createStyles(({ css }) => ({
     margin-inline: auto;
     padding-block: 80px 120px;
     padding-inline: 24px;
+
+    @media (max-width: 640px) {
+      padding-block: 60px 80px;
+      padding-inline: 16px;
+    }
   `,
 }));
 
@@ -148,9 +183,15 @@ const FAQ = () => {
     },
     {
       children:
-        'To ensure high performance for all users and manage API costs, we implement a Fair Usage Policy (FUP). Your account will be granted a generous amount of credits that reset automatically every month. This limit is designed to be more than enough for professional daily use while preventing system abuse.',
+        "We want to be transparent. You get generous monthly credits (approx. $5-$10 value/month) which resets every 30 days. This is enough for ~500 GPT-4 queries or ~2000+ Flash queries. If you need more, you can use the 'Bring Your Own Key' feature.",
       key: '2',
       label: 'Are there any usage limits or monthly credits?',
+    },
+    {
+      children:
+        "Don't worry, you never lose access. Our platform features a 'Bring Your Own Key' (BYOK) architecture. If you exhaust your monthly credits, simply plug in your own API Key (OpenAI, Anthropic, Gemini, etc.) in the settings and keep using the premium UI forever without interruption.",
+      key: 'byok',
+      label: 'What happens if I run out of credits? (Bring Your Own Key)',
     },
     {
       children:
