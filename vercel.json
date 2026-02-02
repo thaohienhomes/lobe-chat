@@ -1,6 +1,18 @@
 {
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=16384 --expose-gc",
+      "SENTRY_LOG_LEVEL": "warn",
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  },
   "buildCommand": "bun run build",
-  "installCommand": "bun install",
+  "crons": [
+    {
+      "path": "/api/cron/reset-lifetime-points",
+      "schedule": "0 0 1 * *"
+    }
+  ],
   "functions": {
     "src/app/(backend)/**/*.ts": {
       "maxDuration": 60
@@ -15,17 +27,15 @@
       "maxDuration": 60
     }
   },
-  "crons": [
+  "installCommand": "bun install",
+  "rewrites": [
     {
-      "path": "/api/cron/reset-lifetime-points",
-      "schedule": "0 0 1 * *"
+      "source": "/studio",
+      "destination": "https://pho-video.vercel.app/studio"
+    },
+    {
+      "source": "/studio/:path*",
+      "destination": "https://pho-video.vercel.app/studio/:path*"
     }
-  ],
-  "build": {
-    "env": {
-      "NODE_OPTIONS": "--max-old-space-size=16384 --expose-gc",
-      "SENTRY_LOG_LEVEL": "warn",
-      "NEXT_TELEMETRY_DISABLED": "1"
-    }
-  }
+  ]
 }
