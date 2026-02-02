@@ -56,9 +56,6 @@ export const config = {
     '/next-auth/(.*)',
     '/oauth(.*)',
     '/oidc(.*)',
-    // Phở Studio integration
-    '/studio',
-    '/studio/(.*)',
     // ↓ cloud ↓
   ],
 };
@@ -68,14 +65,6 @@ const backendApiEndpoints = ['/api', '/trpc', '/webapi', '/oidc'];
 const defaultMiddleware = (request: NextRequest) => {
   const url = new URL(request.url);
   logDefault('Processing request: %s %s', request.method, request.url);
-
-  // Phở Studio integration - rewrite /studio/* to pho-video.vercel.app
-  if (url.pathname === '/studio' || url.pathname.startsWith('/studio/')) {
-    const studioPath = url.pathname.replace(/^\/studio/, '') || '/';
-    const studioUrl = `https://pho-video.vercel.app${studioPath}${url.search}`;
-    logDefault('Rewriting to Phở Studio: %s', studioUrl);
-    return NextResponse.rewrite(new URL(studioUrl));
-  }
 
   // skip all api requests
   if (backendApiEndpoints.some((path) => url.pathname.startsWith(path))) {
@@ -206,9 +195,6 @@ const isPublicRoute = createRouteMatcher([
   '/api/subscription(.*)',
   // Payment checkout
   '/api/payment(.*)',
-  // Phở Studio - public, handled by external app
-  '/studio',
-  '/studio(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
