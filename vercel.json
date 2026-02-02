@@ -27,15 +27,5 @@
       "maxDuration": 60
     }
   },
-  "installCommand": "bun install",
-  "rewrites": [
-    {
-      "source": "/studio",
-      "destination": "https://pho-video.vercel.app/"
-    },
-    {
-      "source": "/studio/:path*",
-      "destination": "https://pho-video.vercel.app/:path*"
-    }
-  ]
+  "installCommand": "bun install"
 }
