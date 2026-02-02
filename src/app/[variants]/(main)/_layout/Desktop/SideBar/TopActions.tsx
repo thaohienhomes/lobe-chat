@@ -1,5 +1,4 @@
 import { ActionIcon, ActionIconProps, Hotkey } from '@lobehub/ui';
-import { Badge } from 'antd';
 import { Compass, FolderClosed, MessageSquare, Palette, Video } from 'lucide-react';
 import Link from 'next/link';
 import { CSSProperties, memo } from 'react';
@@ -104,7 +103,6 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
         aria-label="Phở Studio"
         href="https://studio.pho.chat"
         rel="noopener noreferrer"
-        style={{ display: 'inline-block', position: 'relative' }}
         target="_blank"
       >
         <ActionIcon
@@ -119,20 +117,6 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           }
           title="Phở Studio - AI Video Generation"
           tooltipProps={{ placement: 'right' }}
-        />
-        <Badge
-          count="NEW"
-          size="small"
-          style={{
-            backgroundColor: '#F0421C',
-            fontSize: 8,
-            height: 14,
-            lineHeight: '14px',
-            padding: '0 4px',
-            position: 'absolute',
-            right: -8,
-            top: -4,
-          }}
         />
       </a>
     </Flexbox>
