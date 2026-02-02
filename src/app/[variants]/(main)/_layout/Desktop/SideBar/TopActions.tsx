@@ -1,7 +1,8 @@
 import { ActionIcon, ActionIconProps, Hotkey } from '@lobehub/ui';
-import { Compass, FolderClosed, MessageSquare, Palette } from 'lucide-react';
+import { Badge } from 'antd';
+import { Compass, FolderClosed, MessageSquare, Palette, Video } from 'lucide-react';
 import Link from 'next/link';
-import { memo } from 'react';
+import { CSSProperties, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
@@ -98,6 +99,42 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           />
         </Link>
       )}
+      {/* Phở Studio Cross-Promotion */}
+      <a
+        aria-label="Phở Studio"
+        href="https://studio.pho.chat"
+        rel="noopener noreferrer"
+        style={{ display: 'inline-block', position: 'relative' }}
+        target="_blank"
+      >
+        <ActionIcon
+          icon={Video}
+          size={ICON_SIZE}
+          style={
+            {
+              border: '1px solid rgba(240, 66, 28, 0.6)',
+              borderRadius: 8,
+              boxShadow: '0 0 12px 2px rgba(240, 66, 28, 0.5)',
+            } as CSSProperties
+          }
+          title="Phở Studio - AI Video Generation"
+          tooltipProps={{ placement: 'right' }}
+        />
+        <Badge
+          count="NEW"
+          size="small"
+          style={{
+            backgroundColor: '#F0421C',
+            fontSize: 8,
+            height: 14,
+            lineHeight: '14px',
+            padding: '0 4px',
+            position: 'absolute',
+            right: -8,
+            top: -4,
+          }}
+        />
+      </a>
     </Flexbox>
   );
 });
