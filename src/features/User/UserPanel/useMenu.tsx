@@ -6,6 +6,7 @@ import {
   Book,
   CircleUserRound,
   Cloudy,
+  CreditCard,
   Download,
   FileText,
   HardDriveDownload,
@@ -13,7 +14,7 @@ import {
   LogOut,
   Mail,
   Settings2,
-  CreditCard,
+  Video,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PropsWithChildren, memo } from 'react';
@@ -25,9 +26,7 @@ import { enableAuth } from '@/const/auth';
 import { BRANDING_EMAIL, LOBE_CHAT_CLOUD, SOCIAL_URL } from '@/const/branding';
 import { DEFAULT_DESKTOP_HOTKEY_CONFIG } from '@/const/desktop';
 import {
-  CHANGELOG,
   DOCUMENTS_REFER_URL,
-  GITHUB_ISSUES,
   OFFICIAL_URL,
   UTM_SOURCE,
   mailTo,
@@ -82,9 +81,7 @@ export const useMenu = () => {
     {
       icon: <Icon icon={CreditCard} />,
       key: 'subscription',
-      label: (
-        <Link href={'/settings?active=subscription'}>{t('userPanel.subscription')}</Link>
-      ),
+      label: <Link href={'/settings?active=subscription'}>{t('userPanel.subscription')}</Link>,
     },
   ];
 
@@ -100,6 +97,25 @@ export const useMenu = () => {
       label: (
         <Link href={'/settings'}>
           <NewVersionBadge showBadge={hasNewVersion}>{t('userPanel.setting')}</NewVersionBadge>
+        </Link>
+      ),
+    },
+    {
+      type: 'divider',
+    },
+  ];
+
+  // Phở Studio cross-promotion link
+  const phoStudio: MenuProps['items'] = [
+    {
+      icon: <Icon icon={Video} />,
+      key: 'pho-studio',
+      label: (
+        <Link href={'https://studio.pho.chat'} target={'_blank'}>
+          <Flexbox align={'center'} gap={8} horizontal>
+            <span>Phở Studio</span>
+            <Badge count={'NEW'} style={{ backgroundColor: '#F0421C' }} />
+          </Flexbox>
         </Link>
       ),
     },
@@ -127,15 +143,15 @@ export const useMenu = () => {
   const data = !isLogin
     ? []
     : ([
-      {
-        icon: <Icon icon={HardDriveDownload} />,
-        key: 'import',
-        label: <DataImporter>{t('importData')}</DataImporter>,
-      },
-      {
-        type: 'divider',
-      },
-    ].filter(Boolean) as ItemType[]);
+        {
+          icon: <Icon icon={HardDriveDownload} />,
+          key: 'import',
+          label: <DataImporter>{t('importData')}</DataImporter>,
+        },
+        {
+          type: 'divider',
+        },
+      ].filter(Boolean) as ItemType[]);
 
   const helps: MenuProps['items'] = [
     showCloudPromotion && {
@@ -163,15 +179,19 @@ export const useMenu = () => {
             </Link>
           ),
         },
-        ...(SOCIAL_URL.discord ? [{
-          icon: <Icon icon={DiscordIcon} />,
-          key: 'discord',
-          label: (
-            <Link href={SOCIAL_URL.discord} target={'_blank'}>
-              {t('userPanel.discord')}
-            </Link>
-          ),
-        }] : []),
+        ...(SOCIAL_URL.discord
+          ? [
+              {
+                icon: <Icon icon={DiscordIcon} />,
+                key: 'discord',
+                label: (
+                  <Link href={SOCIAL_URL.discord} target={'_blank'}>
+                    {t('userPanel.discord')}
+                  </Link>
+                ),
+              },
+            ]
+          : []),
         {
           icon: <Icon icon={Mail} />,
           key: 'email',
@@ -197,6 +217,7 @@ export const useMenu = () => {
     },
     ...(!enableAuth || (enableAuth && isLoginWithAuth) ? profile : []),
     ...(isLogin ? settings : []),
+    ...phoStudio, // Cross-promote Phở Studio
     /* ↓ cloud slot ↓ */
 
     /* ↑ cloud slot ↑ */
@@ -207,12 +228,12 @@ export const useMenu = () => {
 
   const logoutItems: MenuProps['items'] = isLoginWithAuth
     ? [
-      {
-        icon: <Icon icon={LogOut} />,
-        key: 'logout',
-        label: <span>{t('signout', { ns: 'auth' })}</span>,
-      },
-    ]
+        {
+          icon: <Icon icon={LogOut} />,
+          key: 'logout',
+          label: <span>{t('signout', { ns: 'auth' })}</span>,
+        },
+      ]
     : [];
 
   return { logoutItems, mainItems };
