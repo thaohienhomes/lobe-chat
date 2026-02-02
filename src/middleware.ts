@@ -206,6 +206,9 @@ const isPublicRoute = createRouteMatcher([
   '/api/subscription(.*)',
   // Payment checkout
   '/api/payment(.*)',
+  // Phở Studio - public, handled by external app
+  '/studio',
+  '/studio(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
