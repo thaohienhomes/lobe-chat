@@ -134,7 +134,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
   vn_team: {
     advancedAI: true,
     code: 'vn_team',
-    displayName: 'Lẩu Phở (Ultimate)',
+    displayName: 'Lẩu Phở (Team)',
     enableCustomAPI: true,
     enableKnowledgeBase: true,
     features: [
@@ -149,6 +149,30 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     price: 299_000,
     prioritySupport: true,
     // New Features
+    storageGB: 4,
+    vectorEntries: 20_000,
+  },
+  vn_ultimate: {
+    advancedAI: true,
+    code: 'vn_ultimate',
+    dailyTier2Limit: -1, // Unlimited
+    dailyTier3Limit: 100,
+    displayName: 'Phở Pro (Ultimate)',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
+    features: [
+      'Unlimited Tier 1 & 2 models',
+      '100 Tier 3 messages/day',
+      '2M Phở Points/tháng',
+      'Priority support',
+      'Phở Studio access',
+      'Export & backup',
+    ],
+    keyLimits: 'Unlim Tier 1 & 2. 100 Tier 3 msgs/day. Studio Access.',
+    monthlyPoints: 2_000_000,
+    price: 499_000,
+    priceYearly: 4_990_000,
+    prioritySupport: true,
     storageGB: 4,
     vectorEntries: 20_000,
   },
@@ -250,7 +274,12 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     displayName: 'Lifetime Early Bird',
     enableCustomAPI: true,
     enableKnowledgeBase: true,
-    features: ['All Premium features', 'Lifetime access', '2M Points/Month (Reset)', 'Priority Support'],
+    features: [
+      'All Premium features',
+      'Lifetime access',
+      '2M Points/Month (Reset)',
+      'Priority Support',
+    ],
     keyLimits: 'Lifetime Access. 2M Points/Mo.',
     monthlyPoints: 2_000_000,
     price: 89,
@@ -266,7 +295,12 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     displayName: 'Lifetime Last Call',
     enableCustomAPI: true,
     enableKnowledgeBase: true,
-    features: ['All Premium features', 'Lifetime access', '2M Points/Month (Reset)', 'Priority Support'],
+    features: [
+      'All Premium features',
+      'Lifetime access',
+      '2M Points/Month (Reset)',
+      'Priority Support',
+    ],
     keyLimits: 'Lifetime Access. 2M Points/Mo.',
     monthlyPoints: 2_000_000,
     price: 149.99,
@@ -282,7 +316,12 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     displayName: 'Lifetime Standard',
     enableCustomAPI: true,
     enableKnowledgeBase: true,
-    features: ['All Premium features', 'Lifetime access', '2M Points/Month (Reset)', 'Priority Support'],
+    features: [
+      'All Premium features',
+      'Lifetime access',
+      '2M Points/Month (Reset)',
+      'Priority Support',
+    ],
     keyLimits: 'Lifetime Access. 2M Points/Mo.',
     monthlyPoints: 2_000_000,
     price: 119,
@@ -430,7 +469,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     ],
   },
 
-
   // Lifetime Last Call: Same as Early Bird and Standard
   lifetime_last_call: {
     allowedTiers: [1, 2, 3],
@@ -457,7 +495,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
       'o1-preview',
     ],
   },
-
 
   // Lifetime Standard: Same as Early Bird
   lifetime_standard: {
@@ -589,6 +626,38 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
       'gpt-4-turbo',
       'claude-3-opus',
       'o1',
+      'o1-pro',
+      'o3',
+    ],
+  },
+
+  // VN Ultimate (Phở Pro): All tiers with 100 Tier 3 messages/day + Studio access
+  vn_ultimate: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier2: -1, tier3: 100 }, // Unlimited Tier 2, 100 Tier 3/day
+    defaultModel: 'claude-3-5-sonnet',
+    defaultProvider: 'openrouter',
+    models: [
+      // Tier 1 models
+      'gpt-4o-mini',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'claude-3-haiku',
+      'deepseek-chat',
+      'qwen-turbo',
+      // Tier 2 models (unlimited)
+      'gpt-4o',
+      'gpt-4.1',
+      'claude-3-5-sonnet',
+      'claude-3-sonnet',
+      'gemini-1.5-pro',
+      'gemini-2.5-pro',
+      'deepseek-reasoner',
+      // Tier 3 models (100 msg/day limit)
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'o1',
+      'o1-preview',
       'o1-pro',
       'o3',
     ],
