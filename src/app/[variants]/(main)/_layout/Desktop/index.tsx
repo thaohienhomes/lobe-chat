@@ -2,7 +2,7 @@
 
 import { useTheme } from 'antd-style';
 import dynamic from 'next/dynamic';
-import { PropsWithChildren, Suspense, memo } from 'react';
+import { PropsWithChildren, Suspense, memo, useEffect, useState } from 'react';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { Flexbox } from 'react-layout-kit';
 
@@ -12,6 +12,8 @@ import TitleBar, { TITLE_BAR_HEIGHT } from '@/features/ElectronTitlebar';
 import HotkeyHelperPanel from '@/features/HotkeyHelperPanel';
 import { usePlatform } from '@/hooks/usePlatform';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
+import { useUserStore } from '@/store/user';
+import { authSelectors } from '@/store/user/slices/auth/selectors';
 import { HotkeyScopeEnum } from '@/types/hotkey';
 
 import DesktopLayoutContainer from './DesktopLayoutContainer';
@@ -19,12 +21,35 @@ import RegisterHotkeys from './RegisterHotkeys';
 import SideBar from './SideBar';
 
 const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'));
+const OnboardingModal = dynamic(() => import('@/features/Onboarding/OnboardingModal'), {
+  ssr: false,
+});
 
 const Layout = memo<PropsWithChildren>(({ children }) => {
   const { isPWA } = usePlatform();
   const theme = useTheme();
 
   const { showCloudPromotion } = useServerConfigStore(featureFlagsSelectors);
+
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const isLogin = useUserStore(authSelectors.isLogin);
+  const isUserStateInit = useUserStore((s) => s.isUserStateInit);
+  const profession = useUserStore((s) => s.preference?.profession);
+
+  useEffect(() => {
+    // Show onboarding for logged-in users who haven't set their profession
+    if (isUserStateInit && isLogin && !profession) {
+      // Delay to allow UI to settle
+      const timer = setTimeout(() => setShowOnboarding(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLogin, isUserStateInit, profession]);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
   return (
     <HotkeysProvider initiallyActiveScopes={[HotkeyScopeEnum.Global]}>
       {isDesktop && <TitleBar />}
@@ -57,6 +82,9 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
       <Suspense>
         <RegisterHotkeys />
       </Suspense>
+
+      {/* Onboarding Modal for first-time users */}
+      <OnboardingModal onComplete={handleOnboardingComplete} open={showOnboarding} />
     </HotkeysProvider>
   );
 });

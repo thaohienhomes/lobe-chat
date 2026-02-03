@@ -61,12 +61,18 @@ export interface LobeAgentChatConfig {
   searchFCModel?: WorkingModel;
   urlContext?: boolean;
   useModelBuiltinSearch?: boolean;
+
+  /**
+   * Whether to enable Artifacts (interactive HTML/JS)
+   */
+  enableArtifact?: boolean;
 }
 /* eslint-enable */
 
 export const AgentChatConfigSchema = z.object({
   autoCreateTopicThreshold: z.number().default(2),
   displayMode: z.enum(['chat', 'docs']).optional(),
+  enableArtifact: z.boolean().optional(),
   enableAutoCreateTopic: z.boolean().optional(),
   enableCompressHistory: z.boolean().optional(),
   enableHistoryCount: z.boolean().optional(),

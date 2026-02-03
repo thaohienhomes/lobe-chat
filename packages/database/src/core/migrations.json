@@ -655,16 +655,17 @@
   },
   {
     "sql": [
-      "CREATE TABLE \"bundled_apps\" (\r\n\t\"id\" varchar(100) PRIMARY KEY NOT NULL,\r\n\t\"title\" varchar(255) NOT NULL,\r\n\t\"description\" text,\r\n\t\"avatar\" text,\r\n\t\"background_color\" text,\r\n\t\"tags\" jsonb DEFAULT '[]'::jsonb,\r\n\t\"system_role\" text NOT NULL,\r\n\t\"config\" jsonb,\r\n\t\"chat_config\" jsonb,\r\n\t\"opening_message\" text,\r\n\t\"opening_questions\" jsonb,\r\n\t\"is_public\" boolean DEFAULT true,\r\n\t\"is_featured\" boolean DEFAULT false,\r\n\t\"category\" varchar(50),\r\n\t\"usage_count\" jsonb DEFAULT '0'::jsonb,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\r\n);"
+      "CREATE TABLE IF NOT EXISTS \"bundled_apps\" (\r\n\t\"id\" varchar(100) PRIMARY KEY NOT NULL,\r\n\t\"title\" varchar(255) NOT NULL,\r\n\t\"description\" text,\r\n\t\"avatar\" text,\r\n\t\"background_color\" text,\r\n\t\"tags\" jsonb DEFAULT '[]'::jsonb,\r\n\t\"system_role\" text NOT NULL,\r\n\t\"config\" jsonb,\r\n\t\"chat_config\" jsonb,\r\n\t\"opening_message\" text,\r\n\t\"opening_questions\" jsonb,\r\n\t\"is_public\" boolean DEFAULT true,\r\n\t\"is_featured\" boolean DEFAULT false,\r\n\t\"category\" varchar(50),\r\n\t\"usage_count\" jsonb DEFAULT '0'::jsonb,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\r\n);"
     ],
     "bps": true,
     "folderMillis": 1763781049722,
-    "hash": "56b10e49167c1b3b710832a07b7666e536105f3f83529c48ed6c6e3c9e0b09d7"
+    "hash": "f7cd36f1b97d1c4eae654c40fd7db9569fb62272ac337e597ccbc804dcceb5b9"
   },
   {
     "sql": [
       "-- CREATE TABLE \"shared_conversations\" (\r\n-- \t\"id\" text PRIMARY KEY NOT NULL,\r\n-- \t\"user_id\" text,\r\n-- \t\"title\" text NOT NULL,\r\n-- \t\"description\" text,\r\n-- \t\"avatar\" text,\r\n-- \t\"background_color\" text,\r\n-- \t\"tags\" jsonb,\r\n-- \t\"system_role\" text,\r\n-- \t\"model\" text,\r\n-- \t\"provider\" text,\r\n-- \t\"params\" jsonb,\r\n-- \t\"chat_config\" jsonb,\r\n-- \t\"messages\" jsonb NOT NULL,\r\n-- \t\"is_public\" boolean DEFAULT true,\r\n-- \t\"view_count\" integer DEFAULT 0,\r\n-- \t\"fork_count\" integer DEFAULT 0,\r\n-- \t\"created_at\" timestamp DEFAULT now(),\r\n-- \t\"updated_at\" timestamp DEFAULT now(),\r\n-- \t\"accessed_at\" timestamp DEFAULT now()\r\n-- );\r\n-- ",
-      "\r\nCREATE TABLE \"model_pricing\" (\r\n\t\"id\" text PRIMARY KEY NOT NULL,\r\n\t\"model_id\" text NOT NULL,\r\n\t\"input_price\" real NOT NULL,\r\n\t\"output_price\" real NOT NULL,\r\n\t\"per_msg_fee\" real DEFAULT 0,\r\n\t\"tier\" integer DEFAULT 1,\r\n\t\"is_active\" boolean DEFAULT true,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\tCONSTRAINT \"model_pricing_model_id_unique\" UNIQUE(\"model_id\")\r\n);\r\n",
+      "\r\nCREATE TABLE IF NOT EXISTS \"model_pricing\" (\r\n\t\"id\" text PRIMARY KEY NOT NULL,\r\n\t\"model_id\" text NOT NULL,\r\n\t\"input_price\" real NOT NULL,\r\n\t\"output_price\" real NOT NULL,\r\n\t\"per_msg_fee\" real DEFAULT 0,\r\n\t\"tier\" integer DEFAULT 1,\r\n\t\"is_active\" boolean DEFAULT true,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\r\n);\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'model_pricing_model_id_unique') THEN\r\n\t\tALTER TABLE \"model_pricing\" ADD CONSTRAINT \"model_pricing_model_id_unique\" UNIQUE(\"model_id\");\r\n\tEND IF;\r\nEND $$;\r\n",
       "\r\n-- ALTER TABLE \"payments\" DISABLE ROW LEVEL SECURITY;",
       "\r\n-- ALTER TABLE \"subscriptions_multi_market\" DISABLE ROW LEVEL SECURITY;",
       "\r\n-- DROP TABLE \"payments\" CASCADE;",
@@ -690,10 +691,10 @@
       "\r\n-- ALTER TABLE \"payment_gateway_configs\" ADD COLUMN \"is_enabled\" boolean DEFAULT true;",
       "\r\n-- ALTER TABLE \"payment_gateway_configs\" ADD COLUMN \"fixed_fee\" numeric(8, 2) DEFAULT '0';",
       "\r\n-- ALTER TABLE \"payment_gateway_configs\" ADD COLUMN \"percentage_fee\" numeric(5, 3) DEFAULT '0';",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"pho_credit_balance\" integer DEFAULT 0;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"lifetime_spent\" integer DEFAULT 0;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"daily_tier1_usage\" integer DEFAULT 0;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"last_usage_date\" timestamp with time zone DEFAULT now();",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'pho_credit_balance') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"pho_credit_balance\" integer DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'lifetime_spent') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"lifetime_spent\" integer DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'daily_tier1_usage') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"daily_tier1_usage\" integer DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'last_usage_date') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"last_usage_date\" timestamp with time zone DEFAULT now();\r\n\tEND IF;\r\nEND $$;\r\n-- ",
       "\r\n-- CREATE UNIQUE INDEX \"payment_gateway_configs_gateway_country_key\" ON \"payment_gateway_configs\" USING btree (\"gateway_name\",\"country_code\");",
       "\r\n-- CREATE UNIQUE INDEX \"ppp_pricing_country_code_key\" ON \"ppp_pricing\" USING btree (\"country_code\");",
       "\r\n-- ALTER TABLE \"payment_gateway_configs\" DROP COLUMN \"provider\";",
@@ -710,51 +711,57 @@
       "\r\n-- ALTER TABLE \"ppp_pricing\" DROP COLUMN \"gdp_per_capita\";",
       "\r\n-- ALTER TABLE \"ppp_pricing\" DROP COLUMN \"purchasing_power_index\";",
       "\r\n-- ALTER TABLE \"ppp_pricing\" DROP COLUMN \"effective_from\";",
-      "\r\n-- ALTER TABLE \"ppp_pricing\" DROP COLUMN \"effective_to\";"
+      "\r\n-- ALTER TABLE \"ppp_pricing\" DROP COLUMN \"effective_to\";\r\n"
     ],
     "bps": true,
     "folderMillis": 1765081035758,
-    "hash": "06a0ae823bdf0c40b9821b473343ef7f49ca385a5f0dbece70fddb91cf86b93d"
+    "hash": "60ca3e942704f5981703c7422d6ffdb0c1e0476932ee2056f1cbea79f500b6ff"
   },
   {
     "sql": [
-      "CREATE TABLE \"daily_usage\" (\r\n\t\"id\" text PRIMARY KEY NOT NULL,\r\n\t\"user_id\" text NOT NULL,\r\n\t\"date\" varchar(10) NOT NULL,\r\n\t\"tier1_messages\" integer DEFAULT 0,\r\n\t\"tier2_messages\" integer DEFAULT 0,\r\n\t\"tier3_messages\" integer DEFAULT 0,\r\n\t\"points_used\" integer DEFAULT 0,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\r\n);\r\n",
-      "\r\nCREATE TABLE \"transactions\" (\r\n\t\"id\" text PRIMARY KEY NOT NULL,\r\n\t\"user_id\" text NOT NULL,\r\n\t\"amount\" real NOT NULL,\r\n\t\"currency\" varchar(10) NOT NULL,\r\n\t\"provider\" varchar(20) NOT NULL,\r\n\t\"provider_tx_id\" text,\r\n\t\"plan_code\" varchar(50),\r\n\t\"points_granted\" integer DEFAULT 0,\r\n\t\"status\" varchar(20) DEFAULT 'PENDING' NOT NULL,\r\n\t\"metadata\" text,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\r\n);\r\n",
-      "\r\nALTER TABLE \"user_cost_settings\" ALTER COLUMN \"monthly_budget_vnd\" SET DEFAULT 0;",
-      "\r\nALTER TABLE \"model_pricing\" ALTER COLUMN \"input_price\" SET DEFAULT 0;",
-      "\r\nALTER TABLE \"model_pricing\" ALTER COLUMN \"input_price\" DROP NOT NULL;",
-      "\r\nALTER TABLE \"model_pricing\" ALTER COLUMN \"output_price\" SET DEFAULT 0;",
-      "\r\nALTER TABLE \"model_pricing\" ALTER COLUMN \"output_price\" DROP NOT NULL;",
-      "\r\nALTER TABLE \"model_pricing\" ALTER COLUMN \"tier\" SET NOT NULL;",
-      "\r\nALTER TABLE \"usage_logs\" ADD COLUMN \"points_deducted\" integer DEFAULT 0;",
-      "\r\nALTER TABLE \"usage_logs\" ADD COLUMN \"model_tier\" integer DEFAULT 1;",
-      "\r\nALTER TABLE \"user_cost_settings\" ADD COLUMN \"monthly_budget_points\" integer DEFAULT 50000;",
-      "\r\nALTER TABLE \"user_cost_settings\" ADD COLUMN \"daily_budget_points\" integer;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"pho_points_balance\" integer DEFAULT 50000;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"points_reset_date\" timestamp with time zone;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"current_plan_id\" text DEFAULT 'vn_free';",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"subscription_status\" text DEFAULT 'FREE';",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"country_code\" text;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"daily_tier2_usage\" integer DEFAULT 0;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"daily_tier3_usage\" integer DEFAULT 0;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"streak_count\" integer DEFAULT 0;",
-      "\r\nALTER TABLE \"users\" ADD COLUMN \"last_active_date\" timestamp with time zone;",
-      "\r\nALTER TABLE \"model_pricing\" ADD COLUMN \"input_cost_per_1m\" real NOT NULL;",
-      "\r\nALTER TABLE \"model_pricing\" ADD COLUMN \"output_cost_per_1m\" real NOT NULL;",
-      "\r\nALTER TABLE \"daily_usage\" ADD CONSTRAINT \"daily_usage_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
-      "\r\nALTER TABLE \"transactions\" ADD CONSTRAINT \"transactions_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
-      "\r\nALTER TABLE \"users\" DROP COLUMN \"pho_credit_balance\";"
+      "CREATE TABLE IF NOT EXISTS \"daily_usage\" (\r\n\t\"id\" text PRIMARY KEY NOT NULL,\r\n\t\"user_id\" text NOT NULL,\r\n\t\"date\" varchar(10) NOT NULL,\r\n\t\"tier1_messages\" integer DEFAULT 0,\r\n\t\"tier2_messages\" integer DEFAULT 0,\r\n\t\"tier3_messages\" integer DEFAULT 0,\r\n\t\"points_used\" integer DEFAULT 0,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\r\n);\r\n",
+      "\r\nCREATE TABLE IF NOT EXISTS \"transactions\" (\r\n\t\"id\" text PRIMARY KEY NOT NULL,\r\n\t\"user_id\" text NOT NULL,\r\n\t\"amount\" real NOT NULL,\r\n\t\"currency\" varchar(10) NOT NULL,\r\n\t\"provider\" varchar(20) NOT NULL,\r\n\t\"provider_tx_id\" text,\r\n\t\"plan_code\" varchar(50),\r\n\t\"points_granted\" integer DEFAULT 0,\r\n\t\"status\" varchar(20) DEFAULT 'PENDING' NOT NULL,\r\n\t\"metadata\" text,\r\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\r\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\r\n);\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user_cost_settings' AND column_name = 'monthly_budget_vnd') THEN\r\n\t\tALTER TABLE \"user_cost_settings\" ALTER COLUMN \"monthly_budget_vnd\" SET DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'model_pricing' AND column_name = 'input_price') THEN\r\n\t\tALTER TABLE \"model_pricing\" ALTER COLUMN \"input_price\" SET DEFAULT 0;\r\n\t\tALTER TABLE \"model_pricing\" ALTER COLUMN \"input_price\" DROP NOT NULL;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'model_pricing' AND column_name = 'output_price') THEN\r\n\t\tALTER TABLE \"model_pricing\" ALTER COLUMN \"output_price\" SET DEFAULT 0;\r\n\t\tALTER TABLE \"model_pricing\" ALTER COLUMN \"output_price\" DROP NOT NULL;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'model_pricing' AND column_name = 'tier') THEN\r\n\t\tALTER TABLE \"model_pricing\" ALTER COLUMN \"tier\" SET NOT NULL;\r\n\tEND IF;\r\nEXCEPTION WHEN others THEN NULL;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'usage_logs' AND column_name = 'points_deducted') THEN\r\n\t\tALTER TABLE \"usage_logs\" ADD COLUMN \"points_deducted\" integer DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'usage_logs' AND column_name = 'model_tier') THEN\r\n\t\tALTER TABLE \"usage_logs\" ADD COLUMN \"model_tier\" integer DEFAULT 1;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user_cost_settings' AND column_name = 'monthly_budget_points') THEN\r\n\t\tALTER TABLE \"user_cost_settings\" ADD COLUMN \"monthly_budget_points\" integer DEFAULT 50000;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user_cost_settings' AND column_name = 'daily_budget_points') THEN\r\n\t\tALTER TABLE \"user_cost_settings\" ADD COLUMN \"daily_budget_points\" integer;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'pho_points_balance') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"pho_points_balance\" integer DEFAULT 50000;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'points_reset_date') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"points_reset_date\" timestamp with time zone;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'current_plan_id') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"current_plan_id\" text DEFAULT 'vn_free';\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'subscription_status') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"subscription_status\" text DEFAULT 'FREE';\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'country_code') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"country_code\" text;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'daily_tier2_usage') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"daily_tier2_usage\" integer DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'daily_tier3_usage') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"daily_tier3_usage\" integer DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'streak_count') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"streak_count\" integer DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'last_active_date') THEN\r\n\t\tALTER TABLE \"users\" ADD COLUMN \"last_active_date\" timestamp with time zone;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'model_pricing' AND column_name = 'input_cost_per_1m') THEN\r\n\t\tALTER TABLE \"model_pricing\" ADD COLUMN \"input_cost_per_1m\" real DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'model_pricing' AND column_name = 'output_cost_per_1m') THEN\r\n\t\tALTER TABLE \"model_pricing\" ADD COLUMN \"output_cost_per_1m\" real DEFAULT 0;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'daily_usage_user_id_users_id_fk') THEN\r\n\t\tALTER TABLE \"daily_usage\" ADD CONSTRAINT \"daily_usage_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'transactions_user_id_users_id_fk') THEN\r\n\t\tALTER TABLE \"transactions\" ADD CONSTRAINT \"transactions_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;\r\n\tEND IF;\r\nEND $$;\r\n",
+      "\r\nDO $$ BEGIN\r\n\tIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'pho_credit_balance') THEN\r\n\t\tALTER TABLE \"users\" DROP COLUMN \"pho_credit_balance\";\r\n\tEND IF;\r\nEXCEPTION WHEN others THEN NULL;\r\nEND $$;"
     ],
     "bps": true,
     "folderMillis": 1765113607943,
-    "hash": "1bff02795ffc6d8ff61644522496a6d6aec3db6646e349ff8a4d6604756df5d8"
+    "hash": "d330663e07323a8897533487ee48c8cfd44d058a264690d77ad62478a8eb21f9"
   },
   {
     "sql": [
-      "ALTER TABLE \"user_cost_settings\" ALTER COLUMN \"budget_alert_thresholds\" SET DEFAULT '{\"critical\":90,\"emergency\":95,\"warning\":75}'::jsonb;"
+      "DO $$ BEGIN\r\n\tIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user_cost_settings' AND column_name = 'budget_alert_thresholds') THEN\r\n\t\tALTER TABLE \"user_cost_settings\" ALTER COLUMN \"budget_alert_thresholds\" SET DEFAULT '{\"critical\":90,\"emergency\":95,\"warning\":75}'::jsonb;\r\n\tEND IF;\r\nEXCEPTION WHEN others THEN NULL;\r\nEND $$;"
     ],
     "bps": true,
     "folderMillis": 1765704184511,
-    "hash": "36f7556577654d8a2c70db3a86a6c561a892d8bdd16b11ea26a13dcc6a03f5b7"
+    "hash": "f4ce5c7a7e8bb3171ab758afc25c1417bc6009de3a55f5956f505f42435820e1"
+  },
+  {
+    "sql": [
+      "-- Migration: Ensure shared_conversations table exists\r\n-- This migration creates the shared_conversations table if it doesn't already exist\r\n-- The table is used for ChatGPT-like public share links with full conversation history\r\n\r\nCREATE TABLE IF NOT EXISTS \"shared_conversations\" (\r\n  \"id\" text PRIMARY KEY NOT NULL,\r\n  \"user_id\" text,\r\n  \"title\" text NOT NULL,\r\n  \"description\" text,\r\n  \"avatar\" text,\r\n  \"background_color\" text,\r\n  \"tags\" jsonb,\r\n  \r\n  -- Agent configuration\r\n  \"system_role\" text,\r\n  \"model\" text,\r\n  \"provider\" text,\r\n  \"params\" jsonb,\r\n  \"chat_config\" jsonb,\r\n  \r\n  -- Messages (full conversation history)\r\n  \"messages\" jsonb NOT NULL,\r\n  \r\n  -- Metadata\r\n  \"is_public\" boolean DEFAULT true,\r\n  \"view_count\" integer DEFAULT 0,\r\n  \"fork_count\" integer DEFAULT 0,\r\n  \r\n  -- Timestamps\r\n  \"created_at\" timestamp DEFAULT now(),\r\n  \"updated_at\" timestamp DEFAULT now(),\r\n  \"accessed_at\" timestamp DEFAULT now()\r\n);\r\n\r\n-- Create indexes if they don't exist\r\nCREATE INDEX IF NOT EXISTS \"shared_conversations_user_id_idx\" ON \"shared_conversations\" (\"user_id\");\r\nCREATE INDEX IF NOT EXISTS \"shared_conversations_is_public_idx\" ON \"shared_conversations\" (\"is_public\");\r\nCREATE INDEX IF NOT EXISTS \"shared_conversations_created_at_idx\" ON \"shared_conversations\" (\"created_at\");\r\n\r\n"
+    ],
+    "bps": true,
+    "folderMillis": 1767000000000,
+    "hash": "47c9a5f4bb2d3397ecb75060b80cdb13e2daada7d701d5265f5aece2f34bd098"
   }
 ]

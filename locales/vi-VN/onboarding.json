@@ -1,0 +1,31 @@
+{
+  "medicalDisclaimer": {
+    "title": "⚠️ CẢNH BÁO Y KHOA QUAN TRỌNG",
+    "content": "Trợ lý AI này chỉ dành cho mục đích GIÁO DỤC và NGHIÊN CỨU. KHÔNG thay thế tư vấn, chẩn đoán hoặc điều trị y tế chuyên nghiệp.",
+    "acknowledge": "Tôi đã hiểu và chấp nhận"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "🎉 Chào mừng đến với Phở Chat!",
+      "subtitle": "Hãy cho chúng tôi biết về bạn để được gợi ý tốt hơn"
+    },
+    "profession": {
+      "biomedical_researcher": "Nghiên cứu Y sinh",
+      "doctor_physician": "Bác sỹ / Y sỹ",
+      "pharmacist": "Dược sỹ",
+      "nurse": "Điều dưỡng",
+      "medical_teacher": "Giảng viên Y khoa",
+      "medical_student": "Sinh viên Y",
+      "researcher_general": "Nhà nghiên cứu",
+      "teacher_educator": "Giảng viên / Giáo viên",
+      "developer": "Lập trình viên",
+      "creative": "Sáng tạo nội dung",
+      "business": "Doanh nghiệp",
+      "other": "Khác"
+    },
+    "actions": {
+      "skip": "Bỏ qua",
+      "continue": "Tiếp tục"
+    }
+  }
+}

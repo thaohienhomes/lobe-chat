@@ -38,6 +38,13 @@ export type UserGuide = z.infer<typeof UserGuideSchema>;
 export interface UserPreference {
   guide?: UserGuide;
   hideSyncAlert?: boolean;
+  isOnboarded?: boolean;
+  /**
+   * New fields for onboarding (added Feb 2026)
+   */
+  profession?: string;
+  specialization?: string;
+
   telemetry: boolean | null;
   topicDisplayMode?: TopicDisplayMode;
   /**

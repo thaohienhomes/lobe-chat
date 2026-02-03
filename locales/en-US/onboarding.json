@@ -1,0 +1,31 @@
+{
+  "medicalDisclaimer": {
+    "title": "⚠️ IMPORTANT MEDICAL DISCLAIMER",
+    "content": "This AI assistant is for EDUCATIONAL and RESEARCH purposes only. NOT a substitute for professional medical advice, diagnosis, or treatment.",
+    "acknowledge": "I understand and accept"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "🎉 Welcome to Phở Chat!",
+      "subtitle": "Tell us about yourself for personalized recommendations"
+    },
+    "profession": {
+      "biomedical_researcher": "Biomedical Researcher",
+      "doctor_physician": "Doctor / Physician",
+      "pharmacist": "Pharmacist",
+      "nurse": "Nurse",
+      "medical_teacher": "Medical Educator",
+      "medical_student": "Medical Student",
+      "researcher_general": "General Researcher",
+      "teacher_educator": "Teacher / Educator",
+      "developer": "Developer",
+      "creative": "Content Creator",
+      "business": "Business",
+      "other": "Other"
+    },
+    "actions": {
+      "skip": "Skip",
+      "continue": "Continue"
+    }
+  }
+}

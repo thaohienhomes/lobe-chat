@@ -1163,6 +1163,17 @@ table users {
   last_usage_date "timestamp with time zone" [default: `now()`]
   streak_count integer [default: 0]
   last_active_date "timestamp with time zone"
+  profession text
+  specialization text
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table pho_wallet {
+  clerk_user_id text [pk, not null]
+  balance integer [not null, default: 0]
+  tier_code text [not null, default: 'free']
   accessed_at "timestamp with time zone" [not null, default: `now()`]
   created_at "timestamp with time zone" [not null, default: `now()`]
   updated_at "timestamp with time zone" [not null, default: `now()`]

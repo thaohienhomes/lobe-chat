@@ -50,6 +50,13 @@ export const users = pgTable('users', {
   streakCount: integer('streak_count').default(0),
   lastActiveDate: timestamptz('last_active_date'),
 
+  // User Profession for personalized recommendations (added Feb 2026)
+  // Categories: biomedical_researcher, doctor_physician, pharmacist, nurse,
+  // medical_teacher, medical_student, researcher_general, teacher_educator,
+  // developer, creative, business, other
+  profession: text('profession'),
+  specialization: text('specialization'),
+
   ...timestamps,
 });
 
