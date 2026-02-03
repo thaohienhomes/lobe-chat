@@ -115,12 +115,11 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     enableCustomAPI: true,
     enableKnowledgeBase: true,
     features: [
+      '2M Phở Points/tháng',
+      '~40 videos hoặc ~200 ảnh',
       'Unlimited Tier 1 & 2 models',
-      '50 Tier 3 messages/day (Claude Opus, GPT-4 Turbo)',
-      'Priority support',
-      'Advanced features',
-      'Team collaboration',
-      'Export & backup',
+      '50 Tier 3 messages/day',
+      'Phở Studio access ✨',
     ],
     keyLimits: 'Unlim Tier 1 & 2. 50 Tier 3 msgs/day.',
     monthlyPoints: 2_000_000,
@@ -161,15 +160,15 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     enableCustomAPI: true,
     enableKnowledgeBase: true,
     features: [
+      '5M Phở Points/tháng',
+      '~100 videos hoặc ~500 ảnh',
       'Unlimited Tier 1 & 2 models',
       '100 Tier 3 messages/day',
-      '2M Phở Points/tháng',
+      'Phở Studio access ✨',
       'Priority support',
-      'Phở Studio access',
-      'Export & backup',
     ],
     keyLimits: 'Unlim Tier 1 & 2. 100 Tier 3 msgs/day. Studio Access.',
-    monthlyPoints: 2_000_000,
+    monthlyPoints: 5_000_000,
     price: 499_000,
     priceYearly: 4_990_000,
     prioritySupport: true,
@@ -187,17 +186,18 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
     advancedAI: true,
     code: 'gl_lifetime',
     dailyTier2Limit: -1, // Unlimited Tier 2 within monthly points cap
-    displayName: 'Founding Member (Ultimate)',
+    displayName: 'Founding Member (Lifetime)',
     enableCustomAPI: true,
     enableKnowledgeBase: true,
     features: [
-      'All Premium features forever',
-      '2M Phở Points/month (reset monthly)', // Reverted
+      'Phở Chat unlimited forever',
+      '2M Phở Points/month (Chat only)',
       'Tier 1 & 2 model access',
       'Priority support',
       'Early access to new features',
+      '⚠️ Studio NOT included',
     ],
-    keyLimits: '2M points/mo (Reset). One-time payment.',
+    keyLimits: '2M points/mo (Chat only). No Studio.',
     monthlyPoints: 2_000_000,
     price: 149.99,
     prioritySupport: true,
@@ -768,6 +768,98 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
     pointsPerMessage: 1000,
     tier: 3,
     tierName: 'Expensive (Premium)',
+  },
+} as const;
+
+// ============================================================================
+// PLAN USAGE ESTIMATES (for comparison table)
+// ============================================================================
+// Based on:
+// - Tier 1 message: ~5 points (GPT-4o-mini)
+// - Tier 2 message: ~150 points (GPT-4o, Claude 3.5)
+// - Tier 3 message: ~1000 points (o1, Claude Opus)
+// - Image (Flux Pro): ~10,000 points
+// - Video 5s (Instant): ~50,000 points
+// - Audio 10s: ~20,000 points
+
+export const PLAN_USAGE_ESTIMATES = {
+  gl_lifetime: {
+    hasStudio: false,
+    images: '0 (Chat only)',
+    monthlyPoints: 2_000_000,
+    tier1Messages: '~400,000',
+    tier2Messages: '~13,000',
+    tier3Messages: '~2,000',
+    videos: '0 (No Studio)',
+  },
+
+  gl_premium: {
+    hasStudio: true,
+    images: '~200',
+    monthlyPoints: 2_000_000,
+    tier1Messages: '~400,000',
+    tier2Messages: '~13,000',
+    tier3Messages: '~2,000',
+    videos: '~40',
+  },
+
+  gl_standard: {
+    hasStudio: false,
+    images: '~30',
+    monthlyPoints: 300_000,
+    tier1Messages: '~60,000',
+    tier2Messages: '~2,000',
+    tier3Messages: '0',
+    videos: '0 (No Studio)',
+  },
+
+  // Global Plans
+  gl_starter: {
+    hasStudio: false,
+    images: '~5',
+    monthlyPoints: 50_000,
+    tier1Messages: '~10,000',
+    tier2Messages: '~300',
+    tier3Messages: '0',
+    videos: '0 (No Studio)',
+  },
+
+  vn_basic: {
+    hasStudio: false,
+    images: '~30',
+    monthlyPoints: 300_000,
+    tier1Messages: '~60,000',
+    tier2Messages: '~2,000',
+    tier3Messages: '0',
+    videos: '0 (No Studio)',
+  },
+  // VN Plans
+  vn_free: {
+    hasStudio: false,
+    images: '~5',
+    monthlyPoints: 50_000,
+    tier1Messages: '~10,000',
+    tier2Messages: '~300',
+    tier3Messages: '0',
+    videos: '0 (No Studio)',
+  },
+  vn_pro: {
+    hasStudio: true,
+    images: '~200',
+    monthlyPoints: 2_000_000,
+    tier1Messages: '~400,000',
+    tier2Messages: '~13,000',
+    tier3Messages: '~2,000',
+    videos: '~40',
+  },
+  vn_ultimate: {
+    hasStudio: true,
+    images: '~500',
+    monthlyPoints: 5_000_000,
+    tier1Messages: '~1,000,000',
+    tier2Messages: '~33,000',
+    tier3Messages: '~5,000',
+    videos: '~100',
   },
 } as const;
 

@@ -51,7 +51,7 @@ export function mapPlanIdToTierCode(planId: string): WalletTierCode {
     return 'vn_pro'; // Map to vn_pro since that's the highest VN tier with Studio
   }
 
-  // Global/Lifetime plans - HAS Studio access
+  // Global/Lifetime plans - NO Studio access (Chat only)
   if (plan.includes('lifetime') || plan.includes('global') || plan.includes('standard')) {
     return 'global_standard';
   }
