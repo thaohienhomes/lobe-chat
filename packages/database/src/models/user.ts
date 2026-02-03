@@ -4,7 +4,6 @@ import { eq } from 'drizzle-orm';
 import type { AdapterAccount } from 'next-auth/adapters';
 import type { PartialDeep } from 'type-fest';
 
-import { LobeChatDatabase } from '../type';
 import { UserGuide, UserPreference } from '@/types/user';
 import { UserKeyVaults, UserSettings } from '@/types/user/settings';
 import { merge } from '@/utils/merge';
@@ -18,6 +17,7 @@ import {
   userSettings,
   users,
 } from '../schemas';
+import { LobeChatDatabase } from '../type';
 
 type DecryptUserKeyVaults = (
   encryptKeyVaultsStr: string | null,
@@ -177,10 +177,22 @@ export class UserModel {
     const user = await this.db.query.users.findFirst({ where: eq(users.id, this.userId) });
     if (!user) return;
 
-    return this.db
-      .update(users)
-      .set({ preference: merge(user.preference, value) })
-      .where(eq(users.id, this.userId));
+    // Extract profession and specialization from preference to save as separate columns
+    const { profession, specialization, ...restPreference } = value;
+
+    const updateData: any = {
+      preference: merge(user.preference, restPreference),
+    };
+
+    // Add profession and specialization as separate columns if provided
+    if (profession !== undefined) {
+      updateData.profession = profession;
+    }
+    if (specialization !== undefined) {
+      updateData.specialization = specialization;
+    }
+
+    return this.db.update(users).set(updateData).where(eq(users.id, this.userId));
   };
 
   updateGuide = async (value: Partial<UserGuide>) => {

@@ -90,13 +90,23 @@ interface ProfessionSelectProps {
 const ProfessionSelect = memo<ProfessionSelectProps>(({ loading, onComplete, onSkip }) => {
   const { styles, cx } = useStyles();
   const { i18n } = useTranslation();
-  const [selected, setSelected] = useState<ProfessionId | null>(null);
+  const [selected, setSelected] = useState<ProfessionId[]>([]);
 
   const lang = i18n.language?.startsWith('vi') ? 'vi' : 'en';
 
+  const handleToggle = (id: ProfessionId) => {
+    setSelected((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((item) => item !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
   const handleContinue = () => {
-    if (selected) {
-      onComplete(selected);
+    if (selected.length > 0) {
+      // Join multiple professions with comma
+      onComplete(selected.join(','));
     }
   };
 
@@ -107,18 +117,18 @@ const ProfessionSelect = memo<ProfessionSelectProps>(({ loading, onComplete, onS
       </h2>
       <p className={styles.subtitle}>
         {lang === 'vi'
-          ? 'Hãy cho chúng tôi biết về bạn để được gợi ý tốt hơn'
-          : 'Tell us about yourself for personalized recommendations'}
+          ? 'Hãy cho chúng tôi biết về bạn để được gợi ý tốt hơn (có thể chọn nhiều)'
+          : 'Tell us about yourself for personalized recommendations (select multiple)'}
       </p>
 
       <div className={styles.grid}>
         {PROFESSION_CATEGORIES.map((profession) => (
           <div
-            className={cx(styles.card, selected === profession.id && styles.cardSelected)}
+            className={cx(styles.card, selected.includes(profession.id) && styles.cardSelected)}
             key={profession.id}
-            onClick={() => setSelected(profession.id)}
+            onClick={() => handleToggle(profession.id)}
             style={{
-              borderColor: selected === profession.id ? profession.color : undefined,
+              borderColor: selected.includes(profession.id) ? profession.color : undefined,
             }}
           >
             <span className={styles.icon}>{profession.icon}</span>
@@ -131,7 +141,12 @@ const ProfessionSelect = memo<ProfessionSelectProps>(({ loading, onComplete, onS
         <Button disabled={loading} onClick={onSkip} type="text">
           {lang === 'vi' ? 'Bỏ qua' : 'Skip'}
         </Button>
-        <Button disabled={!selected} loading={loading} onClick={handleContinue} type="primary">
+        <Button
+          disabled={selected.length === 0}
+          loading={loading}
+          onClick={handleContinue}
+          type="primary"
+        >
           {lang === 'vi' ? 'Tiếp tục' : 'Continue'}
         </Button>
       </Flexbox>
