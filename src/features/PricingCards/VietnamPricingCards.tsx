@@ -28,6 +28,13 @@ import { VN_PLANS } from '@/config/pricing';
  * Based on PRICING_MASTERPLAN.md.md
  */
 
+/**
+ * Vietnam Pricing Cards Component
+ * Displays VND pricing for Vietnamese users via Sepay
+ *
+ * Based on PRICING_MASTERPLAN.md.md
+ */
+
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -112,8 +119,9 @@ const VietnamPricingCards = memo<VietnamPricingCardsProps>(
         <div
           style={{
             display: 'grid',
-            gap: mobile ? 16 : 24,
-            gridTemplateColumns: mobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: mobile ? 16 : 16,
+            // 220px allows 4 cards on standard screens (220*4 + 16*3 = 928px < 1024px)
+            gridTemplateColumns: mobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))',
           }}
         >
           {plans.map((plan) => (
