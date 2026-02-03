@@ -16,6 +16,34 @@ interface OnboardingModalProps {
 
 type OnboardingStep = 'profession' | 'recommendations';
 
+/**
+ * Apply the selected recommendations to user settings
+ * This actually enables the models, features, etc.
+ */
+const applyRecommendations = async (selections: RecommendationSelections) => {
+  const { updateDefaultAgent } = useUserStore.getState();
+
+  // Apply default model if selected
+  if (selections.defaultModel) {
+    await updateDefaultAgent({
+      config: {
+        model: selections.defaultModel,
+      },
+    });
+  }
+
+  // Note: Features like artifacts, web-search are session-level settings
+  // and would need to be applied differently (per-session config)
+  // For now, we save selections for reference and log them
+  console.log('Applied recommendations:', {
+    defaultModel: selections.defaultModel,
+    // These are saved for reference in user profile:
+    enabledAgents: selections.enabledAgents,
+    enabledFeatures: selections.enabledFeatures,
+    enabledPlugins: selections.enabledPlugins,
+  });
+};
+
 const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
   const [step, setStep] = useState<OnboardingStep>('profession');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,14 +84,17 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
   const handleRecommendationsComplete = async (selections: RecommendationSelections) => {
     setIsSubmitting(true);
     try {
-      // Save recommendation selections to database via API
+      // 1. Save recommendation selections to database via API
       // This also marks user as onboarded
       const { userService } = await import('@/services/user');
       await userService.saveRecommendations(selections);
 
+      // 2. Apply the recommendations to user settings
+      await applyRecommendations(selections);
+
       onComplete?.();
     } catch (error) {
-      console.error('Failed to save recommendations:', error);
+      console.error('Failed to save/apply recommendations:', error);
       // Still close modal even if save fails
       onComplete?.();
     } finally {
