@@ -95,6 +95,14 @@ export async function POST(req: Request) {
       // Allocate Phở Points
       await allocateLifetimePoints(db, user.id, planId);
 
+      // Sync wallet tier based on plan
+      try {
+        const { syncWalletTier } = await import('@/libs/wallet/tierSync');
+        await syncWalletTier(db, user.id, planId);
+      } catch (walletError) {
+        console.error('⚠️ Failed to sync wallet tier (non-critical):', walletError);
+      }
+
       console.log('✅ User activated:', {
         email: customer_email,
         planId,
@@ -129,6 +137,14 @@ export async function POST(req: Request) {
             updatedAt: new Date(),
           })
           .where(eq(subscriptions.userId, user.id));
+
+        // Sync wallet tier to free
+        try {
+          const { syncWalletTier } = await import('@/libs/wallet/tierSync');
+          await syncWalletTier(db, user.id, 'gl_starter');
+        } catch (walletError) {
+          console.error('⚠️ Failed to sync wallet tier on refund:', walletError);
+        }
 
         console.log('⚠️ User plan revoked due to refund:', customer_email);
       }

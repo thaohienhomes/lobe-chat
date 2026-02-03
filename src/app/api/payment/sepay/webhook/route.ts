@@ -183,6 +183,15 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
             console.log('✅ Subscription created successfully for user:', payment.userId);
           }
         }
+
+        // Sync wallet tier based on new plan
+        try {
+          const { syncWalletTier } = await import('@/libs/wallet/tierSync');
+          await syncWalletTier(tx as any, payment.userId, payment.planId);
+          console.log('✅ Wallet tier synced for user:', payment.userId);
+        } catch (walletError) {
+          console.error('⚠️ Failed to sync wallet tier (non-critical):', walletError);
+        }
       }
 
       console.log('✅ Transaction committed successfully');

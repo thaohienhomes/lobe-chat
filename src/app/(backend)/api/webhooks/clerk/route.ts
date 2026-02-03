@@ -32,6 +32,20 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       pino.info('creating user due to clerk webhook');
       const result = await userService.createUser(data.id, data);
 
+      // Also create wallet for new user with 'free' tier
+      try {
+        const { phoWallet } = await import('@/database/schemas/wallet');
+        await serverDB.insert(phoWallet).values({
+          clerkUserId: data.id,
+          balance: 0,
+          tierCode: 'free',
+        }).onConflictDoNothing();
+        pino.info({ userId: data.id }, 'wallet created for new user');
+      } catch (walletError) {
+        pino.error({ error: walletError, userId: data.id }, 'failed to create wallet for new user');
+        // Don't fail the whole webhook if wallet creation fails
+      }
+
       return NextResponse.json(result, { status: 200 });
     }
 
