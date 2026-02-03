@@ -21,19 +21,26 @@ import { VN_PLANS } from '@/config/pricing';
  * Based on PRICING_MASTERPLAN.md.md
  */
 
+/**
+ * Vietnam Pricing Cards Component
+ * Displays VND pricing for Vietnamese users via Sepay
+ *
+ * Based on PRICING_MASTERPLAN.md.md
+ */
+
 const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
   card: css`
     position: relative;
+    border: 1px solid ${token.colorBorder};
     border-radius: 16px;
     transition: all 0.3s ease;
-    border: 1px solid ${token.colorBorder};
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
       border-color: ${token.colorPrimary};
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 10%);
     }
 
     &.popular {
@@ -63,7 +70,7 @@ const useStyles = createStyles(({ css, token }) => ({
     color: ${token.colorBgContainer};
 
     background: ${token.colorText};
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 10%);
   `,
   price: css`
     font-size: 32px;
@@ -86,11 +93,12 @@ const VietnamPricingCards = memo<VietnamPricingCardsProps>(
   ({ mobile, onSelectPlan, currentPlanId }) => {
     const { styles, cx } = useStyles();
 
-    // Order: Free, Basic, Pro (exclude Team for now)
+    // Order: Free, Basic, Pro, Ultimate
     const plans = [
       { ...VN_PLANS.vn_free, id: 'vn_free', popular: false },
       { ...VN_PLANS.vn_basic, id: 'vn_basic', popular: true },
       { ...VN_PLANS.vn_pro, id: 'vn_pro', popular: false },
+      { ...VN_PLANS.vn_ultimate, id: 'vn_ultimate', isNew: true, popular: false },
     ];
 
     return (
