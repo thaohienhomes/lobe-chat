@@ -184,7 +184,26 @@ export const userRouter = router({
     return ctx.userModel.deleteSetting();
   }),
 
-  unlinkSSOProvider: userProcedure.input(NextAuthAccountSchame).mutation(async ({ ctx, input }) => {
+  /**
+   * Save user's recommendation selections from onboarding
+   * This also marks the user as onboarded
+   */
+saveRecommendations: userProcedure
+    .input(
+      z.object({
+        defaultModel: z.string().optional(),
+        enabledAgents: z.array(z.string()).optional(),
+        enabledFeatures: z.array(z.string()).optional(),
+        enabledPlugins: z.array(z.string()).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.userModel.updateRecommendationSelections(input);
+    }),
+
+  
+  
+unlinkSSOProvider: userProcedure.input(NextAuthAccountSchame).mutation(async ({ ctx, input }) => {
     const { provider, providerAccountId } = input;
     const account = await ctx.nextAuthUserService.getAccount(providerAccountId, provider);
     // The userId can either get from ctx.nextAuth?.id or ctx.userId
@@ -192,8 +211,9 @@ export const userRouter = router({
     await ctx.nextAuthUserService.unlinkAccount({ provider, providerAccountId });
   }),
 
-  // 服务端上传头像
-  updateAvatar: userProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+  
+// 服务端上传头像
+updateAvatar: userProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     // 如果是 Base64 数据，需要上传到 S3
     if (input.startsWith('data:image')) {
       try {
@@ -247,10 +267,12 @@ export const userRouter = router({
     return ctx.userModel.updateUser({ avatar: input });
   }),
 
-  updateGuide: userProcedure.input(UserGuideSchema).mutation(async ({ ctx, input }) => {
+  
+updateGuide: userProcedure.input(UserGuideSchema).mutation(async ({ ctx, input }) => {
     return ctx.userModel.updateGuide(input);
   }),
 
+  
   updatePreference: userProcedure.input(z.any()).mutation(async ({ ctx, input }) => {
     return ctx.userModel.updatePreference(input);
   }),

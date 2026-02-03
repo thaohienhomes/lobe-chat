@@ -44,4 +44,13 @@ export class ServerService implements IUserService {
   resetUserSettings: IUserService['resetUserSettings'] = async () => {
     return lambdaClient.user.resetSettings.mutate();
   };
+
+  saveRecommendations = async (selections: {
+    defaultModel?: string;
+    enabledAgents?: string[];
+    enabledFeatures?: string[];
+    enabledPlugins?: string[];
+  }) => {
+    return lambdaClient.user.saveRecommendations.mutate(selections);
+  };
 }

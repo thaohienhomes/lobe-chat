@@ -67,4 +67,15 @@ export class ClientService implements IUserService {
   async updateGuide(guide: Partial<UserGuide>) {
     throw new Error('Method not implemented.');
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars,unused-imports/no-unused-vars
+  async saveRecommendations(_selections: {
+    defaultModel?: string;
+    enabledAgents?: string[];
+    enabledFeatures?: string[];
+    enabledPlugins?: string[];
+  }) {
+    // Not implemented for deprecated client - just log
+    console.log('saveRecommendations not implemented in deprecated client');
+  }
 }

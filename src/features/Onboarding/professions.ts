@@ -180,3 +180,40 @@ export const getRecommendationsForProfession = (id: string) => {
     features: profession.suggestedFeatures,
   };
 };
+
+/**
+ * Get aggregated recommendations from multiple professions
+ * Deduplicates across all selected professions
+ */
+export const getAggregatedRecommendations = (professionIds: string[]) => {
+  const result = {
+    agents: new Set<string>(),
+    plugins: new Set<string>(),
+    models: new Set<string>(),
+    features: new Set<string>(),
+  };
+
+  professionIds.forEach((id) => {
+    const prof = getProfessionById(id);
+    if (prof) {
+      prof.suggestedAgents.forEach((a) => result.agents.add(a));
+      prof.suggestedPlugins.forEach((p) => result.plugins.add(p));
+      prof.suggestedModels.forEach((m) => result.models.add(m));
+      prof.suggestedFeatures.forEach((f) => result.features.add(f));
+    }
+  });
+
+  return {
+    agents: [...result.agents],
+    features: [...result.features],
+    models: [...result.models],
+    plugins: [...result.plugins],
+  };
+};
+
+export interface RecommendationSelections {
+  defaultModel?: string;
+  enabledAgents: string[];
+  enabledFeatures: string[];
+  enabledPlugins: string[];
+}

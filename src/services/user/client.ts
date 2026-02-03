@@ -101,4 +101,13 @@ export class ClientService extends BaseClientService implements IUserService {
 
     return user;
   };
+
+  saveRecommendations = async (selections: {
+    defaultModel?: string;
+    enabledAgents?: string[];
+    enabledFeatures?: string[];
+    enabledPlugins?: string[];
+  }) => {
+    return this.userModel.updateRecommendationSelections(selections);
+  };
 }

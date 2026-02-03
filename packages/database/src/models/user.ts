@@ -206,6 +206,25 @@ export class UserModel {
       .where(eq(users.id, this.userId));
   };
 
+  /**
+   * Save user's recommendation selections from onboarding
+   * Also marks the user as onboarded
+   */
+  updateRecommendationSelections = async (value: {
+    defaultModel?: string;
+    enabledAgents?: string[];
+    enabledFeatures?: string[];
+    enabledPlugins?: string[];
+  }) => {
+    return this.db
+      .update(users)
+      .set({
+        isOnboarded: true,
+        recommendationSelections: value,
+      })
+      .where(eq(users.id, this.userId));
+  };
+
   // Static method
   static makeSureUserExist = async (db: LobeChatDatabase, userId: string) => {
     await db.insert(users).values({ id: userId }).onConflictDoNothing();

@@ -1,26 +1,46 @@
 'use client';
 
 import { Modal } from '@lobehub/ui';
-import { memo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 
 import { useUserStore } from '@/store/user';
 
 import ProfessionSelect from './ProfessionSelect';
+import RecommendationModal from './RecommendationModal';
+import type { RecommendationSelections } from './professions';
 
 interface OnboardingModalProps {
   onComplete?: () => void;
   open: boolean;
 }
 
-const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+type OnboardingStep = 'profession' | 'recommendations';
 
-  const handleComplete = async (profession: string) => {
+const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
+  const [step, setStep] = useState<OnboardingStep>('profession');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedProfessions, setSelectedProfessions] = useState<string[]>([]);
+
+  // Define markOnboardedAndClose first to avoid "used before defined" error
+  const markOnboardedAndClose = useCallback(async () => {
+    try {
+      // Mark user as onboarded
+      await useUserStore.getState().updatePreference({ isOnboarded: true } as any);
+    } catch (error) {
+      console.error('Failed to mark onboarded:', error);
+    }
+    onComplete?.();
+  }, [onComplete]);
+
+  const handleProfessionComplete = async (profession: string) => {
     setIsSubmitting(true);
     try {
-      // Update user profession in database
+      // Save profession to database
       await useUserStore.getState().updatePreference({ profession } as any);
-      onComplete?.();
+      // Store selected professions for recommendations step
+      setSelectedProfessions(profession.split(','));
+      // Move to recommendations step
+      setStep('recommendations');
     } catch (error) {
       console.error('Failed to save profession:', error);
     } finally {
@@ -28,8 +48,35 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
     }
   };
 
-  const handleSkip = () => {
-    onComplete?.();
+  const handleProfessionSkip = () => {
+    // Skip onboarding entirely
+    markOnboardedAndClose();
+  };
+
+  const handleRecommendationsComplete = async (selections: RecommendationSelections) => {
+    setIsSubmitting(true);
+    try {
+      // Save recommendation selections to database via API
+      // This also marks user as onboarded
+      const { userService } = await import('@/services/user');
+      await userService.saveRecommendations(selections);
+
+      onComplete?.();
+    } catch (error) {
+      console.error('Failed to save recommendations:', error);
+      // Still close modal even if save fails
+      onComplete?.();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRecommendationsSkip = () => {
+    markOnboardedAndClose();
+  };
+
+  const getModalWidth = () => {
+    return step === 'profession' ? 640 : 560;
   };
 
   return (
@@ -40,9 +87,23 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
       maskClosable={false}
       open={open}
       title={null}
-      width={640}
+      width={getModalWidth()}
     >
-      <ProfessionSelect loading={isSubmitting} onComplete={handleComplete} onSkip={handleSkip} />
+      {step === 'profession' && (
+        <ProfessionSelect
+          loading={isSubmitting}
+          onComplete={handleProfessionComplete}
+          onSkip={handleProfessionSkip}
+        />
+      )}
+      {step === 'recommendations' && (
+        <RecommendationModal
+          loading={isSubmitting}
+          onComplete={handleRecommendationsComplete}
+          onSkip={handleRecommendationsSkip}
+          professions={selectedProfessions}
+        />
+      )}
     </Modal>
   );
 });

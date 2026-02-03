@@ -57,6 +57,15 @@ export const users = pgTable('users', {
   profession: text('profession'),
   specialization: text('specialization'),
 
+  // User's selected recommendations from onboarding (added Feb 2026)
+  // Stores which agents, plugins, models, features user chose to enable
+  recommendationSelections: jsonb('recommendation_selections').$type<{
+    defaultModel?: string;
+    enabledAgents?: string[];
+    enabledFeatures?: string[];
+    enabledPlugins?: string[];
+  }>(),
+
   ...timestamps,
 });
 
