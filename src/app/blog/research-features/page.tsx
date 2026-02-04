@@ -1,3 +1,5 @@
+'use client';
+
 import { Markdown } from '@lobehub/ui';
 import { Flexbox } from 'react-layout-kit';
 
@@ -102,29 +104,240 @@ export default function ResearchFeaturesPage() {
           content="Phở Chat - AI thông minh hỗ trợ nghiên cứu y sinh học với tích hợp PubMed, ArXiv, và công cụ y khoa chuyên biệt."
           name="description"
         />
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+          
+          * {
+            box-sizing: border-box;
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f1f35 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+          }
+          
+          .blog-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+          }
+          
+          .blog-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(75, 0, 130, 0.1) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 
+              0 0 60px rgba(138, 43, 226, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          }
+          
+          .blog-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 16px 0;
+            line-height: 1.2;
+          }
+          
+          .blog-header .subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+          }
+          
+          .blog-content {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 48px;
+            box-shadow: 
+              0 20px 60px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          }
+          
+          .infographic-container {
+            margin: 32px 0;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+          }
+          
+          .infographic-container img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+          }
+          
+          .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+          }
+          
+          .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+          }
+          
+          .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 32px 0;
+          }
+          
+          .feature-card {
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+          }
+          
+          .feature-card:hover {
+            background: rgba(138, 43, 226, 0.08);
+            border-color: rgba(138, 43, 226, 0.3);
+            transform: translateY(-4px);
+          }
+          
+          .footer {
+            text-align: center;
+            margin-top: 48px;
+            padding: 32px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          
+          .footer a {
+            color: #a855f7;
+            text-decoration: none;
+          }
+          
+          .footer a:hover {
+            text-decoration: underline;
+          }
+          
+          /* Markdown overrides */
+          h1, h2, h3 {
+            color: #fff;
+          }
+          
+          h2 {
+            font-size: 1.75rem;
+            margin-top: 48px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+          }
+          
+          h3 {
+            font-size: 1.25rem;
+            color: #c084fc;
+            margin-top: 24px;
+          }
+          
+          p, li {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+          }
+          
+          a {
+            color: #a855f7;
+          }
+          
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+          }
+          
+          th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          }
+          
+          th {
+            background: rgba(138, 43, 226, 0.2);
+            font-weight: 600;
+            color: #fff;
+          }
+          
+          tr:hover {
+            background: rgba(138, 43, 226, 0.05);
+          }
+          
+          hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.5), transparent);
+            margin: 48px 0;
+          }
+          
+          strong {
+            color: #fff;
+          }
+          
+          ul {
+            padding-left: 24px;
+          }
+          
+          li {
+            margin: 8px 0;
+          }
+          
+          li::marker {
+            color: #a855f7;
+          }
+        `}</style>
       </head>
-      <body style={{ margin: 0, padding: 0 }}>
-        <Flexbox
-          padding={24}
-          style={{
-            background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
-            minHeight: '100vh',
-          }}
-        >
-          <Flexbox
-            style={{
-              backdropFilter: 'blur(10px)',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: 16,
-              margin: '0 auto',
-              maxWidth: 900,
-              padding: 32,
-            }}
-          >
-            <Markdown>{blogContent}</Markdown>
-          </Flexbox>
-        </Flexbox>
+      <body>
+        <div className="blog-container">
+          <header className="blog-header">
+            <h1>🍜 Phở Chat</h1>
+            <p className="subtitle">Trợ Lý AI Thông Minh Cho Nghiên Cứu Y Sinh Học</p>
+          </header>
+
+          <main className="blog-content">
+            <Flexbox gap={24}>
+              <Markdown>{blogContent}</Markdown>
+            </Flexbox>
+
+            <Flexbox align="center" gap={16} justify="center" style={{ marginTop: 48 }}>
+              <a className="cta-button" href="https://pho.chat">
+                🚀 Bắt Đầu Miễn Phí
+              </a>
+            </Flexbox>
+          </main>
+
+          <footer className="footer">
+            <p>
+              © 2026 <a href="https://pho.chat">Phở Chat</a>. Made with 💜 for researchers.
+            </p>
+          </footer>
+        </div>
       </body>
     </html>
   );
