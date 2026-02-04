@@ -348,7 +348,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   gl_lifetime: {
     allowedTiers: [1, 2], // Per SPECS: Same as PRO = Tier 1 & 2 only
     dailyLimits: { tier2: -1 }, // Unlimited Tier 2 within monthly points cap
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // Tier 1 models
@@ -373,7 +373,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   gl_premium: {
     allowedTiers: [1, 2], // Per SPECS: PRO = Tier 1 & 2
     dailyLimits: { tier2: -1 }, // Unlimited within monthly cap
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // Tier 1 models
@@ -443,7 +443,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   lifetime_early_bird: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3/day
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter',
     models: [
       // Tier 1 models
@@ -473,7 +473,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   lifetime_last_call: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter',
     models: [
       'gpt-4o-mini',
@@ -500,7 +500,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   lifetime_standard: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter',
     models: [
       'gpt-4o-mini',
@@ -576,7 +576,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_pro: {
     allowedTiers: [1, 2, 3], // Phở Đặc Biệt allows all tiers
     dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3 messages/day
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // Tier 1 models
@@ -606,7 +606,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_team: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier3: 100 },
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter', // OpenRouter as primary
     models: [
       // All models available
@@ -635,7 +635,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_ultimate: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 100 }, // Unlimited Tier 2, 100 Tier 3/day
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'openrouter',
     models: [
       // Tier 1 models
