@@ -1,3 +1,5 @@
+'use client';
+
 import { ChatCitationItem } from '@lobechat/types';
 import { ActionIcon, CopyButton, Icon, Markdown, ScrollShadow } from '@lobehub/ui';
 import { createStyles } from 'antd-style';

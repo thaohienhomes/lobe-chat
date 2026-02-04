@@ -1,3 +1,5 @@
+'use client';
+
 import { exportFile } from '@lobechat/utils/client';
 import { Block, Button, Highlighter, Segmented } from '@lobehub/ui';
 import { Drawer } from 'antd';
