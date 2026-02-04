@@ -287,6 +287,12 @@ const nextConfig: NextConfig = {
       permanent: false,
       source: '/repos',
     },
+    // Blog redirects
+    {
+      destination: '/chat/blog/:path*',
+      permanent: false,
+      source: '/blog/:path*',
+    },
   ],
 
   // when external packages in dev mode with turbopack, this config will lead to bundle error
