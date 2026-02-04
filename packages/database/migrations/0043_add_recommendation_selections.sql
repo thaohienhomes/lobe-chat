@@ -1,7 +1,14 @@
--- Add recommendation_selections column to users table
--- This stores the user's selected recommendations from onboarding
+-- Add onboarding-related columns to users table
+-- These store the user's profession selection and recommendations from onboarding
 
+-- Add profession column for storing user's selected profession(s)
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "profession" text;
+
+-- Add specialization column for more specific role details
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "specialization" text;
+
+-- Add recommendation_selections column for storing AI/plugin recommendations
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "recommendation_selections" jsonb;
 
--- Add index for faster queries
+-- Add index for faster queries on recommendation_selections
 CREATE INDEX IF NOT EXISTS "users_recommendation_selections_idx" ON "users" USING gin ("recommendation_selections");
