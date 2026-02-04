@@ -16,6 +16,7 @@ import { ChatTopicAction, chatTopic } from './slices/topic/action';
 import { ChatAIChatAction, chatAiChat } from './slices/aiChat/actions';
 import { ChatTTSAction, chatTTS } from './slices/tts/action';
 import { ChatThreadAction, chatThreadMessage } from './slices/thread/action';
+import { UserMemoryAction, userMemoryAction } from './slices/userMemory';
 
 export interface ChatStoreAction
   extends ChatMessageAction,
@@ -27,7 +28,8 @@ export interface ChatStoreAction
     ChatTTSAction,
     ChatPluginAction,
     ChatBuiltinToolAction,
-    ChatPortalAction {}
+    ChatPortalAction,
+    UserMemoryAction {}
 
 export type ChatStore = ChatStoreAction & ChatStoreState;
 
@@ -46,6 +48,7 @@ const createStore: StateCreator<ChatStore, [['zustand/devtools', never]]> = (...
   ...chatToolSlice(...params),
   ...chatPlugin(...params),
   ...chatPortalSlice(...params),
+  ...userMemoryAction(...params),
 
   // cloud
 });

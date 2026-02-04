@@ -1171,6 +1171,21 @@ table users {
   updated_at "timestamp with time zone" [not null, default: `now()`]
 }
 
+table user_memories {
+  id text [pk, not null]
+  user_id text [not null]
+  category text [not null, default: 'context']
+  content text [not null]
+  source_topic_id text
+  source_message_id text
+  importance integer [not null, default: 5]
+  usage_count integer [default: 0]
+  last_used_at "timestamp with time zone"
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
 table pho_wallet {
   clerk_user_id text [pk, not null]
   balance integer [not null, default: 0]

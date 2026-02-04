@@ -21,4 +21,5 @@ export * from './sharedConversation';
 export * from './topic';
 export * from './usage';
 export * from './user';
+export * from './userMemory';
 export * from './wallet';

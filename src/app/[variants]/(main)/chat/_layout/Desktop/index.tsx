@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { PendingMessageHandler, UnauthenticatedPrompt } from '@/features/Auth';
 import { isDesktop } from '@/const/version';
+import AgenticProgress from '@/features/AgenticProgress';
+import { PendingMessageHandler, UnauthenticatedPrompt } from '@/features/Auth';
 import InitClientDB from '@/features/InitClientDB';
 import ProtocolUrlHandler from '@/features/ProtocolUrlHandler';
 
@@ -39,6 +40,8 @@ const Layout = ({ children, session }: LayoutProps) => {
       <Suspense>
         <PendingMessageHandler />
       </Suspense>
+      {/* Agentic AI Progress Panel */}
+      <AgenticProgress />
     </>
   );
 };
