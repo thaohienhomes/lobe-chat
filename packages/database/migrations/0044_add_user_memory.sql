@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS user_memories (
   last_used_at TIMESTAMPTZ,
   
   -- Timestamps
+  accessed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
