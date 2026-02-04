@@ -3,6 +3,7 @@
 import { Modal } from '@lobehub/ui';
 import { memo, useCallback, useState } from 'react';
 
+import { useToolStore } from '@/store/tool';
 import { useUserStore } from '@/store/user';
 
 import ProfessionSelect from './ProfessionSelect';
@@ -18,10 +19,11 @@ type OnboardingStep = 'profession' | 'recommendations';
 
 /**
  * Apply the selected recommendations to user settings
- * This actually enables the models, features, etc.
+ * This actually enables the models, features, plugins, etc.
  */
 const applyRecommendations = async (selections: RecommendationSelections) => {
   const { updateDefaultAgent } = useUserStore.getState();
+  const { installPlugins } = useToolStore.getState();
 
   // Apply default model if selected
   if (selections.defaultModel) {
@@ -30,14 +32,23 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
         model: selections.defaultModel,
       },
     });
+    console.log('✅ Applied default model:', selections.defaultModel);
+  }
+
+  // Install selected plugins
+  if (selections.enabledPlugins && selections.enabledPlugins.length > 0) {
+    try {
+      await installPlugins(selections.enabledPlugins);
+      console.log('✅ Installed plugins:', selections.enabledPlugins);
+    } catch (error) {
+      console.error('Failed to install plugins:', error);
+    }
   }
 
   // Note: Features like artifacts, web-search are session-level settings
-  // and would need to be applied differently (per-session config)
-  // For now, we save selections for reference and log them
+  // Agents are shown as recommendations on the home screen
   console.log('Applied recommendations:', {
     defaultModel: selections.defaultModel,
-    // These are saved for reference in user profile:
     enabledAgents: selections.enabledAgents,
     enabledFeatures: selections.enabledFeatures,
     enabledPlugins: selections.enabledPlugins,
