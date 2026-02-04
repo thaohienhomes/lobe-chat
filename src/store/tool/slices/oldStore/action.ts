@@ -114,8 +114,19 @@ export const createPluginStoreSlice: StateCreator<
     }
   },
   installPlugin: async (name, type = 'plugin') => {
-    const plugin = pluginStoreSelectors.getPluginById(name)(get());
-    if (!plugin) return;
+    let plugin = pluginStoreSelectors.getPluginById(name)(get());
+
+    // Fallback to bundled plugins if not found in store
+    if (!plugin) {
+      const { getBundledPluginById } = await import('@/config/bundledPlugins');
+      const bundledPlugin = getBundledPluginById(name);
+      if (bundledPlugin) {
+        plugin = bundledPlugin;
+      } else {
+        console.warn(`Plugin not found: ${name}`);
+        return;
+      }
+    }
 
     const { updateInstallLoadingState, refreshPlugins } = get();
     try {
@@ -135,7 +146,7 @@ export const createPluginStoreSlice: StateCreator<
 
       notification.error({
         description: t(`error.${err.message}`, { ns: 'plugin' }),
-        message: t('error.installError', { name: plugin.title, ns: 'plugin' }),
+        message: t('error.installError', { name: plugin.title || name, ns: 'plugin' }),
       });
     }
   },
@@ -167,9 +178,13 @@ export const createPluginStoreSlice: StateCreator<
       pageSize: 50,
     });
 
-    set({ oldPluginItems: data.items }, false, n('loadPluginList'));
+    // Merge bundled plugins with store plugins (bundled first)
+    const { BUNDLED_PLUGINS } = await import('@/config/bundledPlugins');
+    const allPlugins = uniqBy([...BUNDLED_PLUGINS, ...data.items], 'identifier');
 
-    return data.items;
+    set({ oldPluginItems: allPlugins }, false, n('loadPluginList'));
+
+    return allPlugins;
   },
   refreshPlugins: async () => {
     await mutate(INSTALLED_PLUGINS);
@@ -239,22 +254,30 @@ export const createPluginStoreSlice: StateCreator<
                 draft.isPluginListInit = true;
                 draft.pluginTotalCount = data.totalCount;
               }
-
-              // 累积数据逻辑
-              if (params.page === 1) {
-                // 第一页，直接设置
-                draft.oldPluginItems = uniqBy(data.items, 'identifier');
-              } else {
-                // 后续页面，累积数据
-                draft.oldPluginItems = uniqBy(
-                  [...draft.oldPluginItems, ...data.items],
-                  'identifier',
-                );
-              }
             }),
             false,
             n('useFetchPluginList/onSuccess'),
           );
+
+          // 累积数据逻辑 - include bundled plugins (async import outside produce)
+          import('@/config/bundledPlugins').then(({ BUNDLED_PLUGINS }) => {
+            set(
+              produce((draft: PluginStoreState) => {
+                if (params.page === 1) {
+                  // 第一页，bundled plugins first
+                  draft.oldPluginItems = uniqBy([...BUNDLED_PLUGINS, ...data.items], 'identifier');
+                } else {
+                  // 后续页面，累积数据
+                  draft.oldPluginItems = uniqBy(
+                    [...BUNDLED_PLUGINS, ...draft.oldPluginItems, ...data.items],
+                    'identifier',
+                  );
+                }
+              }),
+              false,
+              n('useFetchPluginList/mergeBundled'),
+            );
+          });
         },
         revalidateOnFocus: false,
       },

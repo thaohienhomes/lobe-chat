@@ -2,7 +2,7 @@ import { ArtifactType } from '@lobechat/types';
 import { ActionIcon, Icon, Segmented, Text } from '@lobehub/ui';
 import { ConfigProvider } from 'antd';
 import { cx } from 'antd-style';
-import { ArrowLeft, CodeIcon, EyeIcon } from 'lucide-react';
+import { ArrowLeft, CodeIcon, Columns2 as ColumnsIcon, EyeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
@@ -62,6 +62,11 @@ const Header = () => {
                 icon: <Icon icon={CodeIcon} />,
                 label: t('artifacts.display.code'),
                 value: ArtifactDisplayMode.Code,
+              },
+              {
+                icon: <Icon icon={ColumnsIcon} />,
+                label: t('artifacts.display.split', 'Split'),
+                value: ArtifactDisplayMode.Split,
               },
             ]}
             size={'small'}

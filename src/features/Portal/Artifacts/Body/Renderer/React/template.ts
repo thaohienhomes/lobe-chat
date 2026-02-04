@@ -2,31 +2,32 @@ interface TemplateFilesParams {
   title?: string;
 }
 export const createTemplateFiles = ({ title }: TemplateFilesParams = {}) => ({
-  'index.html': `<!DOCTYPE html>
+  '/index.html': `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${title || 'Artifacts App'}</title>
+    <title>${title || 'Phở Artifact'}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
+    <style>
+      html, body, #root { height: 100%; margin: 0; padding: 0; }
+    </style>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
 `,
-  'vite.config.ts': {
-    code: `import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+  '/index.tsx': `import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
 
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@/components/ui': '@lshay/ui/components/default',
-    },
-  },
-});`,
-  },
+const root = createRoot(document.getElementById('root')!);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+`,
 });

@@ -1,7 +1,7 @@
-'use client';
-
+import { ActionIcon } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import isEqual from 'fast-deep-equal';
+import { Eye } from 'lucide-react';
 import { MouseEventHandler, ReactNode, memo, use, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
@@ -14,8 +14,10 @@ import { useAgentStore } from '@/store/agent';
 import { agentChatConfigSelectors } from '@/store/agent/selectors';
 import { useChatStore } from '@/store/chat';
 import { chatSelectors } from '@/store/chat/selectors';
+import { ArtifactDisplayMode } from '@/store/chat/slices/portal/initialState';
 import { useUserStore } from '@/store/user';
 import { userGeneralSettingsSelectors } from '@/store/user/selectors';
+import { ArtifactType } from '@/types/artifact';
 import { ChatMessage } from '@/types/message';
 
 import ErrorMessageExtra, { useErrorContent } from '../../Error';
@@ -189,8 +191,48 @@ const Item = memo<ChatListItemProps>(
             actionsRender: ({ content, actionIconSize, language, originalNode }: any) => {
               const showHtmlPreview = isHtmlCode(content, language);
 
+              const handleArtifactPreview = () => {
+                let type = ArtifactType.Code;
+                if (['tsx', 'jsx', 'react'].includes(language)) type = ArtifactType.React;
+                else if (['html'].includes(language)) type = ArtifactType.Html;
+                else if (['svg'].includes(language)) type = ArtifactType.SVG;
+                else if (['mermaid'].includes(language)) type = ArtifactType.Mermaid;
+
+                useChatStore.getState().openArtifact({
+                  content, // Pass content for manual preview
+                  id: 'manual-preview',
+                  identifier: `manual-preview-${Date.now()}`,
+                  language,
+                  title: `Preview: ${language.toUpperCase()}`,
+                  type,
+                });
+
+                // Auto-set to Split view for best side-by-side experience
+                useChatStore.setState({ portalArtifactDisplayMode: ArtifactDisplayMode.Split });
+              };
+
+              // Languages that benefit from Artifact Preview
+              const canPreviewInArtifact = [
+                'tsx',
+                'jsx',
+                'react',
+                'html',
+                'svg',
+                'mermaid',
+                'javascript',
+                'typescript',
+              ].includes(language);
+
               return (
                 <>
+                  {canPreviewInArtifact && (
+                    <ActionIcon
+                      icon={Eye}
+                      onClick={handleArtifactPreview}
+                      size={actionIconSize}
+                      title={'Preview in Phở Artifact'}
+                    />
+                  )}
                   {showHtmlPreview && <HtmlPreviewAction content={content} size={actionIconSize} />}
                   {originalNode}
                 </>

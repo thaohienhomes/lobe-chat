@@ -2,6 +2,8 @@ import { Markdown, Mermaid } from '@lobehub/ui';
 import dynamic from 'next/dynamic';
 import { memo } from 'react';
 
+import { ArtifactType } from '@/types/artifact';
+
 import HTMLRenderer from './HTML';
 import SVGRender from './SVG';
 
@@ -9,15 +11,15 @@ const ReactRenderer = dynamic(() => import('./React'), { ssr: false });
 
 const Renderer = memo<{ content: string; type?: string }>(({ content, type }) => {
   switch (type) {
-    case 'application/lobe.artifacts.react': {
+    case ArtifactType.React: {
       return <ReactRenderer code={content} />;
     }
 
-    case 'image/svg+xml': {
+    case ArtifactType.SVG: {
       return <SVGRender content={content} />;
     }
 
-    case 'application/lobe.artifacts.mermaid': {
+    case ArtifactType.Mermaid: {
       return <Mermaid variant={'borderless'}>{content}</Mermaid>;
     }
 

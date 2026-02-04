@@ -1,5 +1,3 @@
-'use client';
-
 import { Pre, PreSingleLine } from '@lobehub/ui/mdx';
 import { FC, PropsWithChildren } from 'react';
 

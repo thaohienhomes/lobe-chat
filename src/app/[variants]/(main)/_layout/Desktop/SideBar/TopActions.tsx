@@ -98,7 +98,6 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           />
         </Link>
       )}
-      {/* Phở Studio Cross-Promotion */}
       <a
         aria-label="Phở Studio"
         href="https://studio.pho.chat"
@@ -119,6 +118,23 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           tooltipProps={{ placement: 'right' }}
         />
       </a>
+      {/* Phở Academy Entry - PENDING: Temporarily disabled until ready
+      <Link aria-label="Phở Academy" href={'/academy'}>
+        <ActionIcon
+          icon={BookOpen}
+          size={ICON_SIZE}
+          style={
+            {
+              border: '1px solid rgba(124, 58, 237, 0.6)',
+              borderRadius: 8,
+              boxShadow: '0 0 12px 2px rgba(124, 58, 237, 0.4)',
+            } as CSSProperties
+          }
+          title="Phở Academy - AI Tutorials"
+          tooltipProps={{ placement: 'right' }}
+        />
+      </Link>
+      */}
     </Flexbox>
   );
 });

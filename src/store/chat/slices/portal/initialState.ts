@@ -3,12 +3,20 @@ import { PortalArtifact } from '@/types/artifact';
 export enum ArtifactDisplayMode {
   Code = 'code',
   Preview = 'preview',
+  Split = 'split', // Side-by-side code + preview
 }
 
 export interface PortalFile {
   chunkId?: string;
   chunkText?: string;
   fileId: string;
+}
+
+// Extended to support manual content injection
+declare module '@/types/artifact' {
+  interface PortalArtifact {
+    content?: string;
+  }
 }
 
 export interface ChatPortalState {

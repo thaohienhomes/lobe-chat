@@ -7,7 +7,7 @@ import { CustomMDX } from '@/components/mdx';
 import Image from '@/components/mdx/Image';
 import { OFFICIAL_SITE } from '@/const/url';
 import { Locales } from '@/locales/resources';
-import { ChangelogService } from '@/server/services/changelog';
+import { PhoChangelogService } from '@/server/services/changelog/pho';
 import { ChangelogIndexItem } from '@/types/changelog';
 
 import GridLayout from './GridLayout';
@@ -20,7 +20,7 @@ const Post = async ({
   versionRange,
   locale,
 }: ChangelogIndexItem & { branch?: string; locale: Locales; mobile?: boolean }) => {
-  const changelogService = new ChangelogService();
+  const changelogService = new PhoChangelogService();
   const data = await changelogService.getPostById(id, { locale });
 
   if (!data || !data.title) return null;
@@ -51,7 +51,7 @@ const Post = async ({
           <Link href={changelogUrl} style={{ color: 'inherit' }}>
             <h1 id={id}>{data.rawTitle || data.title}</h1>
           </Link>
-          <Image alt={data.title} src={data.image} />
+          {data.image && <Image alt={data.title || ''} src={data.image} />}
           <CustomMDX source={data.content} />
           <Link href={changelogUrl} style={{ color: 'inherit' }}>
             <VersionTag range={versionRange} />

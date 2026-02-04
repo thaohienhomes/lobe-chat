@@ -4,7 +4,6 @@ import { Fragment, Suspense } from 'react';
 import { Flexbox } from 'react-layout-kit';
 import urlJoin from 'url-join';
 
-import Pagination from '@/app/[variants]/@modal/(.)changelog/modal/features/Pagination';
 import UpdateChangelogStatus from '@/app/[variants]/@modal/(.)changelog/modal/features/UpdateChangelogStatus';
 import StructuredData from '@/components/StructuredData';
 import { serverFeatureFlags } from '@/config/featureFlags';
@@ -12,7 +11,7 @@ import { BRANDING_NAME } from '@/const/branding';
 import { OFFICIAL_SITE } from '@/const/url';
 import { ldModule } from '@/server/ld';
 import { metadataModule } from '@/server/metadata';
-import { ChangelogService } from '@/server/services/changelog';
+import { PhoChangelogService } from '@/server/services/changelog/pho';
 import { translation } from '@/server/translation';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
@@ -37,7 +36,7 @@ const Page = async (props: DynamicLayoutProps) => {
 
   const { isMobile, locale } = await RouteVariants.getVariantsFromProps(props);
   const { t } = await translation('metadata', locale);
-  const changelogService = new ChangelogService();
+  const changelogService = new PhoChangelogService();
   const data = await changelogService.getChangelogIndex();
 
   if (!data) return notFound();
@@ -67,9 +66,7 @@ const Page = async (props: DynamicLayoutProps) => {
           </Fragment>
         ))}
       </Flexbox>
-      <GridLayout>
-        <Pagination />
-      </GridLayout>
+      {/* Pagination removed - Phở Chat has only 3 changelogs */}
       <UpdateChangelogStatus currentId={data[0]?.id} />
     </>
   );

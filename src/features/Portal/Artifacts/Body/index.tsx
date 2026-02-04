@@ -26,7 +26,7 @@ const ArtifactsUI = memo(() => {
       s.portalArtifactDisplayMode,
       chatSelectors.isMessageGenerating(messageId)(s),
       chatPortalSelectors.artifactType(s),
-      chatPortalSelectors.artifactCode(messageId)(s),
+      chatPortalSelectors.artifactCode(messageId)(s) || s.portalArtifact?.content || '',
       chatPortalSelectors.artifactCodeLanguage(s),
       chatPortalSelectors.isArtifactTagClosed(messageId)(s),
     ];
@@ -60,14 +60,55 @@ const ArtifactsUI = memo(() => {
     }
   }, [artifactType, artifactCodeLanguage]);
 
-  // make sure the message and id is valid
-  if (!messageId) return;
+  // make sure the message and id is valid (but allow manual-preview)
+  const isManualPreview = messageId === 'manual-preview';
+  if (!messageId && !isManualPreview) return;
+
+  // For manual previews, consider the artifact as "closed" (ready to render)
+  const effectivelyTagClosed = isManualPreview || isArtifactTagClosed;
 
   // show code when the artifact is not closed or the display mode is code or the artifact type is code
   const showCode =
-    !isArtifactTagClosed ||
+    !effectivelyTagClosed ||
     displayMode === ArtifactDisplayMode.Code ||
     artifactType === ArtifactType.Code;
+
+  // Split mode: show both code and preview side-by-side
+  const isSplitMode = displayMode === ArtifactDisplayMode.Split && effectivelyTagClosed;
+
+  if (isSplitMode) {
+    return (
+      <Flexbox
+        className={'portal-artifact'}
+        flex={1}
+        gap={0}
+        height={'100%'}
+        horizontal
+        style={{ overflow: 'hidden' }}
+      >
+        {/* Code Panel */}
+        <Flexbox
+          flex={1}
+          paddingInline={8}
+          style={{
+            borderRight: '1px solid rgba(255,255,255,0.1)',
+            overflow: 'auto',
+          }}
+        >
+          <Highlighter
+            language={language || 'txt'}
+            style={{ fontSize: 11, height: '100%', overflow: 'auto' }}
+          >
+            {artifactContent}
+          </Highlighter>
+        </Flexbox>
+        {/* Preview Panel */}
+        <Flexbox flex={1} paddingInline={8} style={{ overflow: 'auto' }}>
+          <Renderer content={artifactContent} type={artifactType} />
+        </Flexbox>
+      </Flexbox>
+    );
+  }
 
   return (
     <Flexbox

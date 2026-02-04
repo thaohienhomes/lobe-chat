@@ -3,6 +3,7 @@
 import { Modal } from '@lobehub/ui';
 import { memo, useCallback, useState } from 'react';
 
+import { useAgentStore } from '@/store/agent';
 import { useToolStore } from '@/store/tool';
 import { useUserStore } from '@/store/user';
 
@@ -24,6 +25,7 @@ type OnboardingStep = 'profession' | 'recommendations';
 const applyRecommendations = async (selections: RecommendationSelections) => {
   const { updateDefaultAgent } = useUserStore.getState();
   const { installPlugins } = useToolStore.getState();
+  const { togglePlugin } = useAgentStore.getState();
 
   // Apply default model if selected
   if (selections.defaultModel) {
@@ -35,13 +37,20 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
     console.log('✅ Applied default model:', selections.defaultModel);
   }
 
-  // Install selected plugins
+  // Install selected plugins and enable them for current session
   if (selections.enabledPlugins && selections.enabledPlugins.length > 0) {
     try {
+      // First install the plugins to database
       await installPlugins(selections.enabledPlugins);
       console.log('✅ Installed plugins:', selections.enabledPlugins);
+
+      // Then enable each plugin for the current session
+      for (const pluginId of selections.enabledPlugins) {
+        await togglePlugin(pluginId, true);
+        console.log('✅ Enabled plugin for session:', pluginId);
+      }
     } catch (error) {
-      console.error('Failed to install plugins:', error);
+      console.error('Failed to install/enable plugins:', error);
     }
   }
 

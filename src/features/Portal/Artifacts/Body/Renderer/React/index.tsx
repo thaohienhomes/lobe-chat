@@ -16,14 +16,6 @@ const SandpackProvider = dynamic(
   },
 );
 
-const SandpackLayout = dynamic(
-  () => import('@codesandbox/sandpack-react').then((mod) => mod.SandpackLayout),
-  {
-    loading: () => <CircleLoading />,
-    ssr: false,
-  },
-);
-
 const SandpackPreview = dynamic(
   () => import('@codesandbox/sandpack-react').then((mod) => mod.SandpackPreview),
   {
@@ -43,34 +35,67 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
     <SandpackProvider
       customSetup={{
         dependencies: {
+          // UI Libraries
           '@ant-design/icons': 'latest',
           '@lshay/ui': 'latest',
           '@radix-ui/react-alert-dialog': 'latest',
           '@radix-ui/react-dialog': 'latest',
           '@radix-ui/react-icons': 'latest',
+
+          '@react-spring/three': 'latest',
+
+          // 3D Graphics (Three.js ecosystem)
+          '@react-three/drei': 'latest',
+
+          '@react-three/fiber': 'latest',
+
           'antd': 'latest',
+
           'class-variance-authority': 'latest',
+
           'clsx': 'latest',
+
+          // Interactive math visualization library
+          'd3': 'latest',
+
+          // Data visualization
+          // Animation
+          'framer-motion': 'latest',
+
+          // Mathematics & Visualization
+          'katex': 'latest',
+
           'lucide-react': 'latest',
+
+          'mafs': 'latest',
+
+          'react-katex': 'latest',
+
           'recharts': 'latest',
+
           'tailwind-merge': 'latest',
+
+          'three': 'latest',
         },
       }}
       files={{
-        'App.tsx': code,
+        '/App.tsx': code,
         ...createTemplateFiles({ title }),
       }}
       options={{
         externalResources: ['https://cdn.tailwindcss.com'],
-        visibleFiles: ['App.tsx'],
       }}
       style={{ height: '100%' }}
       template="vite-react-ts"
       theme="auto"
     >
-      <SandpackLayout style={{ height: '100%' }}>
-        <SandpackPreview style={{ height: '100%' }} />
-      </SandpackLayout>
+      {/* Preview-only mode: no code editor, maximize preview space */}
+      <SandpackPreview
+        showNavigator={false}
+        showOpenInCodeSandbox={false}
+        showRefreshButton
+        style={{ height: '100%', width: '100%' }}
+      />
     </SandpackProvider>
   );
 });

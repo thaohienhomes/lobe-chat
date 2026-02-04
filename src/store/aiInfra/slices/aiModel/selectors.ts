@@ -45,9 +45,23 @@ const getEnabledModelById = (id: string, provider: string) => (s: AIProviderStor
   s.enabledAiModels?.find((i) => i.id === id && (provider ? provider === i.providerId : true));
 
 const isModelSupportToolUse = (id: string, provider: string) => (s: AIProviderStoreState) => {
-  const model = getEnabledModelById(id, provider)(s);
+  // First, check enabledAiModels (server-side data)
+  const enabledModel = getEnabledModelById(id, provider)(s);
+  if (enabledModel?.abilities?.functionCall) {
+    return true;
+  }
 
-  return model?.abilities?.functionCall || false;
+  // Fallback: check builtinAiModelList (static config)
+  // This handles cases where provider isn't fully configured but model has functionCall in config
+  const builtinModel = s.builtinAiModelList?.find(
+    (m) => m.id === id && (provider ? m.providerId === provider : true),
+  );
+
+  if (builtinModel?.abilities?.functionCall) {
+    return true;
+  }
+
+  return false;
 };
 
 const isModelSupportFiles = (id: string, provider: string) => (s: AIProviderStoreState) => {
