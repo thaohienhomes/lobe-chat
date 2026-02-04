@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { type FormEvent, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 interface BlogPost {
@@ -8,6 +9,7 @@ interface BlogPost {
   date: string;
   description: string;
   emoji: string;
+  image?: string;
   slug: string;
   title: string;
 }
@@ -17,8 +19,29 @@ const posts: BlogPost[] = [
     category: 'blog',
     date: '2026-02-04',
     description:
+      'Ra mắt Phở Studio - Nền tảng tạo ảnh và video AI với FLUX, Kling, Stable Diffusion và nhiều model hàng đầu.',
+    emoji: '🎨',
+    image: '/images/blog/pho-studio.png',
+    slug: 'pho-studio-launch',
+    title: 'Phở Studio - Nền Tảng Tạo Ảnh & Video AI',
+  },
+  {
+    category: 'blog',
+    date: '2026-02-03',
+    description:
+      'Tìm hiểu về Gemini 2.0 Flash Thinking - mô hình AI với khả năng suy luận vượt trội từ Google.',
+    emoji: '🧠',
+    image: '/images/blog/gemini-flash.png',
+    slug: 'gemini-flash-thinking',
+    title: 'Gemini 2.0 Flash Thinking - AI Suy Luận Mới',
+  },
+  {
+    category: 'blog',
+    date: '2026-02-04',
+    description:
       'Khám phá cách Phở Chat hỗ trợ nghiên cứu y sinh học với PubMed, ArXiv và các công cụ y khoa chuyên biệt.',
     emoji: '🔬',
+    image: '/images/blog/pubmed-guide.png',
     slug: 'research-features',
     title: 'Trợ Lý AI Thông Minh Cho Nghiên Cứu Y Sinh Học',
   },
@@ -49,6 +72,36 @@ const categoryLabels = {
 };
 
 export default function BlogIndexPage() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleSubscribe = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        body: JSON.stringify({ email, source: 'blog' }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus('success');
+        setStatusMessage(data.message || 'Đăng ký thành công!');
+        setEmail('');
+      } else {
+        setStatus('error');
+        setStatusMessage(data.error || 'Có lỗi xảy ra');
+      }
+    } catch {
+      setStatus('error');
+      setStatusMessage('Không thể kết nối, vui lòng thử lại.');
+    }
+  };
+
   return (
     <html lang="vi">
       <head>
@@ -143,7 +196,8 @@ export default function BlogIndexPage() {
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
-            padding: 28px;
+            padding: 0;
+            overflow: hidden;
             transition: all 0.3s ease;
             cursor: pointer;
             text-decoration: none;
@@ -156,6 +210,16 @@ export default function BlogIndexPage() {
             border-color: rgba(138, 43, 226, 0.3);
             transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(138, 43, 226, 0.15);
+          }
+          
+          .post-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+          }
+          
+          .post-content {
+            padding: 24px;
           }
           
           .post-emoji {
@@ -309,44 +373,52 @@ export default function BlogIndexPage() {
           </header>
 
           <nav className="nav-tabs">
-            <a className="nav-tab active" href="/blog">
+            <Link className="nav-tab active" href="/blog">
               📝 Tất Cả
-            </a>
-            <a className="nav-tab" href="/blog?category=blog">
+            </Link>
+            <Link className="nav-tab" href="/blog?category=blog">
               📰 Blog
-            </a>
-            <a className="nav-tab" href="/blog?category=newsletter">
+            </Link>
+            <Link className="nav-tab" href="/blog?category=newsletter">
               📬 Newsletter
-            </a>
-            <a className="nav-tab" href="/blog?category=changelog">
+            </Link>
+            <Link className="nav-tab" href="/blog?category=changelog">
               🚀 Changelog
-            </a>
+            </Link>
           </nav>
 
           <Flexbox className="posts-grid">
             {posts.map((post) => (
               <Link className="post-card" href={`/blog/${post.slug}`} key={post.slug}>
-                <div className="post-emoji">{post.emoji}</div>
-                <div className="post-meta">
-                  <span
-                    className="post-category"
-                    style={{
-                      background: `${categoryLabels[post.category].color}20`,
-                      color: categoryLabels[post.category].color,
-                    }}
-                  >
-                    {categoryLabels[post.category].label}
-                  </span>
-                  <span className="post-date">
-                    {new Date(post.date).toLocaleDateString('vi-VN', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </span>
+                {post.image ? (
+                  <img alt={post.title} className="post-image" src={post.image} />
+                ) : (
+                  <div className="post-content" style={{ paddingTop: 0 }}>
+                    <div className="post-emoji">{post.emoji}</div>
+                  </div>
+                )}
+                <div className="post-content">
+                  <div className="post-meta">
+                    <span
+                      className="post-category"
+                      style={{
+                        background: `${categoryLabels[post.category].color}20`,
+                        color: categoryLabels[post.category].color,
+                      }}
+                    >
+                      {categoryLabels[post.category].label}
+                    </span>
+                    <span className="post-date">
+                      {new Date(post.date).toLocaleDateString('vi-VN', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                  <h2 className="post-title">{post.title}</h2>
+                  <p className="post-description">{post.description}</p>
                 </div>
-                <h2 className="post-title">{post.title}</h2>
-                <p className="post-description">{post.description}</p>
               </Link>
             ))}
           </Flexbox>
@@ -356,12 +428,29 @@ export default function BlogIndexPage() {
             <p className="newsletter-desc">
               Nhận cập nhật mới nhất về AI, nghiên cứu y sinh học và các tính năng mới từ Phở Chat.
             </p>
-            <form className="newsletter-form">
-              <input className="newsletter-input" placeholder="email@example.com" type="email" />
-              <button className="newsletter-button" type="submit">
-                Đăng Ký
+            <form className="newsletter-form" onSubmit={handleSubscribe}>
+              <input
+                className="newsletter-input"
+                disabled={status === 'loading'}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                type="email"
+                value={email}
+              />
+              <button className="newsletter-button" disabled={status === 'loading'} type="submit">
+                {status === 'loading' ? 'Đang gửi...' : 'Đăng Ký'}
               </button>
             </form>
+            {statusMessage && (
+              <p
+                style={{
+                  color: status === 'success' ? '#22c55e' : '#ef4444',
+                  marginTop: 16,
+                }}
+              >
+                {statusMessage}
+              </p>
+            )}
           </section>
 
           <footer className="footer">
