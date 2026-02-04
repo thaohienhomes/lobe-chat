@@ -1,3 +1,5 @@
+'use client';
+
 import { CSSProperties, memo, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 

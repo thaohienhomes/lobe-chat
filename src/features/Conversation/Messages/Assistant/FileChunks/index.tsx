@@ -1,3 +1,5 @@
+'use client';
+
 import { Icon } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { BookOpenTextIcon, ChevronDown, ChevronRight } from 'lucide-react';

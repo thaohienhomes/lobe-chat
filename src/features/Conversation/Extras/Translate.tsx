@@ -1,3 +1,5 @@
+'use client';
+
 import { ActionIcon, Icon, Markdown, Tag, copyToClipboard } from '@lobehub/ui';
 import { App } from 'antd';
 import { useTheme } from 'antd-style';

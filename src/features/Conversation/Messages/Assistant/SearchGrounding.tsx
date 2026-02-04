@@ -1,3 +1,5 @@
+'use client';
+
 import { Icon, SearchResultCards, Tag } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { AnimatePresence, motion } from 'framer-motion';
