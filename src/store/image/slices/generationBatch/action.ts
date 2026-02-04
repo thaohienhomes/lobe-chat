@@ -1,3 +1,5 @@
+'use client';
+
 import { isEqual } from 'lodash-es';
 import { useRef } from 'react';
 import { SWRResponse, mutate } from 'swr';

@@ -1,3 +1,5 @@
+'use client';
+
 import { RefObject, createContext } from 'react';
 import { VirtuosoHandle } from 'react-virtuoso';
 
