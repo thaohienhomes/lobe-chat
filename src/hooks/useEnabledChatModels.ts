@@ -1,28 +1,31 @@
 import { useMemo } from 'react';
 
+import VercelAIGatewayConfig from '@/config/modelProviders/vercelaigateway';
 import VertexAIConfig from '@/config/modelProviders/vertexai';
 import { AiProviderSourceEnum, EnabledProviderWithModels } from '@/types/aiProvider';
 
 /**
- * Vertex AI is the primary provider (Feb 2026)
- * Switched from OpenRouter to Vertex AI for enterprise AI access
+ * Primary providers for Phở Chat (Feb 2026):
+ * 1. Vertex AI - Enterprise Gemini access
+ * 2. Vercel AI Gateway - Unified access to 100+ models as fallback
  */
-const ALLOWED_PROVIDER_ID = 'vertexai';
 
 /**
  * Hook to get ALL chat models for the model picker
  *
- * UPDATED Feb 2026: Now using Vertex AI as primary provider
- * Provides access to Gemini, Claude, Llama, DeepSeek, and Mistral models
+ * UPDATED Feb 2026: Now using both Vertex AI and Vercel AI Gateway providers
+ * - Vertex AI: Primary provider for Gemini models
+ * - Vercel AI Gateway: Fallback with access to Anthropic, OpenAI, DeepSeek, xAI, Meta
  */
 export const useEnabledChatModels = (): EnabledProviderWithModels[] => {
-  // Build the model list directly from Vertex AI config
-  const vertexAIProvider = useMemo((): EnabledProviderWithModels[] => {
-    const models = VertexAIConfig.chatModels || [];
+  const providers = useMemo((): EnabledProviderWithModels[] => {
+    const result: EnabledProviderWithModels[] = [];
 
-    return [
-      {
-        children: models.map((model) => ({
+    // Add Vertex AI Provider (Primary)
+    const vertexModels = VertexAIConfig.chatModels || [];
+    if (vertexModels.length > 0) {
+      result.push({
+        children: vertexModels.map((model) => ({
           abilities: {
             functionCall: model.functionCall ?? false,
             reasoning: model.reasoning ?? false,
@@ -32,13 +35,36 @@ export const useEnabledChatModels = (): EnabledProviderWithModels[] => {
           displayName: model.displayName || model.id,
           id: model.id,
         })),
-        id: ALLOWED_PROVIDER_ID,
+        id: 'vertexai',
         name: VertexAIConfig.name || 'Vertex AI',
         source: AiProviderSourceEnum.Builtin,
-      },
-    ];
+      });
+    }
+
+    // Add Vercel AI Gateway Provider (Fallback)
+    const vercelModels = VercelAIGatewayConfig.chatModels || [];
+    if (vercelModels.length > 0) {
+      result.push({
+        children: vercelModels
+          .filter((model) => model.enabled !== false)
+          .map((model) => ({
+            abilities: {
+              functionCall: model.functionCall ?? false,
+              reasoning: model.reasoning ?? false,
+              vision: model.vision ?? false,
+            },
+            contextWindowTokens: model.contextWindowTokens,
+            displayName: model.displayName || model.id,
+            id: model.id,
+          })),
+        id: 'vercelaigateway',
+        name: VercelAIGatewayConfig.name || 'Vercel AI Gateway',
+        source: AiProviderSourceEnum.Builtin,
+      });
+    }
+
+    return result;
   }, []);
 
-  return vertexAIProvider;
+  return providers;
 };
-
