@@ -14,6 +14,7 @@ const VertexAI: ModelProviderCard = {
       functionCall: true,
       id: 'gemini-3-pro-preview',
       maxOutput: 65_536,
+      reasoning: true,
       vision: true,
     },
     {
@@ -24,6 +25,7 @@ const VertexAI: ModelProviderCard = {
       functionCall: true,
       id: 'gemini-3-flash-preview',
       maxOutput: 65_536,
+      reasoning: true,
       vision: true,
     },
     // --- Gemini 2.5 Family ---

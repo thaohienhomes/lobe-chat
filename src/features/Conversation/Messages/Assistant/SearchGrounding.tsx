@@ -90,23 +90,40 @@ const SearchGrounding = memo<GroundingSearch>(({ searchQueries, citations }) => 
           <Flexbox horizontal>{t('search.grounding.title', { count: citations?.length })}</Flexbox>
           {!showDetail && (
             <Flexbox horizontal>
-              {citations?.slice(0, 8).map((item, index) => (
-                <Image
-                  alt={item.title || item.url}
-                  height={16}
-                  key={`${item.url}-${index}`}
-                  src={`https://icons.duckduckgo.com/ip3/${new URL(item.url).host}.ico`}
-                  style={{
-                    background: theme.colorBgContainer,
-                    borderRadius: 8,
-                    marginInline: -2,
-                    padding: 2,
-                    zIndex: 100 - index,
-                  }}
-                  unoptimized
-                  width={16}
-                />
-              ))}
+              {citations?.slice(0, 8).map((item, index) => {
+                const domain = new URL(item.url).host;
+                return (
+                  <Tooltip
+                    key={`${item.url}-${index}`}
+                    title={
+                      <Flexbox gap={4} style={{ maxWidth: 280 }}>
+                        <div className={styles.title} style={{ fontWeight: 500 }}>
+                          {item.title || domain}
+                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11 }}>
+                          {domain}
+                        </div>
+                      </Flexbox>
+                    }
+                  >
+                    <Image
+                      alt={item.title || item.url}
+                      height={16}
+                      src={`https://icons.duckduckgo.com/ip3/${domain}.ico`}
+                      style={{
+                        background: theme.colorBgContainer,
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                        marginInline: -2,
+                        padding: 2,
+                        zIndex: 100 - index,
+                      }}
+                      unoptimized
+                      width={16}
+                    />
+                  </Tooltip>
+                );
+              })}
             </Flexbox>
           )}
         </Flexbox>
