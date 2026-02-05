@@ -1,4 +1,4 @@
-import { isProviderDisableBrowserRequest } from '@/config/modelProviders';
+import { DEFAULT_MODEL_PROVIDER_LIST, isProviderDisableBrowserRequest } from '@/config/modelProviders';
 import { AIProviderStoreState } from '@/store/aiInfra/initialState';
 import { AiProviderRuntimeConfig } from '@/types/aiProvider';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
@@ -103,16 +103,31 @@ const providerKeyVaults = (provider: string | undefined) => (s: AIProviderStoreS
   return s.aiProviderRuntimeConfig?.[provider]?.keyVaults;
 };
 
+// Helper to get searchMode from static config
+const getStaticProviderSearchMode = (provider: string): string | undefined => {
+  const staticConfig = DEFAULT_MODEL_PROVIDER_LIST.find((p) => p.id === provider);
+  return staticConfig?.settings?.searchMode;
+};
+
 const isProviderHasBuiltinSearch = (provider: string) => (s: AIProviderStoreState) => {
   const config = providerConfigById(provider)(s);
 
-  return !!config?.settings.searchMode;
+  // First check runtime config, then fallback to static config
+  return !!config?.settings?.searchMode || !!getStaticProviderSearchMode(provider);
 };
 
 const isProviderHasBuiltinSearchConfig = (id: string) => (s: AIProviderStoreState) => {
   const providerCfg = providerConfigById(id)(s);
 
-  return !!providerCfg?.settings.searchMode && providerCfg?.settings.searchMode !== 'internal';
+  // Check runtime config first
+  const runtimeSearchMode = providerCfg?.settings?.searchMode;
+  if (runtimeSearchMode) {
+    return runtimeSearchMode !== 'internal';
+  }
+
+  // Fallback to static config
+  const staticSearchMode = getStaticProviderSearchMode(id);
+  return !!staticSearchMode && staticSearchMode !== 'internal';
 };
 
 const isProviderEnableResponseApi = (id: string) => (s: AIProviderStoreState) => {
