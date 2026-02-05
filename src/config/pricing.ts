@@ -711,8 +711,13 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       // Vertex AI Tier 1 Models (Feb 2026)
       // ============================================
-      'gemini-2.0-flash',           // Fast, reliable
-      'gemini-2.5-flash-lite',      // Fastest response
+      'gemini-2.0-flash', // Fast, reliable
+      'gemini-2.5-flash-lite', // Fastest response
+      // ============================================
+      // Vercel AI Gateway Tier 1 Models
+      // ============================================
+      'google/gemini-2.0-flash', // Vercel AI Gateway
+      'deepseek/deepseek-chat', // Vercel AI Gateway - DeepSeek V3
     ],
     outputCostPer1M: 15, // Cost per 1M output tokens
     pointsPerMessage: 5, // ~15-20 points per typical message
@@ -749,9 +754,21 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       // Vertex AI Tier 2 Models (Feb 2026)
       // ============================================
-      'gemini-2.5-flash',              // Best value for performance
-      'gemini-2.5-pro',                // High quality, 2M context
-      'gemini-3-flash-preview',        // Latest Gemini 3 (Preview)
+      'gemini-2.5-flash', // Best value for performance
+      'gemini-2.5-pro', // High quality, 2M context
+      'gemini-3-flash-preview', // Latest Gemini 3 (Preview)
+      // ============================================
+      // Vercel AI Gateway Tier 2 Models
+      // ============================================
+      'google/gemini-2.5-flash', // Vercel AI Gateway
+      'google/gemini-2.5-pro', // Vercel AI Gateway
+      'anthropic/claude-sonnet-4.5', // Vercel AI Gateway
+      'anthropic/claude-haiku-4.5', // Vercel AI Gateway
+      'openai/gpt-5.2', // Vercel AI Gateway
+      'openai/gpt-4o', // Vercel AI Gateway
+      'deepseek/deepseek-r1', // Vercel AI Gateway
+      'xai/grok-4', // Vercel AI Gateway
+      'meta-llama/llama-4-70b-instruct', // Vercel AI Gateway
     ],
     outputCostPer1M: 300,
     pointsPerMessage: 150,
@@ -777,7 +794,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       // Vertex AI Tier 3 Models (Feb 2026)
       // ============================================
-      'gemini-3-pro-preview',          // Latest Gemini 3 Pro
+      'gemini-3-pro-preview', // Latest Gemini 3 Pro
     ],
     outputCostPer1M: 1500,
     pointsPerMessage: 1000,
