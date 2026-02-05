@@ -19,7 +19,7 @@ const ThemeSwatchesPrimary = memo<IProps>(({ onChange, value }) => {
     <ColorSwatches
       colors={[
         {
-          color: 'rgba(0, 0, 0, 0)',
+          color: '#00000000',
           title: t('default'),
         },
         {

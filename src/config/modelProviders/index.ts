@@ -134,7 +134,7 @@ export const LOBE_DEFAULT_MODEL_LIST: ChatModelCard[] = [
  */
 export const DEFAULT_MODEL_PROVIDER_LIST = [
   // PRIMARY PROVIDER: OpenRouter - enabled by default
-  { ...OpenRouterProvider, enabled: true },
+  { ...OpenRouterProvider, enabled: false },
 
   // OTHER PROVIDERS: Disabled by default for pho.chat
   // These are kept for potential future use or BYOK scenarios
@@ -148,7 +148,7 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   { ...AnthropicProvider, enabled: false },
   { ...BedrockProvider, enabled: false },
   { ...GoogleProvider, enabled: false },
-  { ...VertexAIProvider, enabled: false },
+  { ...VertexAIProvider, enabled: true },
   { ...DeepSeekProvider, enabled: false },
   { ...MoonshotProvider, enabled: false },
   { ...AiHubMixProvider, enabled: false },

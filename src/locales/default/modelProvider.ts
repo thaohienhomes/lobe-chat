@@ -373,9 +373,9 @@ export default {
   },
   vertexai: {
     apiKey: {
-      desc: '填入你的 Vertex Ai Keys',
-      placeholder: `{ "type": "service_account", "project_id": "xxx", "private_key_id": ... }`,
-      title: 'Vertex AI Keys',
+      desc: 'Nhập nội dung file JSON của GCP Service Account (bao gồm project_id, private_key,...)',
+      placeholder: `{ "type": "service_account", "project_id": "xxx", ... }`,
+      title: 'GCP Service Account JSON',
     },
   },
   zeroone: {

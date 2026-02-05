@@ -3,10 +3,9 @@ import { genUserLLMConfig } from './genUserLLMConfig';
 /**
  * Default LLM Configuration for pho.chat
  *
- * Per PRICING_MASTERPLAN.md and src/config/pricing.ts:
- * - Free tier (Phở Không Người Lái) uses OpenRouter as primary provider
- * - Default model: openai/gpt-4o-mini (Tier 1 model via OpenRouter)
- * - OpenRouter aggregates multiple providers with unified API
+ * UPDATED Feb 2026: Now using Vertex AI as primary provider
+ * - Default model: gemini-2.5-flash (via Vertex AI)
+ * - Vertex AI provides enterprise-grade access to Gemini, Claude, and more
  */
 export const DEFAULT_LLM_CONFIG = genUserLLMConfig({
   lmstudio: {
@@ -16,18 +15,18 @@ export const DEFAULT_LLM_CONFIG = genUserLLMConfig({
     enabled: true,
     fetchOnClient: true,
   },
-  // OpenRouter as primary provider for free tier
-  openrouter: {
+  // Vertex AI as primary provider
+  vertexai: {
     enabled: true,
   },
 });
 
 /**
- * Default model for free tier users
- * Using OpenRouter model ID format: openai/gpt-4o-mini
- * This is a Tier 1 model available to all users including free tier
+ * Default model for pho.chat users
+ * Using Vertex AI model ID: gemini-2.5-flash
+ * Fast, efficient model with 1M context window
  */
-export const DEFAULT_MODEL = 'openai/gpt-4o-mini';
+export const DEFAULT_MODEL = 'gemini-2.5-flash';
 
 export const DEFAULT_EMBEDDING_MODEL = 'text-embedding-3-small';
 export const DEFAULT_EMBEDDING_PROVIDER = 'openai';
@@ -38,7 +37,6 @@ export const DEFAULT_RERANK_QUERY_MODE = 'full_text';
 
 /**
  * Default provider for pho.chat
- * OpenRouter as primary provider to aggregate multiple AI providers
- * Configured via OPENROUTER_API_KEY environment variable
+ * Vertex AI as primary provider for enterprise AI access
  */
-export const DEFAULT_PROVIDER = 'openrouter';
+export const DEFAULT_PROVIDER = 'vertexai';

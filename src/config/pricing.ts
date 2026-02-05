@@ -341,15 +341,15 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
  */
 export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   // ============================================================================
-  // GLOBAL PLANS - All use OpenRouter as primary provider
+  // GLOBAL PLANS - All use Vertex AI as primary provider (Feb 2026)
   // ============================================================================
 
   // Global Lifetime: Tier 1, 2, 3 - Behaves like PRO with 2M points monthly reset
   gl_lifetime: {
     allowedTiers: [1, 2], // Per SPECS: Same as PRO = Tier 1 & 2 only
     dailyLimits: { tier2: -1 }, // Unlimited Tier 2 within monthly points cap
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter', // OpenRouter as primary
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -373,8 +373,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   gl_premium: {
     allowedTiers: [1, 2], // Per SPECS: PRO = Tier 1 & 2
     dailyLimits: { tier2: -1 }, // Unlimited within monthly cap
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter', // OpenRouter as primary
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -398,8 +398,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   gl_standard: {
     allowedTiers: [1, 2],
     dailyLimits: { tier2: 30 },
-    defaultModel: 'gpt-4o',
-    defaultProvider: 'openrouter', // OpenRouter as primary
+    defaultModel: 'gemini-2.5-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -423,8 +423,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   // "BASIC TIER: Models: Tier 1 ONLY (Unlimited*). Strictly NO access to Tier 2 Models."
   gl_starter: {
     allowedTiers: [1], // Tier 1 ONLY - same as vn_basic
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter', // Use OpenRouter as primary provider
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       'gpt-4o-mini',
       'gemini-1.5-flash',
@@ -443,8 +443,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   lifetime_early_bird: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3/day
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter',
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai',
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -473,8 +473,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   lifetime_last_call: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter',
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai',
     models: [
       'gpt-4o-mini',
       'gemini-1.5-flash',
@@ -500,8 +500,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   lifetime_standard: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter',
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai',
     models: [
       'gpt-4o-mini',
       'gemini-1.5-flash',
@@ -532,8 +532,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_basic: {
     allowedTiers: [1, 2], // Phở Tái allows Tier 1 & 2
     dailyLimits: { tier2: 30 }, // 30 Tier 2 messages/day
-    defaultModel: 'gpt-4o',
-    defaultProvider: 'openrouter', // Use OpenRouter as primary provider
+    defaultModel: 'gemini-2.5-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -553,14 +553,14 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     ],
   },
   // ============================================================================
-  // VIETNAM PLANS - All use OpenRouter as primary provider
+  // VIETNAM PLANS - All use Vertex AI as primary provider (Feb 2026)
   // ============================================================================
 
   // VN Free: Tier 1 ONLY with 50,000 points/month, no chat history/file uploads
   vn_free: {
     allowedTiers: [1],
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter', // OpenRouter as primary
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       'gpt-4o-mini',
       'gemini-1.5-flash',
@@ -576,8 +576,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_pro: {
     allowedTiers: [1, 2, 3], // Phở Đặc Biệt allows all tiers
     dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3 messages/day
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter', // OpenRouter as primary
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -606,8 +606,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_team: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier3: 100 },
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter', // OpenRouter as primary
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
     models: [
       // All models available
       'gpt-4o-mini',
@@ -635,8 +635,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_ultimate: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 100 }, // Unlimited Tier 2, 100 Tier 3/day
-    defaultModel: 'gpt-4o-mini',
-    defaultProvider: 'openrouter',
+    defaultModel: 'gemini-2.0-flash',
+    defaultProvider: 'vertexai',
     models: [
       // Tier 1 models
       'gpt-4o-mini',
@@ -680,10 +680,10 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   1: {
     inputCostPer1M: 5,
     models: [
-      // OpenAI budget models
+      // OpenAI budget models (via OpenRouter - legacy)
       'gpt-4o-mini',
       'openai/gpt-4o-mini',
-      // Google budget models
+      // Google budget models (via OpenRouter - legacy)
       'gemini-1.5-flash',
       'gemini-2.0-flash',
       'gemini-flash-1.5',
@@ -692,7 +692,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'google/gemini-2.0-flash-001',
       'google/gemma-2-9b-it',
       'google/gemma-2-9b-it:free',
-      // Anthropic budget models
+      // Anthropic budget models (via OpenRouter - legacy)
       'claude-3-haiku',
       'claude-3.5-haiku',
       'anthropic/claude-3-haiku',
@@ -708,6 +708,11 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'meta-llama/llama-3.1-8b-instruct:free',
       'meta-llama/llama-3.2-11b-vision-instruct',
       'meta-llama/llama-3.3-70b-instruct:free',
+      // ============================================
+      // Vertex AI Tier 1 Models (Feb 2026)
+      // ============================================
+      'gemini-2.0-flash',           // Fast, reliable
+      'gemini-2.5-flash-lite',      // Fastest response
     ],
     outputCostPer1M: 15, // Cost per 1M output tokens
     pointsPerMessage: 5, // ~15-20 points per typical message
@@ -717,16 +722,16 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   2: {
     inputCostPer1M: 100,
     models: [
-      // OpenAI standard models
+      // OpenAI standard models (via OpenRouter - legacy)
       'gpt-4o',
       'openai/gpt-4o',
       'gpt-4.1',
-      // Anthropic standard models
+      // Anthropic standard models (via OpenRouter - legacy)
       'claude-3.5-sonnet',
       'claude-3-5-sonnet',
       'claude-3-sonnet',
       'anthropic/claude-3.5-sonnet',
-      // Google standard models
+      // Google standard models (via OpenRouter - legacy)
       'gemini-1.5-pro',
       'gemini-2.5-pro',
       'gemini-pro-1.5',
@@ -741,6 +746,12 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'meta-llama/llama-3.3-70b-instruct',
       // Auto model - maps to Tier 2 by default since it routes to best model
       'openrouter/auto',
+      // ============================================
+      // Vertex AI Tier 2 Models (Feb 2026)
+      // ============================================
+      'gemini-2.5-flash',              // Best value for performance
+      'gemini-2.5-pro',                // High quality, 2M context
+      'gemini-3-flash-preview',        // Latest Gemini 3 (Preview)
     ],
     outputCostPer1M: 300,
     pointsPerMessage: 150,
@@ -750,7 +761,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   3: {
     inputCostPer1M: 500,
     models: [
-      // OpenAI premium models (O-series)
+      // OpenAI premium models (O-series via OpenRouter - legacy)
       'gpt-4-turbo',
       'o1',
       'o1-mini',
@@ -760,9 +771,13 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'openai/o1',
       'openai/o1-mini',
       'openai/o1-preview',
-      // Anthropic premium models
+      // Anthropic premium models (via OpenRouter - legacy)
       'claude-3-opus',
       'anthropic/claude-3-opus',
+      // ============================================
+      // Vertex AI Tier 3 Models (Feb 2026)
+      // ============================================
+      'gemini-3-pro-preview',          // Latest Gemini 3 Pro
     ],
     outputCostPer1M: 1500,
     pointsPerMessage: 1000,

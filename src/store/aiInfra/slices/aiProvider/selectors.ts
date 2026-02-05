@@ -10,18 +10,19 @@ import { GlobalLLMProviderKey } from '@/types/user/settings';
 // This allows centralized billing, model access control, and tier enforcement.
 // All other providers are hidden from the UI to simplify user experience.
 // ============================================================================
-const ALLOWED_PROVIDER_ID = 'openrouter';
+// NOTE: Temporarily allowing Vertex AI for testing (Feb 2026)
+const ALLOWED_PROVIDER_IDS = new Set(['vertexai']);
 
-// List - filtered to show ONLY OpenRouter provider
+// List - filtered to show ONLY allowed providers
 const enabledAiProviderList = (s: AIProviderStoreState) =>
   s.aiProviderList
-    .filter((item) => item.enabled && item.id === ALLOWED_PROVIDER_ID)
+    .filter((item) => item.enabled && ALLOWED_PROVIDER_IDS.has(item.id))
     .sort((a, b) => a.sort! - b.sort!);
 
-// Disabled list - also filtered to only show OpenRouter if disabled
+// Disabled list - also filtered to only show allowed providers if disabled
 // This prevents other providers from appearing in "Disabled" section
 const disabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => !item.enabled && item.id === ALLOWED_PROVIDER_ID);
+  s.aiProviderList.filter((item) => !item.enabled && ALLOWED_PROVIDER_IDS.has(item.id));
 
 const enabledImageModelList = (s: AIProviderStoreState) => s.enabledImageModelList || [];
 
