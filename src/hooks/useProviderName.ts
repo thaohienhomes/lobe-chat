@@ -1,9 +1,19 @@
+import { DEFAULT_MODEL_PROVIDER_LIST } from '@/config/modelProviders';
+
 /**
- * Returns a generic label for provider name to hide internal infrastructure details
- * This prevents exposing provider names like "OpenAI", "Anthropic", "Vertex AI" in error messages
+ * Returns a label for provider name.
+ * To enhance privacy and simplify UI, infrastructure-specific provider names like
+ * "Vertex AI", "Vercel AI Gateway", and "Groq" are masked as generic "Dịch vụ AI".
+ * Brand providers like "OpenAI" or "Anthropic" remain visible.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const useProviderName = (_provider: string) => {
-  // Hide provider names from users - return generic label
-  return 'Dịch vụ AI';
+export const useProviderName = (provider: string) => {
+  const infrastructureProviders = ['vercelaigateway', 'vertexai', 'groq'];
+
+  if (infrastructureProviders.includes(provider)) {
+    return 'Dịch vụ AI';
+  }
+
+  // Fallback to the provider's display name from the config
+  const providerCard = DEFAULT_MODEL_PROVIDER_LIST.find((p) => p.id === provider);
+  return providerCard?.name || provider;
 };
