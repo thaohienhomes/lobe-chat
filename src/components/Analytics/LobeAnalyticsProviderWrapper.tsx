@@ -22,7 +22,8 @@ export const LobeAnalyticsProviderWrapper = memo<Props>(({ children }) => {
       postHogConfig={{
         debug: analyticsEnv.DEBUG_POSTHOG_ANALYTICS,
         enabled: analyticsEnv.NEXT_PUBLIC_POSTHOG_ENABLED,
-        host: analyticsEnv.NEXT_PUBLIC_POSTHOG_HOST,
+        // Use local proxy to bypass ad blockers
+        host: '/ingest',
         key: analyticsEnv.NEXT_PUBLIC_POSTHOG_KEY ?? '',
         person_profiles: 'always',
       }}

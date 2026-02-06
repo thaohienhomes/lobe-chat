@@ -225,6 +225,7 @@ const nextConfig: NextConfig = {
       permanent: true,
       source: '/sitemap.xml',
     },
+    // ... existing redirects
     {
       destination: '/sitemap-index.xml',
       permanent: true,
@@ -286,6 +287,17 @@ const nextConfig: NextConfig = {
       destination: '/files',
       permanent: false,
       source: '/repos',
+    },
+  ],
+
+  rewrites: async () => [
+    {
+      destination: 'https://us.i.posthog.com/:path*',
+      source: '/ingest/:path*',
+    },
+    {
+      destination: 'https://us.i.posthog.com/static/:path*',
+      source: '/ingest/static/:path*',
     },
   ],
 
