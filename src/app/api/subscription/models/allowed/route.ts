@@ -1,14 +1,14 @@
 /**
  * Subscription Allowed Models Endpoint
  * Returns models that user can access based on their subscription plan
- * 
+ *
  * GET /api/subscription/models/allowed - Get allowed models for current user
  */
-
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { subscriptionModelAccessService } from '@/services/subscription/modelAccess';
+
 import { pino } from '@/libs/logger';
+import { subscriptionModelAccessService } from '@/services/subscription/modelAccess';
 
 /**
  * Response for allowed models
@@ -32,6 +32,26 @@ interface AllowedModelsResponse {
  */
 export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
   try {
+    // STAGING BYPASS: Allow all models in preview/development environments for testing
+    const isPreviewEnv =
+      process.env.VERCEL_ENV === 'preview' ||
+      process.env.VERCEL_ENV === 'development' ||
+      process.env.NODE_ENV === 'development';
+
+    if (isPreviewEnv) {
+      pino.info('Preview/Development bypass: returning all tiers');
+      return NextResponse.json({
+        data: {
+          allowedModels: [],
+          allowedTiers: [1, 2, 3], // All tiers enabled for staging
+          defaultModel: 'gemini-2.0-flash',
+          defaultProvider: 'google',
+          planCode: 'staging_bypass',
+        },
+        success: true,
+      });
+    }
+
     // Verify authentication
     const { userId } = await auth();
 
@@ -44,10 +64,10 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
         data: {
           allowedModels: PLAN_MODEL_ACCESS.vn_free.models,
           allowedTiers: getAllowedTiersForPlan(planCode),
+          dailyLimits: PLAN_MODEL_ACCESS.vn_free.dailyLimits,
           defaultModel: PLAN_MODEL_ACCESS.vn_free.defaultModel,
           defaultProvider: PLAN_MODEL_ACCESS.vn_free.defaultProvider,
           planCode,
-          dailyLimits: PLAN_MODEL_ACCESS.vn_free.dailyLimits,
         },
         success: true,
       });
@@ -73,12 +93,7 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
     const allSubscriptions = await db
       .select()
       .from(subscriptions)
-      .where(
-        and(
-          eq(subscriptions.userId, userId),
-          eq(subscriptions.status, 'active'),
-        ),
-      );
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')));
 
     // Prioritize paid plans over free plan
     const freePlans = new Set(['free', 'trial']);

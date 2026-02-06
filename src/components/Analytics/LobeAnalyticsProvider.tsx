@@ -58,6 +58,11 @@ export const LobeAnalyticsProvider = memo(
           const posthog = analyticsInstance?.getProvider('posthog')?.getNativeInstance();
 
           if (posthog) {
+            // Expose PostHog to window for debugging and external access
+            if (typeof window !== 'undefined') {
+              (window as any).posthog = posthog;
+            }
+
             // Register as super property (event property)
             posthog.register({
               environment,
