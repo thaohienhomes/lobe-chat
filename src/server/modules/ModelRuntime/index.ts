@@ -123,6 +123,20 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
 
       return { apiKey };
     }
+
+    // Vercel AI Gateway - unified access to 100+ models
+    case 'vercelaigateway': {
+      const apiKey = apiKeyManager.pick(
+        payload?.apiKey || process.env.AI_GATEWAY_API_KEY || llmConfig.VERCELAIGATEWAY_API_KEY,
+      );
+      // Vercel AI Gateway uses OpenAI-compatible API endpoint
+      const baseURL = payload?.baseURL || 'https://ai-gateway.vercel.sh/v1';
+
+      console.log('[ModelRuntime] Vercel AI Gateway - API Key exists:', !!apiKey);
+      console.log('[ModelRuntime] Vercel AI Gateway - Base URL:', baseURL);
+
+      return { apiKey, baseURL };
+    }
   }
 };
 
