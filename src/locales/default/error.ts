@@ -118,8 +118,8 @@ export default {
     QuotaLimitReached:
       '很抱歉，当前 Token 用量或请求次数已达该密钥的配额(quota)上限，请增加该密钥的配额或稍后再试',
     PermissionDenied: '很抱歉，你没有权限访问该服务，请检查你的密钥是否有访问权限',
-    InvalidProviderAPIKey: '{{provider}} API Key 不正确或为空，请检查 {{provider}} API Key 后重试',
-    ProviderBizError: '请求 {{provider}} 服务出错，请根据以下信息排查或重试',
+    InvalidProviderAPIKey: 'API Key không chính xác hoặc trống, vui lòng kiểm tra và thử lại',
+    ProviderBizError: 'Yêu cầu dịch vụ AI gặp lỗi, vui lòng thử lại sau',
 
     GoogleAIBlockReason: {
       BLOCKLIST: '您的内容包含被禁止的词汇。请检查并修改您的输入内容后重试。',
