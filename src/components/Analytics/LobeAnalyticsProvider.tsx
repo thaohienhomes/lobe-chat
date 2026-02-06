@@ -55,13 +55,24 @@ export const LobeAnalyticsProvider = memo(
             platform: isDesktop ? 'desktop' : 'web',
           });
 
-          analyticsInstance
-            ?.getProvider('posthog')
-            ?.getNativeInstance()
-            ?.register({
-              environment, // For feature flag targeting
+          const posthog = analyticsInstance?.getProvider('posthog')?.getNativeInstance();
+
+          if (posthog) {
+            // Register as super property (event property)
+            posthog.register({
+              environment,
               platform: isDesktop ? 'desktop' : 'web',
             });
+
+            // Set as Person Property for Feature Flags targeting
+            // This ensures it appears in the "Person properties" dropdown in PostHog
+            posthog.people.set({
+              environment,
+            });
+
+            // Reload flags to ensure new context is used
+            posthog.reloadFeatureFlags();
+          }
         }}
       >
         {children}
