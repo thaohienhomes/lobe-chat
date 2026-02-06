@@ -45,7 +45,13 @@ export const LobeAnalyticsProvider = memo(
       <AnalyticsProvider
         client={analytics}
         onInitializeSuccess={() => {
+          // Determine environment from Vercel or fallback
+          const environment =
+            process.env.NEXT_PUBLIC_VERCEL_ENV || // 'production', 'preview', 'development'
+            (isDev ? 'development' : 'production');
+
           analyticsInstance?.setGlobalContext({
+            environment,
             platform: isDesktop ? 'desktop' : 'web',
           });
 
@@ -53,6 +59,7 @@ export const LobeAnalyticsProvider = memo(
             ?.getProvider('posthog')
             ?.getNativeInstance()
             ?.register({
+              environment, // For feature flag targeting
               platform: isDesktop ? 'desktop' : 'web',
             });
         }}

@@ -26,6 +26,13 @@ const UserUpdater = memo(() => {
     if (nextUser) {
       const userAvatar = useUserStore.getState().user?.avatar;
 
+      if (typeof window !== 'undefined' && (window as any).posthog) {
+        (window as any).posthog.identify(nextUser.id, {
+          email: nextUser.email,
+          name: nextUser.name,
+        });
+      }
+
       const lobeUser = {
         // 头像使用设置的，而不是从 next-auth 中获取
         avatar: userAvatar || '',

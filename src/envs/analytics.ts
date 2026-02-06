@@ -41,9 +41,12 @@ export const getAnalyticsConfig = () => {
       PLAUSIBLE_SCRIPT_BASE_URL: process.env.PLAUSIBLE_SCRIPT_BASE_URL || 'https://plausible.io',
 
       // Posthog Analytics
-      ENABLED_POSTHOG_ANALYTICS: !!process.env.POSTHOG_KEY,
-      POSTHOG_KEY: process.env.POSTHOG_KEY,
-      POSTHOG_HOST: process.env.POSTHOG_HOST || 'https://app.posthog.com',
+      ENABLED_POSTHOG_ANALYTICS: !!(process.env.POSTHOG_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY),
+      POSTHOG_KEY: process.env.POSTHOG_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY,
+      POSTHOG_HOST:
+        process.env.POSTHOG_HOST ||
+        process.env.NEXT_PUBLIC_POSTHOG_HOST ||
+        'https://app.posthog.com',
       DEBUG_POSTHOG_ANALYTICS: process.env.DEBUG_POSTHOG_ANALYTICS === '1',
 
       // Umami Analytics

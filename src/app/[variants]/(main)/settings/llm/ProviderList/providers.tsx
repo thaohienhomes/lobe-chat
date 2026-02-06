@@ -1,3 +1,6 @@
+'use client';
+
+import { useFeatureFlagEnabled } from 'posthog-js/react';
 import { useMemo } from 'react';
 
 import {
@@ -56,6 +59,75 @@ import { useHuggingFaceProvider } from './HuggingFace';
 import { useOllamaProvider } from './Ollama';
 import { useOpenAIProvider } from './OpenAI';
 
+/**
+ * Hook to filter providers based on PostHog feature flags.
+ * Checks both individual provider flags and group flags.
+ */
+const useFilteredProviders = (providers: ProviderItem[]): ProviderItem[] => {
+  // Check group flags
+  const premiumEnabled = useFeatureFlagEnabled('llm-group-premium');
+  const fastEnabled = useFeatureFlagEnabled('llm-group-fast');
+  const openSourceEnabled = useFeatureFlagEnabled('llm-group-open-source');
+  const chinaEnabled = useFeatureFlagEnabled('llm-group-china');
+  const aggregatorsEnabled = useFeatureFlagEnabled('llm-group-aggregators');
+
+  // Check individual provider flags (add more as needed)
+  const groqEnabled = useFeatureFlagEnabled('llm-provider-groq');
+  const googleEnabled = useFeatureFlagEnabled('llm-provider-google');
+  const openaiEnabled = useFeatureFlagEnabled('llm-provider-openai');
+  const anthropicEnabled = useFeatureFlagEnabled('llm-provider-anthropic');
+  const deepseekEnabled = useFeatureFlagEnabled('llm-provider-deepseek');
+
+  return useMemo(() => {
+    return providers.filter((provider) => {
+      const id = provider.id.toLowerCase();
+
+      // Individual flag check (takes precedence)
+      if (id === 'groq' && groqEnabled === false) return false;
+      if (id === 'google' && googleEnabled === false) return false;
+      if (id === 'openai' && openaiEnabled === false) return false;
+      if (id === 'anthropic' && anthropicEnabled === false) return false;
+      if (id === 'deepseek' && deepseekEnabled === false) return false;
+
+      // Group flag check
+      const premiumProviders = ['openai', 'anthropic', 'google', 'vertexai'];
+      const fastProviders = ['groq', 'cerebras', 'sambanova'];
+      const openSourceProviders = ['ollama', 'vllm', 'huggingface', 'xinference'];
+      const chinaProviders = [
+        'qwen',
+        'zhipu',
+        'deepseek',
+        'baichuan',
+        'moonshot',
+        'hunyuan',
+        'spark',
+        'wenxin',
+      ];
+      const aggregatorProviders = ['openrouter', 'togetherai', 'fireworksai'];
+
+      if (premiumProviders.includes(id) && premiumEnabled === false) return false;
+      if (fastProviders.includes(id) && fastEnabled === false) return false;
+      if (openSourceProviders.includes(id) && openSourceEnabled === false) return false;
+      if (chinaProviders.includes(id) && chinaEnabled === false) return false;
+      if (aggregatorProviders.includes(id) && aggregatorsEnabled === false) return false;
+
+      return true;
+    });
+  }, [
+    providers,
+    premiumEnabled,
+    fastEnabled,
+    openSourceEnabled,
+    chinaEnabled,
+    aggregatorsEnabled,
+    groqEnabled,
+    googleEnabled,
+    openaiEnabled,
+    anthropicEnabled,
+    deepseekEnabled,
+  ]);
+};
+
 export const useProviderList = (): ProviderItem[] => {
   const AzureProvider = useAzureProvider();
   const OllamaProvider = useOllamaProvider();
@@ -65,7 +137,7 @@ export const useProviderList = (): ProviderItem[] => {
   const GithubProvider = useGithubProvider();
   const HuggingFaceProvider = useHuggingFaceProvider();
 
-  return useMemo(
+  const allProviders = useMemo(
     () => [
       OpenAIProvider,
       AzureProvider,
@@ -129,4 +201,6 @@ export const useProviderList = (): ProviderItem[] => {
       HuggingFaceProvider,
     ],
   );
+
+  return useFilteredProviders(allProviders);
 };

@@ -41,6 +41,13 @@ const UserUpdater = memo(() => {
   // Track user registration completion
   useEffect(() => {
     if (isLoaded && isSignedIn && user && user.id) {
+      if (typeof window !== 'undefined' && (window as any).posthog) {
+        (window as any).posthog.identify(user.id, {
+          email: user.primaryEmailAddress?.emailAddress,
+          name: user.fullName,
+        });
+      }
+
       // Check if this is a new user registration (user created recently)
       const userCreatedAt = user.createdAt;
       const now = new Date();

@@ -3,6 +3,53 @@ import { ModelProviderCard } from '@/types/llm';
 // ref https://console.groq.com/docs/tool-use
 const Groq: ModelProviderCard = {
   chatModels: [
+    {
+      contextWindowTokens: 131_072,
+      description:
+        'DeepSeek R1 Distill Llama 70B is a reasoning-capable model optimized for complex tasks.',
+      displayName: 'DeepSeek R1 Distill Llama 70B',
+      enabled: true,
+      functionCall: true,
+      id: 'deepseek-r1-distill-llama-70b',
+      maxOutput: 131_072,
+    },
+    {
+      contextWindowTokens: 131_072,
+      description:
+        'Llama 4 Scout is a 17Bx16E mixture-of-experts model for efficient multi-task inference.',
+      displayName: 'Llama 4 Scout (17Bx16E)',
+      enabled: true,
+      id: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      maxOutput: 8192,
+    },
+    {
+      contextWindowTokens: 131_072,
+      description:
+        'Llama 4 Maverick is a 17Bx128E large-scale MoE model with function calling capabilities.',
+      displayName: 'Llama 4 Maverick (17Bx128E)',
+      enabled: true,
+      functionCall: true,
+      id: 'meta-llama/llama-4-maverick-17b-128e-instruct',
+      maxOutput: 8192,
+    },
+    {
+      contextWindowTokens: 131_072,
+      description:
+        'Qwen 3 32B is a reasoning-capable model from Alibaba with strong multilingual support.',
+      displayName: 'Qwen 3 32B',
+      enabled: true,
+      id: 'qwen/qwen3-32b',
+      maxOutput: 40_960,
+    },
+    {
+      contextWindowTokens: 32_768,
+      description:
+        'Mistral Saba 24B is a balanced model for general-purpose chat and reasoning tasks.',
+      displayName: 'Mistral Saba 24B',
+      enabled: true,
+      id: 'mistral-saba-24b',
+      maxOutput: 32_768,
+    },
     // TODO: During preview launch, Groq is limiting 3.2 models to max_tokens of 8k.
     {
       contextWindowTokens: 131_072,
