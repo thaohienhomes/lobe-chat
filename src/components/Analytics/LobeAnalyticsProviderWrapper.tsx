@@ -21,9 +21,9 @@ export const LobeAnalyticsProviderWrapper = memo<Props>(({ children }) => {
       }}
       postHogConfig={{
         debug: analyticsEnv.DEBUG_POSTHOG_ANALYTICS,
-        enabled: analyticsEnv.ENABLED_POSTHOG_ANALYTICS,
-        host: analyticsEnv.POSTHOG_HOST,
-        key: analyticsEnv.POSTHOG_KEY ?? '',
+        enabled: analyticsEnv.NEXT_PUBLIC_POSTHOG_ENABLED,
+        host: analyticsEnv.NEXT_PUBLIC_POSTHOG_HOST,
+        key: analyticsEnv.NEXT_PUBLIC_POSTHOG_KEY ?? '',
         person_profiles: 'always',
       }}
     >

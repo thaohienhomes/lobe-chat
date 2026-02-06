@@ -1,7 +1,12 @@
 import { createServerAnalytics } from '@lobehub/analytics/server';
 
 import { BUSINESS_LINE } from '@/const/analytics';
-import { analyticsEnv } from '@/envs/analytics';
+import {
+  ENABLED_POSTHOG_ANALYTICS,
+  POSTHOG_HOST,
+  POSTHOG_KEY,
+  analyticsEnv,
+} from '@/envs/analytics';
 import { isDev } from '@/utils/env';
 
 export const serverAnalytics = createServerAnalytics({
@@ -10,9 +15,9 @@ export const serverAnalytics = createServerAnalytics({
   providers: {
     posthogNode: {
       debug: analyticsEnv.DEBUG_POSTHOG_ANALYTICS,
-      enabled: analyticsEnv.ENABLED_POSTHOG_ANALYTICS,
-      host: analyticsEnv.POSTHOG_HOST,
-      key: analyticsEnv.POSTHOG_KEY ?? '',
+      enabled: ENABLED_POSTHOG_ANALYTICS,
+      host: POSTHOG_HOST,
+      key: POSTHOG_KEY ?? '',
     },
   },
 });

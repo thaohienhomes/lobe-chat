@@ -4,14 +4,17 @@ import { z } from 'zod';
 
 export const getAnalyticsConfig = () => {
   return createEnv({
+    client: {
+      // PostHog Analytics - Must be in client block with NEXT_PUBLIC_ prefix
+      NEXT_PUBLIC_POSTHOG_ENABLED: z.boolean(),
+      NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+      NEXT_PUBLIC_POSTHOG_HOST: z.string(),
+    },
     server: {
       ENABLED_PLAUSIBLE_ANALYTICS: z.boolean(),
       PLAUSIBLE_SCRIPT_BASE_URL: z.string(),
       PLAUSIBLE_DOMAIN: z.string().optional(),
 
-      ENABLED_POSTHOG_ANALYTICS: z.boolean(),
-      POSTHOG_KEY: z.string().optional(),
-      POSTHOG_HOST: z.string(),
       DEBUG_POSTHOG_ANALYTICS: z.boolean(),
 
       ENABLED_UMAMI_ANALYTICS: z.boolean(),
@@ -40,13 +43,10 @@ export const getAnalyticsConfig = () => {
       PLAUSIBLE_DOMAIN: process.env.PLAUSIBLE_DOMAIN,
       PLAUSIBLE_SCRIPT_BASE_URL: process.env.PLAUSIBLE_SCRIPT_BASE_URL || 'https://plausible.io',
 
-      // Posthog Analytics
-      ENABLED_POSTHOG_ANALYTICS: !!(process.env.POSTHOG_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY),
-      POSTHOG_KEY: process.env.POSTHOG_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY,
-      POSTHOG_HOST:
-        process.env.POSTHOG_HOST ||
-        process.env.NEXT_PUBLIC_POSTHOG_HOST ||
-        'https://app.posthog.com',
+      // Posthog Analytics - Client-side accessible
+      NEXT_PUBLIC_POSTHOG_ENABLED: !!process.env.NEXT_PUBLIC_POSTHOG_KEY,
+      NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+      NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
       DEBUG_POSTHOG_ANALYTICS: process.env.DEBUG_POSTHOG_ANALYTICS === '1',
 
       // Umami Analytics
@@ -80,3 +80,8 @@ export const getAnalyticsConfig = () => {
 };
 
 export const analyticsEnv = getAnalyticsConfig();
+
+// Aliased exports for backward compatibility
+export const ENABLED_POSTHOG_ANALYTICS = analyticsEnv.NEXT_PUBLIC_POSTHOG_ENABLED;
+export const POSTHOG_KEY = analyticsEnv.NEXT_PUBLIC_POSTHOG_KEY;
+export const POSTHOG_HOST = analyticsEnv.NEXT_PUBLIC_POSTHOG_HOST;
