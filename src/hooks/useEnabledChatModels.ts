@@ -19,17 +19,14 @@ import { AiProviderSourceEnum, EnabledProviderWithModels } from '@/types/aiProvi
  * - Vercel AI Gateway: Fallback with access to Anthropic, OpenAI, DeepSeek, xAI, Meta
  */
 export const useEnabledChatModels = (): EnabledProviderWithModels[] => {
-  const { isFeatureEnabled, loading: flagsLoading } = usePostHogFeatureFlags();
+  const { isFeatureEnabled, ready } = usePostHogFeatureFlags();
 
   const providers = useMemo((): EnabledProviderWithModels[] => {
-    // If flags are still loading, return empty or a safe default
-    // For phở.chat, we want to be reactive to flags
-    if (flagsLoading) return [];
-
     const result: EnabledProviderWithModels[] = [];
 
     // --- Provider 1: Vertex AI (Primary) ---
     // Flag: llm-provider-vertexai
+    // Note: isFeatureEnabled is fail-open (returns true when flags not loaded)
     if (isFeatureEnabled('llm-provider-vertexai')) {
       const vertexModels = VertexAIConfig.chatModels || [];
       if (vertexModels.length > 0) {
@@ -89,7 +86,7 @@ export const useEnabledChatModels = (): EnabledProviderWithModels[] => {
     }
 
     return result;
-  }, [flagsLoading, isFeatureEnabled]);
+  }, [ready, isFeatureEnabled]);
 
   return providers;
 };
