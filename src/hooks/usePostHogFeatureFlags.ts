@@ -15,6 +15,10 @@ const LLM_PROVIDER_FLAGS = [
   'llm-provider-xai',
   'llm-provider-meta-llama',
   'llm-provider-groq',
+  'llm-provider-cerebras',
+  'llm-provider-fireworksai',
+  'llm-provider-togetherai',
+  'llm-provider-perplexity',
 ];
 
 /**

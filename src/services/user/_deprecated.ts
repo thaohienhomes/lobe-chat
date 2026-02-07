@@ -68,6 +68,11 @@ export class ClientService implements IUserService {
     throw new Error('Method not implemented.');
   }
 
+  makeUserOnboarded = async () => {
+    // Not implemented for deprecated client - user is always onboarded
+    console.log('makeUserOnboarded not implemented in deprecated client');
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars,unused-imports/no-unused-vars
   async saveRecommendations(_selections: {
     defaultModel?: string;

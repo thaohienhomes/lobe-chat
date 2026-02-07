@@ -12,7 +12,14 @@ export interface IUserService {
   }>;
   getUserSSOProviders: () => Promise<AdapterAccount[]>;
   getUserState: () => Promise<UserInitializationState>;
+  makeUserOnboarded: () => Promise<any>;
   resetUserSettings: () => Promise<any>;
+  saveRecommendations: (selections: {
+    defaultModel?: string;
+    enabledAgents?: string[];
+    enabledFeatures?: string[];
+    enabledPlugins?: string[];
+  }) => Promise<any>;
   unlinkSSOProvider: (provider: string, providerAccountId: string) => Promise<any>;
   updateAvatar: (avatar: string) => Promise<any>;
   updateGuide: (guide: Partial<UserGuide>) => Promise<any>;

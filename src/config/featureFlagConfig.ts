@@ -39,7 +39,9 @@ export const PROVIDER_FLAGS: Record<string, string> = {
   anthropic: 'llm-provider-anthropic',
   azure: 'llm-provider-azure',
   bedrock: 'llm-provider-bedrock',
+  cerebras: 'llm-provider-cerebras',
   deepseek: 'llm-provider-deepseek',
+  fireworksai: 'llm-provider-fireworksai',
   google: 'llm-provider-google',
   groq: 'llm-provider-groq',
   mistral: 'llm-provider-mistral',
@@ -47,8 +49,9 @@ export const PROVIDER_FLAGS: Record<string, string> = {
   openai: 'llm-provider-openai',
   openrouter: 'llm-provider-openrouter',
   perplexity: 'llm-provider-perplexity',
+  togetherai: 'llm-provider-togetherai',
+  vercelaigateway: 'llm-provider-vercelaigateway',
   vertexai: 'llm-provider-vertexai',
-  // Add more as needed
 };
 
 /**

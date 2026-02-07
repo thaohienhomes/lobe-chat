@@ -88,6 +88,11 @@ export class ClientService extends BaseClientService implements IUserService {
     throw new Error('Method not implemented.');
   };
 
+  makeUserOnboarded: IUserService['makeUserOnboarded'] = async () => {
+    // Client DB mode doesn't use onboarding flow - user is always onboarded
+    console.log('makeUserOnboarded called in client DB mode (no-op)');
+  };
+
   makeSureUserExist = async () => {
     const existUsers = await clientDB.query.users.findMany();
 
