@@ -130,6 +130,13 @@ const toolHandlers: Partial<Record<AgenticTool, ToolHandler>> = {
   // Web crawling
   crawl_page: crawlPageHandler,
 
+  // Delegate to specialist agent (handled by coordinator, stub here)
+  delegate_agent: async (input) => ({
+    result: `Delegated to agent: ${input.agentId || 'auto'}`,
+    shouldContinue: true,
+    success: true,
+  }),
+
   // Image generation
   generate_image: generateImageHandler,
 

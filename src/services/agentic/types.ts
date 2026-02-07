@@ -19,6 +19,8 @@ export type TaskStatus =
  * Individual step within a task
  */
 export interface TaskStep {
+  /** Agent assigned to this step (for multi-agent mode) */
+  agentId?: string;
   completedAt?: Date;
   description: string;
   error?: string;
@@ -41,10 +43,14 @@ export interface TaskStep {
  * Complete agentic task
  */
 export interface AgenticTask {
+  /** Agent assignments (for multi-agent mode) */
+  agents?: import('./agentRegistry').AgentAssignment[];
   completedAt?: Date;
 
   completedSteps: number;
 
+  /** Coordinator agent ID (for multi-agent mode) */
+  coordinatorId?: string;
   createdAt: Date;
   currentStepIndex: number;
   error?: string;
@@ -52,6 +58,8 @@ export interface AgenticTask {
   finalResult?: string;
 
   id: string;
+  /** Whether this task uses multi-agent orchestration */
+  isMultiAgent?: boolean;
   // Original user request
   originalRequest: string;
   // Planning
@@ -95,6 +103,8 @@ export interface TaskPlan {
   // Whether this needs agentic mode
   reasoning: string; // High-level plan description
   steps: Array<{
+    /** Hint for which specialist agent should handle this step */
+    agentHint?: string;
     description: string;
     estimatedDuration?: number;
     tool?: string;
@@ -161,6 +171,7 @@ export const AGENTIC_TOOLS = [
   'send_message', // Send message/notification
   'query_database', // Query data
   'call_api', // External API call
+  'delegate_agent', // Delegate to a specialist agent
 ] as const;
 
 export type AgenticTool = (typeof AGENTIC_TOOLS)[number];

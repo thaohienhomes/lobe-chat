@@ -25,16 +25,29 @@ You are an autonomous task planner. Your job is to analyze user requests and det
 - Creative writing without research
 - Direct conversations
 
+## Multi-Agent Mode:
+If the task requires diverse expertise (e.g., research + coding + design),
+set "isMultiAgent": true and tag each step with "agentHint".
+
+Available specialist agents:
+- "researcher": Web search, page crawling, information synthesis
+- "coder": Code writing, debugging, optimization 
+- "creative": Image generation, creative writing, design
+- "analyst": Data analysis, statistics, reporting
+- "integrator": API calls, system integration, automation
+
 ## Output Format (JSON):
 \`\`\`json
 {
   "isAgentic": true/false,
+  "isMultiAgent": false,
   "reasoning": "Brief explanation of decision",
   "plan": "High-level description of the plan (if agentic)",
   "steps": [
     {
       "description": "What this step does",
       "tool": "tool_name (optional)",
+      "agentHint": "agent_id (optional, for multi-agent)",
       "estimatedDuration": 5000
     }
   ]
@@ -43,6 +56,7 @@ You are an autonomous task planner. Your job is to analyze user requests and det
 
 ## Available Tools:
 - web_search: Search the internet for information
+- crawl_page: Crawl page content
 - read_file: Read content from a file
 - write_file: Create or update a file
 - run_code: Execute code snippets
@@ -50,8 +64,9 @@ You are an autonomous task planner. Your job is to analyze user requests and det
 - send_message: Send notifications/messages
 - query_database: Query stored data
 - call_api: Call external APIs
+- delegate_agent: Delegate subtask to a specialist agent
 
-Remember: Only return steps if isAgentic is true.
+Remember: Only return steps if isAgentic is true. Set isMultiAgent to true only when genuinely different expertise is needed.
 `;
 
 /**
@@ -101,6 +116,7 @@ export function createTask(request: CreateTaskRequest): AgenticTask {
  */
 export function planToSteps(plan: TaskPlan): TaskStep[] {
   return plan.steps.map((step) => ({
+    agentId: step.agentHint,
     description: step.description,
     id: uuidv4(),
     status: 'pending' as const,

@@ -1,13 +1,45 @@
 'use client';
 
-import { Progress, Steps, Typography } from 'antd';
-import { CheckCircle, Circle, Loader2, PlayCircle, XCircle } from 'lucide-react';
+import { Progress, Steps, Tag, Typography } from 'antd';
+import {
+  Bot,
+  CheckCircle,
+  Circle,
+  Code,
+  Cpu,
+  Loader2,
+  Palette,
+  PlayCircle,
+  Search,
+  XCircle,
+  Zap,
+} from 'lucide-react';
 import { memo } from 'react';
 
+import { getAgentById } from '@/services/agentic/agentRegistry';
 import { TaskStep } from '@/services/agentic/types';
 import { agenticSelectors, useAgenticStore } from '@/store/agentic';
 
 const { Text, Title } = Typography;
+
+/**
+ * Agent icon mapping
+ */
+const agentIcons: Record<string, typeof Search> = {
+  analyst: Cpu,
+  coder: Code,
+  creative: Palette,
+  integrator: Zap,
+  researcher: Search,
+};
+
+const agentColors: Record<string, string> = {
+  analyst: '#722ed1',
+  coder: '#1890ff',
+  creative: '#fa541c',
+  integrator: '#13c2c2',
+  researcher: '#52c41a',
+};
 
 /**
  * Get step icon based on status
@@ -35,11 +67,13 @@ const getStepIcon = (status: TaskStep['status']) => {
 /**
  * Agentic Progress Panel
  * Shows real-time progress of multi-step task execution
+ * Supports both single-agent and multi-agent display modes
  */
 const AgenticProgress = memo(() => {
   const activeTask = useAgenticStore(agenticSelectors.activeTask);
   const showProgress = useAgenticStore(agenticSelectors.showProgress);
   const progress = useAgenticStore(agenticSelectors.progress);
+  const isMultiAgent = useAgenticStore(agenticSelectors.isMultiAgent);
   const cancelTask = useAgenticStore((s) => s.cancelTask);
 
   if (!showProgress || !activeTask) return null;
@@ -75,7 +109,7 @@ const AgenticProgress = memo(() => {
         <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
           <PlayCircle size={20} />
           <Title level={5} style={{ margin: 0 }}>
-            Agentic Mode
+            {isMultiAgent ? 'Multi-Agent Mode' : 'Agentic Mode'}
           </Title>
         </div>
         <Text
@@ -86,6 +120,27 @@ const AgenticProgress = memo(() => {
           Cancel
         </Text>
       </div>
+
+      {/* Multi-agent badges */}
+      {isMultiAgent && activeTask.agents && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+          {activeTask.agents.map((assignment) => {
+            const agent = getAgentById(assignment.agentId);
+            const AgentIcon = agentIcons[assignment.agentId] || Bot;
+            const color = agentColors[assignment.agentId] || '#666';
+            return (
+              <Tag
+                color={assignment.status === 'working' ? 'processing' : assignment.status === 'done' ? 'success' : assignment.status === 'failed' ? 'error' : 'default'}
+                icon={<AgentIcon size={12} />}
+                key={assignment.agentId}
+                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+              >
+                <span style={{ color }}>{agent?.name || assignment.agentId}</span>
+              </Tag>
+            );
+          })}
+        </div>
+      )}
 
       {/* Progress bar */}
       <Progress
@@ -108,19 +163,34 @@ const AgenticProgress = memo(() => {
         <Steps
           current={activeTask.currentStepIndex}
           direction="vertical"
-          items={activeTask.steps.map((step) => ({
-            description: step.result || step.error,
-            icon: getStepIcon(step.status),
-            status:
-              step.status === 'completed'
-                ? 'finish'
-                : step.status === 'running'
-                  ? 'process'
-                  : step.status === 'failed'
-                    ? 'error'
-                    : 'wait',
-            title: step.description,
-          }))}
+          items={activeTask.steps.map((step) => {
+            const agent = step.agentId ? getAgentById(step.agentId) : undefined;
+            return {
+              description: step.result || step.error,
+              icon: getStepIcon(step.status),
+              status:
+                step.status === 'completed'
+                  ? 'finish'
+                  : step.status === 'running'
+                    ? 'process'
+                    : step.status === 'failed'
+                      ? 'error'
+                      : 'wait',
+              title: (
+                <span>
+                  {step.description}
+                  {agent && (
+                    <Tag
+                      color={agentColors[agent.id] || '#666'}
+                      style={{ fontSize: 10, marginLeft: 6 }}
+                    >
+                      {agent.name}
+                    </Tag>
+                  )}
+                </span>
+              ),
+            };
+          })}
           size="small"
         />
       </div>
@@ -139,6 +209,11 @@ const AgenticProgress = memo(() => {
           Steps: {progress.completed}/{progress.total}
         </Text>
         <Text type="secondary">Status: {activeTask.status}</Text>
+        {isMultiAgent && activeTask.agents && (
+          <Text type="secondary">
+            Agents: {activeTask.agents.filter((a) => a.status === 'done').length}/{activeTask.agents.length}
+          </Text>
+        )}
       </div>
     </div>
   );
@@ -147,3 +222,4 @@ const AgenticProgress = memo(() => {
 AgenticProgress.displayName = 'AgenticProgress';
 
 export default AgenticProgress;
+

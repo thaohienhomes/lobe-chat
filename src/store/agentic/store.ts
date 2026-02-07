@@ -6,6 +6,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { shallow } from 'zustand/shallow';
 import { createWithEqualityFn } from 'zustand/traditional';
 
+import type { AgentAssignment } from '@/services/agentic/agentRegistry';
 import { AgenticTask, TaskStep } from '@/services/agentic/types';
 
 import { createDevtools } from '../middleware/createDevtools';
@@ -14,8 +15,11 @@ import { createDevtools } from '../middleware/createDevtools';
  * Agentic Store State
  */
 interface AgenticState {
+  // Multi-agent state
+  activeAgents: string[];
   // Current active task (if any)
   activeTask: AgenticTask | null;
+  agentAssignments: AgentAssignment[];
 
   isExecuting: boolean;
 
@@ -47,12 +51,18 @@ interface AgenticAction {
   updateStep: (stepId: string, updates: Partial<TaskStep>) => void;
 
   updateTask: (updates: Partial<AgenticTask>) => void;
+
+  // Multi-agent actions
+  setActiveAgents: (agentIds: string[]) => void;
+  updateAgentAssignment: (agentId: string, updates: Partial<AgentAssignment>) => void;
 }
 
 export type AgenticStore = AgenticState & AgenticAction;
 
 const initialState: AgenticState = {
+  activeAgents: [],
   activeTask: null,
+  agentAssignments: [],
   isExecuting: false,
   isPlanning: false,
   showProgress: false,
@@ -82,11 +92,11 @@ const createStore = (set: any, get: any): AgenticStore => ({
     set((state: AgenticState) => {
       const completedTask = state.activeTask
         ? {
-            ...state.activeTask,
-            completedAt: new Date(),
-            finalResult: result,
-            status: 'completed' as const,
-          }
+          ...state.activeTask,
+          completedAt: new Date(),
+          finalResult: result,
+          status: 'completed' as const,
+        }
         : null;
 
       return {
@@ -151,6 +161,16 @@ const createStore = (set: any, get: any): AgenticStore => ({
           : null,
       };
     }),
+
+  // Multi-agent actions
+  setActiveAgents: (agentIds) => set({ activeAgents: agentIds }),
+
+  updateAgentAssignment: (agentId, updates) =>
+    set((state: AgenticState) => ({
+      agentAssignments: state.agentAssignments.map((a) =>
+        a.agentId === agentId ? { ...a, ...updates } : a,
+      ),
+    })),
 });
 
 const devtools = createDevtools('agentic');
