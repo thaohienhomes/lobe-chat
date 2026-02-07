@@ -1,3 +1,4 @@
+import ElevenLabs from './features/ElevenLabs';
 import OpenAI from './features/OpenAI';
 import STT from './features/STT';
 
@@ -6,6 +7,7 @@ const Page = () => {
     <>
       <STT />
       <OpenAI />
+      <ElevenLabs />
     </>
   );
 };

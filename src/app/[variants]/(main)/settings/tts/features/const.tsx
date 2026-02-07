@@ -35,3 +35,18 @@ export const sttOptions: SelectProps['options'] = [
     value: 'browser',
   },
 ];
+
+export const elevenLabsModelOptions: SelectProps['options'] = [
+  {
+    label: 'Eleven Multilingual v2',
+    value: 'eleven_multilingual_v2',
+  },
+  {
+    label: 'Eleven Turbo v2.5',
+    value: 'eleven_turbo_v2_5',
+  },
+  {
+    label: 'Eleven Monolingual v1',
+    value: 'eleven_monolingual_v1',
+  },
+];
