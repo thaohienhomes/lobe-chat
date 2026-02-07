@@ -11,6 +11,7 @@ interface ArxivPaper {
   arxivId: string;
   authors: string[];
   categories: string[];
+  doi?: string;
   pdfUrl: string;
   published: string;
   title: string;
@@ -18,9 +19,10 @@ interface ArxivPaper {
 }
 
 interface SearchParams {
+  arxivId?: string; // Optional: lookup by specific ID
   category?: string;
   maxResults?: number;
-  query: string;
+  query?: string;
   sortBy?: 'relevance' | 'lastUpdatedDate' | 'submittedDate';
 }
 
@@ -66,15 +68,20 @@ function parseArxivResponse(xml: string): ArxivPaper[] {
         })
         .filter(Boolean);
 
+      // Extract DOI if available
+      const doiMatch = entryXml.match(/<arxiv:doi[^>]*>([^<]+)<\/arxiv:doi>/);
+      const doi = doiMatch ? doiMatch[1] : undefined;
+
       // Extract PDF link
       const pdfMatch = entryXml.match(/<link[^>]*title="pdf"[^>]*href="([^"]+)"[^>]*\/>/);
       const pdfUrl = pdfMatch ? pdfMatch[1] : `https://arxiv.org/pdf/${arxivId}.pdf`;
 
       papers.push({
-        abstract: abstract.slice(0, 500) + (abstract.length > 500 ? '...' : ''),
+        abstract: abstract.slice(0, 1000) + (abstract.length > 1000 ? '...' : ''),
         arxivId,
         authors: authors.slice(0, 5),
         categories,
+        doi,
         pdfUrl,
         published: published.split('T')[0],
         title,
@@ -92,35 +99,38 @@ function parseArxivResponse(xml: string): ArxivPaper[] {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as SearchParams;
-    const { query, maxResults = 10, sortBy = 'relevance', category } = body;
+    const { query, maxResults = 10, sortBy = 'relevance', category, arxivId } = body;
 
-    if (!query || typeof query !== 'string') {
-      return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
+    // Build API URL
+    const params = new URLSearchParams();
+
+    if (arxivId) {
+      // Direct lookup by ID
+      params.append('id_list', arxivId);
+    } else if (query) {
+      // General search
+      let searchQuery = query;
+      if (category) {
+        searchQuery = `cat:${category} AND (${query})`;
+      }
+
+      // Map sortBy to arXiv API parameter
+      const sortByMap: Record<string, string> = {
+        lastUpdatedDate: 'lastUpdatedDate',
+        relevance: 'relevance',
+        submittedDate: 'submittedDate',
+      };
+
+      params.append('search_query', searchQuery);
+      params.append('sortBy', sortByMap[sortBy] || 'relevance');
+      params.append('sortOrder', 'descending');
+    } else {
+      return NextResponse.json({ error: 'Either query or arxivId is required' }, { status: 400 });
     }
-
-    // Build search query
-    let searchQuery = query;
-    if (category) {
-      searchQuery = `cat:${category} AND (${query})`;
-    }
-
-    // Map sortBy to arXiv API parameter
-    const sortByMap: Record<string, string> = {
-      lastUpdatedDate: 'lastUpdatedDate',
-      relevance: 'relevance',
-      submittedDate: 'submittedDate',
-    };
 
     // Limit maxResults
     const limitedMaxResults = Math.min(Math.max(1, maxResults), 50);
-
-    // Build API URL
-    const params = new URLSearchParams({
-      max_results: String(limitedMaxResults),
-      search_query: searchQuery,
-      sortBy: sortByMap[sortBy] || 'relevance',
-      sortOrder: 'descending',
-    });
+    params.append('max_results', String(limitedMaxResults));
 
     const response = await fetch(`${ARXIV_API_URL}?${params.toString()}`);
 
@@ -133,7 +143,9 @@ export async function POST(request: NextRequest) {
 
     if (papers.length === 0) {
       return NextResponse.json({
-        message: `No results found for "${query}"`,
+        message: arxivId
+          ? `Paper with ID "${arxivId}" not found`
+          : `No results found for "${query}"`,
         papers: [],
         query,
         totalResults: 0,
@@ -146,9 +158,9 @@ export async function POST(request: NextRequest) {
       totalResults: papers.length,
     });
   } catch (error) {
-    console.error('ArXiv search error:', error);
+    console.error('ArXiv plugin error:', error);
     return NextResponse.json(
-      { error: 'Failed to search arXiv. Please try again later.' },
+      { error: 'Failed to access arXiv. Please try again later.' },
       { status: 500 },
     );
   }
@@ -158,40 +170,46 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('query');
+  const id = searchParams.get('id');
 
-  if (!query) {
+  if (!query && !id) {
     return NextResponse.json(
       {
-        error: 'Query parameter is required',
-        usage: '/api/plugins/arxiv/search?query=machine+learning',
+        error: 'Either query or id parameter is required',
+        usage:
+          '/api/plugins/arxiv/search?query=machine+learning OR /api/plugins/arxiv/search?id=2401.04088',
       },
       { status: 400 },
     );
   }
 
-  const body: SearchParams = {
-    category: searchParams.get('category') || undefined,
-    maxResults: Number(searchParams.get('maxResults')) || 10,
-    query,
-    sortBy: (searchParams.get('sortBy') as SearchParams['sortBy']) || 'relevance',
-  };
+  const params = new URLSearchParams();
+  if (id) {
+    params.append('id_list', id);
+  } else if (query) {
+    const category = searchParams.get('category');
+    const searchQuery = category ? `cat:${category} AND (${query})` : query;
+    const sortBy = searchParams.get('sortBy') || 'relevance';
 
-  // Reuse POST logic
-  const searchQuery = body.category ? `cat:${body.category} AND (${body.query})` : body.query;
-  const params = new URLSearchParams({
-    max_results: String(body.maxResults),
-    search_query: searchQuery,
-    sortBy: body.sortBy || 'relevance',
-    sortOrder: 'descending',
-  });
+    params.append('search_query', searchQuery);
+    params.append('sortBy', sortBy);
+    params.append('sortOrder', 'descending');
+  }
 
-  const response = await fetch(`${ARXIV_API_URL}?${params.toString()}`);
-  const xmlText = await response.text();
-  const papers = parseArxivResponse(xmlText);
+  const maxResults = Number(searchParams.get('maxResults')) || 10;
+  params.append('max_results', String(maxResults));
 
-  return NextResponse.json({
-    papers,
-    query: body.query,
-    totalResults: papers.length,
-  });
+  try {
+    const response = await fetch(`${ARXIV_API_URL}?${params.toString()}`);
+    const xmlText = await response.text();
+    const papers = parseArxivResponse(xmlText);
+
+    return NextResponse.json({
+      papers,
+      query: query || id,
+      totalResults: papers.length,
+    });
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+  }
 }

@@ -177,8 +177,10 @@ const FEATURE_NAMES: Record<string, { en: string; vi: string }> = {
 const PLUGIN_NAMES: Record<string, { en: string; vi: string }> = {
   'arxiv': { en: 'ArXiv Papers', vi: 'Bài báo ArXiv' },
   'clinical-calculator': { en: 'Clinical Calculator', vi: 'Máy tính lâm sàng' },
+  'doi-resolver': { en: 'DOI Resolver', vi: 'Phân giải DOI' },
   'drug-interactions': { en: 'Drug Interactions', vi: 'Tương tác thuốc' },
   'pubmed-search': { en: 'PubMed Search', vi: 'Tìm kiếm PubMed' },
+  'semantic-scholar': { en: 'Semantic Scholar', vi: 'Semantic Scholar' },
 };
 
 interface RecommendationModalProps {

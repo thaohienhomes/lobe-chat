@@ -17,10 +17,15 @@ export enum ModelSearchImplement {
 }
 
 export interface CitationItem {
+  authors?: string[];
+  citationType?: 'web' | 'academic';
+  doi?: string;
   favicon?: string;
   id?: string;
+  journal?: string;
   title?: string;
   url: string;
+  year?: number;
 }
 
 export interface GroundingSearch {

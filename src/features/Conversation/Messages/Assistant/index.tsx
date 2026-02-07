@@ -9,6 +9,7 @@ import { aiChatSelectors, chatSelectors } from '@/store/chat/selectors';
 import { ChatMessage } from '@/types/message';
 
 import { DefaultMessage } from '../Default';
+import BibliographySection from './BibliographySection';
 import FileChunks from './FileChunks';
 import IntentUnderstanding from './IntentUnderstanding';
 import Reasoning from './Reasoning';
@@ -70,6 +71,7 @@ export const AssistantMessage = memo<
       )}
       {showImageItems && <ImageFileListViewer items={imageList} />}
       {showVideoItems && <VideoFileListViewer items={videoList} />}
+      <BibliographySection citations={search?.citations} />
       {tools && (
         <Flexbox gap={8}>
           {tools.map((toolCall, index) => (

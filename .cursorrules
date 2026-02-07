@@ -1,0 +1,51 @@
+# Phở Chat — Development Rules
+
+## Project Overview
+- **Project**: Phở Chat (based on LobeChat)
+- **Stack**: Next.js 15, React 19, TypeScript, Ant Design, @lobehub/ui
+- **Database**: Neon PostgreSQL + Drizzle ORM
+- **AI Providers**: Vertex AI (primary), Vercel AI Gateway (fallback)
+- **Blog**: `src/app/blog/` (Next.js App Router)
+- **Plugins**: `src/app/api/plugins/` (self-hosted), `src/config/bundledPlugins.ts`
+
+## Coding Conventions
+- Use TypeScript strict mode
+- Follow existing LobeChat patterns for stores (Zustand), services, and components
+- Use `react-i18next` for all user-facing strings
+- Use `antd-style` for CSS-in-JS styling
+- Always support both Vietnamese (`vi`) and English (`en`) locales
+
+## File Organization
+- Components: `src/features/` or `src/components/`
+- Services: `src/services/`
+- Store: `src/store/`
+- API routes: `src/app/api/` or `src/app/(backend)/`
+- Locales: `src/locales/`
+
+---
+
+## 🤖 AUTOMATED WORKFLOW PROTOCOL (BẮT BUỘC)
+
+Mỗi khi User yêu cầu triển khai một tính năng mới (Feature Request), bạn PHẢI tuân thủ quy trình 3 bước sau:
+
+### 1. PLAN (Lập kế hoạch)
+- Tạo file mới trong `docs/plans/` (ví dụ: `feature-name.md`).
+- Viết kế hoạch triển khai chi tiết vào đó.
+- Cập nhật `ROADMAP.md` (mục **In Progress**) kèm link đến file plan.
+
+### 2. EXECUTE (Thực thi)
+- Viết code theo kế hoạch đã duyệt.
+- Đánh dấu `[x]` vào các bước trong file plan khi hoàn thành.
+
+### 3. REPORT (Báo cáo)
+- Sau khi tính năng hoàn tất, chuyển mục trong `ROADMAP.md` sang **"Completed"**.
+- Tự động tạo file bài viết mới trong `src/app/blog/` giới thiệu tính năng:
+  - **Title**: Tên tính năng
+  - **What's New**: Mô tả tính năng mới
+  - **How to Use**: Hướng dẫn sử dụng
+  - Viết bằng cả tiếng Việt và tiếng Anh
+- Cập nhật `CHANGELOG.md` (nếu có) hoặc `src/const/changelog.ts` với entry mới
+
+---
+
+_Quy trình này đảm bảo mọi tính năng đều được lập kế hoạch, theo dõi, và ghi nhận đầy đủ._

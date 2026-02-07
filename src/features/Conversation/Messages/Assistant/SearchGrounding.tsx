@@ -12,6 +12,8 @@ import { Flexbox } from 'react-layout-kit';
 
 import { GroundingSearch } from '@/types/search';
 
+import AcademicCitationCard from './AcademicCitationCard';
+
 const useStyles = createStyles(({ css, token, isDarkMode }) => ({
   container: css`
     width: fit-content;
@@ -69,6 +71,9 @@ const SearchGrounding = memo<GroundingSearch>(({ searchQueries, citations }) => 
 
   const [showDetail, setShowDetail] = useState(false);
 
+  const academicCitations = citations?.filter((c) => c.citationType === 'academic');
+  const isAllAcademic = academicCitations?.length === citations?.length;
+
   return (
     <Flexbox
       className={cx(styles.container, showDetail && styles.expand)}
@@ -87,7 +92,14 @@ const SearchGrounding = memo<GroundingSearch>(({ searchQueries, citations }) => 
       >
         <Flexbox align={'center'} gap={8} horizontal>
           <Icon icon={Globe} />
-          <Flexbox horizontal>{t('search.grounding.title', { count: citations?.length })}</Flexbox>
+          <Flexbox horizontal>
+            {isAllAcademic
+              ? t('search.grounding.academicTitle', {
+                  count: citations?.length,
+                  defaultValue: 'Sources (Academic)',
+                })
+              : t('search.grounding.title', { count: citations?.length })}
+          </Flexbox>
           {!showDetail && (
             <Flexbox horizontal>
               {citations?.slice(0, 8).map((item, index) => {
@@ -100,9 +112,7 @@ const SearchGrounding = memo<GroundingSearch>(({ searchQueries, citations }) => 
                         <div className={styles.title} style={{ fontWeight: 500 }}>
                           {item.title || domain}
                         </div>
-                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11 }}>
-                          {domain}
-                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11 }}>{domain}</div>
                       </Flexbox>
                     }
                   >
@@ -160,7 +170,19 @@ const SearchGrounding = memo<GroundingSearch>(({ searchQueries, citations }) => 
                   </Flexbox>
                 </Flexbox>
               )}
-              {citations && <SearchResultCards dataSource={citations} />}
+              <Flexbox gap={12} horizontal wrap={'wrap'}>
+                {citations?.map((citation, index) => {
+                  if (citation.citationType === 'academic') {
+                    return <AcademicCitationCard citation={citation} key={index} />;
+                  }
+                  return null;
+                })}
+              </Flexbox>
+              {citations?.some((c) => c.citationType !== 'academic') && (
+                <SearchResultCards
+                  dataSource={citations.filter((c) => c.citationType !== 'academic')}
+                />
+              )}
             </Flexbox>
           </motion.div>
         )}

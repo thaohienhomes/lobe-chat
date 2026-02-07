@@ -89,6 +89,32 @@ export const BUNDLED_PLUGINS: BundledPlugin[] = [
     tags: ['drug', 'interaction', 'pharmacy', 'fda', 'medical'],
     title: 'Drug Interactions',
   },
+  {
+    author: 'Phở Chat',
+    avatar: '🎓',
+    category: PluginCategory.ScienceEducation,
+    createdAt: '2026-02-07',
+    description: 'Search Semantic Scholar for academic papers with citation counts and metadata',
+    homepage: 'https://pho.chat/plugins/semantic-scholar',
+    identifier: 'semantic-scholar',
+    manifest: getManifestUrl('semantic-scholar'),
+    schemaVersion: 1,
+    tags: ['research', 'academic', 'citation', 'papers', 'scholar'],
+    title: 'Semantic Scholar',
+  },
+  {
+    author: 'Phở Chat',
+    avatar: '🔗',
+    category: PluginCategory.ScienceEducation,
+    createdAt: '2026-02-07',
+    description: 'Resolve DOI to full citation metadata and formatted references (IEEE)',
+    homepage: 'https://pho.chat/plugins/doi-resolver',
+    identifier: 'doi-resolver',
+    manifest: getManifestUrl('doi-resolver'),
+    schemaVersion: 1,
+    tags: ['doi', 'citation', 'reference', 'crossref', 'academic'],
+    title: 'DOI Resolver',
+  },
 ];
 
 /**

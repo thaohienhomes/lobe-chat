@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const baseUrl = `${protocol}://${host}`;
 
   const manifest = {
-    $schema: 'https://chat-plugins.lobehub.com/schema/v1/manifest.json',
+    $schemas: 'https://chat-plugins.lobehub.com/schema/v1/manifest.json',
     api: [
       {
         description:
@@ -46,6 +46,21 @@ export async function GET(request: NextRequest) {
         },
         url: `${baseUrl}/api/plugins/arxiv/search`,
       },
+      {
+        description: 'Get detailed information about a specific arXiv paper by its ID.',
+        name: 'getArxivPaper',
+        parameters: {
+          properties: {
+            arxivId: {
+              description: 'The arXiv ID of the paper (e.g., "2401.04088" or "cs/0501001")',
+              type: 'string',
+            },
+          },
+          required: ['arxivId'],
+          type: 'object',
+        },
+        url: `${baseUrl}/api/plugins/arxiv/search`,
+      },
     ],
     author: 'Phở Chat',
     homepage: 'https://pho.chat/plugins/arxiv',
@@ -61,7 +76,7 @@ export async function GET(request: NextRequest) {
       type: 'object',
     },
     type: 'default',
-    version: '1',
+    version: '1.2',
   };
 
   return NextResponse.json(manifest);

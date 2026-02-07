@@ -6,6 +6,12 @@ import { ChangelogIndexItem } from '@/types/changelog';
  */
 export const PHO_CHANGELOGS: ChangelogIndexItem[] = [
   {
+    date: '2026-02-07',
+    id: 'v1.133.0',
+    image: '/images/changelog/academic-research.png',
+    versionRange: ['1.133.0'],
+  },
+  {
     date: '2026-02-03',
     id: 'v1.132.4',
     image: '/images/changelog/onboarding-recommendations.png',
@@ -30,7 +36,7 @@ export const PHO_CHANGELOGS: ChangelogIndexItem[] = [
  */
 export const PHO_CHANGELOG_CONTENT: Record<
   string,
-  { content: string; contentVi?: string, title: string; titleVi?: string; }
+  { content: string; contentVi?: string; title: string; titleVi?: string }
 > = {
   'v1.131.0': {
     content: `
@@ -151,5 +157,35 @@ Cập nhật này giúp Phở.chat cá nhân hóa hơn ngay từ lần đầu s�
 `,
     title: '✨ Personalized Onboarding Experience',
     titleVi: '✨ Trải nghiệm Onboarding Cá nhân hóa',
+  },
+  'v1.133.0': {
+    content: `
+## What's New
+
+### 🎓 Academic Research Module
+A comprehensive suite of tools for researchers and students:
+- **Semantic Scholar Integration**: Search millions of papers with citation counts and detailed metadata.
+- **Enhanced ArXiv**: Lookup papers by ID, get longer abstracts for better context, and extract DOIs automatically.
+- **DOI Resolver**: Instantly convert DOIs into full IEEE citations and metadata.
+- **Smart Citations**: Beautiful academic cards in search results and an automated Bibliography section at the end of messages.
+
+### 📜 Automated Bibliography
+Assistant messages now automatically generate a standard IEEE bibliography for all academic sources used in the conversation.
+`,
+    contentVi: `
+## Có gì mới
+
+### 🎓 Module Nghiên cứu Khoa học
+Bộ công cụ toàn diện cho nhà nghiên cứu và sinh viên:
+- **Tích hợp Semantic Scholar**: Tìm kiếm hàng triệu bài báo với số lượng trích dẫn và metadata chi tiết.
+- **Nâng cấp ArXiv**: Tìm kiếm theo ID, tóm tắt dài hơn cho ngữ cảnh tốt hơn và tự động trích xuất DOI.
+- **Phân giải DOI**: Chuyển đổi DOI thành nội dung trích dẫn IEEE đầy đủ ngay lập tức.
+- **Trích dẫn thông minh**: Thẻ bài báo học thuật đẹp mắt trong kết quả tìm kiếm và danh mục tham khảo tự động ở cuối tin nhắn.
+
+### 📜 Danh mục tham khảo tự động
+Các phản hồi từ trợ lý giờ đây tự động tạo danh mục tham khảo chuẩn IEEE cho tất cả các nguồn học thuật được sử dụng.
+`,
+    title: '🎓 Academic Research Module',
+    titleVi: '🎓 Module Nghiên cứu Khoa học',
   },
 };
