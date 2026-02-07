@@ -75,14 +75,13 @@ A: Hoàn toàn miễn phí cho tất cả người dùng Phở Chat.
 
 export default function AcademicManualPage() {
   return (
-    <html lang="vi">
-      <head>
-        <title>Hướng Dẫn Sử Dụng Module Nghiên Cứu Khoa Học | Phở Chat</title>
-        <meta
-          content="Hướng dẫn chi tiết cách sử dụng Semantic Scholar, ArXiv, DOI Resolver và tính năng trích dẫn tự động trên Phở Chat."
-          name="description"
-        />
-        <style>{`
+    <>
+      <title>Hướng Dẫn Sử Dụng Module Nghiên Cứu Khoa Học | Phở Chat</title>
+      <meta
+        content="Hướng dẫn chi tiết cách sử dụng Semantic Scholar, ArXiv, DOI Resolver và tính năng trích dẫn tự động trên Phở Chat."
+        name="description"
+      />
+      <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           
           body {
@@ -136,22 +135,19 @@ export default function AcademicManualPage() {
             border-radius: 4px;
           }
         `}</style>
-      </head>
-      <body>
-        <div className="container">
-          <main className="manual-content">
-            <nav style={{ marginBottom: '20px' }}>
-              <Link
-                href="/blog/academic-research-module"
-                style={{ color: '#a78bfa', textDecoration: 'none' }}
-              >
-                ← Quay lại bài giới thiệu
-              </Link>
-            </nav>
-            <Markdown>{manualContent}</Markdown>
-          </main>
-        </div>
-      </body>
-    </html>
+      <div className="container">
+        <main className="manual-content">
+          <nav style={{ marginBottom: '20px' }}>
+            <Link
+              href="/blog/academic-research-module"
+              style={{ color: '#a78bfa', textDecoration: 'none' }}
+            >
+              ← Quay lại bài giới thiệu
+            </Link>
+          </nav>
+          <Markdown>{manualContent}</Markdown>
+        </main>
+      </div>
+    </>
   );
 }

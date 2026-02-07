@@ -72,14 +72,13 @@ Truy cập **[pho.chat](https://pho.chat)** và trải nghiệm ngay hôm nay!
 
 export default function AcademicResearchBlogPage() {
   return (
-    <html lang="vi">
-      <head>
-        <title>Ra Mắt Module Nghiên Cứu Khoa Học | Phở Chat</title>
-        <meta
-          content="Khám phá Module Nghiên cứu Khoa học mới của Phở Chat với Semantic Scholar, ArXiv nâng cao và hệ thống trích dẫn IEEE tự động."
-          name="description"
-        />
-        <style>{`
+    <>
+      <title>Ra Mắt Module Nghiên Cứu Khoa Học | Phở Chat</title>
+      <meta
+        content="Khám phá Module Nghiên cứu Khoa học mới của Phở Chat với Semantic Scholar, ArXiv nâng cao và hệ thống trích dẫn IEEE tự động."
+        name="description"
+      />
+      <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           
           body {
@@ -143,23 +142,20 @@ export default function AcademicResearchBlogPage() {
           th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
           th { color: #7c3aed; }
         `}</style>
-      </head>
-      <body>
-        <div className="container">
-          <header>
-            <h1>🍜 Phở Chat</h1>
-            <p style={{ opacity: 0.6 }}>Academic Research Edition</p>
-          </header>
-          <div className="content-box">
-            <Markdown>{blogContent}</Markdown>
-          </div>
-          <div className="cta-area">
-            <a className="btn" href="https://pho.chat">
-              🚀 Trải Nghiệm Ngay
-            </a>
-          </div>
+      <div className="container">
+        <header>
+          <h1>🍜 Phở Chat</h1>
+          <p style={{ opacity: 0.6 }}>Academic Research Edition</p>
+        </header>
+        <div className="content-box">
+          <Markdown>{blogContent}</Markdown>
         </div>
-      </body>
-    </html>
+        <div className="cta-area">
+          <a className="btn" href="https://pho.chat">
+            🚀 Trải Nghiệm Ngay
+          </a>
+        </div>
+      </div>
+    </>
   );
 }
