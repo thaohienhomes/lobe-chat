@@ -1,19 +1,23 @@
 'use client';
 
 import { VoiceList } from '@lobehub/tts';
-import { Form, type FormGroupItemType, Select } from '@lobehub/ui';
-import { Switch } from 'antd';
+import { Form, type FormGroupItemType, Icon, Select } from '@lobehub/ui';
+import { Button, Switch } from 'antd';
 import isEqual from 'fast-deep-equal';
-import { Mic } from 'lucide-react';
-import { memo, useMemo } from 'react';
+import { Mic, Plus } from 'lucide-react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Flexbox } from 'react-layout-kit';
+import useSWR from 'swr';
 
 import { FORM_STYLE } from '@/const/layoutTokens';
+import { API_ENDPOINTS } from '@/services/_url';
 import { useGlobalStore } from '@/store/global';
 import { globalGeneralSelectors } from '@/store/global/selectors';
 
 import { selectors, useStore } from '../store';
 import SelectWithTTSPreview from './SelectWithTTSPreview';
+import VoiceCloneModal from './VoiceCloneModal';
 import { ttsOptions } from './options';
 
 const TTS_SETTING_KEY = 'tts';
@@ -28,6 +32,24 @@ const AgentTTS = memo(() => {
   });
   const config = useStore(selectors.currentTtsConfig, isEqual);
   const updateConfig = useStore((s) => s.setAgentConfig);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { data: elevenLabsVoicesData, mutate: refreshElevenLabs } = useSWR(
+    config.ttsService === 'elevenlabs' ? API_ENDPOINTS.voiceClone : null,
+    async (url) => {
+      const res = await fetch(url);
+      return res.json();
+    },
+  );
+
+  const elevenLabsVoiceOptions = useMemo(() => {
+    if (!elevenLabsVoicesData?.voices) return [];
+    return elevenLabsVoicesData.voices.map((v: any) => ({
+      label: v.name,
+      value: v.voice_id,
+    }));
+  }, [elevenLabsVoicesData]);
 
   const { edgeVoiceOptions, microsoftVoiceOptions } = useMemo(
     () => voiceList(config.showAllLocaleVoice),
@@ -77,6 +99,23 @@ const AgentTTS = memo(() => {
       },
       {
         children: (
+          <Flexbox gap={8} horizontal>
+            <SelectWithTTSPreview
+              options={elevenLabsVoiceOptions}
+              server={'elevenlabs'}
+              style={{ flex: 1 }}
+            />
+            <Button icon={<Icon icon={Plus} />} onClick={() => setIsModalOpen(true)} />
+          </Flexbox>
+        ),
+        desc: 'Select or clone a voice from ElevenLabs',
+        divider: false,
+        hidden: config.ttsService !== 'elevenlabs',
+        label: t('settingTTS.voice.title'),
+        name: [TTS_SETTING_KEY, 'voice', 'elevenlabs'],
+      },
+      {
+        children: (
           <Select
             options={[
               { label: t('settingCommon.lang.autoMode'), value: 'auto' },
@@ -94,27 +133,34 @@ const AgentTTS = memo(() => {
   };
 
   return (
-    <Form
-      footer={
-        <Form.SubmitFooter
-          texts={{
-            reset: t('submitFooter.reset'),
-            submit: t('settingTTS.submit'),
-            unSaved: t('submitFooter.unSaved'),
-            unSavedWarning: t('submitFooter.unSavedWarning'),
-          }}
-        />
-      }
-      form={form}
-      initialValues={{
-        [TTS_SETTING_KEY]: config,
-      }}
-      items={[tts]}
-      itemsType={'group'}
-      onFinish={updateConfig}
-      variant={'borderless'}
-      {...FORM_STYLE}
-    />
+    <>
+      <Form
+        footer={
+          <Form.SubmitFooter
+            texts={{
+              reset: t('submitFooter.reset'),
+              submit: t('settingTTS.submit'),
+              unSaved: t('submitFooter.unSaved'),
+              unSavedWarning: t('submitFooter.unSavedWarning'),
+            }}
+          />
+        }
+        form={form}
+        initialValues={{
+          [TTS_SETTING_KEY]: config,
+        }}
+        items={[tts]}
+        itemsType={'group'}
+        onFinish={updateConfig}
+        variant={'borderless'}
+        {...FORM_STYLE}
+      />
+      <VoiceCloneModal
+        onCancel={() => setIsModalOpen(false)}
+        onSuccess={() => refreshElevenLabs()}
+        open={isModalOpen}
+      />
+    </>
   );
 });
 

@@ -19,6 +19,8 @@ import { useUserStore } from '@/store/user';
 import { settingsSelectors } from '@/store/user/selectors';
 import { TTSServer } from '@/types/agent';
 
+import { useElevenLabsTTS } from './useElevenLabsTTS';
+
 interface TTSConfig extends TTSOptions {
   onUpload?: (currentVoice: string, arraybuffers: ArrayBuffer[]) => void;
   server?: TTSServer;
@@ -74,12 +76,22 @@ export const useTTS = (content: string, config?: TTSConfig) => {
       } as MicrosoftSpeechOptions;
       break;
     }
+    case 'elevenlabs': {
+      useSelectedTTS = useElevenLabsTTS;
+      options = {
+        options: {
+          model_id: ttsSettings.elevenlabs?.modelId,
+          voice: config?.voice || voice,
+        },
+      };
+      break;
+    }
   }
 
   return useSelectedTTS(content, {
     ...config,
     ...options,
-    onFinish: (arraybuffers) => {
+    onFinish: (arraybuffers: ArrayBuffer[]) => {
       config?.onUpload?.(options.voice || 'alloy', arraybuffers);
     },
   });

@@ -1,6 +1,5 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 
-
 export const API_ENDPOINTS = {
   oauth: '/api/auth',
 
@@ -29,4 +28,7 @@ export const API_ENDPOINTS = {
   tts: '/webapi/tts/openai',
   edge: '/webapi/tts/edge',
   microsoft: '/webapi/tts/microsoft',
+  elevenlabs: '/webapi/tts/elevenlabs',
+
+  voiceClone: '/api/voice-clone',
 };

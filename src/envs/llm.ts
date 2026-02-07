@@ -208,6 +208,7 @@ export const getLLMConfig = () => {
 
       ENABLED_CEREBRAS: z.boolean(),
       CEREBRAS_API_KEY: z.string().optional(),
+      ELEVENLABS_API_KEY: z.string().optional(),
     },
     runtimeEnv: {
       API_KEY_SELECT_MODE: process.env.API_KEY_SELECT_MODE,
@@ -411,6 +412,8 @@ export const getLLMConfig = () => {
 
       ENABLED_CEREBRAS: !!process.env.CEREBRAS_API_KEY,
       CEREBRAS_API_KEY: process.env.CEREBRAS_API_KEY,
+
+      ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
     },
   });
 };

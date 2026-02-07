@@ -1,7 +1,7 @@
 import { FewShots } from '@lobechat/types';
 import { LLMParams } from 'model-bank';
 
-export type TTSServer = 'openai' | 'edge' | 'microsoft';
+export type TTSServer = 'openai' | 'edge' | 'microsoft' | 'elevenlabs';
 
 export interface TTSConfig {
   showAllLocaleVoice?: boolean;
