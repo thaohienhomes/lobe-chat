@@ -1,6 +1,10 @@
 import { llmEnv } from '@/envs/llm';
 
-export const runtime = 'edge';
+// Use Node.js runtime for file upload support (Edge has ~4MB body size limit)
+export const runtime = 'nodejs';
+
+// Increase body size limit for audio uploads (default is 1MB)
+export const maxDuration = 30;
 
 /**
  * Handle Voice Cloning (Add Voice, List Voices, Delete Voice)
@@ -25,8 +29,6 @@ export const GET = async () => {
 
     const data = await response.json();
 
-    // Filter for custom voices only if needed, or return all
-    // Standard ElevenLabs free tier has 3 voice slots
     return new Response(JSON.stringify(data), {
       headers: { 'Content-Type': 'application/json' },
       status: 200,
@@ -50,18 +52,32 @@ export const POST = async (req: Request) => {
       });
     }
 
-    const formData = await req.formData();
+    const incomingFormData = await req.formData();
 
     // Validate required fields
-    if (!formData.has('name') || !formData.has('files')) {
+    const name = incomingFormData.get('name');
+    const files = incomingFormData.getAll('files');
+
+    if (!name || files.length === 0) {
       return new Response(JSON.stringify({ error: 'name and files are required' }), {
         headers: { 'Content-Type': 'application/json' },
         status: 400,
       });
     }
 
+    // Reconstruct FormData for ElevenLabs API
+    // ElevenLabs expects: name (string), files (File[])
+    const elevenLabsFormData = new FormData();
+    elevenLabsFormData.append('name', name as string);
+
+    for (const file of files) {
+      if (file instanceof File) {
+        elevenLabsFormData.append('files', file, file.name);
+      }
+    }
+
     const response = await fetch('https://api.elevenlabs.io/v1/voices/add', {
-      body: formData,
+      body: elevenLabsFormData,
       headers: {
         'xi-api-key': apiKey,
       },
@@ -70,11 +86,26 @@ export const POST = async (req: Request) => {
 
     const data = await response.json();
 
+    if (!response.ok) {
+      console.error('ElevenLabs voice clone error:', data);
+      return new Response(
+        JSON.stringify({
+          error: data?.detail?.message || data?.detail || 'Failed to clone voice',
+          status: response.status,
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+          status: response.status,
+        },
+      );
+    }
+
     return new Response(JSON.stringify(data), {
       headers: { 'Content-Type': 'application/json' },
-      status: response.status,
+      status: 200,
     });
   } catch (e) {
+    console.error('Voice clone route error:', e);
     return new Response(JSON.stringify({ error: (e as Error).message }), {
       headers: { 'Content-Type': 'application/json' },
       status: 500,
