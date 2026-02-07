@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 
+import { requireAdmin } from '../_shared/auth';
+
 export const GET = async () => {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { getServerDB } = await import('@/database/server');
     const serverDB = await getServerDB();

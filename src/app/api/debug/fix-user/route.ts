@@ -1,13 +1,19 @@
-
-import { NextResponse } from 'next/server';
-import { getServerDB } from '@/database/server';
-import { eq } from 'drizzle-orm';
-
 /**
  * Emergency Fix Route for User Subscription
- * Can be called locally or on production temporarily
+ * Protected with Clerk auth + admin check.
  */
+import { NextResponse } from 'next/server';
+
+import { requireAdmin } from '@/app/api/admin/_shared/auth';
+import { getServerDB } from '@/database/server';
+
+import { eq } from 'drizzle-orm';
+
 export async function GET() {
+    // Admin-only access
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
     const email = 'hi@pho.chat';
     const targetPlan = 'lifetime_early_bird';
     const targetPoints = 2_000_000;
@@ -15,7 +21,6 @@ export async function GET() {
     try {
         const db: any = getServerDB();
 
-        // Dynamic import to avoid schema issues - cast to any to bypass strict type checks for this temporary file
         const schemas: any = await import('@lobechat/database/schemas');
         const { subscriptions, phoPointsBalances, users } = schemas;
 
@@ -105,13 +110,15 @@ export async function GET() {
                 newPlan: targetPlan,
                 oldPlan: currentSub?.planId || 'none',
                 points: targetPoints,
-            }
+            },
         });
-
     } catch (error) {
-        return NextResponse.json({
-            details: error instanceof Error ? error.message : String(error),
-            error: 'Fix failed'
-        }, { status: 500 });
+        return NextResponse.json(
+            {
+                details: error instanceof Error ? error.message : String(error),
+                error: 'Fix failed',
+            },
+            { status: 500 },
+        );
     }
 }

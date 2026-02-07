@@ -4,6 +4,8 @@ import { BundledAppModel } from '@/database/models/bundledApp';
 import { NewBundledApp } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 
+import { requireAdmin } from '../_shared/auth';
+
 const BUNDLED_APPS: NewBundledApp[] = [
   {
     avatar: '🎨',
@@ -129,6 +131,8 @@ Always:
 ];
 
 export const GET = async () => {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     // Get database instance
     const serverDB = await getServerDB();
