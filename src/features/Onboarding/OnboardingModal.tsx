@@ -40,15 +40,18 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
   // Install selected plugins and enable them for current session
   if (selections.enabledPlugins && selections.enabledPlugins.length > 0) {
     try {
-      // First install the plugins to database
+      // Install the plugins to database
       await installPlugins(selections.enabledPlugins);
       console.log('✅ Installed plugins:', selections.enabledPlugins);
 
-      // Then enable each plugin for the current session
-      for (const pluginId of selections.enabledPlugins) {
-        await togglePlugin(pluginId, true);
-        console.log('✅ Enabled plugin for session:', pluginId);
-      }
+      // Enable all plugins in parallel for the current session
+      await Promise.all(
+        selections.enabledPlugins.map((pluginId) =>
+          togglePlugin(pluginId, true).then(() =>
+            console.log('✅ Enabled plugin for session:', pluginId),
+          ),
+        ),
+      );
     } catch (error) {
       console.error('Failed to install/enable plugins:', error);
     }
@@ -72,10 +75,16 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
   // Define markOnboardedAndClose first to avoid "used before defined" error
   const markOnboardedAndClose = useCallback(async () => {
     try {
-      // Mark user as onboarded
-      await useUserStore.getState().updatePreference({ isOnboarded: true } as any);
+      // Mark user as onboarded via the proper server mutation
+      const { userService } = await import('@/services/user');
+      await userService.makeUserOnboarded();
+
+      // Also update the store so the modal hides immediately
+      useUserStore.setState({ isOnboard: true });
     } catch (error) {
       console.error('Failed to mark onboarded:', error);
+      // Still update store to prevent modal from re-appearing
+      useUserStore.setState({ isOnboard: true });
     }
     onComplete?.();
   }, [onComplete]);
@@ -112,10 +121,14 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
       // 2. Apply the recommendations to user settings
       await applyRecommendations(selections);
 
+      // 3. Update store so modal hides immediately
+      useUserStore.setState({ isOnboard: true });
+
       onComplete?.();
     } catch (error) {
       console.error('Failed to save/apply recommendations:', error);
-      // Still close modal even if save fails
+      // Still close modal and mark onboarded even if save fails
+      useUserStore.setState({ isOnboard: true });
       onComplete?.();
     } finally {
       setIsSubmitting(false);

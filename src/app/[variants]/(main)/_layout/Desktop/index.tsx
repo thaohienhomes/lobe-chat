@@ -35,16 +35,16 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const isLogin = useUserStore(authSelectors.isLogin);
   const isUserStateInit = useUserStore((s) => s.isUserStateInit);
-  const profession = useUserStore((s) => s.preference?.profession);
+  const isOnboard = useUserStore((s) => s.isOnboard);
 
   useEffect(() => {
-    // Show onboarding for logged-in users who haven't set their profession
-    if (isUserStateInit && isLogin && !profession) {
+    // Show onboarding only for logged-in users who haven't completed onboarding
+    if (isUserStateInit && isLogin && !isOnboard) {
       // Delay to allow UI to settle
       const timer = setTimeout(() => setShowOnboarding(true), 500);
       return () => clearTimeout(timer);
     }
-  }, [isLogin, isUserStateInit, profession]);
+  }, [isLogin, isUserStateInit, isOnboard]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
