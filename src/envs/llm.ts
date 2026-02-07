@@ -40,6 +40,7 @@ export const getLLMConfig = () => {
 
       ENABLED_PERPLEXITY: z.boolean(),
       PERPLEXITY_API_KEY: z.string().optional(),
+      PERPLEXITY_PROXY_URL: z.string().optional(),
 
       ENABLED_ANTHROPIC: z.boolean(),
       ANTHROPIC_API_KEY: z.string().optional(),
@@ -52,6 +53,7 @@ export const getLLMConfig = () => {
 
       ENABLED_GROQ: z.boolean(),
       GROQ_API_KEY: z.string().optional(),
+      GROQ_PROXY_URL: z.string().optional(),
 
       ENABLED_GITHUB: z.boolean(),
       GITHUB_TOKEN: z.string().optional(),
@@ -64,9 +66,11 @@ export const getLLMConfig = () => {
 
       ENABLED_TOGETHERAI: z.boolean(),
       TOGETHERAI_API_KEY: z.string().optional(),
+      TOGETHERAI_PROXY_URL: z.string().optional(),
 
       ENABLED_FIREWORKSAI: z.boolean(),
       FIREWORKSAI_API_KEY: z.string().optional(),
+      FIREWORKSAI_PROXY_URL: z.string().optional(),
 
       ENABLED_AWS_BEDROCK: z.boolean(),
       AWS_REGION: z.string().optional(),
@@ -208,6 +212,7 @@ export const getLLMConfig = () => {
 
       ENABLED_CEREBRAS: z.boolean(),
       CEREBRAS_API_KEY: z.string().optional(),
+      CEREBRAS_PROXY_URL: z.string().optional(),
       ELEVENLABS_API_KEY: z.string().optional(),
     },
     runtimeEnv: {
@@ -243,6 +248,7 @@ export const getLLMConfig = () => {
 
       ENABLED_PERPLEXITY: !!process.env.PERPLEXITY_API_KEY,
       PERPLEXITY_API_KEY: process.env.PERPLEXITY_API_KEY,
+      PERPLEXITY_PROXY_URL: process.env.PERPLEXITY_PROXY_URL,
 
       ENABLED_ANTHROPIC: !!process.env.ANTHROPIC_API_KEY,
       ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
@@ -258,15 +264,18 @@ export const getLLMConfig = () => {
 
       ENABLED_TOGETHERAI: !!process.env.TOGETHERAI_API_KEY,
       TOGETHERAI_API_KEY: process.env.TOGETHERAI_API_KEY,
+      TOGETHERAI_PROXY_URL: process.env.TOGETHERAI_PROXY_URL,
 
       ENABLED_FIREWORKSAI: !!process.env.FIREWORKSAI_API_KEY,
       FIREWORKSAI_API_KEY: process.env.FIREWORKSAI_API_KEY,
+      FIREWORKSAI_PROXY_URL: process.env.FIREWORKSAI_PROXY_URL,
 
       ENABLED_MOONSHOT: !!process.env.MOONSHOT_API_KEY,
       MOONSHOT_API_KEY: process.env.MOONSHOT_API_KEY,
 
       ENABLED_GROQ: !!process.env.GROQ_API_KEY,
       GROQ_API_KEY: process.env.GROQ_API_KEY,
+      GROQ_PROXY_URL: process.env.GROQ_PROXY_URL,
 
       ENABLED_GITHUB: !!process.env.GITHUB_TOKEN,
       GITHUB_TOKEN: process.env.GITHUB_TOKEN,
@@ -412,6 +421,7 @@ export const getLLMConfig = () => {
 
       ENABLED_CEREBRAS: !!process.env.CEREBRAS_API_KEY,
       CEREBRAS_API_KEY: process.env.CEREBRAS_API_KEY,
+      CEREBRAS_PROXY_URL: process.env.CEREBRAS_PROXY_URL,
 
       ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
     },

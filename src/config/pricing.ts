@@ -718,6 +718,23 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       'google/gemini-2.0-flash', // Vercel AI Gateway
       'deepseek/deepseek-chat', // Vercel AI Gateway - DeepSeek V3
+      // ============================================
+      // Groq Tier 1 Models (via CF Gateway)
+      // ============================================
+      'llama-3.1-8b-instant', // Groq - fastest
+      'llama-3.3-70b-versatile', // Groq - best quality
+      'mixtral-8x7b-32768', // Groq - Mixtral
+      'gemma2-9b-it', // Groq - Gemma 2
+      // ============================================
+      // Cerebras Tier 1 Models (via CF Gateway)
+      // ============================================
+      'llama3.1-8b', // Cerebras - fastest inference
+      'llama3.1-70b', // Cerebras - quality
+      // ============================================
+      // Fireworks AI Tier 1 Models (via CF Gateway)
+      // ============================================
+      'accounts/fireworks/models/llama-v3p1-8b-instruct', // Fireworks AI
+      'accounts/fireworks/models/llama-v3p1-70b-instruct', // Fireworks AI
     ],
     outputCostPer1M: 15, // Cost per 1M output tokens
     pointsPerMessage: 5, // ~15-20 points per typical message
@@ -769,6 +786,17 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'deepseek/deepseek-r1', // Vercel AI Gateway
       'xai/grok-4', // Vercel AI Gateway
       'meta-llama/llama-4-70b-instruct', // Vercel AI Gateway
+      // ============================================
+      // Together AI Tier 2 Models (via CF Gateway)
+      // ============================================
+      'Qwen/Qwen2.5-72B-Instruct-Turbo', // Together AI - Qwen 2.5
+      'deepseek-ai/DeepSeek-R1', // Together AI - DeepSeek R1
+      'deepseek-ai/DeepSeek-V3', // Together AI - DeepSeek V3
+      // ============================================
+      // Groq Tier 2 Models (via CF Gateway)
+      // ============================================
+      'deepseek-r1-distill-llama-70b', // Groq - DeepSeek R1 Distill
+      'qwen-qwq-32b', // Groq - Qwen QwQ reasoning
     ],
     outputCostPer1M: 300,
     pointsPerMessage: 150,

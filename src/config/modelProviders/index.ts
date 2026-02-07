@@ -162,10 +162,10 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   { ...PPIOProvider, enabled: false },
   { ...Ai302Provider, enabled: false },
   { ...NvidiaProvider, enabled: false },
-  { ...TogetherAIProvider, enabled: false },
-  { ...FireworksAIProvider, enabled: false },
-  { ...GroqProvider, enabled: false },
-  { ...PerplexityProvider, enabled: false },
+  { ...TogetherAIProvider, enabled: true },
+  { ...FireworksAIProvider, enabled: true },
+  { ...GroqProvider, enabled: true },
+  { ...PerplexityProvider, enabled: true },
   { ...MistralProvider, enabled: false },
   { ...ModelScopeProvider, enabled: false },
   { ...Ai21Provider, enabled: false },
@@ -200,8 +200,8 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   { ...QiniuProvider, enabled: false },
   { ...NebiusProvider, enabled: false },
   { ...CometAPIProvider, enabled: false },
-  { ...VercelAIGatewayProvider, enabled: false },
-  { ...CerebrasProvider, enabled: false },
+  { ...VercelAIGatewayProvider, enabled: true },
+  { ...CerebrasProvider, enabled: true },
 ];
 
 export const filterEnabledModels = (provider: ModelProviderCard) => {
