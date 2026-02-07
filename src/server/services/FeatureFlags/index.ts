@@ -92,7 +92,9 @@ export class FeatureFlagService {
    */
   updateFlags(newFlags: Partial<FeatureFlags>): void {
     this.flags = { ...this.flags, ...newFlags };
-    console.log('🚩 Feature flags updated:', newFlags);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Feature flags updated:', newFlags);
+    }
   }
 
   /**
@@ -100,7 +102,9 @@ export class FeatureFlagService {
    */
   updateRolloutConfig(newConfig: Partial<RolloutConfig>): void {
     this.rolloutConfig = { ...this.rolloutConfig, ...newConfig };
-    console.log('🎯 Rollout config updated:', newConfig);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Rollout config updated:', newConfig);
+    }
   }
 
   /**
@@ -255,7 +259,9 @@ export class FeatureFlagService {
     };
 
     // In production, this would be sent to logging service
-    console.log('📝 Rollback event logged:', rollbackEvent);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Rollback event logged:', rollbackEvent);
+    }
   }
 }
 

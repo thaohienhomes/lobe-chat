@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+import { requireAdmin } from '@/app/api/admin/_shared/auth';
 import { PHO_CHANGELOGS, PHO_CHANGELOG_CONTENT } from '@/const/changelog';
 import { getServerDB } from '@/database/server';
+import { checkRateLimit, newsletterRateLimiter } from '@/middleware/rate-limit';
 
 // Initialize Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -53,27 +55,27 @@ function generateNewsletterHtml(title: string, content: string): string {
             <td style="padding: 0 40px 32px;">
               <div style="font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.8);">
                 ${content
-                  .split('\n')
-                  .map((line) => {
-                    if (line.startsWith('## ')) {
-                      return `<h2 style="margin: 24px 0 12px; font-size: 18px; font-weight: 600; color: #a855f7;">${line.replace('## ', '')}</h2>`;
-                    }
-                    if (line.startsWith('### ')) {
-                      return `<h3 style="margin: 16px 0 8px; font-size: 16px; font-weight: 600; color: #ffffff;">${line.replace('### ', '')}</h3>`;
-                    }
-                    if (line.startsWith('- **')) {
-                      const match = line.match(/- \*\*(.+?)\*\*:?\s*(.+)?/);
-                      if (match) {
-                        return `<p style="margin: 8px 0; padding-left: 16px;">• <strong style="color: #22c55e;">${match[1]}</strong>${match[2] ? ': ' + match[2] : ''}</p>`;
-                      }
-                    }
-                    if (line.startsWith('- ')) {
-                      return `<p style="margin: 8px 0; padding-left: 16px;">• ${line.replace('- ', '')}</p>`;
-                    }
-                    if (line.trim() === '') return '';
-                    return `<p style="margin: 8px 0;">${line}</p>`;
-                  })
-                  .join('')}
+      .split('\n')
+      .map((line) => {
+        if (line.startsWith('## ')) {
+          return `<h2 style="margin: 24px 0 12px; font-size: 18px; font-weight: 600; color: #a855f7;">${line.replace('## ', '')}</h2>`;
+        }
+        if (line.startsWith('### ')) {
+          return `<h3 style="margin: 16px 0 8px; font-size: 16px; font-weight: 600; color: #ffffff;">${line.replace('### ', '')}</h3>`;
+        }
+        if (line.startsWith('- **')) {
+          const match = line.match(/- \*\*(.+?)\*\*:?\s*(.+)?/);
+          if (match) {
+            return `<p style="margin: 8px 0; padding-left: 16px;">• <strong style="color: #22c55e;">${match[1]}</strong>${match[2] ? ': ' + match[2] : ''}</p>`;
+          }
+        }
+        if (line.startsWith('- ')) {
+          return `<p style="margin: 8px 0; padding-left: 16px;">• ${line.replace('- ', '')}</p>`;
+        }
+        if (line.trim() === '') return '';
+        return `<p style="margin: 8px 0;">${line}</p>`;
+      })
+      .join('')}
               </div>
             </td>
           </tr>
@@ -113,6 +115,16 @@ function generateNewsletterHtml(title: string, content: string): string {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Admin-only access
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
+    // Rate limit (very strict — 3 per hour)
+    const rl = await checkRateLimit(request, 'admin-newsletter', newsletterRateLimiter);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: rl.reason }, { status: 429 });
+    }
+
     const body: NewsletterRequestBody = await request.json();
     const { changelogId, testEmail } = body;
 

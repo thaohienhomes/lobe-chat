@@ -24,10 +24,12 @@ export async function createPaymentRecord(params: CreatePaymentRecordParams) {
       status: 'pending',
       userId: params.userId,
     });
-    console.log('✅ Payment record created successfully:', {
-      orderId: params.orderId,
-      userId: params.userId,
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[SePay] Payment record created:', {
+        orderId: params.orderId,
+        userId: params.userId,
+      });
+    }
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
     console.error('❌ Failed to create payment record:', {
@@ -57,11 +59,13 @@ export async function updatePaymentStatus(
         transactionId: opts?.transactionId,
       })
       .where(eq(sepayPayments.orderId, orderId));
-    console.log('✅ Payment status updated successfully:', {
-      orderId,
-      status,
-      transactionId: opts?.transactionId,
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[SePay] Payment status updated:', {
+        orderId,
+        status,
+        transactionId: opts?.transactionId,
+      });
+    }
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
     console.error('❌ Failed to update payment status:', {
@@ -94,12 +98,14 @@ export async function activateUserSubscription(params: {
     if (params.isUpgrade && existing.length > 0) {
       // UPGRADE: Preserve existing period dates, only update plan
       const existingSubscription = existing[0];
-      console.log('🔄 Processing upgrade - preserving existing period:', {
-        currentPeriodEnd: existingSubscription.currentPeriodEnd,
-        currentPeriodStart: existingSubscription.currentPeriodStart,
-        newPlanId: params.planId,
-        oldPlanId: existingSubscription.planId,
-      });
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[SePay] Processing upgrade:', {
+          currentPeriodEnd: existingSubscription.currentPeriodEnd,
+          currentPeriodStart: existingSubscription.currentPeriodStart,
+          newPlanId: params.planId,
+          oldPlanId: existingSubscription.planId,
+        });
+      }
 
       await db
         .update(subscriptions)
@@ -112,12 +118,14 @@ export async function activateUserSubscription(params: {
           status: 'active',
         })
         .where(eq(subscriptions.userId, params.userId));
-      console.log('✅ Subscription upgraded successfully:', {
-        billingCycle: params.billingCycle,
-        currentPeriodEnd: existingSubscription.currentPeriodEnd.toISOString(),
-        planId: params.planId,
-        userId: params.userId,
-      });
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[SePay] Subscription upgraded:', {
+          billingCycle: params.billingCycle,
+          currentPeriodEnd: existingSubscription.currentPeriodEnd.toISOString(),
+          planId: params.planId,
+          userId: params.userId,
+        });
+      }
     } else {
       // NEW SUBSCRIPTION or RENEWAL: Create new billing period
       const start = new Date();
@@ -136,12 +144,14 @@ export async function activateUserSubscription(params: {
             status: 'active',
           })
           .where(eq(subscriptions.userId, params.userId));
-        console.log('✅ Subscription renewed successfully:', {
-          billingCycle: params.billingCycle,
-          currentPeriodEnd: end.toISOString(),
-          planId: params.planId,
-          userId: params.userId,
-        });
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[SePay] Subscription renewed:', {
+            billingCycle: params.billingCycle,
+            currentPeriodEnd: end.toISOString(),
+            planId: params.planId,
+            userId: params.userId,
+          });
+        }
       } else {
         await db.insert(subscriptions).values({
           billingCycle: params.billingCycle,
@@ -151,12 +161,14 @@ export async function activateUserSubscription(params: {
           status: 'active',
           userId: params.userId,
         });
-        console.log('✅ Subscription created successfully:', {
-          billingCycle: params.billingCycle,
-          currentPeriodEnd: end.toISOString(),
-          planId: params.planId,
-          userId: params.userId,
-        });
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[SePay] Subscription created:', {
+            billingCycle: params.billingCycle,
+            currentPeriodEnd: end.toISOString(),
+            planId: params.planId,
+            userId: params.userId,
+          });
+        }
       }
     }
   } catch (e) {
@@ -181,12 +193,9 @@ export async function getPaymentByOrderId(orderId: string) {
       .where(eq(sepayPayments.orderId, orderId))
       .limit(1);
     if (rows.length > 0) {
-      console.log('✅ Payment record retrieved successfully:', {
-        orderId,
-        status: rows[0].status,
-      });
+      // Successfully found
     } else {
-      console.warn('⚠️ Payment record not found:', { orderId });
+      console.warn('[SePay] Payment record not found:', { orderId });
     }
     return rows[0];
   } catch (e) {

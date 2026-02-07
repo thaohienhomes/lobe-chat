@@ -1,8 +1,7 @@
 /**
- * Rate Limiting Middleware for Payment Endpoints
- * Prevents brute force attacks on credit card validation
- *
- * Implements sliding window rate limiting with per-IP and per-user limits
+ * Rate Limiting Middleware
+ * Sliding window rate limiting with per-IP and per-user limits.
+ * Used for payment, API, and other mutating endpoints.
  */
 
 interface RateLimitEntry {
@@ -198,12 +197,30 @@ class RateLimiter {
   }
 }
 
-// Create singleton instance
+// ── Singleton instances ──────────────────────────────────────
+
+/** Payment endpoints (30 req/min IP, 10 req/min user) */
 export const paymentRateLimiter = new RateLimiter({
-  ipLimit: 30, // 30 requests per IP per minute
+  ipLimit: 30,
   ipWindowMs: 60 * 1000,
-  userLimit: 10, // 10 requests per user per minute
+  userLimit: 10,
   userWindowMs: 60 * 1000,
+});
+
+/** General API endpoints (20 req/min IP, 10 req/min user) */
+export const apiRateLimiter = new RateLimiter({
+  ipLimit: 20,
+  ipWindowMs: 60 * 1000,
+  userLimit: 10,
+  userWindowMs: 60 * 1000,
+});
+
+/** Newsletter send — very strict (5 req/hour) */
+export const newsletterRateLimiter = new RateLimiter({
+  ipLimit: 5,
+  ipWindowMs: 60 * 60 * 1000,
+  userLimit: 3,
+  userWindowMs: 60 * 60 * 1000,
 });
 
 /**
@@ -225,28 +242,35 @@ export function getClientIp(request: Request): string {
 }
 
 /**
- * Rate limit check for payment endpoints
+ * Generic rate limit check — works with any RateLimiter instance
  */
-export async function checkPaymentRateLimit(
+export async function checkRateLimit(
   request: Request,
   userId: string,
+  limiter: RateLimiter = apiRateLimiter,
 ): Promise<{ allowed: boolean; reason?: string; remaining?: number; resetTime?: number }> {
   const ip = getClientIp(request);
-  const result = paymentRateLimiter.checkLimit(ip, userId);
+  const result = limiter.checkLimit(ip, userId);
 
   if (!result.allowed) {
     return {
       allowed: false,
       reason: result.reason,
       remaining: 0,
-      resetTime: paymentRateLimiter.getResetTime(userId),
+      resetTime: limiter.getResetTime(userId),
     };
   }
 
   return {
     allowed: true,
-    remaining: paymentRateLimiter.getRemainingRequests(userId),
-    resetTime: paymentRateLimiter.getResetTime(userId),
+    remaining: limiter.getRemainingRequests(userId),
+    resetTime: limiter.getResetTime(userId),
   };
 }
+
+/** @deprecated Use checkRateLimit(req, userId, paymentRateLimiter) instead */
+export const checkPaymentRateLimit = (
+  request: Request,
+  userId: string,
+) => checkRateLimit(request, userId, paymentRateLimiter);
 

@@ -18,10 +18,9 @@ export async function addPhoCredits(userId: string, amount: number) {
       })
       .where(eq(users.id, userId));
 
-    console.log('✅ Added Phở Points:', {
-      amount,
-      userId,
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[Credits] Added Phở Points:', { amount, userId });
+    }
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
     console.error('❌ Failed to add Phở Points:', {
@@ -68,10 +67,9 @@ export async function deductPhoCredits(userId: string, amount: number) {
       })
       .where(eq(users.id, userId));
 
-    console.log('📉 Deducted Phở Points:', {
-      amount,
-      userId,
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[Credits] Deducted Phở Points:', { amount, userId });
+    }
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
     console.error('❌ Failed to deduct Pho credits:', {
@@ -124,26 +122,26 @@ export async function processModelUsage(userId: string, cost: number, tier: numb
 
     // Increment appropriate tier usage
     switch (tier) {
-    case 1: {
-      if (newTier1Usage < FREE_TIER_LIMIT) {
-        finalCost = 0; // Free!
-        isFree = true;
+      case 1: {
+        if (newTier1Usage < FREE_TIER_LIMIT) {
+          finalCost = 0; // Free!
+          isFree = true;
+        }
+        newTier1Usage += 1;
+
+        break;
       }
-      newTier1Usage += 1;
-    
-    break;
-    }
-    case 2: {
-      newTier2Usage += 1;
-    
-    break;
-    }
-    case 3: {
-      newTier3Usage += 1;
-    
-    break;
-    }
-    // No default
+      case 2: {
+        newTier2Usage += 1;
+
+        break;
+      }
+      case 3: {
+        newTier3Usage += 1;
+
+        break;
+      }
+      // No default
     }
 
     // 4. Update DB with all tier usage
@@ -159,14 +157,16 @@ export async function processModelUsage(userId: string, cost: number, tier: numb
       })
       .where(eq(users.id, userId));
 
-    if (isFree) {
-      console.log(
-        `🎉 Free Tier used (${newTier1Usage}/${FREE_TIER_LIMIT}). Cost waived for user ${userId}.`,
-      );
-    } else if (finalCost > 0) {
-      console.log(
-        `📉 Deducted ${finalCost} Credits (Tier ${tier}). Tier usage: T1=${newTier1Usage}, T2=${newTier2Usage}, T3=${newTier3Usage}. User: ${userId}`,
-      );
+    if (process.env.NODE_ENV !== 'production') {
+      if (isFree) {
+        console.log(
+          `[Credits] Free Tier used (${newTier1Usage}/${FREE_TIER_LIMIT}). Cost waived for user ${userId}.`,
+        );
+      } else if (finalCost > 0) {
+        console.log(
+          `[Credits] Deducted ${finalCost} Credits (Tier ${tier}). T1=${newTier1Usage}, T2=${newTier2Usage}, T3=${newTier3Usage}. User: ${userId}`,
+        );
+      }
     }
   } catch (e) {
     console.error('❌ Failed to process model usage:', e);

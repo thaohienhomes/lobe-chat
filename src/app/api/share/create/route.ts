@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SharedConversationModel } from '@/database/models/sharedConversation';
 import { NewSharedConversation } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
+import { apiRateLimiter, checkRateLimit } from '@/middleware/rate-limit';
 
 // Auto-run migration if table doesn't exist
 const ensureTableExists = async () => {
@@ -53,10 +54,16 @@ export const POST = async (req: NextRequest) => {
     await ensureTableExists();
 
     // Get user auth
-    const auth = await getUserAuth();
+    const authResult = await getUserAuth();
 
-    if (!auth) {
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit check
+    const rl = await checkRateLimit(req, authResult.userId || 'anon', apiRateLimiter);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: rl.reason }, { status: 429 });
     }
 
     // Parse request body
@@ -87,7 +94,7 @@ export const POST = async (req: NextRequest) => {
       systemRole: config?.systemRole || '',
       tags: meta?.tags || [],
       title: meta?.title || 'Shared Conversation',
-      userId: auth.userId,
+      userId: authResult.userId,
       viewCount: 0,
     };
 

@@ -2,12 +2,26 @@
  * Memory Extraction API Endpoint
  * Uses LLM to extract user memories from chat messages
  */
+import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getLLMConfig } from '@/envs/llm';
+import { apiRateLimiter, checkRateLimit } from '@/middleware/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Auth check
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit check
+    const rl = await checkRateLimit(request, userId, apiRateLimiter);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: rl.reason }, { status: 429 });
+    }
+
     const { messages, prompt } = await request.json();
 
     if (!messages || typeof messages !== 'string') {

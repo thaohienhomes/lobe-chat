@@ -5,6 +5,9 @@
 import { LobeChatDatabase } from '@lobechat/database';
 import { sql } from 'drizzle-orm';
 
+/** Row shape returned by raw SQL queries */
+type QueryRow = Record<string, unknown>;
+
 export interface PerformanceMetrics {
   averageCostPerQuery: number;
   // System Performance
@@ -101,10 +104,10 @@ export class PerformanceMonitoringService {
       WHERE created_at BETWEEN ${start} AND ${end}
     `);
 
-    const latencyRows = latencyMetrics.rows as any[] || [];
-    const costRows = costMetrics.rows as any[] || [];
-    const budgetRows = budgetMetrics.rows as any[] || [];
-    const routingRows = routingMetrics.rows as any[] || [];
+    const latencyRows = (latencyMetrics.rows ?? []) as QueryRow[];
+    const costRows = (costMetrics.rows ?? []) as QueryRow[];
+    const budgetRows = (budgetMetrics.rows ?? []) as QueryRow[];
+    const routingRows = (routingMetrics.rows ?? []) as QueryRow[];
 
     const latency = latencyRows[0];
     const cost = costRows[0];
@@ -250,7 +253,7 @@ export class PerformanceMonitoringService {
       WHERE created_at BETWEEN ${start} AND ${end}
     `);
 
-    const rows = result.rows as any[] || [];
+    const rows = (result.rows ?? []) as QueryRow[];
     return Number(rows[0]?.optimal_usage_rate) || 0;
   }
 
@@ -276,11 +279,11 @@ export class PerformanceMonitoringService {
       ORDER BY date
     `);
 
-    const rows = result.rows as any[] || [];
-    return rows.map((row: any) => ({
+    const rows = (result.rows ?? []) as QueryRow[];
+    return rows.map((row) => ({
       avgCost: Number(row.avg_cost),
       avgLatency: Number(row.avg_latency),
-      date: row.date,
+      date: row.date as string,
       errorRate: Number(row.error_rate),
       totalQueries: Number(row.total_queries),
     }));
