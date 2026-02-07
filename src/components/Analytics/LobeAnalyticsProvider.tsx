@@ -63,14 +63,19 @@ export const LobeAnalyticsProvider = memo(
               (window as any).posthog = posthog;
             }
 
+            // Ensure properties are available for instant Feature Flag evaluation
+            posthog.setPersonPropertiesForFlags({
+              environment,
+              platform: isDesktop ? 'desktop' : 'web',
+            });
+
             // Register as super property (event property)
             posthog.register({
               environment,
               platform: isDesktop ? 'desktop' : 'web',
             });
 
-            // Set as Person Property for Feature Flags targeting
-            // This ensures it appears in the "Person properties" dropdown in PostHog
+            // Set as Person Property for backend persistence and long-term targeting
             posthog.people.set({
               environment,
             });
