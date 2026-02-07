@@ -5,7 +5,6 @@ import { analyticsEnv } from '@/envs/analytics';
 
 import Desktop from './Desktop';
 import Google from './Google';
-import Sentry from './Sentry';
 import Vercel from './Vercel';
 
 // Lazy load analytics components
@@ -22,7 +21,7 @@ const RouteAwareTikTok = dynamic(() => import('./RouteAwareAnalytics'));
 /**
  * Analytics component - Optimized for performance
  *
- * Core analytics (Sentry, Vercel, Google, Plausible, Umami) load on all pages.
+ * Core analytics (Vercel, Google, Plausible, Umami) load on all pages.
  * TikTok Pixel is route-aware and only loads on marketing pages
  * (/discover, /subscription, /landing, etc.) - NOT on /chat, /settings, etc.
  *
@@ -34,8 +33,7 @@ const RouteAwareTikTok = dynamic(() => import('./RouteAwareAnalytics'));
 const Analytics = () => {
   return (
     <>
-      {/* Core analytics - Always load (essential for error tracking & basic analytics) */}
-      {process.env.NEXT_PUBLIC_ENABLE_SENTRY === '1' && <Sentry />}
+      {/* Core analytics - Always load (essential for basic analytics) */}
       {analyticsEnv.ENABLE_VERCEL_ANALYTICS && <Vercel />}
       {analyticsEnv.ENABLE_GOOGLE_ANALYTICS && <Google />}
 

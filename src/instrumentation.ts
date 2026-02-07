@@ -1,15 +1,8 @@
-import * as Sentry from '@sentry/nextjs';
+// Next.js instrumentation file
+// Sentry has been removed for performance optimization
+// This file is kept as a placeholder for future instrumentation needs
 
 export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('../sentry.server.config');
-  }
-
-  if (process.env.NEXT_RUNTIME === 'edge') {
-    await import('../sentry.edge.config');
-  }
+  // No-op: Sentry removed to reduce bundle size (~200KB+ savings)
+  // Add future server instrumentation here if needed
 }
-
-// Export for Next.js error instrumentation (required by Sentry)
-// This captures errors from nested React Server Components
-export const onRequestError = Sentry.captureRequestError;

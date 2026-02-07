@@ -1,14 +1,13 @@
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ThemeAppearance } from 'antd-style';
 import { ResolvingViewport } from 'next';
+import nextDynamic from 'next/dynamic';
+import Script from 'next/script';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { ReactNode } from 'react';
 import { isRtlLang } from 'rtl-detect';
 
-import NewYearLifetimeBanner from '@/features/PromotionBanner/NewYearLifetimeBanner';
-
 import Analytics from '@/components/Analytics';
-import SentryErrorBoundary from '@/components/SentryErrorBoundary';
 import { DEFAULT_LANG } from '@/const/locale';
 import { isDesktop } from '@/const/version';
 import PWAInstall from '@/features/PWAInstall';
@@ -17,6 +16,11 @@ import GlobalProvider from '@/layout/GlobalProvider';
 import { Locales } from '@/locales/resources';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
+
+const NewYearLifetimeBanner = nextDynamic(
+  () => import('@/features/PromotionBanner/NewYearLifetimeBanner'),
+  { ssr: false },
+);
 
 // Force dynamic rendering to avoid static generation issues with Clerk hooks
 // This is required because Clerk's useUser hook cannot be used during static generation
@@ -40,46 +44,40 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
   return (
     <html dir={direction} lang={locale}>
       <head>
-        {/* Google Site Verification - Replace PLACEHOLDER_REPLACE_WITH_ACTUAL_CODE with actual verification code from Google Search Console */}
+        {/* Google Site Verification */}
         <meta content="PLACEHOLDER_REPLACE_WITH_ACTUAL_CODE" name="google-site-verification" />
         {process.env.DEBUG_REACT_SCAN === '1' && (
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script crossOrigin="anonymous" src="https://unpkg.com/react-scan/dist/auto.global.js" />
         )}
-        {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17766075190" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-17766075190');
-            `,
-          }}
-        />
       </head>
       <body>
-        <SentryErrorBoundary>
-          <NuqsAdapter>
-            <GlobalProvider
-              appearance={theme}
-              isMobile={isMobile}
-              locale={locale}
-              neutralColor={neutralColor}
-              primaryColor={primaryColor}
-              variants={variants}
-            >
-              <AuthProvider>
-                {children}
-                {!isMobile && modal}
-              </AuthProvider>
-              <PWAInstall />
-              <NewYearLifetimeBanner />
-            </GlobalProvider>
-          </NuqsAdapter>
-        </SentryErrorBoundary>
+        <NuqsAdapter>
+          <GlobalProvider
+            appearance={theme}
+            isMobile={isMobile}
+            locale={locale}
+            neutralColor={neutralColor}
+            primaryColor={primaryColor}
+            variants={variants}
+          >
+            <AuthProvider>
+              {children}
+              {!isMobile && modal}
+            </AuthProvider>
+            <PWAInstall />
+            <NewYearLifetimeBanner />
+          </GlobalProvider>
+        </NuqsAdapter>
         <Analytics />
+        {/* Google tag (gtag.js) - deferred to avoid blocking LCP */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=AW-17766075190" strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17766075190');`}
+        </Script>
         {inVercel && <SpeedInsights />}
       </body>
     </html>
