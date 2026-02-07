@@ -5,10 +5,7 @@
  * Uses "Phở Points" hidden credit system for usage tracking
  */
 
-
-
 // Re-export for backward compatibility
-
 
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 // Cost per 1K tokens in USD (for internal cost tracking)
@@ -45,8 +42,6 @@ export const MODEL_COSTS = {
  * Based on PRICING_MASTERPLAN.md.md
  */
 export const VND_PRICING_TIERS = {
-
-
   // Legacy mappings (for backward compatibility)
   premium: {
     dailyTier2Limit: 30,
@@ -56,9 +51,6 @@ export const VND_PRICING_TIERS = {
     monthlyVND: 69_000,
   },
 
-
-
-
   starter: {
     dailyTier2Limit: 0,
     dailyTier3Limit: 0,
@@ -66,9 +58,6 @@ export const VND_PRICING_TIERS = {
     monthlyPoints: 50_000,
     monthlyVND: 0,
   },
-
-
-
 
   ultimate: {
     dailyTier2Limit: -1,
@@ -78,9 +67,6 @@ export const VND_PRICING_TIERS = {
     monthlyVND: 199_000,
   },
 
-
-
-
   // Basic tier (Student)
   vn_basic: {
     dailyTier2Limit: 30,
@@ -89,9 +75,6 @@ export const VND_PRICING_TIERS = {
     monthlyPoints: 300_000,
     monthlyVND: 69_000,
   },
-
-
-
 
   // Free tier
   vn_free: {
@@ -379,7 +362,7 @@ export class UsageTracker {
   constructor(
     private db: any,
     private userId: string,
-  ) { }
+  ) {}
 
   async trackUsage(request: {
     costUSD: number;

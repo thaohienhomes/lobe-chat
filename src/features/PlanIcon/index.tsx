@@ -27,18 +27,6 @@ export const themes: Record<string, PlanTheme> = {
     icon: Crown,
     theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
   },
-  lifetime_early_bird: {
-    icon: Crown,
-    theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
-  },
-  lifetime_last_call: {
-    icon: Crown,
-    theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
-  },
-  lifetime_standard: {
-    icon: Crown,
-    theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
-  },
   gl_premium: {
     icon: Atom,
     theme: { background: 'linear-gradient(45deg, #F7A82F, #BB7227)', color: '#FCFA6E' },
@@ -54,6 +42,18 @@ export const themes: Record<string, PlanTheme> = {
   hobby: {
     icon: Box,
     theme: { background: 'linear-gradient(45deg, #21B2EE, #2271ED)', color: '#E5F8FF' },
+  },
+  lifetime_early_bird: {
+    icon: Crown,
+    theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
+  },
+  lifetime_last_call: {
+    icon: Crown,
+    theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
+  },
+  lifetime_standard: {
+    icon: Crown,
+    theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
   },
   premium: {
     icon: Zap,

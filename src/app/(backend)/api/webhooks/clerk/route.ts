@@ -35,11 +35,14 @@ export const POST = async (req: Request): Promise<NextResponse> => {
       // Also create wallet for new user with 'free' tier
       try {
         const { phoWallet } = await import('@/database/schemas/wallet');
-        await serverDB.insert(phoWallet).values({
-          clerkUserId: data.id,
-          balance: 0,
-          tierCode: 'free',
-        }).onConflictDoNothing();
+        await serverDB
+          .insert(phoWallet)
+          .values({
+            balance: 0,
+            clerkUserId: data.id,
+            tierCode: 'free',
+          })
+          .onConflictDoNothing();
         pino.info({ userId: data.id }, 'wallet created for new user');
       } catch (walletError) {
         pino.error({ error: walletError, userId: data.id }, 'failed to create wallet for new user');
