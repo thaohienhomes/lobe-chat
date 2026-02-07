@@ -21,32 +21,44 @@ interface LlmProvidersResponse {
   providers: Record<string, boolean>;
 }
 
-/**
- * PostHog host for SERVER-SIDE calls.
- * Do NOT use NEXT_PUBLIC_POSTHOG_HOST — that's '/ingest' (client-side proxy).
- */
-const POSTHOG_SERVER_HOST = 'https://us.i.posthog.com';
+const POSTHOG_HOST = 'https://us.i.posthog.com';
+
+/** Safety: if >60% flags are false, treat as misconfiguration */
+const MISCONFIGURATION_THRESHOLD = 0.6;
 
 /**
- * SAFETY THRESHOLD: If PostHog returns more than this percentage of
- * flags as `false`, treat it as a misconfiguration and fall back to
- * all-enabled defaults. This prevents the "all models disappear" scenario.
- *
- * Example: 9 flags, threshold 60% → if 6+ flags are false, it's likely
- * a config issue (flags weren't set to 100% rollout).
+ * Ensure the server-side person exists in PostHog with correct properties.
+ * This is fire-and-forget — doesn't block the response.
+ * After the first call, PostHog processes the identify event (~5-10s),
+ * and subsequent /decide calls work correctly.
  */
-const MISCONFIGURATION_THRESHOLD = 0.6;
+function ensurePersonExists(posthogKey: string, environment: string): void {
+  fetch(`${POSTHOG_HOST}/capture/`, {
+    body: JSON.stringify({
+      api_key: posthogKey,
+      distinct_id: `server-${environment}`,
+      event: '$identify',
+      properties: {
+        $set: { environment },
+      },
+      timestamp: new Date().toISOString(),
+    }),
+    headers: { 'Content-Type': 'application/json' },
+    method: 'POST',
+  }).catch(() => {
+    // Fire-and-forget: don't fail the main request
+  });
+}
 
 /**
  * GET /api/config/llm-providers
  *
- * Evaluates PostHog feature flags server-side via the /decide endpoint.
- * Returns which LLM providers are enabled for the current environment.
+ * Evaluates PostHog feature flags server-side.
+ * On first call, identifies the server person to PostHog.
+ * After ~10 seconds, subsequent calls get correct flag evaluations.
  *
- * FAIL-OPEN: If PostHog is unavailable or returns suspicious data,
- * all providers are enabled.
- *
- * Add ?debug=1 to see raw PostHog response for troubleshooting.
+ * FAIL-OPEN: all providers enabled by default.
+ * Add ?debug=1 for troubleshooting.
  */
 export async function GET(request: Request): Promise<NextResponse<LlmProvidersResponse>> {
   const url = new URL(request.url);
@@ -67,18 +79,16 @@ export async function GET(request: Request): Promise<NextResponse<LlmProvidersRe
     });
   }
 
-  try {
-    const decideUrl = `${POSTHOG_SERVER_HOST}/decide?v=3`;
-    const body = {
-      api_key: posthogKey,
-      distinct_id: `server-${environment}`,
-      person_properties: {
-        environment,
-      },
-    };
+  // Always ensure the person exists (fire-and-forget)
+  ensurePersonExists(posthogKey, environment);
 
-    const response = await fetch(decideUrl, {
-      body: JSON.stringify(body),
+  try {
+    const response = await fetch(`${POSTHOG_HOST}/decide?v=3`, {
+      body: JSON.stringify({
+        api_key: posthogKey,
+        distinct_id: `server-${environment}`,
+        person_properties: { environment },
+      }),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
     });
@@ -93,7 +103,7 @@ export async function GET(request: Request): Promise<NextResponse<LlmProvidersRe
     const data = await response.json();
     const featureFlags: Record<string, boolean | string> = data.featureFlags || {};
 
-    // Build provider map from PostHog response
+    // Build provider map
     const providers: Record<string, boolean> = { ...defaults };
     let falseCount = 0;
     let definedCount = 0;
@@ -105,26 +115,10 @@ export async function GET(request: Request): Promise<NextResponse<LlmProvidersRe
         providers[flag] = value;
         if (!value) falseCount++;
       }
-      // If flag not in PostHog response, keep default (true) — fail-open
     }
 
-    // SAFETY CHECK: If too many flags are false, it's likely a PostHog
-    // misconfiguration (flags created with 0% rollout instead of 100%).
-    // Fall back to defaults and only trust flags that are EXPLICITLY true.
+    // Safety: if too many flags are false, likely misconfiguration or person not yet identified
     if (definedCount > 0 && falseCount / definedCount > MISCONFIGURATION_THRESHOLD) {
-      console.warn(
-        `[llm-providers] SAFETY: ${falseCount}/${definedCount} flags are false — ` +
-          `likely misconfigured (0% rollout). Using opt-out mode instead.`,
-      );
-
-      // OPT-OUT MODE: Start with all enabled, then only disable flags
-      // that are explicitly false AND have a matching condition
-      // (i.e., PostHog intentionally disabled them, not just 0% default rollout).
-      //
-      // Heuristic: A flag is "intentionally disabled" if it returns false
-      // AND other flags of the same type (llm-provider-*) return true.
-      // Since most flags are false, we can't trust any of them.
-      // Fall back to all-enabled defaults.
       return NextResponse.json({
         ...(showDebug && {
           debug: {
@@ -132,10 +126,8 @@ export async function GET(request: Request): Promise<NextResponse<LlmProvidersRe
             definedCount,
             environment,
             falseCount,
+            hint: 'Person may not be identified yet. Wait ~30s and try again.',
             posthogResponse: featureFlags,
-            reason:
-              'Too many flags are false. This usually means flags were created with 0% rollout. ' +
-              'Fix: In PostHog, edit each flag → Release Conditions → set rollout to 100%.',
           },
         }),
         providers: defaults,
@@ -149,6 +141,7 @@ export async function GET(request: Request): Promise<NextResponse<LlmProvidersRe
           environment,
           falseCount,
           posthogResponse: featureFlags,
+          status: 'ok',
         },
       }),
       providers,
