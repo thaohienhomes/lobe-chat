@@ -712,10 +712,10 @@ function CheckoutContent() {
                     }}
                   >
                     <Text style={{ color: '#fff', fontSize: 24, fontWeight: 700 }}>
-                      {new Intl.NumberFormat('vi-VN').format(successPlan.monthlyPoints)}
+                      {formatPrice(successPlan.yearlyPriceVND || successPlan.monthlyPriceVND, false)}
                     </Text>
                     <Text style={{ color: 'rgba(255,255,255,0.8)', display: 'block', fontSize: 13 }}>
-                      Phở Points / tháng
+                      {successPlan.yearlyPriceVND ? '/ năm' : '/ tháng'}
                     </Text>
                   </div>
 
