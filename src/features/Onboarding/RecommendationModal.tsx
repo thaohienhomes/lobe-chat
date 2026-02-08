@@ -1,7 +1,7 @@
 'use client';
 
 import { Icon } from '@lobehub/ui';
-import { Checkbox, Divider } from 'antd';
+import { Checkbox, Divider, Radio, Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import { Bot, Cpu, Puzzle, Sparkles } from 'lucide-react';
 import React, { memo, useMemo, useState } from 'react';
@@ -41,13 +41,23 @@ const useStyles = createStyles(({ css, token }) => ({
     background: ${token.colorPrimary};
 
     &:hover {
-      opacity: 0.9;
+      background: ${token.colorPrimaryHover};
     }
 
     &:disabled {
       cursor: not-allowed;
-      opacity: 0.5;
+      background: ${token.colorPrimaryBg};
+      color: ${token.colorTextDisabled};
     }
+  `,
+  btnLoading: css`
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+
+    background: ${token.colorPrimary};
+    color: white;
+    cursor: wait;
   `,
   btnSecondary: css`
     border: 1px solid ${token.colorBorderSecondary};
@@ -286,7 +296,7 @@ const RecommendationModal = memo<RecommendationModalProps>(
                   key={model}
                   onClick={() => setSelectedModel(model === selectedModel ? undefined : model)}
                 >
-                  <Checkbox checked={selectedModel === model} />
+                  <Radio checked={selectedModel === model} />
                   <span className={styles.itemLabel}>{MODEL_NAMES[model] || model}</span>
                 </div>
               ))}
@@ -366,18 +376,21 @@ const RecommendationModal = memo<RecommendationModalProps>(
             {lang === 'vi' ? 'Chọn tất cả' : 'Select All'}
           </button>
           <button
-            className={cx(styles.btn, styles.btnPrimary)}
-            disabled={loading || !hasSelections}
+            className={cx(styles.btn, loading ? styles.btnLoading : styles.btnPrimary)}
+            disabled={!loading && !hasSelections}
             onClick={handleApply}
             type="button"
           >
-            {loading
-              ? lang === 'vi'
-                ? 'Đang lưu...'
-                : 'Saving...'
-              : lang === 'vi'
-                ? 'Áp dụng'
-                : 'Apply'}
+            {loading ? (
+              <>
+                <Spin size="small" />
+                {lang === 'vi' ? 'Đang lưu...' : 'Saving...'}
+              </>
+            ) : lang === 'vi' ? (
+              'Áp dụng'
+            ) : (
+              'Apply'
+            )}
           </button>
         </Flexbox>
       </div>
