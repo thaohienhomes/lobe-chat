@@ -106,6 +106,39 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     storageGB: 0.5,
     vectorEntries: 0,
   },
+
+  // Medical Beta: Free-tier base with boosted limits via promo code activation
+  // Activation: promo code sets publicMetadata.planId = 'medical_beta'
+  // Default model: Groq (Llama 3.1) — avoids Vertex AI 1 RPM quota limit
+  medical_beta: {
+    advancedAI: false,
+    code: 'medical_beta',
+    dailyTier2Limit: 20,
+    displayName: 'Phở Medical Beta 🏥',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
+    features: [
+      '500k Phở Points/tháng',
+      'Unlimited Tier 1 + 20 Tier 2/ngày',
+      'PubMed, ArXiv, Drug Interaction, Clinical Calculator',
+      'Semantic Scholar + DOI Resolver',
+      'LaTeX upload & citation',
+      'Medical Founding Team badge 🏥',
+    ],
+
+    keyLimits: 'Unlim Tier 1. 20 Tier 2 msgs/day. Medical plugins.',
+
+    monthlyPoints: 500_000,
+
+    // 999k VNĐ/year — paid via Sepay/VietQR, activated by promo code
+    price: 999_000,
+
+    priceYearly: 999_000,
+
+    prioritySupport: false,
+    storageGB: 1,
+    vectorEntries: 5000,
+  },
   vn_pro: {
     advancedAI: false,
     code: 'vn_pro',
@@ -511,6 +544,16 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     models: [...TIER1_MODELS],
   },
 
+  // Medical Beta: Tier 1 + Tier 2 with 20/day limit, Groq primary
+  // Avoids Vertex AI 1 RPM quota — routes through Groq and Gateway
+  medical_beta: {
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: 20 },
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
+    models: [...TIER1_MODELS, ...TIER2_MODELS],
+  },
+
   // VN Pro (Phở Đặc Biệt): All tiers with 50 Tier 3 messages/day
   vn_pro: {
     allowedTiers: [1, 2, 3],
@@ -775,6 +818,17 @@ export const PLAN_USAGE_ESTIMATES = {
     monthlyPoints: 50_000,
     tier1Messages: '~10,000',
     tier2Messages: '~300',
+    tier3Messages: '0',
+    videos: '0 (No Studio)',
+  },
+
+  // Medical Beta
+  medical_beta: {
+    hasStudio: false,
+    images: '~50',
+    monthlyPoints: 500_000,
+    tier1Messages: '~100,000',
+    tier2Messages: '~3,300',
     tier3Messages: '0',
     videos: '0 (No Studio)',
   },

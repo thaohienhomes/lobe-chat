@@ -101,6 +101,15 @@ export const VND_PRICING_TIERS = {
     monthlyPoints: 0, // Pooled
     monthlyVND: 149_000, // per user
   },
+
+  // Medical Beta tier — activated via promo code
+  medical_beta: {
+    dailyTier2Limit: 20,
+    dailyTier3Limit: 0,
+    displayName: 'Phở Medical Beta 🏥',
+    monthlyPoints: 500_000,
+    monthlyVND: 83_250, // 999k/year ÷ 12
+  },
 } as const;
 
 /**
@@ -362,7 +371,7 @@ export class UsageTracker {
   constructor(
     private db: any,
     private userId: string,
-  ) {}
+  ) { }
 
   async trackUsage(request: {
     costUSD: number;

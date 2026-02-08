@@ -64,7 +64,15 @@ export async function POST(request: NextRequest) {
       params.append('fieldsOfStudy', fieldsOfStudy.join(','));
     }
 
-    const response = await fetch(`${S2_API_URL}?${params.toString()}`);
+    // Use API key if available (free key from semanticscholar.org/product/api)
+    // Increases rate limit from 100 → 1,000 requests per 5 minutes
+    const headers: Record<string, string> = {};
+    const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
+
+    const response = await fetch(`${S2_API_URL}?${params.toString()}`, { headers });
 
     if (response.status === 429) {
       return NextResponse.json(
