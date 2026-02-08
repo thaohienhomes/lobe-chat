@@ -242,6 +242,25 @@ const plans = {
     yearlyPriceVND: 0,
   },
 
+
+  // Medical Beta tier - special plan activated via promo code
+  medical_beta: {
+    code: 'medical_beta',
+    description: 'Trợ lý AI lâm sàng cho bác sĩ Việt Nam',
+    features: [
+      '500.000 Phở Points/tháng',
+      '6 Medical plugins (PubMed, Drug Check, Calculator...)',
+      'Unlimited Tier 1 + 20 Tier 2/ngày',
+      'LaTeX & Citation support',
+      'Early Adopter perks',
+    ],
+    monthlyPoints: 500_000,
+    monthlyPriceVND: 0, // Yearly-only plan
+    name: 'Phở Medical Beta',
+    yearlyPriceVND: 999_000,
+  },
+
+
   // Legacy mappings (for backward compatibility with existing URLs)
   premium: {
     code: 'vn_basic',
@@ -260,6 +279,7 @@ const plans = {
     yearlyPriceVND: 690_000,
   },
 
+
   starter: {
     code: 'vn_free',
     description: 'Trải nghiệm miễn phí',
@@ -269,6 +289,8 @@ const plans = {
     name: 'Phở Không Người Lái',
     yearlyPriceVND: 0,
   },
+
+
 
   ultimate: {
     code: 'vn_pro',
@@ -284,6 +306,8 @@ const plans = {
     name: 'Phở Đặc Biệt',
     yearlyPriceVND: 1_990_000,
   },
+
+
 
   // Basic tier (Student) - vn_basic
   vn_basic: {
@@ -303,6 +327,7 @@ const plans = {
     yearlyPriceVND: 690_000,
   },
 
+
   // Free tier - vn_free (for reference, not purchasable)
   vn_free: {
     code: 'vn_free',
@@ -317,6 +342,9 @@ const plans = {
     name: 'Phở Không Người Lái',
     yearlyPriceVND: 0,
   },
+
+
+
   // Pro tier - vn_pro
   vn_pro: {
     code: 'vn_pro',
@@ -337,6 +365,25 @@ const plans = {
     name: 'Phở Đặc Biệt',
     yearlyPriceUSD: 99,
     yearlyPriceVND: 1_990_000,
+  },
+
+
+  // Ultimate tier - vn_ultimate (Phở Pro Ultimate)
+  vn_ultimate: {
+    code: 'vn_ultimate',
+    description: 'Cho chuyên gia và doanh nghiệp với Studio access',
+    features: [
+      '5M Phở Points/tháng',
+      '~100 videos hoặc ~500 ảnh',
+      'Unlimited Tier 1 & 2 models',
+      '100 Tier 3 messages/day',
+      'Phở Studio access ✨',
+      'Priority support',
+    ],
+    monthlyPoints: 5_000_000,
+    monthlyPriceVND: 499_000,
+    name: 'Phở Pro (Ultimate)',
+    yearlyPriceVND: 4_990_000,
   },
 };
 
@@ -398,7 +445,7 @@ function CheckoutContent() {
   // Determine if this is a global plan (gl_*) or Vietnam plan (vn_*)
   const isGlobalPlan = planId?.startsWith('gl_');
   const isVietnamPlan =
-    planId?.startsWith('vn_') || ['starter', 'premium', 'ultimate'].includes(planId);
+    planId?.startsWith('vn_') || ['starter', 'premium', 'ultimate', 'medical_beta'].includes(planId);
 
   // Determine if this is a FREE plan (no payment needed)
   const FREE_PLAN_IDS = ['vn_free', 'gl_starter', 'starter'];
@@ -577,7 +624,7 @@ function CheckoutContent() {
       if (data.success) {
         message.success(
           data.message ||
-            (isGlobalPlan ? 'Free plan activated!' : 'Gói miễn phí đã được kích hoạt!'),
+          (isGlobalPlan ? 'Free plan activated!' : 'Gói miễn phí đã được kích hoạt!'),
         );
         // 🎉 Show confetti celebration animation
         setShowConfetti(true);
@@ -589,7 +636,7 @@ function CheckoutContent() {
         console.error('❌ Free plan activation failed:', data);
         message.error(
           data.message ||
-            (isGlobalPlan ? 'Failed to activate free plan' : 'Không thể kích hoạt gói miễn phí'),
+          (isGlobalPlan ? 'Failed to activate free plan' : 'Không thể kích hoạt gói miễn phí'),
         );
       }
     } catch (error) {

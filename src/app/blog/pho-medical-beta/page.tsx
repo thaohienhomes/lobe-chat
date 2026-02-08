@@ -347,9 +347,9 @@ export default function MedicalBetaPage() {
             <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem', marginBottom: '16px' }}>
               Sẵn sàng nâng cấp workflow y khoa?
             </p>
-            <a className="cta-button" href="https://pho.chat">
+            <Link className="cta-button" href="/subscription/checkout?plan=medical_beta&provider=sepay">
               🏥 Đăng Ký Medical Beta
-            </a>
+            </Link>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginTop: '12px' }}>
               Early Bird: 999k VNĐ/năm · Giá tăng sau Tết
             </p>

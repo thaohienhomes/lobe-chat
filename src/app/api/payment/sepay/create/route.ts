@@ -63,10 +63,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
     const orderId = SepayPaymentGateway.generateOrderId('PHO_SUB');
 
     // Create payment description
-    const planNames = {
+    const planNames: Record<string, string> = {
+      medical_beta: 'Medical Beta',
       premium: 'Premium Plan',
       starter: 'Starter Plan',
       ultimate: 'Ultimate Plan',
+      vn_basic: 'Phở Tái (Starter)',
+      vn_pro: 'Phở Đặc Biệt (Premium)',
+      vn_ultimate: 'Phở Pro (Ultimate)',
     };
     const planName = planNames[planId as keyof typeof planNames] || 'Subscription Plan';
     const description = `pho.chat ${planName} - ${billingCycle} billing`;
@@ -78,8 +82,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
     const baseUrl = host
       ? `${protocol}://${host}`
       : process.env.NEXT_PUBLIC_BASE_URL ||
-        process.env.APP_URL ||
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
+      process.env.APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3010');
 
     console.log('🌐 Base URL for payment redirect:', {
       NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
