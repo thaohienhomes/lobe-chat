@@ -45,9 +45,9 @@ const Redirect = memo<RedirectProps>(({ setLoadingStage }) => {
       return;
     }
 
-    // user need to onboard
+    // user need to onboard - go to chat where OnboardingModal overlay will appear
     if (!isOnboard) {
-      router.replace('/onboard');
+      navToChat();
       return;
     }
 
