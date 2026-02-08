@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/nextjs';
 import { Alert, Button, Card, Divider, Form, Input, Radio, Spin, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
-import { ArrowLeft, Check, CreditCard, Lock, Shield } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Lock, MessageSquare, Settings2, Shield } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
@@ -415,8 +415,9 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Confetti completion handler - redirect after animation
+  // Confetti completion handler
   const handleConfettiComplete = useCallback(() => {
     setShowConfetti(false);
   }, []);
@@ -430,17 +431,13 @@ function CheckoutContent() {
   const paymentSuccess = searchParams.get('success') === 'true';
   const activated = searchParams.get('activated') === 'true';
 
-  // 🎉 Show confetti when returning from successful payment
+  // 🎉 Show celebration screen when returning from successful payment
   useEffect(() => {
     if (paymentSuccess || activated) {
       setShowConfetti(true);
-      // Redirect to subscription page after showing confetti
-      const timer = setTimeout(() => {
-        router.push('/settings?active=subscription&activated=true');
-      }, 2500);
-      return () => clearTimeout(timer);
+      setShowSuccess(true);
     }
-  }, [paymentSuccess, activated, router]);
+  }, [paymentSuccess, activated]);
 
   // Determine if this is a global plan (gl_*) or Vietnam plan (vn_*)
   const isGlobalPlan = planId?.startsWith('gl_');
@@ -658,6 +655,120 @@ function CheckoutContent() {
           </Flexbox>
         </div>
       </div>
+    );
+  }
+
+  // 🎉 Payment Success Celebration Screen
+  if (showSuccess) {
+    const successPlan = plan || plans.vn_basic; // fallback
+    const isGlobal = planId?.startsWith('gl_');
+
+    return (
+      <>
+        <ConfettiCelebration
+          duration={5000}
+          onComplete={handleConfettiComplete}
+          show={showConfetti}
+        />
+        <div className={styles.container}>
+          <div className={styles.content}>
+            <Flexbox align="center" gap={32} style={{ minHeight: '60vh', paddingBlock: 48 }}>
+              {/* Celebration header */}
+              <div style={{ fontSize: 72, lineHeight: 1 }}>🎉</div>
+              <Title level={1} style={{ margin: 0, textAlign: 'center' }}>
+                {isGlobal ? 'Payment Successful!' : 'Thanh toán thành công!'}
+              </Title>
+              <Text style={{ fontSize: 18, textAlign: 'center' }} type="secondary">
+                {isGlobal
+                  ? `Your ${successPlan.name} plan has been activated`
+                  : `Gói ${successPlan.name} đã được kích hoạt`}
+              </Text>
+
+              {/* Plan info card */}
+              <Card
+                style={{
+                  background: 'linear-gradient(135deg, #0f9d58 0%, #00695c 100%)',
+                  border: 'none',
+                  borderRadius: 16,
+                  maxWidth: 480,
+                  width: '100%',
+                }}
+              >
+                <Flexbox align="center" gap={16}>
+                  <Title level={3} style={{ color: '#fff', margin: 0 }}>
+                    {successPlan.name}
+                  </Title>
+                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16 }}>
+                    {successPlan.description}
+                  </Text>
+
+                  {/* Monthly points badge */}
+                  <div
+                    style={{
+                      background: 'rgba(255,255,255,0.2)',
+                      borderRadius: 12,
+                      marginBlock: 8,
+                      padding: '12px 24px',
+                    }}
+                  >
+                    <Text style={{ color: '#fff', fontSize: 24, fontWeight: 700 }}>
+                      {new Intl.NumberFormat('vi-VN').format(successPlan.monthlyPoints)}
+                    </Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.8)', display: 'block', fontSize: 13 }}>
+                      Phở Points / tháng
+                    </Text>
+                  </div>
+
+                  {/* Features list */}
+                  <Flexbox gap={6} style={{ width: '100%' }}>
+                    {successPlan.features.slice(0, 4).map((feature, i) => (
+                      <div key={i} style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+                        <Check size={16} style={{ color: '#a5d6a7', flexShrink: 0 }} />
+                        <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>
+                          {feature}
+                        </Text>
+                      </div>
+                    ))}
+                  </Flexbox>
+                </Flexbox>
+              </Card>
+
+              {/* CTA Buttons */}
+              <Flexbox gap={16} horizontal style={{ marginBlockStart: 8 }}>
+                <Button
+                  icon={<MessageSquare size={18} />}
+                  onClick={() => router.push('/chat')}
+                  size="large"
+                  style={{
+                    borderRadius: 12,
+                    fontSize: 16,
+                    height: 52,
+                    minWidth: 180,
+                    paddingInline: 24,
+                  }}
+                  type="primary"
+                >
+                  {isGlobal ? 'Start Chatting' : 'Bắt đầu Chat'}
+                </Button>
+                <Button
+                  icon={<Settings2 size={18} />}
+                  onClick={() => router.push('/settings?active=subscription&activated=true')}
+                  size="large"
+                  style={{
+                    borderRadius: 12,
+                    fontSize: 16,
+                    height: 52,
+                    minWidth: 180,
+                    paddingInline: 24,
+                  }}
+                >
+                  {isGlobal ? 'Manage Plan' : 'Quản lý gói'}
+                </Button>
+              </Flexbox>
+            </Flexbox>
+          </div>
+        </div>
+      </>
     );
   }
 

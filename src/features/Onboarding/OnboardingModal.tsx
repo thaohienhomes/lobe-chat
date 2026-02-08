@@ -1,5 +1,6 @@
 'use client';
 
+import { useUser } from '@clerk/nextjs';
 import { Modal } from '@lobehub/ui';
 import { memo, useCallback, useState } from 'react';
 
@@ -7,6 +8,7 @@ import { useAgentStore } from '@/store/agent';
 import { useToolStore } from '@/store/tool';
 import { useUserStore } from '@/store/user';
 
+import MedicalOnboarding from './MedicalOnboarding';
 import ProfessionSelect from './ProfessionSelect';
 import RecommendationModal from './RecommendationModal';
 import type { RecommendationSelections } from './professions';
@@ -68,6 +70,11 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
 };
 
 const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
+  const { user } = useUser();
+  const isMedicalBeta =
+    (user?.publicMetadata as any)?.planId === 'medical_beta' ||
+    (user?.publicMetadata as any)?.medical_beta === true;
+
   const [step, setStep] = useState<OnboardingStep>('profession');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProfessions, setSelectedProfessions] = useState<string[]>([]);
@@ -153,20 +160,26 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
       title={null}
       width={getModalWidth()}
     >
-      {step === 'profession' && (
-        <ProfessionSelect
-          loading={isSubmitting}
-          onComplete={handleProfessionComplete}
-          onSkip={handleProfessionSkip}
-        />
-      )}
-      {step === 'recommendations' && (
-        <RecommendationModal
-          loading={isSubmitting}
-          onComplete={handleRecommendationsComplete}
-          onSkip={handleRecommendationsSkip}
-          professions={selectedProfessions}
-        />
+      {isMedicalBeta ? (
+        <MedicalOnboarding loading={isSubmitting} onComplete={markOnboardedAndClose} />
+      ) : (
+        <>
+          {step === 'profession' && (
+            <ProfessionSelect
+              loading={isSubmitting}
+              onComplete={handleProfessionComplete}
+              onSkip={handleProfessionSkip}
+            />
+          )}
+          {step === 'recommendations' && (
+            <RecommendationModal
+              loading={isSubmitting}
+              onComplete={handleRecommendationsComplete}
+              onSkip={handleRecommendationsSkip}
+              professions={selectedProfessions}
+            />
+          )}
+        </>
       )}
     </Modal>
   );
