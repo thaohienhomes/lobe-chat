@@ -51,6 +51,8 @@ export const config = {
     '/share',
     '/share(.*)',
 
+    '/onboard',
+    '/onboard(.*)',
     '/login(.*)',
     '/signup(.*)',
     '/next-auth/(.*)',
@@ -191,6 +193,10 @@ const isPublicRoute = createRouteMatcher([
   // Lifetime deal pages
   '/lifetime',
   '/lifetime(.*)',
+  // Onboarding page - needs to load for first-time users
+  // Auth is enforced at TRPC layer for data mutations
+  '/onboard',
+  '/onboard(.*)',
   // Subscription APIs - allow public access for checking allowed models
   '/api/subscription(.*)',
   // Payment checkout
@@ -200,7 +206,6 @@ const isPublicRoute = createRouteMatcher([
 const isProtectedRoute = createRouteMatcher([
   '/settings(.*)',
   '/files(.*)',
-  '/onboard(.*)',
   '/oauth(.*)',
   // ↓ cloud ↓
 ]);
