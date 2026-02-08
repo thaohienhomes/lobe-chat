@@ -61,13 +61,7 @@ const StoreInitialization = memo(() => {
   useInitAiProviderKeyVaults(isLoginOnInit);
 
   // init user state
-  useInitUserState(isLoginOnInit, serverConfig, {
-    onSuccess: (state) => {
-      if (state.isOnboard === false) {
-        router.push('/onboard');
-      }
-    },
-  });
+  useInitUserState(isLoginOnInit, serverConfig);
 
   const useStoreUpdater = createStoreUpdater(useGlobalStore);
 
