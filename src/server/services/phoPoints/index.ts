@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
- * Phở Points Service
+ * @deprecated This service is NOT used in the runtime pipeline.
+ * Credit deduction is handled by `@/server/services/billing/credits.ts`
+ * which is called from `webapi/chat/[provider]/route.ts`.
+ *
+ * This file is kept for reference but should be removed in a future cleanup.
+ *
+ * Phở Points Service (LEGACY)
  * Based on PRICING_MASTERPLAN.md.md
  *
  * Handles:
@@ -89,7 +95,7 @@ export async function checkPhoPointsBalance(
         allowed: false,
         currentBalance: balance,
         estimatedCost: pointsCost,
-        fallbackModel: 'gpt-4o-mini',
+        fallbackModel: 'gemini-2.0-flash',
         reason: 'Tier 2 not available. Upgrade to Phở Tái.',
         tier,
       };
@@ -114,7 +120,7 @@ export async function checkPhoPointsBalance(
         allowed: false,
         currentBalance: balance,
         estimatedCost: pointsCost,
-        fallbackModel: 'gpt-4o',
+        fallbackModel: 'gemini-2.5-flash',
         reason: 'Tier 3 not available. Upgrade to Phở Đặc Biệt.',
         tier,
       };
@@ -134,7 +140,7 @@ export async function checkPhoPointsBalance(
 
   // Check points balance
   if (balance < pointsCost) {
-    const fallback = tier === 3 ? 'gpt-4o' : 'gpt-4o-mini';
+    const fallback = tier === 3 ? 'gemini-2.5-flash' : 'gemini-2.0-flash';
     return {
       allowed: false,
       currentBalance: balance,

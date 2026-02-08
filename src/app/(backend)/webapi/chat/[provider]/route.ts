@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm';
 import console from 'node:console';
 
 import { checkAuth } from '@/app/(backend)/middleware/auth';
-import { getModelTier } from '@/config/pricing';
+import { MODEL_TIERS, getModelTier } from '@/config/pricing';
 import { modelPricing } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 import { createTraceOptions, initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
@@ -86,8 +86,12 @@ async function getModelPricing(modelId: string) {
 }
 
 // Helper to count tokens from text
-function countTokens(text: string) {
-  return Math.ceil(text.length / 4);
+// Uses byte length / 3 as approximation for multilingual BPE tokenizers
+// (English ~4 chars/token, Vietnamese/CJK ~1.5-2 chars/token, bytes/3 is balanced)
+const textEncoder = new TextEncoder();
+function countTokens(text: string): number {
+  const byteLength = textEncoder.encode(text).length;
+  return Math.ceil(byteLength / 3);
 }
 
 export const POST = checkAuth(async (req: Request, { params, jwtPayload, createRuntime }) => {
@@ -243,17 +247,22 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // relying on data.model for pricing lookup.
     const pricing = await getModelPricing(data.model);
 
-    // Default pricing if not found (FAIL SAFE - or should we hardcode?)
-    // Using 5000/15000 as a fallback baseline (same as 'gpt-4o-mini' in seed)
+    // Resolve correct tier via getModelTier() — supports all providers (Groq, Cerebras, etc.)
+    const resolvedTier = getModelTier(data.model);
+    const resolvedTierConfig = MODEL_TIERS[resolvedTier as keyof typeof MODEL_TIERS];
+
+    // Use DB pricing if available, otherwise derive from MODEL_TIERS config
     const activePricing = pricing || {
       id: 'default',
-      inputPrice: 5000,
-      outputPrice: 15_000,
-      tier: 1,
+      inputPrice: resolvedTierConfig?.inputCostPer1M ?? 100,
+      outputPrice: resolvedTierConfig?.outputCostPer1M ?? 300,
+      tier: resolvedTier,
     };
 
     if (!pricing) {
-      console.warn(`⚠️ No pricing found for model ${data.model}, using fallback.`);
+      console.warn(
+        `⚠️ No DB pricing for model ${data.model}, using Tier ${resolvedTier} fallback (${resolvedTierConfig?.tierName}).`,
+      );
     }
 
     if (data.stream && response.body) {
@@ -267,7 +276,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           let accumulatedText = '';
           const decoder = new TextDecoder();
 
-          for (;;) {
+          for (; ;) {
             const { done, value } = await reader.read();
             if (done) break;
             // Decode chunk. Note: chunks might be partial SSE events.

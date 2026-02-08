@@ -335,6 +335,89 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
 // PLAN-TO-MODELS ACCESS MAPPING
 // ============================================================================
 
+// ============================================================================
+// SHARED MODEL ARRAYS (used by PLAN_MODEL_ACCESS below)
+// Single source of truth - update here to propagate to all plans
+// ============================================================================
+
+/** Tier 1: Budget models — available to ALL plans including Free */
+const TIER1_MODELS = [
+  // Vertex AI (Primary)
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
+  // Vercel AI Gateway
+  'google/gemini-2.0-flash',
+  'deepseek/deepseek-chat',
+  // Groq (via CF Gateway)
+  'llama-3.1-8b-instant',
+  'llama-3.3-70b-versatile',
+  'mixtral-8x7b-32768',
+  'gemma2-9b-it',
+  'mistral-saba-24b',
+  // Cerebras (via CF Gateway)
+  'llama3.1-8b',
+  'llama3.1-70b',
+  // Fireworks AI (via CF Gateway)
+  'accounts/fireworks/models/llama-v3p1-8b-instruct',
+  'accounts/fireworks/models/llama-v3p1-70b-instruct',
+  // Legacy (OpenRouter-style IDs for backward compat)
+  'gpt-4o-mini',
+  'gemini-1.5-flash',
+  'claude-3-haiku',
+  'deepseek-chat',
+  'qwen-turbo',
+] as const;
+
+/** Tier 2: Standard models — available to Basic/Starter+ plans */
+const TIER2_MODELS = [
+  // Vertex AI
+  'gemini-2.5-flash',
+  'gemini-2.5-pro',
+  'gemini-3-flash-preview',
+  // Vercel AI Gateway
+  'google/gemini-2.5-flash',
+  'google/gemini-2.5-pro',
+  'anthropic/claude-sonnet-4.5',
+  'openai/gpt-5.2',
+  'openai/gpt-4o',
+  'openai/gpt-4.1',
+  'deepseek/deepseek-r1',
+  'xai/grok-4',
+  'meta-llama/llama-4-70b-instruct',
+  // Groq Tier 2 (via CF Gateway)
+  'deepseek-r1-distill-llama-70b',
+  'qwen-qwq-32b',
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'meta-llama/llama-4-maverick-17b-128e-instruct',
+  'qwen/qwen3-32b',
+  // Together AI (via CF Gateway)
+  'Qwen/Qwen2.5-72B-Instruct-Turbo',
+  'deepseek-ai/DeepSeek-R1',
+  'deepseek-ai/DeepSeek-V3',
+  // Legacy IDs
+  'gpt-4o',
+  'gpt-4.1',
+  'claude-3-5-sonnet',
+  'claude-3-sonnet',
+  'gemini-1.5-pro',
+  'deepseek-reasoner',
+] as const;
+
+/** Tier 3: Premium models — available to Pro/Ultimate/Team/Lifetime plans */
+const TIER3_MODELS = [
+  // Vertex AI
+  'gemini-3-pro-preview',
+  // Vercel AI Gateway
+  'openai/o3-mini',
+  // Legacy IDs
+  'gpt-4-turbo',
+  'claude-3-opus',
+  'o1',
+  'o1-preview',
+  'o1-pro',
+  'o3',
+] as const;
+
 /**
  * Defines which models are allowed for each subscription plan
  * and sets default model selection per plan
@@ -344,54 +427,22 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   // GLOBAL PLANS - All use Vertex AI as primary provider (Feb 2026)
   // ============================================================================
 
-  // Global Lifetime: Tier 1, 2, 3 - Behaves like PRO with 2M points monthly reset
+  // Global Lifetime: Tier 1 & 2 - Behaves like PRO with 2M points monthly reset
   gl_lifetime: {
-    allowedTiers: [1, 2], // Per SPECS: Same as PRO = Tier 1 & 2 only
-    dailyLimits: { tier2: -1 }, // Unlimited Tier 2 within monthly points cap
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: -1 },
     defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      // Tier 1 models
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      // Tier 2 models
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-    ],
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
   // Global Premium (Pro): Tier 1 & 2 with 2M points cap
   gl_premium: {
-    allowedTiers: [1, 2], // Per SPECS: PRO = Tier 1 & 2
-    dailyLimits: { tier2: -1 }, // Unlimited within monthly cap
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: -1 },
     defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      // Tier 1 models
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      // Tier 2 models
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-    ],
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
   // Global Standard: Tier 1 & 2 with daily limits
@@ -399,207 +450,74 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     allowedTiers: [1, 2],
     dailyLimits: { tier2: 30 },
     defaultModel: 'gemini-2.5-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      // Tier 1 models
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      // Tier 2 models
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-    ],
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
-  // Global Starter Plan: Tier 1 ONLY per SPECS_BUSINESS.md
-  // "BASIC TIER: Models: Tier 1 ONLY (Unlimited*). Strictly NO access to Tier 2 Models."
+  // Global Starter Plan: Tier 1 ONLY
   gl_starter: {
-    allowedTiers: [1], // Tier 1 ONLY - same as vn_basic
+    allowedTiers: [1],
     defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-    ],
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS],
   },
 
   // ============================================================================
   // LIFETIME DEAL PLANS - All tiers with 2M points/month
   // ============================================================================
 
-  // Lifetime Early Bird: All tiers (Tier 1, 2, 3) with 50 Tier 3 messages/day
   lifetime_early_bird: {
     allowedTiers: [1, 2, 3],
-    dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3/day
+    dailyLimits: { tier2: -1, tier3: 50 },
     defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'vertexai',
-    models: [
-      // Tier 1 models
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      // Tier 2 models
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      // Tier 3 models
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-preview',
-    ],
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
-  // Lifetime Last Call: Same as Early Bird and Standard
   lifetime_last_call: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
     defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'vertexai',
-    models: [
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-preview',
-    ],
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
-  // Lifetime Standard: Same as Early Bird
   lifetime_standard: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
     defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'vertexai',
-    models: [
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-preview',
-    ],
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
-  // ============================================================================
-  // VIETNAM PLANS - All use OpenRouter as primary provider
-  // ============================================================================
-
-  // Vietnam Basic Plan (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
-  // Per VN_PLANS config: dailyTier2Limit: 30
-  vn_basic: {
-    allowedTiers: [1, 2], // Phở Tái allows Tier 1 & 2
-    dailyLimits: { tier2: 30 }, // 30 Tier 2 messages/day
-    defaultModel: 'gemini-2.5-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      // Tier 1 models
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      // Tier 2 models (30 msg/day limit)
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-    ],
-  },
   // ============================================================================
   // VIETNAM PLANS - All use Vertex AI as primary provider (Feb 2026)
   // ============================================================================
 
-  // VN Free: Tier 1 ONLY with 50,000 points/month, no chat history/file uploads
+  // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
+  vn_basic: {
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: 30 },
+    defaultModel: 'gemini-2.5-flash',
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS, ...TIER2_MODELS],
+  },
+
+  // VN Free: Tier 1 ONLY with 50,000 points/month
   vn_free: {
     allowedTiers: [1],
     defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-    ],
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS],
   },
 
-  // VN Pro (Phở Đặc Biệt): Tier 1, 2 & 3 with 50 Tier 3 messages/day limit
-  // Per VN_PLANS config: dailyTier2Limit: -1 (unlimited), dailyTier3Limit: 50
+  // VN Pro (Phở Đặc Biệt): All tiers with 50 Tier 3 messages/day
   vn_pro: {
-    allowedTiers: [1, 2, 3], // Phở Đặc Biệt allows all tiers
-    dailyLimits: { tier2: -1, tier3: 50 }, // Unlimited Tier 2, 50 Tier 3 messages/day
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier2: -1, tier3: 50 },
     defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      // Tier 1 models
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      // Tier 2 models (unlimited)
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      // Tier 3 models (50 msg/day limit)
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-preview',
-    ],
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
   // VN Team: All tiers (enterprise plan)
@@ -607,62 +525,19 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier3: 100 },
     defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai', // Vertex AI as primary (Feb 2026)
-    models: [
-      // All models available
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-pro',
-      'o3',
-    ],
+    defaultProvider: 'vertexai',
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
   // VN Ultimate (Phở Pro): All tiers with 100 Tier 3 messages/day + Studio access
   vn_ultimate: {
     allowedTiers: [1, 2, 3],
-    dailyLimits: { tier2: -1, tier3: 100 }, // Unlimited Tier 2, 100 Tier 3/day
+    dailyLimits: { tier2: -1, tier3: 100 },
     defaultModel: 'gemini-2.0-flash',
     defaultProvider: 'vertexai',
-    models: [
-      // Tier 1 models
-      'gpt-4o-mini',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'claude-3-haiku',
-      'deepseek-chat',
-      'qwen-turbo',
-      // Tier 2 models (unlimited)
-      'gpt-4o',
-      'gpt-4.1',
-      'claude-3-5-sonnet',
-      'claude-3-sonnet',
-      'gemini-1.5-pro',
-      'gemini-2.5-pro',
-      'deepseek-reasoner',
-      // Tier 3 models (100 msg/day limit)
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'o1',
-      'o1-preview',
-      'o1-pro',
-      'o3',
-    ],
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
-} as const;
+};
 
 // ============================================================================
 // MODEL TIERS (Points-based pricing)
