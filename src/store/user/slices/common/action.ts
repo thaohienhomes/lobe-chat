@@ -71,6 +71,19 @@ export const createCommonSlice: StateCreator<
       !!isLogin ? GET_USER_STATE_KEY : null,
       () => userService.getUserState(),
       {
+        onError: (error) => {
+          console.error('[useInitUserState] Failed to fetch user state:', error);
+          // CRITICAL: Still set isUserStateInit to true on error
+          // so the app doesn't infinite-load. Users can still use the app
+          // with default settings.
+          set(
+            {
+              isUserStateInit: true,
+            },
+            false,
+            n('initUserState/error'),
+          );
+        },
         onSuccess: (data) => {
           options?.onSuccess?.(data);
 
