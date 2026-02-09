@@ -117,10 +117,12 @@ export function formatPrice(amount: number, region: PricingRegion): string {
  */
 export function getPlanDisplayName(planCode: string, region: PricingRegion): string {
   const vnNames: Record<string, string> = {
+    medical_beta: 'Phở Medical Beta',
     vn_basic: 'Phở Tái',
     vn_free: 'Phở Không Người Lái',
     vn_pro: 'Phở Đặc Biệt',
     vn_team: 'Lẩu Phở (Team)',
+    vn_ultimate: 'Phở Pro (Ultimate)',
   };
 
   const globalNames: Record<string, string> = {

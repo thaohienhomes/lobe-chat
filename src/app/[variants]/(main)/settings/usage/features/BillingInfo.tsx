@@ -88,52 +88,56 @@ interface SubscriptionData {
  * Uses Phở Points system
  */
 const PLAN_PRICING: Record<string, { displayName: string; monthlyPoints: number; price: number }> =
-  {
-    
-    founding_member: {
-      displayName: 'Lifetime Founding Member',
-      monthlyPoints: 2_000_000,
-      price: 0,
-    },
+{
 
-    
-    // Free Plan (default for new users)
-free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-    // Lifetime Founding Member Plans (all variations)
-gl_lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
-    // Global Plans (USD via Polar.sh)
-gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
-    
-gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
-    
-gl_starter: { displayName: 'Starter', monthlyPoints: 200_000, price: 0 },
+  founding_member: {
+    displayName: 'Lifetime Founding Member',
+    monthlyPoints: 2_000_000,
+    price: 0,
+  },
 
-    
-    lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
-    lifetime_founding_member: {
-      displayName: 'Lifetime Founding Member',
-      monthlyPoints: 2_000_000,
-      price: 0,
-    },
-    // Legacy mappings (for backward compatibility)
-premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
 
-    
-    starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-    ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
-    // Vietnam Plans
-vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+  // Free Plan (default for new users)
+  free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+  // Lifetime Founding Member Plans (all variations)
+  gl_lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
+  // Global Plans (USD via Polar.sh)
+  gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
 
-    
-    vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-    vn_lifetime: {
-      displayName: 'Thành Viên Sáng Lập (Trọn Đời)',
-      monthlyPoints: 2_000_000,
-      price: 0,
-    },
-    vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
-    vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
-  };
+  gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
+
+  gl_starter: { displayName: 'Starter', monthlyPoints: 200_000, price: 0 },
+
+
+  lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
+  lifetime_founding_member: {
+    displayName: 'Lifetime Founding Member',
+    monthlyPoints: 2_000_000,
+    price: 0,
+  },
+  // Legacy mappings (for backward compatibility)
+  premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+
+
+  starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+  ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
+  // Vietnam Plans
+  vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+
+
+  vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+  vn_lifetime: {
+    displayName: 'Thành Viên Sáng Lập (Trọn Đời)',
+    monthlyPoints: 2_000_000,
+    price: 0,
+  },
+  vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
+  vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
+  vn_ultimate: { displayName: 'Phở Pro (Ultimate)', monthlyPoints: 5_000_000, price: 4_990_000 },
+
+  // Medical Beta
+  medical_beta: { displayName: 'Phở Medical Beta', monthlyPoints: 500_000, price: 999_000 },
+};
 
 /**
  * Get plan info from planId with intelligent fallback detection
@@ -216,6 +220,10 @@ const BillingInfo = memo<BillingInfoProps>(({ mobile }) => {
     fetchSubscription();
   }, []);
 
+  // Fallback: if no DB subscription, check Clerk publicMetadata for promo-activated plans
+  const clerkPlanId = (user?.publicMetadata as any)?.planId;
+  const hasClerkPlan = clerkPlanId && clerkPlanId !== 'free' && clerkPlanId !== 'vn_free';
+
   if (loading) {
     return (
       <Flexbox gap={16}>
@@ -226,6 +234,39 @@ const BillingInfo = memo<BillingInfoProps>(({ mobile }) => {
   }
 
   if (!subscription) {
+    // If user has a plan from Clerk metadata (promo activation), show it
+    if (hasClerkPlan) {
+      const clerkPlanInfo = getPlanInfo(clerkPlanId);
+      return (
+        <Flexbox gap={16}>
+          <Title level={4}>{t('usage.billing.title')}</Title>
+          <Card className={styles.billingCard}>
+            <Flexbox gap={0}>
+              <div className={styles.infoItem}>
+                <CreditCard className="icon" size={20} />
+                <span className={styles.label}>Current Plan</span>
+                <Flexbox align="center" gap={8} horizontal style={{ flex: 1 }}>
+                  <span className={styles.value}>{clerkPlanInfo.displayName}</span>
+                  <span className={`${styles.statusBadge} active`}>Active</span>
+                </Flexbox>
+              </div>
+              <div className={styles.infoItem}>
+                <DollarSign className="icon" size={20} />
+                <span className={styles.label}>Points</span>
+                <span className={styles.value}>
+                  {clerkPlanInfo.monthlyPoints.toLocaleString('vi-VN')} Phở Points / tháng
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.label}>Activation</span>
+                <span className={styles.value}>Promo Code</span>
+              </div>
+            </Flexbox>
+          </Card>
+        </Flexbox>
+      );
+    }
+
     return (
       <Flexbox gap={16}>
         <Typography.Title level={4}>{t('usage.billing.title')}</Typography.Title>

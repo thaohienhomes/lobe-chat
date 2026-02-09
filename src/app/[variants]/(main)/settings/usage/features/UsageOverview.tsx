@@ -1,5 +1,6 @@
 'use client';
 
+import { useUser } from '@clerk/nextjs';
 import { Alert, Button, Card, Progress, Skeleton, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import { memo, useEffect, useState } from 'react';
@@ -87,6 +88,11 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
   const [usageData, setUsageData] = useState<UsageSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Check Clerk metadata for promo-activated plans (must be before any early return)
+  const { user } = useUser();
+  const clerkPlanId = (user?.publicMetadata as any)?.planId;
+  const hasClerkPlan = clerkPlanId && clerkPlanId !== 'free' && clerkPlanId !== 'vn_free';
+
   // Fetch usage summary from tRPC
   const { data: summary, isLoading } = useSWR(
     'usage-summary',
@@ -120,7 +126,24 @@ const UsageOverview = memo<UsageOverviewProps>(({ mobile }) => {
   }
 
   // If no usage data, it means user doesn't have an active subscription
+  // But check Clerk metadata for promo-activated plans
+
   if (!usageData) {
+    if (hasClerkPlan) {
+      // User has a plan via Clerk metadata (promo activation) but no usage data yet
+      return (
+        <Flexbox gap={24}>
+          <Title level={4}>{t('usage.overview.title')}</Title>
+          <Alert
+            description={`Gói ${clerkPlanId} đã được kích hoạt. Bắt đầu chat để xem thống kê sử dụng tại đây.`}
+            message="🏥 Medical Beta Active"
+            showIcon
+            type="success"
+          />
+        </Flexbox>
+      );
+    }
+
     return (
       <Flexbox gap={24}>
         <Title level={4}>{t('usage.overview.title')}</Title>

@@ -42,6 +42,15 @@ export const MODEL_COSTS = {
  * Based on PRICING_MASTERPLAN.md.md
  */
 export const VND_PRICING_TIERS = {
+  // Medical Beta tier — activated via promo code
+  medical_beta: {
+    dailyTier2Limit: 20,
+    dailyTier3Limit: 0,
+    displayName: 'Phở Medical Beta 🏥',
+    monthlyPoints: 500_000,
+    monthlyVND: 83_250, // 999k/year ÷ 12
+  },
+
   // Legacy mappings (for backward compatibility)
   premium: {
     dailyTier2Limit: 30,
@@ -93,6 +102,8 @@ export const VND_PRICING_TIERS = {
     monthlyPoints: 2_000_000,
     monthlyVND: 199_000,
   },
+
+
   // Team tier
   vn_team: {
     dailyTier2Limit: -1,
@@ -102,13 +113,14 @@ export const VND_PRICING_TIERS = {
     monthlyVND: 149_000, // per user
   },
 
-  // Medical Beta tier — activated via promo code
-  medical_beta: {
-    dailyTier2Limit: 20,
-    dailyTier3Limit: 0,
-    displayName: 'Phở Medical Beta 🏥',
-    monthlyPoints: 500_000,
-    monthlyVND: 83_250, // 999k/year ÷ 12
+
+  // Ultimate tier
+  vn_ultimate: {
+    dailyTier2Limit: -1, // Unlimited
+    dailyTier3Limit: 100,
+    displayName: 'Phở Pro (Ultimate)',
+    monthlyPoints: 5_000_000,
+    monthlyVND: 499_000,
   },
 } as const;
 

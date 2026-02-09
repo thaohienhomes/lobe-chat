@@ -99,7 +99,23 @@ export async function GET() {
 
     // Get effective plan ID - prioritizes subscriptions table for consistency with BillingInfo
     const fallbackPlanId = user.currentPlanId || 'vn_free';
-    const planId = await getEffectivePlanId(db, userId, fallbackPlanId);
+    let planId = await getEffectivePlanId(db, userId, fallbackPlanId);
+
+    // Override with Clerk publicMetadata.planId if it's a non-free plan
+    // This handles promo-activated users who have planId in Clerk but no DB subscription
+    if (planId === fallbackPlanId && (planId === 'vn_free' || planId === 'starter' || planId === 'free')) {
+      const { clerkClient } = await import('@clerk/nextjs/server');
+      try {
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        const clerkPlanId = (clerkUser.publicMetadata as any)?.planId;
+        if (clerkPlanId && clerkPlanId !== 'free' && clerkPlanId !== 'vn_free') {
+          planId = clerkPlanId;
+        }
+      } catch {
+        // Clerk lookup failed, continue with DB planId
+      }
+    }
 
     // Get plan config
     const plan = VN_PLANS[planId] || GLOBAL_PLANS[planId] || VN_PLANS.vn_free;
