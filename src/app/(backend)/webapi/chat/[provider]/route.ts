@@ -110,6 +110,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     hasBaseURL: !!jwtPayload.baseURL,
   });
 
+  let requestModel = ''; // Hoisted for catch block access
+
   try {
     // ============  0. Cost Optimization Setup   ============ //
     const costOptimizationEnabled = jwtPayload.userId
@@ -181,6 +183,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // ============  2. create chat completion   ============ //
 
     const data = (await req.json()) as ChatStreamPayload;
+    requestModel = data.model; // Store for catch block access
 
     // ============  2.1. Cost Optimization & Model Selection   ============ //
     // Disabled for initial deployment - code block intentionally commented out
@@ -189,9 +192,10 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
     // ============  2.2. Tier Access Enforcement   ============ //
     // Check if user's plan allows access to this model tier and daily limits
+    let userPlanId = 'vn_free';
     if (jwtPayload.userId) {
       const creditStatus = await getUserCreditBalance(jwtPayload.userId);
-      let userPlanId = creditStatus?.currentPlanId || 'vn_free';
+      userPlanId = creditStatus?.currentPlanId || 'vn_free';
 
       // Clerk metadata fallback for promo-activated users (medical_beta, etc.)
       const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter', 'vn_free', 'gl_starter']);
@@ -232,6 +236,18 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           `📊 Tier ${modelTier} usage: ${tierAccess.dailyLimit - (tierAccess.remaining || 0)}/${tierAccess.dailyLimit} (${tierAccess.remaining} remaining)`,
         );
       }
+    }
+
+    // ============  2.3. Provider Override (medical_beta)   ============ //
+    // medical_beta plan avoids Vertex AI 1 RPM quota by routing Gemini
+    // models through Vercel AI Gateway instead
+    let activeProvider = provider;
+    if (userPlanId === 'medical_beta' && provider === 'vertexai' && data.model.startsWith('gemini')) {
+      // Remap model ID to Gateway format and re-init runtime
+      data.model = `google/${data.model}`;
+      activeProvider = 'openrouter';
+      console.log(`[Provider Override] medical_beta: vertexai → openrouter, model → ${data.model}`);
+      modelRuntime = await initModelRuntimeWithUserPayload(activeProvider, jwtPayload);
     }
 
     const tracePayload = getTracePayload(req);
@@ -402,16 +418,19 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       ? (error as any).message || String(error)
       : String(error);
 
+    // Include model name so user knows which model failed
+    const modelHint = requestModel ? ` (${requestModel})` : '';
+
     // Map vendor-specific messages to user-friendly ones
-    let sanitizedMessage = 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
+    let sanitizedMessage = `Đã có lỗi xảy ra${modelHint}. Vui lòng thử lại sau.`;
     if (/quota|rate.?limit|exceeded|too many/i.test(rawMessage)) {
-      sanitizedMessage = 'Hệ thống đang bận. Vui lòng thử lại sau giây lát.';
+      sanitizedMessage = `Model${modelHint} tạm thời không khả dụng. Vui lòng thử model khác hoặc thử lại sau.`;
     } else if (/unauthorized|invalid.*key|api.?key/i.test(rawMessage)) {
-      sanitizedMessage = 'Lỗi xác thực. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+      sanitizedMessage = `Lỗi xác thực${modelHint}. Vui lòng thử lại hoặc liên hệ hỗ trợ.`;
     } else if (/timeout|timed?.?out/i.test(rawMessage)) {
-      sanitizedMessage = 'Yêu cầu quá thời gian. Vui lòng thử lại.';
+      sanitizedMessage = `Yêu cầu quá thời gian${modelHint}. Vui lòng thử lại.`;
     } else if (/not.?found|does not exist/i.test(rawMessage)) {
-      sanitizedMessage = 'Model hiện không khả dụng. Vui lòng chọn model khác.';
+      sanitizedMessage = `Model${modelHint} hiện không khả dụng. Vui lòng chọn model khác.`;
     }
 
     return createErrorResponse(errorType, {
