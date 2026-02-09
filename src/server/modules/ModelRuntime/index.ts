@@ -124,6 +124,82 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       return { apiKey };
     }
 
+    // Groq - direct API with CF Gateway bypass
+    case 'groq': {
+      const apiKey = apiKeyManager.pick(
+        payload?.apiKey || llmConfig.GROQ_API_KEY,
+      );
+      const baseURL = payload?.baseURL || 'https://api.groq.com/openai/v1';
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[ModelRuntime] Groq - API Key exists:', !!apiKey);
+        console.log('[ModelRuntime] Groq - Base URL:', baseURL);
+      }
+
+      return { apiKey, baseURL };
+    }
+
+    // Cerebras - direct API with CF Gateway bypass
+    case 'cerebras': {
+      const apiKey = apiKeyManager.pick(
+        payload?.apiKey || llmConfig.CEREBRAS_API_KEY,
+      );
+      const baseURL = payload?.baseURL || 'https://api.cerebras.ai/v1';
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[ModelRuntime] Cerebras - API Key exists:', !!apiKey);
+        console.log('[ModelRuntime] Cerebras - Base URL:', baseURL);
+      }
+
+      return { apiKey, baseURL };
+    }
+
+    // Perplexity - direct API with CF Gateway bypass
+    case 'perplexity': {
+      const apiKey = apiKeyManager.pick(
+        payload?.apiKey || llmConfig.PERPLEXITY_API_KEY,
+      );
+      const baseURL = payload?.baseURL || 'https://api.perplexity.ai';
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[ModelRuntime] Perplexity - API Key exists:', !!apiKey);
+        console.log('[ModelRuntime] Perplexity - Base URL:', baseURL);
+      }
+
+      return { apiKey, baseURL };
+    }
+
+    // Fireworks AI - direct API with CF Gateway bypass
+    case 'fireworksai': {
+      const apiKey = apiKeyManager.pick(
+        payload?.apiKey || llmConfig.FIREWORKSAI_API_KEY,
+      );
+      const baseURL =
+        payload?.baseURL || 'https://api.fireworks.ai/inference/v1';
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[ModelRuntime] Fireworks AI - API Key exists:', !!apiKey);
+        console.log('[ModelRuntime] Fireworks AI - Base URL:', baseURL);
+      }
+
+      return { apiKey, baseURL };
+    }
+
+    // Together AI - direct API with CF Gateway bypass
+    case 'togetherai': {
+      const apiKey = apiKeyManager.pick(
+        payload?.apiKey || llmConfig.TOGETHERAI_API_KEY,
+      );
+      const baseURL = payload?.baseURL || 'https://api.together.xyz/v1';
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[ModelRuntime] Together AI - API Key exists:', !!apiKey);
+        console.log('[ModelRuntime] Together AI - Base URL:', baseURL);
+      }
+
+      return { apiKey, baseURL };
+    }
+
     // Vercel AI Gateway - unified access to 100+ models
     case 'vercelaigateway': {
       const apiKey = apiKeyManager.pick(
