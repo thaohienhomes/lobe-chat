@@ -61,11 +61,11 @@ export const searchSlice: StateCreator<
         'errorMessage' in item
           ? item
           : {
-              ...item.data,
-              // if crawl too many content
-              // slice the top 10000 char
-              content: item.data.content?.slice(0, CRAWL_CONTENT_LIMITED_COUNT),
-            },
+            ...item.data,
+            // if crawl too many content
+            // slice the top 10000 char
+            content: item.data.content?.slice(0, CRAWL_CONTENT_LIMITED_COUNT),
+          },
       );
 
       await internal_updateMessageContent(id, JSON.stringify(content));
@@ -131,7 +131,25 @@ export const searchSlice: StateCreator<
   search: async (id, payload, aiSummary = true) => {
     // Fallback for different model preferences on argument naming
     const { query: rawQuery, ...params } = payload as any;
-    const query = rawQuery || (payload as any).keywords || (payload as any).q;
+    let query = rawQuery || (payload as any).keywords || (payload as any).q;
+
+    // Ultimate fallback: extract query from the user's original message
+    // Message chain: tool message (id) → parent (assistant) → grandparent (user)
+    if (!query) {
+      const toolMessage = chatSelectors.getMessageById(id)(get());
+      const assistantMessage = toolMessage?.parentId
+        ? chatSelectors.getMessageById(toolMessage.parentId)(get())
+        : undefined;
+      const userMessage =
+        assistantMessage?.parentId
+          ? chatSelectors.getMessageById(assistantMessage.parentId)(get())
+          : undefined;
+
+      if (userMessage?.content) {
+        query = userMessage.content;
+        console.info('[Search] Using user message as fallback query:', query);
+      }
+    }
 
     if (!query) {
       console.warn('[Search] No query found in parameters', payload);
