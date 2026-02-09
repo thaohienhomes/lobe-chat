@@ -128,7 +128,15 @@ export const searchSlice: StateCreator<
     openToolUI(newMessageId, message.plugin.identifier);
   },
 
-  search: async (id, { query, ...params }, aiSummary = true) => {
+  search: async (id, payload, aiSummary = true) => {
+    // Fallback for different model preferences on argument naming
+    const { query: rawQuery, ...params } = payload as any;
+    const query = rawQuery || (payload as any).keywords || (payload as any).q;
+
+    if (!query) {
+      console.warn('[Search] No query found in parameters', payload);
+      return;
+    }
     get().toggleSearchLoading(id, true);
     let data: UniformSearchResponse | undefined;
     try {
