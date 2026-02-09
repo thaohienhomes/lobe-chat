@@ -18,6 +18,7 @@ import { S3 } from '@/server/modules/S3';
 import { FileService } from '@/server/services/file';
 import { NextAuthUserService } from '@/server/services/nextAuthUser';
 import { UserService } from '@/server/services/user';
+import { VN_PLANS, GLOBAL_PLANS } from '@/config/pricing';
 import {
   NextAuthAccountSchame,
   UserGuideSchema,
@@ -151,6 +152,26 @@ export const userRouter = router({
       pino.warn({ error, userId: ctx.userId }, 'Failed to get effective plan from subscriptions');
     }
 
+    // Tertiary fallback: check Clerk publicMetadata.planId for promo-activated users
+    if (FREE_PLAN_IDS.has(effectivePlanId.toLowerCase())) {
+      try {
+        const clerkUser = await ctx.clerkAuth.getCurrentUser();
+        const clerkPlanId = (clerkUser?.publicMetadata as any)?.planId;
+        if (clerkPlanId && !FREE_PLAN_IDS.has(clerkPlanId.toLowerCase())) {
+          effectivePlanId = clerkPlanId;
+        }
+      } catch {
+        // Clerk lookup failed, continue with current planId
+      }
+    }
+
+    // Adjust phoPointsBalance if plan upgraded but DB balance still at free-tier level
+    let adjustedBalance = state.phoPointsBalance;
+    const planConfig = VN_PLANS[effectivePlanId] || GLOBAL_PLANS[effectivePlanId];
+    if (planConfig && adjustedBalance !== undefined && adjustedBalance <= 50_000 && planConfig.monthlyPoints > 50_000) {
+      adjustedBalance = planConfig.monthlyPoints;
+    }
+
     return {
       avatar: state.avatar,
       canEnablePWAGuide: hasMoreThan4Messages,
@@ -166,7 +187,7 @@ export const userRouter = router({
       isOnboard: state.isOnboarded ?? false,
       lastName: state.lastName,
       lifetimeSpent: state.lifetimeSpent,
-      phoPointsBalance: state.phoPointsBalance,
+      phoPointsBalance: adjustedBalance,
       preference: state.preference as UserPreference,
       settings: state.settings,
       // Subscription plan code - now uses effective plan from subscriptions table

@@ -1,7 +1,7 @@
 import { Icon } from '@lobehub/ui';
 import { Tag } from 'antd';
 import { createStyles } from 'antd-style';
-import { Atom, Box, CircleSlash, Crown, Sparkle, Star, Zap } from 'lucide-react';
+import { Atom, Box, CircleSlash, Crown, Heart, Sparkle, Star, Zap } from 'lucide-react';
 import { CSSProperties, MouseEvent, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
@@ -55,6 +55,11 @@ export const themes: Record<string, PlanTheme> = {
     icon: Crown,
     theme: { background: 'linear-gradient(45deg, #FFD700, #FFA500)', color: '#FFFACD' },
   },
+  // Medical Beta — premium teal-green medical theme
+  medical_beta: {
+    icon: Heart,
+    theme: { background: 'linear-gradient(135deg, #00C9A7, #0891B2)', color: '#ECFDF5' },
+  },
   premium: {
     icon: Zap,
     theme: { background: 'linear-gradient(45deg, #A5B4C2, #606E7B)', color: '#FCFDFF' },
@@ -82,6 +87,11 @@ export const themes: Record<string, PlanTheme> = {
   vn_team: {
     icon: Star,
     theme: { background: 'linear-gradient(45deg, #F7A82F, #BB7227)', color: '#FCFA6E' },
+  },
+  // Ultimate tier
+  vn_ultimate: {
+    icon: Crown,
+    theme: { background: 'linear-gradient(135deg, #FFD700, #F59E0B)', color: '#FFFBEB' },
   },
 };
 

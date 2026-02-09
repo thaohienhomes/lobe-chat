@@ -134,13 +134,19 @@ export async function GET() {
 
     const usage = usageResult[0] || { tier2Count: 0, tier3Count: 0 };
 
+    // Adjust balance for plan upgrades where DB hasn't been updated yet
+    const dbBalance = user.phoPointsBalance ?? 50_000;
+    const adjustedBalance = (dbBalance <= 50_000 && plan.monthlyPoints > 50_000)
+      ? plan.monthlyPoints
+      : dbBalance;
+
     return NextResponse.json({
       currentPlanId: planId,
       dailyTier2Count: Number(usage.tier2Count),
       dailyTier2Limit: plan.dailyTier2Limit ?? 0,
       dailyTier3Count: Number(usage.tier3Count),
       dailyTier3Limit: plan.dailyTier3Limit ?? 0,
-      phoPointsBalance: user.phoPointsBalance ?? 50_000,
+      phoPointsBalance: adjustedBalance,
       pointsResetDate: user.pointsResetDate?.toISOString() ?? null,
       streakDays: user.streakCount ?? 0,
       totalMonthlyPoints: plan.monthlyPoints,
