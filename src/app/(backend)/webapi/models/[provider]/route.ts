@@ -1,4 +1,4 @@
-import { ChatCompletionErrorPayload, ModelProvider } from '@lobechat/model-runtime';
+import { ChatCompletionErrorPayload } from '@lobechat/model-runtime';
 import { ChatErrorType } from '@lobechat/types';
 import { NextResponse } from 'next/server';
 
@@ -6,7 +6,7 @@ import { checkAuth } from '@/app/(backend)/middleware/auth';
 import { initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
 import { createErrorResponse } from '@/utils/errorResponse';
 
-const noNeedAPIKey = (provider: string) => [ModelProvider.OpenRouter].includes(provider as any);
+const noNeedAPIKey = (provider: string) => ['vercelaigateway', 'groq', 'togetherai', 'fireworksai'].includes(provider);
 
 export const GET = checkAuth(async (req, { params, jwtPayload }) => {
   const { provider } = await params;

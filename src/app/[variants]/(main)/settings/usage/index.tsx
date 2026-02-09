@@ -9,6 +9,7 @@ import { Flexbox } from 'react-layout-kit';
 import { TierUsageDisplay, UsageMeter } from '@/features/UsageMeter';
 
 import BillingInfo from './features/BillingInfo';
+import PromoCodeForm from './features/PromoCodeForm';
 import UsageHistory from './features/UsageHistory';
 import UsageOverview from './features/UsageOverview';
 
@@ -57,6 +58,7 @@ const UsagePage = memo<UsagePageProps>(({ mobile }) => {
 
         {/* Original sections */}
         <UsageOverview mobile={mobile} />
+        <PromoCodeForm />
         <BillingInfo mobile={mobile} />
         <UsageHistory mobile={mobile} />
       </Flexbox>

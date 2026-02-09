@@ -994,6 +994,24 @@ const KNOWN_INTERACTIONS: Record<
     },
   ],
 
+  metronidazole: [
+    {
+      description: 'Disulfiram-like reaction (nausea, vomiting, tachycardia)',
+      drugs: ['alcohol', 'ethanol'],
+      severity: 'high',
+    },
+    {
+      description: 'May increase warfarin levels and bleeding risk',
+      drugs: ['warfarin'],
+      severity: 'high',
+    },
+    {
+      description: 'May increase lithium levels — toxicity risk',
+      drugs: ['lithium'],
+      severity: 'medium',
+    },
+  ],
+
 
 
 

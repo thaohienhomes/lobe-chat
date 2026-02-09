@@ -55,8 +55,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload }) => {
   try {
     // ============  1. init chat model   ============ //
     // For OpenAI image generation, use dedicated OPENAI_IMAGE_API_KEY if available
-    // This is necessary when OPENAI_API_KEY is proxied through OpenRouter or other
-    // providers that don't support the /v1/images/generate endpoint
+    // providers that don't support the direct image generation endpoint
     let imageJwtPayload = { ...jwtPayload };
 
     if (provider === ModelProvider.OpenAI) {

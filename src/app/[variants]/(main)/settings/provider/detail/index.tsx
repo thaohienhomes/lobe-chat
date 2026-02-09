@@ -7,7 +7,6 @@ import DefaultPage from './default/ProviderDetialPage';
 import GitHub from './github';
 import Ollama from './ollama';
 import OpenAI from './openai';
-import VertexAI from './vertexai';
 
 const ProviderDetailPage = (props: { id?: string | null }) => {
   const { id } = props;
@@ -36,9 +35,6 @@ const ProviderDetailPage = (props: { id?: string | null }) => {
     }
     case 'openai': {
       return <OpenAI />;
-    }
-    case 'vertexai': {
-      return <VertexAI />;
     }
     default: {
       return <DefaultPage id={id} />;

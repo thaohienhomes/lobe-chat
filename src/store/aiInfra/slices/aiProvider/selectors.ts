@@ -3,26 +3,15 @@ import { AIProviderStoreState } from '@/store/aiInfra/initialState';
 import { AiProviderRuntimeConfig } from '@/types/aiProvider';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
 
-// ============================================================================
-// OPENROUTER-ONLY ENFORCEMENT (per SPECS_BUSINESS.md)
-// ============================================================================
-// pho.chat uses OpenRouter as the ONLY provider for all AI models.
-// This allows centralized billing, model access control, and tier enforcement.
-// All other providers are hidden from the UI to simplify user experience.
-// ============================================================================
-// NOTE: Temporarily allowing Vertex AI for testing (Feb 2026)
-const ALLOWED_PROVIDER_IDS = new Set(['vertexai']);
-
-// List - filtered to show ONLY allowed providers
+// List - no strict filtering needed as providers are controlled via DEFAULT_MODEL_PROVIDER_LIST
 const enabledAiProviderList = (s: AIProviderStoreState) =>
   s.aiProviderList
-    .filter((item) => item.enabled && ALLOWED_PROVIDER_IDS.has(item.id))
+    .filter((item) => item.enabled)
     .sort((a, b) => a.sort! - b.sort!);
 
-// Disabled list - also filtered to only show allowed providers if disabled
-// This prevents other providers from appearing in "Disabled" section
+// Disabled list
 const disabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => !item.enabled && ALLOWED_PROVIDER_IDS.has(item.id));
+  s.aiProviderList.filter((item) => !item.enabled);
 
 const enabledImageModelList = (s: AIProviderStoreState) => s.enabledImageModelList || [];
 

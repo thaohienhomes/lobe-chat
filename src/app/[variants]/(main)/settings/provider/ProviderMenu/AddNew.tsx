@@ -1,10 +1,10 @@
 'use client';
 
 // ============================================================================
-// OPENROUTER-ONLY ENFORCEMENT (per SPECS_BUSINESS.md)
+// CENTRALIZED BILLING ENFORCEMENT
 // ============================================================================
-// pho.chat uses OpenRouter as the ONLY provider.
-// Adding custom providers is disabled to maintain centralized billing.
+// pho.chat uses a strictly managed list of providers.
+// Adding custom providers is disabled to maintain centralized billing and Phở Points.
 // This component returns null to hide the "Add New Provider" button.
 // ============================================================================
 

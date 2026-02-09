@@ -45,6 +45,7 @@ const UserUpdater = memo(() => {
         (window as any).posthog.identify(user.id, {
           email: user.primaryEmailAddress?.emailAddress,
           name: user.fullName,
+          planId: (user.publicMetadata as any)?.planId,
         });
       }
 

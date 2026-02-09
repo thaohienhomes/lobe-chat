@@ -32,12 +32,12 @@ const InitPlayer = memo<TTSProps>(({ id, content, contentMd5, file }) => {
     [t],
   );
 
-  const { isGlobalLoading, audio, start, stop, response } = useTTS(content, {
-    onError: (err) => {
+  const { isGlobalLoading, audio, start, stop, response } = (useTTS as any)(content, {
+    onError: (err: any) => {
       stop();
       setDefaultError(err);
     },
-    onErrorRetry: (err) => {
+    onErrorRetry: (err: any) => {
       stop();
       setDefaultError(err);
     },
@@ -51,7 +51,7 @@ const InitPlayer = memo<TTSProps>(({ id, content, contentMd5, file }) => {
       }
       stop();
     },
-    onUpload: async (currentVoice, arrayBuffers) => {
+    onUpload: async (currentVoice: string, arrayBuffers: ArrayBuffer[]) => {
       const fileID = await uploadTTS(id, arrayBuffers);
       ttsMessage(id, { contentMd5, file: fileID, voice: currentVoice });
     },

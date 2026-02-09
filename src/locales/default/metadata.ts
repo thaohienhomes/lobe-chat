@@ -31,7 +31,7 @@ export default {
     },
     providers: {
       description:
-        '探索主流模型供应商 OpenAI / Qwen / Ollama / Anthropic / DeepSeek / Google Gemini / OpenRouter',
+        '探索主流模型供应商 OpenAI / Qwen / Ollama / Anthropic / DeepSeek / Google Gemini',
       title: '模型服务市场',
     },
     search: '搜索',

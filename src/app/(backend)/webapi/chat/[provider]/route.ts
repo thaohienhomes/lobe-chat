@@ -26,6 +26,7 @@ import {
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
 import { getTracePayload } from '@/utils/trace';
+import { phoGatewayService } from '@/server/services/phoGateway';
 
 export const maxDuration = 300;
 
@@ -185,11 +186,6 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     const data = (await req.json()) as ChatStreamPayload;
     requestModel = data.model; // Store for catch block access
 
-    // ============  2.1. Cost Optimization & Model Selection   ============ //
-    // Disabled for initial deployment - code block intentionally commented out
-    // to avoid constant-condition and unused variables lint errors.
-    // See git history for the original implementation.
-
     // ============  2.2. Tier Access Enforcement   ============ //
     // Check if user's plan allows access to this model tier and daily limits
     let userPlanId = 'vn_free';
@@ -241,15 +237,11 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // ============  2.3. Provider Override (Universal)   ============ //
     // Vertex AI and OpenRouter are DISABLED — route all traffic through
     // Vercel AI Gateway, Groq, Cerebras, Fireworks AI, Together AI
-    let activeProvider = provider;
-    const DISABLED_PROVIDERS = new Set(['vertexai', 'openrouter']);
-    if (DISABLED_PROVIDERS.has(provider)) {
-      // Remap Gemini bare model IDs to Gateway format (google/ prefix)
-      if (data.model.startsWith('gemini') && !data.model.startsWith('google/')) {
-        data.model = `google/${data.model}`;
-      }
-      activeProvider = 'vercelaigateway';
-      console.log(`[Provider Override] ${provider} → vercelaigateway, model: ${data.model}`);
+    const { provider: activeProvider, modelId: activeModelId } = phoGatewayService.remapProvider(provider, data.model);
+    data.model = activeModelId;
+
+    if (activeProvider !== provider) {
+      console.log(`[Provider Override] ${provider} → ${activeProvider}, model: ${data.model}`);
       modelRuntime = await initModelRuntimeWithUserPayload(activeProvider, jwtPayload);
     }
 
@@ -261,27 +253,95 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       traceOptions = createTraceOptions(data, { provider, trace: tracePayload });
     }
 
-    // ============  3. Execute Chat Completion   ============ //
-    console.log(`[Chat API] Executing chat completion with model: ${data.model}`);
-    console.log(`[Chat API] Messages count: ${data.messages?.length || 0}`);
+    // ============  3. Execute Chat Completion (with Phở Gateway Failover)   ============ //
+    const priorityList = phoGatewayService.resolveProviderList(data.model, activeProvider);
 
-    const response = await modelRuntime.chat(data, {
-      user: jwtPayload.userId,
-      ...traceOptions,
-      signal: req.signal,
-    });
+    console.log(`[Chat API] Orchestration: Priority List for ${data.model} (${activeProvider}):`, priorityList);
+
+    let lastError: any = null;
+    let successfulResponse: Response | null = null;
+    let actualProviderUsed = activeProvider;
+    let actualModelUsed = data.model;
+
+    for (const [index, entry] of priorityList.entries()) {
+      const { provider: targetProvider, modelId: targetModelId } = entry;
+
+      console.log(`[Chat API] Attempt ${index + 1}: trying ${targetProvider} with model ${targetModelId}`);
+
+      try {
+        // Initialize runtime for this specific provider if different from initial
+        let currentRuntime = modelRuntime;
+        if (targetProvider !== activeProvider) {
+          currentRuntime = await initModelRuntimeWithUserPayload(targetProvider, jwtPayload);
+        }
+
+        const response = await currentRuntime.chat({
+          ...data,
+          model: targetModelId,
+        }, {
+          user: jwtPayload.userId,
+          ...traceOptions,
+          signal: req.signal,
+        });
+
+        if (!response.ok) {
+          // If it's a provider error, throw it to trigger catch block for failover
+          const errorData = await response.clone().json().catch(() => ({}));
+          throw {
+            message: errorData?.error?.message || response.statusText,
+            status: response.status,
+            type: AgentRuntimeErrorType.ProviderBizError
+          };
+        }
+
+        console.log(`[Chat API] ✅ Attempt ${index + 1} successful with ${targetProvider}`);
+        successfulResponse = response;
+        actualProviderUsed = targetProvider;
+        actualModelUsed = targetModelId;
+        break; // Exit loop on success
+
+      } catch (e: any) {
+        console.warn(`[Chat API] Attempt ${index + 1} failed for ${targetProvider}:`, e?.message || e);
+        lastError = e;
+
+        // Determine if we should retry
+        const isRetryable =
+          e?.status === 500 ||
+          e?.status === 429 ||
+          e?.status === 502 ||
+          e?.status === 503 ||
+          e?.status === 504 ||
+          e?.type === AgentRuntimeErrorType.ProviderBizError ||
+          e?.code === 'ECONNRESET';
+
+        if (!isRetryable && index < priorityList.length - 1) {
+          console.warn(`[Chat API] Error might not be retryable, but continuing failover as safety measure.`);
+        }
+
+        if (index === priorityList.length - 1) {
+          console.error(`[Chat API] All providers failed. Throwing last error.`);
+          throw lastError;
+        } else {
+          console.warn(`[Chat API] Failover triggered: moving to next provider.`);
+        }
+      }
+    }
+
+    if (!successfulResponse) {
+      throw lastError || new Error('All providers failed without a specific error.');
+    }
+
+    const response = successfulResponse;
 
     console.log(`[Chat API] ✅ Chat completion successful`);
     console.log('='.repeat(80));
 
     // ============  4. Usage Tracking & Credit Deduction   ============ //
-    // Fetch pricing for this model
-    // Note: data.model might be an alias, but provider handles the real model ID.
-    // relying on data.model for pricing lookup.
-    const pricing = await getModelPricing(data.model);
+    // Fetch pricing for the actual model used
+    const pricing = await getModelPricing(actualModelUsed);
 
-    // Resolve correct tier via getModelTier() — supports all providers (Groq, Cerebras, etc.)
-    const resolvedTier = getModelTier(data.model);
+    // Resolve correct tier via getModelTier()
+    const resolvedTier = getModelTier(actualModelUsed);
     const resolvedTierConfig = MODEL_TIERS[resolvedTier as keyof typeof MODEL_TIERS];
 
     // Use DB pricing if available, otherwise derive from MODEL_TIERS config
@@ -346,8 +406,12 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
         }
       })();
 
+      const headers = new Headers(response.headers);
+      headers.set('X-Pho-Provider', actualProviderUsed);
+      headers.set('X-Pho-Model-ID', actualModelUsed);
+
       return new Response(stream1, {
-        headers: response.headers,
+        headers,
         status: response.status,
         statusText: response.statusText,
       });
@@ -395,7 +459,15 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
     // Return original response for non-streaming (since we cloned)
     if (!data.stream) {
-      return response;
+      const headers = new Headers(response.headers);
+      headers.set('X-Pho-Provider', actualProviderUsed);
+      headers.set('X-Pho-Model-ID', actualModelUsed);
+
+      return new Response(response.body, {
+        headers,
+        status: response.status,
+        statusText: response.statusText,
+      });
     }
 
     // Should be unreachable as we returned in stream block

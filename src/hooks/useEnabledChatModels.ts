@@ -6,7 +6,6 @@ import GroqConfig from '@/config/modelProviders/groq';
 import PerplexityConfig from '@/config/modelProviders/perplexity';
 import TogetherAIConfig from '@/config/modelProviders/togetherai';
 import VercelAIGatewayConfig from '@/config/modelProviders/vercelaigateway';
-import VertexAIConfig from '@/config/modelProviders/vertexai';
 import { usePostHogFeatureFlags } from '@/hooks/usePostHogFeatureFlags';
 import { AiProviderSourceEnum, EnabledProviderWithModels } from '@/types/aiProvider';
 import { ModelProviderCard } from '@/types/llm';
@@ -51,28 +50,6 @@ export const useEnabledChatModels = (): EnabledProviderWithModels[] => {
 
   const providers = useMemo((): EnabledProviderWithModels[] => {
     const result: EnabledProviderWithModels[] = [];
-
-    // --- Provider 1: Vertex AI (Primary) ---
-    if (isFeatureEnabled('llm-provider-vertexai')) {
-      const vertexModels = VertexAIConfig.chatModels || [];
-      if (vertexModels.length > 0) {
-        result.push({
-          children: vertexModels.map((model) => ({
-            abilities: {
-              functionCall: model.functionCall ?? false,
-              reasoning: model.reasoning ?? false,
-              vision: model.vision ?? false,
-            },
-            contextWindowTokens: model.contextWindowTokens,
-            displayName: model.displayName || model.id,
-            id: model.id,
-          })),
-          id: 'vertexai',
-          name: VertexAIConfig.name || 'Vertex AI',
-          source: AiProviderSourceEnum.Builtin,
-        });
-      }
-    }
 
     // --- Provider 2: Vercel AI Gateway (Fallback) ---
     if (isFeatureEnabled('llm-provider-vercelaigateway')) {

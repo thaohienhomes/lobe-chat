@@ -371,13 +371,6 @@ export default {
   updateCustomAiProvider: {
     title: '更新自定义 AI 服务商配置',
   },
-  vertexai: {
-    apiKey: {
-      desc: 'Nhập nội dung file JSON của GCP Service Account (bao gồm project_id, private_key,...)',
-      placeholder: `{ "type": "service_account", "project_id": "xxx", ... }`,
-      title: 'GCP Service Account JSON',
-    },
-  },
   zeroone: {
     title: '01.AI 零一万物',
   },

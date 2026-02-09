@@ -9,29 +9,22 @@ import { useAiInfraStore } from '@/store/aiInfra';
 
 import ProviderItem from './Item';
 
-// ============================================================================
-// OPENROUTER-ONLY ENFORCEMENT (per SPECS_BUSINESS.md)
-// ============================================================================
-const ALLOWED_PROVIDER_ID = 'openrouter';
-
 const SearchResult = memo((props: { onProviderSelect?: (key: string) => void }) => {
-  const { onProviderSelect = () => {} } = props;
+  const { onProviderSelect } = props;
   const { t } = useTranslation('modelProvider');
 
   const searchKeyword = useAiInfraStore((s) => s.providerSearchKeyword);
   const aiProviderList = useAiInfraStore((s) => s.aiProviderList, isEqual);
 
-  // Filter providers - ONLY show OpenRouter (per SPECS_BUSINESS.md)
+  // Filter providers
   const filteredProviders = useMemo(() => {
     const keyword = searchKeyword.toLowerCase().trim();
 
     return aiProviderList.filter(
       (provider) =>
-        // OPENROUTER-ONLY: Only include OpenRouter provider
-        provider.id === ALLOWED_PROVIDER_ID &&
-        (provider.id.toLowerCase().includes(keyword) ||
-          provider.name?.toLowerCase().includes(keyword) ||
-          provider.description?.toLowerCase().includes(keyword)),
+        provider.id.toLowerCase().includes(keyword) ||
+        provider.name?.toLowerCase().includes(keyword) ||
+        provider.description?.toLowerCase().includes(keyword),
     );
   }, [searchKeyword, aiProviderList]);
 
@@ -43,7 +36,7 @@ const SearchResult = memo((props: { onProviderSelect?: (key: string) => void }) 
         </Flexbox>
       ) : (
         filteredProviders.map((item) => (
-          <ProviderItem {...item} key={item.id} onClick={onProviderSelect} />
+          <ProviderItem {...item} key={item.id} onClick={() => onProviderSelect?.(item.id)} />
         ))
       )}
     </Flexbox>

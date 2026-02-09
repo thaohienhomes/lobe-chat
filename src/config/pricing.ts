@@ -15,17 +15,22 @@ export interface PlanConfig {
   code: string;
   dailyTier2Limit?: number;
   dailyTier3Limit?: number;
+  // Medical/Beta defaults to avoid latency/quota issues
+  defaultModel?: string;
+  defaultProvider?: string;
   displayName: string;
   enableCustomAPI: boolean;
   enableKnowledgeBase: boolean;
+
   features: string[];
   // Legacy descriptive features
   keyLimits: string;
-
   monthlyPoints: number;
   price: number;
+
   priceYearly?: number;
   prioritySupport: boolean;
+
   // New Feature Flags & Limits (matching Plan Comparison)
   storageGB: number;
   vectorEntries: number;
@@ -55,13 +60,17 @@ export interface PlanModelAccess {
 export const VN_PLANS: Record<string, PlanConfig> = {
   // Medical Beta: Free-tier base with boosted limits via promo code activation
   // Activation: promo code sets publicMetadata.planId = 'medical_beta'
-  // Default model: Groq (Llama 3.1) — avoids Vertex AI 1 RPM quota limit
+  // Default model: Groq (Llama 3.1) — avoids high latency and quota limits
   medical_beta: {
     advancedAI: false,
     code: 'medical_beta',
     dailyTier2Limit: 20,
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     displayName: 'Phở Medical Beta 🏥',
+
     enableCustomAPI: true,
+
     enableKnowledgeBase: true,
     features: [
       '500k Phở Points/tháng',
@@ -71,11 +80,8 @@ export const VN_PLANS: Record<string, PlanConfig> = {
       'LaTeX upload & citation',
       'Medical Founding Team badge 🏥',
     ],
-
     keyLimits: 'Unlim Tier 1. 20 Tier 2 msgs/day. Medical plugins.',
-
     monthlyPoints: 500_000,
-
     // 999k VNĐ/year — paid via Sepay/VietQR, activated by promo code
     price: 999_000,
 
@@ -381,6 +387,8 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
 
 /** Tier 1: Budget models — available to ALL plans including Free */
 const TIER1_MODELS = [
+  // Phở Logical Models
+  'pho-fast',
   // Vercel AI Gateway (Primary for Gemini)
   'google/gemini-2.0-flash',
   'google/gemini-2.5-flash-lite',
@@ -409,6 +417,9 @@ const TIER1_MODELS = [
 
 /** Tier 2: Standard models — available to Basic/Starter+ plans */
 const TIER2_MODELS = [
+  // Phở Logical Models
+  'pho-pro',
+  'pho-vision',
   // Vercel AI Gateway (Primary for premium models)
   'google/gemini-2.5-flash',
   'google/gemini-2.5-pro',
@@ -445,6 +456,8 @@ const TIER2_MODELS = [
 
 /** Tier 3: Premium models — available to Pro/Ultimate/Team/Lifetime plans */
 const TIER3_MODELS = [
+  // Phở Logical Models
+  'pho-smart',
   // Vercel AI Gateway
   'google/gemini-3-pro-preview',
   'openai/o3-mini',
@@ -463,8 +476,7 @@ const TIER3_MODELS = [
  * and sets default model selection per plan
  */
 export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
-  // ============================================================================
-  // GLOBAL PLANS - All use Vertex AI as primary provider (Feb 2026)
+  // GLOBAL PLANS - Primary providers: Vercel Gateway, Groq, Cerebras
   // ============================================================================
 
   // Global Lifetime: Tier 1 & 2 - Behaves like PRO with 2M points monthly reset
@@ -549,7 +561,7 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
 
 
   // ============================================================================
-  // VIETNAM PLANS - All use Vertex AI as primary provider (Feb 2026)
+  // VIETNAM PLANS - Primary providers: Vercel Gateway, Groq, Cerebras
   // ============================================================================
   // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
   vn_basic: {
@@ -614,10 +626,12 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   1: {
     inputCostPer1M: 5,
     models: [
-      // OpenAI budget models (via OpenRouter - legacy)
+      // Phở Logical Models
+      'pho-fast',
+      // OpenAI budget models (legacy IDs)
       'gpt-4o-mini',
       'openai/gpt-4o-mini',
-      // Google budget models (via OpenRouter - legacy)
+      // Google budget models (legacy IDs)
       'gemini-1.5-flash',
       'gemini-2.0-flash',
       'gemini-flash-1.5',
@@ -626,7 +640,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'google/gemini-2.0-flash-001',
       'google/gemma-2-9b-it',
       'google/gemma-2-9b-it:free',
-      // Anthropic budget models (via OpenRouter - legacy)
+      // Anthropic budget models (legacy IDs)
       'claude-3-haiku',
       'claude-3.5-haiku',
       'anthropic/claude-3-haiku',
@@ -643,7 +657,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'meta-llama/llama-3.2-11b-vision-instruct',
       'meta-llama/llama-3.3-70b-instruct:free',
       // ============================================
-      // Vertex AI Tier 1 Models (Feb 2026)
+      // Legacy Tier 1 Models
       // ============================================
       'gemini-2.0-flash', // Fast, reliable
       'gemini-2.5-flash-lite', // Fastest response
@@ -678,16 +692,19 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   2: {
     inputCostPer1M: 100,
     models: [
-      // OpenAI standard models (via OpenRouter - legacy)
+      // Phở Logical Models
+      'pho-pro',
+      'pho-vision',
+      // OpenAI standard models (legacy IDs)
       'gpt-4o',
       'openai/gpt-4o',
       'gpt-4.1',
-      // Anthropic standard models (via OpenRouter - legacy)
+      // Anthropic standard models (legacy IDs)
       'claude-3.5-sonnet',
       'claude-3-5-sonnet',
       'claude-3-sonnet',
       'anthropic/claude-3.5-sonnet',
-      // Google standard models (via OpenRouter - legacy)
+      // Google standard models (legacy IDs)
       'gemini-1.5-pro',
       'gemini-2.5-pro',
       'gemini-pro-1.5',
@@ -701,9 +718,9 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'meta-llama/llama-3.2-90b-vision-instruct',
       'meta-llama/llama-3.3-70b-instruct',
       // Auto model - maps to Tier 2 by default since it routes to best model
-      'openrouter/auto',
+      'Together/auto',
       // ============================================
-      // Vertex AI Tier 2 Models (Feb 2026)
+      // Legacy Tier 2 Models
       // ============================================
       'gemini-2.5-flash', // Best value for performance
       'gemini-2.5-pro', // High quality, 2M context
@@ -740,7 +757,9 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
   3: {
     inputCostPer1M: 500,
     models: [
-      // OpenAI premium models (O-series via OpenRouter - legacy)
+      // Phở Logical Models
+      'pho-smart',
+      // OpenAI premium models (legacy IDs)
       'gpt-4-turbo',
       'o1',
       'o1-mini',
@@ -750,11 +769,11 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'openai/o1',
       'openai/o1-mini',
       'openai/o1-preview',
-      // Anthropic premium models (via OpenRouter - legacy)
+      // Anthropic premium models (legacy IDs)
       'claude-3-opus',
       'anthropic/claude-3-opus',
       // ============================================
-      // Vertex AI Tier 3 Models (Feb 2026)
+      // Legacy Tier 3 Models
       // ============================================
       'gemini-3-pro-preview', // Latest Gemini 3 Pro
     ],

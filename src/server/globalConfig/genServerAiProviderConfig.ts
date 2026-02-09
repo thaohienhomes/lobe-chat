@@ -15,13 +15,6 @@ interface ProviderSpecificConfig {
 }
 
 /**
- * IMPORTANT: Per SPECS_BUSINESS.md, OpenRouter is the PRIMARY provider for pho.chat
- *
- * The system should:
- * 1. NOT crash if OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY are missing
- * 2. Only require OPENROUTER_API_KEY for production operation
- * 3. Gracefully disable providers that don't have API keys configured
- *
  * This function generates provider configs where:
  * - enabled = true only if the provider has an API key
  * - Other providers are disabled by default (enabled = false)
@@ -30,13 +23,6 @@ export const genServerAiProvidersConfig = async (
   specificConfig: Record<any, ProviderSpecificConfig>,
 ) => {
   const llmConfig = getLLMConfig() as Record<string, any>;
-
-  // Check if OpenRouter is configured (required for pho.chat)
-  if (!llmConfig.ENABLED_OPENROUTER) {
-    console.warn(
-      '⚠️ [pho.chat] OPENROUTER_API_KEY is not configured! OpenRouter is required for model access.',
-    );
-  }
 
   // 并发处理所有 providers
   const providerConfigs = await Promise.all(

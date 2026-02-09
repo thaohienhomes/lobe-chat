@@ -48,7 +48,6 @@ vi.mock('@/envs/llm', () => ({
     ANTHROPIC_API_KEY: 'test-anthropic-key',
     MINIMAX_API_KEY: 'test-minimax-key',
     MISTRAL_API_KEY: 'test-mistral-key',
-    OPENROUTER_API_KEY: 'test-openrouter-key',
     TOGETHERAI_API_KEY: 'test-togetherai-key',
     QINIU_API_KEY: 'test-qiniu-key',
     QWEN_API_KEY: 'test-qwen-key',
@@ -163,12 +162,6 @@ describe('initModelRuntimeWithUserPayload method', () => {
       expect(runtime['_runtime']).toBeInstanceOf(LobeMistralAI);
     });
 
-    it('OpenRouter AI provider: with apikey', async () => {
-      const jwtPayload: ClientSecretPayload = { apiKey: 'user-openrouter-key' };
-      const runtime = await initModelRuntimeWithUserPayload(ModelProvider.OpenRouter, jwtPayload);
-      expect(runtime).toBeInstanceOf(ModelRuntime);
-      expect(runtime['_runtime']).toBeInstanceOf(LobeOpenRouterAI);
-    });
 
     it('DeepSeek AI provider: with apikey', async () => {
       const jwtPayload: ClientSecretPayload = { apiKey: 'user-deepseek-key' };
@@ -322,13 +315,6 @@ describe('initModelRuntimeWithUserPayload method', () => {
       expect(runtime['_runtime']).toBeInstanceOf(LobeMistralAI);
     });
 
-    it('OpenRouter AI provider: without apikey', async () => {
-      const jwtPayload = {};
-      const runtime = await initModelRuntimeWithUserPayload(ModelProvider.OpenRouter, jwtPayload);
-
-      // 假设 LobeOpenRouterAI 是 OpenRouter 提供者的实现类
-      expect(runtime['_runtime']).toBeInstanceOf(LobeOpenRouterAI);
-    });
 
     it('DeepSeek AI provider: without apikey', async () => {
       const jwtPayload = {};

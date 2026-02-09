@@ -7,7 +7,7 @@ import { DEFAULT_MODEL_PROVIDER_LIST } from '@/config/modelProviders';
  * Brand providers like "OpenAI" or "Anthropic" remain visible.
  */
 export const useProviderName = (provider: string) => {
-  const infrastructureProviders = ['vercelaigateway', 'vertexai', 'groq'];
+  const infrastructureProviders = ['vercelaigateway', 'groq'];
 
   if (infrastructureProviders.includes(provider)) {
     return 'Dịch vụ AI';

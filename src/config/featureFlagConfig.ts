@@ -10,7 +10,7 @@ export const PROVIDER_GROUPS = {
   aggregators: {
     description: 'Multi-model API gateways',
     flag: 'llm-group-aggregators',
-    providers: ['openrouter', 'vercelaigateway', 'togetherai', 'fireworksai'],
+    providers: ['vercelaigateway', 'togetherai', 'fireworksai'],
   },
   china: {
     description: 'China-based AI providers',
@@ -30,7 +30,7 @@ export const PROVIDER_GROUPS = {
   premium: {
     description: 'High-quality, paid API providers',
     flag: 'llm-group-premium',
-    providers: ['openai', 'anthropic', 'google', 'vertexai'],
+    providers: ['openai', 'anthropic', 'google'],
   },
 } as const;
 
@@ -47,11 +47,9 @@ export const PROVIDER_FLAGS: Record<string, string> = {
   mistral: 'llm-provider-mistral',
   ollama: 'llm-provider-ollama',
   openai: 'llm-provider-openai',
-  openrouter: 'llm-provider-openrouter',
   perplexity: 'llm-provider-perplexity',
   togetherai: 'llm-provider-togetherai',
   vercelaigateway: 'llm-provider-vercelaigateway',
-  vertexai: 'llm-provider-vertexai',
 };
 
 /**

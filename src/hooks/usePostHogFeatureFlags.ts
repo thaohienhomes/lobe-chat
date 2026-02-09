@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
  * All llm-provider-* flags we check.
  */
 const LLM_PROVIDER_FLAGS = [
-  'llm-provider-vertexai',
   'llm-provider-vercelaigateway',
   'llm-provider-anthropic',
   'llm-provider-openai',

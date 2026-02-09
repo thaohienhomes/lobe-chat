@@ -40,7 +40,6 @@ import NvidiaProvider from './nvidia';
 import OllamaProvider from './ollama';
 import OllamaCloudProvider from './ollamacloud';
 import OpenAIProvider from './openai';
-import OpenRouterProvider from './openrouter';
 import PerplexityProvider from './perplexity';
 import PPIOProvider from './ppio';
 import QiniuProvider from './qiniu';
@@ -57,7 +56,6 @@ import TogetherAIProvider from './togetherai';
 import UpstageProvider from './upstage';
 import V0Provider from './v0';
 import VercelAIGatewayProvider from './vercelaigateway';
-import VertexAIProvider from './vertexai';
 import VLLMProvider from './vllm';
 import VolcengineProvider from './volcengine';
 import WenxinProvider from './wenxin';
@@ -85,7 +83,6 @@ export const LOBE_DEFAULT_MODEL_LIST: ChatModelCard[] = [
   OllamaProvider.chatModels,
   VLLMProvider.chatModels,
   XinferenceProvider.chatModels,
-  OpenRouterProvider.chatModels,
   TogetherAIProvider.chatModels,
   FireworksAIProvider.chatModels,
   PerplexityProvider.chatModels,
@@ -134,7 +131,6 @@ export const LOBE_DEFAULT_MODEL_LIST: ChatModelCard[] = [
  */
 export const DEFAULT_MODEL_PROVIDER_LIST = [
   // PRIMARY PROVIDER: OpenRouter - enabled by default
-  { ...OpenRouterProvider, enabled: false },
 
   // OTHER PROVIDERS: Disabled by default for pho.chat
   // These are kept for potential future use or BYOK scenarios
@@ -148,7 +144,6 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   { ...AnthropicProvider, enabled: false },
   { ...BedrockProvider, enabled: false },
   { ...GoogleProvider, enabled: false },
-  { ...VertexAIProvider, enabled: true },
   { ...DeepSeekProvider, enabled: false },
   { ...MoonshotProvider, enabled: false },
   { ...AiHubMixProvider, enabled: false },
@@ -254,7 +249,6 @@ export { default as NvidiaProviderCard } from './nvidia';
 export { default as OllamaProviderCard } from './ollama';
 export { default as OllamaCloudProviderCard } from './ollamacloud';
 export { default as OpenAIProviderCard } from './openai';
-export { default as OpenRouterProviderCard } from './openrouter';
 export { default as PerplexityProviderCard } from './perplexity';
 export { default as PPIOProviderCard } from './ppio';
 export { default as QiniuProviderCard } from './qiniu';
@@ -271,7 +265,6 @@ export { default as TogetherAIProviderCard } from './togetherai';
 export { default as UpstageProviderCard } from './upstage';
 export { default as V0ProviderCard } from './v0';
 export { default as VercelAIGatewayProviderCard } from './vercelaigateway';
-export { default as VertexAIProviderCard } from './vertexai';
 export { default as VLLMProviderCard } from './vllm';
 export { default as VolcengineProviderCard } from './volcengine';
 export { default as WenxinProviderCard } from './wenxin';

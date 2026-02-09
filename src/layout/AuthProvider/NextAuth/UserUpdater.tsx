@@ -30,6 +30,7 @@ const UserUpdater = memo(() => {
         (window as any).posthog.identify(nextUser.id, {
           email: nextUser.email,
           name: nextUser.name,
+          planId: (session as any)?.planId,
         });
       }
 

@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server';
  * If a flag doesn't exist in PostHog, it defaults to TRUE (fail-open).
  */
 const LLM_PROVIDER_FLAGS = [
-  'llm-provider-vertexai',
   'llm-provider-vercelaigateway',
   'llm-provider-anthropic',
   'llm-provider-openai',

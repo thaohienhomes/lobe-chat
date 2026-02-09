@@ -17,7 +17,6 @@ const mockMoonshotAPIKey = 'moonshot-api-key';
 const mockGoogleAPIKey = 'google-api-key';
 const mockAnthropicAPIKey = 'anthropic-api-key';
 const mockMistralAPIKey = 'mistral-api-key';
-const mockOpenRouterAPIKey = 'openrouter-api-key';
 const mockTogetherAIAPIKey = 'togetherai-api-key';
 
 // mock the traditional zustand
@@ -59,12 +58,6 @@ describe('getProviderAuthPayload', () => {
     expect(payload).toEqual({ apiKey: mockMistralAPIKey });
   });
 
-  it('should return correct payload for OpenRouter provider', () => {
-    const payload = getProviderAuthPayload(ModelProvider.OpenRouter, {
-      apiKey: mockOpenRouterAPIKey,
-    });
-    expect(payload).toEqual({ apiKey: mockOpenRouterAPIKey });
-  });
 
   it('should return correct payload for TogetherAI provider', () => {
     const payload = getProviderAuthPayload(ModelProvider.TogetherAI, {
@@ -175,19 +168,6 @@ describe('getProviderAuthPayload', () => {
     });
   });
 
-  it('should return correct payload for VertexAI provider without splitting JSON credentials', () => {
-    // Vertex AI uses JSON credentials that contain commas
-    const mockVertexAIConfig = {
-      apiKey: '{"type":"service_account","project_id":"test-project","private_key":"test-key"}',
-      baseURL: 'https://us-central1-aiplatform.googleapis.com',
-    };
-
-    const payload = getProviderAuthPayload(ModelProvider.VertexAI, mockVertexAIConfig);
-    expect(payload).toEqual({
-      apiKey: mockVertexAIConfig.apiKey,
-      baseURL: mockVertexAIConfig.baseURL,
-    });
-  });
 
   it('should return an empty object or throw an error for an unknown provider', () => {
     const payload = getProviderAuthPayload('UnknownProvider', {});

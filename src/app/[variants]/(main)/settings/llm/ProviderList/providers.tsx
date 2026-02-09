@@ -27,7 +27,6 @@ import {
   NovitaProviderCard,
   NvidiaProviderCard,
   OllamaCloudProviderCard,
-  OpenRouterProviderCard,
   PPIOProviderCard,
   PerplexityProviderCard,
   QiniuProviderCard,
@@ -90,7 +89,7 @@ const useFilteredProviders = (providers: ProviderItem[]): ProviderItem[] => {
       if (id === 'deepseek' && deepseekEnabled === false) return false;
 
       // Group flag check
-      const premiumProviders = ['openai', 'anthropic', 'google', 'vertexai'];
+      const premiumProviders = ['openai', 'anthropic', 'google'];
       const fastProviders = ['groq', 'cerebras', 'sambanova'];
       const openSourceProviders = ['ollama', 'vllm', 'huggingface', 'xinference'];
       const chinaProviders = [
@@ -103,7 +102,7 @@ const useFilteredProviders = (providers: ProviderItem[]): ProviderItem[] => {
         'spark',
         'wenxin',
       ];
-      const aggregatorProviders = ['openrouter', 'togetherai', 'fireworksai'];
+      const aggregatorProviders = ['togetherai', 'fireworksai'];
 
       if (premiumProviders.includes(id) && premiumEnabled === false) return false;
       if (fastProviders.includes(id) && fastEnabled === false) return false;
@@ -149,7 +148,6 @@ export const useProviderList = (): ProviderItem[] => {
       GoogleProviderCard,
       DeepSeekProviderCard,
       HuggingFaceProvider,
-      OpenRouterProviderCard,
       CloudflareProvider,
       GithubProvider,
       NovitaProviderCard,

@@ -30,12 +30,12 @@ const SelectWithTTSPreview = forwardRef<RefSelectProps, SelectWithTTSPreviewProp
       [t],
     );
 
-    const { isGlobalLoading, audio, stop, start, response, setText } = useTTS(PREVIEW_TEXT, {
-      onError: (err) => {
+    const { isGlobalLoading, audio, stop, start, response, setText } = (useTTS as any)(PREVIEW_TEXT, {
+      onError: (err: any) => {
         stop();
         setDefaultError(err);
       },
-      onErrorRetry: (err) => {
+      onErrorRetry: (err: any) => {
         stop();
         setDefaultError(err);
       },

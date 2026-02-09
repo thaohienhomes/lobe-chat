@@ -31,10 +31,6 @@ const APIKeyForm = memo<APIKeyFormProps>(
           return 'sk-ant_*****************************';
         }
 
-        case ModelProvider.OpenRouter: {
-          return 'sk-or-********************************';
-        }
-
         case ModelProvider.Perplexity: {
           return 'pplx-********************************';
         }

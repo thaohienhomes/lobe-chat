@@ -165,7 +165,7 @@ export const checkAuth =
               inputTokens: 100,
               model: trialAccess.model || 'meta-llama/llama-3.1-8b-instruct',
               outputTokens: 200,
-              provider: 'openrouter',
+              provider: 'pho-chat',
               queryComplexity: 'simple',
               sessionId: `trial-${Date.now()}`,
               totalTokens: 300,
