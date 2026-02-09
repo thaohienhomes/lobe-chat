@@ -108,7 +108,23 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
       return bStart - aStart;
     });
 
-    const planCode = sortedSubscriptions[0]?.planId || 'vn_free';
+    let planCode = sortedSubscriptions[0]?.planId || 'vn_free';
+
+    // Clerk metadata fallback for promo-activated users (same pattern as user.ts)
+    const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter', 'vn_free', 'gl_starter']);
+    if (FREE_PLAN_IDS.has(planCode.toLowerCase())) {
+      try {
+        const { clerkClient } = await import('@clerk/nextjs/server');
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        const clerkPlanId = (clerkUser.publicMetadata as any)?.planId;
+        if (clerkPlanId && !FREE_PLAN_IDS.has(clerkPlanId.toLowerCase())) {
+          planCode = clerkPlanId;
+        }
+      } catch {
+        // Clerk lookup failed, continue with DB planCode
+      }
+    }
 
     // Get plan details
     const { PLAN_MODEL_ACCESS, getAllowedTiersForPlan } = await import('@/config/pricing');

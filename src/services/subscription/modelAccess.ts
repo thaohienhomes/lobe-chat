@@ -123,11 +123,26 @@ export class SubscriptionModelAccessService {
         )
         .limit(1);
 
-      if (!currentSubscription || currentSubscription.length === 0) {
-        return null; // No active subscription, default to free plan
+      if (currentSubscription && currentSubscription.length > 0) {
+        return currentSubscription[0];
       }
 
-      return currentSubscription[0];
+      // Clerk metadata fallback for promo-activated users
+      const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter', 'vn_free', 'gl_starter']);
+      try {
+        const { clerkClient } = await import('@clerk/nextjs/server');
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        const clerkPlanId = (clerkUser.publicMetadata as any)?.planId;
+        if (clerkPlanId && !FREE_PLAN_IDS.has(clerkPlanId.toLowerCase())) {
+          // Return synthetic subscription for promo plans
+          return { planId: clerkPlanId, status: 'active' } as any;
+        }
+      } catch {
+        // Clerk lookup failed
+      }
+
+      return null; // No active subscription, default to free plan
     } catch (error) {
       console.error('Error fetching user subscription:', error);
       return null; // Fallback to free plan
