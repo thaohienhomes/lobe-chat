@@ -53,60 +53,6 @@ export interface PlanModelAccess {
 // ============================================================================
 
 export const VN_PLANS: Record<string, PlanConfig> = {
-  vn_basic: {
-    advancedAI: false,
-    code: 'vn_basic',
-    dailyTier2Limit: 30,
-    displayName: 'Phở Tái (Starter)',
-    enableCustomAPI: true,
-    enableKnowledgeBase: true,
-    features: [
-      'Unlimited Tier 1 models',
-      '30 Tier 2 messages/day',
-      'Conversation history',
-      'File upload support',
-      'No ads',
-    ],
-
-    keyLimits: 'Unlim Tier 1. 30 Tier 2 msgs/day.',
-
-    monthlyPoints: 300_000,
-
-    // Matched to Plan Comparison "Starter"
-    price: 69_000,
-
-    priceYearly: 690_000,
-
-    prioritySupport: false,
-    // New Features
-    storageGB: 1,
-    vectorEntries: 5000,
-  },
-  vn_free: {
-    advancedAI: false,
-    code: 'vn_free',
-    displayName: 'Phở Không Người Lái (Free)',
-    enableCustomAPI: false,
-    enableKnowledgeBase: false,
-    features: [
-      'Tier 1 models only (GPT-4o-mini, Gemini Flash)',
-      'Basic conversation',
-      'No history saving',
-    ],
-
-    keyLimits: 'Tier 1 Models Only. No History.',
-
-    monthlyPoints: 50_000,
-
-    // Slight bump for Free
-    price: 0,
-
-    prioritySupport: false,
-    // New Features
-    storageGB: 0.5,
-    vectorEntries: 0,
-  },
-
   // Medical Beta: Free-tier base with boosted limits via promo code activation
   // Activation: promo code sets publicMetadata.planId = 'medical_beta'
   // Default model: Groq (Llama 3.1) — avoids Vertex AI 1 RPM quota limit
@@ -138,6 +84,66 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     prioritySupport: false,
     storageGB: 1,
     vectorEntries: 5000,
+  },
+
+
+
+  vn_basic: {
+    advancedAI: false,
+    code: 'vn_basic',
+    dailyTier2Limit: 30,
+    displayName: 'Phở Tái (Starter)',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
+    features: [
+      'Unlimited Tier 1 models',
+      '30 Tier 2 messages/day',
+      'Conversation history',
+      'File upload support',
+      'No ads',
+    ],
+
+    keyLimits: 'Unlim Tier 1. 30 Tier 2 msgs/day.',
+
+    monthlyPoints: 300_000,
+
+    // Matched to Plan Comparison "Starter"
+    price: 69_000,
+
+    priceYearly: 690_000,
+
+    prioritySupport: false,
+    // New Features
+    storageGB: 1,
+    vectorEntries: 5000,
+  },
+
+
+
+
+  vn_free: {
+    advancedAI: false,
+    code: 'vn_free',
+    displayName: 'Phở Không Người Lái (Free)',
+    enableCustomAPI: false,
+    enableKnowledgeBase: false,
+    features: [
+      'Tier 1 models only (GPT-4o-mini, Gemini Flash)',
+      'Basic conversation',
+      'No history saving',
+    ],
+
+    keyLimits: 'Tier 1 Models Only. No History.',
+
+    monthlyPoints: 50_000,
+
+    // Slight bump for Free
+    price: 0,
+
+    prioritySupport: false,
+    // New Features
+    storageGB: 0.5,
+    vectorEntries: 0,
   },
   vn_pro: {
     advancedAI: false,
@@ -375,11 +381,9 @@ export const GLOBAL_PLANS: Record<string, PlanConfig> = {
 
 /** Tier 1: Budget models — available to ALL plans including Free */
 const TIER1_MODELS = [
-  // Vertex AI (Primary)
-  'gemini-2.0-flash',
-  'gemini-2.5-flash-lite',
-  // Vercel AI Gateway
+  // Vercel AI Gateway (Primary for Gemini)
   'google/gemini-2.0-flash',
+  'google/gemini-2.5-flash-lite',
   'deepseek/deepseek-chat',
   // Groq (via CF Gateway)
   'llama-3.1-8b-instant',
@@ -393,7 +397,9 @@ const TIER1_MODELS = [
   // Fireworks AI (via CF Gateway)
   'accounts/fireworks/models/llama-v3p1-8b-instruct',
   'accounts/fireworks/models/llama-v3p1-70b-instruct',
-  // Legacy (OpenRouter-style IDs for backward compat)
+  // Legacy short IDs (for backward compat & tier lookup)
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
   'gpt-4o-mini',
   'gemini-1.5-flash',
   'claude-3-haiku',
@@ -403,14 +409,12 @@ const TIER1_MODELS = [
 
 /** Tier 2: Standard models — available to Basic/Starter+ plans */
 const TIER2_MODELS = [
-  // Vertex AI
-  'gemini-2.5-flash',
-  'gemini-2.5-pro',
-  'gemini-3-flash-preview',
-  // Vercel AI Gateway
+  // Vercel AI Gateway (Primary for premium models)
   'google/gemini-2.5-flash',
   'google/gemini-2.5-pro',
+  'google/gemini-3-flash-preview',
   'anthropic/claude-sonnet-4.5',
+  'anthropic/claude-haiku-4.5',
   'openai/gpt-5.2',
   'openai/gpt-4o',
   'openai/gpt-4.1',
@@ -427,7 +431,10 @@ const TIER2_MODELS = [
   'Qwen/Qwen2.5-72B-Instruct-Turbo',
   'deepseek-ai/DeepSeek-R1',
   'deepseek-ai/DeepSeek-V3',
-  // Legacy IDs
+  // Legacy short IDs (for backward compat & tier lookup)
+  'gemini-2.5-flash',
+  'gemini-2.5-pro',
+  'gemini-3-flash-preview',
   'gpt-4o',
   'gpt-4.1',
   'claude-3-5-sonnet',
@@ -438,11 +445,11 @@ const TIER2_MODELS = [
 
 /** Tier 3: Premium models — available to Pro/Ultimate/Team/Lifetime plans */
 const TIER3_MODELS = [
-  // Vertex AI
-  'gemini-3-pro-preview',
   // Vercel AI Gateway
+  'google/gemini-3-pro-preview',
   'openai/o3-mini',
-  // Legacy IDs
+  // Legacy short IDs (for backward compat & tier lookup)
+  'gemini-3-pro-preview',
   'gpt-4-turbo',
   'claude-3-opus',
   'o1',
@@ -464,8 +471,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   gl_lifetime: {
     allowedTiers: [1, 2],
     dailyLimits: { tier2: -1 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
@@ -473,8 +480,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   gl_premium: {
     allowedTiers: [1, 2],
     dailyLimits: { tier2: -1 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
@@ -482,16 +489,16 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   gl_standard: {
     allowedTiers: [1, 2],
     dailyLimits: { tier2: 30 },
-    defaultModel: 'gemini-2.5-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
   // Global Starter Plan: Tier 1 ONLY
   gl_starter: {
     allowedTiers: [1],
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS],
   },
 
@@ -502,47 +509,31 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   lifetime_early_bird: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
   lifetime_last_call: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
   lifetime_standard: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
-  // ============================================================================
-  // VIETNAM PLANS - All use Vertex AI as primary provider (Feb 2026)
-  // ============================================================================
 
-  // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
-  vn_basic: {
-    allowedTiers: [1, 2],
-    dailyLimits: { tier2: 30 },
-    defaultModel: 'gemini-2.5-flash',
-    defaultProvider: 'vertexai',
-    models: [...TIER1_MODELS, ...TIER2_MODELS],
-  },
 
-  // VN Free: Tier 1 ONLY with 50,000 points/month
-  vn_free: {
-    allowedTiers: [1],
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
-    models: [...TIER1_MODELS],
-  },
+
+
 
   // Medical Beta: Tier 1 + Tier 2 with 20/day limit, Groq primary
   // Avoids Vertex AI 1 RPM quota — routes through Groq and Gateway
@@ -554,12 +545,37 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
+
+
+
+  // ============================================================================
+  // VIETNAM PLANS - All use Vertex AI as primary provider (Feb 2026)
+  // ============================================================================
+  // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
+  vn_basic: {
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: 30 },
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
+    models: [...TIER1_MODELS, ...TIER2_MODELS],
+  },
+
+
+
+  // VN Free: Tier 1 ONLY with 50,000 points/month
+  vn_free: {
+    allowedTiers: [1],
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
+    models: [...TIER1_MODELS],
+  },
+
   // VN Pro (Phở Đặc Biệt): All tiers with 50 Tier 3 messages/day
   vn_pro: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 50 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
@@ -567,8 +583,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_team: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier3: 100 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
@@ -576,8 +592,8 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   vn_ultimate: {
     allowedTiers: [1, 2, 3],
     dailyLimits: { tier2: -1, tier3: 100 },
-    defaultModel: 'gemini-2.0-flash',
-    defaultProvider: 'vertexai',
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 };
@@ -802,6 +818,18 @@ export const PLAN_USAGE_ESTIMATES = {
     videos: '0 (No Studio)',
   },
 
+  // Medical Beta
+  medical_beta: {
+    hasStudio: false,
+    images: '~50',
+    monthlyPoints: 500_000,
+    tier1Messages: '~100,000',
+    tier2Messages: '~3,300',
+    tier3Messages: '0',
+    videos: '0 (No Studio)',
+  },
+
+
   vn_basic: {
     hasStudio: false,
     images: '~30',
@@ -811,6 +839,8 @@ export const PLAN_USAGE_ESTIMATES = {
     tier3Messages: '0',
     videos: '0 (No Studio)',
   },
+
+
   // VN Plans
   vn_free: {
     hasStudio: false,
@@ -818,17 +848,6 @@ export const PLAN_USAGE_ESTIMATES = {
     monthlyPoints: 50_000,
     tier1Messages: '~10,000',
     tier2Messages: '~300',
-    tier3Messages: '0',
-    videos: '0 (No Studio)',
-  },
-
-  // Medical Beta
-  medical_beta: {
-    hasStudio: false,
-    images: '~50',
-    monthlyPoints: 500_000,
-    tier1Messages: '~100,000',
-    tier2Messages: '~3,300',
     tier3Messages: '0',
     videos: '0 (No Studio)',
   },

@@ -238,15 +238,18 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       }
     }
 
-    // ============  2.3. Provider Override (medical_beta)   ============ //
-    // medical_beta plan avoids Vertex AI 1 RPM quota by routing Gemini
-    // models through Vercel AI Gateway instead
+    // ============  2.3. Provider Override (Universal)   ============ //
+    // Vertex AI and OpenRouter are DISABLED — route all traffic through
+    // Vercel AI Gateway, Groq, Cerebras, Fireworks AI, Together AI
     let activeProvider = provider;
-    if (userPlanId === 'medical_beta' && provider === 'vertexai' && data.model.startsWith('gemini')) {
-      // Remap model ID to Gateway format and re-init runtime
-      data.model = `google/${data.model}`;
-      activeProvider = 'openrouter';
-      console.log(`[Provider Override] medical_beta: vertexai → openrouter, model → ${data.model}`);
+    const DISABLED_PROVIDERS = new Set(['vertexai', 'openrouter']);
+    if (DISABLED_PROVIDERS.has(provider)) {
+      // Remap Gemini bare model IDs to Gateway format (google/ prefix)
+      if (data.model.startsWith('gemini') && !data.model.startsWith('google/')) {
+        data.model = `google/${data.model}`;
+      }
+      activeProvider = 'vercelaigateway';
+      console.log(`[Provider Override] ${provider} → vercelaigateway, model: ${data.model}`);
       modelRuntime = await initModelRuntimeWithUserPayload(activeProvider, jwtPayload);
     }
 
