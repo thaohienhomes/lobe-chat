@@ -2,7 +2,6 @@
 
 import { createStyles } from 'antd-style';
 import { memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Flexbox, FlexboxProps } from 'react-layout-kit';
 
 import PlanTag from '@/features/User/PlanTag';
@@ -29,7 +28,6 @@ export interface UserInfoProps extends FlexboxProps {
 }
 
 const UserInfo = memo<UserInfoProps>(({ avatarProps, onClick, ...rest }) => {
-  const { t } = useTranslation('setting');
   const { styles, theme } = useStyles();
   const isSignedIn = useUserStore(authSelectors.isLogin);
   const [nickname, username, subscriptionPlan] = useUserStore((s) => [
@@ -53,23 +51,6 @@ const UserInfo = memo<UserInfoProps>(({ avatarProps, onClick, ...rest }) => {
         <Flexbox flex={1} gap={6}>
           <Flexbox align={'center'} gap={6} horizontal>
             <div className={styles.nickname}>{nickname}</div>
-            {subscriptionPlan === 'medical_beta' && (
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, #00C9A7, #0891B2)',
-                  borderRadius: 12,
-                  boxShadow: '0 0 8px rgba(0,201,167,0.3)',
-                  color: '#fff',
-                  fontSize: 10,
-                  fontWeight: 'bold',
-                  paddingBlock: 2,
-                  paddingInline: 8,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {t('medicalBadge', { ns: 'setting' })}
-              </div>
-            )}
           </Flexbox>
           <div className={styles.username}>{username}</div>
         </Flexbox>
