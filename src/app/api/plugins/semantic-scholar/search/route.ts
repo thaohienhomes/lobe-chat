@@ -39,6 +39,39 @@ interface SearchParams {
 
 const S2_API_URL = 'https://api.semanticscholar.org/graph/v1/paper/search';
 
+// ---------------------------------------------------------------------------
+// Retry helper — exponential backoff for Semantic Scholar rate limits (1 req/s)
+// Retries up to 3 times with delays: 1s → 2s → 4s
+// ---------------------------------------------------------------------------
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000; // 1 second — matches S2's 1 req/s limit
+
+async function fetchWithRetry(
+  url: string,
+  options: { headers?: Record<string, string> },
+  retries = MAX_RETRIES,
+): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const response = await fetch(url, options);
+
+    if (response.status !== 429 || attempt === retries) {
+      return response;
+    }
+
+    // Exponential backoff: 1s, 2s, 4s + small jitter to avoid thundering herd
+    const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.random() * 200;
+    console.warn(
+      `[Semantic Scholar] Rate limited (429). Retry ${attempt + 1}/${retries} in ${Math.round(delay)}ms`,
+    );
+    await new Promise<void>((resolve) => {
+      setTimeout(() => { resolve(); }, delay);
+    });
+  }
+
+  // Unreachable, but TypeScript needs it
+  throw new Error('fetchWithRetry: exceeded max retries');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as SearchParams;
@@ -65,18 +98,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Use API key if available (free key from semanticscholar.org/product/api)
-    // Increases rate limit from 100 → 1,000 requests per 5 minutes
+    // With key: 1 request/second (~300 req/5min). Without key: 100 req/5min.
     const headers: Record<string, string> = {};
     const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
     if (apiKey) {
       headers['x-api-key'] = apiKey;
     }
 
-    const response = await fetch(`${S2_API_URL}?${params.toString()}`, { headers });
+    const response = await fetchWithRetry(`${S2_API_URL}?${params.toString()}`, { headers });
 
     if (response.status === 429) {
+      // Exhausted all retries — let user know gracefully
       return NextResponse.json(
-        { error: 'Rate limit exceeded. Please try again later.' },
+        { error: 'Semantic Scholar is busy. Please wait a moment and try again.' },
         { status: 429 },
       );
     }
@@ -154,7 +188,13 @@ export async function GET(request: NextRequest) {
   });
   if (year) params.append('year', year);
 
-  const response = await fetch(`${S2_API_URL}?${params.toString()}`);
+  const headers: Record<string, string> = {};
+  const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
+  if (apiKey) {
+    headers['x-api-key'] = apiKey;
+  }
+
+  const response = await fetchWithRetry(`${S2_API_URL}?${params.toString()}`, { headers });
   const data = await response.json();
 
   return NextResponse.json({
