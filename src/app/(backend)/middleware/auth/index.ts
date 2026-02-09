@@ -84,8 +84,6 @@ export const checkAuth =
           nextAuthAuthorized: oauthAuthorized,
         });
     } catch (e) {
-      const params = await options.params;
-
       // if the error is not a ChatCompletionErrorPayload, it means the application error
       if (!(e as ChatCompletionErrorPayload).errorType) {
         if ((e as any).code === 'ERR_JWT_EXPIRED')
@@ -94,20 +92,18 @@ export const checkAuth =
         // other issue will be internal server error
         console.error(e);
         return createErrorResponse(ChatErrorType.InternalServerError, {
-          error: e,
-          provider: params?.provider,
+          error: { message: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' },
+          provider: 'pho-chat',
         });
       }
 
-      const {
-        errorType = ChatErrorType.InternalServerError,
-        error: errorContent,
-        ...res
-      } = e as ChatCompletionErrorPayload;
+      const { errorType = ChatErrorType.InternalServerError } =
+        e as ChatCompletionErrorPayload;
 
-      const error = errorContent || e;
-
-      return createErrorResponse(errorType, { error, ...res, provider: params?.provider });
+      return createErrorResponse(errorType, {
+        error: { message: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' },
+        provider: 'pho-chat',
+      });
     }
 
     // ============  Subscription & Trial Validation   ============ //
@@ -142,9 +138,6 @@ export const checkAuth =
             error: new Error(trialAccess.reason || 'Free trial expired. Please upgrade your plan.'),
             isTrialExpired: true,
             message: trialAccess.reason || 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat.',
-            messagesRemaining: trialAccess.messagesRemaining,
-            planId: plan.planId,
-            tokensRemaining: trialAccess.tokensRemaining,
             upgradeUrl: '/settings/subscription',
           });
         }

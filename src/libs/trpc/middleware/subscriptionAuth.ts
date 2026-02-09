@@ -54,9 +54,6 @@ export const subscriptionAuth = trpc.middleware(async (opts) => {
     throw new TRPCError({
       cause: {
         isTrialExpired: true,
-        messagesRemaining: trialAccess.messagesRemaining,
-        planId: plan.planId,
-        tokensRemaining: trialAccess.tokensRemaining,
         upgradeUrl: '/settings/subscription',
       },
       code: 'FORBIDDEN',

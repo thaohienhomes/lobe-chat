@@ -158,8 +158,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           `🚫 Blocked request due to negative balance: ${balance} (User: ${jwtPayload.userId})`,
         );
         return createErrorResponse(AgentRuntimeErrorType.InsufficientQuota, {
-          error: { message: `Insufficient Pho Credits. Balance: ${balance}` },
-          provider,
+          error: { message: 'Phở Points không đủ. Vui lòng nạp thêm để tiếp tục.' },
+          provider: 'pho-chat',
         });
       }
 
@@ -191,7 +191,24 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // Check if user's plan allows access to this model tier and daily limits
     if (jwtPayload.userId) {
       const creditStatus = await getUserCreditBalance(jwtPayload.userId);
-      const userPlanId = creditStatus?.currentPlanId || 'vn_free';
+      let userPlanId = creditStatus?.currentPlanId || 'vn_free';
+
+      // Clerk metadata fallback for promo-activated users (medical_beta, etc.)
+      const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter', 'vn_free', 'gl_starter']);
+      if (FREE_PLAN_IDS.has(userPlanId.toLowerCase())) {
+        try {
+          const { clerkClient } = await import('@clerk/nextjs/server');
+          const client = await clerkClient();
+          const clerkUser = await client.users.getUser(jwtPayload.userId);
+          const clerkPlanId = (clerkUser.publicMetadata as any)?.planId;
+          if (clerkPlanId && !FREE_PLAN_IDS.has(clerkPlanId.toLowerCase())) {
+            userPlanId = clerkPlanId;
+            console.log(`[Tier Check] Clerk fallback: plan upgraded to ${userPlanId}`);
+          }
+        } catch {
+          // Clerk lookup failed, continue with DB planId
+        }
+      }
       const modelTier = getModelTier(data.model);
 
       console.log(`[Tier Check] Model: ${data.model}, Tier: ${modelTier}, Plan: ${userPlanId}`);
@@ -203,11 +220,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           `🚫 Tier access denied: ${tierAccess.reason} (User: ${jwtPayload.userId}, Model: ${data.model})`,
         );
         return createErrorResponse(AgentRuntimeErrorType.InsufficientQuota, {
-          dailyLimit: tierAccess.dailyLimit,
-          error: { message: tierAccess.reason || `Tier ${modelTier} access denied` },
-          provider,
-          remaining: tierAccess.remaining,
-          tier: modelTier,
+          error: { message: tierAccess.reason || 'Model này yêu cầu gói cao hơn.' },
+          provider: 'pho-chat',
           upgradeUrl: '/settings/subscription',
         });
       }
@@ -374,7 +388,6 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     const {
       errorType = ChatErrorType.InternalServerError,
       error: errorContent,
-      ...res
     } = e as ChatCompletionErrorPayload;
 
     const error = errorContent || e;
@@ -384,7 +397,27 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     console[logMethod](`Route: [${provider}] ${errorType}:`, error);
     console.log('='.repeat(80));
 
-    return createErrorResponse(errorType, { error, ...res, provider });
+    // Sanitize vendor errors — hide provider names, API keys, quota details
+    const rawMessage = typeof error === 'object' && error !== null
+      ? (error as any).message || String(error)
+      : String(error);
+
+    // Map vendor-specific messages to user-friendly ones
+    let sanitizedMessage = 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
+    if (/quota|rate.?limit|exceeded|too many/i.test(rawMessage)) {
+      sanitizedMessage = 'Hệ thống đang bận. Vui lòng thử lại sau giây lát.';
+    } else if (/unauthorized|invalid.*key|api.?key/i.test(rawMessage)) {
+      sanitizedMessage = 'Lỗi xác thực. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+    } else if (/timeout|timed?.?out/i.test(rawMessage)) {
+      sanitizedMessage = 'Yêu cầu quá thời gian. Vui lòng thử lại.';
+    } else if (/not.?found|does not exist/i.test(rawMessage)) {
+      sanitizedMessage = 'Model hiện không khả dụng. Vui lòng chọn model khác.';
+    }
+
+    return createErrorResponse(errorType, {
+      error: { message: sanitizedMessage },
+      provider: 'pho-chat',
+    });
   }
 });
 

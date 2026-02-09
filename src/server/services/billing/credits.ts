@@ -196,7 +196,7 @@ export async function checkTierAccess(
   if (!canUseTier(planId, tier)) {
     return {
       allowed: false,
-      reason: `Gói ${planId} không hỗ trợ Tier ${tier} models. Vui lòng nâng cấp để sử dụng.`,
+      reason: 'Model này yêu cầu gói cao hơn. Vui lòng nâng cấp để sử dụng.',
     };
   }
 
@@ -213,7 +213,7 @@ export async function checkTierAccess(
     return {
       allowed: false,
       dailyLimit: 0,
-      reason: `Tier ${tier} models không khả dụng cho gói ${planId}.`,
+      reason: 'Model này không khả dụng cho gói hiện tại của bạn.',
     };
   }
 
@@ -256,7 +256,7 @@ export async function checkTierAccess(
     return {
       allowed: false,
       dailyLimit,
-      reason: `Đã hết giới hạn Tier ${tier} hôm nay (${dailyLimit}/${dailyLimit}). Thử lại vào ngày mai hoặc nâng cấp gói.`,
+      reason: `Bạn đã dùng hết lượt model cao cấp hôm nay (${dailyLimit}/${dailyLimit}). Thử lại vào ngày mai hoặc nâng cấp gói.`,
       remaining: 0,
     };
   }
