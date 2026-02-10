@@ -18,7 +18,7 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 
 ### ✅ Giải Pháp: Phở Chat Medical
 
-**6 plugin chuyên biệt** tích hợp sẵn, không cần cài thêm:
+**6+ plugin chuyên biệt** tích hợp sẵn, không cần cài thêm:
 
 | Plugin | Mô tả |
 |--------|-------|
@@ -28,7 +28,9 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 | 🧮 **Clinical Calculator** | BMI, GFR, MELD, CHA₂DS₂-VASc — chính xác 100% |
 | 📚 **Semantic Scholar** | Tìm kiếm học thuật nâng cao — citation graph |
 | 🔗 **DOI Resolver** | Tra cứu paper theo DOI — metadata CrossRef |
-
+\`\`\`tsx
+*...sẽ tiếp tục cập nhật thêm *
+  \`\`\`
 **Bonus tích hợp sẵn:**
 - 📐 **LaTeX Loader** — Upload file .tex, parse & chat trực tiếp
 - 📋 **BibliographySection** — Citation định dạng IEEE tự động
@@ -70,26 +72,25 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 
 ### 🌟 Đặc Quyền Early Adopters
 
-Đăng ký trong **200 suất đầu tiên** nhận ngay:
+Đăng ký trong **100 suất đầu tiên** nhận ngay:
 
 | Đặc quyền | Chi tiết |
 |-----------|---------|
 | 🏅 **Badge "Medical Pioneer"** | Hiển thị vĩnh viễn trên profile — không bao giờ mất |
-| 🎨 **Phở Studio Access** | Miễn phí trải nghiệm tạo ảnh AI, video AI (Kling 3.0, Flux Pro) |
+| 🎨 **Phở Studio Access** | Tặng **Free Credits** trải nghiệm tạo ảnh AI, video AI (Kling 3.0, Flux Pro) |
 | 🚀 **Early Access Features** | Truy cập sớm tất cả tính năng mới trước khi public release |
-| 💰 **Giá ưu đãi vĩnh viễn** | Lock giá 999k/năm khi gia hạn — không bao giờ tăng |
-| ⬆️ **Upgrade Priority** | Ưu tiên nâng cấp khi ra mắt gói cao hơn (giảm 30%+) |
-| 🗳️ **Feature Voting** | Bỏ phiếu chọn tính năng ưu tiên phát triển tiếp theo |
-| 🤝 **Founding Team Group** | Truy cập Zalo Group riêng, kết nối trực tiếp với team dev |
+| 💰 **Gia hạn & Nâng cấp** | Ưu đãi giá khi gia hạn, nâng cấp (**Discount lên tới 60%**) |
+| ⬆️ **Feature Request** | Quyền ưu tiên yêu cầu các tính năng chuyên biệt mới |
+| 🤝 **Priority Support** | Hỗ trợ kỹ thuật ưu tiên, kết nối trực tiếp với đội ngũ phát triển |
 
 ### 🚀 Cách Đăng Ký
 
 1. **Đăng ký** tài khoản Phở Chat tại [pho.chat](https://pho.chat)
-2. **Thanh toán** 999.000 VNĐ qua **Sepay** — thanh toán tự động, xác nhận tức thì
-3. **Nhận promo code** tự động qua email sau khi thanh toán thành công
-4. **Kích hoạt** tại Settings → nhập code → xong! Plan active ngay lập tức
+\`\`\`tsx
+2. ** Thanh toán ** 999.000 VNĐ qua[** Sepay **](https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay) — thanh toán tự động, bảo mật, xác nhận tức thì
+  \`\`\`
 
-> **⏰ Chỉ 200 suất Early Bird!** Giá sẽ tăng lên 1.499k–1.999k/năm sau đợt beta.
+> **⏰ Chỉ 100 suất Early Bird!** Giá sẽ tăng sau đợt beta.
 
 ### 💬 Cộng Đồng
 
@@ -114,13 +115,23 @@ A: UpToDate mạnh hơn về nội dung chuyên sâu do bác sĩ viết, CME cre
 A: Có! Phở Chat responsive 100%, dùng tốt trên điện thoại khi đi buồng.
 
 **Q: Tại sao nên đăng ký Early Adopter?**
-A: Lock giá 999k vĩnh viễn, nhận Phở Studio miễn phí, và truy cập sớm mọi tính năng mới. Giá sẽ tăng đáng kể sau khi hết 200 suất.
+A: Lock giá 999k vĩnh viễn, nhận Phở Studio miễn phí, và truy cập sớm mọi tính năng mới. Giá sẽ tăng đáng kể sau khi hết 100 suất.
 
 **Q: Sau khi hết 1 năm thì sao?**
 A: Gia hạn 999k/năm (giá lock vĩnh viễn cho early adopters). Points reset hàng tháng.
 
+**Q: Dữ liệu và tài liệu của tôi có được bảo mật?**
+A: Phở Chat cam kết bảo mật tuyệt đối thông tin người dùng. Chúng tôi không lưu trữ trái phép, không chia sẻ dữ liệu cá nhân cho bất kỳ mục đích nào hoặc cho bên thứ ba khi chưa có sự đồng ý của bạn. Đặc biệt, các tài liệu nghiên cứu, bệnh án hoặc dữ liệu học tập do người dùng tải lên sẽ **không bao giờ** được sử dụng để huấn luyện (training) các mô hình AI.
+
 **Q: Thanh toán bằng gì?**
 A: Chuyển khoản ngân hàng qua **Sepay** — xác nhận tự động, không cần chờ admin. Hỗ trợ tất cả ngân hàng Việt Nam.
+
+---
+
+### ⚠️ Miễn trừ trách nhiệm (Disclaimer)
+
+- **Công cụ hỗ trợ:** Phở Chat Medical cung cấp các giải pháp và công cụ hỗ trợ cho mục đích nghiên cứu và tham khảo chuyên môn. Chúng tôi không chịu trách nhiệm đối với bất kỳ hành vi lạm dụng công cụ để vi phạm pháp luật hoặc các quy định ngành y.
+- **Kiểm chứng thông tin:** AI có thể mắc sai lầm hoặc đưa ra thông tin chưa chính xác (hallucination). Người dùng (đặc biệt là các chuyên gia y tế) có trách nhiệm tự kiểm chứng lại thông tin và chịu trách nhiệm cuối cùng đối với mọi quyết định lâm sàng.
 `;
 
 export default function MedicalBetaPage() {
@@ -195,34 +206,58 @@ export default function MedicalBetaPage() {
           }
           
           .title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #22c55e 0%, #3b82f6 50%, #a855f7 100%);
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #22c55e 0%, #4ade80 40%, #ffffff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 12px;
-            line-height: 1.2;
+            margin-bottom: 16px;
+            line-height: 1.1;
+            filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.3));
           }
           
           .subtitle {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 1.1rem;
-            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
           }
           
           .content {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 48px;
+            position: relative;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(34, 197, 94, 0.15);
+            border-radius: 24px;
+            padding: 56px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.5), 
+                        0 0 30px rgba(34, 197, 94, 0.05);
+            overflow: hidden;
+          }
+
+          .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #22c55e, #4ade80, transparent);
+            animation: borderBeamTop 4s infinite linear;
+          }
+
+          @keyframes borderBeamTop {
+            0% { left: -100%; }
+            100% { left: 100%; }
           }
           
           h2 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #fff;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
+            text-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
           }
           
           h3 {
@@ -280,11 +315,27 @@ export default function MedicalBetaPage() {
           
           .cta-section {
             text-align: center;
-            margin-top: 48px;
-            padding: 32px;
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
-            border-radius: 16px;
-            border: 1px solid rgba(34, 197, 94, 0.2);
+            margin-top: 64px;
+            padding: 48px;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 24px;
+            border: 1px dashed rgba(34, 197, 94, 0.3);
+            position: relative;
+            z-index: 1;
+          }
+
+          .cta-section::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 24px;
+            padding: 1px;
+            background: linear-gradient(135deg, #22c55e, transparent, #4ade80);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.5;
           }
           
           .cta-button {
@@ -329,7 +380,7 @@ export default function MedicalBetaPage() {
           </Link>
 
           <header className="header">
-            <span className="beta-badge">🏥 Early Bird — Chỉ 200 suất</span>
+            <span className="beta-badge">🏥 Early Bird — Chỉ 100 suất</span>
             <h1 className="title">Phở Chat Medical</h1>
             <p className="subtitle">
               Trợ lý AI lâm sàng duy nhất có PubMed, Drug Check, Calculator Y khoa VÀ LaTeX/Citation.
