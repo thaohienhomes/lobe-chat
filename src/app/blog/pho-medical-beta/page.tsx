@@ -28,9 +28,9 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 | 🧮 **Clinical Calculator** | BMI, GFR, MELD, CHA₂DS₂-VASc — chính xác 100% |
 | 📚 **Semantic Scholar** | Tìm kiếm học thuật nâng cao — citation graph |
 | 🔗 **DOI Resolver** | Tra cứu paper theo DOI — metadata CrossRef |
+`;
 
-<p style="color: #ffffff; font-style: italic; opacity: 0.8; font-size: 0.9rem; margin-top: 12px;">*...sẽ tiếp tục cập nhật thêm các plugin chuyên sâu khác*</p>
-
+const medicalBetaContentPart2 = `
 **Bonus tích hợp sẵn:**
 - 📐 **LaTeX Loader** — Upload file .tex, parse & chat trực tiếp
 - 📋 **BibliographySection** — Citation định dạng IEEE tự động
@@ -346,6 +346,8 @@ export default function MedicalBetaPage() {
             border-radius: 12px;
             text-decoration: none;
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            z-index: 10;
           }
           
           .cta-button:hover {
@@ -416,6 +418,10 @@ export default function MedicalBetaPage() {
           <main className="content">
             <Flexbox gap={24}>
               <Markdown>{medicalBetaContent}</Markdown>
+              <p style={{ color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic', marginBottom: '12px', marginTop: '-12px', opacity: 0.8 }}>
+                *...sẽ tiếp tục cập nhật thêm các plugin chuyên sâu khác*
+              </p>
+              <Markdown>{medicalBetaContentPart2}</Markdown>
             </Flexbox>
           </main>
 
