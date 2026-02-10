@@ -62,13 +62,10 @@ const medicalBetaContentPart2 = `
 | **CME Credits** | ❌ *Roadmap* | ✅ | ❌ | ❌ | ❌ |
 | **Giá/năm** | **$40** | **$720** | **$120–780** | **$240** | **$120** |
 
-<div className="review-box">
-  <p className="review-title">💡 Nhận xét của đội ngũ phát triển:</p>
-  <p className="review-content">
-    Phở Chat Medical là giải pháp <strong>duy nhất kết hợp AI conversational + Drug Interaction + Clinical Calculator + PubMed</strong> trong một công cụ với mức giá tối ưu cho thị trường Việt Nam. Trong khi UpToDate mạnh về nội dung chuyên sâu nhưng giá thành cao gấp 18 lần, Consensus mạnh về meta-analysis nhưng thiếu các công cụ lâm sàng thực tiễn - Phở Medical lấp đầy khoảng trống đó bằng sự đa năng và tốc độ.
-  </p>
-</div>
+| **Giá/năm** | **$40** | **$720** | **$120–780** | **$240** | **$120** |
+`;
 
+const medicalBetaContentPart3 = `
 **Tính năng sắp có (Roadmap Q2-Q3 2026):**
 - 📊 **Consensus Meter** — Phân tích đồng thuận từ top papers (tương tự Consensus.app)
 - 📱 **Offline Mode** — Truy cập drug DB & calculator khi không có mạng
@@ -422,6 +419,15 @@ export default function MedicalBetaPage() {
                 *...sẽ tiếp tục cập nhật thêm các plugin chuyên sâu khác*
               </p>
               <Markdown>{medicalBetaContentPart2}</Markdown>
+
+              <div className="review-box">
+                <p className="review-title">💡 Nhận xét của đội ngũ phát triển:</p>
+                <p className="review-content">
+                  Phở Chat Medical là giải pháp <strong>duy nhất kết hợp AI conversational + Drug Interaction + Clinical Calculator + PubMed</strong> trong một công cụ với mức giá tối ưu cho thị trường Việt Nam. Trong khi UpToDate mạnh về nội dung chuyên sâu nhưng giá thành cao gấp 18 lần, Consensus mạnh về meta-analysis nhưng thiếu các công cụ lâm sàng thực tiễn - Phở Medical lấp đầy khoảng trống đó bằng sự đa năng và tốc độ.
+                </p>
+              </div>
+
+              <Markdown>{medicalBetaContentPart3}</Markdown>
             </Flexbox>
           </main>
 
