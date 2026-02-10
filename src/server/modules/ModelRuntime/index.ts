@@ -2,6 +2,7 @@ import { ModelProvider, ModelRuntime } from '@lobechat/model-runtime';
 import { ClientSecretPayload } from '@lobechat/types';
 
 import { getLLMConfig } from '@/envs/llm';
+import { phoGatewayService } from '@/server/services/phoGateway';
 
 import apiKeyManager from './apiKeyManager';
 
@@ -198,6 +199,23 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       }
 
       return { apiKey, baseURL };
+    }
+
+    // Phở Chat — logical model provider with multi-provider failover
+    // Resolves to first provider in priority list from PhoGatewayService
+    case 'phochat': {
+      // Get the first real provider from the gateway's priority list
+      // The chat route's failover loop handles cascading to subsequent providers
+      const defaultModel = 'pho-fast'; // Default; actual model comes from request
+      const priorityList = phoGatewayService.resolveProviderList(defaultModel);
+      const firstProvider = priorityList[0];
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[ModelRuntime] Phở Chat - delegating to first provider:', firstProvider.provider);
+      }
+
+      // Recursively resolve credentials for the first real provider
+      return getParamsFromPayload(firstProvider.provider, payload);
     }
 
     // Vercel AI Gateway - unified access to 100+ models

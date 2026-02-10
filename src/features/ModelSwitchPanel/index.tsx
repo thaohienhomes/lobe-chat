@@ -113,6 +113,24 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
     font-weight: 600;
     color: ${token.colorText};
   `,
+  groupHeader: css`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding-block: 6px;
+    padding-inline: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+    color: ${token.colorTextSecondary};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  `,
+  groupDivider: css`
+    margin-block: 4px;
+    border-block-start: 1px solid ${token.colorBorderSecondary};
+  `,
 }));
 
 const menuKey = (provider: string, model: string) => `${provider}-${model}`;
@@ -287,13 +305,13 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
           ),
           onClick: canAccess
             ? async () => {
-                await updateAgentConfig({ model: modelItem.id, provider: providerItem.id });
-              }
+              await updateAgentConfig({ model: modelItem.id, provider: providerItem.id });
+            }
             : (e: any) => {
-                // Block click for disabled items
-                e?.preventDefault?.();
-                e?.stopPropagation?.();
-              },
+              // Block click for disabled items
+              e?.preventDefault?.();
+              e?.stopPropagation?.();
+            },
         };
       });
 
@@ -337,8 +355,35 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
       return result;
     }
 
-    // Add items directly without provider groups header
-    enabledList.forEach((providerItem) => {
+    // Add items with provider group headers for visual hierarchy
+    enabledList.forEach((providerItem, index) => {
+      // Add divider between groups (not before first)
+      if (index > 0) {
+        result.push({
+          key: `divider-${providerItem.id}`,
+          type: 'divider' as const,
+        });
+      }
+
+      // Group header label
+      const groupIcon = providerItem.id === 'phochat' ? '🍜' : '⭐';
+      result.push({
+        disabled: true,
+        key: `header-${providerItem.id}`,
+        label: (
+          <div className={styles.groupHeader}>
+            <span>{groupIcon}</span>
+            <span>{providerItem.name}</span>
+          </div>
+        ),
+        style: {
+          cursor: 'default',
+          height: 'auto',
+          minHeight: 'auto',
+          padding: '2px 4px',
+        },
+      });
+
       result.push(...getModelItems(providerItem));
     });
 
