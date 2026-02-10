@@ -62,9 +62,9 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 | **CME Credits** | ❌ *Roadmap* | ✅ | ❌ | ❌ | ❌ |
 | **Giá/năm** | **$40** | **$720** | **$120–780** | **$240** | **$120** |
 
-<div style="background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; padding: 24px; border-radius: 0 16px 16px 0; margin: 32px 0;">
-  <p style="color: #fff; font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">💡 Nhận xét của đội ngũ phát triển:</p>
-  <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+<div className="review-box">
+  <p className="review-title">💡 Nhận xét của đội ngũ phát triển:</p>
+  <p className="review-content">
     Phở Chat Medical là giải pháp <strong>duy nhất kết hợp AI conversational + Drug Interaction + Clinical Calculator + PubMed</strong> trong một công cụ với mức giá tối ưu cho thị trường Việt Nam. Trong khi UpToDate mạnh về nội dung chuyên sâu nhưng giá thành cao gấp 18 lần, Consensus mạnh về meta-analysis nhưng thiếu các công cụ lâm sàng thực tiễn - Phở Medical lấp đầy khoảng trống đó bằng sự đa năng và tốc độ.
   </p>
 </div>
@@ -91,7 +91,7 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 ### 🚀 Cách Đăng Ký
 
 1. **Đăng ký** tài khoản Phở Chat tại [pho.chat](https://pho.chat)
-2. **Thanh toán** 999.000 VNĐ qua [**Sepay**](https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay?target=_blank) — thanh toán tự động, bảo mật, xác nhận tức thì (opens in new tab)
+2. **Thanh toán** 999.000 VNĐ qua [**Sepay**](https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay) — thanh toán tự động, bảo mật, xác nhận tức thì (opens in new tab)
 
 > **⏰ Chỉ 100 suất Early Bird!** Giá sẽ tăng sau đợt beta.
 
@@ -129,12 +129,7 @@ A: Phở Chat cam kết bảo mật tuyệt đối thông tin người dùng. Ch
 **Q: Thanh toán bằng gì?**
 A: Chuyển khoản ngân hàng qua **Sepay** — xác nhận tự động, không cần chờ admin. Hỗ trợ tất cả ngân hàng Việt Nam.
 
----
 
-### ⚠️ Miễn trừ trách nhiệm (Disclaimer)
-
-- **Công cụ hỗ trợ:** Phở Chat Medical cung cấp các giải pháp và công cụ hỗ trợ cho mục đích nghiên cứu và tham khảo chuyên môn. Chúng tôi không chịu trách nhiệm đối với bất kỳ hành vi lạm dụng công cụ để vi phạm pháp luật hoặc các quy định ngành y.
-- **Kiểm chứng thông tin:** AI có thể mắc sai lầm hoặc đưa ra thông tin chưa chính xác (hallucination). Người dùng (đặc biệt là các chuyên gia y tế) có trách nhiệm tự kiểm chứng lại thông tin và chịu trách nhiệm cuối cùng đối với mọi quyết định lâm sàng.
 `;
 
 export default function MedicalBetaPage() {
@@ -373,6 +368,33 @@ export default function MedicalBetaPage() {
             .content { padding: 24px 16px; }
             .title { font-size: 1.75rem; }
             .container { padding: 24px 16px; }
+          }
+
+          .review-box {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            padding: 24px;
+            border-radius: 0 16px 16px 0;
+            margin: 32px 0;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.1);
+            backdrop-filter: blur(10px);
+          }
+          
+          .review-title {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+          }
+          
+          .review-content {
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.7;
+            font-size: 1.05rem;
           }
         `}</style>
       </head>
