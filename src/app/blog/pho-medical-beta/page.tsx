@@ -14,11 +14,11 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 - **PubMed?** Phải tab ra ngoài, copy-paste DOI
 - **Calculator y khoa?** Tính BMI, GFR, MELD bằng tay hoặc Google
 - **LaTeX paper?** Không thể upload và chat trực tiếp
-- **UpToDate?** Đắt ($720/năm) và không có AI conversational
+- **UpToDate?** ($720/năm) và không có AI conversational
 
 ### ✅ Giải Pháp: Phở Chat Medical
 
-**6+ plugin chuyên biệt** tích hợp sẵn, không cần cài thêm:
+**6+ plugins chuyên biệt** tích hợp sẵn, không cần cài thêm:
 
 | Plugin | Mô tả |
 |--------|-------|
@@ -28,9 +28,9 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 | 🧮 **Clinical Calculator** | BMI, GFR, MELD, CHA₂DS₂-VASc — chính xác 100% |
 | 📚 **Semantic Scholar** | Tìm kiếm học thuật nâng cao — citation graph |
 | 🔗 **DOI Resolver** | Tra cứu paper theo DOI — metadata CrossRef |
-\`\`\`tsx
-*...sẽ tiếp tục cập nhật thêm *
-  \`\`\`
+
+<p style="color: #ffffff; font-style: italic; opacity: 0.8; font-size: 0.9rem; margin-top: 12px;">*...sẽ tiếp tục cập nhật thêm các plugin chuyên sâu khác*</p>
+
 **Bonus tích hợp sẵn:**
 - 📐 **LaTeX Loader** — Upload file .tex, parse & chat trực tiếp
 - 📋 **BibliographySection** — Citation định dạng IEEE tự động
@@ -62,7 +62,12 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 | **CME Credits** | ❌ *Roadmap* | ✅ | ❌ | ❌ | ❌ |
 | **Giá/năm** | **$40** | **$720** | **$120–780** | **$240** | **$120** |
 
-> 💡 **Nhận xét:** Phở Chat Medical là giải pháp **duy nhất kết hợp AI conversational + Drug Interaction + Clinical Calculator + PubMed** trong một công cụ với mức giá phù hợp thị trường Việt Nam. UpToDate mạnh về nội dung chuyên sâu nhưng đắt gấp 18x. Consensus mạnh về meta-analysis nhưng thiếu công cụ lâm sàng.
+<div style="background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; padding: 24px; border-radius: 0 16px 16px 0; margin: 32px 0;">
+  <p style="color: #fff; font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">💡 Nhận xét của đội ngũ phát triển:</p>
+  <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+    Phở Chat Medical là giải pháp <strong>duy nhất kết hợp AI conversational + Drug Interaction + Clinical Calculator + PubMed</strong> trong một công cụ với mức giá tối ưu cho thị trường Việt Nam. Trong khi UpToDate mạnh về nội dung chuyên sâu nhưng giá thành cao gấp 18 lần, Consensus mạnh về meta-analysis nhưng thiếu các công cụ lâm sàng thực tiễn - Phở Medical lấp đầy khoảng trống đó bằng sự đa năng và tốc độ.
+  </p>
+</div>
 
 **Tính năng sắp có (Roadmap Q2-Q3 2026):**
 - 📊 **Consensus Meter** — Phân tích đồng thuận từ top papers (tương tự Consensus.app)
@@ -86,9 +91,7 @@ Bác sĩ & dược sĩ Việt Nam đang dùng ChatGPT để tra cứu y khoa, nh
 ### 🚀 Cách Đăng Ký
 
 1. **Đăng ký** tài khoản Phở Chat tại [pho.chat](https://pho.chat)
-\`\`\`tsx
-2. ** Thanh toán ** 999.000 VNĐ qua[** Sepay **](https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay) — thanh toán tự động, bảo mật, xác nhận tức thì
-  \`\`\`
+2. **Thanh toán** 999.000 VNĐ qua [**Sepay**](https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay?target=_blank) — thanh toán tự động, bảo mật, xác nhận tức thì (opens in new tab)
 
 > **⏰ Chỉ 100 suất Early Bird!** Giá sẽ tăng sau đợt beta.
 
@@ -394,15 +397,20 @@ export default function MedicalBetaPage() {
             </Flexbox>
           </main>
 
-          <div className="cta-section">
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem', marginBottom: '16px' }}>
-              Sẵn sàng nâng cấp workflow y khoa?
+          <div className="cta-section" id="register">
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.2rem', fontWeight: 500, marginBottom: '24px' }}>
+              Sẵn sàng nâng cấp workflow y khoa chuyên nghiệp?
             </p>
-            <Link className="cta-button" href="/subscription/checkout?plan=medical_beta&provider=sepay">
-              🏥 Đăng Ký Medical Beta
-            </Link>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginTop: '12px' }}>
-              Early Bird: 999k VNĐ/năm · Giá tăng sau Tết
+            <a
+              className="cta-button"
+              href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
+              rel="noreferrer"
+              target="_blank"
+            >
+              🏥 Đăng Ký Medical Beta Ngay
+            </a>
+            <p style={{ color: '#22c55e', fontSize: '0.9rem', fontWeight: 600, marginTop: '16px' }}>
+              Early Bird: 999k VNĐ/năm · Giá sẽ tăng sau khi hết suất
             </p>
           </div>
 
