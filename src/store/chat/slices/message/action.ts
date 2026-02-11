@@ -18,7 +18,7 @@ import {
 import { getSingletonAnalyticsOptional } from '@lobehub/analytics';
 import { copyToClipboard } from '@lobehub/ui';
 import isEqual from 'fast-deep-equal';
-import { SWRResponse, mutate } from 'swr';
+import { SWRResponse, mutate, useSWR } from 'swr';
 import { StateCreator } from 'zustand/vanilla';
 
 import { useClientDataSWR } from '@/libs/swr';

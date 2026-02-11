@@ -1,4 +1,4 @@
-import useSWR, { SWRHook } from 'swr';
+import { useSWR, SWRHook } from 'swr';
 
 import { isDesktop } from '@/const/version';
 
@@ -33,7 +33,7 @@ export const useClientDataSWR: SWRHook = (key, fetch, config) =>
       isDesktop
         ? 1500
         : // web 300s
-          5 * 60 * 1000,
+        5 * 60 * 1000,
     refreshWhenOffline: false,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
