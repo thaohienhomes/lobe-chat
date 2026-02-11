@@ -4,13 +4,17 @@ import { useUser } from '@clerk/nextjs';
 import { Alert, Button, Card, Divider, Form, Input, Radio, Spin, Typography, message } from 'antd';
 import { createStyles } from 'antd-style';
 import { ArrowLeft, Check, CreditCard, Lock, MessageSquare, Settings2, Shield } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import ConfettiCelebration from '@/components/ConfettiCelebration';
-import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { trackAddPaymentInfo } from '@/utils/tiktok-events';
+
+const ConfettiCelebration = dynamic(() => import('@/components/ConfettiCelebration'), {
+  loading: () => null,
+  ssr: false,
+});
 
 const { Title, Text } = Typography;
 
@@ -242,7 +246,6 @@ const plans = {
     yearlyPriceVND: 0,
   },
 
-
   // Medical Beta tier - special plan activated via promo code
   medical_beta: {
     code: 'medical_beta',
@@ -259,7 +262,6 @@ const plans = {
     name: 'Phở Medical Beta',
     yearlyPriceVND: 999_000,
   },
-
 
   // Legacy mappings (for backward compatibility with existing URLs)
   premium: {
@@ -279,7 +281,6 @@ const plans = {
     yearlyPriceVND: 690_000,
   },
 
-
   starter: {
     code: 'vn_free',
     description: 'Trải nghiệm miễn phí',
@@ -289,8 +290,6 @@ const plans = {
     name: 'Phở Không Người Lái',
     yearlyPriceVND: 0,
   },
-
-
 
   ultimate: {
     code: 'vn_pro',
@@ -306,8 +305,6 @@ const plans = {
     name: 'Phở Đặc Biệt',
     yearlyPriceVND: 1_990_000,
   },
-
-
 
   // Basic tier (Student) - vn_basic
   vn_basic: {
@@ -327,7 +324,6 @@ const plans = {
     yearlyPriceVND: 690_000,
   },
 
-
   // Free tier - vn_free (for reference, not purchasable)
   vn_free: {
     code: 'vn_free',
@@ -342,8 +338,6 @@ const plans = {
     name: 'Phở Không Người Lái',
     yearlyPriceVND: 0,
   },
-
-
 
   // Pro tier - vn_pro
   vn_pro: {
@@ -366,7 +360,6 @@ const plans = {
     yearlyPriceUSD: 99,
     yearlyPriceVND: 1_990_000,
   },
-
 
   // Ultimate tier - vn_ultimate (Phở Pro Ultimate)
   vn_ultimate: {
@@ -410,7 +403,7 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoaded } = useUser();
-  usePricingGeo(); // Hook called for potential future use
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
@@ -442,7 +435,8 @@ function CheckoutContent() {
   // Determine if this is a global plan (gl_*) or Vietnam plan (vn_*)
   const isGlobalPlan = planId?.startsWith('gl_');
   const isVietnamPlan =
-    planId?.startsWith('vn_') || ['starter', 'premium', 'ultimate', 'medical_beta'].includes(planId);
+    planId?.startsWith('vn_') ||
+    ['starter', 'premium', 'ultimate', 'medical_beta'].includes(planId);
 
   // Determine if this is a FREE plan (no payment needed)
   const FREE_PLAN_IDS = ['vn_free', 'gl_starter', 'starter'];
@@ -621,7 +615,7 @@ function CheckoutContent() {
       if (data.success) {
         message.success(
           data.message ||
-          (isGlobalPlan ? 'Free plan activated!' : 'Gói miễn phí đã được kích hoạt!'),
+            (isGlobalPlan ? 'Free plan activated!' : 'Gói miễn phí đã được kích hoạt!'),
         );
         // 🎉 Show confetti celebration animation
         setShowConfetti(true);
@@ -633,7 +627,7 @@ function CheckoutContent() {
         console.error('❌ Free plan activation failed:', data);
         message.error(
           data.message ||
-          (isGlobalPlan ? 'Failed to activate free plan' : 'Không thể kích hoạt gói miễn phí'),
+            (isGlobalPlan ? 'Failed to activate free plan' : 'Không thể kích hoạt gói miễn phí'),
         );
       }
     } catch (error) {
@@ -712,9 +706,14 @@ function CheckoutContent() {
                     }}
                   >
                     <Text style={{ color: '#fff', fontSize: 24, fontWeight: 700 }}>
-                      {formatPrice(successPlan.yearlyPriceVND || successPlan.monthlyPriceVND, false)}
+                      {formatPrice(
+                        successPlan.yearlyPriceVND || successPlan.monthlyPriceVND,
+                        false,
+                      )}
                     </Text>
-                    <Text style={{ color: 'rgba(255,255,255,0.8)', display: 'block', fontSize: 13 }}>
+                    <Text
+                      style={{ color: 'rgba(255,255,255,0.8)', display: 'block', fontSize: 13 }}
+                    >
                       {successPlan.yearlyPriceVND ? '/ năm' : '/ tháng'}
                     </Text>
                   </div>
