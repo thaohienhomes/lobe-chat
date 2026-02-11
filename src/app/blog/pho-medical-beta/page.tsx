@@ -5,6 +5,8 @@ import { Markdown } from '@lobehub/ui';
 import Link from 'next/link';
 import { Flexbox } from 'react-layout-kit';
 
+import { LobeAnalyticsProviderWrapper } from '@/components/Analytics/LobeAnalyticsProviderWrapper';
+
 const medicalBetaContent = `
 ## Phở Chat Medical — Trợ Lý AI Lâm Sàng Đầu Tiên Cho Bác Sĩ Việt Nam
 
@@ -130,7 +132,7 @@ A: Chuyển khoản ngân hàng qua **Sepay** — xác nhận tự động, khô
 
 `;
 
-export default function MedicalBetaPage() {
+function MedicalBetaPageContent() {
   const { analytics } = useAnalytics();
 
   const handleCTAClick = () => {
@@ -145,7 +147,7 @@ export default function MedicalBetaPage() {
   };
 
   return (
-    <html lang="vi">
+    <>
       <head>
         <title>Phở Chat Medical — Trợ Lý AI Lâm Sàng | 999k/năm</title>
         <meta
@@ -411,65 +413,71 @@ export default function MedicalBetaPage() {
           }
         `}</style>
       </head>
-      <body>
-        <div className="container">
-          <Link className="back-link" href="/blog">
-            ← Quay lại Blog
-          </Link>
+      <div className="container">
+        <Link className="back-link" href="/blog">
+          ← Quay lại Blog
+        </Link>
 
-          <header className="header">
-            <span className="beta-badge">🏥 Early Bird — Chỉ 100 suất</span>
-            <h1 className="title">Phở Chat Medical</h1>
-            <p className="subtitle">
-              Trợ lý AI lâm sàng duy nhất có PubMed, Drug Check, Calculator Y khoa VÀ LaTeX/Citation.
-              <br />Chỉ 999k VNĐ/năm.
+        <header className="header">
+          <span className="beta-badge">🏥 Early Bird — Chỉ 100 suất</span>
+          <h1 className="title">Phở Chat Medical</h1>
+          <p className="subtitle">
+            Trợ lý AI lâm sàng duy nhất có PubMed, Drug Check, Calculator Y khoa VÀ LaTeX/Citation.
+            <br />Chỉ 999k VNĐ/năm.
+          </p>
+        </header>
+
+        <main className="content">
+          <Flexbox gap={24}>
+            <Markdown>{medicalBetaContent}</Markdown>
+            <p style={{ color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic', marginBottom: '12px', marginTop: '-12px', opacity: 0.8 }}>
+              *...sẽ tiếp tục cập nhật thêm các plugin chuyên sâu khác*
             </p>
-          </header>
+            <Markdown>{medicalBetaContentPart2}</Markdown>
 
-          <main className="content">
-            <Flexbox gap={24}>
-              <Markdown>{medicalBetaContent}</Markdown>
-              <p style={{ color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic', marginBottom: '12px', marginTop: '-12px', opacity: 0.8 }}>
-                *...sẽ tiếp tục cập nhật thêm các plugin chuyên sâu khác*
+            <div className="review-box">
+              <p className="review-title">💡 Nhận xét của đội ngũ phát triển:</p>
+              <p className="review-content">
+                Phở Chat Medical là giải pháp <strong>duy nhất kết hợp AI conversational + Drug Interaction + Clinical Calculator + PubMed</strong> trong một công cụ với mức giá tối ưu cho thị trường Việt Nam. Trong khi UpToDate mạnh về nội dung chuyên sâu nhưng giá thành cao gấp 18 lần, Consensus mạnh về meta-analysis nhưng thiếu các công cụ lâm sàng thực tiễn - Phở Medical lấp đầy khoảng trống đó bằng sự đa năng và tốc độ.
               </p>
-              <Markdown>{medicalBetaContentPart2}</Markdown>
+            </div>
 
-              <div className="review-box">
-                <p className="review-title">💡 Nhận xét của đội ngũ phát triển:</p>
-                <p className="review-content">
-                  Phở Chat Medical là giải pháp <strong>duy nhất kết hợp AI conversational + Drug Interaction + Clinical Calculator + PubMed</strong> trong một công cụ với mức giá tối ưu cho thị trường Việt Nam. Trong khi UpToDate mạnh về nội dung chuyên sâu nhưng giá thành cao gấp 18 lần, Consensus mạnh về meta-analysis nhưng thiếu các công cụ lâm sàng thực tiễn - Phở Medical lấp đầy khoảng trống đó bằng sự đa năng và tốc độ.
-                </p>
-              </div>
+            <Markdown>{medicalBetaContentPart3}</Markdown>
+          </Flexbox>
+        </main>
 
-              <Markdown>{medicalBetaContentPart3}</Markdown>
-            </Flexbox>
-          </main>
-
-          <div className="cta-section" id="register">
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.2rem', fontWeight: 500, marginBottom: '24px' }}>
-              Sẵn sàng nâng cấp workflow y khoa chuyên nghiệp?
-            </p>
-            <a
-              className="cta-button"
-              href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
-              onClick={handleCTAClick}
-              rel="noreferrer"
-              target="_blank"
-            >
-              🏥 Đăng Ký Medical Beta Ngay
-            </a>
-            <p style={{ color: '#22c55e', fontSize: '0.9rem', fontWeight: 600, marginTop: '16px' }}>
-              Early Bird: 999k VNĐ/năm · Giá sẽ tăng sau khi hết suất
-            </p>
-          </div>
-
-          <footer className="footer">
-            <p>
-              <a href="https://pho.chat">← Quay lại Phở Chat</a>
-            </p>
-          </footer>
+        <div className="cta-section" id="register">
+          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.2rem', fontWeight: 500, marginBottom: '24px' }}>
+            Sẵn sàng nâng cấp workflow y khoa chuyên nghiệp?
+          </p>
+          <a
+            className="cta-button"
+            href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
+            onClick={handleCTAClick}
+            rel="noreferrer"
+            target="_blank"
+          >
+            🏥 Đăng Ký Medical Beta Ngay
+          </a>
+          <p style={{ color: '#22c55e', fontSize: '0.9rem', fontWeight: 600, marginTop: '16px' }}>
+            Early Bird: 999k VNĐ/năm · Giá sẽ tăng sau khi hết suất
+          </p>
         </div>
-      </body>
-    </html>
+
+        <footer className="footer">
+          <p>
+            <a href="https://pho.chat">← Quay lại Phở Chat</a>
+          </p>
+        </footer>
+      </div>
+    </>
+  );
+}
+
+export default function MedicalBetaPage() {
+  return (
+    <LobeAnalyticsProviderWrapper>
+      <MedicalBetaPageContent />
+    </LobeAnalyticsProviderWrapper>
   );
 }
