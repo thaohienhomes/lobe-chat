@@ -101,9 +101,11 @@ export async function GET() {
     const fallbackPlanId = user.currentPlanId || 'vn_free';
     let planId = await getEffectivePlanId(db, userId, fallbackPlanId);
 
-    // Override with Clerk publicMetadata.planId if it's a non-free plan
+    // Override with Clerk publicMetadata.planId if DB plan resolves to free-tier
     // This handles promo-activated users who have planId in Clerk but no DB subscription
-    if (planId === fallbackPlanId && (planId === 'vn_free' || planId === 'starter' || planId === 'free')) {
+    const resolvedPlan = VN_PLANS[planId] || GLOBAL_PLANS[planId];
+    const isFreeOrMissing = !resolvedPlan || resolvedPlan.monthlyPoints <= 50_000;
+    if (isFreeOrMissing) {
       const { clerkClient } = await import('@clerk/nextjs/server');
       try {
         const client = await clerkClient();
