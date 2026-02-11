@@ -26,8 +26,7 @@ type OnboardingStep = 'profession' | 'recommendations';
  */
 const applyRecommendations = async (selections: RecommendationSelections) => {
   const { updateDefaultAgent } = useUserStore.getState();
-  const { installPlugins } = useToolStore.getState();
-  const { togglePlugin } = useAgentStore.getState();
+  const agentState = useAgentStore.getState();
 
   // Apply default model if selected
   if (selections.defaultModel) {
@@ -42,17 +41,64 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
   // Install selected plugins and enable them for current session
   if (selections.enabledPlugins && selections.enabledPlugins.length > 0) {
     try {
-      // Install the plugins to database
-      await installPlugins(selections.enabledPlugins);
+      // --- BATCH INSTALL: fetch manifests in parallel, install each, refresh only once ---
+      const { pluginService } = await import('@/services/plugin');
+      const { toolService } = await import('@/services/tool');
+      const { getBundledPluginById } = await import('@/config/bundledPlugins');
+      const { pluginStoreSelectors } = await import('@/store/tool/selectors');
+      const toolState = useToolStore.getState();
+
+      // Fetch all manifests in parallel
+      const manifestResults = await Promise.allSettled(
+        selections.enabledPlugins.map(async (pluginId) => {
+          let plugin = pluginStoreSelectors.getPluginById(pluginId)(toolState);
+          if (!plugin) {
+            const bundled = getBundledPluginById(pluginId);
+            if (bundled) plugin = bundled;
+          }
+          if (!plugin) {
+            console.warn(`Plugin not found: ${pluginId}`);
+            return null;
+          }
+          const manifest = await toolService.getToolManifest(plugin.manifest);
+          return { identifier: plugin.identifier, manifest };
+        }),
+      );
+
+      // Install all plugins to DB in parallel (no refreshPlugins per-plugin)
+      const installPromises = manifestResults
+        .filter(
+          (r): r is PromiseFulfilledResult<{ identifier: string; manifest: any }> =>
+            r.status === 'fulfilled' && r.value !== null,
+        )
+        .map((r) =>
+          pluginService.installPlugin({
+            identifier: r.value.identifier,
+            manifest: r.value.manifest,
+            type: 'plugin',
+          }),
+        );
+      await Promise.all(installPromises);
+
+      // Refresh plugin list only ONCE after all installs
+      await useToolStore.getState().refreshPlugins();
       console.log('✅ Installed plugins:', selections.enabledPlugins);
 
-      // Enable all plugins in parallel for the current session
-      await Promise.all(
-        selections.enabledPlugins.map((pluginId) =>
-          togglePlugin(pluginId, true).then(() =>
-            console.log('✅ Enabled plugin for session:', pluginId),
-          ),
-        ),
+      // --- BATCH ENABLE: single updateAgentConfig call instead of 6 competing ones ---
+      // This avoids AbortController conflicts where each togglePlugin aborts the previous
+      const { agentSelectors } = await import('@/store/agent/slices/chat/selectors');
+      const { produce } = await import('immer');
+      const currentConfig = agentSelectors.currentAgentConfig(agentState);
+      const batchedConfig = produce(currentConfig, (draft: any) => {
+        const existingPlugins = draft.plugins || [];
+        const newPlugins = selections.enabledPlugins!.filter(
+          (id: string) => !existingPlugins.includes(id),
+        );
+        draft.plugins = [...existingPlugins, ...newPlugins];
+      });
+      await agentState.updateAgentConfig(batchedConfig);
+      selections.enabledPlugins.forEach((pluginId) =>
+        console.log('✅ Enabled plugin for session:', pluginId),
       );
     } catch (error) {
       console.error('Failed to install/enable plugins:', error);
