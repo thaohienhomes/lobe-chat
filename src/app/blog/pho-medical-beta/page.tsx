@@ -1,5 +1,6 @@
 'use client';
 
+import { useAnalytics } from '@lobehub/analytics/react';
 import { Markdown } from '@lobehub/ui';
 import Link from 'next/link';
 import { Flexbox } from 'react-layout-kit';
@@ -130,6 +131,19 @@ A: Chuyển khoản ngân hàng qua **Sepay** — xác nhận tự động, khô
 `;
 
 export default function MedicalBetaPage() {
+  const { analytics } = useAnalytics();
+
+  const handleCTAClick = () => {
+    analytics?.track({
+      name: 'medical_beta_cta_clicked',
+      properties: {
+        plan: 'medical_beta',
+        source: 'blog_landing_page',
+        url: 'https://pho.chat/blog/pho-medical-beta',
+      },
+    });
+  };
+
   return (
     <html lang="vi">
       <head>
@@ -438,6 +452,7 @@ export default function MedicalBetaPage() {
             <a
               className="cta-button"
               href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
+              onClick={handleCTAClick}
               rel="noreferrer"
               target="_blank"
             >
