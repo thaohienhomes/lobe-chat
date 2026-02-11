@@ -1,11 +1,8 @@
 'use client';
 
-import { useAnalytics } from '@lobehub/analytics/react';
 import { Markdown } from '@lobehub/ui';
 import Link from 'next/link';
 import { Flexbox } from 'react-layout-kit';
-
-import { LobeAnalyticsProviderWrapper } from '@/components/Analytics/LobeAnalyticsProviderWrapper';
 
 const medicalBetaContent = `
 ## Phở Chat Medical — Trợ Lý AI Lâm Sàng Đầu Tiên Cho Bác Sĩ Việt Nam
@@ -133,17 +130,16 @@ A: Chuyển khoản ngân hàng qua **Sepay** — xác nhận tự động, khô
 `;
 
 function MedicalBetaPageContent() {
-  const { analytics } = useAnalytics();
-
   const handleCTAClick = () => {
-    analytics?.track({
-      name: 'medical_beta_cta_clicked',
-      properties: {
+    try {
+      (window as any).posthog?.capture('medical_beta_cta_clicked', {
         plan: 'medical_beta',
         source: 'blog_landing_page',
         url: 'https://pho.chat/blog/pho-medical-beta',
-      },
-    });
+      });
+    } catch {
+      // Analytics not available — ignore silently
+    }
   };
 
   return (
@@ -475,9 +471,5 @@ function MedicalBetaPageContent() {
 }
 
 export default function MedicalBetaPage() {
-  return (
-    <LobeAnalyticsProviderWrapper>
-      <MedicalBetaPageContent />
-    </LobeAnalyticsProviderWrapper>
-  );
+  return <MedicalBetaPageContent />;
 }
