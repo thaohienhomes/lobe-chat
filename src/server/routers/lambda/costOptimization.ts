@@ -5,6 +5,7 @@ import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { CostOptimizationEngine, UsageTracker, VND_PRICING_TIERS } from '@/server/modules/CostOptimization';
 import { monthlyUsageSummary, usageLogs } from '@/database/schemas/usage';
+import { serverAnalytics } from '@/libs/analytics';
 
 const costOptimizationProcedure = authedProcedure.use(serverDatabase).use(async (opts) => {
   const { ctx } = opts;
@@ -350,6 +351,29 @@ export const costOptimizationRouter = router({
         queryComplexity: input.queryComplexity,
         sessionId: input.sessionId,
       });
+
+      // Bridge to PostHog for LLM Observability dashboard
+      try {
+        serverAnalytics.track({
+          name: 'llm_request',
+          properties: {
+            cost_usd: input.costUSD,
+            cost_vnd: input.costUSD * 24_167,
+            input_tokens: input.inputTokens,
+            model: input.model,
+            output_tokens: input.outputTokens,
+            provider: input.provider,
+            query_complexity: input.queryComplexity,
+            response_time_ms: input.responseTimeMs,
+            session_id: input.sessionId,
+            total_tokens: input.inputTokens + input.outputTokens,
+          },
+          userId: ctx.userId,
+        });
+      } catch (e) {
+        // Non-blocking: don't fail the mutation if analytics fails
+        console.warn('[LLM Observability] PostHog track failed:', e);
+      }
 
       // Check if budget warning should be sent
       const subscriptionTier = await ctx.serverDB

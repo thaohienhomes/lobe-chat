@@ -18,6 +18,14 @@ const UserLoginOrSignup = memo<{ onClick: () => void }>(({ onClick }) => {
       },
     });
 
+    // Explicit Funnel Event: Signup Intent
+    analytics?.track({
+      name: 'user_signup_initiated',
+      properties: {
+        source: 'homepage_community_button',
+      },
+    });
+
     onClick();
   };
 

@@ -16,6 +16,11 @@ interface FeedbackPayload {
     rating: number;
 }
 
+// PostHog Survey ID — create an API Survey in PostHog Dashboard → Surveys → New Survey
+// then paste the ID here. Without this, responses go to Activity instead of Surveys menu.
+// TODO: Replace with actual Survey ID after creating it on PostHog Dashboard
+const POSTHOG_MEDICAL_SURVEY_ID = '019c4bb7-283f-0000-4b17-7763ef2c54fe'; // e.g. '018d1234-abcd-5678-ef90-1234567890ab'
+
 const CATEGORIES = [
     { emoji: '🐛', label: 'Bug Report', value: 'bug' },
     { emoji: '💡', label: 'Feature Request', value: 'feature' },
@@ -44,12 +49,26 @@ const MedicalBetaFeedback = memo(() => {
         // Try PostHog survey first
         const posthog = (window as any).posthog;
         if (posthog) {
-            posthog.capture('medical_beta_feedback', {
-                $survey_response: message.trim(),
-                feedback_category: category,
-                feedback_rating: rating,
-                plan: 'medical_beta',
-            });
+            if (POSTHOG_MEDICAL_SURVEY_ID) {
+                // Route to PostHog Surveys dashboard
+                posthog.capture('survey sent', {
+                    $survey_id: POSTHOG_MEDICAL_SURVEY_ID,
+                    $survey_response: message.trim(),
+                    $survey_response_1: category,
+                    $survey_response_2: rating,
+                    feedback_category: category,
+                    feedback_rating: rating,
+                    plan: 'medical_beta',
+                });
+            } else {
+                // Fallback: send as regular event until Survey ID is configured
+                posthog.capture('medical_beta_feedback', {
+                    $survey_response: message.trim(),
+                    feedback_category: category,
+                    feedback_rating: rating,
+                    plan: 'medical_beta',
+                });
+            }
         }
 
         // Also send to API for persistence
@@ -102,8 +121,8 @@ const MedicalBetaFeedback = memo(() => {
             {isOpen && (
                 <div
                     style={{
-                        background: 'rgba(15, 15, 25, 0.95)',
                         backdropFilter: 'blur(20px)',
+                        background: 'rgba(15, 15, 25, 0.95)',
                         border: '1px solid rgba(34, 197, 94, 0.2)',
                         borderRadius: '16px',
                         bottom: '88px',

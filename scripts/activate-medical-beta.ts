@@ -76,6 +76,33 @@ async function main() {
         console.log(`   Email: ${result.email_addresses?.[0]?.email_address}`);
         console.log(`   Plan: ${result.public_metadata?.planId}`);
         console.log(`   Medical Beta: ${result.public_metadata?.medical_beta}`);
+
+        // Step 4: Send Welcome Email
+        const userEmail = result.email_addresses?.[0]?.email_address;
+        if (userEmail) {
+            console.log(`\n📧 Sending welcome email to: ${userEmail}...`);
+            try {
+                // Dynamic import to avoid issues with top-level await in some environments
+                const { EmailService } = await import('../src/libs/email/index');
+                const { generateMedicalBetaEmail } = await import('../src/libs/email/templates/medical-beta');
+
+                const emailRes = await EmailService.send({
+                    html: generateMedicalBetaEmail(result.first_name || 'Member'),
+                    subject: '🏥 Welcome to Phở Medical Beta!',
+                    text: 'Welcome to Phở Medical Beta! Your account has been upgraded.',
+                    to: userEmail,
+                });
+
+                if (emailRes.success) {
+                    console.log('✅ Welcome email sent successfully!');
+                } else {
+                    console.error('⚠️ Failed to send email:', emailRes.error);
+                }
+            } catch (emailErr) {
+                console.error('⚠️ Error initializing email service:', emailErr);
+            }
+        }
+
         console.log('\n🔄 Refresh pho.chat (Ctrl+Shift+R) to see changes!');
     } else {
         console.error('❌ Failed to update:', result);

@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   try {
+    const { serverAnalytics } = await import('@/libs/analytics');
     const body = await req.text();
     const event = JSON.parse(body);
 
@@ -107,6 +108,34 @@ export async function POST(req: Request) {
         email: customer_email,
         planId,
         productId: product_id,
+        userId: user.id,
+      });
+
+      // PostHog Revenue Tracking - Source of Truth
+      // Polar sends amounts in cents (e.g. 2900 = $29.00) if using USD
+      // We assume USD for now based on Polar context
+      const amountUSD = (event.data.amount || 0) / 100;
+
+      serverAnalytics.track({
+        name: 'payment_succeeded',
+        properties: {
+          $currency: event.data.currency || 'USD',
+          $revenue: amountUSD, // Special PostHog property for Revenue charts
+          billing_period: 'lifetime',
+          payment_provider: 'polar',
+          plan_id: planId,
+          product_id: product_id,
+        },
+        userId: user.id,
+      });
+
+      serverAnalytics.track({
+        name: 'subscription_created',
+        properties: {
+          plan_id: planId,
+          status: 'active',
+          type: 'lifetime',
+        },
         userId: user.id,
       });
 

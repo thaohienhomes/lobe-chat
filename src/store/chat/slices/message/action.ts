@@ -15,6 +15,7 @@ import {
   TraceEventType,
   UpdateMessageRAGParams,
 } from '@lobechat/types';
+import { getSingletonAnalyticsOptional } from '@lobehub/analytics';
 import { copyToClipboard } from '@lobehub/ui';
 import isEqual from 'fast-deep-equal';
 import { SWRResponse, mutate } from 'swr';
@@ -234,6 +235,20 @@ export const chatMessage: StateCreator<
     });
 
     updateInputMessage('');
+
+    // Track detailed activation metric: First message or returning message
+    const analytics = getSingletonAnalyticsOptional();
+    if (analytics) {
+      analytics.track({
+        name: 'message_sent',
+        properties: {
+          file_count: fileList?.length || 0,
+          has_files: (fileList?.length || 0) > 0,
+          session_id: activeId,
+          topic_id: activeTopicId || 'default',
+        },
+      });
+    }
   },
   copyMessage: async (id, content) => {
     await copyToClipboard(content);

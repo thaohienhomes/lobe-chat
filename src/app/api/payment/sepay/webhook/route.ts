@@ -231,6 +231,40 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
+    // Track successful payment to PostHog Revenue Dashboard
+    try {
+      const { serverAnalytics } = await import('@/libs/analytics');
+
+      // Revenue Event
+      serverAnalytics.track({
+        name: 'payment_succeeded',
+        properties: {
+          $currency: webhookData.currency || 'VND',
+          $revenue: webhookData.amount, // Sepay sends full amount (e.g. 500000)
+          billing_period: webhookData.orderId.includes('lifetime') ? 'lifetime' : 'monthly', // simplistic check
+          order_id: webhookData.orderId,
+          payment_method: webhookData.paymentMethod,
+          payment_provider: 'sepay',
+        },
+        userId: webhookData.orderId.split('_').slice(2).join('_') || 'unknown', // Attempt to recover userId from OrderID if possible (PHO_SUB_Timestamp_Code isn't userId, so we rely on DB lookup if possible, but here we only have webhookData)
+      });
+
+      // Subscription Created Event
+      serverAnalytics.track({
+        name: 'subscription_created',
+        properties: {
+          amount: webhookData.amount,
+          currency: 'VND',
+          order_id: webhookData.orderId,
+          status: 'active',
+        },
+        userId: webhookData.orderId, // Fallback ID
+      });
+
+    } catch (analyticsError) {
+      console.error('⚠️ Failed to track PostHog revenue (non-critical):', analyticsError);
+    }
+
     console.log('✅ Successfully processed payment:', {
       duration: `${duration}ms`,
       orderId: webhookData.orderId,
