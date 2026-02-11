@@ -35,29 +35,43 @@ const useStyles = createStyles(({ css, token }) => ({
 
     transition: all 0.2s ease;
   `,
-  btnPrimary: css`
-    border: none;
-    color: white;
-    background: ${token.colorPrimary};
-
-    &:hover {
-      background: ${token.colorPrimaryHover};
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      background: ${token.colorPrimaryBg};
-      color: ${token.colorTextDisabled};
-    }
-  `,
   btnLoading: css`
+    cursor: wait;
+
     display: inline-flex;
     gap: 8px;
     align-items: center;
 
-    background: ${token.colorPrimary};
-    color: white;
-    cursor: wait;
+    color: ${token.colorBgLayout};
+
+    opacity: 0.8;
+    background: linear-gradient(135deg, ${token.colorPrimary} 0%, ${token.colorPrimaryHover} 100%);
+  `,
+  btnPrimary: css`
+    border: none;
+    color: ${token.colorBgLayout};
+    background: linear-gradient(135deg, ${token.colorPrimary} 0%, ${token.colorPrimaryHover} 100%);
+    box-shadow: 0 4px 12px ${token.colorPrimary}40;
+
+    &:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(
+        135deg,
+        ${token.colorPrimaryHover} 0%,
+        ${token.colorPrimaryActive} 100%
+      );
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+
+      transform: none;
+
+      color: ${token.colorTextDisabled};
+
+      background: ${token.colorFillTertiary};
+      box-shadow: none;
+    }
   `,
   btnSecondary: css`
     border: 1px solid ${token.colorBorderSecondary};
