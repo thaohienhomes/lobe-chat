@@ -117,9 +117,16 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
 
 const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
   const { user } = useUser();
-  const isMedicalBeta =
-    (user?.publicMetadata as any)?.planId === 'medical_beta' ||
-    (user?.publicMetadata as any)?.medical_beta === true;
+  const planId = (user?.publicMetadata as any)?.planId as string | undefined;
+
+  // Show advanced onboarding (specialty + plugins) for:
+  // - Medical Beta users
+  // - Lifetime Deal users (they get full access to medical/research plugins)
+  const showAdvancedOnboarding =
+    planId === 'medical_beta' ||
+    (user?.publicMetadata as any)?.medical_beta === true ||
+    (planId && planId.startsWith('lifetime_')) ||
+    planId === 'gl_lifetime';
 
   const [step, setStep] = useState<OnboardingStep>('profession');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,8 +213,12 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
       title={null}
       width={getModalWidth()}
     >
-      {isMedicalBeta ? (
-        <MedicalOnboarding loading={isSubmitting} onComplete={markOnboardedAndClose} />
+      {showAdvancedOnboarding ? (
+        <MedicalOnboarding
+          loading={isSubmitting}
+          onComplete={markOnboardedAndClose}
+          planId={planId}
+        />
       ) : (
         <>
           {step === 'profession' && (
