@@ -23,10 +23,10 @@ import {
   getUserCreditBalance,
   processModelUsage,
 } from '@/server/services/billing/credits';
+import { phoGatewayService } from '@/server/services/phoGateway';
 import { ChatStreamPayload } from '@/types/openai/chat';
 import { createErrorResponse } from '@/utils/errorResponse';
 import { getTracePayload } from '@/utils/trace';
-import { phoGatewayService } from '@/server/services/phoGateway';
 
 export const maxDuration = 300;
 
@@ -169,24 +169,37 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       console.log(`💰 Credit Check: Balance ${balance} (User: ${jwtPayload.userId})`);
     }
 
-    // ============  1. init chat model   ============ //
-    console.log(`[Chat API] Initializing model runtime...`);
+    // ============  1. Parse request & remap provider   ============ //
+    const data = (await req.json()) as ChatStreamPayload;
+    requestModel = data.model; // Store for catch block access
+
+    // Provider Override: redirect disabled providers (google, openai, etc.)
+    // to active ones (vercelaigateway, groq, cerebras).
+    // MUST happen BEFORE runtime init — otherwise init tries the original
+    // provider's API key (which may not exist).
+    const { provider: activeProvider, modelId: activeModelId } = phoGatewayService.remapProvider(
+      provider,
+      data.model,
+    );
+    data.model = activeModelId;
+
+    if (activeProvider !== provider) {
+      console.log(`[Provider Override] ${provider} → ${activeProvider}, model: ${data.model}`);
+    }
+
+    // ============  1.1. Init chat model   ============ //
+    console.log(`[Chat API] Initializing model runtime for provider: ${activeProvider}...`);
     let modelRuntime: ModelRuntime;
     if (createRuntime) {
       console.log(`[Chat API] Using custom createRuntime function`);
       modelRuntime = createRuntime(jwtPayload);
     } else {
       console.log(`[Chat API] Using initModelRuntimeWithUserPayload`);
-      modelRuntime = await initModelRuntimeWithUserPayload(provider, jwtPayload);
+      modelRuntime = await initModelRuntimeWithUserPayload(activeProvider, jwtPayload);
     }
     console.log(`[Chat API] ✅ Model runtime initialized successfully`);
 
-    // ============  2. create chat completion   ============ //
-
-    const data = (await req.json()) as ChatStreamPayload;
-    requestModel = data.model; // Store for catch block access
-
-    // ============  2.2. Tier Access Enforcement   ============ //
+    // ============  2. Tier Access Enforcement   ============ //
     // Check if user's plan allows access to this model tier and daily limits
     let userPlanId = 'vn_free';
     if (jwtPayload.userId) {
@@ -234,17 +247,6 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       }
     }
 
-    // ============  2.3. Provider Override (Universal)   ============ //
-    // Vertex AI and OpenRouter are DISABLED — route all traffic through
-    // Vercel AI Gateway, Groq, Cerebras, Fireworks AI, Together AI
-    const { provider: activeProvider, modelId: activeModelId } = phoGatewayService.remapProvider(provider, data.model);
-    data.model = activeModelId;
-
-    if (activeProvider !== provider) {
-      console.log(`[Provider Override] ${provider} → ${activeProvider}, model: ${data.model}`);
-      modelRuntime = await initModelRuntimeWithUserPayload(activeProvider, jwtPayload);
-    }
-
     const tracePayload = getTracePayload(req);
 
     let traceOptions = {};
@@ -256,7 +258,10 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // ============  3. Execute Chat Completion (with Phở Gateway Failover)   ============ //
     const priorityList = phoGatewayService.resolveProviderList(data.model, activeProvider);
 
-    console.log(`[Chat API] Orchestration: Priority List for ${data.model} (${activeProvider}):`, priorityList);
+    console.log(
+      `[Chat API] Orchestration: Priority List for ${data.model} (${activeProvider}):`,
+      priorityList,
+    );
 
     let lastError: any = null;
     let successfulResponse: Response | null = null;
@@ -266,7 +271,9 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     for (const [index, entry] of priorityList.entries()) {
       const { provider: targetProvider, modelId: targetModelId } = entry;
 
-      console.log(`[Chat API] Attempt ${index + 1}: trying ${targetProvider} with model ${targetModelId}`);
+      console.log(
+        `[Chat API] Attempt ${index + 1}: trying ${targetProvider} with model ${targetModelId}`,
+      );
 
       try {
         // Initialize runtime for this specific provider if different from initial
@@ -275,22 +282,28 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           currentRuntime = await initModelRuntimeWithUserPayload(targetProvider, jwtPayload);
         }
 
-        const response = await currentRuntime.chat({
-          ...data,
-          model: targetModelId,
-        }, {
-          user: jwtPayload.userId,
-          ...traceOptions,
-          signal: req.signal,
-        });
+        const response = await currentRuntime.chat(
+          {
+            ...data,
+            model: targetModelId,
+          },
+          {
+            user: jwtPayload.userId,
+            ...traceOptions,
+            signal: req.signal,
+          },
+        );
 
         if (!response.ok) {
           // If it's a provider error, throw it to trigger catch block for failover
-          const errorData = await response.clone().json().catch(() => ({}));
+          const errorData = await response
+            .clone()
+            .json()
+            .catch(() => ({}));
           throw {
             message: errorData?.error?.message || response.statusText,
             status: response.status,
-            type: AgentRuntimeErrorType.ProviderBizError
+            type: AgentRuntimeErrorType.ProviderBizError,
           };
         }
 
@@ -299,9 +312,11 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
         actualProviderUsed = targetProvider;
         actualModelUsed = targetModelId;
         break; // Exit loop on success
-
       } catch (e: any) {
-        console.warn(`[Chat API] Attempt ${index + 1} failed for ${targetProvider}:`, e?.message || e);
+        console.warn(
+          `[Chat API] Attempt ${index + 1} failed for ${targetProvider}:`,
+          e?.message || e,
+        );
         lastError = e;
 
         // Determine if we should retry
@@ -315,7 +330,9 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           e?.code === 'ECONNRESET';
 
         if (!isRetryable && index < priorityList.length - 1) {
-          console.warn(`[Chat API] Error might not be retryable, but continuing failover as safety measure.`);
+          console.warn(
+            `[Chat API] Error might not be retryable, but continuing failover as safety measure.`,
+          );
         }
 
         if (index === priorityList.length - 1) {
@@ -369,7 +386,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           let accumulatedText = '';
           const decoder = new TextDecoder();
 
-          for (; ;) {
+          for (;;) {
             const { done, value } = await reader.read();
             if (done) break;
             // Decode chunk. Note: chunks might be partial SSE events.
@@ -476,10 +493,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     console.log('='.repeat(80));
     console.error(`[Chat API] ❌ Error occurred:`, e);
 
-    const {
-      errorType = ChatErrorType.InternalServerError,
-      error: errorContent,
-    } = e as ChatCompletionErrorPayload;
+    const { errorType = ChatErrorType.InternalServerError, error: errorContent } =
+      e as ChatCompletionErrorPayload;
 
     const error = errorContent || e;
 
@@ -488,10 +503,21 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     console[logMethod](`Route: [${provider}] ${errorType}:`, error);
     console.log('='.repeat(80));
 
+    // In Phở Chat, all API keys are managed server-side.
+    // Never expose InvalidProviderAPIKey / NoOpenAIAPIKey to users — remap to
+    // ProviderBizError so the client shows a generic error message instead of
+    // the inappropriate "Enter custom API key" form.
+    const safeErrorType =
+      errorType === AgentRuntimeErrorType.InvalidProviderAPIKey ||
+      errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
+        ? AgentRuntimeErrorType.ProviderBizError
+        : errorType;
+
     // Sanitize vendor errors — hide provider names, API keys, quota details
-    const rawMessage = typeof error === 'object' && error !== null
-      ? (error as any).message || String(error)
-      : String(error);
+    const rawMessage =
+      typeof error === 'object' && error !== null
+        ? (error as any).message || String(error)
+        : String(error);
 
     // Include model name so user knows which model failed
     const modelHint = requestModel ? ` (${requestModel})` : '';
@@ -508,7 +534,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       sanitizedMessage = `Model${modelHint} hiện không khả dụng. Vui lòng chọn model khác.`;
     }
 
-    return createErrorResponse(errorType, {
+    return createErrorResponse(safeErrorType, {
       error: { message: sanitizedMessage },
       provider: 'pho-chat',
     });
