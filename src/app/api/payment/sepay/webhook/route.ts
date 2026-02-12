@@ -190,6 +190,13 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         } catch (walletError) {
           console.error('⚠️ Failed to sync wallet tier (non-critical):', walletError);
         }
+
+        // Sync users.currentPlanId for fallback consistency
+        await tx
+          .update(users)
+          .set({ currentPlanId: payment.planId })
+          .where(eq(users.id, payment.userId));
+        console.log('✅ users.currentPlanId synced to:', payment.planId);
       }
 
       console.log('✅ Transaction committed successfully');
@@ -260,6 +267,31 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
       });
     } catch (analyticsError) {
       console.error('⚠️ Failed to track PostHog revenue (non-critical):', analyticsError);
+    }
+
+    // Sync Clerk publicMetadata for UI consistency (non-blocking)
+    try {
+      const payment = await getPaymentByOrderId(webhookData.orderId);
+      if (payment?.userId && payment?.planId) {
+        const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+        if (clerkSecretKey) {
+          await fetch(`https://api.clerk.com/v1/users/${payment.userId}/metadata`, {
+            body: JSON.stringify({
+              public_metadata: {
+                planId: payment.planId,
+              },
+            }),
+            headers: {
+              'Authorization': `Bearer ${clerkSecretKey}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'PATCH',
+          });
+          console.log('✅ Clerk metadata synced for user:', payment.userId);
+        }
+      }
+    } catch (clerkErr) {
+      console.error('⚠️ Clerk metadata sync failed (non-critical):', clerkErr);
     }
 
     // Send welcome email (non-blocking, outside DB transaction)

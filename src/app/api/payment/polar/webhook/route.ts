@@ -142,6 +142,10 @@ export async function POST(req: Request) {
         });
       }
 
+      // Sync users.currentPlanId for fallback consistency
+      await db.update(users).set({ currentPlanId: planId }).where(eq(users.id, user.id));
+      console.log('✅ users.currentPlanId synced to:', planId);
+
       // Allocate Phở Points
       await allocateLifetimePoints(db, user.id, planId);
 
@@ -187,6 +191,30 @@ export async function POST(req: Request) {
         },
         userId: user.id,
       });
+
+      // Sync Clerk publicMetadata for UI consistency (non-blocking)
+      try {
+        const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+        if (clerkSecretKey) {
+          await fetch(`https://api.clerk.com/v1/users/${user.id}/metadata`, {
+            body: JSON.stringify({
+              public_metadata: {
+                lifetimeDeal: planId.startsWith('lifetime_'),
+                planId,
+                promoActivatedAt: new Date().toISOString(),
+              },
+            }),
+            headers: {
+              'Authorization': `Bearer ${clerkSecretKey}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'PATCH',
+          });
+          console.log('✅ Clerk metadata synced for user:', user.id);
+        }
+      } catch (clerkErr) {
+        console.error('⚠️ Clerk metadata sync failed (non-critical):', clerkErr);
+      }
 
       // Send welcome email (non-blocking — failures don't affect webhook)
       try {
