@@ -1,14 +1,5 @@
-import { useGlobalStore } from '@/store/global';
-import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
-
+// Disabled: pho.chat is deployed on Vercel, so this upstream version check
+// against LobeChat GitHub releases is misleading to customers.
 export const useNewVersion = () => {
-  const [hasNewVersion, useCheckLatestVersion] = useGlobalStore((s) => [
-    s.hasNewVersion,
-    s.useCheckLatestVersion,
-  ]);
-
-  const { enableCheckUpdates } = useServerConfigStore(featureFlagsSelectors);
-  useCheckLatestVersion(enableCheckUpdates);
-
-  return hasNewVersion;
+  return false;
 };
