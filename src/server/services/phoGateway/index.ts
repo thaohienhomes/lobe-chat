@@ -16,6 +16,7 @@ class PhoGatewayService {
       providers: [
         { modelId: 'llama-3.1-8b-instant', provider: 'groq' },
         { modelId: '@cf/meta/llama-3.1-8b-instruct', provider: 'cloudflare' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' },
       ],
     },
 
@@ -24,7 +25,7 @@ class PhoGatewayService {
       providers: [
         { modelId: 'llama-3.1-8b-instant', provider: 'groq' },
         { modelId: 'llama3.1-8b', provider: 'cerebras' },
-        { modelId: '@cf/meta/llama-3.1-8b-instruct', provider: 'cloudflare' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' },
       ],
     },
 
@@ -32,8 +33,7 @@ class PhoGatewayService {
       id: 'pho-pro',
       providers: [
         { modelId: 'llama-3.3-70b-versatile', provider: 'groq' },
-        { modelId: 'accounts/fireworks/models/llama-v3p1-70b-instruct', provider: 'fireworksai' },
-        { modelId: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', provider: 'cloudflare' },
+        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' },
       ],
     },
 
@@ -41,21 +41,14 @@ class PhoGatewayService {
       id: 'pho-smart',
       providers: [
         { modelId: 'llama3.1-70b', provider: 'cerebras' },
-        { modelId: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo', provider: 'togetherai' },
         { modelId: 'llama-3.3-70b-versatile', provider: 'groq' },
+        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' },
       ],
     },
 
     'pho-vision': {
       id: 'pho-vision',
-      providers: [
-        { modelId: 'meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo', provider: 'togetherai' },
-        {
-          modelId: 'accounts/fireworks/models/llama-v3p2-90b-vision-instruct',
-          provider: 'fireworksai',
-        },
-        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' },
-      ],
+      providers: [{ modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }],
     },
   };
 
@@ -139,12 +132,15 @@ class PhoGatewayService {
       'anthropic', // No ANTHROPIC_API_KEY configured
       'deepseek', // Route through gateway for reliability
       'xai', // No XAI_API_KEY configured
+      'vertexai', // VertexAI disabled — use Gateway instead
     ]);
 
     if (REMAP_TO_VERCEL.has(provider)) {
       // Vercel AI Gateway expects provider-prefixed model IDs
       // e.g., gemini-2.5-flash → google/gemini-2.5-flash
-      const prefixedModelId = modelId.includes('/') ? modelId : `${provider}/${modelId}`;
+      // For vertexai, remap to google/ prefix
+      const gatewayPrefix = provider === 'vertexai' ? 'google' : provider;
+      const prefixedModelId = modelId.includes('/') ? modelId : `${gatewayPrefix}/${modelId}`;
 
       return { modelId: prefixedModelId, provider: 'vercelaigateway' };
     }
