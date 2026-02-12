@@ -118,6 +118,31 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
     const duration = Date.now() - startTime;
     paymentMetricsCollector.recordWebhookProcessing(webhookData.orderId, 'success', duration);
 
+    // Send welcome email (non-blocking)
+    try {
+      if (payment?.userId && payment?.planId) {
+        const { getServerDB } = await import('@/database/server');
+        const { users } = await import('@/database/schemas');
+        const { eq } = await import('drizzle-orm');
+        const db = await getServerDB();
+        const [user] = await db
+          .select({ email: users.email, firstName: users.firstName, fullName: users.fullName })
+          .from(users)
+          .where(eq(users.id, payment.userId))
+          .limit(1);
+        if (user?.email) {
+          const { sendWelcomeEmail } = await import('@/libs/email');
+          await sendWelcomeEmail({
+            email: user.email,
+            name: user.fullName || user.firstName || user.email.split('@')[0] || 'there',
+            planId: payment.planId,
+          });
+        }
+      }
+    } catch (emailError) {
+      console.error('⚠️ [COMPAT ROUTE] Welcome email failed (non-critical):', emailError);
+    }
+
     console.log(
       '✅ [COMPAT ROUTE] Webhook processed successfully for orderId:',
       webhookData.orderId,

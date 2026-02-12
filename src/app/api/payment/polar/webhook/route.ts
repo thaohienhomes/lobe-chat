@@ -1,7 +1,56 @@
-
-import { NextResponse } from 'next/server';
-import { getServerDB } from '@/database/server';
 import { eq } from 'drizzle-orm';
+import { NextResponse } from 'next/server';
+
+import { getServerDB } from '@/database/server';
+
+/**
+ * Allocate Phở Points for lifetime members
+ */
+async function allocateLifetimePoints(db: any, userId: string, planId: string) {
+  try {
+    const schemas: any = await import('@lobechat/database/schemas');
+    const { phoPointsBalances } = schemas;
+
+    // Dynamic import config to avoid circular deps if needed, though type import is safe
+    const { USD_PRICING_TIERS } = await import('@/server/modules/CostOptimization');
+
+    const tierConfig = USD_PRICING_TIERS[planId as keyof typeof USD_PRICING_TIERS];
+    const points = tierConfig?.monthlyPoints || 2_000_000;
+
+    // Check if balance exists
+    const [existing] = await db
+      .select()
+      .from(phoPointsBalances)
+      .where(eq(phoPointsBalances.userId, userId))
+      .limit(1);
+
+    if (existing) {
+      // Update existing balance
+      await db
+        .update(phoPointsBalances)
+        .set({
+          balance: points,
+          lastResetAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(phoPointsBalances.userId, userId));
+    } else {
+      // Create new balance
+      await db.insert(phoPointsBalances).values({
+        balance: points,
+        createdAt: new Date(),
+        lastResetAt: new Date(),
+        updatedAt: new Date(),
+        userId,
+      });
+    }
+
+    console.log(`✅ Allocated ${points.toLocaleString()} Phở Points to user ${userId}`);
+  } catch (error) {
+    console.error('❌ Failed to allocate points:', error);
+    // Don't throw - subscription is already created
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -139,6 +188,18 @@ export async function POST(req: Request) {
         userId: user.id,
       });
 
+      // Send welcome email (non-blocking — failures don't affect webhook)
+      try {
+        const { sendWelcomeEmail } = await import('@/libs/email');
+        await sendWelcomeEmail({
+          email: customer_email,
+          name: user.fullName || user.firstName || customer_email.split('@')[0] || 'there',
+          planId,
+        });
+      } catch (emailError) {
+        console.error('⚠️ Welcome email failed (non-critical):', emailError);
+      }
+
       return NextResponse.json({ planId, success: true, userId: user.id });
     }
 
@@ -192,54 +253,5 @@ export async function POST(req: Request) {
       },
       { status: 500 },
     );
-  }
-}
-
-/**
- * Allocate Phở Points for lifetime members
- */
-async function allocateLifetimePoints(db: any, userId: string, planId: string) {
-  try {
-    const schemas: any = await import('@lobechat/database/schemas');
-    const { phoPointsBalances } = schemas;
-
-    // Dynamic import config to avoid circular deps if needed, though type import is safe
-    const { USD_PRICING_TIERS } = await import('@/server/modules/CostOptimization');
-
-    const tierConfig = USD_PRICING_TIERS[planId as keyof typeof USD_PRICING_TIERS];
-    const points = tierConfig?.monthlyPoints || 2_000_000;
-
-    // Check if balance exists
-    const [existing] = await db
-      .select()
-      .from(phoPointsBalances)
-      .where(eq(phoPointsBalances.userId, userId))
-      .limit(1);
-
-    if (existing) {
-      // Update existing balance
-      await db
-        .update(phoPointsBalances)
-        .set({
-          balance: points,
-          lastResetAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(phoPointsBalances.userId, userId));
-    } else {
-      // Create new balance
-      await db.insert(phoPointsBalances).values({
-        balance: points,
-        createdAt: new Date(),
-        lastResetAt: new Date(),
-        updatedAt: new Date(),
-        userId,
-      });
-    }
-
-    console.log(`✅ Allocated ${points.toLocaleString()} Phở Points to user ${userId}`);
-  } catch (error) {
-    console.error('❌ Failed to allocate points:', error);
-    // Don't throw - subscription is already created
   }
 }

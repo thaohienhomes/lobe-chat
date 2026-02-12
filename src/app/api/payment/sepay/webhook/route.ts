@@ -6,9 +6,7 @@ import { getServerDB } from '@/database/server';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
 import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
 import { sendTikTokServerEvent } from '@/libs/tiktok-events-api';
-import {
-  getPaymentByOrderId,
-} from '@/server/services/billing/sepay';
+import { getPaymentByOrderId } from '@/server/services/billing/sepay';
 
 /**
  * GET endpoint to test webhook accessibility
@@ -260,9 +258,30 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         },
         userId: webhookData.orderId, // Fallback ID
       });
-
     } catch (analyticsError) {
       console.error('⚠️ Failed to track PostHog revenue (non-critical):', analyticsError);
+    }
+
+    // Send welcome email (non-blocking, outside DB transaction)
+    try {
+      const payment = await getPaymentByOrderId(webhookData.orderId);
+      if (payment?.userId && payment?.planId) {
+        const [user] = await db
+          .select({ email: users.email, firstName: users.firstName, fullName: users.fullName })
+          .from(users)
+          .where(eq(users.id, payment.userId))
+          .limit(1);
+        if (user?.email) {
+          const { sendWelcomeEmail } = await import('@/libs/email');
+          await sendWelcomeEmail({
+            email: user.email,
+            name: user.fullName || user.firstName || user.email.split('@')[0] || 'there',
+            planId: payment.planId,
+          });
+        }
+      }
+    } catch (emailError) {
+      console.error('⚠️ Welcome email failed (non-critical):', emailError);
     }
 
     console.log('✅ Successfully processed payment:', {

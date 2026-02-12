@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Script from 'next/script';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 
 const useStyles = createStyles(({ css, responsive }) => ({
   button: css`
@@ -97,39 +97,13 @@ const useStyles = createStyles(({ css, responsive }) => ({
 const SuccessContent = () => {
   const { styles } = useStyles();
   const searchParams = useSearchParams();
-  const [emailSent, setEmailSent] = useState(false);
 
   // Extract params from URL
   const amount = parseFloat(searchParams.get('amount') || '149.99');
-  const checkoutId = searchParams.get('checkout_id') || searchParams.get('session_id');
   const email = searchParams.get('email');
 
-  // Trigger welcome email on mount
-  useEffect(() => {
-    const sendWelcomeEmail = async () => {
-      if (!email || emailSent) return;
-
-      try {
-        const response = await fetch('/api/lifetime/welcome-email', {
-          body: JSON.stringify({
-            checkout_id: checkoutId,
-            email: decodeURIComponent(email),
-          }),
-          headers: { 'Content-Type': 'application/json' },
-          method: 'POST',
-        });
-
-        if (response.ok) {
-          setEmailSent(true);
-          console.log('[Success] Welcome email triggered');
-        }
-      } catch (error) {
-        console.error('[Success] Failed to trigger welcome email:', error);
-      }
-    };
-
-    sendWelcomeEmail();
-  }, [email, checkoutId, emailSent]);
+  // Welcome email is now sent server-side via the Polar webhook
+  // No client-side trigger needed
 
   return (
     <div className={styles.container}>
