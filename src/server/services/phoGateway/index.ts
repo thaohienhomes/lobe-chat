@@ -110,11 +110,29 @@ class PhoGatewayService {
 
   /**
    * Remap a provider and model if necessary.
-   * Redirects disabled direct providers to Vercel AI Gateway.
+   *
+   * Two responsibilities:
+   * 1. Logical models (pho-pro, pho-fast, etc.) → resolve to their primary
+   *    configured provider so the runtime gets the right API key.
+   *    The modelId is kept as the logical name so resolveProviderList()
+   *    can still return the full failover chain later.
+   * 2. Real vendor models from disabled direct providers (google, openai, …)
+   *    → redirect to Vercel AI Gateway with a provider-prefixed modelId.
    */
   remapProvider(provider: string, modelId: string): { modelId: string; provider: string } {
+    // ── 1. Logical model resolution ──────────────────────────────
+    // If the requested model is a logical model (e.g. 'pho-pro'),
+    // route to its primary provider (e.g. 'groq') so runtime init
+    // picks up the correct API key.  Keep modelId as-is so
+    // resolveProviderList() can still look it up for failover.
+    if (this.logicalModels[modelId]) {
+      const primary = this.logicalModels[modelId].providers[0];
+      return { modelId, provider: primary.provider };
+    }
+
+    // ── 2. Disabled-provider remap ───────────────────────────────
     // Providers that are disabled as direct API connections
-    // and should be routed through Vercel AI Gateway instead
+    // and should be routed through Vercel AI Gateway instead.
     const REMAP_TO_VERCEL = new Set([
       'google', // No GOOGLE_API_KEY configured
       'openai', // OpenRouter disabled; direct OpenAI not used
