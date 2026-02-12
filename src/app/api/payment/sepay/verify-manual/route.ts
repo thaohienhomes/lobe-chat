@@ -130,6 +130,54 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
 
       console.log('✅ Subscription activated successfully for user:', userId);
+
+      // Sync Clerk publicMetadata for UI consistency (non-blocking)
+      try {
+        const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+        if (clerkSecretKey) {
+          await fetch(`https://api.clerk.com/v1/users/${payment.userId}/metadata`, {
+            body: JSON.stringify({
+              public_metadata: {
+                planId: payment.planId,
+              },
+            }),
+            headers: {
+              'Authorization': `Bearer ${clerkSecretKey}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'PATCH',
+          });
+          console.log('✅ [ManualVerify] Clerk metadata synced for user:', payment.userId);
+        }
+      } catch (clerkErr) {
+        console.error('⚠️ [ManualVerify] Clerk metadata sync failed (non-critical):', clerkErr);
+      }
+
+      // Send welcome email (non-blocking)
+      try {
+        // Fetch user email from Clerk
+        const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+        if (clerkSecretKey) {
+          const clerkRes = await fetch(`https://api.clerk.com/v1/users/${payment.userId}`, {
+            headers: { Authorization: `Bearer ${clerkSecretKey}` },
+          });
+          if (clerkRes.ok) {
+            const clerkUser = await clerkRes.json();
+            const userEmail = clerkUser.email_addresses?.[0]?.email_address;
+            if (userEmail) {
+              const { sendWelcomeEmail } = await import('@/libs/email');
+              await sendWelcomeEmail({
+                email: userEmail,
+                name: clerkUser.first_name || userEmail.split('@')[0] || 'there',
+                planId: payment.planId,
+              });
+              console.log('✅ [ManualVerify] Welcome email sent to:', userEmail);
+            }
+          }
+        }
+      } catch (emailError) {
+        console.error('⚠️ [ManualVerify] Welcome email failed (non-critical):', emailError);
+      }
     } else {
       console.error('❌ Cannot activate subscription - missing plan info:', {
         hasBillingCycle: !!payment.billingCycle,
