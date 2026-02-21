@@ -194,9 +194,9 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         // Sync users.currentPlanId for fallback consistency
         await tx
           .update(users)
-          .set({ currentPlanId: payment.planId })
+          .set({ currentPlanId: payment.planId, subscriptionStatus: 'ACTIVE' })
           .where(eq(users.id, payment.userId));
-        console.log('✅ users.currentPlanId synced to:', payment.planId);
+        console.log('✅ users.currentPlanId + subscriptionStatus synced to:', payment.planId);
       }
 
       console.log('✅ Transaction committed successfully');

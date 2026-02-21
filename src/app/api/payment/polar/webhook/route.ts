@@ -143,8 +143,8 @@ export async function POST(req: Request) {
       }
 
       // Sync users.currentPlanId for fallback consistency
-      await db.update(users).set({ currentPlanId: planId }).where(eq(users.id, user.id));
-      console.log('✅ users.currentPlanId synced to:', planId);
+      await db.update(users).set({ currentPlanId: planId, subscriptionStatus: 'ACTIVE' }).where(eq(users.id, user.id));
+      console.log('✅ users.currentPlanId + subscriptionStatus synced to:', planId);
 
       // Allocate Phở Points
       await allocateLifetimePoints(db, user.id, planId);

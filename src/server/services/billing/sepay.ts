@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 
-import { sepayPayments, subscriptions } from '@/database/schemas';
+import { sepayPayments, subscriptions, users } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 
 export type CreatePaymentRecordParams = {
@@ -171,6 +171,16 @@ export async function activateUserSubscription(params: {
         }
       }
     }
+
+    // Sync users table: currentPlanId + subscriptionStatus
+    await db
+      .update(users)
+      .set({
+        currentPlanId: params.planId,
+        subscriptionStatus: 'ACTIVE',
+      })
+      .where(eq(users.id, params.userId));
+    console.log('[SePay] users.currentPlanId + subscriptionStatus synced to:', params.planId);
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
     console.error('❌ Failed to activate subscription:', {
