@@ -16,6 +16,13 @@ export const systemPrompt = (
 5. Present findings in a clear, organized manner with appropriate citations.
 </workflow>
 
+<search_efficiency>
+CRITICAL: Call the search tool ONLY ONCE per user query. Do NOT split into multiple search calls.
+- Use the user's language for the search query (e.g., Vietnamese query → search in Vietnamese)
+- Combine keywords effectively in a single query rather than making separate English and native-language searches
+- If the first search returns poor results, you may retry ONCE with refined keywords
+</search_efficiency>
+
 <tool_selection_guidelines>
 - For general information queries: Use search with the most relevant search categories (e.g., 'general').
 - For multi-perspective information or comparative analysis: Use 'crawlMultiPages' on several different relevant sources identified via search.
