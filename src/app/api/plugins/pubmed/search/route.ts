@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { RATE_LIMITS, getClientIp, rateLimiter } from '@/utils/rate-limiter';
+
 /**
  * PubMed Search API v2
  * Uses NCBI E-utilities to search PubMed database
@@ -162,6 +164,16 @@ async function fetchArticleDetails(pmids: string[]): Promise<PubMedArticle[]> {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const ip = getClientIp(request);
+  const rl = rateLimiter.check('pubmed', ip, RATE_LIMITS.external);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.', retryAfterSeconds: Math.ceil((rl.resetAt - Date.now()) / 1000) },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } },
+    );
+  }
+
   try {
     const body = (await request.json()) as SearchParams;
     const { query, maxResults = 10, sortBy = 'relevance', page = 1 } = body;

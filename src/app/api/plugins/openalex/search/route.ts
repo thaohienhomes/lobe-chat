@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { RATE_LIMITS, getClientIp, rateLimiter } from '@/utils/rate-limiter';
+
 /**
  * OpenAlex Search API
  * Uses OpenAlex API (free, no auth, polite pool with email)
@@ -25,6 +27,15 @@ const OA_API_BASE = 'https://api.openalex.org/works';
 const OA_EMAIL = 'support@pho.chat'; // for polite pool (faster rate limits)
 
 export async function POST(request: NextRequest) {
+    const ip = getClientIp(request);
+    const rl = rateLimiter.check('openalex', ip, RATE_LIMITS.external);
+    if (!rl.allowed) {
+        return NextResponse.json(
+            { error: 'Too many requests. Please try again later.' },
+            { headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) }, status: 429 },
+        );
+    }
+
     try {
         const body = await request.json();
         const {

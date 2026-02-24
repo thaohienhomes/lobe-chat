@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { RATE_LIMITS, getClientIp, rateLimiter } from '@/utils/rate-limiter';
+
 /**
  * ClinicalTrials.gov Search API
  * Uses ClinicalTrials.gov API v2 (free, no auth)
@@ -25,6 +27,15 @@ interface TrialResult {
 const CT_API_BASE = 'https://clinicaltrials.gov/api/v2/studies';
 
 export async function POST(request: NextRequest) {
+    const ip = getClientIp(request);
+    const rl = rateLimiter.check('clinical-trials', ip, RATE_LIMITS.external);
+    if (!rl.allowed) {
+        return NextResponse.json(
+            { error: 'Too many requests. Please try again later.' },
+            { headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) }, status: 429 },
+        );
+    }
+
     try {
         const body = await request.json();
         const {

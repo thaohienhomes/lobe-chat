@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { RATE_LIMITS, getClientIp, rateLimiter } from '@/utils/rate-limiter';
+
 /**
  * Citation Manager - Get Citation
  * Accepts PMID, DOI, or ArXiv ID and returns formatted citations
@@ -227,10 +229,18 @@ function formatRIS(m: ArticleMetadata): string {
 // ── Route Handler ──────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+    const ip = getClientIp(request);
+    const rl = rateLimiter.check('citation', ip, RATE_LIMITS.external);
+    if (!rl.allowed) {
+        return NextResponse.json(
+            { error: 'Too many requests. Please try again later.' },
+            { headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) }, status: 429 },
+        );
+    }
+
     try {
         const body = await request.json();
         const { identifier, format = 'all' } = body;
-
         if (!identifier || typeof identifier !== 'string') {
             return NextResponse.json({ error: 'identifier is required (PMID, DOI, or ArXiv ID)' }, { status: 400 });
         }
