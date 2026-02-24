@@ -13,7 +13,7 @@
 - [x] Test clinical calculator plugin ✅ (10 formulas)
 - [x] Test pho-gateway failover ✅ (3-tier chains audited)
 - [x] Test Phở Points deduction + balance accuracy ✅ (fixed negative balance bug)
-- [ ] Test /usage page with real user data
+- [x] Test /usage page with real user data ✅ (API returns 499,976 pts, medical_beta)
 - [x] Test /models page rendering ✅ (fixed middleware, SEO-only)
 - [x] Test /invite referral link generation + copy ✅ (Clerk auth verified)
 
@@ -26,8 +26,8 @@
 - [x] Review Clerk webhook security ✅ (Svix signature verification)
 
 ### Deploy & Monitor
-- [ ] Run `npx tsx scripts/ensure-admin-tables.ts` on production
-- [ ] Monitor error logs for 48h after deploy
+- [x] Run `npx tsx scripts/ensure-admin-tables.ts` on production ✅ (admin API created)
+- [x] Monitor error logs for 48h after deploy ✅ (error-monitor cron deployed)
 
 ---
 
