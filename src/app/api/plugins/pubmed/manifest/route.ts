@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * PubMed Search Plugin - Manifest
+ * PubMed Search Plugin v2 - Manifest
  * Returns the plugin manifest for LobeChat plugin system
  */
 export async function GET(request: NextRequest) {
-  // Get the base URL from request or environment
   const host = request.headers.get('host') || 'localhost:3010';
   const protocol = request.headers.get('x-forwarded-proto') || 'http';
   const baseUrl = `${protocol}://${host}`;
@@ -15,23 +14,28 @@ export async function GET(request: NextRequest) {
     api: [
       {
         description:
-          'Search for biomedical and life sciences research articles from PubMed/MEDLINE database. Returns article titles, abstracts, authors, journals, and DOI links. Access over 35 million citations.',
+          'Search PubMed for biomedical research articles. Returns articles with clickable PubMed links, DOI links, abstracts, authors, journals, MeSH keywords, and pagination. Supports boolean operators (AND, OR, NOT), MeSH terms, and field tags. IMPORTANT: Always include pubmedUrl and doiUrl links in your response so users can click to read the full paper.',
         name: 'searchPubMed',
         parameters: {
           properties: {
             maxResults: {
-              default: 10,
-              description: 'Maximum number of articles to return (1-50)',
+              default: 5,
+              description: 'Number of articles per page (1-50)',
+              type: 'number',
+            },
+            page: {
+              default: 1,
+              description: 'Page number for pagination (starts at 1). Use this to load more results.',
               type: 'number',
             },
             query: {
               description:
-                'Search query for PubMed. Supports boolean operators (AND, OR, NOT) and field tags like [Title], [Author], [MeSH Terms]',
+                'PubMed search query. Supports: boolean operators (AND, OR, NOT), MeSH terms like "diabetes mellitus"[MeSH Terms], field tags like "metformin"[Title], date filters like "2024"[Date - Publication]',
               type: 'string',
             },
             sortBy: {
               default: 'relevance',
-              description: 'Sort results by relevance or publication date',
+              description: 'Sort by relevance or publication date',
               enum: ['relevance', 'date'],
               type: 'string',
             },
@@ -48,8 +52,8 @@ export async function GET(request: NextRequest) {
     meta: {
       avatar: '🔬',
       description:
-        'Search PubMed for biomedical research articles, clinical studies, and medical literature',
-      tags: ['biomedical', 'research', 'pubmed', 'medical', 'science'],
+        'Search PubMed for biomedical research articles with clickable links, pagination, and citation export',
+      tags: ['biomedical', 'research', 'pubmed', 'medical', 'science', 'literature'],
       title: 'PubMed Search',
     },
     settings: {
@@ -57,7 +61,7 @@ export async function GET(request: NextRequest) {
       type: 'object',
     },
     type: 'default',
-    version: '1',
+    version: '2',
   };
 
   return NextResponse.json(manifest);

@@ -1,25 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * PubMed Search API
+ * PubMed Search API v2
  * Uses NCBI E-utilities to search PubMed database
  * https://www.ncbi.nlm.nih.gov/books/NBK25499/
+ *
+ * v2 Enhancements:
+ * - Clickable URLs (PubMed link, DOI link)
+ * - Pagination (retstart / retmax)
+ * - Total result count from E-search
+ * - MeSH term support in query hints
+ * - Keywords extraction
  */
 
 interface PubMedArticle {
   abstract?: string;
   authors: string[];
   doi?: string;
+  doiUrl?: string;
   journal: string;
+  keywords?: string[];
   pmid: string;
   pubDate: string;
+  pubmedUrl: string;
   title: string;
 }
 
 interface SearchParams {
   maxResults?: number;
+  page?: number;
   query: string;
   sortBy?: 'relevance' | 'date';
+}
+
+interface SearchResult {
+  count: number;
+  idlist: string[];
 }
 
 const NCBI_BASE_URL = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
@@ -29,6 +45,17 @@ function extractTag(xml: string, tagName: string): string | null {
   const regex = new RegExp(`<${tagName}[^>]*>([^<]*)</${tagName}>`, 'i');
   const match = xml.match(regex);
   return match ? match[1].trim() : null;
+}
+
+// Extract all occurrences of a tag
+function extractAllTags(xml: string, tagName: string): string[] {
+  const regex = new RegExp(`<${tagName}[^>]*>([^<]*)</${tagName}>`, 'gi');
+  const results: string[] = [];
+  let match;
+  while ((match = regex.exec(xml)) !== null) {
+    if (match[1].trim()) results.push(match[1].trim());
+  }
+  return results;
 }
 
 // Simple XML parsing for PubMed articles
@@ -69,13 +96,23 @@ function parseArticlesFromXml(xml: string): PubMedArticle[] {
       const doiMatch = articleXml.match(/<ArticleId IdType="doi">([^<]+)<\/ArticleId>/);
       const doi = doiMatch ? doiMatch[1] : undefined;
 
+      // Extract MeSH keywords
+      const meshTerms = extractAllTags(articleXml, 'DescriptorName').slice(0, 8);
+
+      // Build clickable URLs
+      const pubmedUrl = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
+      const doiUrl = doi ? `https://doi.org/${doi}` : undefined;
+
       articles.push({
         abstract: abstract.slice(0, 500) + (abstract.length > 500 ? '...' : ''),
         authors: authors.slice(0, 5),
         doi,
+        doiUrl,
         journal,
+        keywords: meshTerms.length > 0 ? meshTerms : undefined,
         pmid,
         pubDate,
+        pubmedUrl,
         title,
       });
     } catch {
@@ -87,10 +124,15 @@ function parseArticlesFromXml(xml: string): PubMedArticle[] {
   return articles;
 }
 
-// Search PubMed and get list of PMIDs
-async function searchPubMed(query: string, maxResults: number, sortBy: string): Promise<string[]> {
+// Search PubMed and get list of PMIDs + total count
+async function searchPubMed(
+  query: string,
+  maxResults: number,
+  sortBy: string,
+  retstart: number = 0,
+): Promise<SearchResult> {
   const sort = sortBy === 'date' ? 'pub+date' : 'relevance';
-  const searchUrl = `${NCBI_BASE_URL}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${maxResults}&sort=${sort}&retmode=json`;
+  const searchUrl = `${NCBI_BASE_URL}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${maxResults}&retstart=${retstart}&sort=${sort}&retmode=json`;
 
   const response = await fetch(searchUrl);
   if (!response.ok) {
@@ -98,7 +140,10 @@ async function searchPubMed(query: string, maxResults: number, sortBy: string): 
   }
 
   const data = await response.json();
-  return data.esearchresult?.idlist || [];
+  return {
+    count: parseInt(data.esearchresult?.count || '0', 10),
+    idlist: data.esearchresult?.idlist || [],
+  };
 }
 
 // Fetch article details by PMIDs
@@ -119,7 +164,7 @@ async function fetchArticleDetails(pmids: string[]): Promise<PubMedArticle[]> {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as SearchParams;
-    const { query, maxResults = 10, sortBy = 'relevance' } = body;
+    const { query, maxResults = 10, sortBy = 'relevance', page = 1 } = body;
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
@@ -127,15 +172,27 @@ export async function POST(request: NextRequest) {
 
     // Limit maxResults to prevent abuse
     const limitedMaxResults = Math.min(Math.max(1, maxResults), 50);
+    const retstart = (Math.max(1, page) - 1) * limitedMaxResults;
 
     // Search PubMed
-    const pmids = await searchPubMed(query, limitedMaxResults, sortBy);
+    const { count, idlist: pmids } = await searchPubMed(
+      query,
+      limitedMaxResults,
+      sortBy,
+      retstart,
+    );
 
     if (pmids.length === 0) {
       return NextResponse.json({
         articles: [],
         message: `No results found for "${query}"`,
+        pagination: { currentPage: page, perPage: limitedMaxResults, totalPages: 0, totalResults: 0 },
         query,
+        searchTips: [
+          'Try using MeSH terms: "diabetes mellitus"[MeSH Terms]',
+          'Use boolean operators: metformin AND "type 2 diabetes"',
+          'Search specific fields: "SGLT2"[Title] AND "heart failure"[Title]',
+        ],
         totalResults: 0,
       });
     }
@@ -143,8 +200,17 @@ export async function POST(request: NextRequest) {
     // Fetch article details
     const articles = await fetchArticleDetails(pmids);
 
+    const totalPages = Math.ceil(count / limitedMaxResults);
+
     return NextResponse.json({
       articles,
+      pagination: {
+        currentPage: page,
+        hasMore: page < totalPages,
+        perPage: limitedMaxResults,
+        totalPages,
+        totalResults: count,
+      },
       query,
       totalResults: articles.length,
     });
@@ -157,30 +223,47 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Also support GET for simple testing
+// Support GET for simple testing
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('query');
 
   if (!query) {
     return NextResponse.json(
-      { error: 'Query parameter is required', usage: '/api/plugins/pubmed/search?query=cancer' },
+      {
+        error: 'Query parameter is required',
+        usage: '/api/plugins/pubmed/search?query=metformin+diabetes&maxResults=5&sortBy=date&page=1',
+      },
       { status: 400 },
     );
   }
 
-  // Redirect to POST handler
   const body: SearchParams = {
     maxResults: Number(searchParams.get('maxResults')) || 10,
+    page: Number(searchParams.get('page')) || 1,
     query,
     sortBy: (searchParams.get('sortBy') as 'relevance' | 'date') || 'relevance',
   };
 
-  const pmids = await searchPubMed(body.query, body.maxResults ?? 10, body.sortBy || 'relevance');
+  const { count, idlist: pmids } = await searchPubMed(
+    body.query,
+    body.maxResults ?? 10,
+    body.sortBy || 'relevance',
+    ((body.page || 1) - 1) * (body.maxResults ?? 10),
+  );
+
   const articles = await fetchArticleDetails(pmids);
+  const totalPages = Math.ceil(count / (body.maxResults ?? 10));
 
   return NextResponse.json({
     articles,
+    pagination: {
+      currentPage: body.page || 1,
+      hasMore: (body.page || 1) < totalPages,
+      perPage: body.maxResults,
+      totalPages,
+      totalResults: count,
+    },
     query: body.query,
     totalResults: articles.length,
   });

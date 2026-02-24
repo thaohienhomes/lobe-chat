@@ -1,97 +1,103 @@
 # Phở Chat — Product Backlog
 > Last updated: 2026-02-24
-> Status: 🔒 Frozen during Hardening Sprint (Feb 24 — Mar 10, 2026)
+> Status: 🔒 Hardening Sprint active (Feb 24 — Mar 10, 2026)
 
 ---
 
 ## 🔴 Hardening Sprint (NOW — 2 tuần)
 
-Focus: Test stability cho medical/research users trên production.
-
 ### Critical Path Tests
-- [x] Test onboarding flow end-to-end (profession → recommendations → tips)
-- [ ] Test PubMed plugin search accuracy
-- [ ] Test drug interaction checker plugin
+- [x] Test onboarding flow end-to-end
+- [x] Test PubMed plugin search accuracy ✅ (5 studies, DOI, PMID, real-time)
+- [x] Test drug interaction checker plugin ✅ (HIGH RISK warfarin+aspirin)
 - [ ] Test clinical calculator plugin
-- [ ] Test pho-gateway failover (kill 1 provider, verify auto-switch)
+- [ ] Test pho-gateway failover
 - [ ] Test Phở Points deduction + balance accuracy
 - [ ] Test /usage page with real user data
-- [ ] Test /models page rendering
+- [x] Test /models page rendering ✅ (fixed middleware, SEO-only)
 - [ ] Test /invite referral link generation + copy
 
 ### Security Hardening
-- [x] Fix API key: replace deterministic base64 with random tokens + hashed DB storage
-- [ ] Verify admin role check works on all admin API routes
-- [x] Rate limiting on /api/v1/chat (prevent abuse)
+- [x] Secure API keys (random tokens + SHA-256 hashed DB storage)
+- [x] Rate limiting on /api/v1/chat (60 req/min)
+- [x] Health check endpoint /api/health ✅ (all subsystems green, 182ms)
+- [ ] Verify admin role check on all admin API routes
 - [ ] Review Clerk webhook security
-
-### Medical User Experience
-- [ ] Test MedicalOnboarding flow for medical_beta users
-- [ ] Test specialty plugins (PubMed, Semantic Scholar, DOI resolver)
-- [ ] Test long-context research queries with Gemini 2.5 Pro
-- [ ] Gather feedback from 3-5 real medical users
-- [ ] Fix any reported bugs
 
 ### Deploy & Monitor
 - [ ] Run `npx tsx scripts/ensure-admin-tables.ts` on production
-- [ ] Set UPSTASH_REDIS_REST_URL + token on Vercel
 - [ ] Monitor error logs for 48h after deploy
-- [x] Add health check endpoint /api/health
 
 ---
 
-## 🟡 After Hardening — Phase 16: Admin Roadmap Tracker
+## 🟠 Medical Research Sprint (After Hardening — 4 weeks)
 
-**Mục đích:** Admin page quản lý roadmap, track features done/pending, trigger email updates.
+### Sprint 1: Search + Cite (3-5 days)
+- [ ] PubMed v2: clickable links, MeSH terms, pagination
+- [ ] Citation Manager plugin (PMID/DOI → APA/BibTeX/Vancouver)
+- [ ] Search results as markdown table
+- [ ] "Export all citations" as .bib file
 
-- [ ] DB schema: `roadmapItems` table (title, status, phase, priority, category, emailSentAt)
+### Sprint 2: Read + New Databases (1 week)
+- [ ] ClinicalTrials.gov plugin (free API, no auth)
+- [ ] OpenAlex plugin (citation count, OA PDF links)
+- [ ] FDA openFDA upgrade (real-time, replace hardcoded 42-drug DB)
+- [ ] Medical PDF processing (Gemini multimodal, IMRAD chunking)
+- [ ] Background PDF job + progress indicator
+
+### Sprint 3: Extract + Compare + Write (3-5 days)
+- [ ] "Phở Medical Research" assistant preset (GRADE, PICO, IMRAD)
+- [ ] Evidence Summary template (auto-formatted after search)
+- [ ] Auto-detect medical context → suggest plugins
+- [ ] Vietnamese summary option for medical responses
+- [ ] Legal disclaimer system (footer on every medical response)
+
+### Sprint 4: Polish + Workspace (2 weeks)
+- [ ] Clinical calculators (eGFR, CHA₂DS₂-VASc, MELD-Na, BMI, NNT)
+- [ ] Research Session Memory (tag, save, bibliography)
+- [ ] Search history for researchers
+- [ ] Plugin response card rendering (paper cards, severity badges, trial cards)
+- [ ] Mobile quick-action buttons (PubMed, Drug Check, Calculator)
+
+### Cross-Cutting (Throughout)
+- [ ] Redis caching for PubMed/OpenAlex (1h TTL)
+- [ ] Error handling: fallback OpenAlex when PubMed down
+- [ ] Drug not found → "Did you mean...?" suggestions
+- [ ] VN-EN medical terminology mapping
+
+---
+
+## 🟡 Phase 16: Admin Roadmap Tracker
+
+- [ ] DB schema: `roadmapItems` table
 - [ ] API: GET/POST/PATCH /api/admin/roadmap
-- [ ] Admin page: kanban view (Planned → In Progress → Done → Cancelled)
-- [ ] "Notify Customers" button: 1-click gửi email về features mới
-- [ ] Seed data: import tất cả Phase 1-15 items vào roadmap table
-
-**Effort:** ~4-5 hours
+- [ ] Admin page: kanban view
+- [ ] "Notify Customers" button
 
 ---
 
-## 🟡 After Hardening — Phase 17: Admin Second Brain (AI Notes)
+## 🟡 Phase 17: Admin Second Brain
 
-**Mục đích:** Ghi chú + AI phân tích khả thi tích hợp feature mới.
-
-- [ ] DB schema: `adminNotes` table (title, content, sourceUrl, tags, aiAnalysis, feasibilityScore, status)
-- [ ] API: CRUD /api/admin/notes + /api/admin/notes/analyze
-- [ ] AI analysis agent: Gemini 2.5 Pro phân tích khả thi tích hợp vào Phở Chat
-- [ ] Admin page: quick capture bar + notes list + AI analysis panel
-- [ ] "Add to Roadmap" flow: promote note → create roadmap item
-
-**Effort:** ~8-10 hours
+- [ ] DB schema: `adminNotes` table
+- [ ] AI analysis agent for feasibility
+- [ ] "Add to Roadmap" flow
 
 ---
 
-## 🟢 Future Ideas (No Timeline)
+## 🟢 Future Ideas
 
 ### User-Facing
-- [ ] Weekly email digest (Resend template + Vercel Cron)
+- [ ] Weekly email digest
 - [ ] API key generation UI (/settings/api)
-- [ ] Public changelog page (/changelog — auto from roadmap)
-- [ ] User feedback widget (in-app → admin dashboard)
-- [ ] Dynamic model catalog (DB-backed, admin toggleable)
+- [ ] Public changelog page
+- [ ] User feedback widget
 
 ### Admin Tools
-- [ ] Health check dashboard (/admin/health — response times, provider uptime, error rate)
-- [ ] Cost alert system (auto notify khi provider cost vượt threshold)
-- [ ] Feature flags for users (beta access management)
-- [ ] Scheduled maintenance mode
-
-### Medical-Specific
-- [ ] Medical literature summarizer (PubMed → AI summary)
-- [ ] Drug interaction knowledge graph visualization
-- [ ] Clinical trial search integration
-- [ ] DICOM image viewer plugin
-- [ ] Medical terminology glossary (EN ↔ VI)
+- [ ] Health check dashboard
+- [ ] Cost alert system
+- [ ] Feature flags for beta access
 
 ### Growth
-- [ ] Referral bonus automation (auto award Phở Points)
-- [ ] Affiliate conversion tracking dashboard (real data)
+- [ ] Referral bonus automation
 - [ ] SEO: programmatic pages for medical AI topics
-- [ ] Community forum / Q&A for medical users
+- [ ] Community forum for medical users
