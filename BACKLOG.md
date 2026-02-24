@@ -10,8 +10,8 @@
 - [x] Test onboarding flow end-to-end
 - [x] Test PubMed plugin search accuracy ✅ (5 studies, DOI, PMID, real-time)
 - [x] Test drug interaction checker plugin ✅ (HIGH RISK warfarin+aspirin)
-- [ ] Test clinical calculator plugin
-- [ ] Test pho-gateway failover
+- [x] Test clinical calculator plugin ✅ (10 formulas)
+- [x] Test pho-gateway failover ✅ (3-tier chains audited)
 - [ ] Test Phở Points deduction + balance accuracy
 - [ ] Test /usage page with real user data
 - [x] Test /models page rendering ✅ (fixed middleware, SEO-only)
@@ -20,8 +20,9 @@
 ### Security Hardening
 - [x] Secure API keys (random tokens + SHA-256 hashed DB storage)
 - [x] Rate limiting on /api/v1/chat (60 req/min)
+- [x] Rate limiting on plugin APIs (30 req/min per IP) ✅
 - [x] Health check endpoint /api/health ✅ (all subsystems green, 182ms)
-- [ ] Verify admin role check on all admin API routes
+- [x] Verify admin role check on all admin API routes ✅ (6 routes fixed)
 - [ ] Review Clerk webhook security
 
 ### Deploy & Monitor

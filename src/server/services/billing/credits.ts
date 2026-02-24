@@ -63,7 +63,7 @@ export async function deductPhoCredits(userId: string, amount: number) {
       .update(users)
       .set({
         lastUsageDate: new Date(),
-        phoPointsBalance: sql`${users.phoPointsBalance} - ${amount}`,
+        phoPointsBalance: sql`GREATEST(0, ${users.phoPointsBalance} - ${amount})`,
       })
       .where(eq(users.id, userId));
 
@@ -153,7 +153,7 @@ export async function processModelUsage(userId: string, cost: number, tier: numb
         dailyTier3Usage: newTier3Usage,
         lastUsageDate: now,
         lifetimeSpent: sql`${users.lifetimeSpent} + ${finalCost}`,
-        phoPointsBalance: sql`${users.phoPointsBalance} - ${finalCost}`,
+        phoPointsBalance: sql`GREATEST(0, ${users.phoPointsBalance} - ${finalCost})`,
       })
       .where(eq(users.id, userId));
 
