@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { invalidateCache } from '@/libs/cache';
 import { getServerDB } from '@/database/server';
 
+import { requireAdmin } from '../_shared/auth';
+
 /**
  * POST /api/admin/bulk-actions
  * Performs bulk operations on multiple users at once.
@@ -16,6 +18,9 @@ import { getServerDB } from '@/database/server';
  * }
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
     try {
         const body = await request.json();
         const { action, userIds, amount } = body;
@@ -46,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             if (role !== 'admin') {
                 return NextResponse.json({ error: 'Forbidden: admin role required' }, { status: 403 });
             }
-        } catch (_e) {
+        } catch {
             // If Clerk check fails, fall back to checking if user exists in DB
             // This ensures the endpoint still works in development
             console.warn('[bulk-actions] Clerk role check failed, falling back to DB check');

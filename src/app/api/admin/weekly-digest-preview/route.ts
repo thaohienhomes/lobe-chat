@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { cachedQuery } from '@/libs/cache';
 import { getServerDB } from '@/database/server';
 
+import { requireAdmin } from '../_shared/auth';
+
 /**
  * GET /api/admin/weekly-digest-preview
  * Returns a preview of the weekly email digest data for a given userId.
@@ -12,6 +14,9 @@ import { getServerDB } from '@/database/server';
  *   userId (required) — the DB user ID
  */
 export async function GET(request: Request): Promise<NextResponse> {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
     try {
         const url = new URL(request.url);
         const userId = url.searchParams.get('userId');

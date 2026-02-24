@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { cachedQuery } from '@/libs/cache';
 import { getServerDB } from '@/database/server';
 
+import { requireAdmin } from '../_shared/auth';
+
 /**
  * GET /api/admin/anomaly-count
  * Returns the number of detected anomalies (desynced plans, negative points, stuck payments).
@@ -10,6 +12,9 @@ import { getServerDB } from '@/database/server';
  * Cached for 60 seconds to reduce DB load.
  */
 export async function GET(): Promise<NextResponse> {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
     try {
         const count = await cachedQuery('admin:anomaly-count', 60, async () => {
             const db = await getServerDB();

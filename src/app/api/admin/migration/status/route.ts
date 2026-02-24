@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { migrationMonitor } from '@/services/monitoring/migrationMonitor';
 import { featureRolloutService } from '@/services/featureFlags/rolloutService';
 
+import { requireAdmin } from '../../_shared/auth';
+
 /**
  * Admin API endpoint for monitoring migration status
  * 
@@ -55,6 +57,9 @@ interface UpdateRolloutRequest {
 }
 
 export async function GET(): Promise<NextResponse<MigrationStatusResponse>> {
+  const denied = await requireAdmin();
+  if (denied) return denied as any;
+
   try {
     // Get monitoring data
     const report = migrationMonitor.generateReport();
@@ -122,6 +127,9 @@ export async function GET(): Promise<NextResponse<MigrationStatusResponse>> {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const body: UpdateRolloutRequest = await request.json();
 

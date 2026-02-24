@@ -5,13 +5,14 @@
  * GET /api/admin/database-verification - Run database verification checks
  */
 
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getServerDB } from '@/database/server';
 import { sepayPayments, subscriptions } from '@/database/schemas/billing';
 import { users } from '@/database/schemas/user';
 import { sql } from 'drizzle-orm';
 import { pino } from '@/libs/logger';
+
+import { requireAdmin } from '../_shared/auth';
 
 interface VerificationResult {
   details?: Record<string, any>;
@@ -209,14 +210,10 @@ async function verifyForeignKeyConstraints(db: any): Promise<VerificationResult>
  * GET /api/admin/database-verification
  */
 export async function GET(): Promise<NextResponse> {
-  try {
-    // Verify authentication
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-    // TODO: Add admin role check when admin system is implemented
+  try {
 
     pino.info({}, 'Starting database verification');
 

@@ -3,7 +3,12 @@ import { NextResponse } from 'next/server';
 import { sepayPayments, users } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 
+import { requireAdmin } from '../_shared/auth';
+
 export async function GET(req: Request) {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
     const url = new URL(req.url);
     const type = url.searchParams.get('type') || 'users';
 
