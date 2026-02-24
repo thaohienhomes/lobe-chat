@@ -10,13 +10,10 @@ const MODEL_CATALOG = [
         color: '#34D399',
         costPer: 5,
         models: [
-            {
-                desc: 'Google's fastest multimodal model.Great for everyday tasks, coding, and writing.', icon: '🔷', name: 'Gemini 2.0 Flash', provider: 'Google Vertex AI' },
+            { desc: `Google's fastest multimodal model. Great for everyday tasks, coding, and writing.`, icon: '🔷', name: 'Gemini 2.0 Flash', provider: 'Google Vertex AI' },
             { desc: 'Ultra-fast, cost-effective chat and code assistant from DeepSeek.', icon: '🧠', name: 'DeepSeek V3', provider: 'Vercel AI Gateway' },
-            {
-                desc: 'Meta's lightweight Llama model for fast responses.', icon: '🦙', name: 'Llama 4 Scout 17B', provider: 'Groq' },
-            {
-                    desc: 'Mistral's multilingual model with strong instruction following.', icon: '🌊', name: 'Mistral Saba 24B', provider: 'Groq' },
+            { desc: `Meta's lightweight Llama model for fast responses.`, icon: '🦙', name: 'Llama 4 Scout 17B', provider: 'Groq' },
+            { desc: `Mistral's multilingual model with strong instruction following.`, icon: '🌊', name: 'Mistral Saba 24B', provider: 'Groq' },
             { desc: 'Cerebras ultra-fast 8B model via LPU inference chips.', icon: '⚡', name: 'Llama 3.1 8B (Cerebras)', provider: 'Cerebras' },
         ],
     },
@@ -26,13 +23,11 @@ const MODEL_CATALOG = [
         color: '#A78BFA',
         costPer: 150,
         models: [
-            {
-                desc: 'Google's flagship Gemini 3 Pro — best reasoning and multimodal capabilities.', icon: '🔷', name: 'Gemini 3 Flash', provider: 'Google Vertex AI' },
-            { desc: 'OpenAI's most capable general- purpose model.', icon: '🟢', name: 'GPT - 4.1', provider: 'Vercel AI Gateway' },
-            {
-                    desc: 'Anthropic's top conversational AI — excellent for nuanced writing.', icon: '🟠', name: 'Claude Sonnet 4.5', provider: 'Vercel AI Gateway' },
-            { desc: 'DeepSeek's powerful reasoning model — top- tier for complex problems.', icon: '🧠', name: 'DeepSeek R1', provider: 'Vercel AI Gateway' },
-            { desc: 'Meta's large Llama 4 with huge 128K context.', icon: '🦙', name: 'Llama 4 Maverick 17B', provider: 'Groq' },
+            { desc: `Google's flagship Gemini 3 Pro — best reasoning and multimodal capabilities.`, icon: '🔷', name: 'Gemini 3 Flash', provider: 'Google Vertex AI' },
+            { desc: `OpenAI's most capable general-purpose model.`, icon: '🟢', name: 'GPT-4.1', provider: 'Vercel AI Gateway' },
+            { desc: `Anthropic's top conversational AI — excellent for nuanced writing.`, icon: '🟠', name: 'Claude Sonnet 4.5', provider: 'Vercel AI Gateway' },
+            { desc: `DeepSeek's powerful reasoning model — top-tier for complex problems.`, icon: '🧠', name: 'DeepSeek R1', provider: 'Vercel AI Gateway' },
+            { desc: `Meta's large Llama 4 with huge 128K context.`, icon: '🦙', name: 'Llama 4 Maverick 17B', provider: 'Groq' },
         ],
     },
     // Tier 3 – Premium (1000 pts/msg)
@@ -41,10 +36,8 @@ const MODEL_CATALOG = [
         color: '#FBBF24',
         costPer: 1000,
         models: [
-            {
-                desc: 'Google's most powerful Gemini model for ultra - complex tasks and research.', icon: '🔷', name: 'Gemini 3 Pro Preview', provider: 'Google Vertex AI' },
-            {
-                    desc: 'OpenAI's top reasoning model with extended thinking time.', icon: '🟢', name: 'GPT - 5.2', provider: 'Vercel AI Gateway' },
+            { desc: `Google's most powerful Gemini model for ultra-complex tasks and research.`, icon: '🔷', name: 'Gemini 3 Pro Preview', provider: 'Google Vertex AI' },
+            { desc: `OpenAI's top reasoning model with extended thinking time.`, icon: '🟢', name: 'GPT-5.2', provider: 'Vercel AI Gateway' },
             { desc: 'OpenAI o3-mini — advanced math and science reasoning.', icon: '🟢', name: 'o3-mini', provider: 'Vercel AI Gateway' },
         ],
     },
@@ -92,7 +85,7 @@ export default async function ModelsPage() {
                     {allModelCount} AI Models, One Platform
                 </h1>
                 <p style={{ color: '#A1A1AA', fontSize: '18px', margin: '0 0 24px' }}>
-                    Access the world's best AI models through Phở Chat's multi-provider infrastructure.
+                    Access the world&apos;s best AI models through Phở Chat&apos;s multi-provider infrastructure.
                     {totalUsageCount > 0 && ` Over ${totalUsageCount.toLocaleString()} messages processed.`}
                 </p>
                 <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
@@ -101,9 +94,9 @@ export default async function ModelsPage() {
                         borderRadius: '12px',
                         boxShadow: '0 4px 14px rgba(124, 58, 237, 0.35)',
                         color: '#fff',
+                        fontWeight: 600,
                         padding: '12px 28px',
                         textDecoration: 'none',
-                        fontWeight: 600,
                     }}>
                         Start chatting →
                     </Link>
@@ -112,9 +105,9 @@ export default async function ModelsPage() {
                         border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '12px',
                         color: '#E2E8F0',
+                        fontWeight: 600,
                         padding: '12px 28px',
                         textDecoration: 'none',
-                        fontWeight: 600,
                     }}>
                         View Plans
                     </Link>
