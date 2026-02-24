@@ -113,6 +113,29 @@ const FORMULA_INFO: Record<
     normalRange: '275-295 mOsm/kg',
     references: ['Formula: 2×Na + Glucose/18 + BUN/2.8'],
   },
+  meld_na: {
+    description: 'MELD-Na (Sodium-adjusted) — better predicts 90-day mortality than original MELD',
+    inputs: [
+      { description: 'Total bilirubin', name: 'bilirubin', type: 'number', unit: 'mg/dL' },
+      { description: 'Serum creatinine', name: 'creatinine', type: 'number', unit: 'mg/dL' },
+      { description: 'INR', name: 'inr', type: 'number' },
+      { description: 'Serum sodium', name: 'sodium', type: 'number', unit: 'mEq/L' },
+      { description: 'On dialysis (2x/week)', name: 'dialysis', type: 'boolean' },
+    ],
+    name: 'MELD-Na Score',
+    normalRange: '6-40 points',
+    references: ['Kim WR, et al. Hepatology 2008', 'UNOS adopted Jan 2016'],
+  },
+  nnt: {
+    description: 'Number Needed to Treat — how many patients must be treated to prevent 1 event',
+    inputs: [
+      { description: 'Event rate in control group (0-100)', name: 'control_event_rate', type: 'number', unit: '%' },
+      { description: 'Event rate in treatment group (0-100)', name: 'treatment_event_rate', type: 'number', unit: '%' },
+    ],
+    name: 'NNT (Number Needed to Treat)',
+    normalRange: 'Lower = more effective treatment',
+    references: ['Laupacis A, et al. NEJM 1988', 'NNT = 1 / ARR'],
+  },
 };
 
 export async function POST(request: NextRequest) {

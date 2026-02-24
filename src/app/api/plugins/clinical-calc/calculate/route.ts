@@ -260,6 +260,105 @@ const FORMULAS: Record<
     references: ['Kamath PS, et al. Hepatology 2001'],
   },
 
+  meld_na: {
+    calculate: (inputs) => {
+      const bilirubin = Math.max(Number(inputs.bilirubin), 1);
+      const creatinine = Math.min(Math.max(Number(inputs.creatinine), 1), 4);
+      const inr = Math.max(Number(inputs.inr), 1);
+      const sodium = Math.min(Math.max(Number(inputs.sodium), 125), 137);
+      const onDialysis = inputs.dialysis === true;
+
+      const creatinineValue = onDialysis ? 4 : creatinine;
+      const meld =
+        10 *
+        (0.957 * Math.log(creatinineValue) +
+          0.378 * Math.log(bilirubin) +
+          1.12 * Math.log(inr) +
+          0.643);
+      const meldScore = Math.min(Math.round(meld), 40);
+
+      // MELD-Na = MELD + 1.32 × (137 – Na) – [0.033 × MELD × (137 – Na)]
+      const meldNa = meldScore + 1.32 * (137 - sodium) - 0.033 * meldScore * (137 - sodium);
+      const score = Math.min(Math.max(Math.round(meldNa), 6), 40);
+
+      let interpretation = '';
+      if (score < 10) interpretation = '3-month mortality: ~2%';
+      else if (score < 20) interpretation = '3-month mortality: ~6%';
+      else if (score < 30) interpretation = '3-month mortality: ~20%';
+      else if (score < 40) interpretation = '3-month mortality: ~53%';
+      else interpretation = '3-month mortality: ~71%';
+
+      return {
+        interpretation: `MELD-Na: ${score} (original MELD: ${meldScore}). ${interpretation}`,
+        result: score,
+        unit: 'points',
+      };
+    },
+    description: 'MELD-Na (Sodium-adjusted) for liver transplant prioritization',
+    inputs: [
+      { description: 'Total bilirubin', name: 'bilirubin', type: 'number', unit: 'mg/dL' },
+      { description: 'Serum creatinine', name: 'creatinine', type: 'number', unit: 'mg/dL' },
+      { description: 'INR', name: 'inr', type: 'number' },
+      { description: 'Serum sodium', name: 'sodium', type: 'number', unit: 'mEq/L' },
+      { description: 'On dialysis (2x/week)', name: 'dialysis', type: 'boolean' },
+    ],
+    name: 'MELD-Na Score',
+    references: [
+      'Kim WR, et al. Hepatology 2008',
+      'UNOS adopted Jan 2016 for liver allocation',
+    ],
+  },
+
+  nnt: {
+    calculate: (inputs) => {
+      const controlRate = Number(inputs.control_event_rate) / 100;
+      const treatmentRate = Number(inputs.treatment_event_rate) / 100;
+
+      if (controlRate <= 0 || treatmentRate < 0) {
+        return { interpretation: 'Invalid rates', result: 'N/A' };
+      }
+
+      const arr = controlRate - treatmentRate; // Absolute Risk Reduction
+      if (arr <= 0) {
+        const nnh = Math.abs(Math.round(1 / arr));
+        return {
+          interpretation: `Treatment increases risk. NNH (Number Needed to Harm) = ${nnh}`,
+          result: `NNH: ${nnh}`,
+        };
+      }
+
+      const nnt = Math.ceil(1 / arr);
+      const rrr = ((arr / controlRate) * 100).toFixed(1);
+
+      return {
+        interpretation: `Need to treat ${nnt} patients to prevent 1 event. ARR = ${(arr * 100).toFixed(1)}%, RRR = ${rrr}%`,
+        result: nnt,
+        unit: 'patients',
+      };
+    },
+    description: 'Number Needed to Treat — evaluates treatment effectiveness',
+    inputs: [
+      {
+        description: 'Event rate in control group (0-100)',
+        name: 'control_event_rate',
+        type: 'number',
+        unit: '%',
+      },
+      {
+        description: 'Event rate in treatment group (0-100)',
+        name: 'treatment_event_rate',
+        type: 'number',
+        unit: '%',
+      },
+    ],
+    name: 'NNT (Number Needed to Treat)',
+    references: [
+      'Laupacis A, et al. NEJM 1988',
+      'ARR = Control Rate - Treatment Rate',
+      'NNT = 1 / ARR',
+    ],
+  },
+
   osmolality: {
     calculate: (inputs) => {
       const na = Number(inputs.sodium);
