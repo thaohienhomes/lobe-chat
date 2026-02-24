@@ -8,8 +8,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 interface DrugInfo {
   activeIngredients: string[];
+  boxedWarning: string;
   brandName: string;
+  contraindications: string;
   dosageForm: string;
+  drugInteractions: string;
+  fdaUrl: string;
   genericName: string;
   indications: string;
   manufacturer: string;
@@ -52,12 +56,17 @@ export async function POST(request: NextRequest) {
 
     const drugs: DrugInfo[] = results.map((result: Record<string, unknown>) => {
       const openfda = (result.openfda || {}) as Record<string, string[]>;
+      const brandName = (openfda.brand_name || ['Unknown'])[0];
 
       return {
         activeIngredients: (openfda.substance_name || []).slice(0, 5),
-        brandName: (openfda.brand_name || ['Unknown'])[0],
+        boxedWarning: ((result.boxed_warning as string[]) || [''])[0]?.slice(0, 500) || '',
+        brandName,
+        contraindications: ((result.contraindications as string[]) || [''])[0]?.slice(0, 400) || '',
         dosageForm:
           ((result.dosage_and_administration as string[]) || [''])[0]?.slice(0, 200) || '',
+        drugInteractions: ((result.drug_interactions as string[]) || [''])[0]?.slice(0, 500) || '',
+        fdaUrl: `https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=${(openfda.application_number || [''])[0]?.replace(/\D/g, '')}`,
         genericName: (openfda.generic_name || ['Unknown'])[0],
         indications: ((result.indications_and_usage as string[]) || [''])[0]?.slice(0, 300) || '',
         manufacturer: (openfda.manufacturer_name || ['Unknown'])[0],
