@@ -12,10 +12,10 @@
 - [x] Test drug interaction checker plugin ✅ (HIGH RISK warfarin+aspirin)
 - [x] Test clinical calculator plugin ✅ (10 formulas)
 - [x] Test pho-gateway failover ✅ (3-tier chains audited)
-- [ ] Test Phở Points deduction + balance accuracy
+- [x] Test Phở Points deduction + balance accuracy ✅ (fixed negative balance bug)
 - [ ] Test /usage page with real user data
 - [x] Test /models page rendering ✅ (fixed middleware, SEO-only)
-- [ ] Test /invite referral link generation + copy
+- [x] Test /invite referral link generation + copy ✅ (Clerk auth verified)
 
 ### Security Hardening
 - [x] Secure API keys (random tokens + SHA-256 hashed DB storage)
@@ -23,7 +23,7 @@
 - [x] Rate limiting on plugin APIs (30 req/min per IP) ✅
 - [x] Health check endpoint /api/health ✅ (all subsystems green, 182ms)
 - [x] Verify admin role check on all admin API routes ✅ (6 routes fixed)
-- [ ] Review Clerk webhook security
+- [x] Review Clerk webhook security ✅ (Svix signature verification)
 
 ### Deploy & Monitor
 - [ ] Run `npx tsx scripts/ensure-admin-tables.ts` on production
