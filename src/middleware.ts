@@ -60,6 +60,12 @@ export const config = {
     '/oidc(.*)',
     '/admin',
     '/admin(.*)',
+
+    // Custom Phở Chat pages
+    '/models',
+    '/usage',
+    '/invite',
+    '/affiliate',
     // ↓ cloud ↓
   ],
 };
@@ -203,6 +209,12 @@ const isPublicRoute = createRouteMatcher([
   '/api/subscription(.*)',
   // Payment checkout
   '/api/payment(.*)',
+  // Public pages
+  '/models',
+  // Public API endpoints
+  '/api/health',
+  '/api/v1(.*)',
+  '/api/plugins(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
