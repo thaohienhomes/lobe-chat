@@ -1,3 +1,4 @@
+'use client';
 import { Heatmaps, HeatmapsProps } from '@lobehub/charts';
 import { FormGroup, Icon, Tag } from '@lobehub/ui';
 import { useTheme } from 'antd-style';

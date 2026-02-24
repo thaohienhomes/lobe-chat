@@ -38,23 +38,23 @@ interface AgenticAction {
   // History
   clearHistory: () => void;
   completeTask: (result?: string) => void;
-  setCurrentStep: (index: number) => void;
+  // Multi-agent actions
+  setActiveAgents: (agentIds: string[]) => void;
 
+  setCurrentStep: (index: number) => void;
   setIsExecuting: (value: boolean) => void;
+
   // UI actions
   setIsPlanning: (value: boolean) => void;
-
   // Task lifecycle
   startTask: (task: AgenticTask) => void;
   toggleProgress: () => void;
+
+  updateAgentAssignment: (agentId: string, updates: Partial<AgentAssignment>) => void;
+
   // Step management
   updateStep: (stepId: string, updates: Partial<TaskStep>) => void;
-
   updateTask: (updates: Partial<AgenticTask>) => void;
-
-  // Multi-agent actions
-  setActiveAgents: (agentIds: string[]) => void;
-  updateAgentAssignment: (agentId: string, updates: Partial<AgentAssignment>) => void;
 }
 
 export type AgenticStore = AgenticState & AgenticAction;
@@ -108,31 +108,52 @@ const createStore = (set: any, get: any): AgenticStore => ({
       };
     }),
 
-  setCurrentStep: (index) =>
+  // Multi-agent actions
+setActiveAgents: (agentIds) => set({ activeAgents: agentIds }),
+
+  
+setCurrentStep: (index) =>
     set((state: AgenticState) => ({
       activeTask: state.activeTask ? { ...state.activeTask, currentStepIndex: index } : null,
     })),
 
-  setIsExecuting: (value) => set({ isExecuting: value }),
+  
+  
+setIsExecuting: (value) => set({ isExecuting: value }),
 
-  // UI actions
-  setIsPlanning: (value) => set({ isPlanning: value }),
+  
+  
+// UI actions
+setIsPlanning: (value) => set({ isPlanning: value }),
 
-  // Task lifecycle
-  startTask: (task) =>
+  
+// Task lifecycle
+startTask: (task) =>
     set({
       activeTask: task,
       isExecuting: true,
       showProgress: true,
     }),
 
-  toggleProgress: () =>
+  
+  
+toggleProgress: () =>
     set((state: AgenticState) => ({
       showProgress: !state.showProgress,
     })),
 
+  
+
+updateAgentAssignment: (agentId, updates) =>
+    set((state: AgenticState) => ({
+      agentAssignments: state.agentAssignments.map((a) =>
+        a.agentId === agentId ? { ...a, ...updates } : a,
+      ),
+    })),
+
+  
   // Step management
-  updateStep: (stepId, updates) =>
+updateStep: (stepId, updates) =>
     set((state: AgenticState) => {
       if (!state.activeTask) return state;
 
@@ -161,16 +182,6 @@ const createStore = (set: any, get: any): AgenticStore => ({
           : null,
       };
     }),
-
-  // Multi-agent actions
-  setActiveAgents: (agentIds) => set({ activeAgents: agentIds }),
-
-  updateAgentAssignment: (agentId, updates) =>
-    set((state: AgenticState) => ({
-      agentAssignments: state.agentAssignments.map((a) =>
-        a.agentId === agentId ? { ...a, ...updates } : a,
-      ),
-    })),
 });
 
 const devtools = createDevtools('agentic');

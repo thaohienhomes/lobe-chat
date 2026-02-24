@@ -1,3 +1,4 @@
+'use client';
 import { BarList } from '@lobehub/charts';
 import { ModelIcon } from '@lobehub/icons';
 import { ActionIcon, FormGroup, Modal } from '@lobehub/ui';

@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/reset-lifetime-points",
       "schedule": "0 0 1 * *"
+    },
+    {
+      "path": "/api/cron/anomaly-radar",
+      "schedule": "0 * * * *"
     }
   ],
   "functions": {

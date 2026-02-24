@@ -181,7 +181,7 @@ export function findAgentsForQuery(query: string): SpecialistAgent[] {
  * Returns a map of agentId -> stepIds
  */
 export function routeStepsToAgents(
-    steps: Array<{ id: string; tool?: string; description: string }>,
+    steps: Array<{ description: string, id: string; tool?: string; }>,
 ): AgentAssignment[] {
     const assignments = new Map<string, string[]>();
 

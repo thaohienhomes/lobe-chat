@@ -15,7 +15,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#0ea5e9',
     suggestedAgents: ['biomedical-research-assistant'],
     suggestedPlugins: ['pubmed-search', 'arxiv', 'semantic-scholar', 'doi-resolver'],
-    suggestedModels: ['openai/o3-mini', 'claude-3-5-sonnet'],
+    suggestedModels: ['gemini-2.5-pro', 'deepseek-r1'],
     suggestedFeatures: ['web-search'],
   },
   {
@@ -28,7 +28,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#7c3aed',
     suggestedAgents: ['biomedical-research-assistant'],
     suggestedPlugins: ['arxiv', 'semantic-scholar', 'doi-resolver'],
-    suggestedModels: ['o3-deep-research', 'claude-3-5-sonnet'],
+    suggestedModels: ['gemini-2.5-pro', 'deepseek-r1'],
     suggestedFeatures: ['deep-research', 'web-search', 'artifacts'],
   },
   {
@@ -47,7 +47,7 @@ export const PROFESSION_CATEGORIES = [
       'semantic-scholar',
       'doi-resolver',
     ],
-    suggestedModels: ['claude-3-5-sonnet'],
+    suggestedModels: ['gemini-2.5-flash', 'gpt-4.1'],
     suggestedFeatures: ['web-search'],
   },
   {
@@ -65,7 +65,7 @@ export const PROFESSION_CATEGORIES = [
       'semantic-scholar',
       'doi-resolver',
     ],
-    suggestedModels: ['gpt-4o'],
+    suggestedModels: ['gemini-2.5-flash', 'gpt-4.1'],
     suggestedFeatures: ['web-search'],
   },
   {
@@ -78,7 +78,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#ec4899',
     suggestedAgents: ['medical-educator'],
     suggestedPlugins: [],
-    suggestedModels: ['gpt-4o-mini'],
+    suggestedModels: ['gemini-2.0-flash'],
     suggestedFeatures: [],
   },
   {
@@ -91,7 +91,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#f59e0b',
     suggestedAgents: ['medical-educator'],
     suggestedPlugins: [],
-    suggestedModels: ['gpt-4o', 'gemini-2.0-flash-exp'],
+    suggestedModels: ['gemini-2.5-flash', 'gpt-4.1'],
     suggestedFeatures: ['artifacts'],
   },
   {
@@ -104,7 +104,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#3b82f6',
     suggestedAgents: ['medical-educator'],
     suggestedPlugins: ['semantic-scholar', 'arxiv'],
-    suggestedModels: ['gpt-4o-mini', 'gemini-2.0-flash-exp'],
+    suggestedModels: ['gemini-2.0-flash', 'gemini-2.5-flash'],
     suggestedFeatures: ['artifacts'],
   },
   {
@@ -117,7 +117,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#6366f1',
     suggestedAgents: ['biomedical-research-assistant'],
     suggestedPlugins: ['arxiv', 'semantic-scholar', 'doi-resolver'],
-    suggestedModels: ['o3-deep-research', 'claude-3-5-sonnet'],
+    suggestedModels: ['gemini-2.5-pro', 'deepseek-r1'],
     suggestedFeatures: ['deep-research', 'web-search'],
   },
   {
@@ -130,7 +130,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#10b981',
     suggestedAgents: ['content-writer'],
     suggestedPlugins: [],
-    suggestedModels: ['gpt-4o', 'gemini-2.0-flash-exp'],
+    suggestedModels: ['gemini-2.5-flash', 'gpt-4.1'],
     suggestedFeatures: ['artifacts'],
   },
   {
@@ -143,7 +143,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#64748b',
     suggestedAgents: ['artifact-creator', 'code-reviewer'],
     suggestedPlugins: [],
-    suggestedModels: ['claude-3-5-sonnet', 'gpt-4o'],
+    suggestedModels: ['gpt-5.2', 'gemini-2.5-pro'],
     suggestedFeatures: ['artifacts'],
   },
   {
@@ -156,7 +156,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#f43f5e',
     suggestedAgents: ['content-writer', 'artifact-creator'],
     suggestedPlugins: [],
-    suggestedModels: ['gpt-4o', 'claude-3-5-sonnet'],
+    suggestedModels: ['gpt-5.2', 'gemini-2.5-flash'],
     suggestedFeatures: ['artifacts'],
   },
   {
@@ -169,7 +169,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#0891b2',
     suggestedAgents: ['email-writer', 'content-writer'],
     suggestedPlugins: [],
-    suggestedModels: ['gpt-4o-mini'],
+    suggestedModels: ['gemini-2.0-flash'],
     suggestedFeatures: [],
   },
   {
@@ -182,7 +182,7 @@ export const PROFESSION_CATEGORIES = [
     color: '#9ca3af',
     suggestedAgents: [],
     suggestedPlugins: [],
-    suggestedModels: ['gpt-4o-mini'],
+    suggestedModels: ['gemini-2.0-flash'],
     suggestedFeatures: [],
   },
 ] as const;

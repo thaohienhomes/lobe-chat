@@ -13,6 +13,7 @@ import { isDesktop } from '@/const/version';
 import PWAInstall from '@/features/PWAInstall';
 import AuthProvider from '@/layout/AuthProvider';
 import GlobalProvider from '@/layout/GlobalProvider';
+import VoiceSupport from '@/features/VoiceSupport';
 import { Locales } from '@/locales/resources';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
@@ -63,6 +64,7 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
             <AuthProvider>
               {children}
               {!isMobile && modal}
+              <VoiceSupport />
             </AuthProvider>
             <PWAInstall />
             <NewYearLifetimeBanner />

@@ -133,7 +133,7 @@ const AgenticProgress = memo(() => {
                 color={assignment.status === 'working' ? 'processing' : assignment.status === 'done' ? 'success' : assignment.status === 'failed' ? 'error' : 'default'}
                 icon={<AgentIcon size={12} />}
                 key={assignment.agentId}
-                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                style={{ alignItems: 'center', display: 'flex', gap: 4 }}
               >
                 <span style={{ color }}>{agent?.name || assignment.agentId}</span>
               </Tag>

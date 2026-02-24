@@ -223,7 +223,10 @@
     "hash": "b1dd0c4bd43efc33b68ff3c5383c435eb62afcd0fdc6cd5994a90d98e25de69a"
   },
   {
-    "sql": ["DROP TABLE \"user_budgets\";", "\r\nDROP TABLE \"user_subscriptions\";"],
+    "sql": [
+      "DROP TABLE \"user_budgets\";",
+      "\r\nDROP TABLE \"user_subscriptions\";"
+    ],
     "bps": true,
     "folderMillis": 1729699958471,
     "hash": "eea3a1d9206e41b108d3b4bda2d8e36927ec025f77eb7199c018b63d64093d6a"
@@ -295,7 +298,9 @@
     "hash": "47efcf4a847b449b05ab135f7c4a4ebbc75a4eaed26cd6ead73b47a6a2d58a49"
   },
   {
-    "sql": ["ALTER TABLE \"messages\" ADD COLUMN \"reasoning\" jsonb;"],
+    "sql": [
+      "ALTER TABLE \"messages\" ADD COLUMN \"reasoning\" jsonb;"
+    ],
     "bps": true,
     "folderMillis": 1737609172353,
     "hash": "2cb36ae4fcdd7b7064767e04bfbb36ae34518ff4bb1b39006f2dd394d1893868"
@@ -510,7 +515,9 @@
     "hash": "17e740d5f5260b2e60b3fd289a59de3e02514effd6518d3d84136518b366ea82"
   },
   {
-    "sql": ["ALTER TABLE \"ai_providers\" ADD COLUMN \"config\" jsonb;"],
+    "sql": [
+      "ALTER TABLE \"ai_providers\" ADD COLUMN \"config\" jsonb;"
+    ],
     "bps": true,
     "folderMillis": 1749309388370,
     "hash": "39cea379f08ee4cb944875c0b67f7791387b508c2d47958bb4cd501ed1ef33eb"

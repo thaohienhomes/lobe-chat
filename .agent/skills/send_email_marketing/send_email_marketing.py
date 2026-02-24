@@ -11,9 +11,14 @@ def send_email_marketing(to_email, subject, html_content):
         subject (str): The subject line.
         html_content (str): The HTML body of the email.
     """
+import os
+
     # API Key Configuration
     # NOTE: It is recommended to use environment variables for API keys in production.
-    resend_api_key = "re_26NPEjkw_Jp1oFUDJC97brkjQvUNiQN8t"
+    resend_api_key = os.environ.get("RESEND_API_KEY")
+
+    if not resend_api_key:
+        return {"error": "RESEND_API_KEY environment variable is not set"}
 
     url = "https://api.resend.com/emails"
 

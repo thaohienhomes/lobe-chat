@@ -32,6 +32,12 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // Image optimization – prefer WebP for smaller payloads
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 31_536_000, // 1 year
+  },
+
   experimental: {
     optimizePackageImports: [
       'emoji-mart',
@@ -46,6 +52,8 @@ const nextConfig: NextConfig = {
       'antd',
       'antd-style',
       'posthog-js',
+      'react-layout-kit',
+      'react-i18next',
     ],
     // oidc provider depend on constructor.name
     // but swc minification will remove the name

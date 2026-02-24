@@ -1,3 +1,4 @@
+'use client';
 import { ActionIcon, CopyButton, List } from '@lobehub/ui';
 import { RotateCw, Unlink } from 'lucide-react';
 import { CSSProperties, memo, useState } from 'react';

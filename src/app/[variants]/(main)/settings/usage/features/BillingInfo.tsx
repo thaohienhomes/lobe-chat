@@ -115,28 +115,39 @@ const PLAN_PRICING: Record<string, { displayName: string; monthlyPoints: number;
     monthlyPoints: 2_000_000,
     price: 0,
   },
-  // Legacy mappings (for backward compatibility)
-  premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+  
+  // Medical Beta
+medical_beta: { displayName: 'Phở Medical Beta', monthlyPoints: 500_000, price: 999_000 },
 
 
-  starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-  ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
-  // Vietnam Plans
-  vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+  
+// Legacy mappings (for backward compatibility)
+premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+  
+starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+  
+  
+ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
 
 
-  vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-  vn_lifetime: {
+  
+// Vietnam Plans
+vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+  
+vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+  
+vn_lifetime: {
     displayName: 'Thành Viên Sáng Lập (Trọn Đời)',
     monthlyPoints: 2_000_000,
     price: 0,
   },
-  vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
-  vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
-  vn_ultimate: { displayName: 'Phở Pro (Ultimate)', monthlyPoints: 5_000_000, price: 4_990_000 },
+  
+vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
+  
+vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
 
-  // Medical Beta
-  medical_beta: { displayName: 'Phở Medical Beta', monthlyPoints: 500_000, price: 999_000 },
+  
+  vn_ultimate: { displayName: 'Phở Pro (Ultimate)', monthlyPoints: 5_000_000, price: 4_990_000 },
 };
 
 /**

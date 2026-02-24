@@ -58,6 +58,8 @@ export const config = {
     '/next-auth/(.*)',
     '/oauth(.*)',
     '/oidc(.*)',
+    '/admin',
+    '/admin(.*)',
     // ↓ cloud ↓
   ],
 };

@@ -28,6 +28,24 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
       background: transparent !important;
     }
   `,
+  groupDivider: css`
+    margin-block: 4px;
+    border-block-start: 1px solid ${token.colorBorderSecondary};
+  `,
+  groupHeader: css`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding-block: 6px;
+    padding-inline: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+    color: ${token.colorTextSecondary};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  `,
   menu: css`
     .${prefixCls}-dropdown-menu-item {
       display: flex;
@@ -112,24 +130,6 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
     font-size: 13px;
     font-weight: 600;
     color: ${token.colorText};
-  `,
-  groupHeader: css`
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    padding-block: 6px;
-    padding-inline: 8px;
-
-    font-size: 11px;
-    font-weight: 600;
-    color: ${token.colorTextSecondary};
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  `,
-  groupDivider: css`
-    margin-block: 4px;
-    border-block-start: 1px solid ${token.colorBorderSecondary};
   `,
 }));
 

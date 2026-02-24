@@ -6,6 +6,7 @@ import { getServerDB } from '@/database/server';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
 import { SepayWebhookData, sepayGateway } from '@/libs/sepay';
 import { sendTikTokServerEvent } from '@/libs/tiktok-events-api';
+import { logWebhookEvent } from '@/libs/webhookLogger';
 import { getPaymentByOrderId } from '@/server/services/billing/sepay';
 
 /**
@@ -685,25 +686,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.warn('⚠️ No signature provided in webhook - skipping signature verification');
     }
 
+    // Log to admin webhook viewer
+    void logWebhookEvent({
+      amountUsd: String(webhookData.amount || ''),
+      eventType: `payment.${webhookData.status}`,
+      orderId: webhookData.orderId,
+      payload: webhookData as any,
+      provider: 'sepay',
+      status: 'received',
+    });
+
     // Process payment based on status
     switch (webhookData.status) {
       case 'success': {
-        console.log('✅ Processing successful payment for orderId:', webhookData.orderId);
+        console.log(' Processing successful payment for orderId:', webhookData.orderId);
         await handleSuccessfulPayment(webhookData);
+        void logWebhookEvent({ eventType: `payment.${webhookData.status}`, orderId: webhookData.orderId, provider: 'sepay', status: 'success' });
         break;
       }
       case 'failed': {
         console.log('❌ Processing failed payment for orderId:', webhookData.orderId);
         await handleFailedPayment(webhookData);
+        void logWebhookEvent({ eventType: 'payment.failed', orderId: webhookData.orderId, provider: 'sepay', status: 'error' });
         break;
       }
       case 'pending': {
         console.log('⏳ Processing pending payment for orderId:', webhookData.orderId);
         await handlePendingPayment(webhookData);
+        void logWebhookEvent({ eventType: 'payment.pending', orderId: webhookData.orderId, provider: 'sepay', status: 'received' });
         break;
       }
       default: {
         console.warn('⚠️ Unknown payment status:', webhookData.status);
+        void logWebhookEvent({ eventType: `payment.${webhookData.status}`, orderId: webhookData.orderId, provider: 'sepay', status: 'ignored' });
       }
     }
 

@@ -1,3 +1,4 @@
+'use client';
 import { BarList } from '@lobehub/charts';
 import { ActionIcon, Avatar, FormGroup, Modal } from '@lobehub/ui';
 import { MaximizeIcon } from 'lucide-react';

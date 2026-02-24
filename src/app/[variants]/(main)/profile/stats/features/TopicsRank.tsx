@@ -1,3 +1,4 @@
+'use client';
 import { BarList } from '@lobehub/charts';
 import { ActionIcon, FormGroup, Icon, Modal } from '@lobehub/ui';
 import { useTheme } from 'antd-style';

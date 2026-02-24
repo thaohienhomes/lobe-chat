@@ -1,3 +1,4 @@
+'use client';
 import useSWR, { SWRHook } from 'swr';
 
 import { isDesktop } from '@/const/version';

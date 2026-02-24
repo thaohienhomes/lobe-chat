@@ -9,8 +9,10 @@ import { useToolStore } from '@/store/tool';
 import { useUserStore } from '@/store/user';
 
 import MedicalOnboarding from './MedicalOnboarding';
+import OnboardingProgress from './OnboardingProgress';
 import ProfessionSelect from './ProfessionSelect';
 import RecommendationModal from './RecommendationModal';
+import WelcomeTips from './WelcomeTips';
 import type { RecommendationSelections } from './professions';
 
 interface OnboardingModalProps {
@@ -18,7 +20,7 @@ interface OnboardingModalProps {
   open: boolean;
 }
 
-type OnboardingStep = 'profession' | 'recommendations';
+type OnboardingStep = 'profession' | 'recommendations' | 'tips';
 
 /**
  * Apply the selected recommendations to user settings
@@ -115,6 +117,12 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
   });
 };
 
+const STEP_INDEX: Record<OnboardingStep, number> = {
+  profession: 0,
+  recommendations: 1,
+  tips: 2,
+};
+
 const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
   const { user } = useUser();
   const planId = (user?.publicMetadata as any)?.planId as string | undefined;
@@ -173,6 +181,14 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
   const handleRecommendationsComplete = async (selections: RecommendationSelections) => {
     setIsSubmitting(true);
     try {
+      // Item 11: Validate suggested model IDs against the catalog
+      const { getValidModelIds } = await import('@/config/modelCatalog');
+      const validIds = getValidModelIds();
+      if (selections.defaultModel && !validIds.includes(selections.defaultModel)) {
+        console.warn(`[Onboarding] Model "${selections.defaultModel}" not in catalog, falling back`);
+        selections.defaultModel = validIds[0]; // fallback to first available
+      }
+
       // 1. Save recommendation selections to database via API
       // This also marks user as onboarded
       const { userService } = await import('@/services/user');
@@ -181,26 +197,31 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
       // 2. Apply the recommendations to user settings
       await applyRecommendations(selections);
 
-      // 3. Update store so modal hides immediately
-      useUserStore.setState({ isOnboard: true });
-
-      onComplete?.();
+      // 3. Move to the tips step instead of closing immediately
+      setStep('tips');
     } catch (error) {
       console.error('Failed to save/apply recommendations:', error);
-      // Still close modal and mark onboarded even if save fails
-      useUserStore.setState({ isOnboard: true });
-      onComplete?.();
+      // Still move to tips even if save fails
+      setStep('tips');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleRecommendationsSkip = () => {
+    // Skip to tips instead of closing entirely
+    setStep('tips');
+  };
+
+  const handleTipsComplete = () => {
+    // Mark onboarded and close
     markOnboardedAndClose();
   };
 
   const getModalWidth = () => {
-    return step === 'profession' ? 640 : 560;
+    if (step === 'profession') return 640;
+    if (step === 'tips') return 520;
+    return 560;
   };
 
   return (
@@ -221,6 +242,12 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
         />
       ) : (
         <>
+          {/* Progress indicator */}
+          {!showAdvancedOnboarding && (
+            <div style={{ paddingBlockStart: 20, paddingInline: 24 }}>
+              <OnboardingProgress currentStep={STEP_INDEX[step]} totalSteps={3} />
+            </div>
+          )}
           {step === 'profession' && (
             <ProfessionSelect
               loading={isSubmitting}
@@ -234,6 +261,12 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
               onComplete={handleRecommendationsComplete}
               onSkip={handleRecommendationsSkip}
               professions={selectedProfessions}
+            />
+          )}
+          {step === 'tips' && (
+            <WelcomeTips
+              loading={isSubmitting}
+              onComplete={handleTipsComplete}
             />
           )}
         </>

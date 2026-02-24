@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { getServerDB } from '@/database/server';
+import { logWebhookEvent } from '@/libs/webhookLogger';
 
 /**
  * Allocate Phở Points for lifetime members
@@ -271,9 +272,11 @@ export async function POST(req: Request) {
     }
 
     // Other events - just acknowledge
+    void logWebhookEvent({ eventType: 'other', payload: body as any, provider: 'polar', status: 'ignored' });
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('❌ Webhook error:', error);
+    void logWebhookEvent({ errorMessage: error instanceof Error ? error.message : String(error), eventType: 'error', provider: 'polar', status: 'error' });
     return NextResponse.json(
       {
         details: error instanceof Error ? error.message : 'Unknown error',
