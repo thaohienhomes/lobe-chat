@@ -282,9 +282,20 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           currentRuntime = await initModelRuntimeWithUserPayload(targetProvider, jwtPayload);
         }
 
+        // Sanitize messages for Gemini-based providers (require non-empty content)
+        let sanitizedData = data;
+        if (targetProvider === 'vercelaigateway' && targetModelId.startsWith('google/')) {
+          const filteredMessages = data.messages?.filter((msg) => {
+            if (typeof msg.content === 'string') return msg.content.trim().length > 0;
+            if (Array.isArray(msg.content)) return msg.content.length > 0;
+            return msg.content !== null && msg.content !== undefined;
+          });
+          sanitizedData = { ...data, messages: filteredMessages };
+        }
+
         const response = await currentRuntime.chat(
           {
-            ...data,
+            ...sanitizedData,
             model: targetModelId,
           },
           {
@@ -386,7 +397,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           let accumulatedText = '';
           const decoder = new TextDecoder();
 
-          for (;;) {
+          for (; ;) {
             const { done, value } = await reader.read();
             if (done) break;
             // Decode chunk. Note: chunks might be partial SSE events.
@@ -509,7 +520,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // the inappropriate "Enter custom API key" form.
     const safeErrorType =
       errorType === AgentRuntimeErrorType.InvalidProviderAPIKey ||
-      errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
+        errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
         ? AgentRuntimeErrorType.ProviderBizError
         : errorType;
 

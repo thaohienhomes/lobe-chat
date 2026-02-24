@@ -125,12 +125,14 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       return { apiKey };
     }
 
-    // Groq - direct API with CF Gateway bypass
+    // Groq - use proxy URL if available (bypasses geo-restrictions from HKG region)
     case 'groq': {
       const apiKey = apiKeyManager.pick(
         payload?.apiKey || llmConfig.GROQ_API_KEY,
       );
-      const baseURL = payload?.baseURL || 'https://api.groq.com/openai/v1';
+      const baseURL = payload?.baseURL
+        || process.env.GROQ_PROXY_URL
+        || 'https://api.groq.com/openai/v1';
 
       if (process.env.NODE_ENV !== 'production') {
         console.log('[ModelRuntime] Groq - API Key exists:', !!apiKey);
@@ -140,12 +142,14 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       return { apiKey, baseURL };
     }
 
-    // Cerebras - direct API with CF Gateway bypass
+    // Cerebras - use proxy URL if available (bypasses geo-restrictions from HKG region)
     case 'cerebras': {
       const apiKey = apiKeyManager.pick(
         payload?.apiKey || llmConfig.CEREBRAS_API_KEY,
       );
-      const baseURL = payload?.baseURL || 'https://api.cerebras.ai/v1';
+      const baseURL = payload?.baseURL
+        || process.env.CEREBRAS_PROXY_URL
+        || 'https://api.cerebras.ai/v1';
 
       if (process.env.NODE_ENV !== 'production') {
         console.log('[ModelRuntime] Cerebras - API Key exists:', !!apiKey);
@@ -160,7 +164,9 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       const apiKey = apiKeyManager.pick(
         payload?.apiKey || llmConfig.PERPLEXITY_API_KEY,
       );
-      const baseURL = payload?.baseURL || 'https://api.perplexity.ai';
+      const baseURL = payload?.baseURL
+        || process.env.PERPLEXITY_PROXY_URL
+        || 'https://api.perplexity.ai';
 
       if (process.env.NODE_ENV !== 'production') {
         console.log('[ModelRuntime] Perplexity - API Key exists:', !!apiKey);
@@ -175,8 +181,9 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       const apiKey = apiKeyManager.pick(
         payload?.apiKey || llmConfig.FIREWORKSAI_API_KEY,
       );
-      const baseURL =
-        payload?.baseURL || 'https://api.fireworks.ai/inference/v1';
+      const baseURL = payload?.baseURL
+        || process.env.FIREWORKSAI_PROXY_URL
+        || 'https://api.fireworks.ai/inference/v1';
 
       if (process.env.NODE_ENV !== 'production') {
         console.log('[ModelRuntime] Fireworks AI - API Key exists:', !!apiKey);
@@ -191,7 +198,9 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       const apiKey = apiKeyManager.pick(
         payload?.apiKey || llmConfig.TOGETHERAI_API_KEY,
       );
-      const baseURL = payload?.baseURL || 'https://api.together.xyz/v1';
+      const baseURL = payload?.baseURL
+        || process.env.TOGETHERAI_PROXY_URL
+        || 'https://api.together.xyz/v1';
 
       if (process.env.NODE_ENV !== 'production') {
         console.log('[ModelRuntime] Together AI - API Key exists:', !!apiKey);
