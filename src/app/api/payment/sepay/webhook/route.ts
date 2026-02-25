@@ -1,6 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { VN_PLANS } from '@/config/pricing';
 import { sepayPayments, subscriptions, users } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 import { paymentMetricsCollector } from '@/libs/monitoring/payment-metrics';
@@ -87,9 +88,14 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         throw new Error('Payment record incomplete - cannot activate subscription');
       }
 
-      // Step 4: Add Pho Credits (1 VND = 1 Credit)
-      console.log('💰 Adding Phở Points for user:', {
-        amount: webhookData.amount,
+      // Step 4: Set Pho Points based on plan's monthlyPoints (NOT 1 VND = 1 credit)
+      // Look up the plan config to get the correct monthlyPoints allocation
+      const planConfig = VN_PLANS[payment.planId];
+      const planMonthlyPoints = planConfig?.monthlyPoints ?? 500_000;
+
+      console.log('💰 Setting Phở Points for user:', {
+        monthlyPoints: planMonthlyPoints,
+        planId: payment.planId,
         userId: payment.userId,
       });
 
@@ -97,7 +103,7 @@ async function handleSuccessfulPayment(webhookData: SepayWebhookData): Promise<v
         .update(users)
         .set({
           lifetimeSpent: sql`${users.lifetimeSpent} + ${webhookData.amount}`,
-          phoPointsBalance: sql`${users.phoPointsBalance} + ${webhookData.amount}`,
+          phoPointsBalance: planMonthlyPoints,
         })
         .where(eq(users.id, payment.userId));
 
