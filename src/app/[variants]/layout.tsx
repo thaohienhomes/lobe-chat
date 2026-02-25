@@ -21,7 +21,6 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 
 const NewYearLifetimeBanner = nextDynamic(
   () => import('@/features/PromotionBanner/NewYearLifetimeBanner'),
-  { ssr: false },
 );
 
 // NOTE: force-dynamic REMOVED for performance — Feb 2026
