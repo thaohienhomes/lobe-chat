@@ -1,5 +1,6 @@
 'use client';
 
+import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import Link from 'next/link';
 
 export default function DoctorsDayCampaignPage() {
@@ -349,6 +350,79 @@ export default function DoctorsDayCampaignPage() {
           }
           .cta-secondary:hover { color: #22c55e; }
 
+          /* ========== STEPS GUIDE ========== */
+          .steps-guide {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+          }
+          .step-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.7);
+          }
+          .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: rgba(34, 197, 94, 0.2);
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #22c55e;
+            flex-shrink: 0;
+          }
+          .step-arrow {
+            color: rgba(255,255,255,0.25);
+            font-size: 0.8rem;
+          }
+          .clerk-signin-trigger {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 14px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+          }
+          .clerk-signin-trigger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(34, 197, 94, 0.35);
+          }
+          .login-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 6px 14px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-radius: 20px;
+            font-size: 0.78rem;
+            color: #60a5fa;
+          }
+
+          @media (max-width: 768px) {
+            .steps-guide { gap: 6px; }
+            .step-item { padding: 6px 12px; font-size: 0.75rem; }
+            .step-arrow { display: none; }
+          }
+
           /* ========== STATS ========== */
           .stats-row {
             display: grid;
@@ -689,24 +763,62 @@ export default function DoctorsDayCampaignPage() {
             <br />
             <span style={{ fontSize: '0.9rem' }}>500.000 Phở Points/tháng · Unlimited AI Tier 1 · 20 lượt Tier 2/ngày</span>
           </p>
-          <a
-            className="cta-button"
-            href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
-            onClick={() => handleCTAClick('main_cta')}
-            rel="noreferrer"
-            target="_blank"
-          >
-            🩺 Đăng Ký Medical Beta — 999K/năm
-          </a>
+
+          {/* 3-step visual guide */}
+          <div className="steps-guide">
+            <div className="step-item">
+              <span className="step-number">1</span>
+              Đăng nhập / Đăng ký
+            </div>
+            <span className="step-arrow">→</span>
+            <div className="step-item">
+              <span className="step-number">2</span>
+              Chuyển khoản 999K
+            </div>
+            <span className="step-arrow">→</span>
+            <div className="step-item">
+              <span className="step-number">3</span>
+              Dùng ngay! ✨
+            </div>
+          </div>
+
+          {/* Smart CTA: signed-in → direct checkout, signed-out → Clerk modal */}
+          <SignedIn>
+            <Link
+              className="cta-button"
+              href="/subscription/checkout?plan=medical_beta&provider=sepay"
+              onClick={() => handleCTAClick('main_cta_signed_in')}
+            >
+              🩺 Thanh Toán Medical Beta — 999K/năm
+            </Link>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton
+              forceRedirectUrl="/subscription/checkout?plan=medical_beta&provider=sepay"
+              mode="modal"
+            >
+              <button
+                className="clerk-signin-trigger"
+                onClick={() => handleCTAClick('main_cta_signed_out')}
+                type="button"
+              >
+                🩺 Đăng Ký Medical Beta — 999K/năm
+              </button>
+            </SignInButton>
+            <div className="login-hint">
+              🔐 Đăng nhập nhanh bằng Google hoặc Email
+            </div>
+          </SignedOut>
+
           <div className="cta-deadline">⏰ Ưu đãi Ngày Thầy Thuốc chỉ đến hết ngày 28/02/2026</div>
           <div>
-            <a
+            <Link
               className="cta-secondary"
-              href="https://pho.chat"
+              href="/"
               onClick={() => handleCTAClick('free_trial')}
             >
               Hoặc dùng thử miễn phí (50K points/tháng) →
-            </a>
+            </Link>
           </div>
         </div>
 

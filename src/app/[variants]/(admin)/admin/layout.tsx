@@ -14,15 +14,33 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
-    const email = user.emailAddresses[0]?.emailAddress;
 
-    // Simple Admin check: solo founders emails or metadata role
-    const isAdmin =
-        (user.publicMetadata as Record<string, string>)?.role === 'admin' ||
-        email === 'haquochung1970@gmail.com' ||
-        process.env.NODE_ENV === 'development'; // Allow local dev access
+    // Collect ALL email addresses from the user's Clerk profile
+    const userEmails = user.emailAddresses.map((e) => e.emailAddress.toLowerCase());
 
+    // Admin emails: hardcoded founder + env var for flexibility
+    const envAdminEmails = process.env.ADMIN_EMAILS?.split(',').map((e) => e.trim().toLowerCase()) || [];
+    const adminEmails = new Set([
+        'thaohienhomes@gmail.com',
+        ...envAdminEmails,
+    ]);
+
+    // Admin check: metadata role, email match, or local dev
+    const hasAdminRole = (user.publicMetadata as Record<string, string>)?.role === 'admin';
+    const hasAdminEmail = userEmails.some((email) => adminEmails.has(email));
+    const isDev = process.env.NODE_ENV === 'development';
+    const isAdmin = hasAdminRole || hasAdminEmail || isDev;
+
+    // Debug logging for production troubleshooting
     if (!isAdmin) {
+        console.warn('[Admin Layout] Access denied:', {
+            emails: userEmails,
+            hasAdminEmail,
+            hasAdminRole,
+            isDev,
+            publicMetadata: user.publicMetadata,
+            userId,
+        });
         redirect('/'); // Redirect non-admins to home
     }
 
