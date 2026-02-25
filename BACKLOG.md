@@ -102,3 +102,13 @@
 - [ ] Referral bonus automation
 - [ ] SEO: programmatic pages for medical AI topics
 - [ ] Community forum for medical users
+
+### Phase 2 — Advanced Medical Research (khi có >50 medical users)
+> 📎 Analysis: [tooluniverse_integration_analysis.md](file:///C:/Users/HLC_2021/.gemini/antigravity/brain/2a933861-9d6a-49a6-a4f1-2856c8df5988/tooluniverse_integration_analysis.md)
+> 🔗 Source: [ToolUniverse (Harvard MIMS)](https://aiscientist.tools) — 1,000+ scientific tools
+- [ ] Disease Research plugin (DisGeNET + OMIM API)
+- [ ] Variant Interpreter plugin (ClinVar + OncoKB)
+- [ ] Adverse Event Detector plugin (FDA FAERS)
+- [ ] Rare Disease Helper plugin (Orphanet + OMIM)
+- [ ] Drug Repurposing plugin (DrugBank + DisGeNET)
+- [ ] Evaluate ToolUniverse MCP integration (needs non-serverless infra)
