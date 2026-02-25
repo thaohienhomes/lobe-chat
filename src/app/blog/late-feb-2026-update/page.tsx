@@ -194,8 +194,46 @@ export default function LateFeb2026UpdatePage() {
                         </ul>
                     </div>
 
-                    <div className="cta-section">
-                        <a className="cta-btn" href="/chat">🚀 Dùng Thử Ngay</a>
+                    {/* 999K Medical Beta Banner */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.08))',
+                        border: '1px solid rgba(34,197,94,0.3)',
+                        borderRadius: '18px',
+                        marginTop: '40px',
+                        padding: '36px 32px',
+                        textAlign: 'center',
+                    }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🏥</div>
+                        <h2 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px' }}>
+                            Dùng Phở Chat cho Nghiên Cứu & Học Thuật
+                        </h2>
+                        <div style={{ color: '#22c55e', fontSize: '2rem', fontWeight: 800, margin: '8px 0', textShadow: '0 0 24px rgba(34,197,94,0.3)' }}>
+                            chỉ 999.000đ / năm
+                        </div>
+                        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.7, margin: '0 0 24px' }}>
+                            Truy cập không giới hạn tất cả plugins y khoa & học thuật:<br />
+                            PubMed, OpenAlex, ClinicalTrials, Drug Interactions,<br />
+                            Clinical Calculator, DOI Resolver, Citation Manager...
+                        </p>
+                        <a
+                            href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
+                            style={{
+                                background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                borderRadius: '12px',
+                                boxShadow: '0 4px 20px rgba(34,197,94,0.35)',
+                                color: '#fff',
+                                display: 'inline-block',
+                                fontSize: '1rem',
+                                fontWeight: 700,
+                                padding: '14px 36px',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            🩺 Đăng Ký Medical Beta →
+                        </a>
+                        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', margin: '16px 0 0' }}>
+                            ≈ 83K/tháng · Tiết kiệm 83% so với ChatGPT Plus
+                        </p>
                     </div>
 
                     <footer>
