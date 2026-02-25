@@ -148,6 +148,15 @@ const Groq: ModelProviderCard = {
     },
     {
       contextWindowTokens: 8192,
+      description:
+        'Gemma 3 27B is Google\'s latest open model with strong tool-calling capabilities, multilingual support, and excellent performance for its size. Available on Groq with ultra-fast inference.',
+      displayName: 'Gemma 3 27B',
+      enabled: true,
+      functionCall: true,
+      id: 'gemma-3-27b-it',
+    },
+    {
+      contextWindowTokens: 8192,
       description: 'Gemma 7B 适合中小规模任务处理，兼具成本效益。',
       displayName: 'Gemma 7B',
       functionCall: true,

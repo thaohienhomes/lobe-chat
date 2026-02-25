@@ -213,6 +213,15 @@ const TogetherAI: ModelProviderCard = {
       id: 'deepseek-ai/deepseek-llm-67b-chat',
     },
     {
+      contextWindowTokens: 128_000,
+      description:
+        'Kimi K2 is a frontier mixture-of-experts language model with 1 trillion total parameters (32B active), featuring exceptional agentic and tool-use capabilities. Built for complex multi-step tasks, coding, and reasoning.',
+      displayName: 'Kimi K2 (MoonshotAI)',
+      enabled: true,
+      functionCall: true,
+      id: 'moonshotai/Kimi-K2-Instruct',
+    },
+    {
       contextWindowTokens: 32_768,
       description: 'QwQ模型是由 Qwen 团队开发的实验性研究模型，专注于增强 AI 推理能力。',
       displayName: 'QwQ 32B Preview',
