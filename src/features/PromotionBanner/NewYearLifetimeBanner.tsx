@@ -1,12 +1,15 @@
 'use client';
 
-import Lottie from 'lottie-react';
+import dynamic from 'next/dynamic';
 import { memo, useEffect, useState } from 'react';
 import { createStyles } from 'antd-style';
 import Link from 'next/link';
 import { useUserStore } from '@/store/user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+
+// Lazy-load Lottie to keep ~250KB off the critical path
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 const useStyles = createStyles(({ css, token, isDarkMode }) => ({
   closeButton: css`
@@ -108,7 +111,8 @@ const NewYearLifetimeBanner = memo(() => {
   }, []);
 
   // Check if user has a lifetime plan
-  const isLifetime = ['gl_lifetime', 'lifetime_early_bird', 'lifetime_last_call', 'lifetime_standard'].includes(subscriptionPlan || '');
+  // Hide banner for lifetime AND medical_beta paid users
+  const isLifetime = ['gl_lifetime', 'lifetime_early_bird', 'lifetime_last_call', 'lifetime_standard', 'medical_beta'].includes(subscriptionPlan || '');
 
   if (isLifetime || !visible) return null;
 

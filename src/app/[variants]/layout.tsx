@@ -13,13 +13,15 @@ import { isDesktop } from '@/const/version';
 import PWAInstall from '@/features/PWAInstall';
 import AuthProvider from '@/layout/AuthProvider';
 import GlobalProvider from '@/layout/GlobalProvider';
-import VoiceSupport from '@/features/VoiceSupport';
+// VoiceSupport temporarily disabled for performance — Feb 2026
+// import VoiceSupport from '@/features/VoiceSupport';
 import { Locales } from '@/locales/resources';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
 const NewYearLifetimeBanner = nextDynamic(
   () => import('@/features/PromotionBanner/NewYearLifetimeBanner'),
+  { ssr: false },
 );
 
 // Force dynamic rendering to avoid static generation issues with Clerk hooks
@@ -64,7 +66,7 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
             <AuthProvider>
               {children}
               {!isMobile && modal}
-              <VoiceSupport />
+              {/* VoiceSupport temporarily disabled for performance — Feb 2026 */}
             </AuthProvider>
             <PWAInstall />
             <NewYearLifetimeBanner />

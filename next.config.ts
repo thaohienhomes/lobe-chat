@@ -32,11 +32,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
-  // Image optimization – prefer WebP for smaller payloads
-  images: {
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 31_536_000, // 1 year
-  },
 
   experimental: {
     optimizePackageImports: [
@@ -54,6 +49,13 @@ const nextConfig: NextConfig = {
       'posthog-js',
       'react-layout-kit',
       'react-i18next',
+      // Added for performance optimization — Feb 2026
+      'framer-motion',
+      'lodash-es',
+      'ahooks',
+      'dayjs',
+      'react-hotkeys-hook',
+      '@clerk/nextjs',
     ],
     // oidc provider depend on constructor.name
     // but swc minification will remove the name
@@ -63,6 +65,7 @@ const nextConfig: NextConfig = {
     webVitalsAttribution: ['CLS', 'LCP'],
     webpackMemoryOptimizations: true,
   },
+
 
   async headers() {
     const securityHeaders = [
@@ -207,6 +210,12 @@ const nextConfig: NextConfig = {
         source: '/apple-touch-icon.png',
       },
     ];
+  },
+
+  // Image optimization – prefer WebP for smaller payloads
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 31_536_000, // 1 year
   },
 
   logging: {
