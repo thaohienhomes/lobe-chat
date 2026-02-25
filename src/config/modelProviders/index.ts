@@ -22,6 +22,7 @@ import GiteeAIProvider from './giteeai';
 import GithubProvider from './github';
 import GoogleProvider from './google';
 import GroqProvider from './groq';
+import PhoChatProvider from './phochat';
 import HigressProvider from './higress';
 import HuggingFaceProvider from './huggingface';
 import HunyuanProvider from './hunyuan';
@@ -116,6 +117,9 @@ export const LOBE_DEFAULT_MODEL_LIST: ChatModelCard[] = [
   Search1APIProvider.chatModels,
   InfiniAIProvider.chatModels,
   QiniuProvider.chatModels,
+  // Phở Chat logical models — MUST be included so builtinAiModelList can
+  // recognize providerId='phochat' for functionCall / tool-use checks.
+  PhoChatProvider.chatModels,
   VercelAIGatewayProvider.chatModels,
 ].flat();
 
@@ -197,6 +201,7 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   { ...CometAPIProvider, enabled: false },
   { ...VercelAIGatewayProvider, enabled: true },
   { ...CerebrasProvider, enabled: true },
+  { ...PhoChatProvider, enabled: true },
 ];
 
 export const filterEnabledModels = (provider: ModelProviderCard) => {
