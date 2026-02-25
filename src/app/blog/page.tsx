@@ -16,6 +16,16 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
+    category: 'changelog',
+    date: '2026-02-25',
+    description:
+      'PubMed v2 phân trang & MeSH terms, Drug Interactions mở rộng 42 thuốc, OpenAlex, 3 model AI mới và trải nghiệm plugin liền mạch.',
+    emoji: '🔬',
+    slug: 'late-feb-2026-update',
+    title: 'Phở Chat v1.135 — Plugins Y Khoa Nâng Cấp & Model AI Mới',
+  },
+  {
+
     category: 'blog',
     date: '2026-02-07',
     description:

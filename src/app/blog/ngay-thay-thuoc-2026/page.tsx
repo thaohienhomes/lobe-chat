@@ -614,7 +614,74 @@ export default function DoctorsDayCampaignPage() {
           </table>
         </div>
 
+        {/* ===== GIF DEMOS ===== */}
+        <div className="section-card" id="demo">
+          <div className="section-icon">🎬</div>
+          <h2 className="section-title">Xem Demo Thực Tế — 3 Tính Năng Được Dùng Nhiều Nhất</h2>
+          <p className="section-subtitle">Không cần cài đặt — chạy ngay trong chat, hỏi bằng tiếng Việt</p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', marginTop: '24px' }}>
+            <div>
+              <div style={{ alignItems: 'center', display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <span style={{ fontSize: '1.3rem' }}>🔬</span>
+                <strong style={{ color: '#fff', fontSize: '1rem' }}>Tìm kiếm PubMed v2</strong>
+                <span style={{
+                  background: 'rgba(59,130,246,0.2)', borderRadius: '20px',
+                  color: '#60a5fa', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px'
+                }}>v2 MỚI</span>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.87rem', marginBottom: '12px' }}>
+                Phân trang, MeSH terms, link DOI clickable — hỏi tiếng Việt, kết quả 36 triệu bài
+              </p>
+              <img
+                alt="Demo tìm kiếm PubMed v2 - Phở Chat Medical"
+                src="/demos/pubmed-demo.gif"
+                style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', width: '100%' }}
+              />
+            </div>
+
+            <div>
+              <div style={{ alignItems: 'center', display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <span style={{ fontSize: '1.3rem' }}>💊</span>
+                <strong style={{ color: '#fff', fontSize: '1rem' }}>Kiểm tra tương tác thuốc</strong>
+                <span style={{
+                  background: 'rgba(234,179,8,0.15)', borderRadius: '20px',
+                  color: '#fbbf24', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px'
+                }}>42 THUỐC</span>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.87rem', marginBottom: '12px' }}>
+                Nhập tên thuốc, nhận cảnh báo tương tác + Adverse Events từ FDA database
+              </p>
+              <img
+                alt="Demo kiểm tra tương tác thuốc - Drug Interactions FDA"
+                src="/demos/drug-interactions-demo.gif"
+                style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', width: '100%' }}
+              />
+            </div>
+
+            <div>
+              <div style={{ alignItems: 'center', display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <span style={{ fontSize: '1.3rem' }}>🩺</span>
+                <strong style={{ color: '#fff', fontSize: '1rem' }}>Tính toán lâm sàng</strong>
+                <span style={{
+                  background: 'rgba(34,197,94,0.15)', borderRadius: '20px',
+                  color: '#22c55e', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px'
+                }}>10 CÔNG THỨC</span>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.87rem', marginBottom: '12px' }}>
+                eGFR, CrCl, MELD, CHA₂DS₂-VASc, Wells Score... — kết quả kèm diễn giải lâm sàng
+              </p>
+              <img
+                alt="Demo Clinical Calculator - eGFR, MELD, CHA2DS2-VASc"
+                src="/demos/clinical-calc-demo.gif"
+                style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', width: '100%' }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* ===== CTA SECTION ===== */}
+
         <div className="cta-section" id="register">
           <h2 className="cta-title">🏥 Nhân Ngày Thầy Thuốc Việt Nam 27/2</h2>
           <p className="cta-subtitle">
