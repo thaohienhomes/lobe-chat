@@ -21,7 +21,6 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 
 const NewYearLifetimeBanner = nextDynamic(
   () => import('@/features/PromotionBanner/NewYearLifetimeBanner'),
-  { ssr: false },
 );
 
 // Force dynamic rendering to avoid static generation issues with Clerk hooks
