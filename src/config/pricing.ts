@@ -398,7 +398,9 @@ const TIER1_MODELS = [
   'llama-3.3-70b-versatile',
   'mixtral-8x7b-32768',
   'gemma2-9b-it',
+  'gemma-3-27b-it',              // Gemma 3 27B — NEW: strong tool calling, cheap
   'mistral-saba-24b',
+  'meta-llama/llama-4-scout-17b-16e-instruct', // Llama 4 Scout — moved from Tier 2: fast & cheap
   // Cerebras (via CF Gateway)
   'llama3.1-8b',
   'llama3.1-70b',
@@ -413,6 +415,7 @@ const TIER1_MODELS = [
   'claude-3-haiku',
   'deepseek-chat',
   'qwen-turbo',
+  'llama-4-scout',               // Legacy short ID for Llama 4 Scout
 ] as const;
 
 /** Tier 2: Standard models — available to Basic/Starter+ plans */
@@ -435,9 +438,10 @@ const TIER2_MODELS = [
   // Groq Tier 2 (via CF Gateway)
   'deepseek-r1-distill-llama-70b',
   'qwen-qwq-32b',
-  'meta-llama/llama-4-scout-17b-16e-instruct',
-  'meta-llama/llama-4-maverick-17b-128e-instruct',
+  'meta-llama/llama-4-maverick-17b-128e-instruct', // Scout moved to Tier 1
   'qwen/qwen3-32b',
+  // Together AI — Kimi K2
+  'moonshotai/Kimi-K2-Instruct',  // NEW: Kimi K2 — excellent tool calling, 128K ctx
   // Together AI (via CF Gateway)
   'Qwen/Qwen2.5-72B-Instruct-Turbo',
   'deepseek-ai/DeepSeek-R1',
@@ -673,6 +677,9 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'llama-3.3-70b-versatile', // Groq - best quality
       'mixtral-8x7b-32768', // Groq - Mixtral
       'gemma2-9b-it', // Groq - Gemma 2
+      'gemma-3-27b-it', // Groq - Gemma 3 27B (NEW)
+      'meta-llama/llama-4-scout-17b-16e-instruct', // Groq - Llama 4 Scout (moved from Tier 2)
+      'llama-4-scout', // Legacy short ID
       // ============================================
       // Cerebras Tier 1 Models (via CF Gateway)
       // ============================================
@@ -743,11 +750,13 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'Qwen/Qwen2.5-72B-Instruct-Turbo', // Together AI - Qwen 2.5
       'deepseek-ai/DeepSeek-R1', // Together AI - DeepSeek R1
       'deepseek-ai/DeepSeek-V3', // Together AI - DeepSeek V3
+      'moonshotai/Kimi-K2-Instruct', // Together AI - Kimi K2 (NEW)
       // ============================================
       // Groq Tier 2 Models (via CF Gateway)
       // ============================================
       'deepseek-r1-distill-llama-70b', // Groq - DeepSeek R1 Distill
       'qwen-qwq-32b', // Groq - Qwen QwQ reasoning
+      'meta-llama/llama-4-maverick-17b-128e-instruct', // Groq - Llama 4 Maverick (Scout moved to T1)
     ],
     outputCostPer1M: 300,
     pointsPerMessage: 150,

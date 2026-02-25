@@ -231,15 +231,15 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       if (!tierAccess.allowed) {
         // ============ Plugin Auto-Fallback ============
         // When Tier 2/3 quota is exhausted but the request has tool/plugin calls,
-        // transparently reroute to Tier 1 (Groq Llama 3.3 70B) so plugins keep working.
-        // This avoids a jarring quota error mid-session for the user.
+        // transparently reroute to Tier 1 so plugins keep working.
+        // Use Vercel AI Gateway (Gemini 2.0 Flash) — reliable, supports tools, avoids CF Gateway.
         const hasTools = Array.isArray(data.tools) && data.tools.length > 0;
         if (hasTools && modelTier > 1) {
-          const PLUGIN_FALLBACK_MODEL = 'llama-3.3-70b-versatile';
-          const PLUGIN_FALLBACK_PROVIDER = 'groq';
+          const PLUGIN_FALLBACK_MODEL = 'google/gemini-2.0-flash';
+          const PLUGIN_FALLBACK_PROVIDER = 'vercelaigateway';
           console.log(
             `🔄 [Plugin Fallback] Tier ${modelTier} quota exceeded for user ${jwtPayload.userId}. ` +
-            `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Groq).`,
+            `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Vercel+Gemini).`,
           );
           data.model = PLUGIN_FALLBACK_MODEL;
           // Re-init runtime for the fallback provider
