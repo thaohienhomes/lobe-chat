@@ -3,30 +3,30 @@
 import Link from 'next/link';
 
 export default function DoctorsDayCampaignPage() {
-    const handleCTAClick = (source: string) => {
-        try {
-            (window as any).posthog?.capture('doctors_day_cta_clicked', {
-                campaign: 'ngay_thay_thuoc_2026',
-                plan: 'medical_beta',
-                source,
-            });
-        } catch {
-            // Analytics not available
-        }
-    };
+  const handleCTAClick = (source: string) => {
+    try {
+      (window as any).posthog?.capture('doctors_day_cta_clicked', {
+        campaign: 'ngay_thay_thuoc_2026',
+        plan: 'medical_beta',
+        source,
+      });
+    } catch {
+      // Analytics not available
+    }
+  };
 
-    return (
-        <>
-            <head>
-                <title>Tri Ân Ngày Thầy Thuốc 27/2 | Phở Chat Medical — 999K/năm</title>
-                <meta
-                    content="Nhân ngày Thầy Thuốc Việt Nam 27/2, Phở Chat ưu đãi gói Medical Beta — trợ lý AI y khoa chỉ 999K/năm. PubMed, ClinicalTrials, Drug Check, 10 Calculator lâm sàng."
-                    name="description"
-                />
-                <meta content="Phở Chat, Ngày Thầy Thuốc, AI y khoa, Medical Beta, PubMed, bác sĩ Việt Nam" name="keywords" />
-                <meta content="🏥 Tri Ân Ngày Thầy Thuốc Việt Nam 27/2 — Phở Chat Medical" property="og:title" />
-                <meta content="Trợ lý AI y khoa chỉ 999K/năm. PubMed, Drug Check, 10 Clinical Calculators tích hợp sẵn." property="og:description" />
-                <style>{`
+  return (
+    <>
+      <head>
+        <title>Tri Ân Ngày Thầy Thuốc 27/2 | Phở Chat Medical — 999K/năm</title>
+        <meta
+          content="Nhân ngày Thầy Thuốc Việt Nam 27/2, Phở Chat ưu đãi gói Medical Beta — trợ lý AI y khoa chỉ 999K/năm. PubMed, ClinicalTrials, Drug Check, 10 Calculator lâm sàng."
+          name="description"
+        />
+        <meta content="Phở Chat, Ngày Thầy Thuốc, AI y khoa, Medical Beta, PubMed, bác sĩ Việt Nam" name="keywords" />
+        <meta content="🏥 Tri Ân Ngày Thầy Thuốc Việt Nam 27/2 — Phở Chat Medical" property="og:title" />
+        <meta content="Trợ lý AI y khoa chỉ 999K/năm. PubMed, Drug Check, 10 Clinical Calculators tích hợp sẵn." property="og:description" />
+        <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
           * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -195,6 +195,7 @@ export default function DoctorsDayCampaignPage() {
           }
 
           .feature-item {
+            position: relative;
             display: flex;
             align-items: flex-start;
             gap: 12px;
@@ -206,6 +207,26 @@ export default function DoctorsDayCampaignPage() {
           }
           .feature-item:hover {
             background: rgba(34, 197, 94, 0.05);
+          }
+
+          .new-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            padding: 2px 8px;
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            border-radius: 0 10px 0 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            animation: badgePulse 2.5s ease-in-out infinite;
+            z-index: 2;
+          }
+          @keyframes badgePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.75; }
           }
 
           .feature-emoji { font-size: 1.5rem; flex-shrink: 0; }
@@ -371,272 +392,280 @@ export default function DoctorsDayCampaignPage() {
             .cta-section { padding: 32px 20px; }
           }
         `}</style>
-            </head>
+      </head>
 
-            <div className="campaign-container">
-                <Link className="back-link" href="/">← Quay lại Phở Chat</Link>
+      <div className="campaign-container">
+        <Link className="back-link" href="/">← Quay lại Phở Chat</Link>
 
-                {/* ===== HERO ===== */}
-                <section className="hero">
-                    <div>
-                        <span className="event-badge">🏥 Ngày Thầy Thuốc Việt Nam 27/2</span>
-                        <span className="deadline-badge">⏰ Ưu đãi đến 28/2</span>
-                    </div>
-                    <h1 className="hero-title">
-                        Tri Ân Thầy Thuốc —<br />
-                        Trợ Lý AI Y Khoa Chỉ Từ 83K/Tháng
-                    </h1>
-                    <p className="hero-subtitle">
-                        Phở Chat Medical tích hợp sẵn <strong style={{ color: '#fff' }}>4 cơ sở dữ liệu quốc tế</strong>,{' '}
-                        <strong style={{ color: '#fff' }}>10 công cụ tính toán lâm sàng</strong>, và{' '}
-                        <strong style={{ color: '#fff' }}>trích dẫn tự động</strong> — được thiết kế riêng cho bác sĩ, dược sĩ, và nghiên cứu sinh Việt Nam.
-                    </p>
-                    <div className="hero-price-box">
-                        <div className="hero-price-old">2.400.000đ/năm</div>
-                        <div className="hero-price">999.000đ/năm</div>
-                        <div className="hero-price-note">≈ 83K/tháng · Tiết kiệm 83% so với ChatGPT Plus</div>
-                    </div>
-                </section>
+        {/* ===== HERO ===== */}
+        <section className="hero">
+          <div>
+            <span className="event-badge">🏥 Ngày Thầy Thuốc Việt Nam 27/2</span>
+            <span className="deadline-badge">⏰ Ưu đãi đến 28/2</span>
+          </div>
+          <h1 className="hero-title">
+            Tri Ân Thầy Thuốc —<br />
+            Trợ Lý AI Y Khoa Chỉ Từ 83K/Tháng
+          </h1>
+          <p className="hero-subtitle">
+            Phở Chat Medical tích hợp sẵn <strong style={{ color: '#fff' }}>4 cơ sở dữ liệu quốc tế</strong>,{' '}
+            <strong style={{ color: '#fff' }}>10 công cụ tính toán lâm sàng</strong>, và{' '}
+            <strong style={{ color: '#fff' }}>trích dẫn tự động</strong> — được thiết kế riêng cho bác sĩ, dược sĩ, và nghiên cứu sinh Việt Nam.
+          </p>
+          <div className="hero-price-box">
+            <div className="hero-price-old">2.400.000đ/năm</div>
+            <div className="hero-price">999.000đ/năm</div>
+            <div className="hero-price-note">≈ 83K/tháng · Tiết kiệm 83% so với ChatGPT Plus</div>
+          </div>
+        </section>
 
-                {/* ===== STATS ===== */}
-                <div className="stats-row">
-                    <div className="stat-item">
-                        <div className="stat-number">4</div>
-                        <div className="stat-label">Cơ sở dữ liệu<br />y khoa quốc tế</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-number">10</div>
-                        <div className="stat-label">Công cụ tính toán<br />lâm sàng</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-number">500K</div>
-                        <div className="stat-label">Phở Points<br />mỗi tháng</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-number">100%</div>
-                        <div className="stat-label">Hỗ trợ<br />tiếng Việt</div>
-                    </div>
-                </div>
+        {/* ===== STATS ===== */}
+        <div className="stats-row">
+          <div className="stat-item">
+            <div className="stat-number">4</div>
+            <div className="stat-label">Cơ sở dữ liệu<br />y khoa quốc tế</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-number">10</div>
+            <div className="stat-label">Công cụ tính toán<br />lâm sàng</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-number">500K</div>
+            <div className="stat-label">Phở Points<br />mỗi tháng</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-number">100%</div>
+            <div className="stat-label">Hỗ trợ<br />tiếng Việt</div>
+          </div>
+        </div>
 
-                {/* ===== SECTION 1: TRA CỨU ===== */}
-                <div className="section-card">
-                    <div className="section-icon">🔬</div>
-                    <h2 className="section-title">Tra Cứu Nghiên Cứu Từ 4 Cơ Sở Dữ Liệu — Trong Vài Giây</h2>
-                    <p className="section-subtitle">Thay vì mở 4 tab, chỉ cần 1 câu hỏi tiếng Việt</p>
+        {/* ===== SECTION 1: TRA CỨU ===== */}
+        <div className="section-card">
+          <div className="section-icon">🔬</div>
+          <h2 className="section-title">Tra Cứu Nghiên Cứu Từ 4 Cơ Sở Dữ Liệu — Trong Vài Giây</h2>
+          <p className="section-subtitle">Thay vì mở 4 tab, chỉ cần 1 câu hỏi tiếng Việt</p>
 
-                    <div className="feature-grid">
-                        <div className="feature-item">
-                            <span className="feature-emoji">📚</span>
-                            <div>
-                                <div className="feature-name">PubMed — 36 triệu bài báo</div>
-                                <div className="feature-desc">Tìm kiếm thông minh với MeSH terms, phân trang, link DOI/PMID trực tiếp</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <span className="feature-emoji">🌐</span>
-                            <div>
-                                <div className="feature-name">OpenAlex — 250 triệu bài</div>
-                                <div className="feature-desc">Mở rộng tìm kiếm ra toàn bộ lĩnh vực khoa học, kỹ thuật y sinh</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <span className="feature-emoji">🧪</span>
-                            <div>
-                                <div className="feature-name">ClinicalTrials.gov</div>
-                                <div className="feature-desc">Thử nghiệm lâm sàng đang tuyển bệnh nhân, giai đoạn I–IV</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <span className="feature-emoji">💊</span>
-                            <div>
-                                <div className="feature-name">FDA Drug Database</div>
-                                <div className="feature-desc">Drug labels, cảnh báo an toàn, tương tác thuốc chính thống từ FDA</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="prompt-box">
-                        <div className="prompt-label">💬 Ví dụ prompt</div>
-                        &quot;Tìm 10 bài meta-analysis mới nhất về metformin trong đái tháo đường type 2, kèm kiểm tra thử nghiệm lâm sàng đang tuyển bệnh nhân&quot;
-                    </div>
-                </div>
-
-                {/* ===== SECTION 2: VIẾT BÀI ===== */}
-                <div className="section-card">
-                    <div className="section-icon">✍️</div>
-                    <h2 className="section-title">Viết Bài Khoa Học Nhanh Gấp 3 Lần</h2>
-                    <p className="section-subtitle">Citation tự động + PICO + GRADE + IMRAD — tất cả trong 1 cuộc trò chuyện</p>
-
-                    <div className="feature-grid">
-                        <div className="feature-item">
-                            <span className="feature-emoji">📝</span>
-                            <div>
-                                <div className="feature-name">Citation Manager</div>
-                                <div className="feature-desc">PMID/DOI → APA, Vancouver, BibTeX tức thì. Không cần Zotero</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <span className="feature-emoji">🎯</span>
-                            <div>
-                                <div className="feature-name">PICO Framework</div>
-                                <div className="feature-desc">Tự động phân tích câu hỏi nghiên cứu theo Patient, Intervention, Comparison, Outcome</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <span className="feature-emoji">📊</span>
-                            <div>
-                                <div className="feature-name">GRADE Evidence</div>
-                                <div className="feature-desc">Đánh giá mức độ tin cậy bằng chứng: Cao → Trung bình → Thấp</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <span className="feature-emoji">🇻🇳</span>
-                            <div>
-                                <div className="feature-name">Tổng hợp tiếng Việt</div>
-                                <div className="feature-desc">Hỏi tiếng Việt, dữ liệu quốc tế, kết quả tổng hợp tiếng Việt</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="prompt-box">
-                        <div className="prompt-label">💬 Ví dụ prompt</div>
-                        &quot;Viết literature review tổng hợp về statin trong dự phòng tim mạch ở bệnh nhân đái tháo đường, đánh giá evidence theo GRADE, trích dẫn Vancouver&quot;
-                    </div>
-                </div>
-
-                {/* ===== SECTION 3: LÂM SÀNG ===== */}
-                <div className="section-card">
-                    <div className="section-icon">🧮</div>
-                    <h2 className="section-title">10 Công Cụ Tính Toán Lâm Sàng — Ngay Trong Chat</h2>
-                    <p className="section-subtitle">Không cần mở Google — gõ 1 câu, ra kết quả kèm diễn giải</p>
-
-                    <table className="comparison-table">
-                        <thead>
-                            <tr>
-                                <th>Công cụ</th>
-                                <th>Ứng dụng lâm sàng</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td><strong>eGFR (CKD-EPI)</strong></td><td>Đánh giá chức năng thận → chỉnh liều thuốc</td></tr>
-                            <tr><td><strong>CrCl (Cockcroft-Gault)</strong></td><td>Clearance creatinine → chỉnh liều kháng sinh</td></tr>
-                            <tr><td><strong>MELD / MELD-Na</strong></td><td>Mức độ nặng bệnh gan → ưu tiên ghép gan</td></tr>
-                            <tr><td><strong>CHA₂DS₂-VASc</strong></td><td>Nguy cơ đột quỵ trong rung nhĩ → chỉ định kháng đông</td></tr>
-                            <tr><td><strong>Wells Score</strong></td><td>Nguy cơ huyết khối tĩnh mạch sâu (DVT/PE)</td></tr>
-                            <tr><td><strong>Glasgow Coma Scale</strong></td><td>Đánh giá ý thức trong cấp cứu</td></tr>
-                            <tr><td><strong>APGAR Score</strong></td><td>Đánh giá sơ sinh tại phòng sinh</td></tr>
-                            <tr><td><strong>BMI</strong></td><td>Đánh giá thể trạng dinh dưỡng</td></tr>
-                            <tr><td><strong>Corrected Na</strong></td><td>Na hiệu chỉnh khi tăng đường huyết</td></tr>
-                            <tr><td><strong>NNT</strong></td><td>Nghiên cứu: số cần điều trị để ngăn 1 biến cố</td></tr>
-                        </tbody>
-                    </table>
-
-                    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                        <div className="prompt-box" style={{ flex: 1, minWidth: '280px' }}>
-                            <div className="prompt-label">💬 Tính GFR</div>
-                            &quot;Bệnh nhân nữ 72 tuổi, 55kg, creatinine 2.1. Tính eGFR và CrCl&quot;
-                        </div>
-                        <div className="prompt-box" style={{ flex: 1, minWidth: '280px' }}>
-                            <div className="prompt-label">💬 Kiểm tra tương tác</div>
-                            &quot;Kiểm tra tương tác giữa warfarin, aspirin và omeprazole&quot;
-                        </div>
-                    </div>
-                </div>
-
-                {/* ===== SO SÁNH ===== */}
-                <div className="section-card">
-                    <div className="section-icon">⚡</div>
-                    <h2 className="section-title">So Sánh: Tra Cứu Thủ Công vs Phở Chat</h2>
-                    <table className="comparison-table">
-                        <thead>
-                            <tr>
-                                <th>Công việc</th>
-                                <th>Thủ công</th>
-                                <th style={{ color: '#22c55e' }}>Phở Chat</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Tìm 10 bài PubMed + đọc abstract</td>
-                                <td>30–45 phút</td>
-                                <td style={{ color: '#22c55e', fontWeight: 600 }}>30 giây</td>
-                            </tr>
-                            <tr>
-                                <td>Kiểm tra thử nghiệm lâm sàng</td>
-                                <td>15–20 phút</td>
-                                <td style={{ color: '#22c55e', fontWeight: 600 }}>15 giây</td>
-                            </tr>
-                            <tr>
-                                <td>Tính GFR + MELD + tương tác thuốc</td>
-                                <td>10 phút (3 trang web)</td>
-                                <td style={{ color: '#22c55e', fontWeight: 600 }}>10 giây (1 câu)</td>
-                            </tr>
-                            <tr>
-                                <td>Tổng hợp bằng tiếng Việt</td>
-                                <td>1–2 giờ</td>
-                                <td style={{ color: '#22c55e', fontWeight: 600 }}>1 phút</td>
-                            </tr>
-                            <tr style={{ borderTop: '2px solid rgba(34,197,94,0.3)' }}>
-                                <td><strong>Tổng cộng</strong></td>
-                                <td><strong>~3 giờ</strong></td>
-                                <td style={{ color: '#22c55e', fontWeight: 700, fontSize: '1.05rem' }}>~2 phút</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* ===== CTA SECTION ===== */}
-                <div className="cta-section" id="register">
-                    <h2 className="cta-title">🏥 Nhân Ngày Thầy Thuốc Việt Nam 27/2</h2>
-                    <p className="cta-subtitle">
-                        Tặng bạn trọn bộ trợ lý AI y khoa với giá chỉ <strong style={{ color: '#22c55e' }}>999.000đ/năm</strong>
-                        <br />
-                        <span style={{ fontSize: '0.9rem' }}>500.000 Phở Points/tháng · Unlimited AI Tier 1 · 20 lượt Tier 2/ngày</span>
-                    </p>
-                    <a
-                        className="cta-button"
-                        href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
-                        onClick={() => handleCTAClick('main_cta')}
-                        rel="noreferrer"
-                        target="_blank"
-                    >
-                        🩺 Đăng Ký Medical Beta — 999K/năm
-                    </a>
-                    <div className="cta-deadline">⏰ Ưu đãi Ngày Thầy Thuốc chỉ đến hết ngày 28/02/2026</div>
-                    <div>
-                        <a
-                            className="cta-secondary"
-                            href="https://pho.chat"
-                            onClick={() => handleCTAClick('free_trial')}
-                        >
-                            Hoặc dùng thử miễn phí (50K points/tháng) →
-                        </a>
-                    </div>
-                </div>
-
-                {/* ===== DISCLAIMER ===== */}
-                <div style={{
-                    padding: '20px 24px',
-                    background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '12px',
-                    fontSize: '0.82rem',
-                    color: 'rgba(255,255,255,0.4)',
-                    lineHeight: 1.7,
-                    textAlign: 'center',
-                    marginBottom: '24px',
-                }}>
-                    ⚕️ Phở Chat cung cấp công cụ tra cứu và tính toán tham khảo. Kết quả không thay thế đánh giá lâm sàng của bác sĩ.
-                    <br />Luôn xác nhận kết quả với nguồn chính thức trước khi đưa ra quyết định điều trị.
-                </div>
-
-                <footer className="footer">
-                    <p>
-                        <a href="https://pho.chat">Phở Chat</a> — Trợ lý AI thông minh cho người Việt
-                        <br />
-                        <span style={{ fontSize: '0.78rem' }}>© 2026 Phở Chat. Chúc mừng Ngày Thầy Thuốc Việt Nam 27/2 🏥</span>
-                    </p>
-                </footer>
+          <div className="feature-grid">
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">📚</span>
+              <div>
+                <div className="feature-name">PubMed — 36 triệu bài báo</div>
+                <div className="feature-desc">Tìm kiếm thông minh với MeSH terms, phân trang, link DOI/PMID trực tiếp</div>
+              </div>
             </div>
-        </>
-    );
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">🌐</span>
+              <div>
+                <div className="feature-name">OpenAlex — 250 triệu bài</div>
+                <div className="feature-desc">Mở rộng tìm kiếm ra toàn bộ lĩnh vực khoa học, kỹ thuật y sinh</div>
+              </div>
+            </div>
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">🧪</span>
+              <div>
+                <div className="feature-name">ClinicalTrials.gov</div>
+                <div className="feature-desc">Thử nghiệm lâm sàng đang tuyển bệnh nhân, giai đoạn I–IV</div>
+              </div>
+            </div>
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">💊</span>
+              <div>
+                <div className="feature-name">FDA Drug Database</div>
+                <div className="feature-desc">Drug labels, cảnh báo an toàn, tương tác thuốc chính thống từ FDA</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="prompt-box">
+            <div className="prompt-label">💬 Ví dụ prompt</div>
+            &quot;Tìm 10 bài meta-analysis mới nhất về metformin trong đái tháo đường type 2, kèm kiểm tra thử nghiệm lâm sàng đang tuyển bệnh nhân&quot;
+          </div>
+        </div>
+
+        {/* ===== SECTION 2: VIẾT BÀI ===== */}
+        <div className="section-card">
+          <div className="section-icon">✍️</div>
+          <h2 className="section-title">Viết Bài Khoa Học Nhanh Gấp 3 Lần</h2>
+          <p className="section-subtitle">Citation tự động + PICO + GRADE + IMRAD — tất cả trong 1 cuộc trò chuyện</p>
+
+          <div className="feature-grid">
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">📝</span>
+              <div>
+                <div className="feature-name">Citation Manager</div>
+                <div className="feature-desc">PMID/DOI → APA, Vancouver, BibTeX tức thì. Không cần Zotero</div>
+              </div>
+            </div>
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">🎯</span>
+              <div>
+                <div className="feature-name">PICO Framework</div>
+                <div className="feature-desc">Tự động phân tích câu hỏi nghiên cứu theo Patient, Intervention, Comparison, Outcome</div>
+              </div>
+            </div>
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">📊</span>
+              <div>
+                <div className="feature-name">GRADE Evidence</div>
+                <div className="feature-desc">Đánh giá mức độ tin cậy bằng chứng: Cao → Trung bình → Thấp</div>
+              </div>
+            </div>
+            <div className="feature-item">
+              <span className="new-badge">Mới</span>
+              <span className="feature-emoji">🇻🇳</span>
+              <div>
+                <div className="feature-name">Tổng hợp tiếng Việt</div>
+                <div className="feature-desc">Hỏi tiếng Việt, dữ liệu quốc tế, kết quả tổng hợp tiếng Việt</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="prompt-box">
+            <div className="prompt-label">💬 Ví dụ prompt</div>
+            &quot;Viết literature review tổng hợp về statin trong dự phòng tim mạch ở bệnh nhân đái tháo đường, đánh giá evidence theo GRADE, trích dẫn Vancouver&quot;
+          </div>
+        </div>
+
+        {/* ===== SECTION 3: LÂM SÀNG ===== */}
+        <div className="section-card">
+          <div className="section-icon">🧮</div>
+          <h2 className="section-title">10 Công Cụ Tính Toán Lâm Sàng — Ngay Trong Chat</h2>
+          <p className="section-subtitle">Không cần mở Google — gõ 1 câu, ra kết quả kèm diễn giải</p>
+
+          <table className="comparison-table">
+            <thead>
+              <tr>
+                <th>Công cụ</th>
+                <th>Ứng dụng lâm sàng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>eGFR (CKD-EPI)</strong></td><td>Đánh giá chức năng thận → chỉnh liều thuốc</td></tr>
+              <tr><td><strong>CrCl (Cockcroft-Gault)</strong></td><td>Clearance creatinine → chỉnh liều kháng sinh</td></tr>
+              <tr><td><strong>MELD / MELD-Na</strong></td><td>Mức độ nặng bệnh gan → ưu tiên ghép gan</td></tr>
+              <tr><td><strong>CHA₂DS₂-VASc</strong></td><td>Nguy cơ đột quỵ trong rung nhĩ → chỉ định kháng đông</td></tr>
+              <tr><td><strong>Wells Score</strong></td><td>Nguy cơ huyết khối tĩnh mạch sâu (DVT/PE)</td></tr>
+              <tr><td><strong>Glasgow Coma Scale</strong></td><td>Đánh giá ý thức trong cấp cứu</td></tr>
+              <tr><td><strong>APGAR Score</strong></td><td>Đánh giá sơ sinh tại phòng sinh</td></tr>
+              <tr><td><strong>BMI</strong></td><td>Đánh giá thể trạng dinh dưỡng</td></tr>
+              <tr><td><strong>Corrected Na</strong></td><td>Na hiệu chỉnh khi tăng đường huyết</td></tr>
+              <tr><td><strong>NNT</strong></td><td>Nghiên cứu: số cần điều trị để ngăn 1 biến cố</td></tr>
+            </tbody>
+          </table>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+            <div className="prompt-box" style={{ flex: 1, minWidth: '280px' }}>
+              <div className="prompt-label">💬 Tính GFR</div>
+              &quot;Bệnh nhân nữ 72 tuổi, 55kg, creatinine 2.1. Tính eGFR và CrCl&quot;
+            </div>
+            <div className="prompt-box" style={{ flex: 1, minWidth: '280px' }}>
+              <div className="prompt-label">💬 Kiểm tra tương tác</div>
+              &quot;Kiểm tra tương tác giữa warfarin, aspirin và omeprazole&quot;
+            </div>
+          </div>
+        </div>
+
+        {/* ===== SO SÁNH ===== */}
+        <div className="section-card">
+          <div className="section-icon">⚡</div>
+          <h2 className="section-title">So Sánh: Tra Cứu Thủ Công vs Phở Chat</h2>
+          <table className="comparison-table">
+            <thead>
+              <tr>
+                <th>Công việc</th>
+                <th>Thủ công</th>
+                <th style={{ color: '#22c55e' }}>Phở Chat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tìm 10 bài PubMed + đọc abstract</td>
+                <td>30–45 phút</td>
+                <td style={{ color: '#22c55e', fontWeight: 600 }}>30 giây</td>
+              </tr>
+              <tr>
+                <td>Kiểm tra thử nghiệm lâm sàng</td>
+                <td>15–20 phút</td>
+                <td style={{ color: '#22c55e', fontWeight: 600 }}>15 giây</td>
+              </tr>
+              <tr>
+                <td>Tính GFR + MELD + tương tác thuốc</td>
+                <td>10 phút (3 trang web)</td>
+                <td style={{ color: '#22c55e', fontWeight: 600 }}>10 giây (1 câu)</td>
+              </tr>
+              <tr>
+                <td>Tổng hợp bằng tiếng Việt</td>
+                <td>1–2 giờ</td>
+                <td style={{ color: '#22c55e', fontWeight: 600 }}>1 phút</td>
+              </tr>
+              <tr style={{ borderTop: '2px solid rgba(34,197,94,0.3)' }}>
+                <td><strong>Tổng cộng</strong></td>
+                <td><strong>~3 giờ</strong></td>
+                <td style={{ color: '#22c55e', fontSize: '1.05rem', fontWeight: 700 }}>~2 phút</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* ===== CTA SECTION ===== */}
+        <div className="cta-section" id="register">
+          <h2 className="cta-title">🏥 Nhân Ngày Thầy Thuốc Việt Nam 27/2</h2>
+          <p className="cta-subtitle">
+            Tặng bạn trọn bộ trợ lý AI y khoa với giá chỉ <strong style={{ color: '#22c55e' }}>999.000đ/năm</strong>
+            <br />
+            <span style={{ fontSize: '0.9rem' }}>500.000 Phở Points/tháng · Unlimited AI Tier 1 · 20 lượt Tier 2/ngày</span>
+          </p>
+          <a
+            className="cta-button"
+            href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay"
+            onClick={() => handleCTAClick('main_cta')}
+            rel="noreferrer"
+            target="_blank"
+          >
+            🩺 Đăng Ký Medical Beta — 999K/năm
+          </a>
+          <div className="cta-deadline">⏰ Ưu đãi Ngày Thầy Thuốc chỉ đến hết ngày 28/02/2026</div>
+          <div>
+            <a
+              className="cta-secondary"
+              href="https://pho.chat"
+              onClick={() => handleCTAClick('free_trial')}
+            >
+              Hoặc dùng thử miễn phí (50K points/tháng) →
+            </a>
+          </div>
+        </div>
+
+        {/* ===== DISCLAIMER ===== */}
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          borderRadius: '12px',
+          color: 'rgba(255,255,255,0.4)',
+          fontSize: '0.82rem',
+          lineHeight: 1.7,
+          marginBottom: '24px',
+          padding: '20px 24px',
+          textAlign: 'center',
+        }}>
+          ⚕️ Phở Chat cung cấp công cụ tra cứu và tính toán tham khảo. Kết quả không thay thế đánh giá lâm sàng của bác sĩ.
+          <br />Luôn xác nhận kết quả với nguồn chính thức trước khi đưa ra quyết định điều trị.
+        </div>
+
+        <footer className="footer">
+          <p>
+            <a href="https://pho.chat">Phở Chat</a> — Trợ lý AI thông minh cho người Việt
+            <br />
+            <span style={{ fontSize: '0.78rem' }}>© 2026 Phở Chat. Chúc mừng Ngày Thầy Thuốc Việt Nam 27/2 🏥</span>
+          </p>
+        </footer>
+      </div>
+    </>
+  );
 }
