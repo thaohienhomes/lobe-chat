@@ -3,9 +3,9 @@ import dynamic from 'next/dynamic';
 import { isDesktop } from '@/const/version';
 import { analyticsEnv } from '@/envs/analytics';
 
-const Desktop = dynamic(() => import('./Desktop'), { ssr: false });
-const Google = dynamic(() => import('./Google'), { ssr: false });
-const Vercel = dynamic(() => import('./Vercel'), { ssr: false });
+const Desktop = dynamic(() => import('./Desktop'));
+const Google = dynamic(() => import('./Google'));
+const Vercel = dynamic(() => import('./Vercel'));
 
 // Lazy load analytics components
 const Plausible = dynamic(() => import('./Plausible'));
