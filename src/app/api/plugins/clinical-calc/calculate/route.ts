@@ -408,9 +408,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate required inputs
+    // Apply defaults for boolean inputs (default to false if not provided)
+    // Only number inputs are strictly required
+    const filledInputs: FormulaInputs = { ...inputs };
+    for (const inp of formulaDef.inputs) {
+      if (filledInputs[inp.name] === undefined && inp.type === 'boolean') {
+        filledInputs[inp.name] = false;
+      }
+    }
+
+    // Validate required number inputs
     const missingInputs = formulaDef.inputs
-      .filter((inp) => inputs[inp.name] === undefined)
+      .filter((inp) => inp.type === 'number' && filledInputs[inp.name] === undefined)
       .map((inp) => inp.name);
 
     if (missingInputs.length > 0) {
@@ -424,7 +433,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate
-    const calcResult = formulaDef.calculate(inputs);
+    const calcResult = formulaDef.calculate(filledInputs);
 
     const result: CalculationResult = {
       formula: formulaDef.name,
