@@ -8,8 +8,10 @@ import { useFetchMessages } from '@/hooks/useFetchMessages';
 import { useChatStore } from '@/store/chat';
 import { chatSelectors } from '@/store/chat/selectors';
 
-import MainChatItem from './ChatItem';
-import Welcome from './WelcomeChatItem';
+import dynamic from 'next/dynamic';
+
+const MainChatItem = dynamic(() => import('./ChatItem'), { ssr: false });
+const Welcome = dynamic(() => import('./WelcomeChatItem'), { ssr: false });
 
 interface ListProps {
   mobile?: boolean;

@@ -1,8 +1,15 @@
 {
     "servers": {
         "posthog": {
-            "type": "http",
-            "url": "https://mcp.posthog.com/mcp"
+            "command": "npx",
+            "args": [
+                "-y",
+                "@posthog/mcp-server"
+            ],
+            "env": {
+                "POSTHOG_API_KEY": "phx_GEwi02qn10fvgreHb67dncxAH5qyFr7TMt40amgafpUpwpU",
+                "POSTHOG_HOST": "https://us.posthog.com"
+            }
         }
     }
 }
