@@ -256,7 +256,7 @@ export async function checkTierAccess(
     return {
       allowed: false,
       dailyLimit,
-      reason: `Bạn đã dùng hết lượt model cao cấp hôm nay (${dailyLimit}/${dailyLimit}). Thử lại vào ngày mai hoặc nâng cấp gói.`,
+      reason: `Bạn đã dùng hết ${dailyLimit} lượt model cao cấp hôm nay. Hãy chuyển sang model Groq Llama (Tier 1) để tiếp tục không giới hạn, hoặc thử lại vào ngày mai.`,
       remaining: 0,
     };
   }

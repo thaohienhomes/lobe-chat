@@ -229,14 +229,31 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       const tierAccess = await checkTierAccess(jwtPayload.userId, modelTier, userPlanId);
 
       if (!tierAccess.allowed) {
-        console.warn(
-          `🚫 Tier access denied: ${tierAccess.reason} (User: ${jwtPayload.userId}, Model: ${data.model})`,
-        );
-        return createErrorResponse(AgentRuntimeErrorType.InsufficientQuota, {
-          error: { message: tierAccess.reason || 'Model này yêu cầu gói cao hơn.' },
-          provider: 'pho-chat',
-          upgradeUrl: '/settings/subscription',
-        });
+        // ============ Plugin Auto-Fallback ============
+        // When Tier 2/3 quota is exhausted but the request has tool/plugin calls,
+        // transparently reroute to Tier 1 (Groq Llama 3.3 70B) so plugins keep working.
+        // This avoids a jarring quota error mid-session for the user.
+        const hasTools = Array.isArray(data.tools) && data.tools.length > 0;
+        if (hasTools && modelTier > 1) {
+          const PLUGIN_FALLBACK_MODEL = 'llama-3.3-70b-versatile';
+          const PLUGIN_FALLBACK_PROVIDER = 'groq';
+          console.log(
+            `🔄 [Plugin Fallback] Tier ${modelTier} quota exceeded for user ${jwtPayload.userId}. ` +
+            `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Groq).`,
+          );
+          data.model = PLUGIN_FALLBACK_MODEL;
+          // Re-init runtime for the fallback provider
+          modelRuntime = await initModelRuntimeWithUserPayload(PLUGIN_FALLBACK_PROVIDER, jwtPayload);
+        } else {
+          console.warn(
+            `🚫 Tier access denied: ${tierAccess.reason} (User: ${jwtPayload.userId}, Model: ${data.model})`,
+          );
+          return createErrorResponse(AgentRuntimeErrorType.InsufficientQuota, {
+            error: { message: tierAccess.reason || 'Model này yêu cầu gói cao hơn.' },
+            provider: 'pho-chat',
+            upgradeUrl: '/settings/subscription',
+          });
+        }
       }
 
       // Log remaining usage for non-unlimited tiers
