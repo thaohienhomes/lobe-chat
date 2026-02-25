@@ -3,6 +3,16 @@ import { AiModelSourceEnum } from 'model-bank';
 import { AIProviderStoreState } from '@/store/aiInfra/initialState';
 import { ModelSearchImplement } from '@/types/search';
 
+// Phở Chat logical models that support function calling (tool use / plugins).
+// These are NOT in the model-bank npm package, so they need to be listed explicitly.
+// Keep in sync with src/config/modelProviders/phochat.ts
+const PHO_CHAT_FUNCTION_CALL_MODELS = new Set([
+  'pho-pro',
+  'gemma-3-27b-it',
+  'llama-4-scout-17b',
+  'kimi-k2',
+]);
+
 const aiProviderChatModelListIds = (s: AIProviderStoreState) =>
   s.aiProviderModelList.filter((item) => item.type === 'chat').map((item) => item.id);
 // List
@@ -51,13 +61,21 @@ const isModelSupportToolUse = (id: string, provider: string) => (s: AIProviderSt
     return true;
   }
 
-  // Fallback: check builtinAiModelList (static config)
+  // Fallback 2: check builtinAiModelList (static config from model-bank npm package)
   // This handles cases where provider isn't fully configured but model has functionCall in config
   const builtinModel = s.builtinAiModelList?.find(
     (m) => m.id === id && (provider ? m.providerId === provider : true),
   );
 
   if (builtinModel?.abilities?.functionCall) {
+    return true;
+  }
+
+  // Fallback 3: phochat logical models — NOT in model-bank npm package.
+  // Check model ID against explicit set of phochat function-calling models.
+  // provider is 'phochat' when selected from the Phở Chat section in model picker.
+  const isPhochatProvider = !provider || provider === 'phochat';
+  if (isPhochatProvider && PHO_CHAT_FUNCTION_CALL_MODELS.has(id)) {
     return true;
   }
 
