@@ -21,11 +21,12 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 
 const NewYearLifetimeBanner = nextDynamic(
   () => import('@/features/PromotionBanner/NewYearLifetimeBanner'),
+  { ssr: false },
 );
 
-// Force dynamic rendering to avoid static generation issues with Clerk hooks
-// This is required because Clerk's useUser hook cannot be used during static generation
-export const dynamic = 'force-dynamic';
+// NOTE: force-dynamic REMOVED for performance — Feb 2026
+// Clerk hooks only run in 'use client' components, they don't need force-dynamic.
+// Removing this enables Vercel edge caching and ISR, dramatically improving TTFB and LCP.
 
 const inVercel = process.env.VERCEL === '1';
 

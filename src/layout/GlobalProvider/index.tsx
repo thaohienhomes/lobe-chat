@@ -59,9 +59,10 @@ const GlobalLayout = async ({
             serverConfig={serverConfig}
           >
             <QueryProvider>
-              <LobeAnalyticsProviderWrapper>{children}</LobeAnalyticsProviderWrapper>
+              {children}
             </QueryProvider>
-            <StoreInitialization />
+            <LobeAnalyticsProviderWrapper />
+            <Suspense><StoreInitialization /></Suspense>
             <PWARegister />
             <Suspense>
               <ImportSettings />

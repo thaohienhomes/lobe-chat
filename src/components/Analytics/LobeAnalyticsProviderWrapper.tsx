@@ -5,7 +5,7 @@ import { analyticsEnv } from '@/envs/analytics';
 import { isDev } from '@/utils/env';
 
 type Props = {
-  children: ReactNode;
+  children?: ReactNode;
 };
 
 export const LobeAnalyticsProviderWrapper = memo<Props>(({ children }) => {

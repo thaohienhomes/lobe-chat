@@ -56,6 +56,7 @@ const nextConfig: NextConfig = {
       'dayjs',
       'react-hotkeys-hook',
       '@clerk/nextjs',
+      'nuqs',
     ],
     // oidc provider depend on constructor.name
     // but swc minification will remove the name
