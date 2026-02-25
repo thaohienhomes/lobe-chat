@@ -50,6 +50,33 @@ class PhoGatewayService {
       id: 'pho-vision',
       providers: [{ modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }],
     },
+
+    // ── New Open Models (Tier 1/2) ─────────────────────────────────────────
+    // These are exposed in the phochat picker via phochat.ts logical entries.
+
+    'gemma-3-27b-it': {
+      id: 'gemma-3-27b-it',
+      providers: [
+        { modelId: 'gemma-3-27b-it', provider: 'groq' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
+
+    'llama-4-scout-17b': {
+      id: 'llama-4-scout-17b',
+      providers: [
+        { modelId: 'meta-llama/llama-4-scout-17b-16e-instruct', provider: 'groq' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
+
+    'kimi-k2': {
+      id: 'kimi-k2',
+      providers: [
+        { modelId: 'moonshotai/Kimi-K2-Instruct', provider: 'togetherai' },
+        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
   };
 
   /**

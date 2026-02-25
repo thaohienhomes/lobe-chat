@@ -3,6 +3,8 @@ import { ModelProviderCard } from '@/types/llm';
 // Phở Chat — Branded AI models with multi-provider failover
 // Backend: PhoGatewayService resolves logical model IDs to real providers
 // Failover chain: Groq → Cerebras → Cloudflare Workers AI
+// NOTE: Raw providers (Groq, TogetherAI, etc.) are hidden from UI picker.
+// Models exposed here appear in the picker — raw provider models do not.
 const PhoChat: ModelProviderCard = {
     chatModels: [
         {
@@ -38,6 +40,33 @@ const PhoChat: ModelProviderCard = {
             enabled: true,
             id: 'pho-vision',
             vision: true,
+        },
+        {
+            contextWindowTokens: 8192,
+            description:
+                'Gemma 3 27B — Model mã nguồn mở mới nhất của Google với khả năng tool calling mạnh mẽ, hỗ trợ đa ngôn ngữ, và hiệu suất vượt trội so với kích thước. Chạy trên Groq với tốc độ inference cực nhanh.',
+            displayName: 'Gemma 3 27B ✨',
+            enabled: true,
+            functionCall: true,
+            id: 'gemma-3-27b-it',
+        },
+        {
+            contextWindowTokens: 131_072,
+            description:
+                'Llama 4 Scout — Model mixture-of-experts 17Bx16E của Meta, tối ưu cho multi-task inference nhanh. Đã chuyển sang Tier 1 vì chi phí thấp và hiệu suất cao.',
+            displayName: 'Llama 4 Scout ⚡',
+            enabled: true,
+            functionCall: true,
+            id: 'llama-4-scout-17b',
+        },
+        {
+            contextWindowTokens: 128_000,
+            description:
+                'Kimi K2 — Model frontier của MoonshotAI với 1 nghìn tỷ tham số (32B active), xuất sắc trong agentic tasks và tool calling. 128K context, lý tưởng cho coding, reasoning phức tạp.',
+            displayName: 'Kimi K2 🌙',
+            enabled: true,
+            functionCall: true,
+            id: 'kimi-k2',
         },
     ],
     description:

@@ -401,6 +401,7 @@ const TIER1_MODELS = [
   'gemma-3-27b-it',              // Gemma 3 27B — NEW: strong tool calling, cheap
   'mistral-saba-24b',
   'meta-llama/llama-4-scout-17b-16e-instruct', // Llama 4 Scout — moved from Tier 2: fast & cheap
+  'llama-4-scout-17b',           // Logical alias used in phochat picker
   // Cerebras (via CF Gateway)
   'llama3.1-8b',
   'llama3.1-70b',
@@ -442,6 +443,7 @@ const TIER2_MODELS = [
   'qwen/qwen3-32b',
   // Together AI — Kimi K2
   'moonshotai/Kimi-K2-Instruct',  // NEW: Kimi K2 — excellent tool calling, 128K ctx
+  'kimi-k2',                     // Logical alias used in phochat picker
   // Together AI (via CF Gateway)
   'Qwen/Qwen2.5-72B-Instruct-Turbo',
   'deepseek-ai/DeepSeek-R1',
