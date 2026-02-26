@@ -1,9 +1,8 @@
+import { ModelIcon } from '@lobehub/icons';
 import { createStyles } from 'antd-style';
-import { Lock, Zap } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Flexbox } from 'react-layout-kit';
 
-import { ModelItemRender } from '@/components/ModelSelect';
 import { getModelTier } from '@/config/pricing';
 import {
   MODEL_DESCRIPTIONS,
@@ -15,509 +14,329 @@ import {
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
 
-// ── Tier visual configuration ──────────────────────────────────────────────
-const TIER_CONFIGS = {
-  1: { accent: '#22c55e', dotClass: 'dotFree', icon: '⚡', label: 'Nhanh & Miễn Phí', quotaLabel: '' },
-  2: { accent: '#a78bfa', dotClass: 'dotPro', icon: '🔮', label: 'Chuyên Nghiệp', quotaLabel: '20 lượt/ngày' },
-  3: { accent: '#f59e0b', dotClass: 'dotFlagship', icon: '👑', label: 'Flagship', quotaLabel: '5 lượt/ngày' },
+/* ──────────── Tier config ──────────── */
+const TIER = {
+  1: { accent: '#22c55e', icon: '⚡', label: 'Nhanh & Miễn Phí', quota: '' },
+  2: { accent: '#a78bfa', icon: '🔮', label: 'Chuyên Nghiệp', quota: '20 lượt/ngày' },
+  3: { accent: '#f59e0b', icon: '👑', label: 'Flagship', quota: '5 lượt/ngày' },
 } as const;
 
-// ── Access check hook ──────────────────────────────────────────────────────
+/* ──────────── Model-access hook ──────────── */
 const useModelAccess = () => {
-  const [allowedTiers, setAllowedTiers] = useState<number[]>([1]);
-  const [loading, setLoading] = useState(true);
-
+  const [allowed, setAllowed] = useState<number[]>([1]);
   useEffect(() => {
-    const check = async () => {
+    (async () => {
       try {
-        const res = await fetch('/api/subscription/models/allowed');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.data) { setAllowedTiers(data.data.allowedTiers || [1]); }
-        } else { setAllowedTiers([1]); }
-      } catch { setAllowedTiers([1]); }
-      finally { setLoading(false); }
-    };
-    check();
+        const r = await fetch('/api/subscription/models/allowed');
+        if (r.ok) {
+          const d = await r.json();
+          if (d.success && d.data) setAllowed(d.data.allowedTiers || [1]);
+        }
+      } catch { /* default [1] */ }
+    })();
   }, []);
-
-  const canUseModel = useCallback(
-    (modelId: string) => {
-      if (modelId.toLowerCase().includes('auto')) return true;
-      return allowedTiers.includes(getModelTier(modelId));
-    },
-    [allowedTiers],
+  const canUse = useCallback(
+    (id: string) => allowed.includes(id.toLowerCase().includes('auto') ? 2 : getModelTier(id)),
+    [allowed],
   );
-
-  return { canUseModel, loading };
+  return canUse;
 };
 
-// ── Styles ─────────────────────────────────────────────────────────────────
+/* ──────────── Helpers ──────────── */
+const ctxLabel = (n?: number) => (!n ? '' : n >= 1e6 ? `${Math.round(n / 1e6)}M` : `${Math.round(n / 1e3)}K`);
+const iconBg = (tier: number) =>
+  tier === 1 ? 'rgba(34,197,94,0.12)' : tier === 2 ? 'rgba(139,92,246,0.12)' : 'rgba(245,158,11,0.12)';
+
+/* Badge for tier */
+const tierBadge = (tier: number) => {
+  if (tier === 1)
+    return <span style={{ background: 'rgba(34,197,94,0.15)', borderRadius: 4, color: '#4ade80', fontSize: 9, fontWeight: 700, letterSpacing: 0.3, padding: '2px 7px' }}>FREE</span>;
+  if (tier === 2)
+    return <span style={{ background: 'rgba(168,85,247,0.2)', borderRadius: 4, color: '#c084fc', fontSize: 9, fontWeight: 700, letterSpacing: 0.3, padding: '2px 7px' }}>PRO</span>;
+  return <span style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.2),rgba(239,68,68,0.15))', borderRadius: 4, color: '#fbbf24', fontSize: 9, fontWeight: 700, letterSpacing: 0.3, padding: '2px 7px' }}>MAX</span>;
+};
+
+/* ──────────── Styles ──────────── */
 const useStyles = createStyles(({ css, token }) => ({
-  backdrop: css`
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-  `,
+  backdrop: css`position:fixed;inset:0;z-index:1000;`,
   capIcon: css`
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    background: rgba(139, 92, 246, 0.1);
-    color: rgba(168, 85, 247, 0.7);
+    width:18px; height:18px; border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px;
+    background: rgba(139,92,246,0.1);
+    color: rgba(168,85,247,0.7);
+  `,
+  capIconInactive: css`
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.3);
   `,
   ctx: css`
-    font-size: 10px;
-    color: ${token.colorTextQuaternary};
-    font-weight: 500;
-    min-width: 28px;
-    text-align: right;
-    flex-shrink: 0;
+    font-size:10px; color:rgba(255,255,255,0.2); font-weight:500;
+    min-width:30px; text-align:right; flex-shrink:0;
   `,
-  dot: css`
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  `,
-  dotFlagship: css`
-    background: #f59e0b;
-  `,
-  dotFree: css`
-    background: #22c55e;
-  `,
-  dotPro: css`
-    background: #a78bfa;
-  `,
+  dot: css`width:6px;height:6px;border-radius:50%;flex-shrink:0;`,
   footer: css`
-    padding: 8px 16px;
-    border-top: 1px solid ${token.colorBorderSecondary};
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding:10px 16px;
+    border-top:1px solid ${token.colorBorderSecondary};
+    display:flex; justify-content:space-between; align-items:center;
   `,
-  footerLink: css`
-    font-size: 11px;
-    color: rgba(139, 92, 246, 0.6);
-    cursor: pointer;
-    user-select: none;
-    &:hover { color: #a78bfa; }
+  footerLink: css`font-size:11px;color:rgba(139,92,246,0.6);cursor:pointer;&:hover{color:#a78bfa;}`,
+  modelIcon: css`
+    width:32px; height:32px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; flex-shrink:0;
+  `,
+  modelName: css`
+    font-size:13px; font-weight:600; color:${token.colorText};
+    display:flex; align-items:center; gap:6px; line-height:1.3;
   `,
   modelRow: css`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    cursor: pointer;
-    position: relative;
-    transition: background 0.15s;
-    &:hover {
-      background: ${token.colorBgTextHover};
-    }
+    display:flex; align-items:center; gap:10px;
+    padding:9px 16px; cursor:pointer; position:relative;
+    transition:background 0.15s;
+    &:hover { background:rgba(255,255,255,0.04); }
   `,
   modelRowDisabled: css`
-    pointer-events: none;
-    cursor: not-allowed;
-    filter: grayscale(1);
-    opacity: 0.5;
+    pointer-events:none; cursor:not-allowed;
+    filter:grayscale(1); opacity:0.45;
   `,
   modelSub: css`
-    font-size: 11px;
-    line-height: 1.3;
-    color: ${token.colorTextQuaternary};
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 200px;
+    font-size:11px; color:rgba(255,255,255,0.35); margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   `,
   newBadge: css`
-    display: inline-flex;
-    align-items: center;
-    padding: 1px 5px;
-    border-radius: 4px;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    line-height: 1.5;
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    flex-shrink: 0;
-    animation: pulseBadge 2s infinite;
-    @keyframes pulseBadge {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
+    display:inline-flex; padding:2px 7px; border-radius:4px;
+    font-size:9px; font-weight:700; letter-spacing:0.3px;
+    background:rgba(239,68,68,0.15); color:#f87171;
+    animation:pk 2s infinite;
+    @keyframes pk{0%,100%{opacity:1}50%{opacity:0.6}}
   `,
   panel: css`
-    position: fixed;
-    z-index: 1001;
-    width: 380px;
-    max-height: 560px;
+    position:fixed; z-index:1001; width:380px; max-height:540px;
     background: ${token.colorBgElevated};
-    border: 1px solid ${token.colorBorderSecondary};
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    border:1px solid ${token.colorBorderSecondary};
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    display:flex; flex-direction:column; overflow:hidden;
+    animation: slideUp 0.18s ease-out;
+    @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   `,
-  scrollArea: css`
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    &::-webkit-scrollbar { width: 4px; }
-    &::-webkit-scrollbar-thumb {
-      background: ${token.colorTextQuaternary};
-      border-radius: 2px;
-    }
+  scroll: css`
+    flex:1; overflow-y:auto; overflow-x:hidden;
+    &::-webkit-scrollbar{width:4px}
+    &::-webkit-scrollbar-thumb{background:${token.colorTextQuaternary};border-radius:2px}
+  `,
+  search: css`
+    padding:12px 16px; border-bottom:1px solid ${token.colorBorderSecondary};
+    position:relative;
   `,
   searchIcon: css`
-    position: absolute;
-    left: 28px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: ${token.colorTextQuaternary};
-    font-size: 14px;
-    pointer-events: none;
+    position:absolute; left:28px; top:50%; transform:translateY(-50%);
+    color:${token.colorTextQuaternary}; pointer-events:none;
   `,
   searchInput: css`
-    width: 100%;
-    padding: 10px 14px 10px 36px;
-    background: ${token.colorFillTertiary};
-    border: 1px solid ${token.colorBorderSecondary};
-    border-radius: 10px;
-    color: ${token.colorText};
-    font-size: 13px;
-    font-family: inherit;
-    outline: none;
-    &::placeholder { color: ${token.colorTextQuaternary}; }
-    &:focus { border-color: rgba(139, 92, 246, 0.4); }
+    width:100%; padding:10px 14px 10px 38px;
+    background:${token.colorFillTertiary};
+    border:1px solid ${token.colorBorderSecondary};
+    border-radius:10px; color:${token.colorText};
+    font-size:13px; font-family:inherit; outline:none;
+    &::placeholder{color:${token.colorTextQuaternary}}
+    &:focus{border-color:rgba(139,92,246,0.4)}
   `,
-  searchWrap: css`
-    padding: 12px 16px;
-    border-bottom: 1px solid ${token.colorBorderSecondary};
-    position: relative;
-  `,
-  section: css`
-    padding: 4px 0;
-    & + & {
-      border-top: 1px solid ${token.colorBorderSecondary};
-    }
-  `,
+  section: css`padding:6px 0;&+&{border-top:1px solid ${token.colorBorderSecondary}}`,
   sectionHeader: css`
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px 4px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
+    display:flex; align-items:center; gap:6px;
+    padding:10px 16px 6px; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.8px;
   `,
-  sectionQuota: css`
-    margin-left: auto;
-    font-size: 9px;
-    font-weight: 400;
-    text-transform: none;
-    color: ${token.colorTextQuaternary};
-  `,
+  selected: css`background:rgba(139,92,246,0.08);`,
   selectedBar: css`
-    position: absolute;
-    left: 0;
-    top: 4px;
-    bottom: 4px;
-    width: 3px;
-    border-radius: 0 3px 3px 0;
+    position:absolute; left:0; top:4px; bottom:4px; width:3px;
+    border-radius:0 3px 3px 0;
   `,
   speedBadge: css`
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding: 1px 5px;
-    border-radius: 4px;
-    font-size: 9px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #eab308, #f97316);
-    color: #000;
-    flex-shrink: 0;
+    display:inline-flex; align-items:center; gap:2px;
+    padding:2px 6px; border-radius:4px; font-size:8px; font-weight:700;
+    background:linear-gradient(135deg,#eab308,#f97316); color:#000;
   `,
-  speedBar: css`
-    height: 3px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  `,
-  tag: css`
-    cursor: pointer;
-  `,
+  speedBar: css`height:3px;border-radius:2px;flex-shrink:0;`,
+  speedLabel: css`font-size:9px;color:rgba(255,255,255,0.25);`,
   tierLegend: css`
-    display: flex;
-    gap: 10px;
-    font-size: 10px;
-    color: ${token.colorTextQuaternary};
-    & > span {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
+    display:flex;gap:10px;font-size:10px;color:rgba(255,255,255,0.3);
+    &>span{display:flex;align-items:center;gap:3px}
   `,
+  trigger: css`cursor:pointer;`,
 }));
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-const formatContext = (tokens?: number) => {
-  if (!tokens) return '';
-  if (tokens >= 1_000_000) return `${Math.round(tokens / 1_000_000)}M`;
-  return `${Math.round(tokens / 1000)}K`;
-};
-
-// ── Component ──────────────────────────────────────────────────────────────
+/* ──────────── Component ──────────── */
 interface IProps {
   children?: ReactNode;
-  onOpenChange?: (open: boolean) => void;
+  onOpenChange?: (v: boolean) => void;
   open?: boolean;
   updating?: boolean;
 }
 
-const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: externalOpen }) => {
+const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }) => {
   const { styles, cx } = useStyles();
   const model = useAgentStore((s) => agentSelectors.currentAgentModel(s));
   const updateAgentConfig = useAgentStore((s) => s.updateAgentConfig);
-  const enabledList = useEnabledChatModels() as TierGroup[];
-  const { canUseModel } = useModelAccess();
-  const [searchQuery, setSearchQuery] = useState('');
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const tiers = useEnabledChatModels() as TierGroup[];
+  const canUse = useModelAccess();
+  const [q, setQ] = useState('');
+  const trigRef = useRef<HTMLDivElement>(null);
 
-  // Internal open state (used when parent doesn't control it)
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  /* ── internal open state ── */
+  const [intOpen, setIntOpen] = useState(false);
+  const isOpen = extOpen ?? intOpen;
+  const setOpen = useCallback((v: boolean) => { setIntOpen(v); onOpenChange?.(v); if (!v) setQ(''); }, [onOpenChange]);
 
-  const setOpen = useCallback(
-    (val: boolean) => {
-      setInternalOpen(val);
-      onOpenChange?.(val);
-      if (!val) setSearchQuery('');
-    },
-    [onOpenChange],
-  );
-
-  // Panel positioning
-  const [panelPos, setPanelPos] = useState({ left: 0, top: 0 });
+  /* ── position ── */
+  const [pos, setPos] = useState({ x: 0, y: 0 });
   useEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const panelHeight = 560;
-      // Position above the trigger if there's room, else below
-      const spaceAbove = rect.top;
-      const top = spaceAbove > panelHeight + 16
-        ? rect.top - panelHeight - 8
-        : rect.bottom + 8;
-      setPanelPos({
-        left: Math.max(8, Math.min(rect.left, window.innerWidth - 400)),
-        top: Math.max(8, top),
-      });
-    }
+    if (!isOpen || !trigRef.current) return;
+    const r = trigRef.current.getBoundingClientRect();
+    const h = 540;
+    setPos({
+      x: Math.max(8, Math.min(r.left, window.innerWidth - 396)),
+      y: r.top > h + 16 ? r.top - h - 8 : r.bottom + 8,
+    });
   }, [isOpen]);
 
-  // Filter models by search
-  const filteredList = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return enabledList;
-    return enabledList
-      .map((tier) => ({
-        ...tier,
-        children: tier.children.filter(
-          (m) =>
-            m.id.toLowerCase().includes(q) ||
-            m.displayName.toLowerCase().includes(q) ||
-            (MODEL_DESCRIPTIONS[m.id] || '').toLowerCase().includes(q),
+  /* ── search filter ── */
+  const filtered = useMemo(() => {
+    const s = q.toLowerCase().trim();
+    if (!s) return tiers;
+    return tiers
+      .map((t) => ({
+        ...t,
+        children: t.children.filter(
+          (m) => m.id.toLowerCase().includes(s) || m.displayName.toLowerCase().includes(s) || (MODEL_DESCRIPTIONS[m.id] || '').toLowerCase().includes(s),
         ),
       }))
-      .filter((tier) => tier.children.length > 0);
-  }, [enabledList, searchQuery]);
+      .filter((t) => t.children.length > 0);
+  }, [tiers, q]);
 
-  const handleSelect = useCallback(
-    async (modelId: string, modelProvider: string) => {
-      await updateAgentConfig({ model: modelId, provider: modelProvider });
-      setOpen(false);
-    },
+  const onSelect = useCallback(
+    async (id: string, prov: string) => { await updateAgentConfig({ model: id, provider: prov }); setOpen(false); },
     [updateAgentConfig, setOpen],
   );
 
-  const handleClose = useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
+
 
   return (
     <>
-      <div className={styles.tag} onClick={() => setOpen(!isOpen)} ref={triggerRef}>
+      <div className={styles.trigger} onClick={() => setOpen(!isOpen)} ref={trigRef}>
         {children}
       </div>
 
       {isOpen && (
         <>
-          {/* Backdrop */}
-          <div className={styles.backdrop} onClick={handleClose} />
-
-          {/* Panel */}
-          <div
-            className={styles.panel}
-            ref={panelRef}
-            style={{ left: panelPos.left, top: panelPos.top }}
-          >
-            {/* Search bar */}
-            <div className={styles.searchWrap}>
-              <span className={styles.searchIcon}>🔍</span>
+          <div className={styles.backdrop} onClick={() => setOpen(false)} />
+          <div className={styles.panel} style={{ left: pos.x, top: pos.y }}>
+            {/* ── Search ── */}
+            <div className={styles.search}>
+              <Search className={styles.searchIcon} size={15} />
               <input
                 autoFocus
                 className={styles.searchInput}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setQ(e.target.value)}
                 placeholder="Tìm model..."
                 type="text"
-                value={searchQuery}
+                value={q}
               />
             </div>
 
-            {/* Scrollable model list */}
-            <div className={styles.scrollArea}>
-              {filteredList.map((tierGroup) => {
-                const tierNum = (tierGroup.tierGroup || 1) as 1 | 2 | 3;
-                const cfg = TIER_CONFIGS[tierNum];
-
+            {/* ── Scroll ── */}
+            <div className={styles.scroll}>
+              {filtered.map((tier) => {
+                const t = (tier.tierGroup || 1) as 1 | 2 | 3;
+                const cfg = TIER[t];
                 return (
-                  <div className={styles.section} key={tierGroup.id}>
+                  <div className={styles.section} key={tier.id}>
                     {/* Section header */}
                     <div className={styles.sectionHeader} style={{ color: cfg.accent }}>
-                      <span>{cfg.icon}</span>
-                      <span>{cfg.label}</span>
-                      {cfg.quotaLabel && (
-                        <span className={styles.sectionQuota}>{cfg.quotaLabel}</span>
+                      <span style={{ fontSize: 13 }}>{cfg.icon}</span>
+                      {cfg.label}
+                      {cfg.quota && (
+                        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 9, fontWeight: 400, marginLeft: 'auto', textTransform: 'none' }}>
+                          {cfg.quota}
+                        </span>
                       )}
                     </div>
 
                     {/* Model rows */}
-                    {tierGroup.children.map((modelItem) => {
-                      const canAccess = canUseModel(modelItem.id);
-                      const modelProvider =
-                        (modelItem as any).originProvider || tierGroup.id;
-                      const isSelected = model === modelItem.id;
-                      const isNew = NEW_MODEL_IDS.has(modelItem.id);
-                      const speedLabel = SPEED_MODELS[modelItem.id];
-                      const description = MODEL_DESCRIPTIONS[modelItem.id];
-                      const ctxLabel = formatContext(modelItem.contextWindowTokens);
+                    {tier.children.map((m) => {
+                      const ok = canUse(m.id);
+                      const prov = (m as any).originProvider || tier.id;
+                      const sel = model === m.id;
+                      const isNew = NEW_MODEL_IDS.has(m.id);
+                      const speed = SPEED_MODELS[m.id];
+                      const desc = MODEL_DESCRIPTIONS[m.id];
+                      const ctx = ctxLabel(m.contextWindowTokens);
+                      const mTier = getModelTier(m.id);
 
                       return (
                         <div
-                          className={cx(
-                            styles.modelRow,
-                            !canAccess && styles.modelRowDisabled,
-                          )}
-                          key={modelItem.id}
-                          onClick={
-                            canAccess
-                              ? () => handleSelect(modelItem.id, modelProvider)
-                              : undefined
-                          }
+                          className={cx(styles.modelRow, sel && styles.selected, !ok && styles.modelRowDisabled)}
+                          key={m.id}
+                          onClick={ok ? () => onSelect(m.id, prov) : undefined}
                         >
-                          {/* Selected indicator */}
-                          {isSelected && (
-                            <div
-                              className={styles.selectedBar}
-                              style={{ background: cfg.accent }}
-                            />
-                          )}
+                          {/* Selected bar */}
+                          {sel && <div className={styles.selectedBar} style={{ background: cfg.accent }} />}
 
-                          {/* Model info */}
-                          <Flexbox style={{ flex: 1, minWidth: 0 }}>
-                            <Flexbox align="center" gap={5} horizontal>
-                              <ModelItemRender
-                                {...modelItem}
-                                {...modelItem.abilities}
-                                isLocked={!canAccess}
-                              />
-                              {speedLabel && (
-                                <span className={styles.speedBadge}>
-                                  <Zap size={8} /> {speedLabel} tok/s
-                                </span>
-                              )}
+                          {/* Icon */}
+                          <div className={styles.modelIcon} style={{ background: speed ? 'linear-gradient(135deg,rgba(250,204,21,0.15),rgba(251,146,60,0.12))' : iconBg(t) }}>
+                            <ModelIcon model={m.id} size={18} />
+                          </div>
+
+                          {/* Info */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div className={styles.modelName}>
+                              {m.displayName}
+                              {mTier > 1 && tierBadge(mTier)}
+                              {speed && <span className={styles.speedBadge}>⚡ {speed} tok/s</span>}
                               {isNew && <span className={styles.newBadge}>MỚI</span>}
-                            </Flexbox>
-                            {description && (
-                              <div className={styles.modelSub}>
-                                {speedLabel ? (
-                                  <>
-                                    <span
-                                      className={styles.speedBar}
-                                      style={{
-                                        background: speedLabel === '1000+'
-                                          ? 'linear-gradient(90deg, #eab308, #f97316)'
-                                          : 'linear-gradient(90deg, #22c55e, #4ade80)',
-                                        display: 'inline-block',
-                                        marginRight: 6,
-                                        verticalAlign: 'middle',
-                                        width: speedLabel === '1000+' ? 36 : 20,
-                                      }}
-                                    />
-                                    {description}
-                                  </>
-                                ) : (
-                                  description
-                                )}
+                            </div>
+                            {/* Subtitle or speed bar */}
+                            {speed ? (
+                              <div style={{ alignItems: 'center', display: 'flex', gap: 3, marginTop: 2 }}>
+                                <div className={styles.speedBar} style={{ background: 'linear-gradient(90deg,#eab308,#f97316)', width: 36 }} />
+                                <span className={styles.speedLabel}>{desc || 'Instant generation'}</span>
                               </div>
-                            )}
-                          </Flexbox>
+                            ) : desc ? (
+                              <div className={styles.modelSub}>{desc}</div>
+                            ) : null}
+                          </div>
 
-                          {/* Context window */}
-                          {ctxLabel && <span className={styles.ctx}>{ctxLabel}</span>}
+                          {/* Capability icons */}
+                          <div style={{ alignItems: 'center', display: 'flex', flexShrink: 0, gap: 4 }}>
+                            {m.abilities?.functionCall && <div className={styles.capIcon} title="Plugins">🔌</div>}
+                            {m.abilities?.vision && <div className={styles.capIcon} title="Vision">👁</div>}
+                          </div>
 
-                          {/* Lock icon */}
-                          {!canAccess && (
-                            <Lock
-                              size={14}
-                              style={{
-                                color: 'rgba(255,255,255,0.25)',
-                                flexShrink: 0,
-                              }}
-                            />
-                          )}
+                          {/* Context size */}
+                          {ctx && <span className={styles.ctx}>{ctx}</span>}
                         </div>
                       );
                     })}
                   </div>
                 );
               })}
-
-              {/* Empty state */}
-              {filteredList.length === 0 && (
-                <Flexbox
-                  align="center"
-                  justify="center"
-                  style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, padding: '24px 16px' }}
-                >
+              {filtered.length === 0 && (
+                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, padding: '24px 16px', textAlign: 'center' }}>
                   Không tìm thấy model nào
-                </Flexbox>
+                </div>
               )}
             </div>
 
-            {/* Footer */}
+            {/* ── Footer ── */}
             <div className={styles.footer}>
               <div className={styles.tierLegend}>
-                <span>
-                  <span className={cx(styles.dot, styles.dotFree)} /> Free
-                </span>
-                <span>
-                  <span className={cx(styles.dot, styles.dotPro)} /> Pro
-                </span>
-                <span>
-                  <span className={cx(styles.dot, styles.dotFlagship)} /> Max
-                </span>
+                <span><span className={styles.dot} style={{ background: '#22c55e' }} /> Free</span>
+                <span><span className={styles.dot} style={{ background: '#a78bfa' }} /> Pro</span>
+                <span><span className={styles.dot} style={{ background: '#f59e0b' }} /> Max</span>
               </div>
-              <span className={styles.footerLink} onClick={handleClose}>
-                Xem tất cả →
-              </span>
+              <span className={styles.footerLink} onClick={() => setOpen(false)}>Xem tất cả →</span>
             </div>
           </div>
         </>
