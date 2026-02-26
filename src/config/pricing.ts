@@ -430,6 +430,7 @@ const TIER2_MODELS = [
   'google/gemini-3-flash-preview',
   'anthropic/claude-sonnet-4.5',
   'anthropic/claude-haiku-4.5',
+  'anthropic/claude-sonnet-4-20250514',
   'openai/gpt-5.2',
   'openai/gpt-4o',
   'openai/gpt-4.1',
@@ -466,6 +467,7 @@ const TIER3_MODELS = [
   'pho-smart',
   // Vercel AI Gateway
   'google/gemini-3-pro-preview',
+  'anthropic/claude-opus-4-20250514',
   'openai/o3-mini',
   // Legacy short IDs (for backward compat & tier lookup)
   'gemini-3-pro-preview',
@@ -740,6 +742,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'google/gemini-2.5-flash', // Vercel AI Gateway
       'google/gemini-2.5-pro', // Vercel AI Gateway
       'anthropic/claude-sonnet-4.5', // Vercel AI Gateway
+      'anthropic/claude-sonnet-4-20250514', // Vercel AI Gateway — Claude 4 Sonnet
       'anthropic/claude-haiku-4.5', // Vercel AI Gateway
       'openai/gpt-5.2', // Vercel AI Gateway
       'openai/gpt-4o', // Vercel AI Gateway
@@ -783,6 +786,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // Anthropic premium models (legacy IDs)
       'claude-3-opus',
       'anthropic/claude-3-opus',
+      'anthropic/claude-opus-4-20250514', // Vercel AI Gateway — Claude 4 Opus
       // ============================================
       // Legacy Tier 3 Models
       // ============================================

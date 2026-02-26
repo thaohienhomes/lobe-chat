@@ -1,5 +1,24 @@
 // Logical model mapping service
 
+/**
+ * Model redirects for deprecated/sunset models.
+ * When a provider retires a model, add an entry here to transparently
+ * redirect users to the successor model.
+ */
+const MODEL_REDIRECTS: Record<string, string> = {
+
+
+  'claude-3-5-sonnet-20240620': 'claude-sonnet-4-20250514',
+
+
+  // Claude 3.5 Sonnet → Claude 4 Sonnet
+  'claude-3-5-sonnet-20241022': 'claude-sonnet-4-20250514',
+
+  // Claude 3.7 Sonnet → Claude 4 Sonnet (3.7 sunset by Anthropic)
+  'claude-3-7-sonnet-20250219': 'claude-sonnet-4-20250514',
+  'claude-3-7-sonnet-latest': 'claude-sonnet-4-20250514',
+};
+
 export interface LogicalModelConfig {
   id: string;
   providers: {
@@ -10,6 +29,30 @@ export interface LogicalModelConfig {
 
 class PhoGatewayService {
   private logicalModels: Record<string, LogicalModelConfig> = {
+
+    // ── New Open Models (Tier 1/2) ─────────────────────────────────────────
+    // These are exposed in the phochat picker via phochat.ts logical entries.
+    'gemma-3-27b-it': {
+      id: 'gemma-3-27b-it',
+      providers: [
+        { modelId: 'gemma-3-27b-it', provider: 'groq' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
+
+
+
+
+    'kimi-k2': {
+      id: 'kimi-k2',
+      providers: [
+        { modelId: 'moonshotai/Kimi-K2-Instruct', provider: 'togetherai' },
+        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
+
+
+
     // Legacy compatibility
     'llama-3.1-8b-instant': {
       id: 'llama-3.1-8b-instant',
@@ -20,6 +63,18 @@ class PhoGatewayService {
       ],
     },
 
+
+
+    'llama-4-scout-17b': {
+      id: 'llama-4-scout-17b',
+      providers: [
+        { modelId: 'meta-llama/llama-4-scout-17b-16e-instruct', provider: 'groq' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
+
+
+
     'pho-fast': {
       id: 'pho-fast',
       providers: [
@@ -28,6 +83,9 @@ class PhoGatewayService {
         { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' },
       ],
     },
+
+
+
 
     'pho-pro': {
       id: 'pho-pro',
@@ -49,33 +107,6 @@ class PhoGatewayService {
     'pho-vision': {
       id: 'pho-vision',
       providers: [{ modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }],
-    },
-
-    // ── New Open Models (Tier 1/2) ─────────────────────────────────────────
-    // These are exposed in the phochat picker via phochat.ts logical entries.
-
-    'gemma-3-27b-it': {
-      id: 'gemma-3-27b-it',
-      providers: [
-        { modelId: 'gemma-3-27b-it', provider: 'groq' },
-        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
-      ],
-    },
-
-    'llama-4-scout-17b': {
-      id: 'llama-4-scout-17b',
-      providers: [
-        { modelId: 'meta-llama/llama-4-scout-17b-16e-instruct', provider: 'groq' },
-        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
-      ],
-    },
-
-    'kimi-k2': {
-      id: 'kimi-k2',
-      providers: [
-        { modelId: 'moonshotai/Kimi-K2-Instruct', provider: 'togetherai' },
-        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // fallback
-      ],
     },
   };
 
@@ -150,6 +181,13 @@ class PhoGatewayService {
       return { modelId, provider: primary.provider };
     }
 
+    // ── 1.5. Deprecated model redirect ─────────────────────────
+    // If the model has been sunset, redirect to its successor
+    const resolvedModelId = MODEL_REDIRECTS[modelId] || modelId;
+    if (resolvedModelId !== modelId) {
+      console.log(`[Model Redirect] ${modelId} → ${resolvedModelId} (model sunset/deprecated)`);
+    }
+
     // ── 2. Disabled-provider remap ───────────────────────────────
     // Providers that are disabled as direct API connections
     // and should be routed through Vercel AI Gateway instead.
@@ -167,12 +205,12 @@ class PhoGatewayService {
       // e.g., gemini-2.5-flash → google/gemini-2.5-flash
       // For vertexai, remap to google/ prefix
       const gatewayPrefix = provider === 'vertexai' ? 'google' : provider;
-      const prefixedModelId = modelId.includes('/') ? modelId : `${gatewayPrefix}/${modelId}`;
+      const prefixedModelId = resolvedModelId.includes('/') ? resolvedModelId : `${gatewayPrefix}/${resolvedModelId}`;
 
       return { modelId: prefixedModelId, provider: 'vercelaigateway' };
     }
 
-    return { modelId, provider };
+    return { modelId: resolvedModelId, provider };
   }
 
   private mapToCloudflare(modelId: string): string {

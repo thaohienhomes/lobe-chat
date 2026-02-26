@@ -28,6 +28,26 @@ const VercelAIGateway: ModelProviderCard = {
       maxOutput: 8192,
       vision: true,
     },
+    {
+      contextWindowTokens: 200_000,
+      description: 'Claude 4 Sonnet - High-quality reasoning with excellent tool use',
+      displayName: 'Claude 4 Sonnet',
+      enabled: true,
+      functionCall: true,
+      id: 'anthropic/claude-sonnet-4-20250514',
+      maxOutput: 64_000,
+      vision: true,
+    },
+    {
+      contextWindowTokens: 200_000,
+      description: 'Claude 4 Opus - Most powerful Anthropic model for complex tasks',
+      displayName: 'Claude 4 Opus',
+      enabled: true,
+      functionCall: true,
+      id: 'anthropic/claude-opus-4-20250514',
+      maxOutput: 32_000,
+      vision: true,
+    },
     // --- Google Models ---
     {
       contextWindowTokens: 1_000_000,
