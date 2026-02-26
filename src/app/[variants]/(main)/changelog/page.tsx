@@ -1,10 +1,10 @@
 import { Divider, Skeleton } from 'antd';
+import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { Fragment, Suspense } from 'react';
 import { Flexbox } from 'react-layout-kit';
 import urlJoin from 'url-join';
 
-import UpdateChangelogStatus from '@/app/[variants]/@modal/(.)changelog/modal/features/UpdateChangelogStatus';
 import StructuredData from '@/components/StructuredData';
 import { serverFeatureFlags } from '@/config/featureFlags';
 import { BRANDING_NAME } from '@/const/branding';
@@ -18,6 +18,11 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 
 import GridLayout from './features/GridLayout';
 import Post from './features/Post';
+
+const UpdateChangelogStatus = dynamic(
+  () => import('@/app/[variants]/@modal/(.)changelog/modal/features/UpdateChangelogStatus'),
+  { ssr: false },
+);
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);

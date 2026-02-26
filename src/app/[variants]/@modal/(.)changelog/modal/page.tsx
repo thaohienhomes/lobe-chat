@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -7,8 +8,11 @@ import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
 import Post from './features/Post';
-import UpdateChangelogStatus from './features/UpdateChangelogStatus';
 import Loading from './loading';
+
+const UpdateChangelogStatus = dynamic(() => import('./features/UpdateChangelogStatus'), {
+  ssr: false,
+});
 
 const Page = async (props: DynamicLayoutProps) => {
   const hideDocs = serverFeatureFlags().hideDocs;

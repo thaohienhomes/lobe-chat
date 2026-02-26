@@ -339,7 +339,7 @@ const nextConfig: NextConfig = {
       '@shikijs/engine-oniguruma',
     ]
     : ['@xmldom/xmldom'],
-  transpilePackages: ['pdfjs-dist', 'mermaid', 'swr'],
+  transpilePackages: ['pdfjs-dist', 'mermaid'],
 
   typescript: {
     ignoreBuildErrors: true,
