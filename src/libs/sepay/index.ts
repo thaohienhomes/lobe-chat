@@ -306,7 +306,7 @@ export class SepayPaymentGateway {
 
         console.log('🌐 MOCK SEPAY: Using base URL:', baseUrl);
 
-        const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}`;
+        const mockPaymentUrl = `${baseUrl}/payment/waiting?orderId=${request.orderId}`;
 
         return {
           message: 'Payment created successfully (MOCK)',
@@ -357,7 +357,7 @@ export class SepayPaymentGateway {
       console.log('🌐 REAL SEPAY: Using base URL:', baseUrl);
 
       // Construct the payment URL with proper encoding
-      const paymentUrl = `${baseUrl}/en-US__0__light/payment/waiting?orderId=${request.orderId}`;
+      const paymentUrl = `${baseUrl}/payment/waiting?orderId=${request.orderId}`;
 
       console.log('🏦 REAL SEPAY: Payment created with QR code');
       console.log('Bank Account:', bankInfo.accountNumber);
@@ -435,7 +435,7 @@ export class SepayPaymentGateway {
 
         // Generate mock payment response
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3010';
-        const mockPaymentUrl = `${baseUrl}/en-US__0__light/payment/success?orderId=${request.orderId}&method=credit_card`;
+        const mockPaymentUrl = `${baseUrl}/payment/success?orderId=${request.orderId}&method=credit_card`;
 
         return {
           message: 'Credit card payment processed successfully (MOCK)',
