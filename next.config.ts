@@ -371,6 +371,16 @@ const nextConfig: NextConfig = {
 
     config.resolve.alias.canvas = false;
 
+    // Fix SWR react-server export stripping useSWR/mutate
+    // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
+    // which causes "does not contain a default export" errors during build.
+    // Force all SWR imports to resolve to the full client entry.
+    const path = require('node:path');
+    config.resolve.alias['swr'] = path.resolve(
+      __dirname,
+      'node_modules/swr/dist/index/index.mjs',
+    );
+
     // to ignore epub2 compile error
     // refs: https://github.com/lobehub/lobe-chat/discussions/6769
     config.resolve.fallback = {

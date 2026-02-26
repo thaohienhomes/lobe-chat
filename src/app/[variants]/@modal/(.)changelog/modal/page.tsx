@@ -10,6 +10,8 @@ import Post from './features/Post';
 import { UpdateChangelogStatusWrapper as UpdateChangelogStatus } from './features/UpdateChangelogStatusWrapper';
 import Loading from './loading';
 
+export const dynamic = 'force-dynamic';
+
 const Page = async (props: DynamicLayoutProps) => {
   const hideDocs = serverFeatureFlags().hideDocs;
   if (hideDocs) return notFound();
