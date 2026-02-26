@@ -11,6 +11,7 @@ const PHO_CHAT_FUNCTION_CALL_MODELS = new Set([
   'gemma-3-27b-it',
   'llama-4-scout-17b',
   'kimi-k2',
+  'mercury-coder-small-2-2',
 ]);
 
 const aiProviderChatModelListIds = (s: AIProviderStoreState) =>
