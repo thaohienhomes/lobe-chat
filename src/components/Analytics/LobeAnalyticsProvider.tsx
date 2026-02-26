@@ -70,7 +70,11 @@ export const LobeAnalyticsProvider = memo(
             });
 
             // Register as super property (event property)
+            const isZaloBrowser =
+              typeof navigator !== 'undefined' && /zalo/i.test(navigator.userAgent);
+
             posthog.register({
+              ...(isZaloBrowser && { browser_app: 'zalo' }),
               environment,
               platform: isDesktop ? 'desktop' : 'web',
             });

@@ -2,7 +2,7 @@
 
 import { Button, FluentEmoji } from '@lobehub/ui';
 import Link from 'next/link';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
@@ -15,7 +15,33 @@ interface ErrorCaptureProps {
   reset: () => void;
 }
 
-const ErrorCapture = memo<ErrorCaptureProps>(({ reset }) => {
+const ErrorCapture = memo<ErrorCaptureProps>(({ error, reset }) => {
+  // Priority 2: Auto-recover from ChunkLoadError (stale Vercel deployments)
+  useEffect(() => {
+    if (error?.name === 'ChunkLoadError' && typeof window !== 'undefined') {
+      const key = `chunk-reload-${error.message?.slice(0, 80)}`;
+      let alreadyReloaded = false;
+      try {
+        alreadyReloaded = !!sessionStorage.getItem(key);
+      } catch {
+        // Safari private browsing may restrict sessionStorage
+      }
+      if (!alreadyReloaded) {
+        try {
+          sessionStorage.setItem(key, '1');
+        } catch {
+          // Fall through to reload anyway
+        }
+        window.location.reload();
+      } else {
+        // Auto-reload already attempted — track unrecovered error for alerting
+        (window as any).posthog?.capture('chunk_load_error_unrecovered', {
+          error_message: error.message,
+          url: window.location.href,
+        });
+      }
+    }
+  }, [error]);
   const { t } = useTranslation('error');
 
   return (

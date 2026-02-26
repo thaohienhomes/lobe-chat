@@ -45,6 +45,22 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
   return (
     <html dir={direction} lang={locale}>
       <head>
+        {/* === PostHog Error Fixes (Feb 2026) === */}
+        {/* Priority 1: Stub zaloJSV2 for Zalo in-app browser (252 errors) */}
+        {/* Priority 4: Suppress benign ResizeObserver loop warnings (15 errors) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+if(typeof window!=='undefined'){
+  if(!window.zaloJSV2)window.zaloJSV2={};
+  var _origOnErr=window.onerror;
+  window.onerror=function(m){
+    if(typeof m==='string'&&m.indexOf('ResizeObserver')!==-1)return true;
+    return _origOnErr?_origOnErr.apply(window,arguments):false;
+  };
+}`,
+          }}
+        />
         {/* Google Site Verification */}
         <meta content="PLACEHOLDER_REPLACE_WITH_ACTUAL_CODE" name="google-site-verification" />
         {process.env.DEBUG_REACT_SCAN === '1' && (
