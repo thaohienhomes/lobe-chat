@@ -36,11 +36,14 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, ...rest }) => {
     const getChatModels = (provider: EnabledProviderWithModels) =>
       provider.children
         .filter((model) => !!model.abilities.functionCall)
-        .map((model) => ({
-          label: <ModelItemRender {...model} {...model.abilities} showInfoTag={false} />,
-          provider: provider.id,
-          value: `${provider.id}/${model.id}`,
-        }));
+        .map((model) => {
+          const modelProvider = (model as any).originProvider || provider.id;
+          return {
+            label: <ModelItemRender {...model} {...model.abilities} showInfoTag={false} />,
+            provider: modelProvider,
+            value: `${modelProvider}/${model.id}`,
+          };
+        });
 
     if (enabledList.length === 1) {
       const provider = enabledList[0];

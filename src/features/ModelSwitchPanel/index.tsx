@@ -1,7 +1,7 @@
 import { Icon } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import type { ItemType } from 'antd/es/menu/interface';
-import { ArrowUpRight, Lock, LucideArrowRight, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Lock, LucideArrowRight, Sparkles, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, memo, useCallback, useEffect, useMemo, useState } from 'react';
@@ -12,12 +12,24 @@ import { ModelItemRender } from '@/components/ModelSelect';
 import { getModelTier } from '@/config/pricing';
 import { isDeprecatedEdition } from '@/const/version';
 import ActionDropdown from '@/features/ChatInput/ActionBar/components/ActionDropdown';
-import { useEnabledChatModels } from '@/hooks/useEnabledChatModels';
+import {
+  MODEL_DESCRIPTIONS,
+  NEW_MODEL_IDS,
+  SPEED_MODELS,
+  type TierGroup,
+  useEnabledChatModels,
+} from '@/hooks/useEnabledChatModels';
 import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
 import { useUserStore } from '@/store/user';
-import { EnabledProviderWithModels } from '@/types/aiProvider';
+
+// ── Tier-aware styling ─────────────────────────────────────────────────────
+const TIER_CONFIG = {
+  1: { accent: '#22c55e', icon: '⚡', quotaKey: null },
+  2: { accent: '#a78bfa', icon: '🔮', quotaKey: '20' },
+  3: { accent: '#f59e0b', icon: '👑', quotaKey: '5' },
+} as const;
 
 const useStyles = createStyles(({ css, prefixCls, token }) => ({
   disabledItem: css`
@@ -27,24 +39,6 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
     &:hover {
       background: transparent !important;
     }
-  `,
-  groupDivider: css`
-    margin-block: 4px;
-    border-block-start: 1px solid ${token.colorBorderSecondary};
-  `,
-  groupHeader: css`
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    padding-block: 6px;
-    padding-inline: 8px;
-
-    font-size: 11px;
-    font-weight: 600;
-    color: ${token.colorTextSecondary};
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   `,
   menu: css`
     .${prefixCls}-dropdown-menu-item {
@@ -60,6 +54,79 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
         margin: 0 !important;
       }
     }
+  `,
+  modelSub: css`
+    font-size: 11px;
+    line-height: 1.2;
+    color: ${token.colorTextQuaternary};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+  `,
+  newBadge: css`
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    line-height: 1.5;
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    animation: pulseBadge 2s infinite;
+    flex-shrink: 0;
+
+    @keyframes pulseBadge {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+  `,
+  sectionHeader: css`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding-block: 8px;
+    padding-inline: 8px;
+
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  `,
+  sectionQuota: css`
+    margin-inline-start: auto;
+    font-size: 9px;
+    font-weight: 400;
+    text-transform: none;
+    color: ${token.colorTextQuaternary};
+  `,
+  selectedIndicator: css`
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 4px;
+    inset-block-end: 4px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+  `,
+  speedBadge: css`
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #eab308, #f97316);
+    color: #000;
+    flex-shrink: 0;
   `,
   tag: css`
     cursor: pointer;
@@ -82,13 +149,12 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
 
     &:hover {
       border-color: rgba(255, 64, 129, 50%);
-      background: linear-gradient(135deg, rgba(255, 64, 129, 30%) 0%, rgba(156, 39, 176, 30%) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(255, 64, 129, 30%) 0%,
+        rgba(156, 39, 176, 30%) 100%
+      );
     }
-  `,
-  upgradeBannerWrapper: css`
-    padding-block: 8px;
-    padding-inline: 12px;
-    border-block-end: 1px solid rgba(255, 255, 255, 10%);
   `,
   upgradeButton: css`
     cursor: pointer;
@@ -178,7 +244,6 @@ const useModelAccess = () => {
 
   const canUseModel = useCallback(
     (modelId: string) => {
-      // Auto selection should be available for everyone
       if (modelId.toLowerCase().includes('auto')) {
         return true;
       }
@@ -211,7 +276,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
     s.updateAgentConfig,
   ]);
   const router = useRouter();
-  const enabledList = useEnabledChatModels();
+  const enabledList = useEnabledChatModels() as TierGroup[];
   const { canUseModel, needsUpgrade } = useModelAccess();
   const { isVietnam } = usePricingGeo();
   const subscriptionPlan = useUserStore((s) => s.subscriptionPlan);
@@ -226,7 +291,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
   const items = useMemo<ItemType[]>(() => {
     const result: ItemType[] = [];
 
-    // Add upgrade banner as first item if user needs upgrade and is on free plan
+    // ── Upgrade banner (for free users) ──────────────────────────────
     if (shouldShowUpgradeBanner) {
       const upgradePrice = isVietnam ? '69K' : '$9.99';
       const upgradeUnit = isVietnam ? '/tháng' : '/mo';
@@ -273,14 +338,22 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
       );
     }
 
-    const getModelItems = (providerItem: EnabledProviderWithModels) => {
-      const items = providerItem.children.map((modelItem) => {
+    // ── Build model items per tier group ──────────────────────────────
+    const getModelItems = (tierGroupItem: TierGroup) => {
+      return tierGroupItem.children.map((modelItem) => {
         const canAccess = canUseModel(modelItem.id);
+        const isNew = NEW_MODEL_IDS.has(modelItem.id);
+        const speedLabel = SPEED_MODELS[modelItem.id];
+        const description = MODEL_DESCRIPTIONS[modelItem.id];
+        // Use originProvider for correct routing, fall back to group id
+        const modelProvider = (modelItem as any).originProvider || tierGroupItem.id;
+        const tierNum = tierGroupItem.tierGroup || 1;
+        const tierAccent = TIER_CONFIG[tierNum as 1 | 2 | 3]?.accent || '#22c55e';
 
         return {
           className: canAccess ? undefined : styles.disabledItem,
           disabled: !canAccess,
-          key: menuKey(providerItem.id, modelItem.id),
+          key: menuKey(modelProvider, modelItem.id),
           label: (
             <Flexbox
               align="center"
@@ -288,9 +361,31 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
               horizontal
               style={{
                 filter: canAccess ? 'none' : 'grayscale(1)',
+                position: 'relative',
               }}
             >
-              <ModelItemRender {...modelItem} {...modelItem.abilities} isLocked={!canAccess} />
+              {/* Selected indicator bar */}
+              {model === modelItem.id && (
+                <div
+                  className={styles.selectedIndicator}
+                  style={{ background: tierAccent }}
+                />
+              )}
+              {/* Model name + info */}
+              <Flexbox style={{ flex: 1, minWidth: 0 }}>
+                <Flexbox align="center" gap={5} horizontal>
+                  <ModelItemRender {...modelItem} {...modelItem.abilities} isLocked={!canAccess} />
+                  {speedLabel && (
+                    <span className={styles.speedBadge}>
+                      <Zap size={8} /> {speedLabel}
+                    </span>
+                  )}
+                  {isNew && (
+                    <span className={styles.newBadge}>{t('ModelSwitchPanel.newBadge')}</span>
+                  )}
+                </Flexbox>
+                {description && <div className={styles.modelSub}>{description}</div>}
+              </Flexbox>
               {!canAccess && (
                 <Lock
                   size={14}
@@ -305,40 +400,17 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
           ),
           onClick: canAccess
             ? async () => {
-              await updateAgentConfig({ model: modelItem.id, provider: providerItem.id });
+              await updateAgentConfig({ model: modelItem.id, provider: modelProvider });
             }
             : (e: any) => {
-              // Block click for disabled items
               e?.preventDefault?.();
               e?.stopPropagation?.();
             },
         };
       });
-
-      // if there is empty items, add a placeholder guide
-      if (items.length === 0)
-        return [
-          {
-            key: `${providerItem.id}-empty`,
-            label: (
-              <Flexbox gap={8} horizontal style={{ color: theme.colorTextTertiary }}>
-                {t('ModelSwitchPanel.emptyModel')}
-                <Icon icon={LucideArrowRight} />
-              </Flexbox>
-            ),
-            onClick: () => {
-              router.push(
-                isDeprecatedEdition
-                  ? '/settings?active=llm'
-                  : `/settings?active=provider&provider=${providerItem.id}`,
-              );
-            },
-          },
-        ];
-
-      return items;
     };
 
+    // ── Empty state ──────────────────────────────────────────────────
     if (enabledList.length === 0) {
       result.push({
         key: `no-provider`,
@@ -355,25 +427,38 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
       return result;
     }
 
-    // Add items with provider group headers for visual hierarchy
-    enabledList.forEach((providerItem, index) => {
-      // Add divider between groups (not before first)
+    // ── Render tier sections with headers ─────────────────────────────
+    enabledList.forEach((tierGroup, index) => {
+      // Divider between sections
       if (index > 0) {
         result.push({
-          key: `divider-${providerItem.id}`,
+          key: `divider-${tierGroup.id}`,
           type: 'divider' as const,
         });
       }
 
-      // Group header label
-      const groupIcon = providerItem.id === 'phochat' ? '🍜' : '⭐';
+      const tierNum = tierGroup.tierGroup || 1;
+      const tierCfg = TIER_CONFIG[tierNum as 1 | 2 | 3] || TIER_CONFIG[1];
+      const tierLabel =
+        tierNum === 1
+          ? t('ModelSwitchPanel.tierFree')
+          : tierNum === 2
+            ? t('ModelSwitchPanel.tierPro')
+            : t('ModelSwitchPanel.tierFlagship');
+
+      // Section header
       result.push({
         disabled: true,
-        key: `header-${providerItem.id}`,
+        key: `header-${tierGroup.id}`,
         label: (
-          <div className={styles.groupHeader}>
-            <span>{groupIcon}</span>
-            <span>{providerItem.name}</span>
+          <div className={styles.sectionHeader} style={{ color: tierCfg.accent }}>
+            <span>{tierCfg.icon}</span>
+            <span>{tierLabel}</span>
+            {tierCfg.quotaKey && (
+              <span className={styles.sectionQuota}>
+                {`${tierCfg.quotaKey} lượt/ngày`}
+              </span>
+            )}
           </div>
         ),
         style: {
@@ -384,21 +469,41 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
         },
       });
 
-      result.push(...getModelItems(providerItem));
+      // Model items
+      const modelItems = getModelItems(tierGroup);
+      if (modelItems.length === 0) {
+        result.push({
+          key: `${tierGroup.id}-empty`,
+          label: (
+            <Flexbox gap={8} horizontal style={{ color: theme.colorTextTertiary }}>
+              {t('ModelSwitchPanel.emptyModel')}
+              <Icon icon={LucideArrowRight} />
+            </Flexbox>
+          ),
+          onClick: () => {
+            router.push(
+              isDeprecatedEdition
+                ? '/settings?active=llm'
+                : `/settings?active=provider`,
+            );
+          },
+        });
+      } else {
+        result.push(...modelItems);
+      }
     });
 
     return result;
   }, [
     enabledList,
     canUseModel,
+    model,
     needsUpgrade,
     isVietnam,
-    styles.disabledItem,
-    styles.upgradeBanner,
-    styles.upgradeText,
-    styles.upgradePrice,
-    styles.upgradePriceUnit,
-    styles.upgradeButton,
+    shouldShowUpgradeBanner,
+    styles,
+    theme,
+    t,
   ]);
 
   const icon = <div className={styles.tag}>{children}</div>;
@@ -410,7 +515,6 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
         activeKey: menuKey(provider, model),
         className: styles.menu,
         items,
-        // 不加限高就会导致面板超长，顶部的内容会被隐藏
         style: {
           maxHeight: 550,
           overflowY: 'scroll',

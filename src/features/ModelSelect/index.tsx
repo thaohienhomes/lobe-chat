@@ -253,6 +253,8 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = tru
     const getChatModels = (provider: EnabledProviderWithModels) =>
       provider.children.map((model) => {
         const canAccess = canUseModel(model.id);
+        // Use originProvider if available (tier-grouped data), else fall back to provider.id
+        const modelProvider = (model as any).originProvider || provider.id;
 
         return {
           disabled: !canAccess,
@@ -264,8 +266,8 @@ const ModelSelect = memo<ModelSelectProps>(({ value, onChange, showAbility = tru
               showInfoTag={showAbility}
             />
           ),
-          provider: provider.id,
-          value: `${provider.id}/${model.id}`,
+          provider: modelProvider,
+          value: `${modelProvider}/${model.id}`,
         };
       });
 

@@ -125,7 +125,13 @@ export default {
     emptyModel: '没有启用的模型，请前往设置开启',
     emptyProvider: '没有启用的服务商，请前往设置开启',
     goToSettings: '前往设置',
+    newBadge: 'MỚI',
     provider: '服务商',
+    quotaHint: '{{count}} lượt/ngày',
+    searchPlaceholder: 'Tìm model...',
+    tierFlagship: 'Flagship',
+    tierFree: 'Nhanh & Miễn Phí',
+    tierPro: 'Chuyên Nghiệp',
     title: '模型',
   },
   MultiImagesUpload: {
