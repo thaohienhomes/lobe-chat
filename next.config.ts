@@ -376,7 +376,7 @@ const nextConfig: NextConfig = {
     // which causes "does not contain a default export" errors during build.
     // Force all SWR imports to resolve to the full client entry.
     const path = require('node:path');
-    config.resolve.alias['swr'] = path.resolve(
+    config.resolve.alias['swr$'] = path.resolve(
       __dirname,
       'node_modules/swr/dist/index/index.mjs',
     );
