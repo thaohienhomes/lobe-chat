@@ -1,6 +1,6 @@
 import { ModelIcon } from '@lobehub/icons';
-import { createStyles } from 'antd-style';
-import { Search } from 'lucide-react';
+import { createStyles, useThemeMode } from 'antd-style';
+import { Plug, Search, Eye } from 'lucide-react';
 import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getModelTier } from '@/config/pricing';
@@ -14,7 +14,7 @@ import {
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
 
-/* ──────────── Tier config ──────────── */
+/* ──────────── Tier palette ──────────── */
 const TIER = {
   1: { accent: '#22c55e', icon: '⚡', label: 'Nhanh & Miễn Phí', quota: '' },
   2: { accent: '#a78bfa', icon: '🔮', label: 'Chuyên Nghiệp', quota: '20 lượt/ngày' },
@@ -35,138 +35,382 @@ const useModelAccess = () => {
       } catch { /* default [1] */ }
     })();
   }, []);
-  const canUse = useCallback(
+  return useCallback(
     (id: string) => allowed.includes(id.toLowerCase().includes('auto') ? 2 : getModelTier(id)),
     [allowed],
   );
-  return canUse;
 };
 
 /* ──────────── Helpers ──────────── */
-const ctxLabel = (n?: number) => (!n ? '' : n >= 1e6 ? `${Math.round(n / 1e6)}M` : `${Math.round(n / 1e3)}K`);
-const iconBg = (tier: number) =>
-  tier === 1 ? 'rgba(34,197,94,0.12)' : tier === 2 ? 'rgba(139,92,246,0.12)' : 'rgba(245,158,11,0.12)';
+const ctxLabel = (n?: number) =>
+  !n ? '' : n >= 1e6 ? `${Math.round(n / 1e6)}M` : `${Math.round(n / 1e3)}K`;
 
-/* Badge for tier */
-const tierBadge = (tier: number) => {
-  if (tier === 1)
-    return <span style={{ background: 'rgba(34,197,94,0.15)', borderRadius: 4, color: '#4ade80', fontSize: 9, fontWeight: 700, letterSpacing: 0.3, padding: '2px 7px' }}>FREE</span>;
-  if (tier === 2)
-    return <span style={{ background: 'rgba(168,85,247,0.2)', borderRadius: 4, color: '#c084fc', fontSize: 9, fontWeight: 700, letterSpacing: 0.3, padding: '2px 7px' }}>PRO</span>;
-  return <span style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.2),rgba(239,68,68,0.15))', borderRadius: 4, color: '#fbbf24', fontSize: 9, fontWeight: 700, letterSpacing: 0.3, padding: '2px 7px' }}>MAX</span>;
+const iconBg = (tier: number, isDark: boolean) => {
+  if (isDark) {
+    return tier === 1 ? 'rgba(34,197,94,0.12)' : tier === 2 ? 'rgba(139,92,246,0.12)' : 'rgba(245,158,11,0.12)';
+  }
+  return tier === 1 ? 'rgba(34,197,94,0.08)' : tier === 2 ? 'rgba(139,92,246,0.08)' : 'rgba(245,158,11,0.08)';
 };
 
 /* ──────────── Styles ──────────── */
-const useStyles = createStyles(({ css, token }) => ({
-  backdrop: css`position:fixed;inset:0;z-index:1000;`,
-  capIcon: css`
-    width:18px; height:18px; border-radius:4px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:10px;
-    background: rgba(139,92,246,0.1);
-    color: rgba(168,85,247,0.7);
-  `,
-  capIconInactive: css`
-    background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.3);
-  `,
-  ctx: css`
-    font-size:10px; color:rgba(255,255,255,0.2); font-weight:500;
-    min-width:30px; text-align:right; flex-shrink:0;
-  `,
-  dot: css`width:6px;height:6px;border-radius:50%;flex-shrink:0;`,
-  footer: css`
-    padding:10px 16px;
-    border-top:1px solid ${token.colorBorderSecondary};
-    display:flex; justify-content:space-between; align-items:center;
-  `,
-  footerLink: css`font-size:11px;color:rgba(139,92,246,0.6);cursor:pointer;&:hover{color:#a78bfa;}`,
-  modelIcon: css`
-    width:32px; height:32px; border-radius:8px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:16px; flex-shrink:0;
-  `,
-  modelName: css`
-    font-size:13px; font-weight:600; color:${token.colorText};
-    display:flex; align-items:center; gap:6px; line-height:1.3;
-  `,
-  modelRow: css`
-    display:flex; align-items:center; gap:10px;
-    padding:9px 16px; cursor:pointer; position:relative;
-    transition:background 0.15s;
-    &:hover { background:rgba(255,255,255,0.04); }
-  `,
-  modelRowDisabled: css`
-    pointer-events:none; cursor:not-allowed;
-    filter:grayscale(1); opacity:0.45;
-  `,
-  modelSub: css`
-    font-size:11px; color:rgba(255,255,255,0.35); margin-top:1px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  `,
-  newBadge: css`
-    display:inline-flex; padding:2px 7px; border-radius:4px;
-    font-size:9px; font-weight:700; letter-spacing:0.3px;
-    background:rgba(239,68,68,0.15); color:#f87171;
-    animation:pk 2s infinite;
-    @keyframes pk{0%,100%{opacity:1}50%{opacity:0.6}}
-  `,
-  panel: css`
-    position:fixed; z-index:1001; width:380px; max-height:540px;
-    background: ${token.colorBgElevated};
-    border:1px solid ${token.colorBorderSecondary};
-    border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.5);
-    display:flex; flex-direction:column; overflow:hidden;
-    animation: slideUp 0.18s ease-out;
-    @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  `,
-  scroll: css`
-    flex:1; overflow-y:auto; overflow-x:hidden;
-    &::-webkit-scrollbar{width:4px}
-    &::-webkit-scrollbar-thumb{background:${token.colorTextQuaternary};border-radius:2px}
-  `,
-  search: css`
-    padding:12px 16px; border-bottom:1px solid ${token.colorBorderSecondary};
-    position:relative;
-  `,
-  searchIcon: css`
-    position:absolute; left:28px; top:50%; transform:translateY(-50%);
-    color:${token.colorTextQuaternary}; pointer-events:none;
-  `,
-  searchInput: css`
-    width:100%; padding:10px 14px 10px 38px;
-    background:${token.colorFillTertiary};
-    border:1px solid ${token.colorBorderSecondary};
-    border-radius:10px; color:${token.colorText};
-    font-size:13px; font-family:inherit; outline:none;
-    &::placeholder{color:${token.colorTextQuaternary}}
-    &:focus{border-color:rgba(139,92,246,0.4)}
-  `,
-  section: css`padding:6px 0;&+&{border-top:1px solid ${token.colorBorderSecondary}}`,
-  sectionHeader: css`
-    display:flex; align-items:center; gap:6px;
-    padding:10px 16px 6px; font-size:11px; font-weight:700;
-    text-transform:uppercase; letter-spacing:0.8px;
-  `,
-  selected: css`background:rgba(139,92,246,0.08);`,
-  selectedBar: css`
-    position:absolute; left:0; top:4px; bottom:4px; width:3px;
-    border-radius:0 3px 3px 0;
-  `,
-  speedBadge: css`
-    display:inline-flex; align-items:center; gap:2px;
-    padding:2px 6px; border-radius:4px; font-size:8px; font-weight:700;
-    background:linear-gradient(135deg,#eab308,#f97316); color:#000;
-  `,
-  speedBar: css`height:3px;border-radius:2px;flex-shrink:0;`,
-  speedLabel: css`font-size:9px;color:rgba(255,255,255,0.25);`,
-  tierLegend: css`
-    display:flex;gap:10px;font-size:10px;color:rgba(255,255,255,0.3);
-    &>span{display:flex;align-items:center;gap:3px}
-  `,
-  trigger: css`cursor:pointer;`,
-}));
+const useStyles = createStyles(({ css, token, isDarkMode }) => {
+  const isDark = isDarkMode;
+  const mutedText = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)';
+  const subtleText = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)';
+  const hoverBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+  const selectedBg = isDark ? 'rgba(139,92,246,0.1)' : 'rgba(139,92,246,0.06)';
+  const panelShadow = isDark
+    ? '0 20px 60px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,0.08)'
+    : '0 12px 48px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.1)';
+  const capBg = isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.08)';
+  const capColor = isDark ? 'rgba(167,139,250,0.8)' : 'rgba(139,92,246,0.7)';
+
+  return {
+    backdrop: css`
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+    `,
+
+    capIcon: css`
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: ${capBg};
+      color: ${capColor};
+    `,
+
+    ctx: css`
+      font-size: 10px;
+      color: ${subtleText};
+      font-weight: 500;
+      min-width: 30px;
+      text-align: right;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    `,
+
+    dot: css`
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    `,
+
+    empty: css`
+      padding: 28px 16px;
+      text-align: center;
+      font-size: 13px;
+      color: ${mutedText};
+    `,
+
+    footer: css`
+      padding: 10px 16px;
+      border-top: 1px solid ${token.colorBorderSecondary};
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    `,
+
+    footerLink: css`
+      font-size: 11px;
+      font-weight: 500;
+      color: ${isDark ? 'rgba(167,139,250,0.7)' : '#7c3aed'};
+      cursor: pointer;
+      transition: color 0.2s;
+
+      &:hover {
+        color: ${isDark ? '#c4b5fd' : '#6d28d9'};
+      }
+    `,
+
+    modelIcon: css`
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    `,
+
+    modelName: css`
+      font-size: 13px;
+      font-weight: 600;
+      color: ${token.colorText};
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.3;
+    `,
+
+    modelRow: css`
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: ${hoverBg};
+      }
+
+      &:active {
+        background: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'};
+      }
+    `,
+
+    modelRowDisabled: css`
+      pointer-events: none;
+      cursor: not-allowed;
+      filter: grayscale(0.8);
+      opacity: 0.4;
+    `,
+
+    modelSub: css`
+      font-size: 11px;
+      color: ${mutedText};
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `,
+
+    newBadge: css`
+      display: inline-flex;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: ${isDark ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.1)'};
+      color: ${isDark ? '#f87171' : '#dc2626'};
+      animation: moi-pulse 2s ease-in-out infinite;
+
+      @keyframes moi-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.55; }
+      }
+    `,
+
+    panel: css`
+      position: fixed;
+      z-index: 1001;
+      width: 380px;
+      max-height: 540px;
+      background: ${token.colorBgElevated};
+      border: 1px solid ${token.colorBorderSecondary};
+      border-radius: 16px;
+      box-shadow: ${panelShadow};
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: panel-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      @keyframes panel-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+    `,
+
+    scroll: css`
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      &::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'};
+        border-radius: 4px;
+
+        &:hover {
+          background: ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)'};
+        }
+      }
+    `,
+
+    search: css`
+      padding: 12px 16px;
+      border-bottom: 1px solid ${token.colorBorderSecondary};
+      position: relative;
+    `,
+
+    searchIcon: css`
+      position: absolute;
+      left: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: ${token.colorTextQuaternary};
+      pointer-events: none;
+    `,
+
+    searchInput: css`
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      background: ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'};
+      border: 1px solid ${token.colorBorderSecondary};
+      border-radius: 10px;
+      color: ${token.colorText};
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+      &::placeholder {
+        color: ${token.colorTextQuaternary};
+      }
+
+      &:focus {
+        border-color: ${isDark ? 'rgba(139,92,246,0.5)' : 'rgba(139,92,246,0.4)'};
+        box-shadow: 0 0 0 3px ${isDark ? 'rgba(139,92,246,0.1)' : 'rgba(139,92,246,0.08)'};
+      }
+    `,
+
+    section: css`
+      padding: 4px 0;
+
+      & + & {
+        border-top: 1px solid ${token.colorBorderSecondary};
+      }
+    `,
+
+    sectionHeader: css`
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    `,
+
+    selected: css`
+      background: ${selectedBg};
+    `,
+
+    selectedBar: css`
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+    `,
+
+    speedBadge: css`
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 8px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #eab308, #f97316);
+      color: #000;
+    `,
+
+    speedBar: css`
+      height: 3px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    `,
+
+    speedLabel: css`
+      font-size: 9px;
+      color: ${subtleText};
+    `,
+
+    tierLegend: css`
+      display: flex;
+      gap: 10px;
+      font-size: 10px;
+      color: ${mutedText};
+
+      & > span {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+    `,
+
+    trigger: css`
+      cursor: pointer;
+    `,
+  };
+});
+
+/* ──────────── Tier badges (theme-aware) ──────────── */
+const TierBadge = memo<{ isDark: boolean; tier: number }>(({ tier, isDark }) => {
+  if (tier === 1)
+    return (
+      <span
+        style={{
+          background: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)',
+          borderRadius: 4,
+          color: isDark ? '#4ade80' : '#16a34a',
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: 0.3,
+          padding: '2px 7px',
+        }}
+      >
+        FREE
+      </span>
+    );
+  if (tier === 2)
+    return (
+      <span
+        style={{
+          background: isDark ? 'rgba(168,85,247,0.2)' : 'rgba(139,92,246,0.12)',
+          borderRadius: 4,
+          color: isDark ? '#c084fc' : '#7c3aed',
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: 0.3,
+          padding: '2px 7px',
+        }}
+      >
+        PRO
+      </span>
+    );
+  return (
+    <span
+      style={{
+        background: isDark
+          ? 'linear-gradient(135deg,rgba(245,158,11,0.2),rgba(239,68,68,0.15))'
+          : 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.1))',
+        borderRadius: 4,
+        color: isDark ? '#fbbf24' : '#d97706',
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: 0.3,
+        padding: '2px 7px',
+      }}
+    >
+      MAX
+    </span>
+  );
+});
 
 /* ──────────── Component ──────────── */
 interface IProps {
@@ -178,6 +422,7 @@ interface IProps {
 
 const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }) => {
   const { styles, cx } = useStyles();
+  const { isDarkMode: isDark } = useThemeMode();
   const model = useAgentStore((s) => agentSelectors.currentAgentModel(s));
   const updateAgentConfig = useAgentStore((s) => s.updateAgentConfig);
   const tiers = useEnabledChatModels() as TierGroup[];
@@ -188,7 +433,14 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
   /* ── internal open state ── */
   const [intOpen, setIntOpen] = useState(false);
   const isOpen = extOpen ?? intOpen;
-  const setOpen = useCallback((v: boolean) => { setIntOpen(v); onOpenChange?.(v); if (!v) setQ(''); }, [onOpenChange]);
+  const setOpen = useCallback(
+    (v: boolean) => {
+      setIntOpen(v);
+      onOpenChange?.(v);
+      if (!v) setQ('');
+    },
+    [onOpenChange],
+  );
 
   /* ── position ── */
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -210,18 +462,25 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
       .map((t) => ({
         ...t,
         children: t.children.filter(
-          (m) => m.id.toLowerCase().includes(s) || m.displayName.toLowerCase().includes(s) || (MODEL_DESCRIPTIONS[m.id] || '').toLowerCase().includes(s),
+          (m) =>
+            m.id.toLowerCase().includes(s) ||
+            m.displayName.toLowerCase().includes(s) ||
+            (MODEL_DESCRIPTIONS[m.id] || '').toLowerCase().includes(s),
         ),
       }))
       .filter((t) => t.children.length > 0);
   }, [tiers, q]);
 
   const onSelect = useCallback(
-    async (id: string, prov: string) => { await updateAgentConfig({ model: id, provider: prov }); setOpen(false); },
+    async (id: string, prov: string) => {
+      await updateAgentConfig({ model: id, provider: prov });
+      setOpen(false);
+    },
     [updateAgentConfig, setOpen],
   );
 
-
+  /* ── quota hint color ── */
+  const quotaColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.3)';
 
   return (
     <>
@@ -258,7 +517,15 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                       <span style={{ fontSize: 13 }}>{cfg.icon}</span>
                       {cfg.label}
                       {cfg.quota && (
-                        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 9, fontWeight: 400, marginLeft: 'auto', textTransform: 'none' }}>
+                        <span
+                          style={{
+                            color: quotaColor,
+                            fontSize: 9,
+                            fontWeight: 400,
+                            marginLeft: 'auto',
+                            textTransform: 'none',
+                          }}
+                        >
                           {cfg.quota}
                         </span>
                       )}
@@ -277,41 +544,91 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
 
                       return (
                         <div
-                          className={cx(styles.modelRow, sel && styles.selected, !ok && styles.modelRowDisabled)}
+                          className={cx(
+                            styles.modelRow,
+                            sel && styles.selected,
+                            !ok && styles.modelRowDisabled,
+                          )}
                           key={m.id}
                           onClick={ok ? () => onSelect(m.id, prov) : undefined}
                         >
-                          {/* Selected bar */}
-                          {sel && <div className={styles.selectedBar} style={{ background: cfg.accent }} />}
+                          {/* Selected accent bar */}
+                          {sel && (
+                            <div
+                              className={styles.selectedBar}
+                              style={{ background: cfg.accent }}
+                            />
+                          )}
 
-                          {/* Icon */}
-                          <div className={styles.modelIcon} style={{ background: speed ? 'linear-gradient(135deg,rgba(250,204,21,0.15),rgba(251,146,60,0.12))' : iconBg(t) }}>
+                          {/* Model icon */}
+                          <div
+                            className={styles.modelIcon}
+                            style={{
+                              background: speed
+                                ? isDark
+                                  ? 'linear-gradient(135deg,rgba(250,204,21,0.15),rgba(251,146,60,0.12))'
+                                  : 'linear-gradient(135deg,rgba(250,204,21,0.12),rgba(251,146,60,0.08))'
+                                : iconBg(t, isDark),
+                            }}
+                          >
                             <ModelIcon model={m.id} size={18} />
                           </div>
 
-                          {/* Info */}
+                          {/* Model info */}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div className={styles.modelName}>
                               {m.displayName}
-                              {mTier > 1 && tierBadge(mTier)}
-                              {speed && <span className={styles.speedBadge}>⚡ {speed} tok/s</span>}
+                              {mTier > 1 && <TierBadge isDark={isDark} tier={mTier} />}
+                              {speed && (
+                                <span className={styles.speedBadge}>⚡ {speed} tok/s</span>
+                              )}
                               {isNew && <span className={styles.newBadge}>MỚI</span>}
                             </div>
-                            {/* Subtitle or speed bar */}
+                            {/* Subtitle or speed indicator */}
                             {speed ? (
-                              <div style={{ alignItems: 'center', display: 'flex', gap: 3, marginTop: 2 }}>
-                                <div className={styles.speedBar} style={{ background: 'linear-gradient(90deg,#eab308,#f97316)', width: 36 }} />
-                                <span className={styles.speedLabel}>{desc || 'Instant generation'}</span>
+                              <div
+                                style={{
+                                  alignItems: 'center',
+                                  display: 'flex',
+                                  gap: 4,
+                                  marginTop: 3,
+                                }}
+                              >
+                                <div
+                                  className={styles.speedBar}
+                                  style={{
+                                    background: 'linear-gradient(90deg,#eab308,#f97316)',
+                                    width: 36,
+                                  }}
+                                />
+                                <span className={styles.speedLabel}>
+                                  {desc || 'Instant generation'}
+                                </span>
                               </div>
                             ) : desc ? (
                               <div className={styles.modelSub}>{desc}</div>
                             ) : null}
                           </div>
 
-                          {/* Capability icons */}
-                          <div style={{ alignItems: 'center', display: 'flex', flexShrink: 0, gap: 4 }}>
-                            {m.abilities?.functionCall && <div className={styles.capIcon} title="Plugins">🔌</div>}
-                            {m.abilities?.vision && <div className={styles.capIcon} title="Vision">👁</div>}
+                          {/* Capability icons (SVG via lucide) */}
+                          <div
+                            style={{
+                              alignItems: 'center',
+                              display: 'flex',
+                              flexShrink: 0,
+                              gap: 4,
+                            }}
+                          >
+                            {m.abilities?.functionCall && (
+                              <div className={styles.capIcon} title="Plugins">
+                                <Plug size={11} />
+                              </div>
+                            )}
+                            {m.abilities?.vision && (
+                              <div className={styles.capIcon} title="Vision">
+                                <Eye size={11} />
+                              </div>
+                            )}
                           </div>
 
                           {/* Context size */}
@@ -323,20 +640,26 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                 );
               })}
               {filtered.length === 0 && (
-                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, padding: '24px 16px', textAlign: 'center' }}>
-                  Không tìm thấy model nào
-                </div>
+                <div className={styles.empty}>Không tìm thấy model nào</div>
               )}
             </div>
 
             {/* ── Footer ── */}
             <div className={styles.footer}>
               <div className={styles.tierLegend}>
-                <span><span className={styles.dot} style={{ background: '#22c55e' }} /> Free</span>
-                <span><span className={styles.dot} style={{ background: '#a78bfa' }} /> Pro</span>
-                <span><span className={styles.dot} style={{ background: '#f59e0b' }} /> Max</span>
+                <span>
+                  <span className={styles.dot} style={{ background: '#22c55e' }} /> Free
+                </span>
+                <span>
+                  <span className={styles.dot} style={{ background: '#a78bfa' }} /> Pro
+                </span>
+                <span>
+                  <span className={styles.dot} style={{ background: '#f59e0b' }} /> Max
+                </span>
               </div>
-              <span className={styles.footerLink} onClick={() => setOpen(false)}>Xem tất cả →</span>
+              <span className={styles.footerLink} onClick={() => setOpen(false)}>
+                Xem tất cả →
+              </span>
             </div>
           </div>
         </>
