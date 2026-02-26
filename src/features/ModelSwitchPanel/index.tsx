@@ -47,23 +47,26 @@ const ctxLabel = (n?: number) =>
 
 const iconBg = (tier: number, isDark: boolean) => {
   if (isDark) {
-    return tier === 1 ? 'rgba(34,197,94,0.12)' : tier === 2 ? 'rgba(139,92,246,0.12)' : 'rgba(245,158,11,0.12)';
+    return tier === 1 ? 'rgba(34,197,94,0.15)' : tier === 2 ? 'rgba(139,92,246,0.15)' : 'rgba(245,158,11,0.15)';
   }
-  return tier === 1 ? 'rgba(34,197,94,0.08)' : tier === 2 ? 'rgba(139,92,246,0.08)' : 'rgba(245,158,11,0.08)';
+  return tier === 1 ? 'rgba(34,197,94,0.1)' : tier === 2 ? 'rgba(139,92,246,0.1)' : 'rgba(245,158,11,0.1)';
 };
 
 /* ──────────── Styles ──────────── */
 const useStyles = createStyles(({ css, token, isDarkMode }) => {
   const isDark = isDarkMode;
-  const mutedText = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)';
-  const subtleText = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)';
-  const hoverBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
-  const selectedBg = isDark ? 'rgba(139,92,246,0.1)' : 'rgba(139,92,246,0.06)';
+  const mutedText = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)';
+  const subtleText = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.32)';
+  const hoverBg = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)';
+  const selectedBg = isDark ? 'rgba(139,92,246,0.14)' : 'rgba(139,92,246,0.08)';
+  const panelBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+  const sectionBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
   const panelShadow = isDark
-    ? '0 20px 60px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,0.08)'
-    : '0 12px 48px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.1)';
-  const capBg = isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.08)';
-  const capColor = isDark ? 'rgba(167,139,250,0.8)' : 'rgba(139,92,246,0.7)';
+    ? '0 20px 60px rgba(0,0,0,0.7), 0 0 1px rgba(255,255,255,0.1)'
+    : '0 16px 48px rgba(0,0,0,0.14), 0 0 1px rgba(0,0,0,0.12)';
+  const capBg = isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)';
+  const capColor = isDark ? 'rgba(167,139,250,0.9)' : 'rgba(109,40,217,0.7)';
+  const capBorder = isDark ? 'rgba(139,92,246,0.2)' : 'rgba(139,92,246,0.15)';
 
   return {
     backdrop: css`
@@ -81,6 +84,7 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
       justify-content: center;
       background: ${capBg};
       color: ${capColor};
+      border: 1px solid ${capBorder};
     `,
 
     ctx: css`
@@ -109,23 +113,13 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
 
     footer: css`
       padding: 10px 16px;
-      border-top: 1px solid ${token.colorBorderSecondary};
+      border-top: 1px solid ${sectionBorder};
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
     `,
 
-    footerLink: css`
-      font-size: 11px;
-      font-weight: 500;
-      color: ${isDark ? 'rgba(167,139,250,0.7)' : '#7c3aed'};
-      cursor: pointer;
-      transition: color 0.2s;
 
-      &:hover {
-        color: ${isDark ? '#c4b5fd' : '#6d28d9'};
-      }
-    `,
 
     modelIcon: css`
       width: 32px;
@@ -205,7 +199,7 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
       width: 380px;
       max-height: 540px;
       background: ${token.colorBgElevated};
-      border: 1px solid ${token.colorBorderSecondary};
+      border: 1px solid ${panelBorder};
       border-radius: 16px;
       box-shadow: ${panelShadow};
       display: flex;
@@ -250,7 +244,7 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
 
     search: css`
       padding: 12px 16px;
-      border-bottom: 1px solid ${token.colorBorderSecondary};
+      border-bottom: 1px solid ${sectionBorder};
       position: relative;
     `,
 
@@ -266,8 +260,8 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
     searchInput: css`
       width: 100%;
       padding: 10px 14px 10px 38px;
-      background: ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'};
-      border: 1px solid ${token.colorBorderSecondary};
+      background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.035)'};
+      border: 1px solid ${panelBorder};
       border-radius: 10px;
       color: ${token.colorText};
       font-size: 13px;
@@ -289,7 +283,7 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
       padding: 4px 0;
 
       & + & {
-        border-top: 1px solid ${token.colorBorderSecondary};
+        border-top: 1px solid ${sectionBorder};
       }
     `,
 
@@ -365,9 +359,9 @@ const TierBadge = memo<{ isDark: boolean; tier: number }>(({ tier, isDark }) => 
     return (
       <span
         style={{
-          background: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)',
+          background: isDark ? 'rgba(34,197,94,0.18)' : 'rgba(22,163,74,0.12)',
           borderRadius: 4,
-          color: isDark ? '#4ade80' : '#16a34a',
+          color: isDark ? '#4ade80' : '#15803d',
           fontSize: 9,
           fontWeight: 700,
           letterSpacing: 0.3,
@@ -381,9 +375,9 @@ const TierBadge = memo<{ isDark: boolean; tier: number }>(({ tier, isDark }) => 
     return (
       <span
         style={{
-          background: isDark ? 'rgba(168,85,247,0.2)' : 'rgba(139,92,246,0.12)',
+          background: isDark ? 'rgba(168,85,247,0.22)' : 'rgba(124,58,237,0.14)',
           borderRadius: 4,
-          color: isDark ? '#c084fc' : '#7c3aed',
+          color: isDark ? '#c084fc' : '#6d28d9',
           fontSize: 9,
           fontWeight: 700,
           letterSpacing: 0.3,
@@ -397,10 +391,10 @@ const TierBadge = memo<{ isDark: boolean; tier: number }>(({ tier, isDark }) => 
     <span
       style={{
         background: isDark
-          ? 'linear-gradient(135deg,rgba(245,158,11,0.2),rgba(239,68,68,0.15))'
-          : 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.1))',
+          ? 'linear-gradient(135deg,rgba(245,158,11,0.22),rgba(239,68,68,0.18))'
+          : 'linear-gradient(135deg,rgba(217,119,6,0.16),rgba(220,38,38,0.12))',
         borderRadius: 4,
-        color: isDark ? '#fbbf24' : '#d97706',
+        color: isDark ? '#fbbf24' : '#b45309',
         fontSize: 9,
         fontWeight: 700,
         letterSpacing: 0.3,
@@ -657,9 +651,6 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                   <span className={styles.dot} style={{ background: '#f59e0b' }} /> Max
                 </span>
               </div>
-              <span className={styles.footerLink} onClick={() => setOpen(false)}>
-                Xem tất cả →
-              </span>
             </div>
           </div>
         </>
