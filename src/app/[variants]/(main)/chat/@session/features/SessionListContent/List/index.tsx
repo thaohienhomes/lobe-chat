@@ -1,4 +1,4 @@
-import { useAnalytics } from '@lobehub/analytics/react';
+import { useAnalyticsSafe } from '@/hooks/useAnalyticsSafe';
 import { Empty } from 'antd';
 import { createStyles } from 'antd-style';
 import Link from 'next/link';
@@ -32,7 +32,7 @@ interface SessionListProps {
 }
 const SessionList = memo<SessionListProps>(({ dataSource, groupId, showAddButton = true }) => {
   const { t } = useTranslation('chat');
-  const { analytics } = useAnalytics();
+  const { analytics } = useAnalyticsSafe();
   const { styles } = useStyles();
 
   const isInit = useSessionStore(sessionSelectors.isSessionListInit);

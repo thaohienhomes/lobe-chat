@@ -1,6 +1,6 @@
 'use client';
 
-import { useAnalytics } from '@lobehub/analytics/react';
+import { useAnalyticsSafe } from '@/hooks/useAnalyticsSafe';
 import { memo, useCallback, useEffect } from 'react';
 
 import { getChatStoreState } from '@/store/chat';
@@ -11,7 +11,7 @@ import { getSessionStoreState } from '@/store/session';
 import { sessionSelectors } from '@/store/session/selectors';
 
 const MainInterfaceTracker = memo(() => {
-  const { analytics } = useAnalytics();
+  const { analytics } = useAnalyticsSafe();
 
   const getMainInterfaceAnalyticsData = useCallback(() => {
     const currentSession = sessionSelectors.currentSession(getSessionStoreState());

@@ -1,7 +1,7 @@
-import { useAnalytics } from '@lobehub/analytics/react';
 import { useMemo } from 'react';
 
 import { PENDING_MESSAGE_KEY } from '@/const/localStorage';
+import { useAnalyticsSafe } from '@/hooks/useAnalyticsSafe';
 import { useGeminiChineseWarning } from '@/hooks/useGeminiChineseWarning';
 import { getAgentStoreState } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
@@ -50,7 +50,7 @@ export const useSend = () => {
     chatSelectors.isSendButtonDisabledByMessage(s),
     aiChatSelectors.isCurrentSendMessageLoading(s),
   ]);
-  const { analytics } = useAnalytics();
+  const { analytics } = useAnalyticsSafe();
   const checkGeminiChineseWarning = useGeminiChineseWarning();
 
   // Auth state for checking if user is signed in

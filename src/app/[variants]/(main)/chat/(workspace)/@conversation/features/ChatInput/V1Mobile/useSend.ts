@@ -1,6 +1,6 @@
-import { useAnalytics } from '@lobehub/analytics/react';
 import { useCallback, useMemo } from 'react';
 
+import { useAnalyticsSafe } from '@/hooks/useAnalyticsSafe';
 import { useGeminiChineseWarning } from '@/hooks/useGeminiChineseWarning';
 import { getAgentStoreState } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
@@ -20,7 +20,7 @@ export const useSendMessage = () => {
     s.sendMessage,
     s.updateInputMessage,
   ]);
-  const { analytics } = useAnalytics();
+  const { analytics } = useAnalyticsSafe();
   const checkGeminiChineseWarning = useGeminiChineseWarning();
 
   const clearChatUploadFileList = useFileStore((s) => s.clearChatUploadFileList);

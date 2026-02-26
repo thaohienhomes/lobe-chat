@@ -1,4 +1,4 @@
-import { useAnalytics } from '@lobehub/analytics/react';
+import { useAnalyticsSafe } from '@/hooks/useAnalyticsSafe';
 import { Button } from '@lobehub/ui';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import UserInfo from '../UserInfo';
 
 const UserLoginOrSignup = memo<{ onClick: () => void }>(({ onClick }) => {
   const { t } = useTranslation('auth');
-  const { analytics } = useAnalytics();
+  const { analytics } = useAnalyticsSafe();
 
   const handleClick = () => {
     analytics?.track({
