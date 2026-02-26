@@ -17,10 +17,11 @@ import { agentSelectors } from '@/store/agent/slices/chat';
 
 /* ──────────── Tier palette ──────────── */
 const TIER = {
+  0: { accent: '#ec4899', icon: '✨', labelKey: 'ModelSwitchPanel.tierAuto' as const, quotaCount: 0, quotaKey: '' },
   1: { accent: '#22c55e', icon: '⚡', labelKey: 'ModelSwitchPanel.tierFree' as const, quotaCount: 0, quotaKey: '' },
   2: { accent: '#a78bfa', icon: '🔮', labelKey: 'ModelSwitchPanel.tierPro' as const, quotaCount: 20, quotaKey: 'ModelSwitchPanel.quotaHint' as const },
   3: { accent: '#f59e0b', icon: '👑', labelKey: 'ModelSwitchPanel.tierFlagship' as const, quotaCount: 5, quotaKey: 'ModelSwitchPanel.quotaHint' as const },
-};
+} as const;
 
 /* ──────────── Model-access hook ──────────── */
 const useModelAccess = () => {
@@ -37,7 +38,11 @@ const useModelAccess = () => {
     })();
   }, []);
   return useCallback(
-    (id: string) => allowed.includes(id.toLowerCase().includes('auto') ? 2 : getModelTier(id)),
+    (id: string) => {
+      const tier = id.toLowerCase().includes('auto') ? 0 : getModelTier(id);
+      // Tier 0 (Phở Auto) is always accessible
+      return tier === 0 || allowed.includes(tier);
+    },
     [allowed],
   );
 };
@@ -47,6 +52,7 @@ const ctxLabel = (n?: number) =>
   !n ? '' : n >= 1e6 ? `${Math.round(n / 1e6)}M` : `${Math.round(n / 1e3)}K`;
 
 const iconBg = (tier: number, isDark: boolean) => {
+  if (tier === 0) { return isDark ? 'rgba(236,72,153,0.18)' : 'rgba(236,72,153,0.1)'; }
   if (isDark) {
     return tier === 1 ? 'rgba(34,197,94,0.15)' : tier === 2 ? 'rgba(139,92,246,0.15)' : 'rgba(245,158,11,0.15)';
   }
@@ -504,7 +510,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
             {/* ── Scroll ── */}
             <div className={styles.scroll}>
               {filtered.map((tier) => {
-                const tierNum = (tier.tierGroup || 1) as 1 | 2 | 3;
+                const tierNum = (tier.tierGroup ?? 1) as 0 | 1 | 2 | 3;
                 const cfg = TIER[tierNum];
                 return (
                   <div className={styles.section} key={tier.id}>

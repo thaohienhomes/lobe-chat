@@ -6,6 +6,7 @@ import VercelAIGatewayConfig from '@/config/modelProviders/vercelaigateway';
 import { usePostHogFeatureFlags } from '@/hooks/usePostHogFeatureFlags';
 import { AiProviderSourceEnum, EnabledProviderWithModels } from '@/types/aiProvider';
 import { ModelProviderCard } from '@/types/llm';
+import { PHO_AUTO_MODEL_ID } from '@/utils/autoRouter';
 
 /**
  * New model IDs that should display a "MỚI" (NEW) badge in the picker.
@@ -31,6 +32,24 @@ export const SPEED_MODELS: Record<string, string> = {
  * Vietnamese language for local brand, English for international models.
  */
 export const MODEL_DESCRIPTIONS: Record<string, string> = {
+  // Phở Auto — virtual model for smart routing
+  [PHO_AUTO_MODEL_ID]: 'Tự động chọn model phù hợp nhất',
+
+  'anthropic/claude-4-opus': 'Anthropic · Suy luận cao cấp',
+
+
+
+
+
+  'anthropic/claude-4.5-sonnet': 'Anthropic · Sáng tạo',
+
+
+
+
+
+  'anthropic/claude-haiku-3.5': 'Anthropic · Nhẹ & nhanh',
+
+
 
 
   // Premium models (vercelaigateway)
@@ -43,43 +62,46 @@ export const MODEL_DESCRIPTIONS: Record<string, string> = {
 
 
 
+  'anthropic/claude-sonnet-4-6-20250219': 'Anthropic · Tốc độ + chất lượng',
 
-  'anthropic/claude-4.5-sonnet': 'Anthropic · Sáng tạo',
 
+
+  'deepseek/deepseek-chat': 'DeepSeek · Coding & Math',
+
+
+
+  'deepseek/deepseek-reasoner': 'DeepSeek · Reasoning sâu',
 
 
   // Open models
   'gemma-3-27b-it': 'Google · Tool calling',
 
+  'google/gemini-2.0-flash': 'Google · Đa năng & nhanh',
 
+  'google/gemini-2.5-flash': 'Google · Reasoning nhanh',
 
-  'anthropic/claude-4-opus': 'Anthropic · Suy luận cao cấp',
+  'google/gemini-2.5-pro': 'Google · Reasoning mạnh',
 
+  'google/gemini-3.1-pro': 'Google · 2M context · Multimodal',
 
   'kimi-k2': 'MoonshotAI · 1T params · Coding',
 
+  'llama-4-scout-17b': 'Meta · MoE 17Bx16E',
 
-  'anthropic/claude-haiku-3.5': 'Anthropic · Nhẹ & nhanh',
+  'mercury-coder-small-2-2': 'AI nhanh nhất thế giới · Diffusion LLM',
 
+  'openai/gpt-4.1': 'OpenAI · Coding xuất sắc',
+
+  'openai/gpt-4o': 'OpenAI · Đa năng',
+
+  'openai/gpt-5.2': 'OpenAI · Flagship',
+
+  'openai/o4-mini': 'OpenAI · Reasoning nhanh',
   // Phở Chat branded
   'pho-fast': 'Trả lời tức thì',
-
-  'anthropic/claude-sonnet-4-6-20250219': 'Anthropic · Tốc độ + chất lượng',
   'pho-pro': 'Viết nội dung · Phân tích',
-  'google/gemini-2.0-flash': 'Google · Đa năng & nhanh',
   'pho-smart': 'Suy luận phức tạp',
-  'google/gemini-2.5-flash': 'Google · Reasoning nhanh',
   'pho-vision': 'Phân tích hình ảnh',
-  'deepseek/deepseek-chat': 'DeepSeek · Coding & Math',
-  'llama-4-scout-17b': 'Meta · MoE 17Bx16E',
-  'deepseek/deepseek-reasoner': 'DeepSeek · Reasoning sâu',
-  'mercury-coder-small-2-2': 'AI nhanh nhất thế giới · Diffusion LLM',
-  'google/gemini-2.5-pro': 'Google · Reasoning mạnh',
-  'google/gemini-3.1-pro': 'Google · 2M context · Multimodal',
-  'openai/gpt-4.1': 'OpenAI · Coding xuất sắc',
-  'openai/gpt-4o': 'OpenAI · Đa năng',
-  'openai/gpt-5.2': 'OpenAI · Flagship',
-  'openai/o4-mini': 'OpenAI · Reasoning nhanh',
   'xai/grok-3': 'xAI · Flagship',
   'xai/grok-3-mini': 'xAI · Reasoning nhanh',
 };
@@ -160,6 +182,20 @@ export const useEnabledChatModels = (): TierGroup[] => {
     }
 
     const result: TierGroup[] = [];
+
+    // ✨ Phở Auto: always first, always available
+    result.push({
+      children: [{
+        abilities: { functionCall: true, reasoning: true, vision: true },
+        displayName: 'Phở Auto ✨',
+        id: PHO_AUTO_MODEL_ID,
+        originProvider: 'phochat',
+      }],
+      id: 'tier-auto',
+      name: '✨ Tự Động',
+      source: AiProviderSourceEnum.Builtin,
+      tierGroup: 0,
+    });
 
     if (tier1.length > 0) {
       result.push({

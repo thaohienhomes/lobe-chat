@@ -133,6 +133,7 @@ export default {
     provider: '服务商',
     quotaHint: '{{count}} lượt/ngày',
     searchPlaceholder: 'Tìm model...',
+    tierAuto: '✨ Tự Động',
     tierFlagship: 'Flagship',
     tierFree: 'Nhanh & Miễn Phí',
     tierPro: 'Chuyên Nghiệp',
