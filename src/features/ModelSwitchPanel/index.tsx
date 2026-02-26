@@ -281,7 +281,7 @@ interface IProps {
   updating?: boolean;
 }
 
-const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
+const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: externalOpen }) => {
   const { styles, cx } = useStyles();
   const model = useAgentStore((s) => agentSelectors.currentAgentModel(s));
   const updateAgentConfig = useAgentStore((s) => s.updateAgentConfig);
@@ -291,17 +291,36 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
   const triggerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Internal open state (used when parent doesn't control it)
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+
+  const setOpen = useCallback(
+    (val: boolean) => {
+      setInternalOpen(val);
+      onOpenChange?.(val);
+      if (!val) setSearchQuery('');
+    },
+    [onOpenChange],
+  );
+
   // Panel positioning
   const [panelPos, setPanelPos] = useState({ left: 0, top: 0 });
   useEffect(() => {
-    if (open && triggerRef.current) {
+    if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
+      const panelHeight = 560;
+      // Position above the trigger if there's room, else below
+      const spaceAbove = rect.top;
+      const top = spaceAbove > panelHeight + 16
+        ? rect.top - panelHeight - 8
+        : rect.bottom + 8;
       setPanelPos({
-        left: Math.max(8, rect.left),
-        top: Math.max(8, rect.top - 570),
+        left: Math.max(8, Math.min(rect.left, window.innerWidth - 400)),
+        top: Math.max(8, top),
       });
     }
-  }, [open]);
+  }, [isOpen]);
 
   // Filter models by search
   const filteredList = useMemo(() => {
@@ -323,24 +342,22 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
   const handleSelect = useCallback(
     async (modelId: string, modelProvider: string) => {
       await updateAgentConfig({ model: modelId, provider: modelProvider });
-      onOpenChange?.(false);
-      setSearchQuery('');
+      setOpen(false);
     },
-    [updateAgentConfig, onOpenChange],
+    [updateAgentConfig, setOpen],
   );
 
   const handleClose = useCallback(() => {
-    onOpenChange?.(false);
-    setSearchQuery('');
-  }, [onOpenChange]);
+    setOpen(false);
+  }, [setOpen]);
 
   return (
     <>
-      <div className={styles.tag} onClick={() => onOpenChange?.(!open)} ref={triggerRef}>
+      <div className={styles.tag} onClick={() => setOpen(!isOpen)} ref={triggerRef}>
         {children}
       </div>
 
-      {open && (
+      {isOpen && (
         <>
           {/* Backdrop */}
           <div className={styles.backdrop} onClick={handleClose} />
