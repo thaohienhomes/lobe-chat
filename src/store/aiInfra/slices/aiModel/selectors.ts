@@ -79,6 +79,33 @@ const isModelSupportToolUse = (id: string, provider: string) => (s: AIProviderSt
     return true;
   }
 
+  // Fallback 4: Cross-provider search — find the model in ANY provider's data.
+  // This handles Vercel AI Gateway models whose IDs contain provider prefixes
+  // (e.g. 'anthropic/claude-sonnet-4-20250514' under provider 'vercelaigateway').
+  // The config may register functionCall under a different provider entry.
+  const crossProviderMatch = s.enabledAiModels?.find((m) => m.id === id);
+  if (crossProviderMatch?.abilities?.functionCall) {
+    return true;
+  }
+  const crossProviderBuiltin = s.builtinAiModelList?.find((m) => m.id === id);
+  if (crossProviderBuiltin?.abilities?.functionCall) {
+    return true;
+  }
+
+  // Fallback 5: All Vercel AI Gateway models support tool calling.
+  // These are premium models (Claude, GPT, Gemini, etc.) routed through
+  // Vercel's unified gateway — all of them support function calling natively.
+  if (provider === 'vercelaigateway') {
+    return true;
+  }
+
+  // Fallback 6: Known model prefixes that always support function calling.
+  // Models from major providers inherently support tool use.
+  const FC_PREFIXES = ['anthropic/', 'openai/', 'google/', 'deepseek/', 'xai/', 'meta-llama/'];
+  if (FC_PREFIXES.some((prefix) => id.startsWith(prefix))) {
+    return true;
+  }
+
   return false;
 };
 
