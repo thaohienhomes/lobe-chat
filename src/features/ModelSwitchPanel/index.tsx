@@ -1,17 +1,10 @@
-import { Icon } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
-import type { ItemType } from 'antd/es/menu/interface';
-import { ArrowUpRight, Lock, LucideArrowRight, Sparkles, Zap } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { type ReactNode, memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Lock, Zap } from 'lucide-react';
+import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { ModelItemRender } from '@/components/ModelSelect';
 import { getModelTier } from '@/config/pricing';
-import { isDeprecatedEdition } from '@/const/version';
-import ActionDropdown from '@/features/ChatInput/ActionBar/components/ActionDropdown';
 import {
   MODEL_DESCRIPTIONS,
   NEW_MODEL_IDS,
@@ -19,50 +12,127 @@ import {
   type TierGroup,
   useEnabledChatModels,
 } from '@/hooks/useEnabledChatModels';
-import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
-import { useUserStore } from '@/store/user';
 
-// ── Tier-aware styling ─────────────────────────────────────────────────────
-const TIER_CONFIG = {
-  1: { accent: '#22c55e', icon: '⚡', quotaKey: null },
-  2: { accent: '#a78bfa', icon: '🔮', quotaKey: '20' },
-  3: { accent: '#f59e0b', icon: '👑', quotaKey: '5' },
+// ── Tier visual configuration ──────────────────────────────────────────────
+const TIER_CONFIGS = {
+  1: { accent: '#22c55e', dotClass: 'dotFree', icon: '⚡', label: 'Nhanh & Miễn Phí', quotaLabel: '' },
+  2: { accent: '#a78bfa', dotClass: 'dotPro', icon: '🔮', label: 'Chuyên Nghiệp', quotaLabel: '20 lượt/ngày' },
+  3: { accent: '#f59e0b', dotClass: 'dotFlagship', icon: '👑', label: 'Flagship', quotaLabel: '5 lượt/ngày' },
 } as const;
 
-const useStyles = createStyles(({ css, prefixCls, token }) => ({
-  disabledItem: css`
-    pointer-events: none;
-    cursor: not-allowed !important;
+// ── Access check hook ──────────────────────────────────────────────────────
+const useModelAccess = () => {
+  const [allowedTiers, setAllowedTiers] = useState<number[]>([1]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const res = await fetch('/api/subscription/models/allowed');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data) { setAllowedTiers(data.data.allowedTiers || [1]); }
+        } else { setAllowedTiers([1]); }
+      } catch { setAllowedTiers([1]); }
+      finally { setLoading(false); }
+    };
+    check();
+  }, []);
+
+  const canUseModel = useCallback(
+    (modelId: string) => {
+      if (modelId.toLowerCase().includes('auto')) return true;
+      return allowedTiers.includes(getModelTier(modelId));
+    },
+    [allowedTiers],
+  );
+
+  return { canUseModel, loading };
+};
+
+// ── Styles ─────────────────────────────────────────────────────────────────
+const useStyles = createStyles(({ css, token }) => ({
+  backdrop: css`
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+  `,
+  capIcon: css`
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    background: rgba(139, 92, 246, 0.1);
+    color: rgba(168, 85, 247, 0.7);
+  `,
+  ctx: css`
+    font-size: 10px;
+    color: ${token.colorTextQuaternary};
+    font-weight: 500;
+    min-width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  `,
+  dot: css`
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  `,
+  dotFlagship: css`
+    background: #f59e0b;
+  `,
+  dotFree: css`
+    background: #22c55e;
+  `,
+  dotPro: css`
+    background: #a78bfa;
+  `,
+  footer: css`
+    padding: 8px 16px;
+    border-top: 1px solid ${token.colorBorderSecondary};
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  `,
+  footerLink: css`
+    font-size: 11px;
+    color: rgba(139, 92, 246, 0.6);
+    cursor: pointer;
+    user-select: none;
+    &:hover { color: #a78bfa; }
+  `,
+  modelRow: css`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
     &:hover {
-      background: transparent !important;
+      background: ${token.colorBgTextHover};
     }
   `,
-  menu: css`
-    .${prefixCls}-dropdown-menu-item {
-      display: flex;
-      gap: 8px;
-    }
-    .${prefixCls}-dropdown-menu {
-      &-item-group-title {
-        padding-inline: 8px;
-      }
-
-      &-item-group-list {
-        margin: 0 !important;
-      }
-    }
+  modelRowDisabled: css`
+    pointer-events: none;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    opacity: 0.5;
   `,
   modelSub: css`
     font-size: 11px;
-    line-height: 1.2;
+    line-height: 1.3;
     color: ${token.colorTextQuaternary};
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 180px;
+    max-width: 200px;
   `,
   newBadge: css`
     display: inline-flex;
@@ -75,44 +145,91 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
     line-height: 1.5;
     background: rgba(239, 68, 68, 0.15);
     color: #f87171;
-    animation: pulseBadge 2s infinite;
     flex-shrink: 0;
-
+    animation: pulseBadge 2s infinite;
     @keyframes pulseBadge {
-      0%,
-      100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.6;
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+  `,
+  panel: css`
+    position: fixed;
+    z-index: 1001;
+    width: 380px;
+    max-height: 560px;
+    background: ${token.colorBgElevated};
+    border: 1px solid ${token.colorBorderSecondary};
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  `,
+  scrollArea: css`
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb {
+      background: ${token.colorTextQuaternary};
+      border-radius: 2px;
+    }
+  `,
+  searchIcon: css`
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: ${token.colorTextQuaternary};
+    font-size: 14px;
+    pointer-events: none;
+  `,
+  searchInput: css`
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    background: ${token.colorFillTertiary};
+    border: 1px solid ${token.colorBorderSecondary};
+    border-radius: 10px;
+    color: ${token.colorText};
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    &::placeholder { color: ${token.colorTextQuaternary}; }
+    &:focus { border-color: rgba(139, 92, 246, 0.4); }
+  `,
+  searchWrap: css`
+    padding: 12px 16px;
+    border-bottom: 1px solid ${token.colorBorderSecondary};
+    position: relative;
+  `,
+  section: css`
+    padding: 4px 0;
+    & + & {
+      border-top: 1px solid ${token.colorBorderSecondary};
     }
   `,
   sectionHeader: css`
     display: flex;
     align-items: center;
     gap: 6px;
-
-    padding-block: 8px;
-    padding-inline: 8px;
-
+    padding: 8px 16px 4px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
   `,
   sectionQuota: css`
-    margin-inline-start: auto;
+    margin-left: auto;
     font-size: 9px;
     font-weight: 400;
     text-transform: none;
     color: ${token.colorTextQuaternary};
   `,
-  selectedIndicator: css`
+  selectedBar: css`
     position: absolute;
-    inset-inline-start: 0;
-    inset-block-start: 4px;
-    inset-block-end: 4px;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
     width: 3px;
     border-radius: 0 3px 3px 0;
   `,
@@ -128,138 +245,35 @@ const useStyles = createStyles(({ css, prefixCls, token }) => ({
     color: #000;
     flex-shrink: 0;
   `,
+  speedBar: css`
+    height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  `,
   tag: css`
     cursor: pointer;
   `,
-  upgradeBanner: css`
-    cursor: pointer;
-
-    display: block;
-
-    padding-block: 12px;
-    padding-inline: 14px;
-    border: 1px solid rgba(255, 64, 129, 30%);
-    border-radius: 10px;
-
-    text-decoration: none;
-
-    background: linear-gradient(135deg, rgba(255, 64, 129, 20%) 0%, rgba(156, 39, 176, 20%) 100%);
-
-    transition: all 0.2s ease;
-
-    &:hover {
-      border-color: rgba(255, 64, 129, 50%);
-      background: linear-gradient(
-        135deg,
-        rgba(255, 64, 129, 30%) 0%,
-        rgba(156, 39, 176, 30%) 100%
-      );
+  tierLegend: css`
+    display: flex;
+    gap: 10px;
+    font-size: 10px;
+    color: ${token.colorTextQuaternary};
+    & > span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
     }
-  `,
-  upgradeButton: css`
-    cursor: pointer;
-
-    display: inline-flex;
-    gap: 3px;
-    align-items: center;
-
-    padding-block: 6px;
-    padding-inline: 12px;
-    border: none;
-    border-radius: 6px;
-
-    font-size: 11px;
-    font-weight: 600;
-    color: white;
-    white-space: nowrap;
-
-    background: linear-gradient(135deg, #ff4081 0%, #9c27b0 100%);
-
-    transition: all 0.2s ease;
-
-    &:hover {
-      opacity: 0.9;
-    }
-  `,
-  upgradePrice: css`
-    margin-inline-end: 2px;
-    font-size: 20px;
-    font-weight: 700;
-    color: ${token.colorText};
-  `,
-  upgradePriceUnit: css`
-    font-size: 12px;
-    color: ${token.colorTextDescription};
-  `,
-  upgradeText: css`
-    margin-block-end: 2px;
-    font-size: 13px;
-    font-weight: 600;
-    color: ${token.colorText};
   `,
 }));
 
-const menuKey = (provider: string, model: string) => `${provider}-${model}`;
-
-/**
- * Hook to check if user can access a specific model based on subscription tier
- */
-const useModelAccess = () => {
-  const [allowedTiers, setAllowedTiers] = useState<number[]>([1]);
-  const [loading, setLoading] = useState(true);
-  const [isGuest, setIsGuest] = useState(false);
-
-  useEffect(() => {
-    const checkModelAccess = async () => {
-      try {
-        const response = await fetch('/api/subscription/models/allowed');
-
-        if (response.status === 401) {
-          setAllowedTiers([1]);
-          setIsGuest(true);
-          setLoading(false);
-          return;
-        }
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            setAllowedTiers(data.data.allowedTiers || [1]);
-            setIsGuest(false);
-          }
-        } else {
-          setAllowedTiers([1]);
-          setIsGuest(true);
-        }
-      } catch {
-        setAllowedTiers([1]);
-        setIsGuest(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkModelAccess();
-  }, []);
-
-  const canUseModel = useCallback(
-    (modelId: string) => {
-      if (modelId.toLowerCase().includes('auto')) {
-        return true;
-      }
-      const tier = getModelTier(modelId);
-      return allowedTiers.includes(tier);
-    },
-    [allowedTiers],
-  );
-
-  const needsUpgrade = useMemo(() => {
-    return isGuest || (allowedTiers.length === 1 && allowedTiers[0] === 1);
-  }, [allowedTiers, isGuest]);
-
-  return { allowedTiers, canUseModel, isGuest, loading, needsUpgrade };
+// ── Helpers ────────────────────────────────────────────────────────────────
+const formatContext = (tokens?: number) => {
+  if (!tokens) return '';
+  if (tokens >= 1_000_000) return `${Math.round(tokens / 1_000_000)}M`;
+  return `${Math.round(tokens / 1000)}K`;
 };
 
+// ── Component ──────────────────────────────────────────────────────────────
 interface IProps {
   children?: ReactNode;
   onOpenChange?: (open: boolean) => void;
@@ -268,264 +282,230 @@ interface IProps {
 }
 
 const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
-  const { t } = useTranslation('components');
-  const { styles, theme } = useStyles();
-  const [model, provider, updateAgentConfig] = useAgentStore((s) => [
-    agentSelectors.currentAgentModel(s),
-    agentSelectors.currentAgentModelProvider(s),
-    s.updateAgentConfig,
-  ]);
-  const router = useRouter();
+  const { styles, cx } = useStyles();
+  const model = useAgentStore((s) => agentSelectors.currentAgentModel(s));
+  const updateAgentConfig = useAgentStore((s) => s.updateAgentConfig);
   const enabledList = useEnabledChatModels() as TierGroup[];
-  const { canUseModel, needsUpgrade } = useModelAccess();
-  const { isVietnam } = usePricingGeo();
-  const subscriptionPlan = useUserStore((s) => s.subscriptionPlan);
+  const { canUseModel } = useModelAccess();
+  const [searchQuery, setSearchQuery] = useState('');
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  const isFreePlan = useMemo(() => {
-    const FREE_PLAN_IDS = ['vn_free', 'gl_starter', 'starter'];
-    return !subscriptionPlan || FREE_PLAN_IDS.includes(subscriptionPlan);
-  }, [subscriptionPlan]);
-
-  const shouldShowUpgradeBanner = needsUpgrade && isFreePlan;
-
-  const items = useMemo<ItemType[]>(() => {
-    const result: ItemType[] = [];
-
-    // ── Upgrade banner (for free users) ──────────────────────────────
-    if (shouldShowUpgradeBanner) {
-      const upgradePrice = isVietnam ? '69K' : '$9.99';
-      const upgradeUnit = isVietnam ? '/tháng' : '/mo';
-      const upgradeText = isVietnam ? 'Mở khóa tất cả models' : 'Unlock all models';
-      const upgradeButtonText = isVietnam ? 'Nâng cấp' : 'Upgrade';
-
-      result.push(
-        {
-          key: 'upgrade-banner',
-          label: (
-            <Link
-              className={styles.upgradeBanner}
-              href="/subscription/upgrade"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Flexbox align="center" horizontal justify="space-between">
-                <Flexbox gap={1}>
-                  <Flexbox align="center" gap={5} horizontal>
-                    <Sparkles size={14} style={{ color: '#ff4081' }} />
-                    <span className={styles.upgradeText}>{upgradeText}</span>
-                  </Flexbox>
-                  <Flexbox align="baseline" gap={2} horizontal>
-                    <span className={styles.upgradePrice}>{upgradePrice}</span>
-                    <span className={styles.upgradePriceUnit}>{upgradeUnit}</span>
-                  </Flexbox>
-                </Flexbox>
-                <button className={styles.upgradeButton} type="button">
-                  {upgradeButtonText}
-                  <ArrowUpRight size={12} />
-                </button>
-              </Flexbox>
-            </Link>
-          ),
-          style: {
-            background: 'transparent',
-            cursor: 'default',
-            padding: '8px 4px',
-          },
-        },
-        {
-          key: 'upgrade-divider',
-          type: 'divider',
-        },
-      );
+  // Panel positioning
+  const [panelPos, setPanelPos] = useState({ left: 0, top: 0 });
+  useEffect(() => {
+    if (open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPanelPos({
+        left: Math.max(8, rect.left),
+        top: Math.max(8, rect.top - 570),
+      });
     }
+  }, [open]);
 
-    // ── Build model items per tier group ──────────────────────────────
-    const getModelItems = (tierGroupItem: TierGroup) => {
-      return tierGroupItem.children.map((modelItem) => {
-        const canAccess = canUseModel(modelItem.id);
-        const isNew = NEW_MODEL_IDS.has(modelItem.id);
-        const speedLabel = SPEED_MODELS[modelItem.id];
-        const description = MODEL_DESCRIPTIONS[modelItem.id];
-        // Use originProvider for correct routing, fall back to group id
-        const modelProvider = (modelItem as any).originProvider || tierGroupItem.id;
-        const tierNum = tierGroupItem.tierGroup || 1;
-        const tierAccent = TIER_CONFIG[tierNum as 1 | 2 | 3]?.accent || '#22c55e';
-
-        return {
-          className: canAccess ? undefined : styles.disabledItem,
-          disabled: !canAccess,
-          key: menuKey(modelProvider, modelItem.id),
-          label: (
-            <Flexbox
-              align="center"
-              gap={8}
-              horizontal
-              style={{
-                filter: canAccess ? 'none' : 'grayscale(1)',
-                position: 'relative',
-              }}
-            >
-              {/* Selected indicator bar */}
-              {model === modelItem.id && (
-                <div
-                  className={styles.selectedIndicator}
-                  style={{ background: tierAccent }}
-                />
-              )}
-              {/* Model name + info */}
-              <Flexbox style={{ flex: 1, minWidth: 0 }}>
-                <Flexbox align="center" gap={5} horizontal>
-                  <ModelItemRender {...modelItem} {...modelItem.abilities} isLocked={!canAccess} />
-                  {speedLabel && (
-                    <span className={styles.speedBadge}>
-                      <Zap size={8} /> {speedLabel}
-                    </span>
-                  )}
-                  {isNew && (
-                    <span className={styles.newBadge}>{t('ModelSwitchPanel.newBadge')}</span>
-                  )}
-                </Flexbox>
-                {description && <div className={styles.modelSub}>{description}</div>}
-              </Flexbox>
-              {!canAccess && (
-                <Lock
-                  size={14}
-                  style={{
-                    color: theme.colorTextDisabled,
-                    flexShrink: 0,
-                    marginLeft: 'auto',
-                  }}
-                />
-              )}
-            </Flexbox>
-          ),
-          onClick: canAccess
-            ? async () => {
-              await updateAgentConfig({ model: modelItem.id, provider: modelProvider });
-            }
-            : (e: any) => {
-              e?.preventDefault?.();
-              e?.stopPropagation?.();
-            },
-        };
-      });
-    };
-
-    // ── Empty state ──────────────────────────────────────────────────
-    if (enabledList.length === 0) {
-      result.push({
-        key: `no-provider`,
-        label: (
-          <Flexbox gap={8} horizontal style={{ color: theme.colorTextTertiary }}>
-            {t('ModelSwitchPanel.emptyProvider')}
-            <Icon icon={LucideArrowRight} />
-          </Flexbox>
+  // Filter models by search
+  const filteredList = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return enabledList;
+    return enabledList
+      .map((tier) => ({
+        ...tier,
+        children: tier.children.filter(
+          (m) =>
+            m.id.toLowerCase().includes(q) ||
+            m.displayName.toLowerCase().includes(q) ||
+            (MODEL_DESCRIPTIONS[m.id] || '').toLowerCase().includes(q),
         ),
-        onClick: () => {
-          router.push(isDeprecatedEdition ? '/settings?active=llm' : `/settings?active=provider`);
-        },
-      });
-      return result;
-    }
+      }))
+      .filter((tier) => tier.children.length > 0);
+  }, [enabledList, searchQuery]);
 
-    // ── Render tier sections with headers ─────────────────────────────
-    enabledList.forEach((tierGroup, index) => {
-      // Divider between sections
-      if (index > 0) {
-        result.push({
-          key: `divider-${tierGroup.id}`,
-          type: 'divider' as const,
-        });
-      }
+  const handleSelect = useCallback(
+    async (modelId: string, modelProvider: string) => {
+      await updateAgentConfig({ model: modelId, provider: modelProvider });
+      onOpenChange?.(false);
+      setSearchQuery('');
+    },
+    [updateAgentConfig, onOpenChange],
+  );
 
-      const tierNum = tierGroup.tierGroup || 1;
-      const tierCfg = TIER_CONFIG[tierNum as 1 | 2 | 3] || TIER_CONFIG[1];
-      const tierLabel =
-        tierNum === 1
-          ? t('ModelSwitchPanel.tierFree')
-          : tierNum === 2
-            ? t('ModelSwitchPanel.tierPro')
-            : t('ModelSwitchPanel.tierFlagship');
-
-      // Section header
-      result.push({
-        disabled: true,
-        key: `header-${tierGroup.id}`,
-        label: (
-          <div className={styles.sectionHeader} style={{ color: tierCfg.accent }}>
-            <span>{tierCfg.icon}</span>
-            <span>{tierLabel}</span>
-            {tierCfg.quotaKey && (
-              <span className={styles.sectionQuota}>
-                {`${tierCfg.quotaKey} lượt/ngày`}
-              </span>
-            )}
-          </div>
-        ),
-        style: {
-          cursor: 'default',
-          height: 'auto',
-          minHeight: 'auto',
-          padding: '2px 4px',
-        },
-      });
-
-      // Model items
-      const modelItems = getModelItems(tierGroup);
-      if (modelItems.length === 0) {
-        result.push({
-          key: `${tierGroup.id}-empty`,
-          label: (
-            <Flexbox gap={8} horizontal style={{ color: theme.colorTextTertiary }}>
-              {t('ModelSwitchPanel.emptyModel')}
-              <Icon icon={LucideArrowRight} />
-            </Flexbox>
-          ),
-          onClick: () => {
-            router.push(
-              isDeprecatedEdition
-                ? '/settings?active=llm'
-                : `/settings?active=provider`,
-            );
-          },
-        });
-      } else {
-        result.push(...modelItems);
-      }
-    });
-
-    return result;
-  }, [
-    enabledList,
-    canUseModel,
-    model,
-    needsUpgrade,
-    isVietnam,
-    shouldShowUpgradeBanner,
-    styles,
-    theme,
-    t,
-  ]);
-
-  const icon = <div className={styles.tag}>{children}</div>;
+  const handleClose = useCallback(() => {
+    onOpenChange?.(false);
+    setSearchQuery('');
+  }, [onOpenChange]);
 
   return (
-    <ActionDropdown
-      menu={{
-        // @ts-expect-error 等待 antd 修复
-        activeKey: menuKey(provider, model),
-        className: styles.menu,
-        items,
-        style: {
-          maxHeight: 550,
-          overflowY: 'scroll',
-        },
-      }}
-      onOpenChange={onOpenChange}
-      open={open}
-      placement={'topLeft'}
-    >
-      {icon}
-    </ActionDropdown>
+    <>
+      <div className={styles.tag} onClick={() => onOpenChange?.(!open)} ref={triggerRef}>
+        {children}
+      </div>
+
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div className={styles.backdrop} onClick={handleClose} />
+
+          {/* Panel */}
+          <div
+            className={styles.panel}
+            ref={panelRef}
+            style={{ left: panelPos.left, top: panelPos.top }}
+          >
+            {/* Search bar */}
+            <div className={styles.searchWrap}>
+              <span className={styles.searchIcon}>🔍</span>
+              <input
+                autoFocus
+                className={styles.searchInput}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm model..."
+                type="text"
+                value={searchQuery}
+              />
+            </div>
+
+            {/* Scrollable model list */}
+            <div className={styles.scrollArea}>
+              {filteredList.map((tierGroup) => {
+                const tierNum = (tierGroup.tierGroup || 1) as 1 | 2 | 3;
+                const cfg = TIER_CONFIGS[tierNum];
+
+                return (
+                  <div className={styles.section} key={tierGroup.id}>
+                    {/* Section header */}
+                    <div className={styles.sectionHeader} style={{ color: cfg.accent }}>
+                      <span>{cfg.icon}</span>
+                      <span>{cfg.label}</span>
+                      {cfg.quotaLabel && (
+                        <span className={styles.sectionQuota}>{cfg.quotaLabel}</span>
+                      )}
+                    </div>
+
+                    {/* Model rows */}
+                    {tierGroup.children.map((modelItem) => {
+                      const canAccess = canUseModel(modelItem.id);
+                      const modelProvider =
+                        (modelItem as any).originProvider || tierGroup.id;
+                      const isSelected = model === modelItem.id;
+                      const isNew = NEW_MODEL_IDS.has(modelItem.id);
+                      const speedLabel = SPEED_MODELS[modelItem.id];
+                      const description = MODEL_DESCRIPTIONS[modelItem.id];
+                      const ctxLabel = formatContext(modelItem.contextWindowTokens);
+
+                      return (
+                        <div
+                          className={cx(
+                            styles.modelRow,
+                            !canAccess && styles.modelRowDisabled,
+                          )}
+                          key={modelItem.id}
+                          onClick={
+                            canAccess
+                              ? () => handleSelect(modelItem.id, modelProvider)
+                              : undefined
+                          }
+                        >
+                          {/* Selected indicator */}
+                          {isSelected && (
+                            <div
+                              className={styles.selectedBar}
+                              style={{ background: cfg.accent }}
+                            />
+                          )}
+
+                          {/* Model info */}
+                          <Flexbox style={{ flex: 1, minWidth: 0 }}>
+                            <Flexbox align="center" gap={5} horizontal>
+                              <ModelItemRender
+                                {...modelItem}
+                                {...modelItem.abilities}
+                                isLocked={!canAccess}
+                              />
+                              {speedLabel && (
+                                <span className={styles.speedBadge}>
+                                  <Zap size={8} /> {speedLabel} tok/s
+                                </span>
+                              )}
+                              {isNew && <span className={styles.newBadge}>MỚI</span>}
+                            </Flexbox>
+                            {description && (
+                              <div className={styles.modelSub}>
+                                {speedLabel ? (
+                                  <>
+                                    <span
+                                      className={styles.speedBar}
+                                      style={{
+                                        background: speedLabel === '1000+'
+                                          ? 'linear-gradient(90deg, #eab308, #f97316)'
+                                          : 'linear-gradient(90deg, #22c55e, #4ade80)',
+                                        display: 'inline-block',
+                                        marginRight: 6,
+                                        verticalAlign: 'middle',
+                                        width: speedLabel === '1000+' ? 36 : 20,
+                                      }}
+                                    />
+                                    {description}
+                                  </>
+                                ) : (
+                                  description
+                                )}
+                              </div>
+                            )}
+                          </Flexbox>
+
+                          {/* Context window */}
+                          {ctxLabel && <span className={styles.ctx}>{ctxLabel}</span>}
+
+                          {/* Lock icon */}
+                          {!canAccess && (
+                            <Lock
+                              size={14}
+                              style={{
+                                color: 'rgba(255,255,255,0.25)',
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+
+              {/* Empty state */}
+              {filteredList.length === 0 && (
+                <Flexbox
+                  align="center"
+                  justify="center"
+                  style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, padding: '24px 16px' }}
+                >
+                  Không tìm thấy model nào
+                </Flexbox>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className={styles.footer}>
+              <div className={styles.tierLegend}>
+                <span>
+                  <span className={cx(styles.dot, styles.dotFree)} /> Free
+                </span>
+                <span>
+                  <span className={cx(styles.dot, styles.dotPro)} /> Pro
+                </span>
+                <span>
+                  <span className={cx(styles.dot, styles.dotFlagship)} /> Max
+                </span>
+              </div>
+              <span className={styles.footerLink} onClick={handleClose}>
+                Xem tất cả →
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 });
 

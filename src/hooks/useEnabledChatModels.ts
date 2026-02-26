@@ -24,7 +24,6 @@ export const NEW_MODEL_IDS = new Set([
  */
 export const SPEED_MODELS: Record<string, string> = {
   'mercury-coder-small-2-2': '1000+',
-  'pho-fast': 'Nhanh',
 };
 
 /**
@@ -32,33 +31,55 @@ export const SPEED_MODELS: Record<string, string> = {
  * Vietnamese language for local brand, English for international models.
  */
 export const MODEL_DESCRIPTIONS: Record<string, string> = {
-  // Phở Chat branded
-  'pho-fast': 'Trả lời tức thì',
-  'pho-pro': 'Viết nội dung · Phân tích',
-  'pho-smart': 'Suy luận phức tạp',
-  'pho-vision': 'Phân tích hình ảnh',
-  // Open models
-  'gemma-3-27b-it': 'Google · Tool calling',
-  'llama-4-scout-17b': 'Meta · MoE 17Bx16E',
-  'kimi-k2': 'MoonshotAI · 1T params · Coding',
-  'mercury-coder-small-2-2': 'AI nhanh nhất thế giới · Diffusion LLM',
+
+
   // Premium models (vercelaigateway)
   'anthropic/claude-opus-4-6-20250219': 'Anthropic · Mạnh nhất',
-  'anthropic/claude-sonnet-4-6-20250219': 'Anthropic · Tốc độ + chất lượng',
+
+
+
+
   'anthropic/claude-sonnet-4-20250514': 'Anthropic · Cân bằng',
+
+
+
+
   'anthropic/claude-4.5-sonnet': 'Anthropic · Sáng tạo',
-  'anthropic/claude-haiku-3.5': 'Anthropic · Nhẹ & nhanh',
+
+
+
+  // Open models
+  'gemma-3-27b-it': 'Google · Tool calling',
+
+
+
   'anthropic/claude-4-opus': 'Anthropic · Suy luận cao cấp',
-  'google/gemini-3.1-pro': 'Google · 2M context · Multimodal',
-  'google/gemini-2.5-pro': 'Google · Reasoning mạnh',
-  'google/gemini-2.5-flash': 'Google · Reasoning nhanh',
+
+
+  'kimi-k2': 'MoonshotAI · 1T params · Coding',
+
+
+  'anthropic/claude-haiku-3.5': 'Anthropic · Nhẹ & nhanh',
+
+  // Phở Chat branded
+  'pho-fast': 'Trả lời tức thì',
+
+  'anthropic/claude-sonnet-4-6-20250219': 'Anthropic · Tốc độ + chất lượng',
+  'pho-pro': 'Viết nội dung · Phân tích',
   'google/gemini-2.0-flash': 'Google · Đa năng & nhanh',
-  'openai/gpt-5.2': 'OpenAI · Flagship',
+  'pho-smart': 'Suy luận phức tạp',
+  'google/gemini-2.5-flash': 'Google · Reasoning nhanh',
+  'pho-vision': 'Phân tích hình ảnh',
+  'deepseek/deepseek-chat': 'DeepSeek · Coding & Math',
+  'llama-4-scout-17b': 'Meta · MoE 17Bx16E',
+  'deepseek/deepseek-reasoner': 'DeepSeek · Reasoning sâu',
+  'mercury-coder-small-2-2': 'AI nhanh nhất thế giới · Diffusion LLM',
+  'google/gemini-2.5-pro': 'Google · Reasoning mạnh',
+  'google/gemini-3.1-pro': 'Google · 2M context · Multimodal',
   'openai/gpt-4.1': 'OpenAI · Coding xuất sắc',
   'openai/gpt-4o': 'OpenAI · Đa năng',
+  'openai/gpt-5.2': 'OpenAI · Flagship',
   'openai/o4-mini': 'OpenAI · Reasoning nhanh',
-  'deepseek/deepseek-chat': 'DeepSeek · Coding & Math',
-  'deepseek/deepseek-reasoner': 'DeepSeek · Reasoning sâu',
   'xai/grok-3': 'xAI · Flagship',
   'xai/grok-3-mini': 'xAI · Reasoning nhanh',
 };
