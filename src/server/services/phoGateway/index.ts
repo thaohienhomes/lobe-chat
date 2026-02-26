@@ -51,6 +51,15 @@ class PhoGatewayService {
       ],
     },
 
+    // InceptionLabs Mercury 2 — ultra-fast diffusion LLM (1000+ tok/s)
+    'mercury-coder-small-2-2': {
+      id: 'mercury-coder-small-2-2',
+      providers: [
+        { modelId: 'mercury-coder-small-2-2', provider: 'inceptionlabs' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
+
 
 
     // Legacy compatibility

@@ -68,6 +68,15 @@ const PhoChat: ModelProviderCard = {
             functionCall: true,
             id: 'kimi-k2',
         },
+        {
+            contextWindowTokens: 128_000,
+            description:
+                'Mercury 2 — Model AI nhanh nhất thế giới (1000+ tokens/giây). Diffusion LLM sinh tokens song song, lý tưởng cho trả lời tức thì, structured outputs, và tool calling. Miễn phí Tier 1.',
+            displayName: 'Mercury 2 ⚡',
+            enabled: true,
+            functionCall: true,
+            id: 'mercury-coder-small-2-2',
+        },
     ],
     description:
         'Phở Chat AI — Mô hình AI thông minh với tự động chuyển đổi đa nhà cung cấp. Tối ưu cho người dùng Việt Nam với độ trễ thấp và độ tin cậy cao nhờ failover qua Groq, Cerebras, và Cloudflare Workers AI.',
