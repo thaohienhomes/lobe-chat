@@ -124,7 +124,11 @@ export default {
   ModelSwitchPanel: {
     emptyModel: '没有启用的模型，请前往设置开启',
     emptyProvider: '没有启用的服务商，请前往设置开启',
+    emptySearch: 'Không tìm thấy model nào',
     goToSettings: '前往设置',
+    legendFree: 'Free',
+    legendMax: 'Max',
+    legendPro: 'Pro',
     newBadge: 'MỚI',
     provider: '服务商',
     quotaHint: '{{count}} lượt/ngày',

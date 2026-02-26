@@ -2,6 +2,7 @@ import { ModelIcon } from '@lobehub/icons';
 import { createStyles, useThemeMode } from 'antd-style';
 import { Plug, Search, Eye } from 'lucide-react';
 import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { getModelTier } from '@/config/pricing';
 import {
@@ -16,10 +17,10 @@ import { agentSelectors } from '@/store/agent/slices/chat';
 
 /* ──────────── Tier palette ──────────── */
 const TIER = {
-  1: { accent: '#22c55e', icon: '⚡', label: 'Nhanh & Miễn Phí', quota: '' },
-  2: { accent: '#a78bfa', icon: '🔮', label: 'Chuyên Nghiệp', quota: '20 lượt/ngày' },
-  3: { accent: '#f59e0b', icon: '👑', label: 'Flagship', quota: '5 lượt/ngày' },
-} as const;
+  1: { accent: '#22c55e', icon: '⚡', labelKey: 'ModelSwitchPanel.tierFree' as const, quotaCount: 0, quotaKey: '' },
+  2: { accent: '#a78bfa', icon: '🔮', labelKey: 'ModelSwitchPanel.tierPro' as const, quotaCount: 20, quotaKey: 'ModelSwitchPanel.quotaHint' as const },
+  3: { accent: '#f59e0b', icon: '👑', labelKey: 'ModelSwitchPanel.tierFlagship' as const, quotaCount: 5, quotaKey: 'ModelSwitchPanel.quotaHint' as const },
+};
 
 /* ──────────── Model-access hook ──────────── */
 const useModelAccess = () => {
@@ -417,6 +418,7 @@ interface IProps {
 const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }) => {
   const { styles, cx } = useStyles();
   const { isDarkMode: isDark } = useThemeMode();
+  const { t } = useTranslation('components');
   const model = useAgentStore((s) => agentSelectors.currentAgentModel(s));
   const updateAgentConfig = useAgentStore((s) => s.updateAgentConfig);
   const tiers = useEnabledChatModels() as TierGroup[];
@@ -493,7 +495,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                 autoFocus
                 className={styles.searchInput}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Tìm model..."
+                placeholder={t('ModelSwitchPanel.searchPlaceholder')}
                 type="text"
                 value={q}
               />
@@ -502,15 +504,15 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
             {/* ── Scroll ── */}
             <div className={styles.scroll}>
               {filtered.map((tier) => {
-                const t = (tier.tierGroup || 1) as 1 | 2 | 3;
-                const cfg = TIER[t];
+                const tierNum = (tier.tierGroup || 1) as 1 | 2 | 3;
+                const cfg = TIER[tierNum];
                 return (
                   <div className={styles.section} key={tier.id}>
                     {/* Section header */}
                     <div className={styles.sectionHeader} style={{ color: cfg.accent }}>
                       <span style={{ fontSize: 13 }}>{cfg.icon}</span>
-                      {cfg.label}
-                      {cfg.quota && (
+                      {t(cfg.labelKey)}
+                      {cfg.quotaKey && (
                         <span
                           style={{
                             color: quotaColor,
@@ -520,7 +522,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                             textTransform: 'none',
                           }}
                         >
-                          {cfg.quota}
+                          {t(cfg.quotaKey as 'ModelSwitchPanel.quotaHint', { count: cfg.quotaCount })}
                         </span>
                       )}
                     </div>
@@ -562,7 +564,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                                 ? isDark
                                   ? 'linear-gradient(135deg,rgba(250,204,21,0.15),rgba(251,146,60,0.12))'
                                   : 'linear-gradient(135deg,rgba(250,204,21,0.12),rgba(251,146,60,0.08))'
-                                : iconBg(t, isDark),
+                                : iconBg(tierNum, isDark),
                             }}
                           >
                             <ModelIcon model={m.id} size={18} />
@@ -634,7 +636,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                 );
               })}
               {filtered.length === 0 && (
-                <div className={styles.empty}>Không tìm thấy model nào</div>
+                <div className={styles.empty}>{t('ModelSwitchPanel.emptySearch')}</div>
               )}
             </div>
 
@@ -642,13 +644,13 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
             <div className={styles.footer}>
               <div className={styles.tierLegend}>
                 <span>
-                  <span className={styles.dot} style={{ background: '#22c55e' }} /> Free
+                  <span className={styles.dot} style={{ background: '#22c55e' }} /> {t('ModelSwitchPanel.legendFree')}
                 </span>
                 <span>
-                  <span className={styles.dot} style={{ background: '#a78bfa' }} /> Pro
+                  <span className={styles.dot} style={{ background: '#a78bfa' }} /> {t('ModelSwitchPanel.legendPro')}
                 </span>
                 <span>
-                  <span className={styles.dot} style={{ background: '#f59e0b' }} /> Max
+                  <span className={styles.dot} style={{ background: '#f59e0b' }} /> {t('ModelSwitchPanel.legendMax')}
                 </span>
               </div>
             </div>

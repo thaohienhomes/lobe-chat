@@ -122,8 +122,18 @@
   "ModelSwitchPanel": {
     "emptyModel": "Không có mô hình nào được kích hoạt, vui lòng điều chỉnh trong cài đặt",
     "emptyProvider": "Không có nhà cung cấp nào được kích hoạt, vui lòng vào cài đặt để bật",
+    "emptySearch": "Không tìm thấy model nào",
     "goToSettings": "Đi đến cài đặt",
+    "legendFree": "Miễn phí",
+    "legendMax": "Cao cấp",
+    "legendPro": "Chuyên nghiệp",
+    "newBadge": "MỚI",
     "provider": "Nhà cung cấp",
+    "quotaHint": "{{count}} lượt/ngày",
+    "searchPlaceholder": "Tìm model...",
+    "tierFlagship": "Flagship",
+    "tierFree": "Nhanh & Miễn Phí",
+    "tierPro": "Chuyên Nghiệp",
     "title": "Mô hình"
   },
   "MultiImagesUpload": {

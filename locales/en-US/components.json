@@ -122,8 +122,18 @@
   "ModelSwitchPanel": {
     "emptyModel": "No enabled model. Please go to settings to enable.",
     "emptyProvider": "No enabled providers. Please go to settings to enable one.",
+    "emptySearch": "No models found",
     "goToSettings": "Go to settings",
+    "legendFree": "Free",
+    "legendMax": "Max",
+    "legendPro": "Pro",
+    "newBadge": "NEW",
     "provider": "Provider",
+    "quotaHint": "{{count}} uses/day",
+    "searchPlaceholder": "Search models...",
+    "tierFlagship": "Flagship",
+    "tierFree": "Fast & Free",
+    "tierPro": "Professional",
     "title": "Model"
   },
   "MultiImagesUpload": {
