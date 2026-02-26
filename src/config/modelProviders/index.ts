@@ -22,6 +22,7 @@ import GiteeAIProvider from './giteeai';
 import GithubProvider from './github';
 import GoogleProvider from './google';
 import GroqProvider from './groq';
+import InceptionLabsProvider from './inceptionlabs';
 import PhoChatProvider from './phochat';
 import HigressProvider from './higress';
 import HuggingFaceProvider from './huggingface';
@@ -120,6 +121,7 @@ export const LOBE_DEFAULT_MODEL_LIST: ChatModelCard[] = [
   // Phở Chat logical models — MUST be included so builtinAiModelList can
   // recognize providerId='phochat' for functionCall / tool-use checks.
   PhoChatProvider.chatModels,
+  InceptionLabsProvider.chatModels,
   VercelAIGatewayProvider.chatModels,
 ].flat();
 
@@ -200,6 +202,7 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   { ...NebiusProvider, enabled: false },
   { ...CometAPIProvider, enabled: false },
   { ...VercelAIGatewayProvider, enabled: true },
+  { ...InceptionLabsProvider, enabled: true },
   { ...CerebrasProvider, enabled: true },
   { ...PhoChatProvider, enabled: true },
 ];
@@ -235,6 +238,7 @@ export { default as GiteeAIProviderCard } from './giteeai';
 export { default as GithubProviderCard } from './github';
 export { default as GoogleProviderCard } from './google';
 export { default as GroqProviderCard } from './groq';
+export { default as InceptionLabsProviderCard } from './inceptionlabs';
 export { default as HigressProviderCard } from './higress';
 export { default as HuggingFaceProviderCard } from './huggingface';
 export { default as HunyuanProviderCard } from './hunyuan';

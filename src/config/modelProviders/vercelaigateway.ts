@@ -10,6 +10,26 @@ const VercelAIGateway: ModelProviderCard = {
     // --- Anthropic Models ---
     {
       contextWindowTokens: 200_000,
+      description: 'Claude Opus 4.6 - Mô hình mạnh nhất của Anthropic với 1M context beta, agentic coding xuất sắc',
+      displayName: 'Claude Opus 4.6',
+      enabled: true,
+      functionCall: true,
+      id: 'anthropic/claude-opus-4-6',
+      maxOutput: 32_000,
+      vision: true,
+    },
+    {
+      contextWindowTokens: 200_000,
+      description: 'Claude Sonnet 4.6 - Sonnet mạnh nhất, suy luận nâng cao và coding vượt trội',
+      displayName: 'Claude Sonnet 4.6',
+      enabled: true,
+      functionCall: true,
+      id: 'anthropic/claude-sonnet-4-6',
+      maxOutput: 64_000,
+      vision: true,
+    },
+    {
+      contextWindowTokens: 200_000,
       description: 'Claude 4.5 Sonnet - Best balance of intelligence and speed',
       displayName: 'Claude 4.5 Sonnet',
       enabled: true,
@@ -49,6 +69,17 @@ const VercelAIGateway: ModelProviderCard = {
       vision: true,
     },
     // --- Google Models ---
+    {
+      contextWindowTokens: 2_000_000,
+      description: 'Gemini 3.1 Pro - Suy luận nâng cao, agentic workflows, native multimodal code gen',
+      displayName: 'Gemini 3.1 Pro',
+      enabled: true,
+      functionCall: true,
+      id: 'google/gemini-3.1-pro-preview',
+      maxOutput: 65_536,
+      reasoning: true,
+      vision: true,
+    },
     {
       contextWindowTokens: 1_000_000,
       description: 'Gemini 3 Flash - Mô hình mới nhất, nhanh, multimodal với Google Search grounding',

@@ -6,6 +6,30 @@ const Anthropic: ModelProviderCard = {
     {
       contextWindowTokens: 200_000,
       description:
+        'Claude Opus 4.6 là mô hình mạnh nhất của Anthropic với 1M context window beta, xuất sắc trong agentic coding, lập kế hoạch và suy luận phức tạp.',
+      displayName: 'Claude Opus 4.6',
+      enabled: true,
+      functionCall: true,
+      id: 'claude-opus-4-6',
+      maxOutput: 32_000,
+      releasedAt: '2026-02-05',
+      vision: true,
+    },
+    {
+      contextWindowTokens: 200_000,
+      description:
+        'Claude Sonnet 4.6 là Sonnet mạnh nhất, nâng cấp toàn diện coding, computer use, long-context reasoning và agent planning. 1M context beta.',
+      displayName: 'Claude Sonnet 4.6',
+      enabled: true,
+      functionCall: true,
+      id: 'claude-sonnet-4-6',
+      maxOutput: 64_000,
+      releasedAt: '2026-02-17',
+      vision: true,
+    },
+    {
+      contextWindowTokens: 200_000,
+      description:
         'Claude 4 Opus 是 Anthropic 最强大的下一代模型，具有卓越的推理能力和创造力，适用于最复杂的任务和高级分析。',
       displayName: 'Claude 4 Opus',
       enabled: true,

@@ -62,9 +62,10 @@ export const VN_PLANS: Record<string, PlanConfig> = {
   // Activation: promo code sets publicMetadata.planId = 'medical_beta'
   // Default model: Groq (Llama 3.1) — avoids high latency and quota limits
   medical_beta: {
-    advancedAI: false,
+    advancedAI: true,
     code: 'medical_beta',
     dailyTier2Limit: 20,
+    dailyTier3Limit: 5,
     defaultModel: 'llama-3.1-8b-instant',
     defaultProvider: 'groq',
     displayName: 'Phở Medical Beta 🏥',
@@ -75,12 +76,13 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     features: [
       '500k Phở Points/tháng',
       'Unlimited Tier 1 + 20 Tier 2/ngày',
+      '5 lượt Tier 3/ngày (Claude Opus 4.6, Gemini 3.1 Pro)',
       'PubMed, ArXiv, Drug Interaction, Clinical Calculator',
       'Semantic Scholar + DOI Resolver',
       'LaTeX upload & citation',
       'Medical Founding Team badge 🏥',
     ],
-    keyLimits: 'Unlim Tier 1. 20 Tier 2 msgs/day. Medical plugins.',
+    keyLimits: 'Unlim Tier 1. 20 Tier 2. 5 Tier 3/day. Medical plugins.',
     monthlyPoints: 500_000,
     // 999k VNĐ/year — paid via Sepay/VietQR, activated by promo code
     price: 999_000,
@@ -417,6 +419,9 @@ const TIER1_MODELS = [
   'deepseek-chat',
   'qwen-turbo',
   'llama-4-scout',               // Legacy short ID for Llama 4 Scout
+  // InceptionLabs Mercury — ultra-fast diffusion LLM (1000+ tok/s)
+  'mercury-coder-small-2-2',     // Mercury 2
+  'mercury-coder-small-2',       // Mercury Coder Small
 ] as const;
 
 /** Tier 2: Standard models — available to Basic/Starter+ plans */
@@ -429,6 +434,7 @@ const TIER2_MODELS = [
   'google/gemini-2.5-pro',
   'google/gemini-3-flash-preview',
   'anthropic/claude-sonnet-4.5',
+  'anthropic/claude-sonnet-4-6',
   'anthropic/claude-haiku-4.5',
   'anthropic/claude-sonnet-4-20250514',
   'openai/gpt-5.2',
@@ -467,10 +473,14 @@ const TIER3_MODELS = [
   'pho-smart',
   // Vercel AI Gateway
   'google/gemini-3-pro-preview',
+  'google/gemini-3.1-pro-preview',
   'anthropic/claude-opus-4-20250514',
+  'anthropic/claude-opus-4-6',
   'openai/o3-mini',
   // Legacy short IDs (for backward compat & tier lookup)
   'gemini-3-pro-preview',
+  'gemini-3.1-pro-preview',
+  'claude-opus-4-6',
   'gpt-4-turbo',
   'claude-3-opus',
   'o1',
@@ -555,14 +565,14 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
 
 
 
-  // Medical Beta: Tier 1 + Tier 2 with 20/day limit, Groq primary
-  // Avoids Vertex AI 1 RPM quota — routes through Groq and Gateway
+  // Medical Beta: Tier 1 + Tier 2 + Tier 3 (limited), Groq primary
+  // 999K VND/year — doctors plan with flagship model access
   medical_beta: {
-    allowedTiers: [1, 2],
-    dailyLimits: { tier2: 20 },
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier2: 20, tier3: 5 },
     defaultModel: 'llama-3.1-8b-instant',
     defaultProvider: 'groq',
-    models: [...TIER1_MODELS, ...TIER2_MODELS],
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
 
@@ -694,6 +704,11 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       'accounts/fireworks/models/llama-v3p1-8b-instruct', // Fireworks AI
       'accounts/fireworks/models/llama-v3p1-70b-instruct', // Fireworks AI
+      // ============================================
+      // InceptionLabs Mercury (Tier 1 — ultra-fast)
+      // ============================================
+      'mercury-coder-small-2-2', // Mercury 2
+      'mercury-coder-small-2', // Mercury Coder Small
     ],
     outputCostPer1M: 15, // Cost per 1M output tokens
     pointsPerMessage: 5, // ~15-20 points per typical message
@@ -742,6 +757,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'google/gemini-2.5-flash', // Vercel AI Gateway
       'google/gemini-2.5-pro', // Vercel AI Gateway
       'anthropic/claude-sonnet-4.5', // Vercel AI Gateway
+      'anthropic/claude-sonnet-4-6', // Vercel AI Gateway — Claude Sonnet 4.6
+      'claude-sonnet-4-6', // Legacy short ID
       'anthropic/claude-sonnet-4-20250514', // Vercel AI Gateway — Claude 4 Sonnet
       'anthropic/claude-haiku-4.5', // Vercel AI Gateway
       'openai/gpt-5.2', // Vercel AI Gateway
@@ -787,6 +804,10 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'claude-3-opus',
       'anthropic/claude-3-opus',
       'anthropic/claude-opus-4-20250514', // Vercel AI Gateway — Claude 4 Opus
+      'anthropic/claude-opus-4-6', // Vercel AI Gateway — Claude Opus 4.6
+      'claude-opus-4-6', // Legacy short ID
+      'google/gemini-3.1-pro-preview', // Vercel AI Gateway — Gemini 3.1 Pro
+      'gemini-3.1-pro-preview', // Legacy short ID
       // ============================================
       // Legacy Tier 3 Models
       // ============================================

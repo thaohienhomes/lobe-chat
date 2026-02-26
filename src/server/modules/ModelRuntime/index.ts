@@ -227,6 +227,22 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
       return getParamsFromPayload(firstProvider.provider, payload);
     }
 
+    // InceptionLabs Mercury — ultra-fast Diffusion LLM (1000+ tok/s)
+    // OpenAI-compatible API at https://api.inceptionlabs.ai/v1
+    case 'inceptionlabs': {
+      const apiKey = apiKeyManager.pick(
+        payload?.apiKey || process.env.INCEPTIONLABS_API_KEY || llmConfig.INCEPTIONLABS_API_KEY,
+      );
+      const baseURL = payload?.baseURL || 'https://api.inceptionlabs.ai/v1';
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[ModelRuntime] InceptionLabs Mercury - API Key exists:', !!apiKey);
+        console.log('[ModelRuntime] InceptionLabs Mercury - Base URL:', baseURL);
+      }
+
+      return { apiKey, baseURL };
+    }
+
     // Vercel AI Gateway - unified access to 100+ models
     case 'vercelaigateway': {
       const apiKey = apiKeyManager.pick(

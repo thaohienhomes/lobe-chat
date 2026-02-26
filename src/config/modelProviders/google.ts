@@ -4,6 +4,18 @@ import { ModelProviderCard } from '@/types/llm';
 const Google: ModelProviderCard = {
   chatModels: [
     {
+      contextWindowTokens: 2_097_152 + 65_536,
+      description:
+        'Gemini 3.1 Pro Preview là phiên bản nâng cấp mạnh mẽ, suy luận phức tạp, agentic workflows, và native multimodal code generation.',
+      displayName: 'Gemini 3.1 Pro Preview',
+      enabled: true,
+      functionCall: true,
+      id: 'gemini-3.1-pro-preview',
+      maxOutput: 65_536,
+      releasedAt: '2026-02-19',
+      vision: true,
+    },
+    {
       contextWindowTokens: 1_048_576 + 65_536,
       description:
         'Gemini 2.5 Pro Experimental 是 Google 最先进的思维模型，能够对代码、数学和STEM领域的复杂问题进行推理，以及使用长上下文分析大型数据集、代码库和文档。',

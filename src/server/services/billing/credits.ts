@@ -253,10 +253,33 @@ export async function checkTierAccess(
   const remaining = dailyLimit - currentUsage;
 
   if (remaining <= 0) {
+    // Tier-specific model switch suggestions
+    let reason: string;
+    if (tier === 3) {
+      reason =
+        `⚠️ Bạn đã dùng hết ${dailyLimit} lượt Tier 3 hôm nay.\n\n` +
+        `💡 Thử các model Tier 2 (không giới hạn hoặc giới hạn cao hơn):\n` +
+        `• Claude Sonnet 4.6 — suy luận mạnh, coding xuất sắc\n` +
+        `• Gemini 2.5 Pro — 2M context, Google Search\n` +
+        `• GPT-5.2 — flagship OpenAI\n\n` +
+        `🔄 Hạn mức reset lúc 0:00 mỗi ngày.`;
+    } else if (tier === 2) {
+      reason =
+        `⚠️ Bạn đã dùng hết ${dailyLimit} lượt Tier 2 hôm nay.\n\n` +
+        `💡 Thử các model Tier 1 (miễn phí không giới hạn):\n` +
+        `• Mercury 2 ⚡ — siêu nhanh 1000+ tok/s\n` +
+        `• Gemini 2.0 Flash — đáng tin cậy, multimodal\n` +
+        `• Llama 4 Scout — MoE, multi-task mạnh\n` +
+        `• Gemma 3 27B — tool calling xuất sắc\n\n` +
+        `🔄 Hạn mức reset lúc 0:00 mỗi ngày.`;
+    } else {
+      reason = `Bạn đã dùng hết hạn mức model hôm nay. Hãy thử lại vào ngày mai.`;
+    }
+
     return {
       allowed: false,
       dailyLimit,
-      reason: `Bạn đã dùng hết ${dailyLimit} lượt model cao cấp hôm nay. Hãy chuyển sang model Groq Llama (Tier 1) để tiếp tục không giới hạn, hoặc thử lại vào ngày mai.`,
+      reason,
       remaining: 0,
     };
   }
