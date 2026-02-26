@@ -37,8 +37,8 @@ def load_env():
     CLERK_SECRET_KEY = CLERK_SECRET_KEY or os.environ.get('CLERK_SECRET_KEY')
     RESEND_API_KEY   = RESEND_API_KEY   or os.environ.get('RESEND_API_KEY')
 
-EMAIL_SUBJECT = "🔬 Phở Chat: PubMed v2, OpenAlex, Drug Interactions & Model AI Mới"
-EMAIL_HTML_PATH = r"C:\Users\HLC_2021\.gemini\antigravity\brain\d1fbf0bb-d705-4f52-be0b-7e3338078541\email_v3.html"
+EMAIL_SUBJECT = "🚀 Phở Chat: 4 Model AI Mới — Claude Opus 4.6, Mercury 2 ⚡ & Medical Beta Tier 3"
+EMAIL_HTML_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src', 'emails', 'new-models-feb-2026.html')
 FROM_EMAIL    = "Tom from Phở Chat <hi@pho.chat>"
 
 # Rate limiting: Resend free tier = 100 emails/day, paid = 10 req/s
