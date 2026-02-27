@@ -13,10 +13,13 @@ import { PHO_AUTO_MODEL_ID } from '@/utils/autoRouter';
  * Remove entries once the launch period ends.
  */
 export const NEW_MODEL_IDS = new Set([
-  'mercury-coder-small-2-2',
-  'anthropic/claude-opus-4-6-20250219',
-  'anthropic/claude-sonnet-4-6-20250219',
-  'google/gemini-3.1-pro',
+  'openai/gpt-5.3-codex',
+  'xai/grok-4.2',
+  'moonshot/kimi-k2.5',
+  'kimi-k2.5',
+  'anthropic/claude-opus-4-6',
+  'anthropic/claude-sonnet-4-6',
+  'google/gemini-3.1-pro-preview',
 ]);
 
 /**
