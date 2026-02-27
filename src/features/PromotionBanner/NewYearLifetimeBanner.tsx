@@ -110,11 +110,11 @@ const NewYearLifetimeBanner = memo(() => {
       .catch(err => console.error('Failed to load Lottie', err));
   }, []);
 
-  // Check if user has a lifetime plan
-  // Hide banner for lifetime AND medical_beta paid users
-  const isLifetime = ['gl_lifetime', 'lifetime_early_bird', 'lifetime_last_call', 'lifetime_standard', 'medical_beta'].includes(subscriptionPlan || '');
+  // Hide banner for ALL paid users (anyone not on free tier)
+  const FREE_PLANS = ['vn_free', 'gl_starter', ''];
+  const isPaidUser = subscriptionPlan && !FREE_PLANS.includes(subscriptionPlan);
 
-  if (isLifetime || !visible) return null;
+  if (isPaidUser || !visible) return null;
 
   return (
     <AnimatePresence>
