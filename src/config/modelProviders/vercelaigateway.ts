@@ -48,26 +48,7 @@ const VercelAIGateway: ModelProviderCard = {
       maxOutput: 8192,
       vision: true,
     },
-    {
-      contextWindowTokens: 200_000,
-      description: 'Claude 4 Sonnet - High-quality reasoning with excellent tool use',
-      displayName: 'Claude 4 Sonnet',
-      enabled: true,
-      functionCall: true,
-      id: 'anthropic/claude-sonnet-4-20250514',
-      maxOutput: 64_000,
-      vision: true,
-    },
-    {
-      contextWindowTokens: 200_000,
-      description: 'Claude 4 Opus - Most powerful Anthropic model for complex tasks',
-      displayName: 'Claude 4 Opus',
-      enabled: true,
-      functionCall: true,
-      id: 'anthropic/claude-opus-4-20250514',
-      maxOutput: 32_000,
-      vision: true,
-    },
+    // Claude 4 Sonnet/Opus (old IDs) — retired, replaced by 4.6 versions above
     // --- Google Models ---
     {
       contextWindowTokens: 2_000_000,
@@ -135,7 +116,17 @@ const VercelAIGateway: ModelProviderCard = {
     // --- OpenAI Models ---
     {
       contextWindowTokens: 128_000,
-      description: 'GPT-5.2 - Latest OpenAI flagship model',
+      description: 'GPT-5.3 Codex — Model coding flagship mới nhất của OpenAI, nhanh hơn 25%, tích hợp Codex + GPT-5 training stacks',
+      displayName: 'GPT-5.3 Codex',
+      enabled: true,
+      functionCall: true,
+      id: 'openai/gpt-5.3-codex',
+      maxOutput: 16_384,
+      vision: true,
+    },
+    {
+      contextWindowTokens: 128_000,
+      description: 'GPT-5.2 - OpenAI flagship model, mặc định cho ChatGPT',
       displayName: 'GPT-5.2',
       enabled: true,
       functionCall: true,
@@ -143,26 +134,7 @@ const VercelAIGateway: ModelProviderCard = {
       maxOutput: 16_384,
       vision: true,
     },
-    {
-      contextWindowTokens: 128_000,
-      description: 'GPT-4.1 - Balanced performance and cost',
-      displayName: 'GPT-4.1',
-      enabled: true,
-      functionCall: true,
-      id: 'openai/gpt-4.1',
-      maxOutput: 16_384,
-      vision: true,
-    },
-    {
-      contextWindowTokens: 128_000,
-      description: 'GPT-4o - Optimized for vision and multimodal',
-      displayName: 'GPT-4o',
-      enabled: true,
-      functionCall: true,
-      id: 'openai/gpt-4o',
-      maxOutput: 16_384,
-      vision: true,
-    },
+    // GPT-4.1 and GPT-4o — retired by OpenAI on Feb 13, 2026
     // --- DeepSeek Models ---
     {
       contextWindowTokens: 128_000,
@@ -185,11 +157,22 @@ const VercelAIGateway: ModelProviderCard = {
     // --- xAI Models ---
     {
       contextWindowTokens: 128_000,
-      description: 'Grok 4 - Latest xAI model with real-time knowledge',
-      displayName: 'Grok 4',
+      description: 'Grok 4.2 — Kiến trúc 4-agent (Harper, Benjamin, Lucas), giảm 65% hallucination, chuyên gia y khoa & kỹ thuật',
+      displayName: 'Grok 4.2',
       enabled: true,
       functionCall: true,
-      id: 'xai/grok-4',
+      id: 'xai/grok-4.2',
+      maxOutput: 16_384,
+      vision: true,
+    },
+    // --- Moonshot Models ---
+    {
+      contextWindowTokens: 128_000,
+      description: 'Kimi K2.5 — Agent Swarm (100 agents đồng thời), 1T params MoE, multimodal, visual coding xuất sắc',
+      displayName: 'Kimi K2.5',
+      enabled: true,
+      functionCall: true,
+      id: 'moonshot/kimi-k2.5',
       maxOutput: 16_384,
       vision: true,
     },

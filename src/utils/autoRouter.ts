@@ -133,37 +133,37 @@ const CATEGORY_KEYWORDS: Record<PromptCategory, string[]> = {
 const CATEGORY_AFFINITY: Record<PromptCategory, Record<number, string[]>> = {
     analysis: {
         1: ['google/gemini-2.0-flash', 'pho-fast', 'gemma-3-27b-it'],
-        2: ['google/gemini-2.5-pro', 'openai/gpt-4o', 'pho-pro', 'anthropic/claude-sonnet-4-20250514'],
+        2: ['google/gemini-2.5-pro', 'openai/gpt-5.2', 'pho-pro', 'anthropic/claude-sonnet-4-6'],
         3: ['google/gemini-3.1-pro-preview', 'anthropic/claude-opus-4-6', 'pho-smart'],
     },
     coding: {
         1: ['google/gemini-2.0-flash', 'mercury-coder-small-2-2', 'pho-fast'],
-        2: ['anthropic/claude-sonnet-4-20250514', 'openai/gpt-4o', 'pho-pro', 'google/gemini-2.5-pro'],
+        2: ['openai/gpt-5.3-codex', 'anthropic/claude-sonnet-4-6', 'pho-pro', 'google/gemini-2.5-pro'],
         3: ['anthropic/claude-opus-4-6', 'google/gemini-3.1-pro-preview', 'pho-smart'],
     },
     creative: {
         1: ['google/gemini-2.0-flash', 'pho-fast'],
-        2: ['anthropic/claude-sonnet-4-20250514', 'pho-pro', 'openai/gpt-4o'],
+        2: ['anthropic/claude-sonnet-4-6', 'pho-pro', 'openai/gpt-5.2'],
         3: ['anthropic/claude-opus-4-6', 'pho-smart'],
     },
     general: {
         1: ['google/gemini-2.0-flash', 'pho-fast', 'llama-3.3-70b-versatile'],
-        2: ['openai/gpt-4o', 'pho-pro', 'google/gemini-2.5-flash'],
+        2: ['openai/gpt-5.2', 'pho-pro', 'google/gemini-2.5-flash'],
         3: ['pho-smart', 'google/gemini-3.1-pro-preview'],
     },
     math: {
         1: ['google/gemini-2.0-flash', 'pho-fast'],
-        2: ['google/gemini-2.5-pro', 'openai/gpt-4o', 'pho-pro'],
+        2: ['google/gemini-2.5-pro', 'openai/gpt-5.2', 'pho-pro'],
         3: ['google/gemini-3.1-pro-preview', 'anthropic/claude-opus-4-6', 'pho-smart'],
     },
     medical: {
         1: ['google/gemini-2.0-flash', 'pho-fast'],
-        2: ['openai/gpt-4o', 'google/gemini-2.5-pro', 'pho-pro'],
+        2: ['xai/grok-4.2', 'google/gemini-2.5-pro', 'pho-pro'],
         3: ['google/gemini-3.1-pro-preview', 'anthropic/claude-opus-4-6', 'pho-smart'],
     },
     translation: {
         1: ['google/gemini-2.0-flash', 'pho-fast'],
-        2: ['openai/gpt-4o', 'pho-pro', 'google/gemini-2.5-flash'],
+        2: ['openai/gpt-5.2', 'pho-pro', 'google/gemini-2.5-flash'],
         3: ['pho-smart', 'google/gemini-3.1-pro-preview'],
     },
 };

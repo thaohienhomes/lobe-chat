@@ -709,6 +709,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       'mercury-coder-small-2-2', // Mercury 2
       'mercury-coder-small-2', // Mercury Coder Small
+      // Kimi K2.5 (via phochat)
+      'kimi-k2.5', // Kimi K2.5 (upgraded from K2)
     ],
     outputCostPer1M: 15, // Cost per 1M output tokens
     pointsPerMessage: 5, // ~15-20 points per typical message
@@ -762,9 +764,12 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'anthropic/claude-sonnet-4-20250514', // Vercel AI Gateway — Claude 4 Sonnet
       'anthropic/claude-haiku-4.5', // Vercel AI Gateway
       'openai/gpt-5.2', // Vercel AI Gateway
-      'openai/gpt-4o', // Vercel AI Gateway
+      'openai/gpt-4o', // Vercel AI Gateway — retired but kept for legacy
+      'openai/gpt-5.3-codex', // Vercel AI Gateway — GPT-5.3 Codex (NEW)
       'deepseek/deepseek-r1', // Vercel AI Gateway
-      'xai/grok-4', // Vercel AI Gateway
+      'xai/grok-4', // Vercel AI Gateway — legacy
+      'xai/grok-4.2', // Vercel AI Gateway — Grok 4.2 (NEW)
+      'moonshot/kimi-k2.5', // Vercel AI Gateway — Kimi K2.5 (NEW)
       'meta-llama/llama-4-70b-instruct', // Vercel AI Gateway
       // ============================================
       // Together AI Tier 2 Models (via CF Gateway)
@@ -772,7 +777,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'Qwen/Qwen2.5-72B-Instruct-Turbo', // Together AI - Qwen 2.5
       'deepseek-ai/DeepSeek-R1', // Together AI - DeepSeek R1
       'deepseek-ai/DeepSeek-V3', // Together AI - DeepSeek V3
-      'moonshotai/Kimi-K2-Instruct', // Together AI - Kimi K2 (NEW)
+      'moonshotai/Kimi-K2-Instruct', // Together AI - Kimi K2 (legacy)
+      'moonshotai/Kimi-K2.5-Instruct', // Together AI - Kimi K2.5 (NEW)
       // ============================================
       // Groq Tier 2 Models (via CF Gateway)
       // ============================================

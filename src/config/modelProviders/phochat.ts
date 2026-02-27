@@ -62,11 +62,11 @@ const PhoChat: ModelProviderCard = {
         {
             contextWindowTokens: 128_000,
             description:
-                'Kimi K2 — Model frontier của MoonshotAI với 1 nghìn tỷ tham số (32B active), xuất sắc trong agentic tasks và tool calling. 128K context, lý tưởng cho coding, reasoning phức tạp.',
-            displayName: 'Kimi K2 🌙',
+                'Kimi K2.5 — Agent Swarm mới nhất của MoonshotAI (100 agents đồng thời), 1 nghìn tỷ tham số MoE (32B active), xuất sắc trong visual coding, agentic tasks.',
+            displayName: 'Kimi K2.5 🌙',
             enabled: true,
             functionCall: true,
-            id: 'kimi-k2',
+            id: 'kimi-k2.5',
         },
         {
             contextWindowTokens: 128_000,
