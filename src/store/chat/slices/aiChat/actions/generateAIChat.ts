@@ -20,10 +20,7 @@ import { messageMapKey } from '@/store/chat/utils/messageMapKey';
 import { getFileStoreState } from '@/store/file/store';
 import { useSessionStore } from '@/store/session';
 import { WebBrowsingManifest } from '@/tools/web-browsing';
-import { PHO_AUTO_MODEL_ID, classifyPrompt, pickBestModel } from '@/utils/autoRouter';
-import PhoChatConfig from '@/config/modelProviders/phochat';
-import VercelAIGatewayConfig from '@/config/modelProviders/vercelaigateway';
-import type { ModelProviderCard } from '@/types/llm';
+import { PHO_AUTO_MODEL_ID, resolveAutoModel } from '@/utils/autoRouter';
 import { ChatMessage, CreateMessageParams, SendMessageParams } from '@/types/message';
 import { ChatImageItem } from '@/types/message/image';
 import { MessageSemanticSearchChunk } from '@/types/rag';
@@ -327,25 +324,7 @@ export const generateAIChat: StateCreator<
       const lastUserMsg = messages.findLast((m) => m.role === 'user');
       const promptText = lastUserMsg?.content || '';
       const hasFiles = !!(lastUserMsg as any)?.files?.length;
-
-      const classification = classifyPrompt(promptText, hasFiles);
-
-      // Build available model list from configs (same source as useEnabledChatModels)
-      const availableModels: Array<{ id: string; originProvider: string }> = [];
-      const phoChatModels = (PhoChatConfig.chatModels || [])
-        .filter((m) => m.enabled !== false)
-        .map((m) => ({ id: m.id, originProvider: 'phochat' }));
-      availableModels.push(...phoChatModels);
-
-      const gatewayModels = ((VercelAIGatewayConfig as ModelProviderCard).chatModels || [])
-        .filter((m) => m.enabled !== false)
-        .map((m) => ({ id: m.id, originProvider: 'vercelaigateway' }));
-      availableModels.push(...gatewayModels);
-
-      const resolved = pickBestModel(classification, availableModels);
-      console.log(
-        `✨ Phở Auto: "${promptText.slice(0, 60)}..." → ${resolved.modelId} (${resolved.reason})`,
-      );
+      const resolved = resolveAutoModel(promptText, hasFiles, 'Phở Auto (client)');
       model = resolved.modelId;
       provider = resolved.providerId;
     }

@@ -1,18 +1,22 @@
 /**
- * Phở Auto ✨ — Client-side Prompt Router
+ * Phở Auto ✨ — Client-side Prompt Router (Phase 2)
  *
  * Classifies user prompts by complexity and category, then selects the
  * optimal model from the user's available model list. This runs entirely
  * on the client side (zero latency overhead) and falls back gracefully
  * when quota is exhausted.
  *
- * Architecture:
- *   1. classifyPrompt()  — regex-based analysis of the raw prompt text
- *   2. pickBestModel()   — walks tiers from best-fit ↓, checks affinity
- *   3. resolveAutoModel() — orchestrates 1+2 for store integration
+ * Phase 2 improvements:
+ *   - Multi-category scoring (replaces first-match-wins)
+ *   - New `math` category for reasoning-heavy prompts
+ *   - Short-prompt heuristic (< 20 chars → simple)
+ *   - resolveAutoModel() helper to DRY up store integrations
  */
 
+import PhoChatConfig from '@/config/modelProviders/phochat';
 import { getModelTier } from '@/config/pricing';
+import VercelAIGatewayConfig from '@/config/modelProviders/vercelaigateway';
+import type { ModelProviderCard } from '@/types/llm';
 
 // ─── Constants ────────────────────────────────────────────────────────
 export const PHO_AUTO_MODEL_ID = 'pho-auto';
@@ -21,6 +25,7 @@ export const PHO_AUTO_MODEL_ID = 'pho-auto';
 export type PromptComplexity = 'simple' | 'medium' | 'complex';
 export type PromptCategory =
     | 'coding'
+    | 'math'
     | 'medical'
     | 'creative'
     | 'analysis'
@@ -54,14 +59,15 @@ const VIETNAMESE_REGEX =
 // ─── Keyword Dictionaries ─────────────────────────────────────────────
 const COMPLEX_KEYWORDS = [
     // English
-    'algorithm', 'architecture', 'benchmark', 'build', 'code', 'compile',
-    'comprehensive', 'debug', 'deep dive', 'deploy', 'design pattern',
-    'detailed analysis', 'differential diagnosis', 'implement',
-    'machine learning', 'multi-step', 'optimize', 'refactor', 'research',
-    'step by step', 'systematic',
+    'algorithm', 'architecture', 'benchmark', 'build', 'code review',
+    'compile', 'comprehensive', 'debug', 'deep dive', 'deploy',
+    'design pattern', 'detailed analysis', 'differential diagnosis',
+    'implement', 'machine learning', 'multi-step', 'optimize',
+    'refactor', 'research', 'step by step', 'systematic',
     // Vietnamese
-    'chẩn đoán', 'kiến trúc', 'lập trình', 'nghiên cứu', 'phân tích chi tiết',
-    'phương pháp', 'thuật toán', 'tối ưu hóa', 'triển khai', 'xây dựng',
+    'chẩn đoán', 'kiến trúc', 'lập trình', 'nghiên cứu',
+    'phân tích chi tiết', 'phương pháp', 'thuật toán', 'tối ưu hóa',
+    'triển khai', 'xây dựng',
 ];
 
 const MEDIUM_KEYWORDS = [
@@ -77,28 +83,41 @@ const MEDIUM_KEYWORDS = [
 const CATEGORY_KEYWORDS: Record<PromptCategory, string[]> = {
     analysis: [
         'analyze', 'benchmark', 'chart', 'compare', 'data', 'evaluate',
-        'metrics', 'report', 'statistics', 'trend',
-        'dữ liệu', 'đánh giá', 'phân tích', 'so sánh', 'thống kê',
+        'graph', 'insight', 'metrics', 'report', 'statistics', 'trend',
+        'visualization',
+        'biểu đồ', 'dữ liệu', 'đánh giá', 'phân tích', 'so sánh',
+        'thống kê',
     ],
     coding: [
-        'api', 'bug', 'class', 'code', 'component', 'css', 'database',
-        'debug', 'deploy', 'docker', 'error', 'function', 'git', 'html',
-        'implement', 'javascript', 'json', 'node', 'python', 'react',
-        'refactor', 'regex', 'rest', 'sql', 'test', 'typescript', 'variable',
+        'api', 'bug', 'class', 'code', 'component', 'config', 'css',
+        'database', 'debug', 'deploy', 'docker', 'error', 'function',
+        'git', 'html', 'implement', 'javascript', 'json', 'kubernetes',
+        'node', 'npm', 'python', 'react', 'refactor', 'regex', 'rest',
+        'sql', 'test', 'typescript', 'variable', 'webpack',
         'lập trình', 'lỗi', 'mã nguồn', 'thuật toán', 'triển khai',
     ],
     creative: [
         'blog', 'brainstorm', 'creative', 'essay', 'fiction', 'novel',
-        'poem', 'slogan', 'story', 'tagline', 'tone',
+        'poem', 'script', 'slogan', 'song', 'story', 'tagline', 'tone',
         'bài viết', 'sáng tác', 'sáng tạo', 'thơ', 'truyện', 'viết',
     ],
     general: [], // fallback — never matched by keywords
+    math: [
+        'algebra', 'calculus', 'calculate', 'derivative', 'equation',
+        'formula', 'geometry', 'integral', 'logarithm', 'matrix',
+        'mathematical', 'probability', 'proof', 'solve', 'theorem',
+        'trigonometry',
+        'bất phương trình', 'công thức', 'giải', 'hình học',
+        'phương trình', 'tích phân', 'tính', 'tính toán', 'toán',
+        'xác suất', 'đạo hàm',
+    ],
     medical: [
         'blood', 'clinical', 'diagnosis', 'disease', 'dosage', 'drug',
-        'health', 'medical', 'medicine', 'patient', 'prescription',
-        'side effect', 'symptom', 'therapy', 'treatment', 'vaccine',
+        'health', 'interactions', 'medical', 'medicine', 'patient',
+        'pharmacology', 'prescription', 'side effect', 'symptom',
+        'therapy', 'treatment', 'vaccine',
         'bệnh', 'chẩn đoán', 'dược', 'liều', 'sức khỏe', 'thuốc',
-        'triệu chứng', 'điều trị',
+        'triệu chứng', 'tương tác thuốc', 'điều trị',
     ],
     translation: [
         'dịch', 'interpret', 'localize', 'translate', 'translation',
@@ -110,9 +129,6 @@ const CATEGORY_KEYWORDS: Record<PromptCategory, string[]> = {
  *
  * The router tries from highest applicable tier downward. Within each tier
  * it picks the first model that is actually available in the user's list.
- *
- * NOTE: These include BOTH phochat shorthand IDs AND vercelaigateway full
- * IDs so matching works regardless of which provider the model comes from.
  */
 const CATEGORY_AFFINITY: Record<PromptCategory, Record<number, string[]>> = {
     analysis: {
@@ -135,6 +151,11 @@ const CATEGORY_AFFINITY: Record<PromptCategory, Record<number, string[]>> = {
         2: ['openai/gpt-4o', 'pho-pro', 'google/gemini-2.5-flash'],
         3: ['pho-smart', 'google/gemini-3.1-pro-preview'],
     },
+    math: {
+        1: ['google/gemini-2.0-flash', 'pho-fast'],
+        2: ['google/gemini-2.5-pro', 'openai/gpt-4o', 'pho-pro'],
+        3: ['google/gemini-3.1-pro-preview', 'anthropic/claude-opus-4-6', 'pho-smart'],
+    },
     medical: {
         1: ['google/gemini-2.0-flash', 'pho-fast'],
         2: ['openai/gpt-4o', 'google/gemini-2.5-pro', 'pho-pro'],
@@ -151,7 +172,7 @@ const CATEGORY_AFFINITY: Record<PromptCategory, Record<number, string[]>> = {
 
 /**
  * Classify a user prompt by complexity, category, and language.
- * Pure function — no side-effects, safe to call from anywhere.
+ * Phase 2: uses **score-based** multi-category matching instead of first-match.
  */
 export function classifyPrompt(
     query: string,
@@ -173,30 +194,44 @@ export function classifyPrompt(
         complexity = 'medium';
     }
 
-    // ── Category (first match wins — order matters) ──
-    let category: PromptCategory = 'general';
-    const categoryOrder: PromptCategory[] = [
-        'coding', 'medical', 'analysis', 'creative', 'translation',
+    // Phase 2: Short-prompt heuristic — very short + no keywords → force simple
+    if (query.length < 20 && !hasComplexKeyword && !hasMediumKeyword) {
+        complexity = 'simple';
+    }
+
+    // ── Category (Phase 2: score-based multi-category matching) ──
+    const scoredCategories: PromptCategory[] = [
+        'coding', 'math', 'medical', 'analysis', 'creative', 'translation',
     ];
 
-    for (const cat of categoryOrder) {
+    let bestCategory: PromptCategory = 'general';
+    let bestScore = 0;
+
+    for (const cat of scoredCategories) {
         const keywords = CATEGORY_KEYWORDS[cat];
-        if (keywords.some((kw) => lower.includes(kw))) {
-            category = cat;
-            break;
+        let score = 0;
+        for (const kw of keywords) {
+            if (lower.includes(kw)) {
+                score += 1;
+            }
+        }
+        if (score > bestScore) {
+            bestScore = score;
+            bestCategory = cat;
         }
     }
 
-    return { category, complexity, hasAttachments, language };
+    return { category: bestCategory, complexity, hasAttachments, language };
 }
 
-// ─── Reason Builder (defined before pickBestModel to avoid use-before-define) ──
+// ─── Reason Builder ───────────────────────────────────────────────────
 
 const CATEGORY_LABELS: Record<PromptCategory, string> = {
     analysis: 'phân tích dữ liệu',
     coding: 'lập trình',
     creative: 'sáng tạo nội dung',
     general: 'hội thoại',
+    math: 'toán học & suy luận',
     medical: 'y khoa',
     translation: 'dịch thuật',
 };
@@ -226,9 +261,6 @@ function buildReason(
 
 // ─── Model Selection ──────────────────────────────────────────────────
 
-/**
- * Determine the ideal tier based on prompt complexity.
- */
 function idealTierForComplexity(complexity: PromptComplexity): number {
     if (complexity === 'complex') { return 3; }
     if (complexity === 'medium') { return 2; }
@@ -298,4 +330,37 @@ export function pickBestModel(
         reason: 'Không tìm thấy model — sử dụng Phở Fast',
         resolvedTier: 1,
     };
+}
+
+// ─── resolveAutoModel (Phase 2 — DRY helper) ──────────────────────────
+
+/**
+ * All-in-one resolver: builds available model list, classifies prompt,
+ * picks the best model, and logs the decision.
+ *
+ * Call from any store integration point with just the user message text.
+ */
+export function resolveAutoModel(
+    message: string,
+    hasFiles = false,
+    logPrefix = 'Phở Auto',
+): AutoRouterResult {
+    const classification = classifyPrompt(message, hasFiles);
+
+    const availableModels: AvailableModel[] = [
+        ...(PhoChatConfig.chatModels || [])
+            .filter((m) => m.enabled !== false)
+            .map((m) => ({ id: m.id, originProvider: 'phochat' })),
+        ...((VercelAIGatewayConfig as ModelProviderCard).chatModels || [])
+            .filter((m) => m.enabled !== false)
+            .map((m) => ({ id: m.id, originProvider: 'vercelaigateway' })),
+    ];
+
+    const result = pickBestModel(classification, availableModels);
+
+    console.log(
+        `✨ ${logPrefix}: "${message.slice(0, 60)}${message.length > 60 ? '...' : ''}" → ${result.modelId} [${classification.category}/${classification.complexity}] (${result.reason})`,
+    );
+
+    return result;
 }

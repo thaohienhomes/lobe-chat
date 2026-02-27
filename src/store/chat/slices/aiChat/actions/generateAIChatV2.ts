@@ -26,10 +26,7 @@ import type { ChatStore } from '@/store/chat/store';
 import { getFileStoreState } from '@/store/file/store';
 import { getSessionStoreState } from '@/store/session';
 import { WebBrowsingManifest } from '@/tools/web-browsing';
-import { PHO_AUTO_MODEL_ID, classifyPrompt, pickBestModel } from '@/utils/autoRouter';
-import PhoChatConfig from '@/config/modelProviders/phochat';
-import VercelAIGatewayConfig from '@/config/modelProviders/vercelaigateway';
-import type { ModelProviderCard } from '@/types/llm';
+import { PHO_AUTO_MODEL_ID, resolveAutoModel } from '@/utils/autoRouter';
 import { ChatImageItem } from '@/types/message/image';
 import { ChatVideoItem } from '@/types/message/video';
 import { setNamespace } from '@/utils/storeDebug';
@@ -164,13 +161,7 @@ export const generateAIChatV2: StateCreator<
 
       // ── Phở Auto ✨: resolve virtual model before sending to server ──
       if (model === PHO_AUTO_MODEL_ID) {
-        const classification = classifyPrompt(message || '', hasFile);
-        const availableModels = [
-          ...(PhoChatConfig.chatModels || []).filter((m) => m.enabled !== false).map((m) => ({ id: m.id, originProvider: 'phochat' })),
-          ...((VercelAIGatewayConfig as ModelProviderCard).chatModels || []).filter((m) => m.enabled !== false).map((m) => ({ id: m.id, originProvider: 'vercelaigateway' })),
-        ];
-        const resolved = pickBestModel(classification, availableModels);
-        console.log(`✨ Phở Auto (server): "${(message || '').slice(0, 60)}..." → ${resolved.modelId} (${resolved.reason})`);
+        const resolved = resolveAutoModel(message || '', hasFile, 'Phở Auto (server)');
         model = resolved.modelId;
         provider = resolved.providerId;
       }
@@ -353,13 +344,7 @@ export const generateAIChatV2: StateCreator<
       const lastUserMsg = messages.findLast((m) => m.role === 'user');
       const promptText = lastUserMsg?.content || '';
       const hasFiles = !!(lastUserMsg as any)?.files?.length;
-      const classification = classifyPrompt(promptText, hasFiles);
-      const availableModels = [
-        ...(PhoChatConfig.chatModels || []).filter((m) => m.enabled !== false).map((m) => ({ id: m.id, originProvider: 'phochat' })),
-        ...((VercelAIGatewayConfig as ModelProviderCard).chatModels || []).filter((m) => m.enabled !== false).map((m) => ({ id: m.id, originProvider: 'vercelaigateway' })),
-      ];
-      const resolved = pickBestModel(classification, availableModels);
-      console.log(`✨ Phở Auto (exec): "${promptText.slice(0, 60)}..." → ${resolved.modelId} (${resolved.reason})`);
+      const resolved = resolveAutoModel(promptText, hasFiles, 'Phở Auto (exec)');
       model = resolved.modelId;
       provider = resolved.providerId;
     }
