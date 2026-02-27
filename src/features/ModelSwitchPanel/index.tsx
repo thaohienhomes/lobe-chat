@@ -514,24 +514,26 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                 const cfg = TIER[tierNum];
                 return (
                   <div className={styles.section} key={tier.id}>
-                    {/* Section header */}
-                    <div className={styles.sectionHeader} style={{ color: cfg.accent }}>
-                      <span style={{ fontSize: 13 }}>{cfg.icon}</span>
-                      {t(cfg.labelKey)}
-                      {cfg.quotaKey && (
-                        <span
-                          style={{
-                            color: quotaColor,
-                            fontSize: 9,
-                            fontWeight: 400,
-                            marginLeft: 'auto',
-                            textTransform: 'none',
-                          }}
-                        >
-                          {t(cfg.quotaKey as 'ModelSwitchPanel.quotaHint', { count: cfg.quotaCount })}
-                        </span>
-                      )}
-                    </div>
+                    {/* Section header — skip for tier 0 (Phở Auto) */}
+                    {tierNum !== 0 && (
+                      <div className={styles.sectionHeader} style={{ color: cfg.accent }}>
+                        <span style={{ fontSize: 13 }}>{cfg.icon}</span>
+                        {t(cfg.labelKey)}
+                        {cfg.quotaKey && (
+                          <span
+                            style={{
+                              color: quotaColor,
+                              fontSize: 9,
+                              fontWeight: 400,
+                              marginLeft: 'auto',
+                              textTransform: 'none',
+                            }}
+                          >
+                            {t(cfg.quotaKey as 'ModelSwitchPanel.quotaHint', { count: cfg.quotaCount })}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Model rows */}
                     {tier.children.map((m) => {
