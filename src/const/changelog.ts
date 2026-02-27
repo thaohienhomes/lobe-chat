@@ -8,34 +8,30 @@ export const PHO_CHANGELOGS: ChangelogIndexItem[] = [
   {
     date: '2026-02-27',
     id: 'v1.134.0',
-    image: '/images/changelog/models-feb-2026.png',
     versionRange: ['1.134.0'],
   },
   {
     date: '2026-02-07',
     id: 'v1.133.0',
-    image: '/images/changelog/academic-research.png',
     versionRange: ['1.133.0'],
   },
   {
     date: '2026-02-03',
     id: 'v1.132.4',
-    image: '/images/changelog/onboarding-recommendations.png',
     versionRange: ['1.132.4'],
   },
   {
     date: '2026-02-01',
     id: 'v1.132.0',
-    image: '/images/changelog/biomedical-agents.png',
     versionRange: ['1.132.0'],
   },
   {
     date: '2026-01-28',
     id: 'v1.131.0',
-    image: '/images/changelog/pho-points.png',
     versionRange: ['1.131.0'],
   },
 ];
+
 
 /**
  * Changelog content (markdown)
