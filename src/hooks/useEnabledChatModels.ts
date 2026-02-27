@@ -17,6 +17,7 @@ export const NEW_MODEL_IDS = new Set([
   'xai/grok-4.2',
   'moonshot/kimi-k2.5',
   'kimi-k2.5',
+  'mercury-coder-small-2-2',
   'anthropic/claude-opus-4-6',
   'anthropic/claude-sonnet-4-6',
   'google/gemini-3.1-pro-preview',

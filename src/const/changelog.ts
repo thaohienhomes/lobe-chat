@@ -6,6 +6,12 @@ import { ChangelogIndexItem } from '@/types/changelog';
  */
 export const PHO_CHANGELOGS: ChangelogIndexItem[] = [
   {
+    date: '2026-02-27',
+    id: 'v1.134.0',
+    image: '/images/changelog/models-feb-2026.png',
+    versionRange: ['1.134.0'],
+  },
+  {
     date: '2026-02-07',
     id: 'v1.133.0',
     image: '/images/changelog/academic-research.png',
@@ -187,5 +193,53 @@ Các phản hồi từ trợ lý giờ đây tự động tạo danh mục tham 
 `,
     title: '🎓 Academic Research Module',
     titleVi: '🎓 Module Nghiên cứu Khoa học',
+  },
+  'v1.134.0': {
+    content: `
+## What's New
+
+### ✨ Phở Auto — Smart Model Routing
+New intelligent auto-routing that selects the best AI model for your query:
+- **Score-based classification** analyzes your prompt's complexity and category
+- **7 categories** supported: coding, math, medical, analysis, creative, translation, general
+- **Tier-walking** automatically picks the optimal model from your available options
+- Simply select "Phở Auto ✨" from the model picker and let AI choose the best model for you
+
+### 🤖 New Models Added
+- **GPT-5.3 Codex** — OpenAI's latest coding flagship, 25% faster
+- **Grok 4.2** — xAI's 4-agent architecture, 65% less hallucination
+- **Kimi K2.5** — MoonshotAI Agent Swarm with 100 simultaneous agents
+- **Mercury 2** — World's fastest AI (1000+ tokens/sec), diffusion-based parallel generation
+- **Claude Opus 4.6 & Sonnet 4.6** — Anthropic's upgraded models
+- **Gemini 3.1 Pro** — Google's advanced reasoning model
+
+### 🗑️ Deprecated Models Removed
+- GPT-4o and GPT-4.1 (retired by OpenAI)
+- Claude 4 Sonnet/Opus old versions (replaced by 4.6)
+`,
+    contentVi: `
+## Có gì mới
+
+### ✨ Phở Auto — Tự Động Chọn Model
+Cơ chế route thông minh tự động chọn model AI tốt nhất cho yêu cầu của bạn:
+- **Phân loại điểm số** phân tích độ phức tạp và loại câu hỏi
+- **7 chuyên mục**: lập trình, toán học, y khoa, phân tích, sáng tạo, dịch thuật, chung
+- **Tự động tối ưu** chọn model phù hợp nhất từ danh sách khả dụng
+- Chỉ cần chọn "Phở Auto ✨" từ model picker và để AI chọn giúp bạn
+
+### 🤖 Models Mới
+- **GPT-5.3 Codex** — Model coding mới nhất của OpenAI, nhanh hơn 25%
+- **Grok 4.2** — Kiến trúc 4-agent của xAI, giảm 65% hallucination
+- **Kimi K2.5** — Agent Swarm của MoonshotAI với 100 agents đồng thời
+- **Mercury 2** — AI nhanh nhất thế giới (1000+ tokens/giây), sinh tokens song song
+- **Claude Opus 4.6 & Sonnet 4.6** — Models nâng cấp của Anthropic
+- **Gemini 3.1 Pro** — Model suy luận nâng cao của Google
+
+### 🗑️ Models Đã Xóa
+- GPT-4o và GPT-4.1 (đã bị OpenAI ngừng hỗ trợ)
+- Claude 4 Sonnet/Opus phiên bản cũ (được thay bằng 4.6)
+`,
+    title: '✨ Phở Auto & New Models (Feb 2026)',
+    titleVi: '✨ Phở Auto & Models Mới (Tháng 2/2026)',
   },
 };
