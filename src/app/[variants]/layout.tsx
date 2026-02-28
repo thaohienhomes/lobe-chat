@@ -45,6 +45,19 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
   return (
     <html dir={direction} lang={locale}>
       <head>
+        {/* === Critical Resource Hints — Improve FCP/LCP by parallelizing connections === */}
+        {/* Clerk auth domain — loads ~200KB+ JS, preconnect saves ~200ms */}
+        <link rel="preconnect" href="https://clerk.pho.chat" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://clerk.pho.chat" />
+        {/* Clerk CDN for JS bundles */}
+        <link rel="preconnect" href="https://cdn.clerk.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.clerk.com" />
+        {/* Google Analytics */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        {/* Vercel Speed Insights */}
+        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
+
         {/* === Global Error Handlers (Feb 2026) === */}
         {/* 1. Stub zaloJSV2 for Zalo in-app browser */}
         {/* 2. Suppress benign ResizeObserver loop warnings */}

@@ -6,7 +6,7 @@ import {
   createSingletonAnalytics,
 } from '@lobehub/analytics';
 import { AnalyticsProvider } from '@lobehub/analytics/react';
-import { ReactNode, memo, useMemo } from 'react';
+import { ReactNode, memo, useEffect, useState, useState } from 'react';
 
 import { BUSINESS_LINE } from '@/const/analytics';
 import { isDesktop } from '@/const/version';
@@ -22,21 +22,37 @@ let analyticsInstance: ReturnType<typeof createSingletonAnalytics> | null = null
 
 export const LobeAnalyticsProvider = memo(
   ({ children, ga4Config, postHogConfig }: Props) => {
-    const analytics = useMemo(() => {
+    // Defer analytics initialization until after first paint
+    // This prevents PostHog (~150KB) and GA4 from blocking FCP/LCP
+    const [analytics, setAnalytics] = useState<typeof analyticsInstance>(analyticsInstance);
+
+    useEffect(() => {
       if (analyticsInstance) {
-        return analyticsInstance;
+        setAnalytics(analyticsInstance);
+        return;
       }
 
-      analyticsInstance = createSingletonAnalytics({
-        business: BUSINESS_LINE,
-        debug: isDev,
-        providers: {
-          ga4: ga4Config,
-          posthog: postHogConfig,
-        },
-      });
+      // Use requestIdleCallback to initialize after browser is idle
+      const init = () => {
+        analyticsInstance = createSingletonAnalytics({
+          business: BUSINESS_LINE,
+          debug: isDev,
+          providers: {
+            ga4: ga4Config,
+            posthog: postHogConfig,
+          },
+        });
+        setAnalytics(analyticsInstance);
+      };
 
-      return analyticsInstance;
+      if (typeof requestIdleCallback !== 'undefined') {
+        const id = requestIdleCallback(init, { timeout: 3000 });
+        return () => cancelIdleCallback(id);
+      } else {
+        // Fallback for Safari — defer to next frame
+        const timer = setTimeout(init, 100);
+        return () => clearTimeout(timer);
+      }
     }, []);
 
     if (!analytics) return children;
