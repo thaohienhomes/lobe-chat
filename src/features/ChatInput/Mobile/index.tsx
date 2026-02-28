@@ -12,6 +12,7 @@ import ActionBar from '../ActionBar';
 import InputEditor from '../InputEditor';
 import SendArea from '../SendArea';
 
+const AnnouncementBanner = dynamic(() => import('../AnnouncementBanner'), { ssr: false });
 const FilePreview = dynamic(() => import('./FilePreview'), { ssr: false });
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -40,6 +41,7 @@ const DesktopChatInput = memo(() => {
   return (
     <>
       {!expand && fileNode}
+      {!expand && <AnnouncementBanner />}
       <Flexbox
         className={cx(styles.container, expand && styles.fullscreen)}
         paddingBlock={'0 12px'}

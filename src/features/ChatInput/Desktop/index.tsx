@@ -14,6 +14,7 @@ import { useGlobalStore } from '@/store/global';
 import { systemStatusSelectors } from '@/store/global/selectors';
 
 import ActionBar from '../ActionBar';
+import AnnouncementBanner from '../AnnouncementBanner';
 import InputEditor from '../InputEditor';
 import SendArea from '../SendArea';
 import TypoBar from '../TypoBar';
@@ -76,6 +77,7 @@ const DesktopChatInput = memo<{ showFootnote?: boolean }>(({ showFootnote }) => 
   return (
     <>
       {!expand && fileNode}
+      {!expand && <AnnouncementBanner />}
       <Flexbox
         className={cx(styles.container, expand && styles.fullscreen)}
         gap={8}
