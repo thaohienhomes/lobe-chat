@@ -273,7 +273,10 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     }
 
     // ============  3. Execute Chat Completion (with Phở Gateway Failover)   ============ //
-    const priorityList = phoGatewayService.resolveProviderList(data.model, activeProvider);
+    // Use the ORIGINAL request model ID for failover lookup (not the remapped API-specific ID).
+    // e.g. requestModel = 'mercury-coder-small-2-2' (logical ID in logicalModels map),
+    //      data.model  = 'mercury-2' (already remapped to InceptionLabs API model name).
+    const priorityList = phoGatewayService.resolveProviderList(requestModel, activeProvider);
 
     console.log(
       `[Chat API] Orchestration: Priority List for ${data.model} (${activeProvider}):`,

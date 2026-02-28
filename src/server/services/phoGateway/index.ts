@@ -187,13 +187,12 @@ class PhoGatewayService {
    */
   remapProvider(provider: string, modelId: string): { modelId: string; provider: string } {
     // ── 1. Logical model resolution ──────────────────────────────
-    // If the requested model is a logical model (e.g. 'pho-pro'),
-    // route to its primary provider (e.g. 'groq') so runtime init
-    // picks up the correct API key.  Keep modelId as-is so
-    // resolveProviderList() can still look it up for failover.
+    // If the requested model is a logical model (e.g. 'pho-pro', 'mercury-coder-small-2-2'),
+    // route to its primary provider and use that provider's actual API model ID.
+    // e.g. internal 'mercury-coder-small-2-2' → provider 'inceptionlabs', modelId 'mercury-2'
     if (this.logicalModels[modelId]) {
       const primary = this.logicalModels[modelId].providers[0];
-      return { modelId, provider: primary.provider };
+      return { modelId: primary.modelId, provider: primary.provider };
     }
 
     // ── 1.5. Deprecated model redirect ─────────────────────────
