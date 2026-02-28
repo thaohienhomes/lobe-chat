@@ -6,7 +6,7 @@ import {
   createSingletonAnalytics,
 } from '@lobehub/analytics';
 import { AnalyticsProvider } from '@lobehub/analytics/react';
-import { ReactNode, memo, useEffect, useState, useState } from 'react';
+import { ReactNode, memo, useEffect, useState } from 'react';
 
 import { BUSINESS_LINE } from '@/const/analytics';
 import { isDesktop } from '@/const/version';
