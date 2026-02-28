@@ -25,27 +25,27 @@ const fadeSlideOut = keyframes`
 `;
 
 export const useStyles = createStyles(({ css, token, responsive }) => ({
-    banner: css`
+  banner: css`
     cursor: default;
 
     position: relative;
 
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
 
-    max-width: 520px;
+    max-width: 580px;
     margin: 0 auto;
-    padding: 6px 12px;
+    padding: 8px 16px;
 
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.4;
     color: ${token.colorTextSecondary};
 
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
+    border-radius: 28px;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
 
     transition: border-color 300ms ease;
@@ -56,40 +56,40 @@ export const useStyles = createStyles(({ css, token, responsive }) => ({
 
     ${responsive.mobile} {
       max-width: 100%;
-      padding: 5px 10px;
-      font-size: 12px;
+      padding: 6px 12px;
+      font-size: 13px;
     }
   `,
 
-    container: css`
+  container: css`
     display: flex;
     justify-content: center;
 
     width: 100%;
-    padding: 0 12px 4px;
+    padding: 0 12px 8px;
 
     animation: ${fadeSlideIn} 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
     ${responsive.mobile} {
-      padding: 0 8px 2px;
+      padding: 0 8px 6px;
     }
   `,
 
-    cta: css`
+  cta: css`
     cursor: pointer;
 
     flex-shrink: 0;
 
-    padding: 3px 10px;
+    padding: 4px 14px;
 
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     line-height: 1.5;
     color: #fff;
     white-space: nowrap;
 
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
 
     transition: all 200ms ease;
 
@@ -103,7 +103,7 @@ export const useStyles = createStyles(({ css, token, responsive }) => ({
     }
   `,
 
-    dismiss: css`
+  dismiss: css`
     cursor: pointer;
 
     flex-shrink: 0;
@@ -126,21 +126,21 @@ export const useStyles = createStyles(({ css, token, responsive }) => ({
     }
   `,
 
-    emoji: css`
+  emoji: css`
     flex-shrink: 0;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1;
 
     ${responsive.mobile} {
-      font-size: 14px;
+      font-size: 16px;
     }
   `,
 
-    exiting: css`
+  exiting: css`
     animation: ${fadeSlideOut} 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
   `,
 
-    tagline: css`
+  tagline: css`
     overflow: hidden;
 
     font-size: 12px;
@@ -153,7 +153,7 @@ export const useStyles = createStyles(({ css, token, responsive }) => ({
     }
   `,
 
-    text: css`
+  text: css`
     overflow: hidden;
 
     display: flex;
@@ -163,14 +163,14 @@ export const useStyles = createStyles(({ css, token, responsive }) => ({
     min-width: 0;
   `,
 
-    title: css`
-    font-size: 13px;
+  title: css`
+    font-size: 14px;
     font-weight: 600;
     color: ${token.colorText};
     white-space: nowrap;
 
     ${responsive.mobile} {
-      font-size: 12px;
+      font-size: 13px;
     }
   `,
 }));
