@@ -51,15 +51,6 @@ class PhoGatewayService {
       ],
     },
 
-    // InceptionLabs Mercury 2 — ultra-fast diffusion LLM (1000+ tok/s)
-    'mercury-coder-small-2-2': {
-      id: 'mercury-coder-small-2-2',
-      providers: [
-        { modelId: 'mercury-coder-small-2-2', provider: 'inceptionlabs' },
-        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
-      ],
-    },
-
 
 
     // Legacy compatibility
@@ -74,10 +65,25 @@ class PhoGatewayService {
 
 
 
+
+
+
     'llama-4-scout-17b': {
       id: 'llama-4-scout-17b',
       providers: [
         { modelId: 'meta-llama/llama-4-scout-17b-16e-instruct', provider: 'groq' },
+        { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
+      ],
+    },
+
+
+
+    // InceptionLabs Mercury 2 — ultra-fast diffusion LLM (1000+ tok/s)
+    // API model name: "mercury-2" (per https://docs.inceptionlabs.ai/get-started/models)
+    'mercury-coder-small-2-2': {
+      id: 'mercury-coder-small-2-2',
+      providers: [
+        { modelId: 'mercury-2', provider: 'inceptionlabs' },
         { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
       ],
     },
