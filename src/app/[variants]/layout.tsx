@@ -45,19 +45,71 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
   return (
     <html dir={direction} lang={locale}>
       <head>
-        {/* === PostHog Error Fixes (Feb 2026) === */}
-        {/* Priority 1: Stub zaloJSV2 for Zalo in-app browser (252 errors) */}
-        {/* Priority 4: Suppress benign ResizeObserver loop warnings (15 errors) */}
+        {/* === Global Error Handlers (Feb 2026) === */}
+        {/* 1. Stub zaloJSV2 for Zalo in-app browser */}
+        {/* 2. Suppress benign ResizeObserver loop warnings */}
+        {/* 3. Auto-reload on ChunkLoadError (stale Vercel deployments, Clerk JS 404) */}
+        {/* 4. Gracefully handle unhandled tRPC promise rejections */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
 if(typeof window!=='undefined'){
   if(!window.zaloJSV2)window.zaloJSV2={};
+
+  // Global error handler
   var _origOnErr=window.onerror;
-  window.onerror=function(m){
+  window.onerror=function(m,src,line,col,err){
+    // Suppress ResizeObserver noise
     if(typeof m==='string'&&m.indexOf('ResizeObserver')!==-1)return true;
+
+    // Auto-reload on ChunkLoadError (stale deployment chunks 404)
+    if(err&&(err.name==='ChunkLoadError'||
+      (typeof m==='string'&&(m.indexOf('Loading chunk')!==-1||m.indexOf('Failed to fetch dynamically imported')!==-1)))){
+      var rk='__chunk_reload';
+      try{
+        if(!sessionStorage.getItem(rk)){
+          sessionStorage.setItem(rk,'1');
+          window.location.reload();
+          return true;
+        }
+      }catch(e){}
+    }
     return _origOnErr?_origOnErr.apply(window,arguments):false;
   };
+
+  // Catch unhandled promise rejections (tRPC Failed to fetch, UNAUTHORIZED)
+  window.addEventListener('unhandledrejection',function(e){
+    var r=e&&e.reason;
+    if(!r)return;
+    var msg=r.message||'';
+    // Auto-reload on chunk load promises
+    if(r.name==='ChunkLoadError'||msg.indexOf('Loading chunk')!==-1){
+      var rk='__chunk_reload';
+      try{
+        if(!sessionStorage.getItem(rk)){
+          sessionStorage.setItem(rk,'1');
+          window.location.reload();
+        }
+      }catch(ex){}
+      e.preventDefault();
+      return;
+    }
+    // Suppress tRPC UNAUTHORIZED (expected during auth transitions)
+    if(msg==='UNAUTHORIZED'&&r.constructor&&r.constructor.name==='TRPCClientError'){
+      e.preventDefault();
+      return;
+    }
+    // Suppress transient network errors (tRPC Failed to fetch)
+    if(msg==='Failed to fetch'&&r.constructor&&r.constructor.name==='TRPCClientError'){
+      e.preventDefault();
+      return;
+    }
+  });
+
+  // Clear chunk reload flag on successful page load
+  window.addEventListener('load',function(){
+    try{sessionStorage.removeItem('__chunk_reload');}catch(e){}
+  });
 }`,
           }}
         />

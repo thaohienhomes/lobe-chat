@@ -42,7 +42,15 @@ const errorHandlingLink: TRPCLink<LambdaRouter> = () => {
               }
 
               default: {
-                fetchErrorNotification.error({ errorMessage: err.message, status });
+                // Don't show notification for transient network errors
+                const isNetworkError =
+                  err.message === 'Failed to fetch' ||
+                  err.message.includes('NetworkError') ||
+                  err.message.includes('Load failed');
+
+                if (!isNetworkError) {
+                  fetchErrorNotification.error({ errorMessage: err.message, status });
+                }
               }
             }
           }
