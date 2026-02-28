@@ -1,168 +1,211 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { memo, useEffect, useState } from 'react';
-import { createStyles } from 'antd-style';
-import Link from 'next/link';
-import { useUserStore } from '@/store/user';
-import { motion, AnimatePresence } from 'framer-motion';
+import { createStyles, keyframes } from 'antd-style';
 import { X } from 'lucide-react';
+import Link from 'next/link';
+import { memo, useEffect, useState } from 'react';
 
-// Lazy-load Lottie to keep ~250KB off the critical path
-const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+import { useUserStore } from '@/store/user';
 
-const useStyles = createStyles(({ css, token, isDarkMode }) => ({
-  closeButton: css`
+const shimmer = keyframes`
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+`;
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+`;
+
+const useStyles = createStyles(({ css, token, isDarkMode, responsive }) => ({
+  badge: css`
+    padding: 2px 6px;
+
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #fff;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+
+    background: linear-gradient(135deg, #ff4d4f, #ff7a45);
+    border-radius: 6px;
+
+    animation: ${pulse} 2s ease-in-out infinite;
+  `,
+
+  closeBtn: css`
+    cursor: pointer;
+
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: ${token.colorBgContainer};
-    border: 1px solid ${token.colorBorder};
+    top: -6px;
+    right: -6px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${token.colorTextSecondary};
+
+    width: 18px;
+    height: 18px;
+
+    color: ${token.colorTextQuaternary};
+
+    background: ${isDarkMode ? 'rgba(50,50,50,0.9)' : 'rgba(240,240,240,0.9)'};
+    border: 1px solid ${token.colorBorderSecondary};
+    border-radius: 50%;
+
     opacity: 0;
-    transition: opacity 0.2s;
-    
+    transition: all 0.2s;
+
     &:hover {
       color: ${token.colorError};
       background: ${token.colorErrorBg};
     }
   `,
+
   container: css`
-    position: fixed;
-    bottom: 24px;
-    left: 24px;
-    z-index: 1000;
-    pointer-events: auto;
-    
-    background: ${isDarkMode ? 'rgba(30, 30, 30, 0.75)' : 'rgba(255, 255, 255, 0.75)'};
-    backdrop-filter: blur(12px);
-    border: 1px solid ${token.colorBorderSecondary};
-    border-radius: 20px;
-    padding: 8px 16px 8px 8px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
     cursor: pointer;
-    
+
+    position: relative;
+
     display: flex;
-    align-items: center;
     gap: 8px;
-    
+    align-items: center;
+
+    padding: 6px 14px 6px 10px;
+
+    background: ${isDarkMode ? 'rgba(30, 30, 30, 0.7)' : 'rgba(255, 255, 255, 0.7)'};
+    backdrop-filter: blur(16px);
+    border: 1px solid ${isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
+    border-radius: 16px;
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, ${isDarkMode ? 0.25 : 0.08}),
+      inset 0 1px 0 rgba(255, 255, 255, ${isDarkMode ? 0.04 : 0.5});
+
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    
+
     &:hover {
-      background: ${isDarkMode ? 'rgba(40, 40, 40, 0.85)' : 'rgba(255, 255, 255, 0.85)'};
-      border-color: ${token.colorPrimary};
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 100, 50, 0.3);
+      box-shadow:
+        0 6px 24px rgba(255, 100, 50, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, ${isDarkMode ? 0.06 : 0.6});
+      transform: translateY(-2px);
+
+      .close-lifetime {
+        opacity: 1;
+      }
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+
+    ${responsive.mobile} {
+      padding: 5px 12px 5px 8px;
     }
   `,
-  desc: css`
-    font-size: 16px;
+
+  emoji: css`
+    font-size: 20px;
+    line-height: 1;
+  `,
+
+  price: css`
+    font-size: 13px;
     font-weight: 700;
     color: ${token.colorText};
-    line-height: 1.2;
     white-space: nowrap;
-  `,
-  lottie: css`
-    width: 70px;
-    height: 70px;
-    flex: none;
-  `,
-  textContainer: css`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-  `,
-  title: css`
-    font-size: 14px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: linear-gradient(135deg, #ff4d4f 0%, #ff7a45 50%, #ffa940 100%);
+
+    background: linear-gradient(90deg, #ff4d4f, #ff7a45, #ffa940, #ff4d4f);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    line-height: 1.2;
-  `,
-  wrapper: css`
-    &:hover .close-btn {
-      opacity: 1;
+
+    animation: ${shimmer} 3s linear infinite;
+
+    ${responsive.mobile} {
+      font-size: 12px;
     }
-  `
+  `,
+
+  subtitle: css`
+    font-size: 11px;
+    color: ${token.colorTextTertiary};
+    white-space: nowrap;
+
+    ${responsive.mobile} {
+      display: none;
+    }
+  `,
+
+  textWrap: css`
+    display: flex;
+    gap: 6px;
+    align-items: center;
+
+    min-width: 0;
+  `,
+
+  wrapper: css`
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+
+    ${responsive.mobile} {
+      bottom: 76px;
+      left: 12px;
+    }
+  `,
 }));
+
+const DISMISS_KEY = 'pho-lifetime-banner-dismissed';
 
 const NewYearLifetimeBanner = memo(() => {
   const { styles } = useStyles();
   const subscriptionPlan = useUserStore((s) => s.subscriptionPlan);
-  const [animationData, setAnimationData] = useState<any>(null);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
+  // Only show after mount (avoid SSR flash)
   useEffect(() => {
-    // Gift Box Lottie Animation
-    const lottieUrl = '/animations/gift-box.json';
-    fetch(lottieUrl)
-      .then(res => res.json())
-      .then(data => setAnimationData(data))
-      .catch(err => console.error('Failed to load Lottie', err));
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+    if (!dismissed) setVisible(true);
   }, []);
 
-  // Hide banner for ALL paid users (anyone not on free tier)
-  const FREE_PLANS = ['vn_free', 'gl_starter', ''];
-  const isPaidUser = subscriptionPlan && !FREE_PLANS.includes(subscriptionPlan);
+  // Hide for ALL paid users
+  const FREE_PLANS = new Set(['vn_free', 'gl_starter', '']);
+  const isPaidUser = subscriptionPlan && !FREE_PLANS.has(subscriptionPlan);
 
   if (isPaidUser || !visible) return null;
 
-  return (
-    <AnimatePresence>
-      <motion.div
-        animate={{ opacity: 1, rotate: 0, scale: 1, x: 0 }}
-        className={styles.wrapper}
-        exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-        initial={{ opacity: 0, rotate: -10, scale: 0.5, x: -100 }}
-        style={{ bottom: 24, left: 24, position: 'fixed', zIndex: 1001 }}
-      >
-        <div
-          className={`${styles.closeButton} close-btn`}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setVisible(false);
-          }}
-        >
-          <X size={12} strokeWidth={3} />
-        </div>
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    sessionStorage.setItem(DISMISS_KEY, '1');
+    setVisible(false);
+  };
 
-        <Link href="/lifetime" style={{ textDecoration: 'none' }}>
-          <motion.div
-            className={styles.container}
-            whileHover={{ y: -8 }}
-            whileTap={{ scale: 0.96 }}
-          >
-            <div className={styles.lottie}>
-              {animationData ? (
-                <Lottie
-                  animationData={animationData}
-                  autoplay={true}
-                  loop={true}
-                />
-              ) : (
-                <div style={{ alignItems: 'center', display: 'flex', height: 70, justifyContent: 'center', width: 70 }}>
-                  🎉
-                </div>
-              )}
-            </div>
-            <div className={styles.textContainer}>
-              <span className={styles.title}>New Year 2026</span>
-              <span className={styles.desc}>Lifetime Offer</span>
-            </div>
-          </motion.div>
-        </Link>
-      </motion.div>
-    </AnimatePresence>
+  return (
+    <div className={styles.wrapper}>
+      <Link href="/lifetime" style={{ textDecoration: 'none' }}>
+        <div className={styles.container}>
+          {/* Close */}
+          <div className={`${styles.closeBtn} close-lifetime`} onClick={handleDismiss}>
+            <X size={10} strokeWidth={3} />
+          </div>
+
+          {/* Icon */}
+          <span className={styles.emoji}>🎁</span>
+
+          {/* Text */}
+          <div className={styles.textWrap}>
+            <span className={styles.badge}>SALE</span>
+            <span className={styles.price}>Lifetime — 499K</span>
+            <span className={styles.subtitle}>Dùng mãi mãi</span>
+          </div>
+        </div>
+      </Link>
+    </div>
   );
 });
 
