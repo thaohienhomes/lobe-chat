@@ -1,7 +1,6 @@
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ThemeAppearance } from 'antd-style';
 import { ResolvingViewport } from 'next';
-import nextDynamic from 'next/dynamic';
 import Script from 'next/script';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { ReactNode } from 'react';
@@ -19,9 +18,10 @@ import { Locales } from '@/locales/resources';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
-const NewYearLifetimeBanner = nextDynamic(
-  () => import('@/features/PromotionBanner/NewYearLifetimeBanner'),
-);
+// Lifetime banner temporarily hidden — pending copy/pricing review
+// const NewYearLifetimeBanner = nextDynamic(
+//   () => import('@/features/PromotionBanner/NewYearLifetimeBanner'),
+// );
 
 // NOTE: force-dynamic REMOVED for performance — Feb 2026
 // Clerk hooks only run in 'use client' components, they don't need force-dynamic.
@@ -84,7 +84,8 @@ if(typeof window!=='undefined'){
               {/* VoiceSupport temporarily disabled for performance — Feb 2026 */}
             </AuthProvider>
             <PWAInstall />
-            <NewYearLifetimeBanner />
+            {/* Lifetime banner temporarily hidden — pending copy/pricing review */}
+            {/* <NewYearLifetimeBanner /> */}
           </GlobalProvider>
         </NuqsAdapter>
         <Analytics />
