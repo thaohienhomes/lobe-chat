@@ -211,6 +211,10 @@ const isPublicRoute = createRouteMatcher([
   '/api/payment(.*)',
   // Public pages
   '/models',
+  // Subscription checkout & plans - must be public so landing page CTAs work
+  // Auth is handled at component level via Clerk's useUser() hook
+  '/subscription/checkout',
+  '/subscription/plans',
   // Public API endpoints
   '/api/health',
   '/api/v1(.*)',
