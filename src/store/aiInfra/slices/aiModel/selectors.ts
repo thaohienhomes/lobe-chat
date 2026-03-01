@@ -7,10 +7,15 @@ import { ModelSearchImplement } from '@/types/search';
 // These are NOT in the model-bank npm package, so they need to be listed explicitly.
 // Keep in sync with src/config/modelProviders/phochat.ts
 const PHO_CHAT_FUNCTION_CALL_MODELS = new Set([
+  'pho-auto',
+  'pho-fast',
   'pho-pro',
+  'pho-smart',
+  'pho-vision',
   'gemma-3-27b-it',
   'llama-4-scout-17b',
   'kimi-k2',
+  'kimi-k2.5',
   'mercury-coder-small-2-2',
 ]);
 

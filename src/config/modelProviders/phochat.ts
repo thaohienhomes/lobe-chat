@@ -13,6 +13,7 @@ const PhoChat: ModelProviderCard = {
                 'Model nhanh nhất của Phở Chat. Tối ưu cho trả lời tức thì, brainstorming, và hỏi đáp nhanh. Sử dụng Llama 3.1 8B với failover tự động qua Groq, Cerebras, và Cloudflare Workers AI.',
             displayName: 'Phở Fast ⚡',
             enabled: true,
+            functionCall: true,
             id: 'pho-fast',
         },
         {
@@ -30,6 +31,7 @@ const PhoChat: ModelProviderCard = {
                 'Model thông minh nhất của Phở Chat. Dành cho suy luận phức tạp, lập trình nâng cao, và phân tích chuyên sâu. Sử dụng Llama 3.1 70B từ Cerebras và Together AI.',
             displayName: 'Phở Smart 🧠',
             enabled: true,
+            functionCall: true,
             id: 'pho-smart',
         },
         {
@@ -38,6 +40,7 @@ const PhoChat: ModelProviderCard = {
                 'Model hỗ trợ hình ảnh và multimodal. Có thể phân tích ảnh, biểu đồ, và tài liệu. Sử dụng Llama 3.2 90B Vision và Gemini 2.0 Flash với failover tự động.',
             displayName: 'Phở Vision 👁️',
             enabled: true,
+            functionCall: true,
             id: 'pho-vision',
             vision: true,
         },

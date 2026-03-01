@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hướng Dẫn Sử Dụng — Phở Medical Beta 🏥</title>
+    <meta name="description" content="Hướng dẫn chi tiết cách sử dụng Phở Chat Medical Beta dành cho nhân viên y tế." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --surface: #111827;
+            --surface-2: #1a2236;
+            --border: #1f2b40;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --rose: #fb7185;
+            --medical: #2dd4bf;
+            --medical-dim: rgba(45, 212, 191, 0.12);
+            --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --gradient-card: linear-gradient(145deg, rgba(56, 189, 248, 0.06), rgba(129, 140, 248, 0.04));
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ====== HERO ====== */
+        .hero {
+            min-height: 520px;
+            background: var(--gradient-hero);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 30% 20%, rgba(45, 212, 191, 0.10), transparent),
+                radial-gradient(ellipse 500px 350px at 70% 80%, rgba(129, 140, 248, 0.08), transparent);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--medical-dim);
+            color: var(--medical);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 100px;
+            border: 1px solid rgba(45, 212, 191, 0.2);
+            margin-bottom: 24px;
+            letter-spacing: 0.02em;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #e2e8f0 0%, #38bdf8 50%, #2dd4bf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            max-width: 540px;
+            margin: 0 auto 32px;
+        }
+
+        .hero-plan {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-size: 1rem;
+        }
+
+        .hero-plan .price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--amber);
+        }
+
+        .hero-plan .period {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* ====== CONTAINER ====== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            padding: 64px 0;
+        }
+
+        section+section {
+            border-top: 1px solid var(--border);
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-desc {
+            color: var(--text-dim);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        /* ====== STEPS ====== */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .step {
+            display: flex;
+            gap: 20px;
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+
+        .step:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .step p {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+        }
+
+        .step code {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        /* ====== TIERS TABLE ====== */
+        .tiers-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tier-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: border-color 0.25s;
+        }
+
+        .tier-card:hover {
+            border-color: rgba(56, 189, 248, 0.25);
+        }
+
+        .tier-badge {
+            flex-shrink: 0;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .tier-badge.t1 {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .tier-badge.t2 {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .tier-badge.t3 {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .tier-info {
+            flex: 1;
+        }
+
+        .tier-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .tier-info p {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .tier-limit {
+            flex-shrink: 0;
+            text-align: right;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .tier-limit.unlimited {
+            color: var(--green);
+        }
+
+        .tier-limit.limited {
+            color: var(--accent);
+        }
+
+        .tier-limit.premium {
+            color: var(--amber);
+        }
+
+        .tier-limit small {
+            display: block;
+            font-weight: 400;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+        }
+
+        /* ====== POINTS ====== */
+        .points-card {
+            background: linear-gradient(135deg, rgba(45, 212, 191, 0.08), rgba(129, 140, 248, 0.05));
+            border: 1px solid rgba(45, 212, 191, 0.2);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-align: center;
+        }
+
+        .points-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--medical), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .points-unit {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .points-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 28px;
+        }
+
+        .point-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .point-item .val {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .point-item .val.t1 {
+            color: var(--green);
+        }
+
+        .point-item .val.t2 {
+            color: var(--accent);
+        }
+
+        .point-item .val.t3 {
+            color: var(--amber);
+        }
+
+        .point-item .label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        /* ====== PLUGINS ====== */
+        .plugins-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .plugin-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+
+        .plugin-card:hover {
+            border-color: rgba(45, 212, 191, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .plugin-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .plugin-card h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .plugin-card p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* ====== TIPS ====== */
+        .tips-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .tip-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .tip h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .tip p {
+            font-size: 0.88rem;
+            color: var(--text-dim);
+        }
+
+        /* ====== FAQ ====== */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .faq-q {
+            padding: 20px 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .faq-q:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .faq-q::after {
+            content: '+';
+            font-size: 1.3rem;
+            color: var(--accent);
+            font-weight: 300;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.open .faq-q::after {
+            content: '−';
+        }
+
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+            padding: 0 24px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .faq-item.open .faq-a {
+            max-height: 300px;
+            padding: 0 24px 20px;
+        }
+
+        /* ====== CTA ====== */
+        .cta-section {
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 600;
+            padding: 16px 40px;
+            border-radius: 100px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.25);
+        }
+
+        /* ====== FOOTER ====== */
+        footer {
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 32px 24px;
+            color: var(--text-dim);
+            font-size: 0.82rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 640px) {
+            .hero {
+                padding: 60px 20px 48px;
+                min-height: 420px;
+            }
+
+            .step {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .tier-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .tier-limit {
+                text-align: left;
+            }
+
+            .points-details {
+                grid-template-columns: 1fr;
+            }
+
+            .plugins-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====== HERO ====== -->
+    <header class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">🏥 Dành cho Nhân Viên Y Tế</div>
+            <h1>Hướng Dẫn Sử Dụng<br />Phở Medical Beta</h1>
+            <p>Trợ lý AI thông minh cho y tế — tra cứu y văn, phân tích ca lâm sàng, và hỗ trợ nghiên cứu chỉ trong vài
+                giây.</p>
+            <div class="hero-plan">
+                <span class="price">999,000₫</span>
+                <span class="period">/năm</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- ====== HƯỚNG DẪN BẮT ĐẦU ====== -->
+        <section>
+            <div class="section-label">📋 Bước Đầu Tiên</div>
+            <h2 class="section-title">Bắt Đầu Sử Dụng</h2>
+            <p class="section-desc">Chỉ cần 3 bước đơn giản để kích hoạt và bắt đầu trải nghiệm Phở Medical Beta.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <h3>Đăng ký tài khoản</h3>
+                        <p>Truy cập <strong>pho.chat</strong> → Nhấn <strong>"Đăng nhập"</strong> ở góc trên bên phải →
+                            Đăng ký bằng Google, GitHub hoặc Email. Quá trình chỉ mất 30 giây.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <h3>Kích hoạt gói Medical Beta</h3>
+                        <p>Sau khi thanh toán 999,000₫/năm, bạn sẽ nhận được <strong>mã kích hoạt (Promo Code)</strong>.
+                            Vào <strong>Cài đặt → Nhập mã</strong> để kích hoạt gói. Hệ thống sẽ tự động nâng cấp tài
+                            khoản của bạn lên <code>Phở Medical Beta 🏥</code>.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>
+                        <h3>Bắt đầu chat với AI</h3>
+                        <p>Giao diện chat sẽ mở sẵn. Mặc định sử dụng model <strong>nhanh nhất</strong> (Llama 3.1). Bạn
+                            có thể chuyển sang model mạnh hơn (Claude, GPT, Gemini) bằng cách nhấn vào <strong>tên model
+                                ở góc trên</strong> của cửa sổ chat.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== CÁC TẦNG MODEL ====== -->
+        <section>
+            <div class="section-label">🤖 AI Models</div>
+            <h2 class="section-title">Bạn Được Truy Cập 3 Tầng Model</h2>
+            <p class="section-desc">Gói Medical Beta cho phép bạn sử dụng tất cả các mô hình AI từ cơ bản đến cao cấp
+                nhất.</p>
+
+            <div class="tiers-grid">
+                <div class="tier-card">
+                    <span class="tier-badge t1">Tier 1</span>
+                    <div class="tier-info">
+                        <h4>Budget — Nhanh & Tiết Kiệm</h4>
+                        <p>Gemini 2.0 Flash, GPT-4o-mini, Llama 3.1/3.3, DeepSeek, Gemma, Mercury — Phù hợp cho câu hỏi
+                            nhanh, tra cứu cơ bản, dịch thuật.</p>
+                    </div>
+                    <div class="tier-limit unlimited">Không giới hạn<small>mỗi ngày</small></div>
+                </div>
+                <div class="tier-card">
+                    <span class="tier-badge t2">Tier 2</span>
+                    <div class="tier-info">
+                        <h4>Standard — Chất Lượng Cao</h4>
+                        <p>GPT-5.2, Claude Sonnet 4.6, Gemini 2.5 Pro, DeepSeek R1, Grok 4 — Phù hợp cho phân tích ca
+                            lâm sàng, viết báo cáo, tra cứu chuyên sâu.</p>
+                    </div>
+                    <div class="tier-limit limited">20 lượt<small>mỗi ngày</small></div>
+                </div>
+                <div class="tier-card">
+                    <span class="tier-badge t3">Tier 3</span>
+                    <div class="tier-info">
+                        <h4>Premium — Cao Cấp Nhất</h4>
+                        <p>Claude Opus 4.6, Gemini 3.1 Pro, O3 — Phù hợp cho phân tích phức tạp, nghiên cứu chuyên sâu,
+                            reasoning nâng cao.</p>
+                    </div>
+                    <div class="tier-limit premium">5 lượt<small>mỗi ngày</small></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== PHỞ POINTS ====== -->
+        <section>
+            <div class="section-label">💎 Hệ Thống Điểm</div>
+            <h2 class="section-title">Phở Points Là Gì?</h2>
+            <p class="section-desc">Mỗi tin nhắn bạn gửi sẽ tiêu tốn một lượng Points tùy theo model sử dụng. Points
+                được reset vào đầu mỗi tháng.</p>
+
+            <div class="points-card">
+                <div class="points-amount">500,000</div>
+                <span class="points-unit">Phở Points / tháng</span>
+
+                <div class="points-details">
+                    <div class="point-item">
+                        <div class="val t1">~5 pts/câu</div>
+                        <div class="label">Tier 1 — Budget<br />≈ không giới hạn</div>
+                    </div>
+                    <div class="point-item">
+                        <div class="val t2">~150 pts/câu</div>
+                        <div class="label">Tier 2 — Standard<br />≈ 3,300 câu/tháng</div>
+                    </div>
+                    <div class="point-item">
+                        <div class="val t3">~500 pts/câu</div>
+                        <div class="label">Tier 3 — Premium<br />≈ 1,000 câu/tháng</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== PLUGINS Y KHOA ====== -->
+        <section>
+            <div class="section-label">🔬 Công Cụ Chuyên Biệt</div>
+            <h2 class="section-title">Plugins Y Khoa</h2>
+            <p class="section-desc">Các plugins được thiết kế riêng cho nhân viên y tế, hỗ trợ tra cứu và nghiên cứu y
+                văn trực tiếp trong chat.</p>
+
+            <div class="plugins-grid">
+                <div class="plugin-card">
+                    <div class="plugin-icon">📚</div>
+                    <h4>PubMed Search</h4>
+                    <p>Tra cứu hàng triệu bài báo y khoa trên PubMed. Tìm nghiên cứu liên quan theo từ khóa, tác giả,
+                        hoặc chủ đề.</p>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">📄</div>
+                    <h4>ArXiv Papers</h4>
+                    <p>Truy cập preprints mới nhất từ ArXiv trong các lĩnh vực y sinh, thống kê y khoa, và khoa học sức
+                        khỏe.</p>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">💊</div>
+                    <h4>Drug Interaction</h4>
+                    <p>Kiểm tra tương tác thuốc nhanh chóng. Phát hiện xung đột thuốc, liều lượng, và tác dụng phụ tiềm
+                        ẩn.</p>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🧮</div>
+                    <h4>Clinical Calculator</h4>
+                    <p>Máy tính lâm sàng cho BMI, GFR, MELD, CHA₂DS₂-VASc, Wells Score và nhiều công cụ tính toán y khoa
+                        khác.</p>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🔎</div>
+                    <h4>Semantic Scholar</h4>
+                    <p>Tìm kiếm bài báo học thuật bằng AI — hiểu ngữ nghĩa và đề xuất bài viết liên quan chính xác hơn.
+                    </p>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🔗</div>
+                    <h4>DOI Resolver</h4>
+                    <p>Tra cứu thông tin chi tiết bài báo từ mã DOI. Xem abstract, tác giả, journal, và số lượng trích
+                        dẫn.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== CÁCH DÙNG HIỆU QUẢ ====== -->
+        <section>
+            <div class="section-label">💡 Mẹo Hay</div>
+            <h2 class="section-title">Sử Dụng Hiệu Quả</h2>
+            <p class="section-desc">Một số mẹo giúp bạn tận dụng tối đa gói Medical Beta.</p>
+
+            <div class="tips-grid">
+                <div class="tip">
+                    <div class="tip-icon">⚡</div>
+                    <div>
+                        <h4>Dùng Tier 1 cho câu hỏi nhanh</h4>
+                        <p>Dịch thuật, tóm tắt, tra cứu thuật ngữ → dùng Tier 1 (Llama, Gemini Flash) để tiết kiệm
+                            Points và nhận phản hồi nhanh nhất.</p>
+                    </div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">🎯</div>
+                    <div>
+                        <h4>Dùng Tier 2-3 cho phân tích chuyên sâu</h4>
+                        <p>Phân tích ca lâm sàng phức tạp, viết báo cáo nghiên cứu, đọc hiểu bài báo → chuyển sang
+                            Claude Sonnet/Opus hoặc GPT-5.2 để có kết quả tốt nhất.</p>
+                    </div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">📎</div>
+                    <div>
+                        <h4>Upload tài liệu</h4>
+                        <p>Bạn có thể upload PDF, hình ảnh (chụp kết quả xét nghiệm, X-ray), và file LaTeX. AI sẽ đọc và
+                            phân tích nội dung cho bạn.</p>
+                    </div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">🔌</div>
+                    <div>
+                        <h4>Bật Plugins trong Settings</h4>
+                        <p>Vào <strong>Cài đặt → Plugins</strong> → Bật các plugin y khoa (PubMed, Drug Interaction...).
+                            Sau đó khi chat, AI sẽ tự động sử dụng plugins khi cần.</p>
+                    </div>
+                </div>
+                <div class="tip">
+                    <div class="tip-icon">💾</div>
+                    <div>
+                        <h4>Knowledge Base</h4>
+                        <p>Upload tài liệu lên Knowledge Base (1GB dung lượng) để AI có thể tra cứu và trả lời dựa trên
+                            tài liệu riêng của bạn — như guidelines nội bộ bệnh viện.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== FAQ ====== -->
+        <section>
+            <div class="section-label">❓ Câu Hỏi Thường Gặp</div>
+            <h2 class="section-title">FAQ</h2>
+            <p class="section-desc">Giải đáp những thắc mắc phổ biến nhất.</p>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-q">Points hết thì sao?</div>
+                    <div class="faq-a">Points được reset tự động vào đầu mỗi tháng (500,000 Points/tháng). Nếu hết
+                        Points trước kỳ reset, bạn vẫn có thể chat bằng model Tier 1 cơ bản. Giới hạn hàng ngày (20 Tier
+                        2, 5 Tier 3) cũng reset mỗi ngày.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Model nào cho kết quả tốt nhất cho y khoa?</div>
+                    <div class="faq-a">Theo khuyến nghị: <strong>Claude Opus 4.6</strong> (Tier 3) cho reasoning và phân
+                        tích phức tạp nhất, <strong>GPT-5.2</strong> hoặc <strong>Claude Sonnet 4.6</strong> (Tier 2)
+                        cho phân tích hàng ngày, và <strong>Gemini 2.5 Pro</strong> (Tier 2) cho bài toán cần context
+                        dài (đọc bài báo dài). Dùng Tier 1 cho tra cứu nhanh.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Có thể dùng trên điện thoại không?</div>
+                    <div class="faq-a">Có! Phở Chat hoạt động hoàn hảo trên trình duyệt điện thoại. Truy cập
+                        <strong>pho.chat</strong> trên Chrome/Safari, đăng nhập và sử dụng bình thường. Bạn cũng có thể
+                        thêm vào Màn hình chính (Add to Home Screen) để truy cập nhanh hơn.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Gói 999k/năm có bị tăng giá không?</div>
+                    <div class="faq-a">Giá 999,000₫/năm là ưu đãi đặc biệt cho chương trình Medical Beta dành riêng cho
+                        nhân viên y tế. Khi bạn đã đăng ký, giá sẽ được giữ nguyên trong suốt thời gian sử dụng.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Dữ liệu chat có bảo mật không?</div>
+                    <div class="faq-a">Có. Tất cả dữ liệu chat được mã hóa và lưu trữ an toàn. Chúng tôi không sử dụng
+                        dữ liệu chat của bạn cho mục đích huấn luyện AI. Bạn có thể xóa lịch sử chat bất kỳ lúc nào.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== CTA ====== -->
+        <section class="cta-section">
+            <h2 class="section-title" style="margin-bottom: 16px;">Sẵn sàng bắt đầu?</h2>
+            <p class="section-desc" style="margin: 0 auto 32px; text-align: center;">Truy cập Phở Chat ngay và trải
+                nghiệm trợ lý AI y khoa thông minh nhất.</p>
+            <a href="https://pho.chat" class="cta-btn">Mở Phở Chat →</a>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>© 2025 Phở Chat — AI cho Nhân Viên Y Tế Việt Nam 🇻🇳</p>
+        <p style="margin-top: 8px;">Cần hỗ trợ? Liên hệ <a href="mailto:support@pho.chat">support@pho.chat</a></p>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-q').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                const isOpen = item.classList.contains('open');
+                // Close all
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                // Toggle current
+                if (!isOpen) item.classList.add('open');
+            });
+        });
+    </script>
+</body>
+
+</html>
