@@ -3,6 +3,7 @@ import History from './History';
 import Knowledge from './Knowledge';
 import Model from './Model';
 import Params from './Params';
+import Research from './Research';
 import STT from './STT';
 import SaveTopic from './SaveTopic';
 import Search from './Search';
@@ -20,6 +21,7 @@ export const actionMap = {
   model: Model,
   params: Params,
   portalToken: PortalToken,
+  research: Research,
   saveTopic: SaveTopic,
   search: Search,
   stt: STT,
@@ -31,3 +33,4 @@ export const actionMap = {
 export type ActionKey = keyof typeof actionMap;
 
 export type ActionKeys = ActionKey | ActionKey[] | '---';
+
