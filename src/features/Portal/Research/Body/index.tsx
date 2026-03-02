@@ -6,6 +6,7 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type ResearchPhase, useResearchStore } from '@/store/research';
 
+import AnalysisPhase from './Analysis';
 import DiscoveryPhase from './Discovery';
 import ScreeningPhase from './Screening';
 
@@ -68,6 +69,7 @@ const PHASES: { key: ResearchPhase; label: string }[] = [
 const ResearchBody = memo(() => {
   const { styles, cx } = useStyles();
   const activePhase = useResearchStore((s) => s.activePhase);
+  const setActivePhase = useResearchStore((s) => s.setActivePhase);
 
   const getPhaseClass = (phaseKey: ResearchPhase) => {
     const phaseIndex = PHASES.findIndex((p) => p.key === phaseKey);
@@ -83,7 +85,12 @@ const ResearchBody = memo(() => {
       {/* Phase Progress Bar */}
       <div className={styles.phaseBar}>
         {PHASES.map((phase) => (
-          <span className={cx(getPhaseClass(phase.key))} key={phase.key}>
+          <span
+            className={cx(getPhaseClass(phase.key))}
+            key={phase.key}
+            onClick={() => setActivePhase(phase.key)}
+            style={{ cursor: 'pointer' }}
+          >
             {phase.label}
           </span>
         ))}
@@ -92,6 +99,7 @@ const ResearchBody = memo(() => {
       {/* Active Phase Content */}
       {activePhase === 'discovery' && <DiscoveryPhase />}
       {activePhase === 'screening' && <ScreeningPhase />}
+      {activePhase === 'analysis' && <AnalysisPhase />}
     </Flexbox>
   );
 });
