@@ -8,7 +8,9 @@ import { type ResearchPhase, useResearchStore } from '@/store/research';
 
 import AnalysisPhase from './Analysis';
 import DiscoveryPhase from './Discovery';
+import PublishingPhase from './Publishing';
 import ScreeningPhase from './Screening';
+import WritingPhase from './Writing';
 
 const useStyles = createStyles(({ css, token }) => ({
   container: css`
@@ -100,6 +102,8 @@ const ResearchBody = memo(() => {
       {activePhase === 'discovery' && <DiscoveryPhase />}
       {activePhase === 'screening' && <ScreeningPhase />}
       {activePhase === 'analysis' && <AnalysisPhase />}
+      {activePhase === 'writing' && <WritingPhase />}
+      {activePhase === 'publishing' && <PublishingPhase />}
     </Flexbox>
   );
 });
