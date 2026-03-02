@@ -5,7 +5,7 @@
  * Phase B: Screening (include/exclude papers, criteria)
  */
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
 
 // ========== Types ==========
 
@@ -19,7 +19,7 @@ export interface PaperResult {
     isOpenAccess?: boolean;
     journal?: string;
     pubmedUrl?: string;
-    source: 'PubMed' | 'OpenAlex' | 'ClinicalTrials.gov';
+    source: 'PubMed' | 'OpenAlex' | 'ArXiv' | 'ClinicalTrials.gov';
     title: string;
     year: number;
 }
@@ -33,7 +33,7 @@ export interface PICOQuery {
 
 export type ResearchPhase = 'discovery' | 'screening' | 'analysis' | 'writing' | 'publishing';
 
-export type SearchSource = 'PubMed' | 'OpenAlex' | 'ClinicalTrials.gov';
+export type SearchSource = 'PubMed' | 'OpenAlex' | 'ArXiv' | 'ClinicalTrials.gov';
 
 export type ScreeningDecision = 'included' | 'excluded' | 'pending';
 
@@ -69,29 +69,29 @@ interface ResearchState {
     includeAllPapers: () => void;
 
     isSearching: boolean;
-    toggleSource: (source: SearchSource) => void;
-    searchPapers: (query: string) => Promise<void>;
+    papers: PaperResult[];
     pico: PICOQuery | null;
-    setActivePhase: (phase: ResearchPhase) => void;
+    reset: () => void;
+    resetScreening: () => void;
 
     // Screening Actions
     screenPaper: (paperId: string, decision: ScreeningDecision, reason?: string) => void;
-    selectedSources: SearchSource[];
-    papers: PaperResult[];
-    updateScreeningCriteria: (criteria: Partial<ScreeningCriteria>) => void;
     screeningCriteria: ScreeningCriteria;
-    // Discovery
-    searchQuery: string;
-    resetScreening: () => void;
-
-    // Discovery Actions
-    setSearchQuery: (query: string) => void;
-    totalResults: number;
-    searchError: string | null;
     // Screening
     screeningDecisions: Record<string, ScreeningEntry>;
+    searchError: string | null;
+    searchPapers: (query: string) => Promise<void>;
+    // Discovery
+    searchQuery: string;
+    selectedSources: SearchSource[];
 
-    reset: () => void;
+    setActivePhase: (phase: ResearchPhase) => void;
+    // Discovery Actions
+    setSearchQuery: (query: string) => void;
+    toggleSource: (source: SearchSource) => void;
+    updateScreeningCriteria: (criteria: Partial<ScreeningCriteria>) => void;
+
+    totalResults: number;
 }
 
 const defaultCriteria: ScreeningCriteria = {
@@ -112,7 +112,7 @@ const initialState = {
     screeningDecisions: {} as Record<string, ScreeningEntry>,
     searchError: null as string | null,
     searchQuery: '',
-    selectedSources: ['PubMed', 'OpenAlex'] as SearchSource[],
+    selectedSources: ['PubMed', 'OpenAlex', 'ArXiv'] as SearchSource[],
     totalResults: 0,
 };
 
@@ -177,6 +177,36 @@ const searchOpenAlex = async (query: string, maxResults = 10): Promise<PaperResu
     }
 };
 
+const searchArXiv = async (query: string, maxResults = 10): Promise<PaperResult[]> => {
+    try {
+        const response = await fetch('/api/plugins/arxiv/search', {
+            body: JSON.stringify({ maxResults, query }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+        if (!response.ok) throw new Error('ArXiv search failed');
+
+        const data = await response.json();
+        const papers = data.papers || [];
+        return papers.map((a: any) => ({
+            abstract: a.abstract,
+            authors: (a.authors || []).join(', '),
+            citations: undefined,
+            doi: a.doi,
+            doiUrl: a.doi ? `https://doi.org/${a.doi}` : undefined,
+            id: `arxiv-${a.arxivId}`,
+            journal: `arXiv:${a.arxivId}`,
+            pubmedUrl: `https://arxiv.org/abs/${a.arxivId}`,
+            source: 'ArXiv' as const,
+            title: a.title,
+            year: a.published ? new Date(a.published).getFullYear() : 0,
+        }));
+    } catch (error) {
+        console.error('[Research] ArXiv search error:', error);
+        return [];
+    }
+};
+
 // ========== PICO extraction (keyword-based) ==========
 
 const extractPICOFromQuery = (query: string): PICOQuery => {
@@ -224,155 +254,171 @@ const extractPICOFromQuery = (query: string): PICOQuery => {
 
 export const useResearchStore = create<ResearchState>()(
     devtools(
-        (set, get) => ({
-            ...initialState,
+        persist(
+            (set, get) => ({
+                ...initialState,
 
-            autoScreenByCitations: (minCitations) => {
-                const { papers, screeningDecisions } = get();
-                const updated = { ...screeningDecisions };
-                for (const paper of papers) {
-                    if ((paper.citations || 0) < minCitations) {
-                        updated[paper.id] = { decision: 'excluded', paperId: paper.id, reason: `< ${minCitations} citations` };
+                autoScreenByCitations: (minCitations) => {
+                    const { papers, screeningDecisions } = get();
+                    const updated = { ...screeningDecisions };
+                    for (const paper of papers) {
+                        if ((paper.citations || 0) < minCitations) {
+                            updated[paper.id] = { decision: 'excluded', paperId: paper.id, reason: `< ${minCitations} citations` };
+                        }
                     }
-                }
-                set({ screeningCriteria: { ...get().screeningCriteria, minCitations }, screeningDecisions: updated }, false, 'autoScreenByCitations');
-            },
+                    set({ screeningCriteria: { ...get().screeningCriteria, minCitations }, screeningDecisions: updated }, false, 'autoScreenByCitations');
+                },
 
-            autoScreenByYearRange: (yearFrom, yearTo) => {
-                const { papers, screeningDecisions } = get();
-                const updated = { ...screeningDecisions };
-                for (const paper of papers) {
-                    if (paper.year < yearFrom || paper.year > yearTo) {
-                        updated[paper.id] = { decision: 'excluded', paperId: paper.id, reason: `Outside ${yearFrom}-${yearTo}` };
+                autoScreenByYearRange: (yearFrom, yearTo) => {
+                    const { papers, screeningDecisions } = get();
+                    const updated = { ...screeningDecisions };
+                    for (const paper of papers) {
+                        if (paper.year < yearFrom || paper.year > yearTo) {
+                            updated[paper.id] = { decision: 'excluded', paperId: paper.id, reason: `Outside ${yearFrom}-${yearTo}` };
+                        }
                     }
-                }
-                set({ screeningCriteria: { ...get().screeningCriteria, yearFrom, yearTo }, screeningDecisions: updated }, false, 'autoScreenByYearRange');
-            },
+                    set({ screeningCriteria: { ...get().screeningCriteria, yearFrom, yearTo }, screeningDecisions: updated }, false, 'autoScreenByYearRange');
+                },
 
-            excludeAllPapers: () => {
-                const { papers } = get();
-                const decisions: Record<string, ScreeningEntry> = {};
-                for (const paper of papers) {
-                    decisions[paper.id] = { decision: 'excluded', paperId: paper.id };
-                }
-                set({ screeningDecisions: decisions }, false, 'excludeAllPapers');
-            },
+                excludeAllPapers: () => {
+                    const { papers } = get();
+                    const decisions: Record<string, ScreeningEntry> = {};
+                    for (const paper of papers) {
+                        decisions[paper.id] = { decision: 'excluded', paperId: paper.id };
+                    }
+                    set({ screeningDecisions: decisions }, false, 'excludeAllPapers');
+                },
 
-            extractPICO: (query) => {
-                const pico = extractPICOFromQuery(query);
-                set({ pico }, false, 'extractPICO');
-            },
+                extractPICO: (query) => {
+                    const pico = extractPICOFromQuery(query);
+                    set({ pico }, false, 'extractPICO');
+                },
 
-            getExcludedPapers: () => {
-                const { papers, screeningDecisions } = get();
-                return papers.filter((p) => screeningDecisions[p.id]?.decision === 'excluded');
-            },
+                getExcludedPapers: () => {
+                    const { papers, screeningDecisions } = get();
+                    return papers.filter((p) => screeningDecisions[p.id]?.decision === 'excluded');
+                },
 
-            getIncludedPapers: () => {
-                const { papers, screeningDecisions } = get();
-                return papers.filter((p) => screeningDecisions[p.id]?.decision === 'included');
-            },
+                getIncludedPapers: () => {
+                    const { papers, screeningDecisions } = get();
+                    return papers.filter((p) => screeningDecisions[p.id]?.decision === 'included');
+                },
 
-            getPendingPapers: () => {
-                const { papers, screeningDecisions } = get();
-                return papers.filter((p) => !screeningDecisions[p.id] || screeningDecisions[p.id]?.decision === 'pending');
-            },
+                getPendingPapers: () => {
+                    const { papers, screeningDecisions } = get();
+                    return papers.filter((p) => !screeningDecisions[p.id] || screeningDecisions[p.id]?.decision === 'pending');
+                },
 
-            getScreeningStats: () => {
-                const { papers, screeningDecisions } = get();
-                let included = 0;
-                let excluded = 0;
-                for (const paper of papers) {
-                    const d = screeningDecisions[paper.id]?.decision;
-                    if (d === 'included') included++;
-                    else if (d === 'excluded') excluded++;
-                }
-                return { excluded, included, pending: papers.length - included - excluded, total: papers.length };
-            },
+                getScreeningStats: () => {
+                    const { papers, screeningDecisions } = get();
+                    let included = 0;
+                    let excluded = 0;
+                    for (const paper of papers) {
+                        const d = screeningDecisions[paper.id]?.decision;
+                        if (d === 'included') included++;
+                        else if (d === 'excluded') excluded++;
+                    }
+                    return { excluded, included, pending: papers.length - included - excluded, total: papers.length };
+                },
 
-            includeAllPapers: () => {
-                const { papers } = get();
-                const decisions: Record<string, ScreeningEntry> = {};
-                for (const paper of papers) {
-                    decisions[paper.id] = { decision: 'included', paperId: paper.id };
-                }
-                set({ screeningDecisions: decisions }, false, 'includeAllPapers');
-            },
+                includeAllPapers: () => {
+                    const { papers } = get();
+                    const decisions: Record<string, ScreeningEntry> = {};
+                    for (const paper of papers) {
+                        decisions[paper.id] = { decision: 'included', paperId: paper.id };
+                    }
+                    set({ screeningDecisions: decisions }, false, 'includeAllPapers');
+                },
 
-            reset: () => {
-                set(initialState, false, 'reset');
-            },
+                reset: () => {
+                    set(initialState, false, 'reset');
+                },
 
-            resetScreening: () => {
-                set({ screeningDecisions: {} }, false, 'resetScreening');
-            },
+                resetScreening: () => {
+                    set({ screeningDecisions: {} }, false, 'resetScreening');
+                },
 
-            screenPaper: (paperId, decision, reason) => {
-                const { screeningDecisions } = get();
-                set({
-                    screeningDecisions: {
-                        ...screeningDecisions,
-                        [paperId]: { decision, paperId, reason },
-                    },
-                }, false, 'screenPaper');
-            },
+                screenPaper: (paperId, decision, reason) => {
+                    const { screeningDecisions } = get();
+                    set({
+                        screeningDecisions: {
+                            ...screeningDecisions,
+                            [paperId]: { decision, paperId, reason },
+                        },
+                    }, false, 'screenPaper');
+                },
 
-            searchPapers: async (query) => {
-                const { selectedSources } = get();
-                set({ isSearching: true, searchError: null, searchQuery: query }, false, 'searchPapers/start');
+                searchPapers: async (query) => {
+                    const { selectedSources } = get();
+                    set({ isSearching: true, searchError: null, searchQuery: query }, false, 'searchPapers/start');
 
-                try {
-                    const promises: Promise<PaperResult[]>[] = [];
-                    if (selectedSources.includes('PubMed')) promises.push(searchPubMed(query));
-                    if (selectedSources.includes('OpenAlex')) promises.push(searchOpenAlex(query));
+                    try {
+                        const promises: Promise<PaperResult[]>[] = [];
+                        if (selectedSources.includes('PubMed')) promises.push(searchPubMed(query));
+                        if (selectedSources.includes('OpenAlex')) promises.push(searchOpenAlex(query));
+                        if (selectedSources.includes('ArXiv')) promises.push(searchArXiv(query));
 
-                    const results = await Promise.allSettled(promises);
-                    const allPapers: PaperResult[] = [];
-                    const seenDois = new Set<string>();
+                        const results = await Promise.allSettled(promises);
+                        const allPapers: PaperResult[] = [];
+                        const seenDois = new Set<string>();
 
-                    for (const result of results) {
-                        if (result.status === 'fulfilled') {
-                            for (const paper of result.value) {
-                                const key = paper.doi || paper.title;
-                                if (!seenDois.has(key)) {
-                                    seenDois.add(key);
-                                    allPapers.push(paper);
+                        for (const result of results) {
+                            if (result.status === 'fulfilled') {
+                                for (const paper of result.value) {
+                                    const key = paper.doi || paper.title;
+                                    if (!seenDois.has(key)) {
+                                        seenDois.add(key);
+                                        allPapers.push(paper);
+                                    }
                                 }
                             }
                         }
+
+                        allPapers.sort((a, b) => {
+                            if ((b.citations || 0) !== (a.citations || 0)) return (b.citations || 0) - (a.citations || 0);
+                            return b.year - a.year;
+                        });
+
+                        set({
+                            isSearching: false,
+                            papers: allPapers,
+                            screeningDecisions: {},
+                            totalResults: allPapers.length,
+                        }, false, 'searchPapers/done');
+                    } catch {
+                        set({ isSearching: false, searchError: 'Search failed. Please try again.' }, false, 'searchPapers/error');
                     }
+                },
 
-                    allPapers.sort((a, b) => {
-                        if ((b.citations || 0) !== (a.citations || 0)) return (b.citations || 0) - (a.citations || 0);
-                        return b.year - a.year;
-                    });
+                setActivePhase: (phase) => set({ activePhase: phase }, false, 'setActivePhase'),
+                setSearchQuery: (query) => set({ searchQuery: query }, false, 'setSearchQuery'),
 
-                    set({
-                        isSearching: false,
-                        papers: allPapers,
-                        screeningDecisions: {},
-                        totalResults: allPapers.length,
-                    }, false, 'searchPapers/done');
-                } catch {
-                    set({ isSearching: false, searchError: 'Search failed. Please try again.' }, false, 'searchPapers/error');
-                }
+                toggleSource: (source) => {
+                    const { selectedSources } = get();
+                    const newSources = selectedSources.includes(source)
+                        ? selectedSources.filter((s) => s !== source)
+                        : [...selectedSources, source];
+                    set({ selectedSources: newSources }, false, 'toggleSource');
+                },
+
+                updateScreeningCriteria: (criteria) => {
+                    set({ screeningCriteria: { ...get().screeningCriteria, ...criteria } }, false, 'updateScreeningCriteria');
+                },
+            }),
+            {
+                name: 'pho-research-store',
+                partialize: (state) => ({
+                    activePhase: state.activePhase,
+                    papers: state.papers,
+                    pico: state.pico,
+                    screeningCriteria: state.screeningCriteria,
+                    screeningDecisions: state.screeningDecisions,
+                    searchQuery: state.searchQuery,
+                    selectedSources: state.selectedSources,
+                    totalResults: state.totalResults,
+                }),
             },
-
-            setActivePhase: (phase) => set({ activePhase: phase }, false, 'setActivePhase'),
-            setSearchQuery: (query) => set({ searchQuery: query }, false, 'setSearchQuery'),
-
-            toggleSource: (source) => {
-                const { selectedSources } = get();
-                const newSources = selectedSources.includes(source)
-                    ? selectedSources.filter((s) => s !== source)
-                    : [...selectedSources, source];
-                set({ selectedSources: newSources }, false, 'toggleSource');
-            },
-
-            updateScreeningCriteria: (criteria) => {
-                set({ screeningCriteria: { ...get().screeningCriteria, ...criteria } }, false, 'updateScreeningCriteria');
-            },
-        }),
+        ),
         { name: 'ResearchStore' },
     ),
 );
