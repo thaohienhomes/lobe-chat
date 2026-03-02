@@ -4,7 +4,7 @@ import { Button, Input, Tag } from '@lobehub/ui';
 import { Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import { ArrowRight, ExternalLink, Search } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { type SearchSource, useResearchStore } from '@/store/research';
@@ -88,6 +88,22 @@ const useStyles = createStyles(({ css, token }) => ({
     font-size: 12px;
     color: ${token.colorTextSecondary};
   `,
+    resultAbstract: css`
+    font-size: 12px;
+    line-height: 1.5;
+    color: ${token.colorTextTertiary};
+  `,
+    resultAbstractToggle: css`
+    cursor: pointer;
+
+    font-size: 11px;
+    font-weight: 500;
+    color: ${token.colorPrimary};
+
+    &:hover {
+      text-decoration: underline;
+    }
+  `,
     resultTitle: css`
     font-size: 14px;
     font-weight: 600;
@@ -101,7 +117,7 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 }));
 
-const SOURCES: SearchSource[] = ['PubMed', 'OpenAlex', 'ClinicalTrials.gov'];
+const SOURCES: SearchSource[] = ['PubMed', 'OpenAlex', 'ArXiv'];
 
 const DiscoveryPhase = memo(() => {
     const { styles } = useStyles();
@@ -119,6 +135,17 @@ const DiscoveryPhase = memo(() => {
     const searchPapers = useResearchStore((s) => s.searchPapers);
     const extractPICO = useResearchStore((s) => s.extractPICO);
     const setActivePhase = useResearchStore((s) => s.setActivePhase);
+
+    const [expandedAbstracts, setExpandedAbstracts] = useState<Set<string>>(new Set());
+
+    const toggleAbstract = useCallback((paperId: string) => {
+        setExpandedAbstracts((prev) => {
+            const next = new Set(prev);
+            if (next.has(paperId)) next.delete(paperId);
+            else next.add(paperId);
+            return next;
+        });
+    }, []);
 
     const handleSearch = () => {
         if (searchQuery.trim()) {
@@ -221,9 +248,32 @@ const DiscoveryPhase = memo(() => {
                                     )}
                                 </Flexbox>
                                 <span className={styles.resultMeta}>{paper.authors}</span>
+                                {/* Abstract */}
+                                {paper.abstract && (
+                                    <Flexbox gap={2}>
+                                        <span className={styles.resultAbstract}>
+                                            {expandedAbstracts.has(paper.id)
+                                                ? paper.abstract
+                                                : paper.abstract.length > 200
+                                                    ? `${paper.abstract.slice(0, 200)}...`
+                                                    : paper.abstract}
+                                        </span>
+                                        {paper.abstract.length > 200 && (
+                                            <span
+                                                className={styles.resultAbstractToggle}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleAbstract(paper.id);
+                                                }}
+                                            >
+                                                {expandedAbstracts.has(paper.id) ? '▲ Thu gọn' : '▼ Xem abstract'}
+                                            </span>
+                                        )}
+                                    </Flexbox>
+                                )}
                                 <Flexbox align={'center'} gap={8} horizontal wrap={'wrap'}>
                                     <Tag
-                                        color={paper.source === 'PubMed' ? 'blue' : 'green'}
+                                        color={paper.source === 'PubMed' ? 'blue' : paper.source === 'ArXiv' ? 'purple' : 'green'}
                                         style={{ fontSize: 11 }}
                                     >
                                         {paper.source}

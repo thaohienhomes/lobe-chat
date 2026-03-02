@@ -3,7 +3,7 @@
 import { Button, Tag } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { CheckCircle, ChevronLeft, XCircle } from 'lucide-react';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { type ScreeningDecision, useResearchStore } from '@/store/research';
@@ -85,6 +85,22 @@ const useStyles = createStyles(({ css, token }) => ({
     line-height: 1.4;
     color: ${token.colorText};
   `,
+    paperAbstract: css`
+    font-size: 11px;
+    line-height: 1.5;
+    color: ${token.colorTextTertiary};
+  `,
+    paperAbstractToggle: css`
+    cursor: pointer;
+
+    font-size: 10px;
+    font-weight: 500;
+    color: ${token.colorPrimary};
+
+    &:hover {
+      text-decoration: underline;
+    }
+  `,
     statItem: css`
     display: flex;
     gap: 6px;
@@ -153,6 +169,17 @@ const ScreeningPhase = memo(() => {
     const includeAllPapers = useResearchStore((s) => s.includeAllPapers);
     const resetScreening = useResearchStore((s) => s.resetScreening);
     const setActivePhase = useResearchStore((s) => s.setActivePhase);
+
+    const [expandedAbstracts, setExpandedAbstracts] = useState<Set<string>>(new Set());
+
+    const toggleAbstract = useCallback((paperId: string) => {
+        setExpandedAbstracts((prev) => {
+            const next = new Set(prev);
+            if (next.has(paperId)) next.delete(paperId);
+            else next.add(paperId);
+            return next;
+        });
+    }, []);
 
     const stats = getScreeningStats();
 
@@ -280,9 +307,29 @@ const ScreeningPhase = memo(() => {
                                 </Flexbox>
                             </Flexbox>
                             <span className={styles.paperMeta}>{paper.authors}</span>
+                            {/* Abstract */}
+                            {paper.abstract && (
+                                <Flexbox gap={2}>
+                                    <span className={styles.paperAbstract}>
+                                        {expandedAbstracts.has(paper.id)
+                                            ? paper.abstract
+                                            : paper.abstract.length > 150
+                                                ? `${paper.abstract.slice(0, 150)}...`
+                                                : paper.abstract}
+                                    </span>
+                                    {paper.abstract.length > 150 && (
+                                        <span
+                                            className={styles.paperAbstractToggle}
+                                            onClick={() => toggleAbstract(paper.id)}
+                                        >
+                                            {expandedAbstracts.has(paper.id) ? '▲ Thu gọn' : '▼ Xem abstract'}
+                                        </span>
+                                    )}
+                                </Flexbox>
+                            )}
                             <Flexbox align={'center'} gap={6} horizontal wrap={'wrap'}>
                                 <Tag
-                                    color={paper.source === 'PubMed' ? 'blue' : 'green'}
+                                    color={paper.source === 'PubMed' ? 'blue' : paper.source === 'ArXiv' ? 'purple' : 'green'}
                                     style={{ fontSize: 10 }}
                                 >
                                     {paper.source}
