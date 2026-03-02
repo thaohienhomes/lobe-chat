@@ -24,6 +24,7 @@ export interface ChatPortalState {
   portalArtifactDisplayMode?: ArtifactDisplayMode;
   portalFile?: PortalFile;
   portalMessageDetail?: string;
+  portalResearch?: boolean;
   portalThreadId?: string;
   portalToolMessage?: { id: string; identifier: string };
   showPortal: boolean;
@@ -31,5 +32,6 @@ export interface ChatPortalState {
 
 export const initialChatPortalState: ChatPortalState = {
   portalArtifactDisplayMode: ArtifactDisplayMode.Preview,
+  portalResearch: false,
   showPortal: false,
 };
