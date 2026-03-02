@@ -6,10 +6,12 @@ import {
   canPlanUseModel,
   getAllowedModelsForPlan,
   getAllowedTiersForPlan,
+  getDailyTierLimit,
   getDefaultModelForPlan,
   getModelTier,
 } from '@/config/pricing';
 import { pino } from '@/libs/logger';
+import { chatDailyRateLimiter } from '@/middleware/rate-limit';
 
 // Legacy imports for backward compatibility
 import { FREE_TIER_MODELS, TRIAL_CONFIG } from '../trial/config';
@@ -25,6 +27,12 @@ export interface TrialAccessResult {
   allowed: boolean;
   /** Tiers user can access based on their plan */
   allowedTiers?: number[];
+  /** Daily limit for the requested model's tier */
+  dailyLimit?: number;
+  /** Remaining messages for the requested model's tier today */
+  dailyRemaining?: number;
+  /** Timestamp (ms) when daily limit resets (next midnight UTC) */
+  dailyResetTime?: number;
   isTrialUser: boolean;
   /** @deprecated Use allowedTiers instead */
   messagesRemaining?: number;
@@ -221,6 +229,55 @@ export class SubscriptionService {
             reason: 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat với AI.',
           };
         }
+      }
+    }
+
+    // ── Daily tier rate limiting ──
+    // Enforce dailyLimits from PLAN_MODEL_ACCESS (e.g. tier2: 30, tier3: 50)
+    if (finalModel) {
+      const modelTier = getModelTier(finalModel);
+      const dailyLimit = getDailyTierLimit(planCode, modelTier);
+
+      // Only enforce if limit is set and not unlimited (-1)
+      if (dailyLimit !== -1 && dailyLimit >= 0) {
+        const tierCheck = await chatDailyRateLimiter.check(userId, modelTier, dailyLimit);
+
+        if (!tierCheck.allowed) {
+          pino.warn(
+            {
+              dailyLimit,
+              model: finalModel,
+              planCode,
+              tier: modelTier,
+              userId,
+            },
+            'Daily tier rate limit reached',
+          );
+          return {
+            allowed: false,
+            allowedTiers,
+            dailyLimit: tierCheck.dailyLimit,
+            dailyRemaining: 0,
+            dailyResetTime: tierCheck.resetTime,
+            isTrialUser: isFreePlan,
+            model: finalModel,
+            planCode,
+            reason: `Bạn đã đạt giới hạn ${dailyLimit} tin nhắn Tier ${modelTier}/ngày. Thử lại sau nửa đêm UTC hoặc nâng cấp gói.`,
+          };
+        }
+
+        // Return success with daily usage info
+        return {
+          allowed: true,
+          allowedTiers,
+          dailyLimit: tierCheck.dailyLimit,
+          dailyRemaining: tierCheck.remaining,
+          dailyResetTime: tierCheck.resetTime,
+          isTrialUser: isFreePlan,
+          model: finalModel,
+          modelAdjusted,
+          planCode,
+        };
       }
     }
 

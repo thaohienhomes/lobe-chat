@@ -255,3 +255,130 @@ describe('Rate Limiting Middleware', () => {
   });
 });
 
+// ── DailyTierRateLimiter Tests ──────────────────────────────
+// Tests run in-memory fallback mode (no UPSTASH env vars in test)
+
+import { DailyTierRateLimiter, chatDailyRateLimiter } from './rate-limit';
+
+describe('DailyTierRateLimiter', () => {
+  let limiter: DailyTierRateLimiter;
+
+  beforeEach(() => {
+    limiter = new DailyTierRateLimiter();
+  });
+
+  describe('Basic limiting', () => {
+    it('should allow requests within daily limit', async () => {
+      const limit = 5;
+      for (let i = 0; i < limit; i++) {
+        const result = await limiter.check('user1', 2, limit);
+        expect(result.allowed).toBe(true);
+        expect(result.remaining).toBe(limit - i - 1);
+      }
+    });
+
+    it('should block requests exceeding daily limit', async () => {
+      const limit = 3;
+      // Use up all 3
+      for (let i = 0; i < limit; i++) {
+        await limiter.check('user1', 2, limit);
+      }
+
+      const result = await limiter.check('user1', 2, limit);
+      expect(result.allowed).toBe(false);
+      expect(result.remaining).toBe(0);
+      expect(result.reason).toContain('Daily Tier 2 limit reached');
+      expect(result.reason).toContain('3 messages/day');
+    });
+
+    it('should return correct dailyLimit in result', async () => {
+      const result = await limiter.check('user1', 3, 50);
+      expect(result.dailyLimit).toBe(50);
+      expect(result.tier).toBe(3);
+    });
+  });
+
+  describe('Unlimited access', () => {
+    it('should always allow when limit is -1', async () => {
+      for (let i = 0; i < 100; i++) {
+        const result = await limiter.check('user1', 2, -1);
+        expect(result.allowed).toBe(true);
+        expect(result.remaining).toBe(-1);
+        expect(result.dailyLimit).toBe(-1);
+      }
+    });
+
+    it('should always allow when limit is undefined', async () => {
+      const result = await limiter.check('user1', 1, undefined);
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(-1);
+    });
+  });
+
+  describe('Tier independence', () => {
+    it('should track different tiers independently', async () => {
+      // Use up Tier 2 limit
+      for (let i = 0; i < 5; i++) {
+        await limiter.check('user1', 2, 5);
+      }
+      const tier2Result = await limiter.check('user1', 2, 5);
+      expect(tier2Result.allowed).toBe(false);
+
+      // Tier 3 should still be available
+      const tier3Result = await limiter.check('user1', 3, 10);
+      expect(tier3Result.allowed).toBe(true);
+    });
+  });
+
+  describe('User independence', () => {
+    it('should track different users independently', async () => {
+      // User 1 uses up limit
+      for (let i = 0; i < 3; i++) {
+        await limiter.check('user1', 2, 3);
+      }
+      expect((await limiter.check('user1', 2, 3)).allowed).toBe(false);
+
+      // User 2 should still be fine
+      expect((await limiter.check('user2', 2, 3)).allowed).toBe(true);
+    });
+  });
+
+  describe('Usage tracking', () => {
+    it('should report correct usage', async () => {
+      await limiter.check('user1', 2, 10);
+      await limiter.check('user1', 2, 10);
+      await limiter.check('user1', 2, 10);
+
+      const usage = await limiter.getUsage('user1', 2);
+      expect(usage.count).toBe(3);
+    });
+
+    it('should report 0 for unknown user', async () => {
+      const usage = await limiter.getUsage('unknown', 2);
+      expect(usage.count).toBe(0);
+    });
+  });
+
+  describe('Reset', () => {
+    it('should clear all entries on reset', async () => {
+      await limiter.check('user1', 2, 5);
+      await limiter.check('user2', 3, 10);
+      limiter.reset();
+
+      const stats = limiter.getStats();
+      expect(stats.activeEntries).toBe(0);
+
+      // Should be able to use again after reset
+      const result = await limiter.check('user1', 2, 5);
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(4);
+    });
+  });
+
+  describe('Singleton', () => {
+    it('chatDailyRateLimiter should be a DailyTierRateLimiter', () => {
+      expect(chatDailyRateLimiter).toBeInstanceOf(DailyTierRateLimiter);
+    });
+  });
+});
+
