@@ -1,12 +1,50 @@
 'use client';
 
 import { Button, Input, Tag } from '@lobehub/ui';
+import { Spin } from 'antd';
 import { createStyles } from 'antd-style';
-import { Search } from 'lucide-react';
-import { memo, useState } from 'react';
+import { ExternalLink, Search } from 'lucide-react';
+import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+import { type SearchSource, useResearchStore } from '@/store/research';
+
 const useStyles = createStyles(({ css, token }) => ({
+    container: css`
+    width: 100%;
+  `,
+    emptyState: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+
+    padding: 48px 24px;
+
+    color: ${token.colorTextQuaternary};
+    text-align: center;
+  `,
+    errorMsg: css`
+    padding: 12px 16px;
+
+    font-size: 13px;
+    color: ${token.colorError};
+
+    background: ${token.colorErrorBg};
+    border: 1px solid ${token.colorErrorBorder};
+    border-radius: ${token.borderRadiusLG}px;
+  `,
+    openAccess: css`
+    padding: 1px 6px;
+
+    font-size: 10px;
+    font-weight: 600;
+    color: ${token.colorSuccess};
+
+    background: ${token.colorSuccessBg};
+    border-radius: 4px;
+  `,
     picoCard: css`
     padding: 16px;
 
@@ -46,122 +84,68 @@ const useStyles = createStyles(({ css, token }) => ({
       border-color: ${token.colorPrimaryBorder};
     }
   `,
+    resultMeta: css`
+    font-size: 12px;
+    color: ${token.colorTextSecondary};
+  `,
     resultTitle: css`
     font-size: 14px;
     font-weight: 600;
     line-height: 1.4;
     color: ${token.colorText};
   `,
-    resultMeta: css`
-    font-size: 12px;
-    color: ${token.colorTextSecondary};
-  `,
     sectionTitle: css`
     font-size: 13px;
     font-weight: 600;
     color: ${token.colorTextSecondary};
   `,
-    sourceTag: css`
-    cursor: pointer;
-
-    padding: 4px 12px;
-
-    font-size: 12px;
-    font-weight: 500;
-
-    border-radius: 20px;
-
-    transition: all 0.2s ease;
-  `,
-    emptyState: css`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
-
-    padding: 48px 24px;
-
-    color: ${token.colorTextQuaternary};
-    text-align: center;
-  `,
 }));
 
-// Mock PICO data for demo
-const MOCK_PICO = {
-    population: 'Bệnh nhân tiền đái tháo đường',
-    intervention: 'Metformin',
-    comparison: 'Placebo / Lifestyle modification',
-    outcome: 'Tỷ lệ chuyển thành ĐTĐ type 2',
-};
-
-const MOCK_PAPERS = [
-    {
-        id: '1',
-        title: 'Reduction in the Incidence of Type 2 Diabetes with Lifestyle Intervention or Metformin',
-        authors: 'Knowler WC, Barrett-Connor E, Fowler SE, et al.',
-        journal: 'New England Journal of Medicine',
-        year: 2002,
-        citations: 12847,
-        source: 'PubMed',
-    },
-    {
-        id: '2',
-        title: 'Long-term effects of metformin on diabetes prevention: identification of subgroups',
-        authors: 'Aroda VR, Knowler WC, Crandall JP, et al.',
-        journal: 'Diabetes Care',
-        year: 2017,
-        citations: 456,
-        source: 'PubMed',
-    },
-    {
-        id: '3',
-        title: 'Metformin in Prediabetes: Clinical Benefits and Mechanism',
-        authors: 'Hostalek U, Gwilt M, Hildemann S.',
-        journal: 'Drugs',
-        year: 2015,
-        citations: 312,
-        source: 'OpenAlex',
-    },
-];
+const SOURCES: SearchSource[] = ['PubMed', 'OpenAlex', 'ClinicalTrials.gov'];
 
 const DiscoveryPhase = memo(() => {
     const { styles } = useStyles();
-    const [query, setQuery] = useState('');
-    const [hasSearched, setHasSearched] = useState(false);
-    const [selectedSources, setSelectedSources] = useState<string[]>([
-        'PubMed',
-        'OpenAlex',
-        'ClinicalTrials.gov',
-    ]);
+
+    const searchQuery = useResearchStore((s) => s.searchQuery);
+    const selectedSources = useResearchStore((s) => s.selectedSources);
+    const papers = useResearchStore((s) => s.papers);
+    const pico = useResearchStore((s) => s.pico);
+    const totalResults = useResearchStore((s) => s.totalResults);
+    const isSearching = useResearchStore((s) => s.isSearching);
+    const searchError = useResearchStore((s) => s.searchError);
+
+    const setSearchQuery = useResearchStore((s) => s.setSearchQuery);
+    const toggleSource = useResearchStore((s) => s.toggleSource);
+    const searchPapers = useResearchStore((s) => s.searchPapers);
+    const extractPICO = useResearchStore((s) => s.extractPICO);
 
     const handleSearch = () => {
-        if (query.trim()) {
-            setHasSearched(true);
+        if (searchQuery.trim()) {
+            extractPICO(searchQuery);
+            searchPapers(searchQuery);
         }
     };
 
-    const toggleSource = (source: string) => {
-        setSelectedSources((prev) =>
-            prev.includes(source) ? prev.filter((s) => s !== source) : [...prev, source],
-        );
+    const handlePaperClick = (paper: (typeof papers)[0]) => {
+        const url = paper.doiUrl || paper.pubmedUrl;
+        if (url) window.open(url, '_blank');
     };
 
     return (
-        <Flexbox gap={16}>
+        <Flexbox className={styles.container} gap={16}>
             {/* Search Input */}
             <Flexbox gap={8}>
                 <Input
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     onPressEnter={handleSearch}
-                    placeholder="Nhập câu hỏi nghiên cứu..."
+                    placeholder="Nhập câu hỏi nghiên cứu (VD: metformin diabetes prevention)..."
                     prefix={<Search size={16} />}
                     size="large"
-                    value={query}
+                    value={searchQuery}
                 />
                 <Flexbox align={'center'} gap={8} horizontal justify={'space-between'}>
-                    <Flexbox gap={6} horizontal>
-                        {['PubMed', 'OpenAlex', 'ClinicalTrials.gov'].map((source) => (
+                    <Flexbox gap={6} horizontal wrap={'wrap'}>
+                        {SOURCES.map((source) => (
                             <Tag
                                 color={selectedSources.includes(source) ? 'processing' : undefined}
                                 key={source}
@@ -173,69 +157,104 @@ const DiscoveryPhase = memo(() => {
                             </Tag>
                         ))}
                     </Flexbox>
-                    <Button onClick={handleSearch} size={'small'} type={'primary'}>
+                    <Button
+                        loading={isSearching}
+                        onClick={handleSearch}
+                        size={'small'}
+                        type={'primary'}
+                    >
                         Tìm kiếm
                     </Button>
                 </Flexbox>
             </Flexbox>
 
-            {/* PICO Card (shown after search) */}
-            {hasSearched && (
-                <>
-                    <Flexbox gap={8}>
-                        <span className={styles.sectionTitle}>🎯 PICO Framework Analysis</span>
-                        <div className={styles.picoCard}>
-                            <Flexbox gap={8}>
-                                {[
-                                    { label: 'Population (P)', value: MOCK_PICO.population },
-                                    { label: 'Intervention (I)', value: MOCK_PICO.intervention },
-                                    { label: 'Comparison (C)', value: MOCK_PICO.comparison },
-                                    { label: 'Outcome (O)', value: MOCK_PICO.outcome },
-                                ].map((item) => (
-                                    <Flexbox align={'center'} gap={12} horizontal key={item.label}>
-                                        <span className={styles.picoLabel}>{item.label}</span>
-                                        <span className={styles.picoValue}>{item.value}</span>
-                                    </Flexbox>
-                                ))}
+            {/* Loading state */}
+            {isSearching && (
+                <Flexbox align={'center'} justify={'center'} style={{ padding: 32 }}>
+                    <Spin size="large" tip="Đang tìm kiếm từ PubMed, OpenAlex..." />
+                </Flexbox>
+            )}
+
+            {/* Error state */}
+            {searchError && <div className={styles.errorMsg}>⚠️ {searchError}</div>}
+
+            {/* PICO Card */}
+            {pico && !isSearching && (
+                <Flexbox gap={8}>
+                    <span className={styles.sectionTitle}>🎯 PICO Framework Analysis</span>
+                    <div className={styles.picoCard}>
+                        <Flexbox gap={8}>
+                            {[
+                                { label: 'Population (P)', value: pico.population },
+                                { label: 'Intervention (I)', value: pico.intervention },
+                                { label: 'Comparison (C)', value: pico.comparison },
+                                { label: 'Outcome (O)', value: pico.outcome },
+                            ].map((item) => (
+                                <Flexbox align={'center'} gap={12} horizontal key={item.label}>
+                                    <span className={styles.picoLabel}>{item.label}</span>
+                                    <span className={styles.picoValue}>{item.value}</span>
+                                </Flexbox>
+                            ))}
+                        </Flexbox>
+                    </div>
+                </Flexbox>
+            )}
+
+            {/* Search Results */}
+            {papers.length > 0 && !isSearching && (
+                <Flexbox gap={8}>
+                    <span className={styles.sectionTitle}>
+                        📄 Kết quả tìm kiếm ({totalResults} papers)
+                    </span>
+                    {papers.map((paper) => (
+                        <div
+                            className={styles.resultCard}
+                            key={paper.id}
+                            onClick={() => handlePaperClick(paper)}
+                        >
+                            <Flexbox gap={6}>
+                                <Flexbox align={'flex-start'} gap={8} horizontal justify={'space-between'}>
+                                    <span className={styles.resultTitle}>{paper.title}</span>
+                                    {(paper.doiUrl || paper.pubmedUrl) && (
+                                        <ExternalLink size={14} style={{ flexShrink: 0, marginTop: 3, opacity: 0.5 }} />
+                                    )}
+                                </Flexbox>
+                                <span className={styles.resultMeta}>{paper.authors}</span>
+                                <Flexbox align={'center'} gap={8} horizontal wrap={'wrap'}>
+                                    <Tag
+                                        color={paper.source === 'PubMed' ? 'blue' : 'green'}
+                                        style={{ fontSize: 11 }}
+                                    >
+                                        {paper.source}
+                                    </Tag>
+                                    {paper.isOpenAccess && <span className={styles.openAccess}>Open Access</span>}
+                                    {paper.journal && (
+                                        <span className={styles.resultMeta}>{paper.journal}</span>
+                                    )}
+                                    {paper.year > 0 && (
+                                        <span className={styles.resultMeta}>· {paper.year}</span>
+                                    )}
+                                    {paper.citations !== undefined && paper.citations > 0 && (
+                                        <span className={styles.resultMeta}>
+                                            📝 {paper.citations.toLocaleString()} citations
+                                        </span>
+                                    )}
+                                </Flexbox>
                             </Flexbox>
                         </div>
-                    </Flexbox>
-
-                    {/* Search Results */}
-                    <Flexbox gap={8}>
-                        <span className={styles.sectionTitle}>
-                            📄 Kết quả tìm kiếm ({MOCK_PAPERS.length} papers)
-                        </span>
-                        {MOCK_PAPERS.map((paper) => (
-                            <div className={styles.resultCard} key={paper.id}>
-                                <Flexbox gap={6}>
-                                    <span className={styles.resultTitle}>{paper.title}</span>
-                                    <span className={styles.resultMeta}>{paper.authors}</span>
-                                    <Flexbox align={'center'} gap={8} horizontal>
-                                        <Tag color="blue" style={{ fontSize: 11 }}>
-                                            {paper.source}
-                                        </Tag>
-                                        <span className={styles.resultMeta}>
-                                            {paper.journal} · {paper.year}
-                                        </span>
-                                        <span className={styles.resultMeta}>📝 {paper.citations} citations</span>
-                                    </Flexbox>
-                                </Flexbox>
-                            </div>
-                        ))}
-                    </Flexbox>
-                </>
+                    ))}
+                </Flexbox>
             )}
 
             {/* Empty state */}
-            {!hasSearched && (
+            {papers.length === 0 && !isSearching && !searchError && (
                 <div className={styles.emptyState}>
                     <span style={{ fontSize: 48 }}>🔬</span>
                     <span style={{ fontSize: 16, fontWeight: 600 }}>Research Mode</span>
                     <span style={{ fontSize: 13 }}>
                         Nhập câu hỏi nghiên cứu để AI phân tích PICO
                         <br />
-                        và tìm kiếm papers từ PubMed, OpenAlex, ClinicalTrials.gov
+                        và tìm kiếm papers từ PubMed, OpenAlex
                     </span>
                 </div>
             )}
