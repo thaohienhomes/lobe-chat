@@ -3,7 +3,7 @@
 import { Button, Input, Tag } from '@lobehub/ui';
 import { Spin } from 'antd';
 import { createStyles } from 'antd-style';
-import { ExternalLink, Search } from 'lucide-react';
+import { ArrowRight, ExternalLink, Search } from 'lucide-react';
 import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
@@ -118,6 +118,7 @@ const DiscoveryPhase = memo(() => {
     const toggleSource = useResearchStore((s) => s.toggleSource);
     const searchPapers = useResearchStore((s) => s.searchPapers);
     const extractPICO = useResearchStore((s) => s.extractPICO);
+    const setActivePhase = useResearchStore((s) => s.setActivePhase);
 
     const handleSearch = () => {
         if (searchQuery.trim()) {
@@ -243,6 +244,16 @@ const DiscoveryPhase = memo(() => {
                             </Flexbox>
                         </div>
                     ))}
+                    {/* Proceed to Screening */}
+                    <Flexbox align={'center'} justify={'center'} style={{ paddingTop: 8 }}>
+                        <Button
+                            icon={<ArrowRight size={14} />}
+                            onClick={() => setActivePhase('screening')}
+                            type={'primary'}
+                        >
+                            Proceed to Screening ({totalResults} papers)
+                        </Button>
+                    </Flexbox>
                 </Flexbox>
             )}
 

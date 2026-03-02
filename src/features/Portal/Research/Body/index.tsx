@@ -7,6 +7,7 @@ import { Flexbox } from 'react-layout-kit';
 import { type ResearchPhase, useResearchStore } from '@/store/research';
 
 import DiscoveryPhase from './Discovery';
+import ScreeningPhase from './Screening';
 
 const useStyles = createStyles(({ css, token }) => ({
   container: css`
@@ -90,6 +91,7 @@ const ResearchBody = memo(() => {
 
       {/* Active Phase Content */}
       {activePhase === 'discovery' && <DiscoveryPhase />}
+      {activePhase === 'screening' && <ScreeningPhase />}
     </Flexbox>
   );
 });
