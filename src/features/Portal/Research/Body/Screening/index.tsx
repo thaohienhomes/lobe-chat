@@ -1,13 +1,70 @@
 'use client';
 
 import { Button, Tag } from '@lobehub/ui';
-import { Select } from 'antd';
+import { Select, Tooltip } from 'antd';
 import { createStyles } from 'antd-style';
-import { CheckCircle, ChevronLeft, XCircle } from 'lucide-react';
+import { Bot, CheckCircle, ChevronLeft, Loader2, Sparkles, XCircle } from 'lucide-react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { type ScreeningDecision, useResearchStore } from '@/store/research';
+
+// ── AI Screening helper ────────────────────────────────────────────────────
+type AIVerdict = { decision: 'excluded' | 'included'; paperId: string; reason: string };
+
+const aiScreenBatch = async (
+    papers: Array<{ abstract?: string; id: string; title: string }>,
+    pico: { comparison: string; intervention: string; outcome: string; population: string } | null,
+    query: string,
+): Promise<AIVerdict[]> => {
+    // Build a concise screener prompt
+    const picoTxt = pico
+        ? `PICO: P=${pico.population}, I=${pico.intervention}, C=${pico.comparison}, O=${pico.outcome}`
+        : `Research question: ${query}`;
+
+    const papersList = papers.map((p, i) =>
+        `[${i + 1}] ID:${p.id}\nTitle: ${p.title}\nAbstract: ${p.abstract ? p.abstract.slice(0, 300) : 'N/A'}`,
+    ).join('\n---\n');
+
+    const prompt = [
+        `You are a systematic review assistant. Screen these papers for inclusion.`,
+        `${picoTxt}`,
+        `For each paper, respond ONLY with a JSON array (no markdown fences) like:`,
+        `[{"id":"...","decision":"included"|"excluded","reason":"1 short phrase"}]`,
+        `Papers:\n${papersList}`,
+    ].join('\n');
+
+    try {
+        const res = await fetch('/api/chat/direct', {
+            body: JSON.stringify({
+                messages: [{ content: prompt, role: 'user' }],
+                model: 'gpt-4o-mini',
+                stream: false,
+                temperature: 0,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        const text: string = data?.choices?.[0]?.message?.content ?? data?.content ?? '';
+        const parsed = JSON.parse(text.replaceAll(/```[\s\w]*/g, '').trim()) as AIVerdict[];
+        return parsed;
+    } catch {
+        // Fallback: AI not available — return heuristic decisions based on keywords
+        return papers.map((p) => {
+            const titleLower = (p.title + (p.abstract ?? '')).toLowerCase();
+            const queryWords = query.toLowerCase().split(' ').filter((w) => w.length > 4);
+            const matches = queryWords.filter((w) => titleLower.includes(w)).length;
+            const score = queryWords.length > 0 ? matches / queryWords.length : 0;
+            return {
+                decision: score >= 0.3 ? 'included' : 'excluded',
+                paperId: p.id,
+                reason: score >= 0.3 ? 'Keyword match ≥30%' : 'Low keyword relevance',
+            };
+        });
+    }
+};
 
 const useStyles = createStyles(({ css, token }) => ({
     actionBtn: css`
@@ -170,9 +227,13 @@ const ScreeningPhase = memo(() => {
     const includeAllPapers = useResearchStore((s) => s.includeAllPapers);
     const resetScreening = useResearchStore((s) => s.resetScreening);
     const setActivePhase = useResearchStore((s) => s.setActivePhase);
+    const pico = useResearchStore((s) => s.pico);
+    const searchQuery = useResearchStore((s) => s.searchQuery);
 
     const [expandedAbstracts, setExpandedAbstracts] = useState<Set<string>>(new Set());
     const [pendingExclude, setPendingExclude] = useState<string | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiScreenedCount, setAiScreenedCount] = useState(0);
 
     const EXCLUSION_REASONS = [
         { label: 'Wrong population', value: 'Wrong population' },
@@ -209,6 +270,29 @@ const ScreeningPhase = memo(() => {
             return next;
         });
     }, []);
+
+    // ── AI Auto-Screen ───────────────────────────────────────────────────
+    const handleAIScreen = useCallback(async () => {
+        const pendingPapers = papers.filter(
+            (p) => !screeningDecisions[p.id] || screeningDecisions[p.id]?.decision === 'pending',
+        );
+        if (pendingPapers.length === 0) return;
+        setAiLoading(true);
+        try {
+            const verdicts = await aiScreenBatch(pendingPapers, pico, searchQuery);
+            let count = 0;
+            for (const v of verdicts) {
+                const id = v.paperId ?? (v as { id?: string }).id;
+                if (id) {
+                    screenPaper(id, v.decision, v.reason);
+                    count++;
+                }
+            }
+            setAiScreenedCount(count);
+        } finally {
+            setAiLoading(false);
+        }
+    }, [papers, screeningDecisions, pico, searchQuery, screenPaper]);
 
     const stats = getScreeningStats();
 
@@ -277,6 +361,27 @@ const ScreeningPhase = memo(() => {
 
             {/* Quick Actions */}
             <Flexbox gap={8} horizontal wrap={'wrap'}>
+                {/* AI Screen Button — MED-39 */}
+                <Tooltip title={aiLoading ? 'AI đang sàng lọc...' : 'AI tự động phân tích abstract và gợi ý include/exclude'}>
+                    <Button
+                        icon={aiLoading ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
+                        loading={aiLoading}
+                        onClick={handleAIScreen}
+                        size={'small'}
+                        style={{
+                            background: 'linear-gradient(135deg, rgba(114,46,209,0.15), rgba(22,119,255,0.1))',
+                            borderColor: 'rgba(114,46,209,0.4)',
+                            color: '#722ed1',
+                            fontWeight: 600,
+                        }}
+                    >
+                        <Bot size={13} />
+                        AI Sàng lọc tự động
+                        {aiScreenedCount > 0 && (
+                            <Tag bordered={false} style={{ fontSize: 9, marginLeft: 4 }}>{aiScreenedCount} đã xử lý</Tag>
+                        )}
+                    </Button>
+                </Tooltip>
                 <Button onClick={includeAllPapers} size={'small'}>
                     ✅ Include All
                 </Button>

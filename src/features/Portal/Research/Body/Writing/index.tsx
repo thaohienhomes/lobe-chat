@@ -1,13 +1,77 @@
 'use client';
 
 import { Button, Tag } from '@lobehub/ui';
-import { Input } from 'antd';
+import { Input, Tooltip } from 'antd';
 import { createStyles } from 'antd-style';
-import { ChevronLeft, ChevronRight, Copy, FileText, Plus, Trash2 } from 'lucide-react';
-import { memo, useState } from 'react';
+import { Copy, FileText, Loader2, Sparkles } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { useResearchStore } from '@/store/research';
+
+// ── AI Writing helper ────────────────────────────────────────────────────
+const aiWriteSection = async (
+    sectionKey: string,
+    sectionLabel: string,
+    existingContent: string,
+    context: {
+        pico: { comparison: string; intervention: string; outcome: string; population: string } | null;
+        query: string;
+        refs: string;
+    },
+): Promise<string> => {
+    const systemInstructions: Record<string, string> = {
+        abstract: 'Write a structured abstract with Background, Objectives, Methods, Results, Conclusions sections. 250 words max.',
+        conclusion: 'Write a concise conclusion paragraph summarizing key findings and recommendations for practice. 150 words.',
+        discussion: 'Write an academic discussion section addressing: summary of findings, comparison with literature, limitations, and clinical implications.',
+        introduction: 'Write an academic introduction with: background context, problem statement, and study objectives. 3 paragraphs.',
+        methods: 'Write a systematic review Methods section covering: search strategy, inclusion/exclusion criteria, data extraction, and quality assessment.',
+        results: 'Write a systematic review Results section covering: study selection (with numbers), study characteristics, and main findings synthesis.',
+        title: 'Generate 3 alternative academic titles for this systematic review. Format as a numbered list.',
+    };
+
+    const instruction = systemInstructions[sectionKey] ?? `Write the ${sectionLabel} section for a systematic review.`;
+    const picoText = context.pico
+        ? `PICO: P=${context.pico.population}, I=${context.pico.intervention}, C=${context.pico.comparison}, O=${context.pico.outcome}`
+        : `Research question: ${context.query}`;
+
+    const prompt = [
+        instruction,
+        '',
+        picoText,
+        existingContent ? `\nExisting draft (improve this):\n${existingContent}` : '',
+        context.refs ? `\nKey references:\n${context.refs}` : '',
+        '\nRespond in English. Academic register. Use markdown formatting.',
+    ].join('\n');
+
+    try {
+        const res = await fetch('/api/chat/direct', {
+            body: JSON.stringify({
+                messages: [{ content: prompt, role: 'user' }],
+                model: 'gpt-4o-mini',
+                stream: false,
+                temperature: 0.6,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+        if (!res.ok) throw new Error('fail');
+        const data = await res.json();
+        return data?.choices?.[0]?.message?.content ?? data?.content ?? '';
+    } catch {
+        // Fallback: template scaffold
+        const templates: Record<string, string> = {
+            abstract: `## Abstract\n\n**Background:** ${context.query}\n\n**Methods:** Systematic review following PRISMA guidelines.\n\n**Results:** [number] studies included.\n\n**Conclusions:** Further research warranted.`,
+            conclusion: `This systematic review examined ${context.query}. The evidence suggests that [key finding]. Future research should focus on [gap].`,
+            discussion: `## Discussion\n\nThis review identified [n] relevant studies. Our findings are consistent with [prior work]. Limitations include [search scope, language bias]. Clinical implications: [recommendation].`,
+            introduction: `## Introduction\n\n${context.query} represents an important area of clinical inquiry.\n\nThe objective of this systematic review was to synthesize available evidence on this topic.`,
+            methods: `## Methods\n\n### Search Strategy\nSearched PubMed, OpenAlex, and ClinicalTrials.gov.\n\n### ${picoText}\n\n### Eligibility Criteria\nIncluded: peer-reviewed studies addressing the PICO.`,
+            results: `## Results\n\n### Study Selection\n[n] records identified, [m] included after screening.\n\n### Characteristics of Included Studies\n[Describe study designs, sample sizes, populations].`,
+            title: `1. Effectiveness of ${context.pico?.intervention ?? '[intervention]'} in ${context.pico?.population ?? '[population]'}: A Systematic Review\n2. ${context.query}: A Systematic Review and Meta-Analysis\n3. ${context.pico?.intervention ?? '[intervention]'} versus ${context.pico?.comparison ?? '[comparison]'}: Evidence from a Systematic Review`,
+        };
+        return templates[sectionKey] ?? `[AI-generated ${sectionLabel} section - edit as needed]`;
+    }
+};
 
 const { TextArea } = Input;
 
@@ -26,6 +90,18 @@ const DEFAULT_SECTIONS = [
 const useStyles = createStyles(({ css, token }) => ({
     container: css`
     width: 100%;
+  `,
+    emptyState: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+
+    padding: 48px 24px;
+
+    color: ${token.colorTextQuaternary};
+    text-align: center;
   `,
     sectionCard: css`
     padding: 12px 16px;
@@ -61,10 +137,18 @@ const useStyles = createStyles(({ css, token }) => ({
     font-weight: 700;
     color: ${token.colorText};
   `,
-    wordCount: css`
-    font-size: 11px;
-    font-weight: 400;
-    color: ${token.colorTextQuaternary};
+    sectionTitle: css`
+    font-size: 13px;
+    font-weight: 600;
+    color: ${token.colorTextSecondary};
+  `,
+    statItem: css`
+    display: flex;
+    gap: 6px;
+    align-items: center;
+
+    font-size: 13px;
+    font-weight: 600;
   `,
     statsCard: css`
     display: flex;
@@ -78,30 +162,10 @@ const useStyles = createStyles(({ css, token }) => ({
     border: 1px solid ${token.colorPrimaryBorder};
     border-radius: ${token.borderRadiusLG}px;
   `,
-    statItem: css`
-    display: flex;
-    gap: 6px;
-    align-items: center;
-
-    font-size: 13px;
-    font-weight: 600;
-  `,
-    sectionTitle: css`
-    font-size: 13px;
-    font-weight: 600;
-    color: ${token.colorTextSecondary};
-  `,
-    emptyState: css`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
-
-    padding: 48px 24px;
-
+    wordCount: css`
+    font-size: 11px;
+    font-weight: 400;
     color: ${token.colorTextQuaternary};
-    text-align: center;
   `,
 }));
 
@@ -118,15 +182,10 @@ const WritingPhase = memo(() => {
 
     // Section state
     const [sections, setSections] = useState(() => {
-        // Pre-fill some sections with data
         const filled = DEFAULT_SECTIONS.map((s) => ({ ...s }));
 
-        // Auto-fill Title
-        if (searchQuery) {
-            filled[0].content = `Systematic Review: ${searchQuery}`;
-        }
+        if (searchQuery) filled[0].content = `Systematic Review: ${searchQuery}`;
 
-        // Auto-fill Methods
         const methodsIdx = filled.findIndex((s) => s.key === 'methods');
         if (methodsIdx >= 0 && pico) {
             filled[methodsIdx].content = [
@@ -143,13 +202,12 @@ const WritingPhase = memo(() => {
                 '- PubMed (MEDLINE)',
                 '- OpenAlex',
                 '',
-                `### Selection Criteria`,
+                '### Selection Criteria',
                 `- ${includedPapers.length} studies included after screening`,
                 `- ${papers.length - includedPapers.length} studies excluded`,
             ].join('\n');
         }
 
-        // Auto-fill References
         const refsIdx = filled.findIndex((s) => s.key === 'references');
         if (refsIdx >= 0) {
             filled[refsIdx].content = includedPapers.map((p, i) =>
@@ -161,10 +219,29 @@ const WritingPhase = memo(() => {
     });
 
     const [expandedSection, setExpandedSection] = useState<string | null>('title');
+    // Track which sections are AI-generating
+    const [aiGenerating, setAiGenerating] = useState<Record<string, boolean>>({});
 
     const updateSection = (key: string, content: string) => {
         setSections((prev) => prev.map((s) => s.key === key ? { ...s, content } : s));
     };
+
+    // AI write a section — MED-40
+    const handleAIWrite = useCallback(async (sectionKey: string, sectionLabel: string, existingContent: string) => {
+        setAiGenerating((prev) => ({ ...prev, [sectionKey]: true }));
+        setExpandedSection(sectionKey); // open the section
+        const refsText = includedPapers.slice(0, 8).map((p) =>
+            `- ${p.authors} (${p.year}). ${p.title}`,
+        ).join('\n');
+        try {
+            const result = await aiWriteSection(sectionKey, sectionLabel, existingContent, {
+                pico, query: searchQuery, refs: refsText,
+            });
+            updateSection(sectionKey, result);
+        } finally {
+            setAiGenerating((prev) => ({ ...prev, [sectionKey]: false }));
+        }
+    }, [includedPapers, pico, searchQuery]);
 
     const totalWords = sections.reduce((sum, s) => sum + (s.content ? s.content.split(/\s+/).filter(Boolean).length : 0), 0);
     const completedSections = sections.filter((s) => s.content.trim().length > 0).length;
@@ -206,11 +283,44 @@ const WritingPhase = memo(() => {
                                 {section.content.trim() && (
                                     <Tag color="green" style={{ fontSize: 10 }}>✓</Tag>
                                 )}
+                                {aiGenerating[section.key] && (
+                                    <Tag color="purple" style={{ fontSize: 9 }}>AI đang viết...</Tag>
+                                )}
                             </span>
-                            <span className={styles.wordCount}>
-                                {section.content ? section.content.split(/\s+/).filter(Boolean).length : 0} words
-                                {expandedSection === section.key ? ' ▲' : ' ▼'}
-                            </span>
+                            <Flexbox align={'center'} gap={4} horizontal onClick={(e) => e.stopPropagation()}>
+                                {/* AI Write Button — MED-40 */}
+                                {section.key !== 'references' && (
+                                    <Tooltip title={`AI viết ${section.label} dựa trên PICO và paper chọn`}>
+                                        <button
+                                            disabled={aiGenerating[section.key]}
+                                            onClick={() => handleAIWrite(section.key, section.label, section.content)}
+                                            style={{
+                                                alignItems: 'center',
+                                                background: 'linear-gradient(135deg, rgba(114,46,209,0.12), rgba(22,119,255,0.08))',
+                                                border: '1px solid rgba(114,46,209,0.3)',
+                                                borderRadius: 6,
+                                                color: '#722ed1',
+                                                cursor: aiGenerating[section.key] ? 'not-allowed' : 'pointer',
+                                                display: 'flex',
+                                                fontSize: 11,
+                                                fontWeight: 600,
+                                                gap: 4,
+                                                padding: '3px 8px',
+                                            }}
+                                            type="button"
+                                        >
+                                            {aiGenerating[section.key]
+                                                ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                                                : <Sparkles size={11} />}
+                                            AI
+                                        </button>
+                                    </Tooltip>
+                                )}
+                                <span className={styles.wordCount}>
+                                    {section.content ? section.content.split(/\s+/).filter(Boolean).length : 0} words
+                                    {expandedSection === section.key ? ' ▲' : ' ▼'}
+                                </span>
+                            </Flexbox>
                         </div>
                         {expandedSection === section.key && (
                             <div style={{ marginTop: 8 }}>
