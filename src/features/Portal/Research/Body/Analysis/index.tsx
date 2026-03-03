@@ -9,12 +9,15 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type PaperResult, useResearchStore } from '@/store/research';
 
+import ConsortStrobe from './ConsortStrobe';
 import DataAnalyzer from './DataAnalyzer';
+import DoiResolver from './DoiResolver';
 import ForestPlot from './ForestPlot';
 import InteractiveSimulators from './InteractiveSimulators';
 import KnowledgeBase from './KnowledgeBase';
 import LearningModules from './LearningModules';
 import PrismaDiagram from './PrismaDiagram';
+import ProsperoHelper from './ProsperoHelper';
 import RiskOfBias from './RiskOfBias';
 import StatTestAdvisor from './StatTestAdvisor';
 
@@ -405,6 +408,21 @@ const AnalysisPhase = memo(() => {
                         children: <ForestPlot />,
                         key: 'forestplot',
                         label: '📈 Forest Plot',
+                    },
+                    {
+                        children: <ConsortStrobe />,
+                        key: 'consort',
+                        label: '📋 CONSORT/STROBE',
+                    },
+                    {
+                        children: <DoiResolver />,
+                        key: 'doi',
+                        label: '🔗 DOI Resolver',
+                    },
+                    {
+                        children: <ProsperoHelper />,
+                        key: 'prospero',
+                        label: '📝 PROSPERO',
                     },
                 ]}
                 size={'small'}

@@ -76,6 +76,7 @@ interface ResearchState {
     loadMoreResults: () => Promise<void>;
 
     papers: PaperResult[];
+    addPaper: (paper: PaperResult) => void;
     pico: PICOQuery | null;
     reset: () => void;
     resetScreening: () => void;
@@ -335,6 +336,21 @@ export const useResearchStore = create<ResearchState>()(
                         decisions[paper.id] = { decision: 'excluded', paperId: paper.id };
                     }
                     set({ screeningDecisions: decisions }, false, 'excludeAllPapers');
+                },
+
+                addPaper: (paper: PaperResult) => {
+                    const { papers, screeningDecisions } = get();
+                    // Avoid duplicates by id
+                    if (papers.some((p) => p.id === paper.id)) return;
+                    set({
+                        papers: [paper, ...papers],
+                        // Auto-include the manually added paper
+                        screeningDecisions: {
+                            ...screeningDecisions,
+                            [paper.id]: { decision: 'included', paperId: paper.id, reason: 'Manually added via DOI resolver' },
+                        },
+                        totalResults: papers.length + 1,
+                    }, false, 'addPaper');
                 },
 
                 extractPICO: (query) => {
