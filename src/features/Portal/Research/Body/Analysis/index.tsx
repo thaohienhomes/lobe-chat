@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Tag } from '@lobehub/ui';
-import { Progress, Tooltip } from 'antd';
+import { Progress, Tabs, Tooltip } from 'antd';
 import { createStyles } from 'antd-style';
 import { ChevronLeft } from 'lucide-react';
 import { memo, useMemo } from 'react';
@@ -10,6 +10,7 @@ import { Flexbox } from 'react-layout-kit';
 import { type PaperResult, useResearchStore } from '@/store/research';
 
 import PrismaDiagram from './PrismaDiagram';
+import StatTestAdvisor from './StatTestAdvisor';
 
 // GRADE levels
 type GradeLevel = 'high' | 'moderate' | 'low' | 'very_low';
@@ -241,118 +242,137 @@ const AnalysisPhase = memo(() => {
     }
 
     return (
-        <Flexbox className={styles.container} gap={16}>
-            {/* Summary Card */}
-            <div className={styles.summaryCard}>
-                <Flexbox gap={12}>
-                    <Flexbox align={'center'} gap={12} horizontal justify={'space-between'}>
-                        <span style={{ fontSize: 15, fontWeight: 700 }}>📊 Evidence Summary</span>
-                        <span
-                            className={styles.gradeBadge}
-                            style={{ background: gradeConfig.color + '20', color: gradeConfig.color }}
-                        >
-                            GRADE: {gradeConfig.label}
-                        </span>
-                    </Flexbox>
-                    <Flexbox gap={8} horizontal wrap={'wrap'}>
-                        <Tag>{includedPapers.length} studies included</Tag>
-                        <Tag>📅 {yearRange}</Tag>
-                        <Tag>📝 {totalCitations.toLocaleString()} total citations</Tag>
-                    </Flexbox>
-                </Flexbox>
-            </div>
+        <Flexbox className={styles.container} gap={0}>
+            <Tabs
+                defaultActiveKey="evidence"
+                items={[
+                    {
+                        children: (
+                            <Flexbox gap={16}>
+                                {/* Summary Card */}
+                                <div className={styles.summaryCard}>
+                                    <Flexbox gap={12}>
+                                        <Flexbox align={'center'} gap={12} horizontal justify={'space-between'}>
+                                            <span style={{ fontSize: 15, fontWeight: 700 }}>📊 Evidence Summary</span>
+                                            <span
+                                                className={styles.gradeBadge}
+                                                style={{ background: gradeConfig.color + '20', color: gradeConfig.color }}
+                                            >
+                                                GRADE: {gradeConfig.label}
+                                            </span>
+                                        </Flexbox>
+                                        <Flexbox gap={8} horizontal wrap={'wrap'}>
+                                            <Tag>{includedPapers.length} studies included</Tag>
+                                            <Tag>📅 {yearRange}</Tag>
+                                            <Tag>📝 {totalCitations.toLocaleString()} total citations</Tag>
+                                        </Flexbox>
+                                    </Flexbox>
+                                </div>
 
-            {/* PRISMA 2020 Flowchart */}
-            <PrismaDiagram />
+                                {/* PRISMA 2020 Flowchart */}
+                                <PrismaDiagram />
 
-            {/* Study Type Distribution */}
-            <Flexbox gap={8}>
-                <span className={styles.sectionTitle}>📋 Study Type Distribution</span>
-                <div className={styles.gradeCard}>
-                    {typeDistribution.map(([type, count]) => (
-                        <Flexbox align={'center'} gap={12} horizontal justify={'space-between'} key={type} style={{ padding: '6px 0' }}>
-                            <span style={{ fontSize: 12, fontWeight: 600 }}>{type}</span>
-                            <Flexbox align={'center'} gap={8} horizontal>
-                                <Progress
-                                    percent={Math.round((count / includedPapers.length) * 100)}
-                                    showInfo={false}
-                                    size={'small'}
-                                    style={{ width: 80 }}
-                                />
-                                <span style={{ fontSize: 11, minWidth: 40, textAlign: 'right' }}>
-                                    {count} ({Math.round((count / includedPapers.length) * 100)}%)
-                                </span>
-                            </Flexbox>
-                        </Flexbox>
-                    ))}
-                </div>
-            </Flexbox>
-
-            {/* Evidence Table */}
-            <Flexbox gap={8}>
-                <span className={styles.sectionTitle}>📄 Evidence Table</span>
-                <div className={styles.evidenceTable}>
-                    <div className={styles.tableHeader}>
-                        <span>Study</span>
-                        <span>Type</span>
-                        <span>Year</span>
-                        <span>Source</span>
-                        <span>Citations</span>
-                    </div>
-                    {includedPapers.map((paper) => (
-                        <div className={styles.tableRow} key={paper.id}>
-                            <Tooltip title={paper.title}>
-                                <span className={styles.studyTitle}>{paper.title}</span>
-                            </Tooltip>
-                            <Tag color="blue" style={{ fontSize: 10 }}>{inferStudyType(paper)}</Tag>
-                            <span className={styles.cellText}>{paper.year || '–'}</span>
-                            <Tag color={paper.source === 'PubMed' ? 'blue' : 'green'} style={{ fontSize: 10 }}>
-                                {paper.source}
-                            </Tag>
-                            <span className={styles.cellText}>
-                                {paper.citations ? paper.citations.toLocaleString() : '–'}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </Flexbox>
-
-            {/* GRADE Assessment */}
-            <Flexbox gap={8}>
-                <span className={styles.sectionTitle}>⭐ GRADE Quality Assessment</span>
-                <div className={styles.gradeCard}>
-                    <Flexbox gap={4}>
-                        {GRADE_DOMAINS.map((domain) => (
-                            <div className={styles.gradeDomain} key={domain.key}>
-                                <Flexbox gap={2}>
-                                    <span className={styles.domainLabel}>{domain.label}</span>
-                                    <span className={styles.domainDesc}>{domain.desc}</span>
+                                {/* Study Type Distribution */}
+                                <Flexbox gap={8}>
+                                    <span className={styles.sectionTitle}>📋 Study Type Distribution</span>
+                                    <div className={styles.gradeCard}>
+                                        {typeDistribution.map(([type, count]) => (
+                                            <Flexbox align={'center'} gap={12} horizontal justify={'space-between'} key={type} style={{ padding: '6px 0' }}>
+                                                <span style={{ fontSize: 12, fontWeight: 600 }}>{type}</span>
+                                                <Flexbox align={'center'} gap={8} horizontal>
+                                                    <Progress
+                                                        percent={Math.round((count / includedPapers.length) * 100)}
+                                                        showInfo={false}
+                                                        size={'small'}
+                                                        style={{ width: 80 }}
+                                                    />
+                                                    <span style={{ fontSize: 11, minWidth: 40, textAlign: 'right' }}>
+                                                        {count} ({Math.round((count / includedPapers.length) * 100)}%)
+                                                    </span>
+                                                </Flexbox>
+                                            </Flexbox>
+                                        ))}
+                                    </div>
                                 </Flexbox>
-                                <Tag color="green" style={{ fontSize: 10 }}>No concerns</Tag>
-                            </div>
-                        ))}
-                    </Flexbox>
-                    <Flexbox align={'center'} gap={12} horizontal justify={'space-between'} style={{ borderTop: '2px solid', marginTop: 12, paddingTop: 12 }}>
-                        <span style={{ fontSize: 14, fontWeight: 700 }}>Overall GRADE</span>
-                        <span
-                            className={styles.gradeBadge}
-                            style={{ background: gradeConfig.color + '20', color: gradeConfig.color, fontSize: 14, padding: '4px 16px' }}
-                        >
-                            {gradeConfig.label}
-                        </span>
-                    </Flexbox>
-                </div>
-            </Flexbox>
 
-            {/* Phase Navigation */}
-            <Flexbox gap={8} horizontal justify={'space-between'}>
-                <Button onClick={() => setActivePhase('screening')} size={'small'}>
-                    ← Back to Screening
-                </Button>
-                <Button onClick={() => setActivePhase('writing')} size={'small'} type={'primary'}>
-                    → Proceed to Writing
-                </Button>
-            </Flexbox>
+                                {/* Evidence Table */}
+                                <Flexbox gap={8}>
+                                    <span className={styles.sectionTitle}>📄 Evidence Table</span>
+                                    <div className={styles.evidenceTable}>
+                                        <div className={styles.tableHeader}>
+                                            <span>Study</span>
+                                            <span>Type</span>
+                                            <span>Year</span>
+                                            <span>Source</span>
+                                            <span>Citations</span>
+                                        </div>
+                                        {includedPapers.map((paper) => (
+                                            <div className={styles.tableRow} key={paper.id}>
+                                                <Tooltip title={paper.title}>
+                                                    <span className={styles.studyTitle}>{paper.title}</span>
+                                                </Tooltip>
+                                                <Tag color="blue" style={{ fontSize: 10 }}>{inferStudyType(paper)}</Tag>
+                                                <span className={styles.cellText}>{paper.year || '–'}</span>
+                                                <Tag color={paper.source === 'PubMed' ? 'blue' : 'green'} style={{ fontSize: 10 }}>
+                                                    {paper.source}
+                                                </Tag>
+                                                <span className={styles.cellText}>
+                                                    {paper.citations ? paper.citations.toLocaleString() : '–'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Flexbox>
+
+                                {/* GRADE Assessment */}
+                                <Flexbox gap={8}>
+                                    <span className={styles.sectionTitle}>⭐ GRADE Quality Assessment</span>
+                                    <div className={styles.gradeCard}>
+                                        <Flexbox gap={4}>
+                                            {GRADE_DOMAINS.map((domain) => (
+                                                <div className={styles.gradeDomain} key={domain.key}>
+                                                    <Flexbox gap={2}>
+                                                        <span className={styles.domainLabel}>{domain.label}</span>
+                                                        <span className={styles.domainDesc}>{domain.desc}</span>
+                                                    </Flexbox>
+                                                    <Tag color="green" style={{ fontSize: 10 }}>No concerns</Tag>
+                                                </div>
+                                            ))}
+                                        </Flexbox>
+                                        <Flexbox align={'center'} gap={12} horizontal justify={'space-between'} style={{ borderTop: '2px solid', marginTop: 12, paddingTop: 12 }}>
+                                            <span style={{ fontSize: 14, fontWeight: 700 }}>Overall GRADE</span>
+                                            <span
+                                                className={styles.gradeBadge}
+                                                style={{ background: gradeConfig.color + '20', color: gradeConfig.color, fontSize: 14, padding: '4px 16px' }}
+                                            >
+                                                {gradeConfig.label}
+                                            </span>
+                                        </Flexbox>
+                                    </div>
+                                </Flexbox>
+
+                                {/* Phase Navigation */}
+                                <Flexbox gap={8} horizontal justify={'space-between'}>
+                                    <Button onClick={() => setActivePhase('screening')} size={'small'}>
+                                        ← Back to Screening
+                                    </Button>
+                                    <Button onClick={() => setActivePhase('writing')} size={'small'} type={'primary'}>
+                                        → Proceed to Writing
+                                    </Button>
+                                </Flexbox>
+                            </Flexbox>
+                        ),
+                        key: 'evidence',
+                        label: '📊 Bằng chứng & PRISMA',
+                    },
+                    {
+                        children: <StatTestAdvisor />,
+                        key: 'statadvisor',
+                        label: '🧮 Tư vấn Kiểm định',
+                    },
+                ]}
+                size={'small'}
+            />
         </Flexbox>
     );
 });
