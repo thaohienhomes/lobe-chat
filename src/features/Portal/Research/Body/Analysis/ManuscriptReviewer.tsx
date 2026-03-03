@@ -280,7 +280,7 @@ const ManuscriptReviewer = memo(() => {
         : searchQuery || 'Systematic review';
 
     const [journal, setJournal] = useState('top-medical');
-    const [model, setModel] = useState('gpt-4o-mini');
+    const [model, setModel] = useState('gemini-2.5-flash');
     const [results, setResults] = useState<Record<string, AgentResult>>({});
     const [running, setRunning] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -308,11 +308,21 @@ const ManuscriptReviewer = memo(() => {
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST',
             });
-            if (!res.ok) throw new Error(`Server error ${res.status}`);
+            if (!res.ok) {
+                const errJson = await res.json().catch(() => ({})) as { error?: string };
+                throw new Error(errJson.error || `Server error ${res.status}`);
+            }
             const json = await res.json() as { text: string };
             setResults((prev) => ({ ...prev, [agent.id]: { output: json.text || '(No output)', status: 'done' } }));
         } catch (err) {
-            setResults((prev) => ({ ...prev, [agent.id]: { output: `Error: ${String(err)}`, status: 'error' } }));
+            const msg = err instanceof Error ? err.message : String(err);
+            setResults((prev) => ({
+                ...prev,
+                [agent.id]: {
+                    output: `⚠️ ${agent.name} failed:\n${msg}\n\nTip: Make sure you are logged in and have AI provider credits available.`,
+                    status: 'error',
+                },
+            }));
         }
     }, [ctx, model]);
 
@@ -404,7 +414,8 @@ const ManuscriptReviewer = memo(() => {
                         <Flexbox gap={2} style={{ flex: 1, minWidth: 180 }}>
                             <span style={{ fontSize: 11, fontWeight: 600 }}>🧠 AI Model</span>
                             <Select onChange={(v: string) => setModel(v)} options={[
-                                { label: 'GPT-4o Mini (fast)', value: 'gpt-4o-mini' },
+                                { label: 'Gemini 2.5 Flash (fast)', value: 'gemini-2.5-flash' },
+                                { label: 'GPT-4o Mini', value: 'gpt-4o-mini' },
                                 { label: 'GPT-4o (best)', value: 'gpt-4o' },
                                 { label: 'Gemini 2.5 Pro', value: 'gemini-2.5-pro' },
                                 { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
