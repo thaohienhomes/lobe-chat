@@ -39,6 +39,7 @@ import BibExport from './BibExport';
 import KappaCalculator from './KappaCalculator';
 import MetaRegression from './MetaRegression';
 import RevManExport from './RevManExport';
+import ManuscriptReviewer from './ManuscriptReviewer';
 
 // GRADE levels
 type GradeLevel = 'high' | 'moderate' | 'low' | 'very_low';
@@ -537,6 +538,11 @@ const AnalysisPhase = memo(() => {
                         children: <KappaCalculator />,
                         key: 'kappa',
                         label: '👥 Kappa',
+                    },
+                    {
+                        children: <ManuscriptReviewer />,
+                        key: 'manuscript-reviewer',
+                        label: '🤖 Manuscript Review',
                     },
                 ]}
                 size={'small'}

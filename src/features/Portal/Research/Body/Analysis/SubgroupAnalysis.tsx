@@ -19,6 +19,7 @@ import { Select } from 'antd';
 import { createStyles } from 'antd-style';
 import { Plus, Trash2 } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
+import type React from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -51,18 +52,39 @@ interface Subgroup {
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
+const SAFE_RESULT = { ci_high: 0, ci_low: 0, i2: 0, p: 1, pooled: 0, q: 0 };
+
 const poolDL = (studies: Study[]) => {
-    if (studies.length === 0) return { ci_high: 0, ci_low: 0, i2: 0, p: 1, pooled: 0, q: 0 };
-    const wi = studies.map((s) => 1 / ((s.ci_high - s.ci_low) / (2 * 1.96)) ** 2);
-    const pooledFE = studies.reduce((s, st, i) => s + st.yi * wi[i], 0) / wi.reduce((a, b) => a + b, 0);
+    if (studies.length === 0) return SAFE_RESULT;
+
+    // Compute SE from CI width — guard against zero-width CIs
+    const se = studies.map((s) => {
+        const width = s.ci_high - s.ci_low;
+        return width > 0 ? width / (2 * 1.96) : 0.5; // fallback SE = 0.5
+    });
+    const wi = se.map((s) => (s > 0 ? 1 / (s * s) : 0));
+    const sumW = wi.reduce((a, b) => a + b, 0);
+    if (sumW <= 0) return SAFE_RESULT;
+
+    // Pooled fixed-effect estimate
+    const pooledFE = studies.reduce((s, st, i) => s + st.yi * wi[i], 0) / sumW;
     const Q = studies.reduce((s, st, i) => s + wi[i] * (st.yi - pooledFE) ** 2, 0);
-    const df = studies.length - 1;
-    const i2 = Math.max(0, (Q - df) / Q * 100);
-    const tau2 = Math.max(0, (Q - df) / (wi.reduce((a, b) => a + b, 0) - wi.reduce((a, b, _, arr) => a + b ** 2, 0) / wi.reduce((a, b) => a + b, 0)));
-    const wRE = wi.map((w) => 1 / (1 / w + tau2));
-    const pooled = studies.reduce((s, st, i) => s + st.yi * wRE[i], 0) / wRE.reduce((a, b) => a + b, 0);
-    const seRE = 1 / Math.sqrt(wRE.reduce((a, b) => a + b, 0));
-    const pQ = 1 - Math.exp(-0.5 * Q); // chi-sq approx
+    const df = Math.max(1, studies.length - 1);
+    const i2 = Q > 0 ? Math.max(0, ((Q - df) / Q) * 100) : 0;
+
+    // τ² via DerSimonian-Laird
+    const sumW2 = wi.reduce((s, w) => s + w * w, 0);
+    const c = sumW - sumW2 / sumW;
+    const tau2 = c > 0 ? Math.max(0, (Q - df) / c) : 0;
+
+    // Random-effects weights incorporating τ²
+    const wRE = wi.map((w) => (w > 0 ? 1 / (1 / w + tau2) : 0));
+    const sumWRE = wRE.reduce((a, b) => a + b, 0);
+    if (sumWRE <= 0) return SAFE_RESULT;
+
+    const pooled = studies.reduce((s, st, i) => s + st.yi * wRE[i], 0) / sumWRE;
+    const seRE = 1 / Math.sqrt(sumWRE);
+    const pQ = 1 - Math.exp(-0.5 * Math.max(0, Q)); // chi-sq approx
     return { ci_high: pooled + 1.96 * seRE, ci_low: pooled - 1.96 * seRE, i2, p: pQ, pooled, q: Q };
 };
 
@@ -76,20 +98,20 @@ const DEFAULT_SUBGROUPS: Subgroup[] = [
         studies: [
             { ci_high: -0.05, ci_low: -0.65, id: 's1', n: 320, name: 'Smith 2020', yi: -0.35 },
             { ci_high: -0.12, ci_low: -0.55, id: 's2', n: 450, name: 'Jones 2019', yi: -0.33 },
-            { ci_high: 0.08, ci_low: -0.60, id: 's3', n: 180, name: 'Lee 2021', yi: -0.26 },
+            { ci_high: 0.08, ci_low: -0.6, id: 's3', n: 180, name: 'Lee 2021', yi: -0.26 },
         ],
     },
     {
         color: '#fa8c16', id: 'sg2', label: 'High Risk of Bias',
         studies: [
             { ci_high: 0.28, ci_low: -0.72, id: 's4', n: 120, name: 'Brown 2018', yi: -0.22 },
-            { ci_high: 0.15, ci_low: -0.95, id: 's5', n: 85, name: 'White 2017', yi: -0.40 },
+            { ci_high: 0.15, ci_low: -0.95, id: 's5', n: 85, name: 'White 2017', yi: -0.4 },
         ],
     },
 ];
 
 // ── SVG Forest Plot (subgroup aware) ─────────────────────────────────────────
-const SubgroupForestPlot = ({ subgroups, model }: { model: string; subgroups: Subgroup[] }) => {
+const SubgroupForestPlot = ({ subgroups }: { model?: string; subgroups: Subgroup[] }) => {
     const SVG_W = 680, LEFT = 220, RIGHT = 120, PLOT_W = SVG_W - LEFT - RIGHT;
     const ROW_H = 22, HEADER_H = 24, POOL_H = 10, GAP_H = 14;
 
@@ -110,7 +132,8 @@ const SubgroupForestPlot = ({ subgroups, model }: { model: string; subgroups: Su
         <text key="h-yi" style={{ fontSize: 10, fontWeight: 700 }} x={LEFT + PLOT_W + 10} y={y - 4}>Effect (95% CI)</text>,
     );
 
-    for (const { sg, pooled: p } of pooled) {
+    for (const item of pooled) {
+        const { sg } = item;
         // Subgroup header
         elements.push(
             <text key={`sg-${sg.id}`} style={{ fill: sg.color, fontSize: 11, fontWeight: 700 }} x={8} y={y + HEADER_H / 2 + 4}>
@@ -140,15 +163,15 @@ const SubgroupForestPlot = ({ subgroups, model }: { model: string; subgroups: Su
         }
 
         // Subgroup diamond
-        const dcx = toX(p.pooled), dl = toX(p.ci_low), dr = toX(p.ci_high);
+        const dcx = toX(item.pooled), dl = toX(item.ci_low), dr = toX(item.ci_high);
         const dh = POOL_H / 2;
         elements.push(
             <g key={`pool-${sg.id}`}>
                 <polygon fill={sg.color} fillOpacity={0.7}
                     points={`${dcx},${y + 2} ${dr},${y + dh + 2} ${dcx},${y + POOL_H + 2} ${dl},${y + dh + 2}`} />
                 <text style={{ fill: sg.color, fontSize: 9, fontWeight: 700 }} x={LEFT + PLOT_W + 10} y={y + 8}>
-                    RR {Math.exp(p.pooled).toFixed(2)} [{Math.exp(p.ci_low).toFixed(2)}, {Math.exp(p.ci_high).toFixed(2)}]
-                    {' '} I²={(p.i2).toFixed(0)}%
+                    RR {Math.exp(item.pooled).toFixed(2)} [{Math.exp(item.ci_low).toFixed(2)}, {Math.exp(item.ci_high).toFixed(2)}]
+                    {' '} I²={(item.i2).toFixed(0)}%
                 </text>
             </g>,
         );
@@ -165,7 +188,7 @@ const SubgroupForestPlot = ({ subgroups, model }: { model: string; subgroups: Su
 
     const totalH = y + 24;
     return (
-        <svg height={totalH} style={{ width: '100%', maxWidth: SVG_W, fontFamily: 'inherit' }} viewBox={`0 0 ${SVG_W} ${totalH}`}>
+        <svg height={totalH} style={{ fontFamily: 'inherit', maxWidth: SVG_W, width: '100%' }} viewBox={`0 0 ${SVG_W} ${totalH}`}>
             <rect fill="transparent" height={totalH} width={SVG_W} x={0} y={0} />
             {elements}
         </svg>
@@ -263,7 +286,7 @@ const SubgroupAnalysis = memo(() => {
                 <div className={styles.card} key={sg.id} style={{ borderLeft: `3px solid ${sg.color}` }}>
                     <Flexbox gap={10}>
                         <Flexbox align={'center'} gap={8} horizontal justify={'space-between'}>
-                            <span style={{ color: sg.color, fontWeight: 700, fontSize: 13 }}>● {sg.label}</span>
+                            <span style={{ color: sg.color, fontSize: 13, fontWeight: 700 }}>● {sg.label}</span>
                             <Flexbox gap={6} horizontal>
                                 <Tag color={pooledAll[sgi]?.i2 > 50 ? 'orange' : 'green'}>
                                     I² = {pooledAll[sgi]?.i2.toFixed(0)}%
@@ -276,7 +299,7 @@ const SubgroupAnalysis = memo(() => {
                             </Flexbox>
                         </Flexbox>
 
-                        <div className={styles.studyRow} style={{ fontWeight: 700, fontSize: 10, opacity: 0.6 }}>
+                        <div className={styles.studyRow} style={{ fontSize: 10, fontWeight: 700, opacity: 0.6 }}>
                             <span>Study</span><span>log(RR)</span><span>CI low</span><span>CI high</span><span>N</span>
                         </div>
                         {sg.studies.map((st) => (
