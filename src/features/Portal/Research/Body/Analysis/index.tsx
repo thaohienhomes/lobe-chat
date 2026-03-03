@@ -10,10 +10,12 @@ import { Flexbox } from 'react-layout-kit';
 import { type PaperResult, useResearchStore } from '@/store/research';
 
 import DataAnalyzer from './DataAnalyzer';
+import ForestPlot from './ForestPlot';
 import InteractiveSimulators from './InteractiveSimulators';
 import KnowledgeBase from './KnowledgeBase';
 import LearningModules from './LearningModules';
 import PrismaDiagram from './PrismaDiagram';
+import RiskOfBias from './RiskOfBias';
 import StatTestAdvisor from './StatTestAdvisor';
 
 // GRADE levels
@@ -393,6 +395,16 @@ const AnalysisPhase = memo(() => {
                         children: <KnowledgeBase />,
                         key: 'kb',
                         label: '📚 Bách khoa',
+                    },
+                    {
+                        children: <RiskOfBias />,
+                        key: 'rob',
+                        label: '⚖️ RoB 2',
+                    },
+                    {
+                        children: <ForestPlot />,
+                        key: 'forestplot',
+                        label: '📈 Forest Plot',
                     },
                 ]}
                 size={'small'}
