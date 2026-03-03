@@ -125,45 +125,22 @@ const EvidenceSummarizer = memo(() => {
         const prompt = config.prompt(abstracts, researchQuestion);
 
         try {
-            const res = await fetch('/api/chat', {
-                body: JSON.stringify({
-                    messages: [{ content: prompt, role: 'user' }],
-                    model,
-                    stream: true,
-                }),
+            const res = await fetch('/api/research/ai-summary', {
+                body: JSON.stringify({ model, prompt }),
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST',
             });
 
-            if (!res.ok || !res.body) throw new Error(`API error ${res.status}`);
-
-            const reader = res.body.getReader();
-            const decoder = new TextDecoder();
-            let text = '';
-
-            let running = true;
-            while (running) {
-                const { done, value } = await reader.read();
-                if (done) { running = false; break; }
-                const chunk = decoder.decode(value);
-                // Handle SSE/streaming — extract text from data: lines
-                for (const line of chunk.split('\n')) {
-                    if (line.startsWith('data: ')) {
-                        const raw = line.slice(6).trim();
-                        if (raw === '[DONE]') break;
-                        try {
-                            const j = JSON.parse(raw);
-                            const delta = j?.choices?.[0]?.delta?.content ?? '';
-                            text += delta;
-                            setOutput(text);
-                        } catch {
-                            // non-JSON line, skip
-                        }
-                    }
-                }
+            if (!res.ok) {
+                const errJson = await res.json().catch(() => ({}));
+                throw new Error((errJson as any).error || `Server error ${res.status}`);
             }
+
+            const json = await res.json() as { text: string; model?: string; provider?: string };
+            setOutput(json.text || '(No content returned)');
         } catch (err) {
-            setOutput(`⚠️ Error calling AI: ${String(err)}\n\nMake sure the chat API is running and a model is configured.`);
+            setOutput(`⚠️ Error calling AI: ${String(err)}\n\nAi Synthesis requires a valid session and at least one configured AI provider.`);
         } finally {
             setLoading(false);
         }
@@ -226,8 +203,9 @@ const EvidenceSummarizer = memo(() => {
                             <Select onChange={(v: string) => setModel(v)} options={[
                                 { label: 'GPT-4o Mini (fast)', value: 'gpt-4o-mini' },
                                 { label: 'GPT-4o (best)', value: 'gpt-4o' },
-                                { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
+                                { label: 'Gemini 2.5 Pro', value: 'gemini-2.5-pro' },
                                 { label: 'Gemini 2.0 Flash', value: 'gemini-2.0-flash' },
+                                { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
                             ]} style={{ width: '100%' }} value={model} />
                         </Flexbox>
                     </Flexbox>
