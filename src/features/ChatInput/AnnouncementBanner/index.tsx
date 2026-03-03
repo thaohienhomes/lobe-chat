@@ -3,6 +3,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAgentStore } from '@/store/agent';
+import { useChatStore } from '@/store/chat';
 
 import { ANNOUNCEMENTS, type Announcement, DISMISSED_KEY } from './const';
 import { useStyles } from './style';
@@ -29,6 +30,7 @@ const ROTATE_INTERVAL = 5000; // ms
 const AnnouncementBanner = memo(() => {
     const { styles, cx } = useStyles();
     const updateAgentConfig = useAgentStore((s) => s.updateAgentConfig);
+    const openResearchMode = useChatStore((s) => s.openResearchMode);
 
     // ── Filter active announcements ──
     const activeItems = useMemo(() => {
@@ -78,6 +80,11 @@ const AnnouncementBanner = memo(() => {
 
     const handleCta = useCallback(
         (item: Announcement) => {
+            if (item.id === 'research-mode-launch-v1') {
+                openResearchMode();
+                handleDismiss(item.id);
+                return;
+            }
             if (item.url) {
                 window.open(item.url, '_blank');
                 return;
@@ -88,7 +95,7 @@ const AnnouncementBanner = memo(() => {
             // Auto-dismiss after clicking
             handleDismiss(item.id);
         },
-        [updateAgentConfig, handleDismiss],
+        [updateAgentConfig, handleDismiss, openResearchMode],
     );
 
     // ── Nothing to show ──
