@@ -1,15 +1,16 @@
 'use client';
 
 import { Button, Tag } from '@lobehub/ui';
+import { Select } from 'antd';
 import { createStyles } from 'antd-style';
-import { CheckCircle, Copy, ExternalLink, FileText } from 'lucide-react';
+import { CheckCircle, Copy, Download, ExternalLink, FileText } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { type PaperResult, useResearchStore } from '@/store/research';
 
 const useStyles = createStyles(({ css, token }) => ({
-    checklist: css`
+  checklist: css`
     display: flex;
     gap: 4px;
     align-items: center;
@@ -17,10 +18,10 @@ const useStyles = createStyles(({ css, token }) => ({
     font-size: 12px;
     color: ${token.colorText};
   `,
-    container: css`
+  container: css`
     width: 100%;
   `,
-    exportCard: css`
+  exportCard: css`
     cursor: pointer;
 
     padding: 16px;
@@ -36,16 +37,16 @@ const useStyles = createStyles(({ css, token }) => ({
       border-color: ${token.colorPrimaryBorder};
     }
   `,
-    exportDesc: css`
+  exportDesc: css`
     font-size: 12px;
     color: ${token.colorTextSecondary};
   `,
-    exportTitle: css`
+  exportTitle: css`
     font-size: 14px;
     font-weight: 700;
     color: ${token.colorText};
   `,
-    previewFrame: css`
+  previewFrame: css`
     overflow: hidden;
 
     width: 100%;
@@ -54,12 +55,12 @@ const useStyles = createStyles(({ css, token }) => ({
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: ${token.borderRadiusLG}px;
   `,
-    sectionTitle: css`
+  sectionTitle: css`
     font-size: 13px;
     font-weight: 600;
     color: ${token.colorTextSecondary};
   `,
-    successCard: css`
+  successCard: css`
     padding: 16px;
 
     text-align: center;
@@ -68,7 +69,7 @@ const useStyles = createStyles(({ css, token }) => ({
     border: 1px solid ${token.colorSuccessBorder};
     border-radius: ${token.borderRadiusLG}px;
   `,
-    summaryCard: css`
+  summaryCard: css`
     padding: 16px;
 
     background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorFillQuaternary} 100%);
@@ -79,54 +80,273 @@ const useStyles = createStyles(({ css, token }) => ({
 
 // ===== Helper functions =====
 const inferStudyType = (paper: PaperResult): string => {
-    const t = paper.title.toLowerCase();
-    if (t.includes('meta-analysis') || t.includes('meta analysis')) return 'Meta-analysis';
-    if (t.includes('systematic review')) return 'Systematic Review';
-    if (t.includes('randomized') || t.includes('randomised') || t.includes('rct')) return 'RCT';
-    if (t.includes('cohort')) return 'Cohort Study';
-    if (t.includes('case-control') || t.includes('case control')) return 'Case-Control';
-    if (t.includes('cross-sectional')) return 'Cross-sectional';
-    if (t.includes('trial')) return 'Clinical Trial';
-    if (t.includes('review')) return 'Review';
-    return 'Observational';
+  const t = paper.title.toLowerCase();
+  if (t.includes('meta-analysis') || t.includes('meta analysis')) return 'Meta-analysis';
+  if (t.includes('systematic review')) return 'Systematic Review';
+  if (t.includes('randomized') || t.includes('randomised') || t.includes('rct')) return 'RCT';
+  if (t.includes('cohort')) return 'Cohort Study';
+  if (t.includes('case-control') || t.includes('case control')) return 'Case-Control';
+  if (t.includes('cross-sectional')) return 'Cross-sectional';
+  if (t.includes('trial')) return 'Clinical Trial';
+  if (t.includes('review')) return 'Review';
+  return 'Observational';
 };
 
 const assessGradeLevel = (papers: PaperResult[]): string => {
-    const types = papers.map(inferStudyType);
-    const hasMA = types.includes('Meta-analysis');
-    const hasSR = types.includes('Systematic Review');
-    const rctCount = types.filter((t) => t === 'RCT').length;
-    if (hasMA && hasSR && rctCount >= 2) return 'High';
-    if (rctCount > 0 || hasMA || hasSR) return 'Moderate';
-    if (papers.length >= 5) return 'Low';
-    return 'Very Low';
+  const types = papers.map(inferStudyType);
+  const hasMA = types.includes('Meta-analysis');
+  const hasSR = types.includes('Systematic Review');
+  const rctCount = types.filter((t) => t === 'RCT').length;
+  if (hasMA && hasSR && rctCount >= 2) return 'High';
+  if (rctCount > 0 || hasMA || hasSR) return 'Moderate';
+  if (papers.length >= 5) return 'Low';
+  return 'Very Low';
 };
+
+// ===== Journal Templates =====
+const JOURNAL_TEMPLATES: Record<string, {
+  bibopts?: string;
+  citation_package: string;
+  format: string;
+  geometry?: string;
+  label: string;
+  template?: string;
+}> = {
+  biorxiv: {
+    citation_package: 'natbib',
+    format: 'pdf',
+    label: 'bioRxiv (Preprint)',
+    template: 'chi-raag/biorxiv-quarto',
+  },
+  elsevier: {
+    citation_package: 'natbib',
+    format: 'pdf',
+    geometry: 'margin=2cm',
+    label: 'Elsevier (The Lancet, Cell, etc.)',
+    template: 'quarto-journals/elsevier',
+  },
+  generic: {
+    citation_package: 'biblatex',
+    format: 'html+pdf+docx',
+    label: 'Generic Academic (HTML + PDF + DOCX)',
+  },
+  nature: {
+    citation_package: 'natbib',
+    format: 'pdf',
+    label: 'Nature',
+    template: 'christopherkenny/nature',
+  },
+  plos: {
+    bibopts: 'plos2015',
+    citation_package: 'natbib',
+    format: 'pdf',
+    label: 'PLOS ONE / PLOS Medicine',
+    template: 'quarto-journals/plos',
+  },
+};
+
+// ===== Quarto .qmd Builder =====
+const buildQuartoQMD = (
+  query: string,
+  pico: { comparison: string; intervention: string; outcome: string; population: string } | null,
+  included: PaperResult[],
+  excluded: PaperResult[],
+  allPapers: PaperResult[],
+  journalKey: string,
+): string => {
+  const today = new Date().toISOString().split('T')[0];
+  const jt = JOURNAL_TEMPLATES[journalKey] ?? JOURNAL_TEMPLATES.generic;
+  const grade = assessGradeLevel(included);
+
+  // Build YAML frontmatter
+  const formatLine = jt.format === 'html+pdf+docx'
+    ? `format:\n  html:\n    toc: true\n  pdf:\n    documentclass: article${jt.geometry ? `\n    geometry: ${jt.geometry}` : ''}\n  docx: default`
+    : `format:\n  pdf:\n    documentclass: article${jt.geometry ? `\n    geometry: ${jt.geometry}` : ''}`;
+
+  const templateLine = jt.template ? `\nfrom: ${jt.template}` : '';
+  const bibLine = `bibliography: references.bib\ncsl: vancouver.csl  # Download from https://citationstyles.org`;
+
+  const yaml = `---
+title: "Systematic Review: ${query}"
+author:
+  - name: "[Author Name]"
+    affiliation: "[Institution]"
+date: "${today}"
+abstract: |
+  **Background:** ${query}
+  
+  **Methods:** Systematic search of PubMed and OpenAlex. PICO: ${pico ? `P=${pico.population}; I=${pico.intervention}; C=${pico.comparison}; O=${pico.outcome}` : 'See Methods'}. GRADE assessment applied.
+  
+  **Results:** ${allPapers.length} records identified; ${included.length} included after screening. Overall GRADE: ${grade}.
+  
+  **Conclusions:** [To be completed]
+keywords: [systematic review, ${pico?.population ?? 'medicine'}, ${pico?.intervention ?? 'intervention'}]
+${formatLine}${templateLine}
+${bibLine}
+---
+`;
+
+  // Build citation keys from papers (use pmid or doi-based key)
+  const citeKey = (p: PaperResult, i: number): string => {
+    const firstAuthorLast = p.authors?.split(',')[0]?.trim().split(' ').at(-1) ?? `Author${i + 1}`;
+    return `${firstAuthorLast.toLowerCase()}${p.year}`;
+  };
+
+  const picoTable = pico ? `
+| Component | Criteria |
+|---|---|
+| **P** — Population | ${pico.population} |
+| **I** — Intervention | ${pico.intervention} |
+| **C** — Comparison | ${pico.comparison} |
+| **O** — Outcome | ${pico.outcome} |
+` : '';
+
+  const studyTable = [
+    '| # | Study | Design | Year | Citations |',
+    '|---|---|---|---|---|',
+    ...included.map((p, i) =>
+      `| ${i + 1} | @${citeKey(p, i)} | ${inferStudyType(p)} | ${p.year} | ${p.citations?.toLocaleString() ?? '–'} |`,
+    ),
+  ].join('\n');
+
+  return `${yaml}
+
+# Introduction
+
+## Background
+
+[Describe context and rationale for this review of "${query}".]
+
+## Objectives
+
+${pico ? `To evaluate the effect of **${pico.intervention}** on **${pico.outcome}** in **${pico.population}**, compared to **${pico.comparison}**.` : `To systematically review evidence on **${query}**.`}
+
+# Methods
+
+## Eligibility Criteria
+${picoTable}
+## Information Sources
+
+Searched PubMed (MEDLINE) and OpenAlex on ${today}. Search query: \`${query}\`
+
+## Study Selection
+
+All ${allPapers.length} identified records were independently screened against the PICO-based eligibility criteria.
+
+## Quality Assessment
+
+Evidence certainty was assessed using the GRADE framework across five domains: risk of bias, inconsistency, indirectness, imprecision, and publication bias.
+
+# Results
+
+## Study Selection
+
+Database searches identified ${allPapers.length} records. After duplicate removal and screening, ${included.length} studies were included and ${excluded.length} were excluded.
+
+**PRISMA Flow:**
+$$${allPapers.length} \\text{ identified} \\rightarrow ${allPapers.length} \\text{ screened} \\rightarrow ${excluded.length} \\text{ excluded} \\rightarrow \\mathbf{${included.length} \\text{ included}}$$
+
+## Study Characteristics
+
+${studyTable}
+
+## Synthesis of Results
+
+[Narrative synthesis or meta-analysis. Cite studies using @citekey syntax, e.g. @${citeKey(included[0] ?? { authors: 'Author', id: '', year: 2024 }, 0)}]
+
+## GRADE Summary
+
+Overall certainty of evidence: **${grade}**
+
+| Domain | Rating | Notes |
+|---|---|---|
+| Risk of Bias | ⚠️ To assess | RoB 2 for RCTs, ROBINS-I for observational |
+| Inconsistency | ⚠️ To assess | Compare I² across studies |
+| Indirectness | ⚠️ To assess | PICO alignment |
+| Imprecision | ⚠️ To assess | Width of confidence intervals |
+| Publication Bias | ⚠️ To assess | Funnel plot if ≥10 studies |
+| **Overall GRADE** | **${grade}** | Based on ${included.length} studies |
+
+# Discussion
+
+## Summary of Evidence
+
+[Summary of key findings from included studies.]
+
+## Limitations
+
+[Limitations at the review and study level.]
+
+## Conclusions
+
+[State main conclusions and clinical/policy implications.]
+
+# References
+
+::: {#refs}
+:::
+`;
+};
+
+// ===== BibTeX .bib Builder =====
+const buildBibTeX = (papers: PaperResult[]): string => {
+  const citeKey = (p: PaperResult, i: number): string => {
+    const firstAuthorLast = p.authors?.split(',')[0]?.trim().split(' ').at(-1) ?? `Author${i + 1}`;
+    return `${firstAuthorLast.toLowerCase()}${p.year}${i > 0 ? String.fromCharCode(97 + (i % 26)) : ''}`;
+  };
+
+  const entries = papers.map((p, i) => {
+    const key = citeKey(p, i);
+    const type = inferStudyType(p).includes('Review') || inferStudyType(p).includes('Meta') ? 'article' : 'article';
+    const lines = [
+      `@${type}{${key},`,
+      `  author  = {${p.authors || 'Unknown'}},`,
+      `  title   = {${p.title}},`,
+      `  journal = {${p.journal || 'Unknown Journal'}},`,
+      `  year    = {${p.year || 'n.d.'}},`,
+    ];
+    if (p.doi) lines.push(`  doi     = {${p.doi}},`);
+    if ((p as any).pmid) lines.push(`  note    = {PMID: ${(p as any).pmid}},`);
+    lines.push(`}`);
+    return lines.join('\n');
+  });
+
+  return [
+    `% BibTeX references generated by Phở Chat Research Mode`,
+    `% ${new Date().toISOString().split('T')[0]} — ${papers.length} entries`,
+    `% Usage in Quarto: bibliography: references.bib`,
+    `%          Citation: [@${citeKey(papers[0] ?? { authors: 'Author', id: '', year: 2024 }, 0)}]`,
+    '',
+    ...entries,
+  ].join('\n\n');
+};
+
 
 // ===== HTML Document Builder =====
 const buildStyledHTML = (
-    query: string,
-    pico: { comparison: string; intervention: string; outcome: string; population: string } | null,
-    allPapers: PaperResult[],
-    included: PaperResult[],
-    excluded: PaperResult[],
+  query: string,
+  pico: { comparison: string; intervention: string; outcome: string; population: string } | null,
+  allPapers: PaperResult[],
+  included: PaperResult[],
+  excluded: PaperResult[],
 ): string => {
-    const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-    const pubmedCount = allPapers.filter((p) => p.source === 'PubMed').length;
-    const oaCount = allPapers.filter((p) => p.source === 'OpenAlex').length;
-    const years = included.map((p) => p.year).filter((y) => y > 0);
-    const yearRange = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : 'N/A';
-    const totalCitations = included.reduce((s, p) => s + (p.citations || 0), 0);
-    const grade = assessGradeLevel(included);
-    const gradeColor = grade === 'High' ? '#059669' : grade === 'Moderate' ? '#2563eb' : grade === 'Low' ? '#d97706' : '#dc2626';
+  const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  const pubmedCount = allPapers.filter((p) => p.source === 'PubMed').length;
+  const oaCount = allPapers.filter((p) => p.source === 'OpenAlex').length;
+  const years = included.map((p) => p.year).filter((y) => y > 0);
+  const yearRange = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : 'N/A';
+  const totalCitations = included.reduce((s, p) => s + (p.citations || 0), 0);
+  const grade = assessGradeLevel(included);
+  const gradeColor = grade === 'High' ? '#059669' : grade === 'Moderate' ? '#2563eb' : grade === 'Low' ? '#d97706' : '#dc2626';
 
-    const typeCounts: Record<string, number> = {};
-    for (const p of included) {
-        const t = inferStudyType(p);
-        typeCounts[t] = (typeCounts[t] || 0) + 1;
-    }
-    const typeList = Object.entries(typeCounts).sort(([, a], [, b]) => b - a);
+  const typeCounts: Record<string, number> = {};
+  for (const p of included) {
+    const t = inferStudyType(p);
+    typeCounts[t] = (typeCounts[t] || 0) + 1;
+  }
+  const typeList = Object.entries(typeCounts).sort(([, a], [, b]) => b - a);
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -548,227 +768,283 @@ ${pico ? `
 
 // ===== Export Formats =====
 const EXPORT_FORMATS = [
-    {
-        desc: 'Open beautifully formatted systematic review in new tab — ready to print/save as PDF',
-        format: 'html_preview',
-        icon: '📄',
-        label: 'Full Systematic Review (HTML)',
-        primary: true,
-    },
-    {
-        desc: 'Copy formatted content — paste into Google Docs/Word with proper headings & tables',
-        format: 'rich_copy',
-        icon: '📋',
-        label: 'Copy to Google Docs / Word',
-        primary: false,
-    },
-    {
-        desc: 'Raw Markdown for Overleaf, Quarto, or GitHub — with full PRISMA structure',
-        format: 'markdown',
-        icon: '📝',
-        label: 'Raw Markdown (Overleaf / Quarto)',
-        primary: false,
-    },
-    {
-        desc: 'Vancouver-style numbered bibliography ready for submission',
-        format: 'references',
-        icon: '📚',
-        label: 'References Only (Vancouver)',
-        primary: false,
-    },
+  {
+    desc: 'Open beautifully formatted systematic review in new tab — ready to print/save as PDF',
+    format: 'html_preview',
+    icon: '📄',
+    label: 'Full Systematic Review (HTML)',
+    primary: true,
+  },
+  {
+    desc: 'Copy formatted content — paste into Google Docs/Word with proper headings & tables',
+    format: 'rich_copy',
+    icon: '📋',
+    label: 'Copy to Google Docs / Word',
+    primary: false,
+  },
+  {
+    desc: 'Quarto .qmd document — YAML frontmatter + Pandoc citations [@citekey]. Open with Quarto: quarto render review.qmd',
+    format: 'quarto_qmd',
+    icon: '🔬',
+    label: 'Quarto Document (.qmd)',
+    primary: false,
+  },
+  {
+    desc: 'BibTeX references — paste as references.bib in your Quarto/LaTeX project. Includes DOI & PMID.',
+    format: 'bibtex',
+    icon: '📚',
+    label: 'BibTeX References (.bib)',
+    primary: false,
+  },
+  {
+    desc: 'Raw Markdown for Overleaf or GitHub — with PRISMA structure',
+    format: 'markdown',
+    icon: '📝',
+    label: 'Markdown (Overleaf / GitHub)',
+    primary: false,
+  },
+  {
+    desc: 'Vancouver-style numbered bibliography ready for submission',
+    format: 'references',
+    icon: '🗂️',
+    label: 'References Only (Vancouver)',
+    primary: false,
+  },
 ];
 
 const PublishingPhase = memo(() => {
-    const { styles } = useStyles();
-    const [exported, setExported] = useState<string | null>(null);
+  const { styles } = useStyles();
+  const [exported, setExported] = useState<string | null>(null);
+  const [journalKey, setJournalKey] = useState<string>('generic');
 
-    const papers = useResearchStore((s) => s.papers);
-    const screeningDecisions = useResearchStore((s) => s.screeningDecisions);
-    const searchQuery = useResearchStore((s) => s.searchQuery);
-    const pico = useResearchStore((s) => s.pico);
-    const setActivePhase = useResearchStore((s) => s.setActivePhase);
+  const papers = useResearchStore((s) => s.papers);
+  const screeningDecisions = useResearchStore((s) => s.screeningDecisions);
+  const searchQuery = useResearchStore((s) => s.searchQuery);
+  const pico = useResearchStore((s) => s.pico);
+  const setActivePhase = useResearchStore((s) => s.setActivePhase);
 
-    const includedPapers = useMemo(
-        () => papers.filter((p) => screeningDecisions[p.id]?.decision === 'included'),
-        [papers, screeningDecisions],
-    );
-    const excludedPapers = useMemo(
-        () => papers.filter((p) => screeningDecisions[p.id]?.decision === 'excluded'),
-        [papers, screeningDecisions],
-    );
+  const includedPapers = useMemo(
+    () => papers.filter((p) => screeningDecisions[p.id]?.decision === 'included'),
+    [papers, screeningDecisions],
+  );
+  const excludedPapers = useMemo(
+    () => papers.filter((p) => screeningDecisions[p.id]?.decision === 'excluded'),
+    [papers, screeningDecisions],
+  );
 
-    const htmlDocument = useMemo(
-        () => buildStyledHTML(searchQuery, pico, papers, includedPapers, excludedPapers),
-        [searchQuery, pico, papers, includedPapers, excludedPapers],
-    );
+  const htmlDocument = useMemo(
+    () => buildStyledHTML(searchQuery, pico, papers, includedPapers, excludedPapers),
+    [searchQuery, pico, papers, includedPapers, excludedPapers],
+  );
 
-    const handleExport = useCallback((format: string) => {
-        switch (format) {
-            case 'html_preview': {
-                // Open styled HTML in new tab
-                const blob = new Blob([htmlDocument], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                setExported(format);
-                setTimeout(() => setExported(null), 3000);
-                break;
-            }
+  const handleExport = useCallback((format: string) => {
+    const markdownExport = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const years = includedPapers.map((p) => p.year).filter((y) => y > 0);
+      const yearRange = years.length ? `${Math.min(...years)}\u2013${Math.max(...years)}` : 'N/A';
+      const totalCitations = includedPapers.reduce((s, p) => s + (p.citations || 0), 0);
+      const grade = assessGradeLevel(includedPapers);
+      const typeCounts: Record<string, number> = {};
+      for (const p of includedPapers) { const t = inferStudyType(p); typeCounts[t] = (typeCounts[t] || 0) + 1; }
+      const typeList = Object.entries(typeCounts).sort(([, a], [, b]) => b - a);
+      return [
+        `# Systematic Review: ${searchQuery}`,
+        `*${today}*`,
+        '',
+        '## Abstract',
+        `**Background:** This systematic review examines evidence on "${searchQuery}".`,
+        `**Methods:** PubMed + OpenAlex searched on ${today}. PICO: ${pico ? `P: ${pico.population}, I: ${pico.intervention}, C: ${pico.comparison}, O: ${pico.outcome}` : 'N/A'}. GRADE assessment applied.`,
+        `**Results:** ${papers.length} identified \u2192 ${includedPapers.length} included. Years ${yearRange}. ${totalCitations.toLocaleString()} total citations. Types: ${typeList.map(([t, c]) => `${t}(${c})`).join(', ')}. GRADE: ${grade}.`,
+        '**Conclusions:** [To be completed]',
+        '',
+        '## 1. Introduction', '',
+        '### 1.1 Rationale', '[Describe knowledge gap]', '',
+        '### 1.2 Objectives',
+        pico ? `To review ${pico.intervention} effects on ${pico.outcome} in ${pico.population} vs ${pico.comparison}.` : `To review ${searchQuery}.`,
+        '',
+        '## 2. Methods', '',
+        '### 2.1 Eligibility',
+        pico ? `| Component | Criteria |\n|---|---|\n| P | ${pico.population} |\n| I | ${pico.intervention} |\n| C | ${pico.comparison} |\n| O | ${pico.outcome} |` : '[PICO]',
+        '',
+        '### 2.2 Sources', `PubMed (${papers.filter((p) => p.source === 'PubMed').length}) + OpenAlex (${papers.filter((p) => p.source === 'OpenAlex').length})`,
+        '### 2.3 Search', `Query: \`${searchQuery}\``,
+        '',
+        '## 3. Results', '',
+        '### PRISMA Flow', `Identified: ${papers.length} \u2192 Screened: ${papers.length} \u2192 Excluded: ${excludedPapers.length} \u2192 **Included: ${includedPapers.length}**`,
+        '',
+        '### Study Characteristics',
+        '| # | Study | Design | Year | Citations |',
+        '|---|---|---|---|---|',
+        ...includedPapers.map((p, i) => `| ${i + 1} | ${p.title} | ${inferStudyType(p)} | ${p.year} | ${p.citations?.toLocaleString() || '\u2013'} |`),
+        '',
+        '## 4. Discussion', '', '[Summary + Limitations + Conclusions]',
+        '',
+        '## References',
+        ...includedPapers.map((p, i) => `${i + 1}. ${p.authors}. ${p.title}. *${p.journal || 'N/A'}*. ${p.year}.${p.doi ? ` DOI: ${p.doi}` : ''}`),
+      ].join('\n');
+    };
 
-            case 'rich_copy': {
-                // Copy rich HTML to clipboard — pastes formatted in Google Docs/Word
-                const blobHTML = new Blob([htmlDocument], { type: 'text/html' });
-                const blobText = new Blob([htmlDocument], { type: 'text/plain' });
-                const clipboardItem = new ClipboardItem({
-                    'text/html': blobHTML,
-                    'text/plain': blobText,
-                });
-                navigator.clipboard.write([clipboardItem]);
-                setExported(format);
-                setTimeout(() => setExported(null), 3000);
-                break;
-            }
+    const downloadFile = (content: string, filename: string, mime: string) => {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
 
-            case 'markdown': {
-                // Raw Markdown for Overleaf / Quarto
-                const today = new Date().toISOString().split('T')[0];
-                const years = includedPapers.map((p) => p.year).filter((y) => y > 0);
-                const yearRange = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : 'N/A';
-                const totalCitations = includedPapers.reduce((s, p) => s + (p.citations || 0), 0);
-                const grade = assessGradeLevel(includedPapers);
-                const typeCounts: Record<string, number> = {};
-                for (const p of includedPapers) { const t = inferStudyType(p); typeCounts[t] = (typeCounts[t] || 0) + 1; }
-                const typeList = Object.entries(typeCounts).sort(([, a], [, b]) => b - a);
+    switch (format) {
+      case 'html_preview': {
+        const blob = new Blob([htmlDocument], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setExported(format);
+        setTimeout(() => setExported(null), 3000);
+        break;
+      }
 
-                const md = [
-                    `# Systematic Review: ${searchQuery}`,
-                    `*${today}*`,
-                    '',
-                    '## Abstract',
-                    `**Background:** This systematic review examines evidence on "${searchQuery}".`,
-                    `**Methods:** PubMed + OpenAlex searched on ${today}. PICO: ${pico ? `P: ${pico.population}, I: ${pico.intervention}, C: ${pico.comparison}, O: ${pico.outcome}` : 'N/A'}. GRADE assessment applied.`,
-                    `**Results:** ${papers.length} identified → ${includedPapers.length} included. Years ${yearRange}. ${totalCitations.toLocaleString()} total citations. Types: ${typeList.map(([t, c]) => `${t}(${c})`).join(', ')}. GRADE: ${grade}.`,
-                    `**Conclusions:** [To be completed]`,
-                    '',
-                    '## 1. Introduction', '',
-                    `### 1.1 Rationale`, '[Describe knowledge gap]', '',
-                    `### 1.2 Objectives`,
-                    pico ? `To review ${pico.intervention} effects on ${pico.outcome} in ${pico.population} vs ${pico.comparison}.` : `To review ${searchQuery}.`,
-                    '',
-                    '## 2. Methods', '',
-                    '### 2.1 Eligibility',
-                    pico ? `| Component | Criteria |\n|---|---|\n| P | ${pico.population} |\n| I | ${pico.intervention} |\n| C | ${pico.comparison} |\n| O | ${pico.outcome} |` : '[PICO]',
-                    '',
-                    `### 2.2 Sources`, `PubMed (${papers.filter((p) => p.source === 'PubMed').length}) + OpenAlex (${papers.filter((p) => p.source === 'OpenAlex').length})`,
-                    `### 2.3 Search`, `Query: \`${searchQuery}\``,
-                    '',
-                    '## 3. Results', '',
-                    `### PRISMA Flow`, `Identified: ${papers.length} → Screened: ${papers.length} → Excluded: ${excludedPapers.length} → **Included: ${includedPapers.length}**`,
-                    '',
-                    '### Study Characteristics',
-                    '| # | Study | Design | Year | Citations |',
-                    '|---|---|---|---|---|',
-                    ...includedPapers.map((p, i) => `| ${i + 1} | ${p.title} | ${inferStudyType(p)} | ${p.year} | ${p.citations?.toLocaleString() || '–'} |`),
-                    '',
-                    '## 4. Discussion', '', '[Summary + Limitations + Conclusions]',
-                    '',
-                    '## References',
-                    ...includedPapers.map((p, i) => `${i + 1}. ${p.authors}. ${p.title}. *${p.journal || 'N/A'}*. ${p.year}.${p.doi ? ` DOI: ${p.doi}` : ''}`),
-                ].join('\n');
-                navigator.clipboard.writeText(md);
-                setExported(format);
-                setTimeout(() => setExported(null), 3000);
-                break;
-            }
+      case 'rich_copy': {
+        const blobHTML = new Blob([htmlDocument], { type: 'text/html' });
+        const blobText = new Blob([htmlDocument], { type: 'text/plain' });
+        const clipboardItem = new ClipboardItem({
+          'text/html': blobHTML,
+          'text/plain': blobText,
+        });
+        navigator.clipboard.write([clipboardItem]);
+        setExported(format);
+        setTimeout(() => setExported(null), 3000);
+        break;
+      }
 
-            case 'references': {
-                const refs = includedPapers.map((p, i) =>
-                    `${i + 1}. ${p.authors}. ${p.title}. ${p.journal || 'N/A'}. ${p.year}.${p.doi ? ` DOI: ${p.doi}` : ''}`,
-                ).join('\n');
-                navigator.clipboard.writeText(refs);
-                setExported(format);
-                setTimeout(() => setExported(null), 3000);
-                break;
-            }
-            // No default
-        }
-    }, [htmlDocument, searchQuery, pico, papers, includedPapers, excludedPapers]);
+      case 'quarto_qmd': {
+        const qmd = buildQuartoQMD(searchQuery, pico, includedPapers, excludedPapers, papers, journalKey);
+        downloadFile(qmd, 'systematic-review.qmd', 'text/plain');
+        setExported(format);
+        setTimeout(() => setExported(null), 3000);
+        break;
+      }
 
-    return (
-        <Flexbox className={styles.container} gap={16}>
-            {/* Summary */}
-            <div className={styles.summaryCard}>
-                <Flexbox gap={12}>
-                    <span style={{ fontSize: 15, fontWeight: 700 }}>📤 Publishing Summary</span>
-                    <Flexbox gap={4}>
-                        <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> Research question defined</span>
-                        <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> {papers.length} papers searched (PubMed + OpenAlex)</span>
-                        <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> {includedPapers.length} included, {excludedPapers.length} excluded</span>
-                        <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> GRADE assessment completed</span>
-                        <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> PRISMA 2020 structure ready</span>
-                    </Flexbox>
-                </Flexbox>
-            </div>
+      case 'bibtex': {
+        const bib = buildBibTeX(includedPapers);
+        downloadFile(bib, 'references.bib', 'text/plain');
+        setExported(format);
+        setTimeout(() => setExported(null), 3000);
+        break;
+      }
 
-            {/* Export Options */}
-            <Flexbox gap={8}>
-                <span className={styles.sectionTitle}>📥 Export Formats</span>
-                {EXPORT_FORMATS.map((fmt) => (
-                    <div
-                        className={styles.exportCard}
-                        key={fmt.format}
-                        onClick={() => handleExport(fmt.format)}
-                    >
-                        <Flexbox align={'center'} gap={12} horizontal justify={'space-between'}>
-                            <Flexbox gap={4}>
-                                <Flexbox align={'center'} gap={8} horizontal>
-                                    <span className={styles.exportTitle}>
-                                        {fmt.icon} {fmt.label}
-                                    </span>
-                                    {fmt.primary && <Tag color="blue" style={{ fontSize: 10 }}>Recommended</Tag>}
-                                </Flexbox>
-                                <span className={styles.exportDesc}>{fmt.desc}</span>
-                            </Flexbox>
-                            {exported === fmt.format ? (
-                                <Tag color="green">✓ Done!</Tag>
-                            ) : fmt.format === 'html_preview' ? (
-                                <ExternalLink size={16} style={{ opacity: 0.5 }} />
-                            ) : (
-                                <Copy size={16} style={{ opacity: 0.5 }} />
-                            )}
-                        </Flexbox>
-                    </div>
-                ))}
-            </Flexbox>
+      case 'markdown': {
+        navigator.clipboard.writeText(markdownExport());
+        setExported(format);
+        setTimeout(() => setExported(null), 3000);
+        break;
+      }
 
-            {/* Inline Preview */}
-            <Flexbox gap={8}>
-                <span className={styles.sectionTitle}>👀 Preview</span>
-                <iframe
-                    className={styles.previewFrame}
-                    srcDoc={htmlDocument}
-                    title="Systematic Review Preview"
-                />
-            </Flexbox>
+      case 'references': {
+        const refs = includedPapers.map((p, i) =>
+          `${i + 1}. ${p.authors}. ${p.title}. ${p.journal || 'N/A'}. ${p.year}.${p.doi ? ` DOI: ${p.doi}` : ''}`,
+        ).join('\n');
+        navigator.clipboard.writeText(refs);
+        setExported(format);
+        setTimeout(() => setExported(null), 3000);
+        break;
+      }
+      // No default
+    }
+  }, [htmlDocument, searchQuery, pico, papers, includedPapers, excludedPapers, journalKey]);
 
-            {/* Success */}
-            {exported && (
-                <div className={styles.successCard}>
-                    <Flexbox align={'center'} gap={6}>
-                        <CheckCircle color="#52c41a" size={24} />
-                        <span style={{ fontSize: 14, fontWeight: 700 }}>
-                            {exported === 'html_preview' ? 'Opened in new tab!' : 'Copied to clipboard!'}
-                        </span>
-                    </Flexbox>
-                </div>
-            )}
-
-            {/* Navigation */}
-            <Flexbox gap={8} horizontal justify={'space-between'}>
-                <Button onClick={() => setActivePhase('writing')} size={'small'}>← Back to Writing</Button>
-                <Button onClick={() => setActivePhase('discovery')} size={'small'} type={'primary'}>🔄 New Research</Button>
-            </Flexbox>
+  return (
+    <Flexbox className={styles.container} gap={16}>
+      {/* Summary */}
+      <div className={styles.summaryCard}>
+        <Flexbox gap={12}>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>📤 Publishing Summary</span>
+          <Flexbox gap={4}>
+            <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> Research question defined</span>
+            <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> {papers.length} papers searched (PubMed + OpenAlex)</span>
+            <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> {includedPapers.length} included, {excludedPapers.length} excluded</span>
+            <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> GRADE assessment completed</span>
+            <span className={styles.checklist}><CheckCircle color="#52c41a" size={14} /> PRISMA 2020 structure ready</span>
+          </Flexbox>
         </Flexbox>
-    );
+      </div>
+
+      {/* Export Options */}
+      <Flexbox gap={8}>
+        <Flexbox align={'center'} gap={10} horizontal justify={'space-between'}>
+          <span className={styles.sectionTitle}>📥 Export Formats</span>
+          {/* Journal Template Selector */}
+          <Flexbox align={'center'} gap={6} horizontal>
+            <FileText size={13} style={{ opacity: 0.5 }} />
+            <span style={{ fontSize: 11, opacity: 0.6 }}>Journal:</span>
+            <Select
+              onChange={(v) => setJournalKey(v)}
+              options={Object.entries(JOURNAL_TEMPLATES).map(([k, v]) => ({ label: v.label, value: k }))}
+              size="small"
+              style={{ fontSize: 11, minWidth: 220 }}
+              value={journalKey}
+            />
+          </Flexbox>
+        </Flexbox>
+        {EXPORT_FORMATS.map((fmt) => (
+          <div
+            className={styles.exportCard}
+            key={fmt.format}
+            onClick={() => handleExport(fmt.format)}
+          >
+            <Flexbox align={'center'} gap={12} horizontal justify={'space-between'}>
+              <Flexbox gap={4}>
+                <Flexbox align={'center'} gap={8} horizontal>
+                  <span className={styles.exportTitle}>
+                    {fmt.icon} {fmt.label}
+                  </span>
+                  {fmt.primary && <Tag color="blue" style={{ fontSize: 10 }}>Recommended</Tag>}
+                </Flexbox>
+                <span className={styles.exportDesc}>{fmt.desc}</span>
+              </Flexbox>
+              {exported === fmt.format ? (
+                <Tag color="green">✓ Done!</Tag>
+              ) : (fmt.format === 'quarto_qmd' || fmt.format === 'bibtex') ? (
+                <Download size={16} style={{ opacity: 0.5 }} />
+              ) : fmt.format === 'html_preview' ? (
+                <ExternalLink size={16} style={{ opacity: 0.5 }} />
+              ) : (
+                <Copy size={16} style={{ opacity: 0.5 }} />
+              )}
+            </Flexbox>
+          </div>
+        ))}
+      </Flexbox>
+
+      {/* Inline Preview */}
+      <Flexbox gap={8}>
+        <span className={styles.sectionTitle}>👀 Preview</span>
+        <iframe
+          className={styles.previewFrame}
+          srcDoc={htmlDocument}
+          title="Systematic Review Preview"
+        />
+      </Flexbox>
+
+      {/* Success */}
+      {exported && (
+        <div className={styles.successCard}>
+          <Flexbox align={'center'} gap={6}>
+            <CheckCircle color="#52c41a" size={24} />
+            <span style={{ fontSize: 14, fontWeight: 700 }}>
+              {exported === 'html_preview' ? 'Opened in new tab!' : 'Copied to clipboard!'}
+            </span>
+          </Flexbox>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <Flexbox gap={8} horizontal justify={'space-between'}>
+        <Button onClick={() => setActivePhase('writing')} size={'small'}>← Back to Writing</Button>
+        <Button onClick={() => setActivePhase('discovery')} size={'small'} type={'primary'}>🔄 New Research</Button>
+      </Flexbox>
+    </Flexbox>
+  );
 });
 
 PublishingPhase.displayName = 'PublishingPhase';
