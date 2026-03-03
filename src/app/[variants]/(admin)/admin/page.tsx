@@ -5,6 +5,7 @@ import { sepayPayments, supportTickets, users } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 
 import { AutoRefresh } from '@/features/Admin/AutoRefresh';
+import { RateLimitInspector } from '@/features/Admin/RateLimitInspector';
 
 // Extracted style objects for Premium Glassmorphism
 const cardStyle = {
@@ -201,6 +202,7 @@ export default async function AdminDashboardPage() {
         { emoji: '▲', href: 'https://vercel.com/dashboard', label: 'Vercel Deploy' },
         { emoji: '🎙️', href: 'https://dashboard.vapi.ai', label: 'Vapi Voice' },
         { emoji: '📊', href: 'https://us.posthog.com', label: 'PostHog Analytics' },
+        { emoji: '🔴', href: 'https://console.upstash.com', label: 'Upstash Redis' },
     ];
 
     return (
@@ -330,6 +332,15 @@ export default async function AdminDashboardPage() {
                         </a>
                     ))}
                 </div>
+            </div>
+
+            {/* Rate Limit Inspector */}
+            <div>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '8px' }}>Rate Limit Inspector</h2>
+                <p style={{ color: '#71717A', fontSize: '13px', marginBottom: '20px' }}>
+                    Lookup and reset per-user daily AI quota counters stored in Upstash Redis.
+                </p>
+                <RateLimitInspector />
             </div>
         </div>
     );
