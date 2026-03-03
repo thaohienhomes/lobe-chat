@@ -11,6 +11,7 @@ import { type PaperResult, useResearchStore } from '@/store/research';
 
 import DataAnalyzer from './DataAnalyzer';
 import InteractiveSimulators from './InteractiveSimulators';
+import LearningModules from './LearningModules';
 import PrismaDiagram from './PrismaDiagram';
 import StatTestAdvisor from './StatTestAdvisor';
 
@@ -381,6 +382,11 @@ const AnalysisPhase = memo(() => {
                         children: <DataAnalyzer />,
                         key: 'data',
                         label: '📊 Phân tích dữ liệu',
+                    },
+                    {
+                        children: <LearningModules />,
+                        key: 'learning',
+                        label: '🧠 Ôn tập',
                     },
                 ]}
                 size={'small'}
