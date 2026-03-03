@@ -87,8 +87,11 @@ const SUMMARY_PROMPTS: Record<SummaryType, { description: string; label: string;
 
 const EvidenceSummarizer = memo(() => {
     const { styles } = useStyles();
-    const papers = useResearchStore((s) => s.papers.filter((p) => p.status === 'included'));
-    const researchQuestion = useResearchStore((s) => s.researchQuestion);
+    const allPapers = useResearchStore((s) => s.papers);
+    const screeningDecisions = useResearchStore((s) => s.screeningDecisions);
+    const papers = allPapers.filter((p) => screeningDecisions[p.id]?.decision === 'included');
+    const searchQuery = useResearchStore((s) => s.searchQuery);
+    const pico = useResearchStore((s) => s.pico);
 
     const [summaryType, setSummaryType] = useState<SummaryType>('narrative');
     const [output, setOutput] = useState('');
@@ -115,9 +118,11 @@ const EvidenceSummarizer = memo(() => {
         setOutput('');
 
         const abstracts = buildAbstracts();
-        const pico = researchQuestion || 'the specified research question';
+        const researchQuestion = pico
+            ? `${pico.population} receiving ${pico.intervention} vs ${pico.comparison} on ${pico.outcome}`
+            : searchQuery || 'the specified research question';
         const config = SUMMARY_PROMPTS[summaryType];
-        const prompt = config.prompt(abstracts, pico);
+        const prompt = config.prompt(abstracts, researchQuestion);
 
         try {
             const res = await fetch('/api/chat', {
@@ -162,7 +167,7 @@ const EvidenceSummarizer = memo(() => {
         } finally {
             setLoading(false);
         }
-    }, [papersToUse, buildAbstracts, researchQuestion, summaryType, model]);
+    }, [papersToUse, buildAbstracts, searchQuery, pico, summaryType, model]);
 
     const copyOutput = useCallback(() => {
         navigator.clipboard.writeText(output);

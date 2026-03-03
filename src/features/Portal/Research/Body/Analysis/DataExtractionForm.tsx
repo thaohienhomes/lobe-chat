@@ -81,7 +81,9 @@ const FieldInput = ({ field, onChange, value }: { field: FormField; onChange: (v
 
 const DataExtractionForm = memo(() => {
     const { styles } = useStyles();
-    const papers = useResearchStore((s) => s.papers.filter((p) => p.status === 'included'));
+    const allPapers = useResearchStore((s) => s.papers);
+    const screeningDecisions = useResearchStore((s) => s.screeningDecisions);
+    const papers = allPapers.filter((p) => screeningDecisions[p.id]?.decision === 'included');
     const [fields, setFields] = useState<FormField[]>(DEFAULT_FIELDS);
     const [data, setData] = useState<Record<string, ExtractedData>>({});
     const [activeTab, setActiveTab] = useState<'extract' | 'fields' | 'table'>('extract');
@@ -229,7 +231,7 @@ const DataExtractionForm = memo(() => {
             {activeTab === 'fields' && (
                 <Flexbox gap={12}>
                     {fields.map((field) => (
-                        <Flexbox align={'center'} gap={8} horizontal key={field.id} justify={'space-between'}>
+                        <Flexbox align={'center'} gap={8} horizontal justify={'space-between'} key={field.id}>
                             <span style={{ fontSize: 12 }}>{field.label}</span>
                             <Flexbox gap={4} horizontal>
                                 <Tag style={{ fontSize: 9 }}>{field.type}</Tag>
