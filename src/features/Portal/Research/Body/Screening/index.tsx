@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Tag } from '@lobehub/ui';
+import { Select } from 'antd';
 import { createStyles } from 'antd-style';
 import { CheckCircle, ChevronLeft, XCircle } from 'lucide-react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -56,6 +57,22 @@ const useStyles = createStyles(({ css, token }) => ({
       background: ${token.colorSuccessBgHover};
     }
   `,
+    paperAbstract: css`
+    font-size: 11px;
+    line-height: 1.5;
+    color: ${token.colorTextTertiary};
+  `,
+    paperAbstractToggle: css`
+    cursor: pointer;
+
+    font-size: 10px;
+    font-weight: 500;
+    color: ${token.colorPrimary};
+
+    &:hover {
+      text-decoration: underline;
+    }
+  `,
     paperCard: css`
     padding: 12px 16px;
 
@@ -84,22 +101,6 @@ const useStyles = createStyles(({ css, token }) => ({
     font-weight: 600;
     line-height: 1.4;
     color: ${token.colorText};
-  `,
-    paperAbstract: css`
-    font-size: 11px;
-    line-height: 1.5;
-    color: ${token.colorTextTertiary};
-  `,
-    paperAbstractToggle: css`
-    cursor: pointer;
-
-    font-size: 10px;
-    font-weight: 500;
-    color: ${token.colorPrimary};
-
-    &:hover {
-      text-decoration: underline;
-    }
   `,
     statItem: css`
     display: flex;
@@ -171,6 +172,34 @@ const ScreeningPhase = memo(() => {
     const setActivePhase = useResearchStore((s) => s.setActivePhase);
 
     const [expandedAbstracts, setExpandedAbstracts] = useState<Set<string>>(new Set());
+    const [pendingExclude, setPendingExclude] = useState<string | null>(null);
+
+    const EXCLUSION_REASONS = [
+        { label: 'Wrong population', value: 'Wrong population' },
+        { label: 'Wrong intervention', value: 'Wrong intervention' },
+        { label: 'Wrong outcome', value: 'Wrong outcome' },
+        { label: 'Wrong study type', value: 'Wrong study type' },
+        { label: 'Irrelevant topic', value: 'Irrelevant topic' },
+        { label: 'Duplicate', value: 'Duplicate' },
+        { label: 'Not enough data', value: 'Not enough data' },
+        { label: 'Animal study', value: 'Animal study' },
+        { label: 'Non-English', value: 'Non-English' },
+    ];
+
+    const handleExcludeClick = (paperId: string, currentDecision: ScreeningDecision) => {
+        if (currentDecision === 'excluded') {
+            // Toggle back to pending
+            screenPaper(paperId, 'pending');
+            setPendingExclude(null);
+        } else {
+            setPendingExclude(paperId);
+        }
+    };
+
+    const handleReasonSelect = (paperId: string, reason: string) => {
+        screenPaper(paperId, 'excluded', reason);
+        setPendingExclude(null);
+    };
 
     const toggleAbstract = useCallback((paperId: string) => {
         setExpandedAbstracts((prev) => {
@@ -290,20 +319,35 @@ const ScreeningPhase = memo(() => {
                                 <Flexbox gap={4} horizontal style={{ flexShrink: 0 }}>
                                     <span
                                         className={cx(styles.actionBtn, styles.includeBtn)}
-                                        onClick={() => screenPaper(paper.id, decision === 'included' ? 'pending' : 'included')}
+                                        onClick={() => {
+                                            screenPaper(paper.id, decision === 'included' ? 'pending' : 'included');
+                                            setPendingExclude(null);
+                                        }}
                                         style={{ opacity: decision === 'included' ? 1 : 0.6 }}
                                     >
                                         <CheckCircle size={12} />
                                         {decision === 'included' ? '✓' : 'Include'}
                                     </span>
-                                    <span
-                                        className={cx(styles.actionBtn, styles.excludeBtn)}
-                                        onClick={() => screenPaper(paper.id, decision === 'excluded' ? 'pending' : 'excluded')}
-                                        style={{ opacity: decision === 'excluded' ? 1 : 0.6 }}
-                                    >
-                                        <XCircle size={12} />
-                                        {decision === 'excluded' ? '✗' : 'Exclude'}
-                                    </span>
+                                    {pendingExclude === paper.id ? (
+                                        <Select
+                                            autoFocus
+                                            onBlur={() => setPendingExclude(null)}
+                                            onChange={(reason) => handleReasonSelect(paper.id, reason)}
+                                            options={EXCLUSION_REASONS}
+                                            placeholder="Lý do loại..."
+                                            size="small"
+                                            style={{ fontSize: 11, minWidth: 140 }}
+                                        />
+                                    ) : (
+                                        <span
+                                            className={cx(styles.actionBtn, styles.excludeBtn)}
+                                            onClick={() => handleExcludeClick(paper.id, decision)}
+                                            style={{ opacity: decision === 'excluded' ? 1 : 0.6 }}
+                                        >
+                                            <XCircle size={12} />
+                                            {decision === 'excluded' ? '✗' : 'Exclude'}
+                                        </span>
+                                    )}
                                 </Flexbox>
                             </Flexbox>
                             <span className={styles.paperMeta}>{paper.authors}</span>

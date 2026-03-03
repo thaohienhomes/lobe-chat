@@ -58,17 +58,23 @@ interface ResearchState {
 
     autoScreenByCitations: (minCitations: number) => void;
     autoScreenByYearRange: (yearFrom: number, yearTo: number) => void;
+    // Pagination (MED-33)
+    currentPage: number;
     excludeAllPapers: () => void;
     extractPICO: (query: string) => void;
     getExcludedPapers: () => PaperResult[];
     // Getters
     getIncludedPapers: () => PaperResult[];
+
     getPendingPapers: () => PaperResult[];
-
     getScreeningStats: () => { excluded: number; included: number; pending: number; total: number };
-    includeAllPapers: () => void;
 
+    hasMore: boolean;
+    includeAllPapers: () => void;
+    isLoadingMore: boolean;
     isSearching: boolean;
+    loadMoreResults: () => Promise<void>;
+
     papers: PaperResult[];
     pico: PICOQuery | null;
     reset: () => void;
@@ -89,9 +95,9 @@ interface ResearchState {
     // Discovery Actions
     setSearchQuery: (query: string) => void;
     toggleSource: (source: SearchSource) => void;
-    updateScreeningCriteria: (criteria: Partial<ScreeningCriteria>) => void;
-
     totalResults: number;
+
+    updateScreeningCriteria: (criteria: Partial<ScreeningCriteria>) => void;
 }
 
 const defaultCriteria: ScreeningCriteria = {
@@ -105,6 +111,9 @@ const defaultCriteria: ScreeningCriteria = {
 
 const initialState = {
     activePhase: 'discovery' as ResearchPhase,
+    currentPage: 1,
+    hasMore: true,
+    isLoadingMore: false,
     isSearching: false,
     papers: [] as PaperResult[],
     pico: null as PICOQuery | null,
@@ -118,10 +127,10 @@ const initialState = {
 
 // ========== API Services ==========
 
-const searchPubMed = async (query: string, maxResults = 10): Promise<PaperResult[]> => {
+const searchPubMed = async (query: string, maxResults = 10, offset = 0): Promise<PaperResult[]> => {
     try {
         const response = await fetch('/api/plugins/pubmed/search', {
-            body: JSON.stringify({ maxResults, query }),
+            body: JSON.stringify({ maxResults, offset, query }),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
         });
@@ -148,10 +157,10 @@ const searchPubMed = async (query: string, maxResults = 10): Promise<PaperResult
     }
 };
 
-const searchOpenAlex = async (query: string, maxResults = 10): Promise<PaperResult[]> => {
+const searchOpenAlex = async (query: string, maxResults = 10, offset = 0): Promise<PaperResult[]> => {
     try {
         const response = await fetch('/api/plugins/openalex/search', {
-            body: JSON.stringify({ maxResults, query }),
+            body: JSON.stringify({ maxResults, offset, query }),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
         });
@@ -177,10 +186,10 @@ const searchOpenAlex = async (query: string, maxResults = 10): Promise<PaperResu
     }
 };
 
-const searchArXiv = async (query: string, maxResults = 10): Promise<PaperResult[]> => {
+const searchArXiv = async (query: string, maxResults = 10, offset = 0): Promise<PaperResult[]> => {
     try {
         const response = await fetch('/api/plugins/arxiv/search', {
-            body: JSON.stringify({ maxResults, query }),
+            body: JSON.stringify({ maxResults, offset, query }),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
         });
@@ -330,6 +339,54 @@ export const useResearchStore = create<ResearchState>()(
                     set({ screeningDecisions: decisions }, false, 'includeAllPapers');
                 },
 
+                loadMoreResults: async () => {
+                    const { currentPage, isLoadingMore, searchQuery, selectedSources, papers } = get();
+                    if (isLoadingMore || !searchQuery) return;
+
+                    const nextPage = currentPage + 1;
+                    const offset = currentPage * 10;
+                    set({ isLoadingMore: true }, false, 'loadMoreResults/start');
+
+                    try {
+                        const promises: Promise<PaperResult[]>[] = [];
+                        if (selectedSources.includes('PubMed')) promises.push(searchPubMed(searchQuery, 10, offset));
+                        if (selectedSources.includes('OpenAlex')) promises.push(searchOpenAlex(searchQuery, 10, offset));
+                        if (selectedSources.includes('ArXiv')) promises.push(searchArXiv(searchQuery, 10, offset));
+
+                        const results = await Promise.allSettled(promises);
+                        const newPapers: PaperResult[] = [];
+                        const seenKeys = new Set(papers.map((p) => p.doi || p.title));
+
+                        for (const result of results) {
+                            if (result.status === 'fulfilled') {
+                                for (const paper of result.value) {
+                                    const key = paper.doi || paper.title;
+                                    if (!seenKeys.has(key)) {
+                                        seenKeys.add(key);
+                                        newPapers.push(paper);
+                                    }
+                                }
+                            }
+                        }
+
+                        const combined = [...papers, ...newPapers];
+                        combined.sort((a, b) => {
+                            if ((b.citations || 0) !== (a.citations || 0)) return (b.citations || 0) - (a.citations || 0);
+                            return b.year - a.year;
+                        });
+
+                        set({
+                            currentPage: nextPage,
+                            hasMore: newPapers.length >= 10,
+                            isLoadingMore: false,
+                            papers: combined,
+                            totalResults: combined.length,
+                        }, false, 'loadMoreResults/done');
+                    } catch {
+                        set({ isLoadingMore: false }, false, 'loadMoreResults/error');
+                    }
+                },
+
                 reset: () => {
                     set(initialState, false, 'reset');
                 },
@@ -350,7 +407,7 @@ export const useResearchStore = create<ResearchState>()(
 
                 searchPapers: async (query) => {
                     const { selectedSources } = get();
-                    set({ isSearching: true, searchError: null, searchQuery: query }, false, 'searchPapers/start');
+                    set({ currentPage: 1, hasMore: true, isSearching: true, searchError: null, searchQuery: query }, false, 'searchPapers/start');
 
                     try {
                         const promises: Promise<PaperResult[]>[] = [];
@@ -379,7 +436,11 @@ export const useResearchStore = create<ResearchState>()(
                             return b.year - a.year;
                         });
 
+                        // If any source returned 10 results (max per page), there may be more
+                        const hasMore = allPapers.length >= 10;
+
                         set({
+                            hasMore,
                             isSearching: false,
                             papers: allPapers,
                             screeningDecisions: {},

@@ -68,6 +68,22 @@ const useStyles = createStyles(({ css, token }) => ({
     font-size: 13px;
     color: ${token.colorText};
   `,
+    resultAbstract: css`
+    font-size: 12px;
+    line-height: 1.5;
+    color: ${token.colorTextTertiary};
+  `,
+    resultAbstractToggle: css`
+    cursor: pointer;
+
+    font-size: 11px;
+    font-weight: 500;
+    color: ${token.colorPrimary};
+
+    &:hover {
+      text-decoration: underline;
+    }
+  `,
     resultCard: css`
     cursor: pointer;
 
@@ -87,22 +103,6 @@ const useStyles = createStyles(({ css, token }) => ({
     resultMeta: css`
     font-size: 12px;
     color: ${token.colorTextSecondary};
-  `,
-    resultAbstract: css`
-    font-size: 12px;
-    line-height: 1.5;
-    color: ${token.colorTextTertiary};
-  `,
-    resultAbstractToggle: css`
-    cursor: pointer;
-
-    font-size: 11px;
-    font-weight: 500;
-    color: ${token.colorPrimary};
-
-    &:hover {
-      text-decoration: underline;
-    }
   `,
     resultTitle: css`
     font-size: 14px;
@@ -135,6 +135,9 @@ const DiscoveryPhase = memo(() => {
     const searchPapers = useResearchStore((s) => s.searchPapers);
     const extractPICO = useResearchStore((s) => s.extractPICO);
     const setActivePhase = useResearchStore((s) => s.setActivePhase);
+    const loadMoreResults = useResearchStore((s) => s.loadMoreResults);
+    const hasMore = useResearchStore((s) => s.hasMore);
+    const isLoadingMore = useResearchStore((s) => s.isLoadingMore);
 
     const [expandedAbstracts, setExpandedAbstracts] = useState<Set<string>>(new Set());
 
@@ -294,6 +297,18 @@ const DiscoveryPhase = memo(() => {
                             </Flexbox>
                         </div>
                     ))}
+                    {/* Load More */}
+                    {hasMore && (
+                        <Flexbox align={'center'} justify={'center'} style={{ paddingTop: 4 }}>
+                            <Button
+                                loading={isLoadingMore}
+                                onClick={loadMoreResults}
+                                size={'small'}
+                            >
+                                {isLoadingMore ? 'Đang tải thêm...' : `⬇ Tải thêm papers`}
+                            </Button>
+                        </Flexbox>
+                    )}
                     {/* Proceed to Screening */}
                     <Flexbox align={'center'} justify={'center'} style={{ paddingTop: 8 }}>
                         <Button
