@@ -18,7 +18,10 @@ import ImpactFactor from './ImpactFactor';
 import InteractiveSimulators from './InteractiveSimulators';
 import JournalRecommender from './JournalRecommender';
 import KnowledgeBase from './KnowledgeBase';
+import ManuscriptTimeline from './ManuscriptTimeline';
 import LearningModules from './LearningModules';
+import PeerReviewSim from './PeerReviewSim';
+import PowerCalculator from './PowerCalculator';
 import PrismaDiagram from './PrismaDiagram';
 import ProsperoHelper from './ProsperoHelper';
 import RiskOfBias from './RiskOfBias';
@@ -441,6 +444,21 @@ const AnalysisPhase = memo(() => {
                         children: <JournalRecommender />,
                         key: 'journals',
                         label: '📚 Journal Recommender',
+                    },
+                    {
+                        children: <ManuscriptTimeline />,
+                        key: 'timeline',
+                        label: '📅 Timeline',
+                    },
+                    {
+                        children: <PowerCalculator />,
+                        key: 'power',
+                        label: '🔬 Power Calculator',
+                    },
+                    {
+                        children: <PeerReviewSim />,
+                        key: 'peerreview',
+                        label: '🎭 Peer Review',
                     },
                 ]}
                 size={'small'}
