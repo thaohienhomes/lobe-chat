@@ -11,6 +11,7 @@ import DiscoveryPhase from './Discovery';
 import PublishingPhase from './Publishing';
 import ScreeningPhase from './Screening';
 import WritingPhase from './Writing';
+import ResearchFeedback from '../Feedback';
 
 const useStyles = createStyles(({ css, token }) => ({
   container: css`
@@ -61,11 +62,11 @@ const useStyles = createStyles(({ css, token }) => ({
 }));
 
 const PHASES: { key: ResearchPhase; label: string }[] = [
-  { key: 'discovery', label: '🔍 Discovery' },
-  { key: 'screening', label: '📋 Screening' },
-  { key: 'analysis', label: '📊 Analysis' },
-  { key: 'writing', label: '✍️ Writing' },
-  { key: 'publishing', label: '📤 Publishing' },
+  { key: 'discovery', label: '🔍 Tìm kiếm' },
+  { key: 'screening', label: '📋 Sàng lọc' },
+  { key: 'analysis', label: '📊 Phân tích' },
+  { key: 'writing', label: '✍️ Soạn thảo' },
+  { key: 'publishing', label: '📤 Xuất bản' },
 ];
 
 const ResearchBody = memo(() => {
@@ -97,6 +98,9 @@ const ResearchBody = memo(() => {
           </span>
         ))}
       </div>
+
+      {/* Feedback widget — shown on discovery phase */}
+      {activePhase === 'discovery' && <ResearchFeedback featureName="Research Mode" />}
 
       {/* Active Phase Content */}
       {activePhase === 'discovery' && <DiscoveryPhase />}

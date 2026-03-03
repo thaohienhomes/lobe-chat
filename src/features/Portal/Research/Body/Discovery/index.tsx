@@ -202,6 +202,7 @@ const DiscoveryPhase = memo(() => {
                 const typeMap: Record<string, string[]> = {
                     cohort: ['cohort', 'prospective', 'retrospective', 'longitudinal'],
                     cr: ['case report', 'case series'],
+                    cross: ['cross-sectional', 'cross sectional', 'prevalence study', 'survey study'],
                     meta: ['meta-analysis', 'meta analysis', 'systematic review and meta'],
                     rct: ['randomized', 'randomised', 'rct', 'clinical trial', 'controlled trial'],
                     sr: ['systematic review', 'scoping review'],
@@ -308,11 +309,12 @@ const DiscoveryPhase = memo(() => {
                                         allowClear
                                         onChange={(v) => setStudyType(v ?? '')}
                                         options={[
-                                            { label: 'Thử nghiệm lâm sàng ngẫu nhiên (RCT)', value: 'rct' },
+                                            { label: 'Thử nghiệm lâm sàng ngẫu nhiên có đối chứng (RCT)', value: 'rct' },
                                             { label: 'Tổng quan hệ thống (Systematic Review)', value: 'sr' },
-                                            { label: 'Meta-phân tích (Meta-analysis)', value: 'meta' },
-                                            { label: 'Nghiên cứu thuần tập (Cohort)', value: 'cohort' },
-                                            { label: 'Ca lâm sàng (Case Report)', value: 'cr' },
+                                            { label: 'Phân tích tổng hợp (Meta-analysis)', value: 'meta' },
+                                            { label: 'Nghiên cứu thuần tập (Cohort Study)', value: 'cohort' },
+                                            { label: 'Nghiên cứu cắt ngang (Cross-sectional)', value: 'cross' },
+                                            { label: 'Báo cáo ca bệnh (Case Report/Series)', value: 'cr' },
                                         ]}
                                         placeholder="Tất cả loại"
                                         size={'small'}
