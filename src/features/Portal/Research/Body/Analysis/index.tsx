@@ -9,6 +9,8 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type PaperResult, useResearchStore } from '@/store/research';
 
+import PrismaDiagram from './PrismaDiagram';
+
 // GRADE levels
 type GradeLevel = 'high' | 'moderate' | 'low' | 'very_low';
 
@@ -88,6 +90,11 @@ const useStyles = createStyles(({ css, token }) => ({
       border-bottom: none;
     }
   `,
+    sectionTitle: css`
+    font-size: 13px;
+    font-weight: 600;
+    color: ${token.colorTextSecondary};
+  `,
     studyTitle: css`
     overflow: hidden;
 
@@ -98,10 +105,12 @@ const useStyles = createStyles(({ css, token }) => ({
     text-overflow: ellipsis;
     white-space: nowrap;
   `,
-    sectionTitle: css`
-    font-size: 13px;
-    font-weight: 600;
-    color: ${token.colorTextSecondary};
+    summaryCard: css`
+    padding: 16px;
+
+    background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorFillQuaternary} 100%);
+    border: 1px solid ${token.colorPrimaryBorder};
+    border-radius: ${token.borderRadiusLG}px;
   `,
     tableHeader: css`
     display: grid;
@@ -117,13 +126,6 @@ const useStyles = createStyles(({ css, token }) => ({
 
     background: ${token.colorFillQuaternary};
     border-bottom: 1px solid ${token.colorBorderSecondary};
-  `,
-    summaryCard: css`
-    padding: 16px;
-
-    background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorFillQuaternary} 100%);
-    border: 1px solid ${token.colorPrimaryBorder};
-    border-radius: ${token.borderRadiusLG}px;
   `,
     tableRow: css`
     display: grid;
@@ -259,6 +261,9 @@ const AnalysisPhase = memo(() => {
                     </Flexbox>
                 </Flexbox>
             </div>
+
+            {/* PRISMA 2020 Flowchart */}
+            <PrismaDiagram />
 
             {/* Study Type Distribution */}
             <Flexbox gap={8}>
