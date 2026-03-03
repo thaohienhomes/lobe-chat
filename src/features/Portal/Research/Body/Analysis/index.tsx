@@ -9,11 +9,14 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type PaperResult, useResearchStore } from '@/store/research';
 
+import CitationNetwork from './CitationNetwork';
 import ConsortStrobe from './ConsortStrobe';
 import DataAnalyzer from './DataAnalyzer';
 import DoiResolver from './DoiResolver';
 import ForestPlot from './ForestPlot';
+import ImpactFactor from './ImpactFactor';
 import InteractiveSimulators from './InteractiveSimulators';
+import JournalRecommender from './JournalRecommender';
 import KnowledgeBase from './KnowledgeBase';
 import LearningModules from './LearningModules';
 import PrismaDiagram from './PrismaDiagram';
@@ -423,6 +426,21 @@ const AnalysisPhase = memo(() => {
                         children: <ProsperoHelper />,
                         key: 'prospero',
                         label: '📝 PROSPERO',
+                    },
+                    {
+                        children: <CitationNetwork />,
+                        key: 'citationnet',
+                        label: '🕸️ Citation Network',
+                    },
+                    {
+                        children: <ImpactFactor />,
+                        key: 'impact',
+                        label: '📊 Impact Factor',
+                    },
+                    {
+                        children: <JournalRecommender />,
+                        key: 'journals',
+                        label: '📚 Journal Recommender',
                     },
                 ]}
                 size={'small'}
