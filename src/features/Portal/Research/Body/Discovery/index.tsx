@@ -1,10 +1,10 @@
 'use client';
 
 import { Button, Input, Tag } from '@lobehub/ui';
-import { Spin } from 'antd';
+import { InputNumber, Select, Slider, Spin } from 'antd';
 import { createStyles } from 'antd-style';
-import { ArrowRight, ExternalLink, Search } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { ArrowRight, ExternalLink, Search, SlidersHorizontal } from 'lucide-react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { type SearchSource, useResearchStore } from '@/store/research';
@@ -33,6 +33,19 @@ const useStyles = createStyles(({ css, token }) => ({
 
     background: ${token.colorErrorBg};
     border: 1px solid ${token.colorErrorBorder};
+    border-radius: ${token.borderRadiusLG}px;
+  `,
+    filterLabel: css`
+    font-size: 11px;
+    font-weight: 600;
+    color: ${token.colorTextTertiary};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  `,
+    filterPanel: css`
+    padding: 12px 14px;
+    background: ${token.colorFillQuaternary};
+    border: 1px solid ${token.colorBorderSecondary};
     border-radius: ${token.borderRadiusLG}px;
   `,
     openAccess: css`
@@ -162,6 +175,51 @@ const DiscoveryPhase = memo(() => {
         if (url) window.open(url, '_blank');
     };
 
+    const currentYear = new Date().getFullYear();
+
+    // ── local state ──────────────────────────────────────────
+    const [showFilters, setShowFilters] = useState(false);
+    const [yearFrom, setYearFrom] = useState<number>(2000);
+    const [yearTo, setYearTo] = useState<number>(currentYear);
+    const [minCitations, setMinCitations] = useState<number>(0);
+    const [studyType, setStudyType] = useState<string>('');
+
+    // Active filter count badge
+    const activeFilters = [
+        yearFrom > 2000,
+        yearTo < currentYear,
+        minCitations > 0,
+        studyType !== '',
+    ].filter(Boolean).length;
+
+    // ── filtered papers (client-side) ────────────────────────
+    const filteredPapers = useMemo(() => {
+        return papers.filter((p) => {
+            if (p.year && (p.year < yearFrom || p.year > yearTo)) return false;
+            if (minCitations > 0 && (p.citations ?? 0) < minCitations) return false;
+            if (studyType) {
+                const haystack = `${p.title} ${p.abstract ?? ''}`.toLowerCase();
+                const typeMap: Record<string, string[]> = {
+                    cohort: ['cohort', 'prospective', 'retrospective', 'longitudinal'],
+                    cr: ['case report', 'case series'],
+                    meta: ['meta-analysis', 'meta analysis', 'systematic review and meta'],
+                    rct: ['randomized', 'randomised', 'rct', 'clinical trial', 'controlled trial'],
+                    sr: ['systematic review', 'scoping review'],
+                };
+                const keywords = typeMap[studyType] ?? [];
+                if (!keywords.some((kw) => haystack.includes(kw))) return false;
+            }
+            return true;
+        });
+    }, [papers, yearFrom, yearTo, minCitations, studyType]);
+
+    const resetFilters = () => {
+        setYearFrom(2000);
+        setYearTo(currentYear);
+        setMinCitations(0);
+        setStudyType('');
+    };
+
     return (
         <Flexbox className={styles.container} gap={16}>
             {/* Search Input */}
@@ -188,15 +246,89 @@ const DiscoveryPhase = memo(() => {
                             </Tag>
                         ))}
                     </Flexbox>
-                    <Button
-                        loading={isSearching}
-                        onClick={handleSearch}
-                        size={'small'}
-                        type={'primary'}
-                    >
-                        Tìm kiếm
-                    </Button>
+                    <Flexbox gap={6} horizontal>
+                        <Button
+                            icon={<SlidersHorizontal size={13} />}
+                            onClick={() => setShowFilters((v) => !v)}
+                            size={'small'}
+                            type={showFilters ? 'primary' : 'default'}
+                        >
+                            Bộ lọc{activeFilters > 0 ? ` (${activeFilters})` : ''}
+                        </Button>
+                        <Button
+                            loading={isSearching}
+                            onClick={handleSearch}
+                            size={'small'}
+                            type={'primary'}
+                        >
+                            Tìm kiếm
+                        </Button>
+                    </Flexbox>
                 </Flexbox>
+
+                {/* Filter Panel */}
+                {showFilters && (
+                    <div className={styles.filterPanel}>
+                        <Flexbox gap={12}>
+                            {/* Year range */}
+                            <Flexbox gap={4}>
+                                <Flexbox align={'center'} horizontal justify={'space-between'}>
+                                    <span className={styles.filterLabel}>Năm công bố</span>
+                                    <span style={{ fontSize: 11, opacity: 0.6 }}>{yearFrom} – {yearTo}</span>
+                                </Flexbox>
+                                <Slider
+                                    max={currentYear}
+                                    min={1990}
+                                    onChange={(val: number[]) => { setYearFrom(val[0]); setYearTo(val[1]); }}
+                                    range
+                                    style={{ margin: '0 4px' }}
+                                    value={[yearFrom, yearTo]}
+                                />
+                            </Flexbox>
+
+                            <Flexbox gap={10} horizontal wrap={'wrap'}>
+                                {/* Min citations */}
+                                <Flexbox gap={4} style={{ minWidth: 140 }}>
+                                    <span className={styles.filterLabel}>Trích dẫn tối thiểu</span>
+                                    <InputNumber
+                                        min={0}
+                                        onChange={(v) => setMinCitations(v ?? 0)}
+                                        placeholder="0"
+                                        size={'small'}
+                                        step={10}
+                                        style={{ width: '100%' }}
+                                        value={minCitations}
+                                    />
+                                </Flexbox>
+
+                                {/* Study type */}
+                                <Flexbox gap={4} style={{ flex: 1, minWidth: 160 }}>
+                                    <span className={styles.filterLabel}>Loại nghiên cứu</span>
+                                    <Select
+                                        allowClear
+                                        onChange={(v) => setStudyType(v ?? '')}
+                                        options={[
+                                            { label: 'Thử nghiệm lâm sàng ngẫu nhiên (RCT)', value: 'rct' },
+                                            { label: 'Tổng quan hệ thống (Systematic Review)', value: 'sr' },
+                                            { label: 'Meta-phân tích (Meta-analysis)', value: 'meta' },
+                                            { label: 'Nghiên cứu thuần tập (Cohort)', value: 'cohort' },
+                                            { label: 'Ca lâm sàng (Case Report)', value: 'cr' },
+                                        ]}
+                                        placeholder="Tất cả loại"
+                                        size={'small'}
+                                        value={studyType || undefined}
+                                    />
+                                </Flexbox>
+                            </Flexbox>
+
+                            {activeFilters > 0 && (
+                                <Button onClick={resetFilters} size={'small'} style={{ alignSelf: 'flex-start', padding: 0 }} type={'link'}>
+                                    ✕ Xóa bộ lọc
+                                </Button>
+                            )}
+                        </Flexbox>
+                    </div>
+                )}
             </Flexbox>
 
             {/* Loading state */}
@@ -234,10 +366,16 @@ const DiscoveryPhase = memo(() => {
             {/* Search Results */}
             {papers.length > 0 && !isSearching && (
                 <Flexbox gap={8}>
-                    <span className={styles.sectionTitle}>
-                        📄 Kết quả tìm kiếm ({totalResults} papers)
-                    </span>
-                    {papers.map((paper) => (
+                    <Flexbox align={'center'} horizontal justify={'space-between'}>
+                        <span className={styles.sectionTitle}>
+                            📄 Kết quả tìm kiếm ({filteredPapers.length}
+                            {filteredPapers.length !== totalResults ? ` / ${totalResults}` : ''} papers)
+                        </span>
+                        {filteredPapers.length !== totalResults && (
+                            <span style={{ fontSize: 11, opacity: 0.6 }}>Đang lọc — {totalResults - filteredPapers.length} ẩn</span>
+                        )}
+                    </Flexbox>
+                    {filteredPapers.map((paper) => (
                         <div
                             className={styles.resultCard}
                             key={paper.id}
