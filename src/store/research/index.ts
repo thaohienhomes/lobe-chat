@@ -56,28 +56,30 @@ interface ResearchState {
     // Phase tracking
     activePhase: ResearchPhase;
 
+    addPaper: (paper: PaperResult) => void;
+    addPapers: (papers: PaperResult[]) => void;
     autoScreenByCitations: (minCitations: number) => void;
     autoScreenByYearRange: (yearFrom: number, yearTo: number) => void;
     // Pagination (MED-33)
     currentPage: number;
     excludeAllPapers: () => void;
     extractPICO: (query: string) => void;
+
     getExcludedPapers: () => PaperResult[];
     // Getters
     getIncludedPapers: () => PaperResult[];
 
     getPendingPapers: () => PaperResult[];
-    getScreeningStats: () => { excluded: number; included: number; pending: number; total: number };
-
-    hasMore: boolean;
     includeAllPapers: () => void;
     isLoadingMore: boolean;
     isSearching: boolean;
     loadMoreResults: () => Promise<void>;
 
     papers: PaperResult[];
-    addPaper: (paper: PaperResult) => void;
+    getScreeningStats: () => { excluded: number; included: number; pending: number; total: number };
+    hasMore: boolean;
     pico: PICOQuery | null;
+    removePapers: (ids: string[]) => void;
     reset: () => void;
     resetScreening: () => void;
 
@@ -307,6 +309,37 @@ export const useResearchStore = create<ResearchState>()(
             (set, get) => ({
                 ...initialState,
 
+                addPaper: (paper: PaperResult) => {
+                    const { papers, screeningDecisions } = get();
+                    // Avoid duplicates by id
+                    if (papers.some((p) => p.id === paper.id)) return;
+                    set({
+                        papers: [paper, ...papers],
+                        // Auto-include the manually added paper
+                        screeningDecisions: {
+                            ...screeningDecisions,
+                            [paper.id]: { decision: 'included', paperId: paper.id, reason: 'Manually added via DOI resolver' },
+                        },
+                        totalResults: papers.length + 1,
+                    }, false, 'addPaper');
+                },
+
+                addPapers: (toAdd: PaperResult[]) => {
+                    const { papers, screeningDecisions } = get();
+                    const existingIds = new Set(papers.map((p) => p.id));
+                    const newPapers = toAdd.filter((p) => !existingIds.has(p.id));
+                    if (newPapers.length === 0) return;
+                    const newDecisions = { ...screeningDecisions };
+                    for (const p of newPapers) {
+                        newDecisions[p.id] = { decision: 'pending', paperId: p.id, reason: 'Imported via RIS/BibTeX' };
+                    }
+                    set({
+                        papers: [...newPapers, ...papers],
+                        screeningDecisions: newDecisions,
+                        totalResults: papers.length + newPapers.length,
+                    }, false, 'addPapers');
+                },
+
                 autoScreenByCitations: (minCitations) => {
                     const { papers, screeningDecisions } = get();
                     const updated = { ...screeningDecisions };
@@ -336,21 +369,6 @@ export const useResearchStore = create<ResearchState>()(
                         decisions[paper.id] = { decision: 'excluded', paperId: paper.id };
                     }
                     set({ screeningDecisions: decisions }, false, 'excludeAllPapers');
-                },
-
-                addPaper: (paper: PaperResult) => {
-                    const { papers, screeningDecisions } = get();
-                    // Avoid duplicates by id
-                    if (papers.some((p) => p.id === paper.id)) return;
-                    set({
-                        papers: [paper, ...papers],
-                        // Auto-include the manually added paper
-                        screeningDecisions: {
-                            ...screeningDecisions,
-                            [paper.id]: { decision: 'included', paperId: paper.id, reason: 'Manually added via DOI resolver' },
-                        },
-                        totalResults: papers.length + 1,
-                    }, false, 'addPaper');
                 },
 
                 extractPICO: (query) => {
@@ -441,6 +459,19 @@ export const useResearchStore = create<ResearchState>()(
                     } catch {
                         set({ isLoadingMore: false }, false, 'loadMoreResults/error');
                     }
+                },
+
+                removePapers: (ids: string[]) => {
+                    const { papers, screeningDecisions } = get();
+                    const removeSet = new Set(ids);
+                    const remaining = papers.filter((p) => !removeSet.has(p.id));
+                    const newDecisions = { ...screeningDecisions };
+                    for (const id of ids) delete newDecisions[id];
+                    set({
+                        papers: remaining,
+                        screeningDecisions: newDecisions,
+                        totalResults: remaining.length,
+                    }, false, 'removePapers');
                 },
 
                 reset: () => {

@@ -26,6 +26,9 @@ import PrismaDiagram from './PrismaDiagram';
 import ProsperoHelper from './ProsperoHelper';
 import RiskOfBias from './RiskOfBias';
 import StatTestAdvisor from './StatTestAdvisor';
+import DeduplicationEngine from './DeduplicationEngine';
+import GradeSoF from './GradeSoF';
+import RisImporter from './RisImporter';
 
 // GRADE levels
 type GradeLevel = 'high' | 'moderate' | 'low' | 'very_low';
@@ -459,6 +462,21 @@ const AnalysisPhase = memo(() => {
                         children: <PeerReviewSim />,
                         key: 'peerreview',
                         label: '🎭 Peer Review',
+                    },
+                    {
+                        children: <RisImporter />,
+                        key: 'import',
+                        label: '📎 Import Refs',
+                    },
+                    {
+                        children: <DeduplicationEngine />,
+                        key: 'dedup',
+                        label: '♻️ Dedup',
+                    },
+                    {
+                        children: <GradeSoF />,
+                        key: 'grade',
+                        label: '🏆 GRADE SoF',
                     },
                 ]}
                 size={'small'}
