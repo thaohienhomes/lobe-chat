@@ -43,13 +43,15 @@ export async function POST(request: NextRequest) {
             intervention,
             location,
             phase,
-            status = 'RECRUITING',
-            maxResults = 5,
+            query,       // Generic query for Research Mode integration
+            offset = 0,  // Pagination offset
+            status = 'ANY',
+            maxResults = 10,
         } = body;
 
-        if (!condition && !intervention) {
+        if (!condition && !intervention && !query) {
             return NextResponse.json(
-                { error: 'At least one of "condition" or "intervention" is required' },
+                { error: 'At least one of "query", "condition" or "intervention" is required' },
                 { status: 400 },
             );
         }
@@ -58,13 +60,17 @@ export async function POST(request: NextRequest) {
         const params = new URLSearchParams();
         params.set('format', 'json');
         params.set('pageSize', String(Math.min(Math.max(1, maxResults), 20)));
+        if (offset > 0) params.set('pageToken', String(Math.floor(offset / maxResults) + 1));
+
 
         // Build condition/intervention queries
         if (condition) params.set('query.cond', condition);
         if (intervention) params.set('query.intr', intervention);
+        if (query && !condition) params.set('query.cond', query); // Generic query → condition search
+        if (query && !intervention) params.set('query.intr', query); // Also search intervention
         if (location) params.set('query.locn', location);
 
-        // Status filter
+        // Status filter — for Research Mode we want all statuses
         if (status && status !== 'ANY') {
             params.set('filter.overallStatus', status);
         }

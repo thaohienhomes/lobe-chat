@@ -121,7 +121,7 @@ const initialState = {
     screeningDecisions: {} as Record<string, ScreeningEntry>,
     searchError: null as string | null,
     searchQuery: '',
-    selectedSources: ['PubMed', 'OpenAlex', 'ArXiv'] as SearchSource[],
+    selectedSources: ['PubMed', 'OpenAlex', 'ArXiv', 'ClinicalTrials.gov'] as SearchSource[],
     totalResults: 0,
 };
 
@@ -212,6 +212,45 @@ const searchArXiv = async (query: string, maxResults = 10, offset = 0): Promise<
         }));
     } catch (error) {
         console.error('[Research] ArXiv search error:', error);
+        return [];
+    }
+};
+
+// ========== ClinicalTrials.gov ==========
+
+const searchClinicalTrials = async (query: string, maxResults = 10, offset = 0): Promise<PaperResult[]> => {
+    try {
+        const response = await fetch('/api/plugins/clinical-trials/search', {
+            body: JSON.stringify({ maxResults, offset, query }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+        if (!response.ok) throw new Error('ClinicalTrials.gov search failed');
+
+        const data = await response.json();
+        const trials = data.trials || [];
+        return trials.map((t: any) => ({
+            abstract: [
+                t.status ? `Status: ${t.status}` : '',
+                t.phase && t.phase !== 'N/A' ? `Phase: ${t.phase}` : '',
+                t.enrollmentCount ? `Enrollment: ${t.enrollmentCount} participants` : '',
+                t.conditions?.length ? `Conditions: ${t.conditions.slice(0, 3).join(', ')}` : '',
+                t.interventions?.length ? `Interventions: ${t.interventions.slice(0, 3).join(', ')}` : '',
+                t.eligibility ? t.eligibility : '',
+            ].filter(Boolean).join(' | '),
+            authors: t.sponsor || 'Unknown sponsor',
+            citations: t.enrollmentCount,
+            doi: undefined,
+            doiUrl: t.url,
+            id: `ct-${t.nctId}`,
+            journal: `ClinicalTrials.gov · ${t.nctId}`,
+            pubmedUrl: t.url,
+            source: 'ClinicalTrials.gov' as const,
+            title: t.title,
+            year: t.startDate ? new Date(t.startDate).getFullYear() : new Date().getFullYear(),
+        }));
+    } catch (error) {
+        console.error('[Research] ClinicalTrials.gov search error:', error);
         return [];
     }
 };
@@ -352,6 +391,7 @@ export const useResearchStore = create<ResearchState>()(
                         if (selectedSources.includes('PubMed')) promises.push(searchPubMed(searchQuery, 10, offset));
                         if (selectedSources.includes('OpenAlex')) promises.push(searchOpenAlex(searchQuery, 10, offset));
                         if (selectedSources.includes('ArXiv')) promises.push(searchArXiv(searchQuery, 10, offset));
+                        if (selectedSources.includes('ClinicalTrials.gov')) promises.push(searchClinicalTrials(searchQuery, 10, offset));
 
                         const results = await Promise.allSettled(promises);
                         const newPapers: PaperResult[] = [];
@@ -414,6 +454,7 @@ export const useResearchStore = create<ResearchState>()(
                         if (selectedSources.includes('PubMed')) promises.push(searchPubMed(query));
                         if (selectedSources.includes('OpenAlex')) promises.push(searchOpenAlex(query));
                         if (selectedSources.includes('ArXiv')) promises.push(searchArXiv(query));
+                        if (selectedSources.includes('ClinicalTrials.gov')) promises.push(searchClinicalTrials(query));
 
                         const results = await Promise.allSettled(promises);
                         const allPapers: PaperResult[] = [];

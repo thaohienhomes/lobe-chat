@@ -117,7 +117,7 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 }));
 
-const SOURCES: SearchSource[] = ['PubMed', 'OpenAlex', 'ArXiv'];
+const SOURCES: SearchSource[] = ['PubMed', 'OpenAlex', 'ArXiv', 'ClinicalTrials.gov'];
 
 const DiscoveryPhase = memo(() => {
     const { styles } = useStyles();
@@ -276,7 +276,12 @@ const DiscoveryPhase = memo(() => {
                                 )}
                                 <Flexbox align={'center'} gap={8} horizontal wrap={'wrap'}>
                                     <Tag
-                                        color={paper.source === 'PubMed' ? 'blue' : paper.source === 'ArXiv' ? 'purple' : 'green'}
+                                        color={
+                                            paper.source === 'PubMed' ? 'blue'
+                                                : paper.source === 'ArXiv' ? 'purple'
+                                                    : paper.source === 'ClinicalTrials.gov' ? 'cyan'
+                                                        : 'green'
+                                        }
                                         style={{ fontSize: 11 }}
                                     >
                                         {paper.source}
