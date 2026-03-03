@@ -9,6 +9,7 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type PaperResult, useResearchStore } from '@/store/research';
 
+import InteractiveSimulators from './InteractiveSimulators';
 import PrismaDiagram from './PrismaDiagram';
 import StatTestAdvisor from './StatTestAdvisor';
 
@@ -369,6 +370,11 @@ const AnalysisPhase = memo(() => {
                         children: <StatTestAdvisor />,
                         key: 'statadvisor',
                         label: '🧮 Tư vấn Kiểm định',
+                    },
+                    {
+                        children: <InteractiveSimulators />,
+                        key: 'simulators',
+                        label: '📈 Simulators',
                     },
                 ]}
                 size={'small'}
