@@ -29,6 +29,11 @@ import StatTestAdvisor from './StatTestAdvisor';
 import DeduplicationEngine from './DeduplicationEngine';
 import GradeSoF from './GradeSoF';
 import RisImporter from './RisImporter';
+import DataExtractionForm from './DataExtractionForm';
+import EvidenceSummarizer from './EvidenceSummarizer';
+import NntCalculator from './NntCalculator';
+import PublicationBias from './PublicationBias';
+import SubgroupAnalysis from './SubgroupAnalysis';
 
 // GRADE levels
 type GradeLevel = 'high' | 'moderate' | 'low' | 'very_low';
@@ -477,6 +482,31 @@ const AnalysisPhase = memo(() => {
                         children: <GradeSoF />,
                         key: 'grade',
                         label: '🏆 GRADE SoF',
+                    },
+                    {
+                        children: <NntCalculator />,
+                        key: 'nnt',
+                        label: '🏥 NNT/NNH',
+                    },
+                    {
+                        children: <SubgroupAnalysis />,
+                        key: 'subgroup',
+                        label: '📊 Subgroup',
+                    },
+                    {
+                        children: <PublicationBias />,
+                        key: 'pubbias',
+                        label: '🔎 Pub Bias',
+                    },
+                    {
+                        children: <DataExtractionForm />,
+                        key: 'extraction',
+                        label: '📋 Data Extract',
+                    },
+                    {
+                        children: <EvidenceSummarizer />,
+                        key: 'aisummary',
+                        label: '🧠 AI Synthesis',
                     },
                 ]}
                 size={'small'}
