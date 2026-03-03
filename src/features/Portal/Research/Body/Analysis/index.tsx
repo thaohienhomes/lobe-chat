@@ -34,6 +34,11 @@ import EvidenceSummarizer from './EvidenceSummarizer';
 import NntCalculator from './NntCalculator';
 import PublicationBias from './PublicationBias';
 import SubgroupAnalysis from './SubgroupAnalysis';
+import AiRobFiller from './AiRobFiller';
+import BibExport from './BibExport';
+import KappaCalculator from './KappaCalculator';
+import MetaRegression from './MetaRegression';
+import RevManExport from './RevManExport';
 
 // GRADE levels
 type GradeLevel = 'high' | 'moderate' | 'low' | 'very_low';
@@ -507,6 +512,31 @@ const AnalysisPhase = memo(() => {
                         children: <EvidenceSummarizer />,
                         key: 'aisummary',
                         label: '🧠 AI Synthesis',
+                    },
+                    {
+                        children: <RevManExport />,
+                        key: 'revman',
+                        label: '📦 RevMan',
+                    },
+                    {
+                        children: <AiRobFiller />,
+                        key: 'airob',
+                        label: '🤖 AI RoB',
+                    },
+                    {
+                        children: <MetaRegression />,
+                        key: 'metareg',
+                        label: '📈 Meta-Reg',
+                    },
+                    {
+                        children: <BibExport />,
+                        key: 'bibexport',
+                        label: '📤 BibTeX/RIS',
+                    },
+                    {
+                        children: <KappaCalculator />,
+                        key: 'kappa',
+                        label: '👥 Kappa',
                     },
                 ]}
                 size={'small'}
