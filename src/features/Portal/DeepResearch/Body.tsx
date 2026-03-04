@@ -639,10 +639,9 @@ ${article.replaceAll('\n', '<br>\n')}
             <Flexbox align={'center'} gap={8} horizontal>
                 <BookOpen size={22} />
                 <span className={styles.header}>Deep Research</span>
-                <Tag color="purple" style={{ fontSize: 10, marginLeft: 4 }}>STORM-inspired</Tag>
             </Flexbox>
             <span className={styles.subtitle}>
-                Tạo bài tổng quan y văn tự động với citations — Lấy cảm hứng từ Stanford STORM
+                Tạo bài tổng quan y văn tự động với citations
             </span>
 
             {/* Phase Bar */}
@@ -690,7 +689,7 @@ ${article.replaceAll('\n', '<br>\n')}
                             onClick={handleStart}
                             type="primary"
                         >
-                            \uD83D\uDE80 B\u1EAFt \u0111\u1EA7u nghi\u00EAn c\u1EE9u
+                            {'🚀 Bắt đầu nghiên cứu'}
                         </Button>
                         <Tooltip title={showHistory ? '\u1EA8n l\u1ECBch s\u1EED' : 'L\u1ECBch s\u1EED nghi\u00EAn c\u1EE9u'}>
                             <Button
@@ -704,9 +703,9 @@ ${article.replaceAll('\n', '<br>\n')}
                     {/* History panel */}
                     {showHistory && (
                         <Flexbox gap={4} style={{ maxHeight: 200, overflowY: 'auto' }}>
-                            <span style={{ fontSize: 12, fontWeight: 600 }}>\uD83D\uDCCB L\u1ECBch s\u1EED nghi\u00EAn c\u1EE9u ({history.length}):</span>
+                            <span style={{ fontSize: 12, fontWeight: 600 }}>{'📋 Lịch sử nghiên cứu'} ({history.length}):</span>
                             {history.length === 0 ? (
-                                <span style={{ color: '#888', fontSize: 12 }}>Ch\u01B0a c\u00F3 nghi\u00EAn c\u1EE9u n\u00E0o</span>
+                                <span style={{ color: '#888', fontSize: 12 }}>Chưa có nghiên cứu nào</span>
                             ) : (
                                 history.map((item) => (
                                     <div className={styles.historyItem} key={item.id}>
@@ -769,10 +768,10 @@ ${article.replaceAll('\n', '<br>\n')}
             {(phase === 'research' || phase === 'outline' || phase === 'article' || phase === 'done') && (
                 <Flexbox gap={8}>
                     <Flexbox align={'center'} gap={8} horizontal justify={'space-between'}>
-                        <span style={{ fontWeight: 600 }}>\uD83E\uDD16 AI Research Agents:</span>
+                        <span style={{ fontWeight: 600 }}>{'🤖 AI Research Agents:'}</span>
                         {phase === 'research' && (
                             <Button danger icon={<StopCircle size={14} />} onClick={handleStop} size="small">
-                                D\u1EEBng
+                                Dừng
                             </Button>
                         )}
                     </Flexbox>
