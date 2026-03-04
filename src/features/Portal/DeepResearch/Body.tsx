@@ -12,7 +12,6 @@ import {
     Eye,
     EyeOff,
     Loader2,
-    Loader2,
     Play,
     RefreshCw,
     Search,
