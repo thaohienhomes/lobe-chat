@@ -14,7 +14,7 @@ import {
     Search,
     Sparkles,
 } from 'lucide-react';
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 const { TextArea } = Input;
@@ -152,18 +152,27 @@ const useStyles = createStyles(({ css, token }) => ({
 /* ────────────────────────── helpers ────────────────────────── */
 
 async function callAI(model: string, prompt: string): Promise<string> {
-    const res = await fetch('/api/research/ai-summary', {
-        body: JSON.stringify({ model, prompt }),
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `HTTP ${res.status}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90_000); // 90s timeout
+
+    try {
+        const res = await fetch('/api/research/ai-summary', {
+            body: JSON.stringify({ model, prompt }),
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+            signal: controller.signal,
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        console.log('[DeepResearch] callAI response:', { length: data.text?.length, model: data.model, provider: data.provider });
+        return data.text || '';
+    } finally {
+        clearTimeout(timeoutId);
     }
-    const data = await res.json();
-    return data.text || '';
 }
 
 /* ────────────────────────── component ────────────────────────── */
@@ -183,6 +192,7 @@ const DeepResearchBody = memo(() => {
     const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
     const [article, setArticle] = useState('');
     const abortRef = useRef(false);
+    const startResearchRef = useRef<(() => void) | undefined>(undefined);
 
     const PHASES_LIST: { key: Phase; label: string }[] = [
         { key: 'input', label: '📝 Câu hỏi' },
@@ -218,22 +228,29 @@ Format: Return ONLY a JSON array of strings, each being one question. Example:
 Return ONLY the JSON array, no other text.`;
 
             const result = await callAI(model, prompt);
+            console.log('[DeepResearch] Clarify raw result:', result.slice(0, 500));
             try {
-                const cleaned = result.replaceAll('```json\n', '').replaceAll('```\n', '').replaceAll('```', '').trim();
+                // Clean markdown code fences and extract JSON
+                let cleaned = result.replaceAll('```json', '').replaceAll('```', '').trim();
+                // Also try to extract JSON array from any surrounding text
+                const jsonMatch = cleaned.match(/\[\s*"[\S\s]*]/);
+                if (jsonMatch) cleaned = jsonMatch[0];
                 const parsed = JSON.parse(cleaned);
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     setClarifyQs(parsed);
                     setProgressLines((prev) => [...prev, '✅ Câu hỏi làm rõ đã được tạo']);
-                } else {
-                    // No clarifying questions, go straight to research
-                    setClarifyQs([]);
-                    setPhase('input'); // Will be overridden by startResearch
+                    return; // Stay in clarify phase
                 }
-            } catch {
-                // If JSON parse fails, skip clarify phase
-                setClarifyQs([]);
+            } catch (parseErr) {
+                console.warn('[DeepResearch] Failed to parse clarify JSON:', parseErr);
             }
+            // If we get here, parsing failed or empty — skip to research
+            console.log('[DeepResearch] Skipping clarify phase, going to research directly');
+            setClarifyQs([]);
+            setPhase('research');
+            setProgressLines((prev) => [...prev, '⚠️ Bỏ qua giai đoạn làm rõ, bắt đầu nghiên cứu trực tiếp...']);
         } catch (e: any) {
+            console.error('[DeepResearch] handleStart error:', e);
             message.error(`Lỗi: ${e.message}`);
             setPhase('input');
         }
@@ -346,6 +363,16 @@ Provide a thorough analysis from your perspective. Use markdown formatting with 
             startOutline(findings);
         }
     }, [question, model, clarifyQs, clarifyAnswers, agents, startOutline]);
+
+    // Keep ref in sync so handleStart can trigger it without forward reference
+    startResearchRef.current = startResearch;
+
+    // Auto-trigger research when phase transitions to 'research' but agents haven't started
+    useEffect(() => {
+        if (phase === 'research' && agents.every((a) => a.status === 'idle')) {
+            startResearch();
+        }
+    }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
     /* ── Phase 4 → Article ── */
     const handleGenerateArticle = useCallback(async () => {
