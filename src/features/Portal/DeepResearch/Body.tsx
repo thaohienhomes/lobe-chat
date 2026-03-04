@@ -355,9 +355,18 @@ const DeepResearchBody = memo(() => {
     const [refinePrompt, setRefinePrompt] = useState('');
     const [isRefining, setIsRefining] = useState(false);
     const [showTemplates, setShowTemplates] = useState(false);
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [elapsed, setElapsed] = useState(0);
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
+
+    // Elapsed timer
+    useEffect(() => {
+        if (!startTime) { setElapsed(0); return; }
+        const interval = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
+        return () => clearInterval(interval);
+    }, [startTime]);
 
     // Load history from localStorage on mount
     useEffect(() => {
@@ -483,6 +492,7 @@ Return ONLY the JSON array.`;
     const startResearch = useCallback(async () => {
         setPhase('research');
         abortRef.current = false;
+        setStartTime(Date.now());
 
         const clarifyContext = clarifyQs.length > 0
             ? `\n\nAdditional scope context from clarifying questions:\n${clarifyQs.map((q, i) => `Q: ${q}\nA: ${clarifyAnswers[i] || 'No specific preference'}`).join('\n')}`
@@ -602,6 +612,7 @@ Write the full article now in markdown format.`;
             const finalArticle = result + footer;
             setArticle(finalArticle);
             setProgressLines((prev) => [...prev, '✅ Bài tổng quan hoàn thành!']);
+            setStartTime(null);
 
             // Save to history
             const historyItem: HistoryItem = {
@@ -636,14 +647,16 @@ Write the full article now in markdown format.`;
         setOutline([]);
         setArticle('');
         setExpandedAgent(null);
+        setStartTime(null);
     };
 
     /* \u2500\u2500 Stop \u2500\u2500 */
     const handleStop = () => {
         abortRef.current = true;
         abortControllerRef.current?.abort();
-        setProgressLines((prev) => [...prev, '\u26D4 Ng\u01B0\u1EDDi d\u00F9ng \u0111\u00E3 d\u1EEBng nghi\u00EAn c\u1EE9u']);
-        message.info('\u0110\u00E3 d\u1EEBng nghi\u00EAn c\u1EE9u');
+        setStartTime(null);
+        setProgressLines((prev) => [...prev, '⛔ Người dùng đã dừng nghiên cứu']);
+        message.info('Đã dừng nghiên cứu');
     };
 
     /* \u2500\u2500 History \u2500\u2500 */
@@ -965,7 +978,14 @@ ${article.replaceAll('\n', '<br>\n')}
             {(phase === 'research' || phase === 'outline' || phase === 'article' || phase === 'done') && (
                 <Flexbox gap={8}>
                     <Flexbox align={'center'} gap={8} horizontal justify={'space-between'}>
-                        <span style={{ fontWeight: 600 }}>{'🤖 AI Research Agents:'}</span>
+                        <Flexbox align={'center'} gap={8} horizontal>
+                            <span style={{ fontWeight: 600 }}>{'🤖 AI Research Agents:'}</span>
+                            {phase === 'research' && (
+                                <Tag color="processing" style={{ fontSize: 11 }}>
+                                    ⏱️ {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')} — {agents.filter(a => a.status === 'done').length}/{agents.length} xong
+                                </Tag>
+                            )}
+                        </Flexbox>
                         {phase === 'research' && (
                             <Button danger icon={<StopCircle size={14} />} onClick={handleStop} size="small">
                                 Dừng
