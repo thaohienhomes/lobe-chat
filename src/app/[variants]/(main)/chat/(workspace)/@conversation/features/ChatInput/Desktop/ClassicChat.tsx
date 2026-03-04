@@ -25,7 +25,7 @@ const leftActions: ActionKeys[] = [
   'knowledgeBase',
   'tools',
   '---',
-  ['research', 'params', 'history', 'stt', 'clear'],
+  ['research', 'deepResearch', 'params', 'history', 'stt', 'clear'],
   'mainToken',
 ];
 

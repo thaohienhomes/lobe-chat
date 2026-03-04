@@ -3,6 +3,7 @@
 import { memo } from 'react';
 
 import { Artifacts } from './Artifacts';
+import { DeepResearch } from './DeepResearch';
 import { FilePreview } from './FilePreview';
 import { HomeBody, HomeTitle } from './Home';
 import { MessageDetail } from './MessageDetail';
@@ -12,7 +13,7 @@ import { Thread } from './Thread';
 import Header from './components/Header';
 import { PortalImpl } from './type';
 
-const items: PortalImpl[] = [Research, Thread, MessageDetail, Artifacts, Plugins, FilePreview];
+const items: PortalImpl[] = [DeepResearch, Research, Thread, MessageDetail, Artifacts, Plugins, FilePreview];
 
 export const PortalTitle = memo(() => {
   const enabledList: boolean[] = [];

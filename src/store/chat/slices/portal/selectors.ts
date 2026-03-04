@@ -51,6 +51,7 @@ const isArtifactTagClosed = (id: string) => (s: ChatStoreState) => {
   return ARTIFACT_TAG_CLOSED_REGEX.test(content || '');
 };
 
+const showDeepResearch = (s: ChatStoreState) => !!s.portalDeepResearch;
 const showResearchMode = (s: ChatStoreState) => !!s.portalResearch;
 
 /* eslint-disable sort-keys-fix/sort-keys-fix, typescript-sort-keys/interface */
@@ -64,6 +65,7 @@ export const chatPortalSelectors = {
   messageDetailId,
   showMessageDetail,
 
+  showDeepResearch,
   showPluginUI,
   showPortal,
   showResearchMode,

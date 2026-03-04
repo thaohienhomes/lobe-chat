@@ -7,11 +7,13 @@ import { PortalFile } from './initialState';
 
 export interface ChatPortalAction {
   closeArtifact: () => void;
+  closeDeepResearch: () => void;
   closeFilePreview: () => void;
   closeMessageDetail: () => void;
   closeResearchMode: () => void;
   closeToolUI: () => void;
   openArtifact: (artifact: PortalArtifact) => void;
+  openDeepResearch: () => void;
   openFilePreview: (portal: PortalFile) => void;
   openMessageDetail: (messageId: string) => void;
   openResearchMode: () => void;
@@ -29,6 +31,9 @@ export const chatPortalSlice: StateCreator<
     get().togglePortal(false);
     set({ portalArtifact: undefined }, false, 'closeArtifact');
   },
+  closeDeepResearch: () => {
+    set({ portalDeepResearch: false }, false, 'closeDeepResearch');
+  },
   closeFilePreview: () => {
     set({ portalFile: undefined }, false, 'closeFilePreview');
   },
@@ -45,6 +50,11 @@ export const chatPortalSlice: StateCreator<
     get().togglePortal(true);
 
     set({ portalArtifact: artifact }, false, 'openArtifact');
+  },
+  openDeepResearch: () => {
+    get().togglePortal(true);
+
+    set({ portalDeepResearch: true, portalResearch: false }, false, 'openDeepResearch');
   },
   openFilePreview: (portal) => {
     get().togglePortal(true);

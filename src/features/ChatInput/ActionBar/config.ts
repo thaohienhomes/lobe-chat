@@ -1,4 +1,5 @@
 import Clear from './Clear';
+import DeepResearch from './DeepResearch';
 import History from './History';
 import Knowledge from './Knowledge';
 import Model from './Model';
@@ -14,6 +15,7 @@ import Upload from './Upload';
 
 export const actionMap = {
   clear: Clear,
+  deepResearch: DeepResearch,
   fileUpload: Upload,
   history: History,
   knowledgeBase: Knowledge,
