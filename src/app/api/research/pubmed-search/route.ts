@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
+export const maxDuration = 60;
 /**
  * /api/research/pubmed-search
  * Searches PubMed for papers relevant to a clinical question.
@@ -91,7 +92,7 @@ export async function POST(req: Request) {
         const papers: PubMedPaper[] = [];
 
         // Simple XML parsing for PubmedArticle elements
-        const articleRegex = /<PubmedArticle>([\s\S]*?)<\/PubmedArticle>/g;
+        const articleRegex = /<PubmedArticle>([\S\s]*?)<\/PubmedArticle>/g;
         let match;
 
         while ((match = articleRegex.exec(xmlText)) !== null) {
@@ -104,7 +105,7 @@ export async function POST(req: Request) {
             const year = extractXmlValue(articleXml, 'Year') || '';
 
             // Extract authors
-            const authorRegex = /<Author[\s\S]*?<LastName>(.*?)<\/LastName>[\s\S]*?<Initials>(.*?)<\/Initials>/g;
+            const authorRegex = /<Author[\S\s]*?<LastName>(.*?)<\/LastName>[\S\s]*?<Initials>(.*?)<\/Initials>/g;
             const authors: string[] = [];
             let authorMatch;
             while ((authorMatch = authorRegex.exec(articleXml)) !== null) {
@@ -147,7 +148,7 @@ function extractXmlValue(xml: string, tag: string): string | null {
 
 function extractAbstract(xml: string): string {
     // Try structured abstract first
-    const abstractTextRegex = /<AbstractText[^>]*>([\s\S]*?)<\/AbstractText>/g;
+    const abstractTextRegex = /<AbstractText[^>]*>([\S\s]*?)<\/AbstractText>/g;
     const parts: string[] = [];
     let match;
     while ((match = abstractTextRegex.exec(xml)) !== null) {
@@ -162,11 +163,11 @@ function extractAbstract(xml: string): string {
 
 function cleanXmlText(text: string): string {
     return text
-        .replace(/<[^>]+>/g, '') // Remove XML tags
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/\s+/g, ' ')
+        .replaceAll(/<[^>]+>/g, '') // Remove XML tags
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&quot;', '"')
+        .replaceAll(/\s+/g, ' ')
         .trim();
 }

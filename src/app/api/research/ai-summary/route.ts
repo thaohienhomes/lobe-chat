@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
 import { phoGatewayService } from '@/server/services/phoGateway';
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 /**
  * Known model-to-provider mappings for common research models.

@@ -575,9 +575,9 @@ Return ONLY the JSON array.`;
         }
         if (abortRef.current) return;
 
-        // Build literature context from PubMed papers
+        // Build literature context from PubMed papers (limit size to avoid timeout)
         const litContext = papers.length > 0
-            ? `\n\n=== RETRIEVED LITERATURE FROM PUBMED ===\n${papers.map((p, i) => `[${i + 1}] ${p.authors} (${p.year}). ${p.title}. ${p.journal}. PMID: ${p.pmid}\nAbstract: ${p.abstract}`).join('\n\n')}\n=== END LITERATURE ===`
+            ? `\n\n=== RETRIEVED LITERATURE FROM PUBMED ===\n${papers.slice(0, 6).map((p, i) => `[${i + 1}] ${p.authors} (${p.year}). ${p.title}. ${p.journal}. PMID: ${p.pmid}\nAbstract: ${p.abstract.slice(0, 400)}`).join('\n\n')}\n=== END LITERATURE ===`
             : '';
 
         const clarifyContext = clarifyQs.length > 0
