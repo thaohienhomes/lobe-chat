@@ -43,14 +43,14 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 2. Parse body ───────────────────────────────────────────────────────
-    let body: { model?: string; prompt?: string };
+    let body: { model?: string; prompt?: string; stream?: boolean };
     try {
         body = await req.json();
     } catch {
         return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const { model = 'gemini-2.5-flash', prompt } = body;
+    const { model = 'gemini-2.5-flash', prompt, stream: streamMode = false } = body;
     if (!prompt) {
         return NextResponse.json({ error: 'prompt is required' }, { status: 400 });
     }
@@ -95,6 +95,63 @@ export async function POST(req: NextRequest) {
             } as any);
 
             if (response.body) {
+                // ── Streaming mode: pipe SSE events to client ──
+                if (streamMode) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    const encoder = new TextEncoder();
+
+                    const readable = new ReadableStream({
+                        async start(controller) {
+                            try {
+                                // eslint-disable-next-line no-constant-condition
+                                while (true) {
+                                    const { done, value } = await reader.read();
+                                    if (done) break;
+                                    const chunk = decoder.decode(value, { stream: true });
+                                    for (const line of chunk.split('\n')) {
+                                        const trimmed = line.trim();
+                                        if (trimmed.startsWith('data: ')) {
+                                            const raw = trimmed.slice(6);
+                                            if (raw === '[DONE]') continue;
+                                            try {
+                                                const json = JSON.parse(raw);
+                                                const delta = json?.choices?.[0]?.delta?.content;
+                                                if (delta) controller.enqueue(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
+                                                else if (typeof json === 'string') controller.enqueue(encoder.encode(`data: ${JSON.stringify(json)}\n\n`));
+                                            } catch {
+                                                if (raw && raw !== '[DONE]') controller.enqueue(encoder.encode(`data: ${JSON.stringify(raw)}\n\n`));
+                                            }
+                                        } else if (trimmed && !trimmed.startsWith(':') && !trimmed.startsWith('event:')) {
+                                            try {
+                                                const json = JSON.parse(trimmed);
+                                                const delta = json?.choices?.[0]?.delta?.content ?? json?.text ?? '';
+                                                if (delta) controller.enqueue(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
+                                            } catch {
+                                                controller.enqueue(encoder.encode(`data: ${JSON.stringify(trimmed)}\n\n`));
+                                            }
+                                        }
+                                    }
+                                }
+                                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+                                controller.close();
+                            } catch (err) {
+                                controller.error(err);
+                            }
+                        },
+                    });
+
+                    console.log(`[research/ai-summary] Streaming via ${provider}`);
+                    return new Response(readable, {
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Connection': 'keep-alive',
+                            'Content-Type': 'text/event-stream',
+                        },
+                    });
+                }
+
+                // ── Non-streaming mode: buffer full response ──
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let fullContent = '';
