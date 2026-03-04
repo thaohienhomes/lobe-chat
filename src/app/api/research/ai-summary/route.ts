@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { checkAuth } from '@/app/(backend)/middleware/auth';
 import { initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
 import { phoGatewayService } from '@/server/services/phoGateway';
 
@@ -9,14 +8,29 @@ export const maxDuration = 120;
 /**
  * POST /api/research/ai-summary
  *
- * Simple Clerk-authenticated AI completions endpoint for the Research Mode
- * Evidence Summarizer. Returns a plain JSON response with the full AI text
- * (non-streaming) so the frontend doesn't need to parse SSE.
+ * Clerk-authenticated AI completions endpoint for the Research Mode
+ * Evidence Summarizer & Multi-Agent Manuscript Reviewer.
+ * Uses Clerk's auth() to validate session cookies directly.
  *
  * Body: { model: string; prompt: string }
  * Response: { text: string }
  */
-const coreHandler = async (req: NextRequest, { jwtPayload }: any) => {
+export async function POST(req: NextRequest) {
+    // ── 1. Auth via Clerk cookies ───────────────────────────────────────────
+    let userId: string | null = null;
+    try {
+        const { auth } = await import('@clerk/nextjs/server');
+        const session = await auth();
+        userId = session.userId;
+    } catch {
+        // Clerk auth not available
+    }
+
+    if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized – please sign in' }, { status: 401 });
+    }
+
+    // ── 2. Parse body ───────────────────────────────────────────────────────
     let body: { model?: string; prompt?: string };
     try {
         body = await req.json();
@@ -24,11 +38,12 @@ const coreHandler = async (req: NextRequest, { jwtPayload }: any) => {
         return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const { model = 'gpt-4o-mini', prompt } = body;
+    const { model = 'gemini-2.5-flash', prompt } = body;
     if (!prompt) {
         return NextResponse.json({ error: 'prompt is required' }, { status: 400 });
     }
 
+    // ── 3. Call AI provider ─────────────────────────────────────────────────
     const messages = [{ content: prompt, role: 'user' as const }];
     const priorityList = phoGatewayService.resolveProviderList(model);
     let lastError: any = null;
@@ -36,6 +51,7 @@ const coreHandler = async (req: NextRequest, { jwtPayload }: any) => {
     for (const [idx, entry] of priorityList.entries()) {
         const { provider, modelId } = entry;
         try {
+            const jwtPayload = { userId };
             const runtime = await initModelRuntimeWithUserPayload(provider, jwtPayload);
             const response = await runtime.chat({
                 messages,
@@ -98,8 +114,4 @@ const coreHandler = async (req: NextRequest, { jwtPayload }: any) => {
         { error: `All providers failed. ${lastError?.message || ''}` },
         { status: 502 },
     );
-};
-
-const authenticatedHandler = checkAuth(coreHandler as any);
-
-export const POST = async (req: NextRequest, options: any) => authenticatedHandler(req, options);
+}
