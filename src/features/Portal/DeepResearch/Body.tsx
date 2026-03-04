@@ -56,6 +56,22 @@ interface HistoryItem {
     question: string;
 }
 
+interface PubMedPaper {
+    abstract: string;
+    authors: string;
+    journal: string;
+    pmid: string;
+    title: string;
+    year: string;
+}
+
+interface CitationResult {
+    citation: string;
+    pmid?: string;
+    status: 'verified' | 'unverified' | 'checking';
+    title?: string;
+}
+
 const HISTORY_KEY = 'pho-deep-research-history';
 
 const LANGUAGES = [
@@ -320,6 +336,55 @@ async function callAIStream(
     }
 }
 
+async function searchPubMed(query: string, maxResults = 8): Promise<PubMedPaper[]> {
+    try {
+        const res = await fetch('/api/research/pubmed-search', {
+            body: JSON.stringify({ maxResults, query }),
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+            signal: AbortSignal.timeout(25_000),
+        });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.papers || [];
+    } catch {
+        console.warn('[DeepResearch] PubMed search failed, continuing without literature');
+        return [];
+    }
+}
+
+async function verifyCitationsAgainstPubMed(article: string): Promise<CitationResult[]> {
+    // Extract citations in [Author, Year] format
+    const citationRegex = /\[([A-Z][\sA-Za-zÀ-ỹ]+(?:et al\.?)?),?\s*(\d{4}[a-z]?)]/g;
+    const found = new Map<string, string>();
+    let match;
+    while ((match = citationRegex.exec(article)) !== null) {
+        const key = `${match[1].trim()}, ${match[2]}`;
+        if (!found.has(key)) found.set(key, match[0]);
+    }
+
+    if (found.size === 0) return [];
+
+    const results: CitationResult[] = [];
+    // Verify each citation against PubMed
+    for (const [key, raw] of found.entries()) {
+        const [author, year] = key.split(', ');
+        const searchQuery = `${author.replace(' et al.', '').replace(' et al', '')}[Author] AND ${year}[Date - Publication]`;
+        try {
+            const papers = await searchPubMed(searchQuery, 3);
+            if (papers.length > 0) {
+                results.push({ citation: raw, pmid: papers[0].pmid, status: 'verified', title: papers[0].title });
+            } else {
+                results.push({ citation: raw, status: 'unverified' });
+            }
+        } catch {
+            results.push({ citation: raw, status: 'unverified' });
+        }
+    }
+    return results;
+}
+
 function downloadFile(content: string, filename: string, mimeType: string) {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
@@ -357,6 +422,9 @@ const DeepResearchBody = memo(() => {
     const [showTemplates, setShowTemplates] = useState(false);
     const [startTime, setStartTime] = useState<number | null>(null);
     const [elapsed, setElapsed] = useState(0);
+    const [pubmedPapers, setPubmedPapers] = useState<PubMedPaper[]>([]);
+    const [citationResults, setCitationResults] = useState<CitationResult[]>([]);
+    const [isVerifying, setIsVerifying] = useState(false);
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -493,6 +561,24 @@ Return ONLY the JSON array.`;
         setPhase('research');
         abortRef.current = false;
         setStartTime(Date.now());
+        setPubmedPapers([]);
+        setCitationResults([]);
+
+        // ── PubMed Literature Search ──
+        setProgressLines((prev) => [...prev, '🔍 Đang tìm y văn trên PubMed...']);
+        const papers = await searchPubMed(question, 10);
+        setPubmedPapers(papers);
+        if (papers.length > 0) {
+            setProgressLines((prev) => [...prev, `📚 Tìm thấy ${papers.length} bài báo trên PubMed`]);
+        } else {
+            setProgressLines((prev) => [...prev, '⚠️ Không tìm thấy bài báo PubMed, agents sẽ nghiên cứu từ kiến thức chung']);
+        }
+        if (abortRef.current) return;
+
+        // Build literature context from PubMed papers
+        const litContext = papers.length > 0
+            ? `\n\n=== RETRIEVED LITERATURE FROM PUBMED ===\n${papers.map((p, i) => `[${i + 1}] ${p.authors} (${p.year}). ${p.title}. ${p.journal}. PMID: ${p.pmid}\nAbstract: ${p.abstract}`).join('\n\n')}\n=== END LITERATURE ===`
+            : '';
 
         const clarifyContext = clarifyQs.length > 0
             ? `\n\nAdditional scope context from clarifying questions:\n${clarifyQs.map((q, i) => `Q: ${q}\nA: ${clarifyAnswers[i] || 'No specific preference'}`).join('\n')}`
@@ -510,9 +596,11 @@ Return ONLY the JSON array.`;
                 name: agent.name,
                 prompt: `${perspectiveMap[agent.name] || ''}
 
-Clinical Question: "${question}"${clarifyContext}
+Clinical Question: "${question}"${clarifyContext}${litContext}
 
-Provide a thorough analysis from your perspective. Use markdown formatting with headers, bullet points, and bold for key findings. Include specific data points (percentages, confidence intervals, p-values) where relevant. Cite studies as [Author, Year] format.`,
+IMPORTANT: When citing studies, use ONLY real papers from the provided PubMed literature above. Use the format [Author, Year] and include the PMID when possible. Do NOT fabricate or hallucinate citations.
+
+Provide a thorough analysis from your perspective. Use markdown formatting with headers, bullet points, and bold for key findings. Include specific data points (percentages, confidence intervals, p-values) where relevant.`,
             };
         });
 
@@ -624,10 +712,23 @@ Write the full article now in markdown format.`;
                 question,
             };
             setHistory((prev) => {
-                const updated = [historyItem, ...prev].slice(0, 20); // Keep max 20
+                const updated = [historyItem, ...prev].slice(0, 20);
                 try { localStorage.setItem(HISTORY_KEY, JSON.stringify(updated)); } catch { /* ignore */ }
                 return updated;
             });
+
+            // Auto-verify citations against PubMed
+            setIsVerifying(true);
+            setProgressLines((prev) => [...prev, '🔍 Đang xác minh citations trên PubMed...']);
+            try {
+                const verifyResults = await verifyCitationsAgainstPubMed(finalArticle);
+                setCitationResults(verifyResults);
+                const verified = verifyResults.filter(r => r.status === 'verified').length;
+                setProgressLines((prev) => [...prev, `✅ Xác minh xong: ${verified}/${verifyResults.length} citations tìm thấy trên PubMed`]);
+            } catch {
+                setProgressLines((prev) => [...prev, '⚠️ Không thể xác minh citations']);
+            }
+            setIsVerifying(false);
         } catch (e: any) {
             message.error(`Article generation error: ${e.message}`);
             setPhase('outline');
@@ -648,6 +749,9 @@ Write the full article now in markdown format.`;
         setArticle('');
         setExpandedAgent(null);
         setStartTime(null);
+        setPubmedPapers([]);
+        setCitationResults([]);
+        setIsVerifying(false);
     };
 
     /* \u2500\u2500 Stop \u2500\u2500 */
@@ -1028,6 +1132,32 @@ ${article.replaceAll('\n', '<br>\n')}
                 </Flexbox>
             )}
 
+            {/* PubMed Papers */}
+            {pubmedPapers.length > 0 && (phase === 'research' || phase === 'outline' || phase === 'article' || phase === 'done') && (
+                <Flexbox gap={6}>
+                    <Flexbox align={'center'} gap={6} horizontal>
+                        <BookOpen size={14} />
+                        <span style={{ fontSize: 13, fontWeight: 600 }}>Y văn PubMed ({pubmedPapers.length} bài báo)</span>
+                    </Flexbox>
+                    <div style={{ display: 'grid', gap: 4 }}>
+                        {pubmedPapers.slice(0, 6).map((p) => (
+                            <a
+                                href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`}
+                                key={p.pmid}
+                                rel="noreferrer"
+                                style={{ color: '#1890ff', cursor: 'pointer', fontSize: 11, textDecoration: 'none' }}
+                                target="_blank"
+                            >
+                                <span style={{ fontWeight: 500 }}>{p.authors} ({p.year}).</span> {p.title.slice(0, 100)}{p.title.length > 100 ? '...' : ''} <Tag style={{ fontSize: 9 }}>{p.journal.slice(0, 30)}</Tag>
+                            </a>
+                        ))}
+                        {pubmedPapers.length > 6 && (
+                            <span style={{ color: '#888', fontSize: 11 }}>+{pubmedPapers.length - 6} bài báo khác</span>
+                        )}
+                    </div>
+                </Flexbox>
+            )}
+
             {/* ────── PROGRESS LOG ────── */}
             {progressLines.length > 0 && phase !== 'input' && (
                 <Flexbox gap={2} style={{ maxHeight: 120, overflowY: 'auto' }}>
@@ -1150,6 +1280,49 @@ ${article.replaceAll('\n', '<br>\n')}
                             Nghiên cứu mới
                         </Button>
                     </Flexbox>
+
+                    {/* Citation Verification */}
+                    {(citationResults.length > 0 || isVerifying) && (
+                        <Flexbox gap={6} style={{ background: 'rgba(0,0,0,0.02)', borderRadius: 8, padding: '8px 12px' }}>
+                            <Flexbox align={'center'} gap={8} horizontal>
+                                <span style={{ fontSize: 13, fontWeight: 600 }}>Xác minh Citations</span>
+                                {isVerifying ? (
+                                    <Tag color="processing" icon={<Loader2 className="animate-spin" size={10} />}>
+                                        Đang kiểm tra...
+                                    </Tag>
+                                ) : citationResults.length > 0 ? (
+                                    <Tag color={citationResults.filter(r => r.status === 'verified').length / citationResults.length > 0.5 ? 'success' : 'warning'}>
+                                        {citationResults.filter(r => r.status === 'verified').length}/{citationResults.length} tìm thấy trên PubMed ({Math.round(citationResults.filter(r => r.status === 'verified').length / citationResults.length * 100)}%)
+                                    </Tag>
+                                ) : null}
+                            </Flexbox>
+                            {citationResults.length > 0 && (
+                                <div style={{ display: 'grid', gap: 3 }}>
+                                    {citationResults.map((cr, i) => (
+                                        <Flexbox align={'center'} gap={6} horizontal key={i} style={{ fontSize: 11 }}>
+                                            <Tag color={cr.status === 'verified' ? 'success' : 'warning'} style={{ fontSize: 10 }}>
+                                                {cr.status === 'verified' ? 'V' : '?'}
+                                            </Tag>
+                                            <span style={{ fontWeight: 500 }}>{cr.citation}</span>
+                                            {cr.status === 'verified' && cr.pmid && (
+                                                <a
+                                                    href={`https://pubmed.ncbi.nlm.nih.gov/${cr.pmid}/`}
+                                                    rel="noreferrer"
+                                                    style={{ color: '#1890ff', fontSize: 10 }}
+                                                    target="_blank"
+                                                >
+                                                    PMID: {cr.pmid}
+                                                </a>
+                                            )}
+                                            {cr.status === 'unverified' && (
+                                                <span style={{ color: '#999', fontSize: 10 }}>Không tìm thấy trên PubMed</span>
+                                            )}
+                                        </Flexbox>
+                                    ))}
+                                </div>
+                            )}
+                        </Flexbox>
+                    )}
 
                     {/* Follow-up refinement */}
                     <Flexbox gap={4}>
