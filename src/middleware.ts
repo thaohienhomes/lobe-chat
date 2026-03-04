@@ -219,6 +219,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/health',
   '/api/v1(.*)',
   '/api/plugins(.*)',
+  // Research mode API (auth handled internally via Clerk auth())
+  '/api/research(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
