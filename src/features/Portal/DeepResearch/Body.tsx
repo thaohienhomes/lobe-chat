@@ -425,6 +425,7 @@ const DeepResearchBody = memo(() => {
     const [pubmedPapers, setPubmedPapers] = useState<PubMedPaper[]>([]);
     const [citationResults, setCitationResults] = useState<CitationResult[]>([]);
     const [isVerifying, setIsVerifying] = useState(false);
+    const [showAllPapers, setShowAllPapers] = useState(false);
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -1134,13 +1135,13 @@ ${article.replaceAll('\n', '<br>\n')}
 
             {/* PubMed Papers */}
             {pubmedPapers.length > 0 && (phase === 'research' || phase === 'outline' || phase === 'article' || phase === 'done') && (
-                <Flexbox gap={6}>
+                <Flexbox gap={6} style={{ background: 'rgba(0,150,255,0.05)', borderRadius: 8, padding: '8px 12px' }}>
                     <Flexbox align={'center'} gap={6} horizontal>
                         <BookOpen size={14} />
                         <span style={{ fontSize: 13, fontWeight: 600 }}>Y văn PubMed ({pubmedPapers.length} bài báo)</span>
                     </Flexbox>
                     <div style={{ display: 'grid', gap: 4 }}>
-                        {pubmedPapers.slice(0, 6).map((p) => (
+                        {(showAllPapers ? pubmedPapers : pubmedPapers.slice(0, 6)).map((p) => (
                             <a
                                 href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`}
                                 key={p.pmid}
@@ -1152,17 +1153,23 @@ ${article.replaceAll('\n', '<br>\n')}
                             </a>
                         ))}
                         {pubmedPapers.length > 6 && (
-                            <span style={{ color: '#888', fontSize: 11 }}>+{pubmedPapers.length - 6} bài báo khác</span>
+                            <span
+                                onClick={() => setShowAllPapers(!showAllPapers)}
+                                style={{ color: '#1890ff', cursor: 'pointer', fontSize: 11, fontWeight: 500 }}
+                            >
+                                {showAllPapers ? '▲ Thu gọn' : `▼ Xem thêm ${pubmedPapers.length - 6} bài báo khác`}
+                            </span>
                         )}
                     </div>
                 </Flexbox>
             )}
 
-            {/* ────── PROGRESS LOG ────── */}
+            {/* Progress Log */}
             {progressLines.length > 0 && phase !== 'input' && (
-                <Flexbox gap={2} style={{ maxHeight: 120, overflowY: 'auto' }}>
+                <Flexbox gap={2} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, maxHeight: 200, overflowY: 'auto', padding: '8px 12px' }}>
+                    <span style={{ color: '#aaa', fontSize: 11, fontWeight: 600, marginBottom: 2 }}>Quá trình nghiên cứu:</span>
                     {progressLines.map((line, i) => (
-                        <div className={styles.progressLine} key={i}>{line}</div>
+                        <div className={styles.progressLine} key={i} style={{ fontSize: 12, lineHeight: 1.5 }}>{line}</div>
                     ))}
                 </Flexbox>
             )}
