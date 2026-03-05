@@ -1,9 +1,10 @@
 import { BuiltinToolManifest } from '@/types/tool';
 
+import { ScientificSkillsAPIs } from './apis';
 import { scientificSkillsSystemPrompt } from './systemRole';
 
 export const ScientificSkillsManifest: BuiltinToolManifest = {
-  api: [],
+  api: ScientificSkillsAPIs,
   identifier: 'pho-scientific-skills',
   meta: {
     avatar: '🔬',
