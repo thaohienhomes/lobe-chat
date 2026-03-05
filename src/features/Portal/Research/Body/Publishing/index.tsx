@@ -10,7 +10,11 @@ import { Flexbox } from 'react-layout-kit';
 import { type PaperResult, useResearchStore } from '@/store/research';
 
 import PlagiarismChecker from './PlagiarismChecker';
-import ResearchSlides from './ResearchSlides';
+
+// Lazy-load ResearchSlides to avoid webpack bundling pptxgenjs (which uses node: protocol)
+import dynamic from 'next/dynamic';
+
+const ResearchSlides = dynamic(() => import('./ResearchSlides'), { ssr: false });
 
 const useStyles = createStyles(({ css, token }) => ({
   checklist: css`
