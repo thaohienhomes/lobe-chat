@@ -256,7 +256,7 @@ const useStyles = createStyles(({ css, token }) => ({
 
 async function callAI(model: string, prompt: string, retries = 1): Promise<string> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort('Timeout: request took too long'), 180_000); // 3 min timeout
+    const timeoutId = setTimeout(() => controller.abort('Timeout: request took too long'), 300_000); // 5 min to match API maxDuration
 
     try {
         const res = await fetch('/api/research/ai-summary', {
@@ -297,7 +297,7 @@ async function callAIStream(
     signal?: AbortSignal,
 ): Promise<string> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 180_000); // 3 min for long articles
+    const timeoutId = setTimeout(() => controller.abort('Timeout: article generation took too long'), 300_000); // 5 min to match API maxDuration
 
     // Forward external abort signal
     if (signal) {
@@ -344,6 +344,12 @@ async function callAIStream(
 
         console.log('[DeepResearch] callAIStream complete:', { length: fullContent.length });
         return fullContent;
+    } catch (e: any) {
+        // Convert AbortError to friendly message
+        if (e.name === 'AbortError') {
+            throw new Error('Quá thời gian chờ — server có thể đang quá tải. Vui lòng thử lại.');
+        }
+        throw e;
     } finally {
         clearTimeout(timeoutId);
     }
