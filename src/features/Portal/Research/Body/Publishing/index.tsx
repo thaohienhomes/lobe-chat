@@ -9,6 +9,9 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type PaperResult, useResearchStore } from '@/store/research';
 
+import PlagiarismChecker from './PlagiarismChecker';
+import ResearchSlides from './ResearchSlides';
+
 const useStyles = createStyles(({ css, token }) => ({
   checklist: css`
     display: flex;
@@ -832,6 +835,17 @@ const PublishingPhase = memo(() => {
     [papers, screeningDecisions],
   );
 
+  const markdownContent = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const parts = [
+      `# Systematic Review: ${searchQuery}`,
+      `*${today}*`,
+      '',
+      `${pico ? `PICO — P: ${pico.population}, I: ${pico.intervention}, C: ${pico.comparison}, O: ${pico.outcome}` : ''}`,
+    ];
+    return parts.join('\n');
+  }, [searchQuery, pico]);
+
   const htmlDocument = useMemo(
     () => buildStyledHTML(searchQuery, pico, papers, includedPapers, excludedPapers),
     [searchQuery, pico, papers, includedPapers, excludedPapers],
@@ -1037,6 +1051,12 @@ const PublishingPhase = memo(() => {
           </Flexbox>
         </div>
       )}
+
+      {/* Plagiarism Check */}
+      <PlagiarismChecker reviewText={markdownContent} searchQuery={searchQuery} />
+
+      {/* Research Slides */}
+      <ResearchSlides papers={papers} />
 
       {/* Navigation */}
       <Flexbox gap={8} horizontal justify={'space-between'}>

@@ -9,6 +9,8 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type SearchSource, useResearchStore } from '@/store/research';
 
+import PdfUploader from './PdfUploader';
+
 const useStyles = createStyles(({ css, token }) => ({
     container: css`
     width: 100%;
@@ -469,15 +471,19 @@ const DiscoveryPhase = memo(() => {
 
             {/* Empty state */}
             {papers.length === 0 && !isSearching && !searchError && (
-                <div className={styles.emptyState}>
-                    <span style={{ fontSize: 48 }}>🔬</span>
-                    <span style={{ fontSize: 16, fontWeight: 600 }}>Research Mode</span>
-                    <span style={{ fontSize: 13 }}>
-                        Nhập câu hỏi nghiên cứu để AI phân tích PICO
-                        <br />
-                        và tìm kiếm papers từ PubMed, OpenAlex
-                    </span>
-                </div>
+                <>
+                    <div className={styles.emptyState}>
+                        <span style={{ fontSize: 48 }}>🔬</span>
+                        <span style={{ fontSize: 16, fontWeight: 600 }}>Research Mode</span>
+                        <span style={{ fontSize: 13 }}>
+                            Nhập câu hỏi nghiên cứu để AI phân tích PICO
+                            <br />
+                            và tìm kiếm papers từ PubMed, OpenAlex
+                        </span>
+                    </div>
+                    {/* PDF Upload — alternative entry point */}
+                    <PdfUploader />
+                </>
             )}
         </Flexbox>
     );
