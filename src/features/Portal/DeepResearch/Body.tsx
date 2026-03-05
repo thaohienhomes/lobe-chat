@@ -364,8 +364,14 @@ async function callAIStream(
                 if (raw === '[DONE]') continue;
                 try {
                     const delta = JSON.parse(raw);
+                    let text = '';
                     if (typeof delta === 'string') {
-                        fullContent += delta;
+                        text = delta;
+                    } else if (delta && typeof delta === 'object') {
+                        text = delta?.choices?.[0]?.delta?.content ?? delta?.text ?? delta?.content ?? '';
+                    }
+                    if (text) {
+                        fullContent += text;
                         onChunk(fullContent);
                     }
                 } catch { /* skip unparseable */ }

@@ -111,24 +111,45 @@ export async function POST(req: NextRequest) {
                                     const chunk = decoder.decode(value, { stream: true });
                                     for (const line of chunk.split('\n')) {
                                         const trimmed = line.trim();
+                                        if (!trimmed) continue;
+                                        // Skip SSE metadata fields — these are NOT content
+                                        if (trimmed.startsWith('id:') || trimmed.startsWith('retry:') || trimmed.startsWith('event:') || trimmed.startsWith(':')) continue;
+                                        // Skip known non-content markers
+                                        if (/^(stop|output_speed|ping)$/i.test(trimmed)) continue;
+
                                         if (trimmed.startsWith('data: ')) {
                                             const raw = trimmed.slice(6);
                                             if (raw === '[DONE]') continue;
                                             try {
                                                 const json = JSON.parse(raw);
+                                                // Vercel AI SDK format: full text responses
+                                                if (typeof json === 'string') {
+                                                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(json)}\n\n`));
+                                                    continue;
+                                                }
+                                                // OpenAI-style format
                                                 const delta = json?.choices?.[0]?.delta?.content;
-                                                if (delta) controller.enqueue(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
-                                                else if (typeof json === 'string') controller.enqueue(encoder.encode(`data: ${JSON.stringify(json)}\n\n`));
+                                                if (delta) {
+                                                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
+                                                    continue;
+                                                }
+                                                // Google AI / Anthropic text field
+                                                const text = json?.text || json?.content || json?.candidates?.[0]?.content?.parts?.[0]?.text;
+                                                if (text) {
+                                                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(text)}\n\n`));
+                                                    continue;
+                                                }
                                             } catch {
-                                                if (raw && raw !== '[DONE]') controller.enqueue(encoder.encode(`data: ${JSON.stringify(raw)}\n\n`));
+                                                // Not valid JSON — skip non-text data lines
                                             }
-                                        } else if (trimmed && !trimmed.startsWith(':') && !trimmed.startsWith('event:')) {
+                                        } else {
+                                            // Non-prefixed lines — try to extract content only if it's valid JSON with text
                                             try {
                                                 const json = JSON.parse(trimmed);
-                                                const delta = json?.choices?.[0]?.delta?.content ?? json?.text ?? '';
+                                                const delta = json?.choices?.[0]?.delta?.content ?? json?.text ?? json?.content ?? '';
                                                 if (delta) controller.enqueue(encoder.encode(`data: ${JSON.stringify(delta)}\n\n`));
                                             } catch {
-                                                controller.enqueue(encoder.encode(`data: ${JSON.stringify(trimmed)}\n\n`));
+                                                // Not JSON — skip (do NOT forward raw metadata as content)
                                             }
                                         }
                                     }
@@ -163,24 +184,31 @@ export async function POST(req: NextRequest) {
                     const chunk = decoder.decode(value, { stream: true });
                     for (const line of chunk.split('\n')) {
                         const trimmed = line.trim();
+                        if (!trimmed) continue;
+                        // Skip SSE metadata fields — NOT content
+                        if (trimmed.startsWith('id:') || trimmed.startsWith('retry:') || trimmed.startsWith('event:') || trimmed.startsWith(':')) continue;
+                        if (/^(stop|output_speed|ping)$/i.test(trimmed)) continue;
+
                         if (trimmed.startsWith('data: ')) {
                             const raw = trimmed.slice(6);
                             if (raw === '[DONE]') continue;
                             try {
                                 const json = JSON.parse(raw);
+                                if (typeof json === 'string') { fullContent += json; continue; }
                                 const delta = json?.choices?.[0]?.delta?.content;
-                                if (delta) fullContent += delta;
-                                else if (typeof json === 'string') fullContent += json;
+                                if (delta) { fullContent += delta; continue; }
+                                const text = json?.text || json?.content || json?.candidates?.[0]?.content?.parts?.[0]?.text;
+                                if (text) fullContent += text;
                             } catch {
-                                if (raw && raw !== '[DONE]') fullContent += raw;
+                                // Skip unparseable data lines
                             }
-                        } else if (trimmed && !trimmed.startsWith(':') && !trimmed.startsWith('event:')) {
+                        } else {
                             try {
                                 const json = JSON.parse(trimmed);
-                                const delta = json?.choices?.[0]?.delta?.content ?? json?.text ?? '';
+                                const delta = json?.choices?.[0]?.delta?.content ?? json?.text ?? json?.content ?? '';
                                 if (delta) fullContent += delta;
                             } catch {
-                                fullContent += trimmed + '\n';
+                                // Not JSON — skip (do NOT append raw metadata as content)
                             }
                         }
                     }
