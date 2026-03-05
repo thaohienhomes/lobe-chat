@@ -384,19 +384,24 @@ const nextConfig: NextConfig = {
       'node_modules/swr/dist/index/index.mjs',
     );
 
+    // Strip `node:` prefix from imports so resolve.fallback can handle them
+    // pptxgenjs ESM bundle uses `node:https`, `node:fs` etc. which cause
+    // UnhandledSchemeError in webpack client builds
+    const webpack = require('webpack');
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: any) => {
+        resource.request = resource.request.replace(/^node:/, '');
+      }),
+    );
+
     // to ignore epub2 compile error
     // refs: https://github.com/lobehub/lobe-chat/discussions/6769
-    // pptxgenjs ESM bundle references node: built-ins — stub them for client builds
+    // Stub Node.js built-ins for client builds (pptxgenjs, epub2, etc.)
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
       http: false,
       https: false,
-      'node:fs': false,
-      'node:http': false,
-      'node:https': false,
-      'node:stream': false,
-      'node:zlib': false,
       stream: false,
       zipfile: false,
       zlib: false,
