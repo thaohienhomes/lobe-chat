@@ -37,6 +37,16 @@ const useStyles = createStyles(({ css }) => ({
 const DeepResearchAction = memo(() => {
     const { styles } = useStyles();
     const openDeepResearch = useChatStore((s) => s.openDeepResearch);
+    const closeDeepResearch = useChatStore((s) => s.closeDeepResearch);
+    const isOpen = useChatStore((s) => !!s.portalDeepResearch);
+
+    const handleToggle = () => {
+        if (isOpen) {
+            closeDeepResearch();
+        } else {
+            openDeepResearch();
+        }
+    };
 
     return (
         <div className={styles.badgeWrapper}>
@@ -47,7 +57,7 @@ const DeepResearchAction = memo(() => {
             >
                 <Action
                     icon={BookOpen}
-                    onClick={() => openDeepResearch()}
+                    onClick={handleToggle}
                     title={'Deep Research — Tổng quan y văn tự động'}
                     tooltipProps={{
                         placement: 'bottom',
