@@ -116,6 +116,29 @@ export const chatPlugin: StateCreator<
       internal_updateMessageContent,
       internal_updatePluginError,
     } = get();
+
+    // Gate scientific skills by subscription plan
+    if (payload.identifier === 'pho-scientific-skills') {
+      try {
+        const res = await fetch('/api/subscription/check-scientific-access');
+        const result = await res.json();
+        if (!result.allowed) {
+          await internal_updateMessageContent(
+            id,
+            JSON.stringify({
+              error: 'subscription_required',
+              message: result.reason || 'Scientific Skills requires a paid plan.',
+              upgradeUrl: '/settings/subscription',
+            }),
+          );
+          internal_togglePluginApiCalling(false, id);
+          return;
+        }
+      } catch {
+        /* fail open - allow on network error */
+      }
+    }
+
     const params = JSON.parse(payload.arguments);
     internal_togglePluginApiCalling(true, id, n('invokeBuiltinTool/start') as string);
     let data;
@@ -330,6 +353,11 @@ export const chatPlugin: StateCreator<
           value: { search },
         });
         await messageService.updateMessage(assistantId, { search });
+
+        // Increment scientific skills usage counter (fire-and-forget)
+        fetch('/api/subscription/check-scientific-access', { method: 'POST' }).catch(() => {
+          /* silent */
+        });
       }
     }
 

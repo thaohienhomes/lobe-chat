@@ -41,6 +41,11 @@ export function mapPlanIdToTierCode(planId: string): WalletTierCode {
     return 'vn_creator';
   }
 
+  // VN Premium (129k) - HAS Studio access (basic)
+  if (plan.includes('premium') && !plan.includes('gl_')) {
+    return 'vn_creator'; // Map to creator tier (has basic Studio)
+  }
+
   // VN Pro (499k) - HAS Studio access
   if (plan.includes('pro') || plan === 'vn_499k') {
     return 'vn_pro';

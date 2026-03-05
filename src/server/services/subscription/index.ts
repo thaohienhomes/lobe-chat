@@ -17,7 +17,7 @@ import { FREE_TIER_MODELS, TRIAL_CONFIG } from '../trial/config';
 export interface CreateSubscriptionParams {
   billingCycle?: 'monthly' | 'yearly';
   paymentProvider?: 'sepay' | 'polar' | 'free';
-  planId: 'free' | 'starter' | 'premium' | 'ultimate';
+  planId: 'free' | 'starter' | 'premium' | 'ultimate' | 'vn_free' | 'vn_basic' | 'vn_premium' | 'vn_pro' | 'vn_ultimate' | 'medical_beta';
   userId: string;
 }
 

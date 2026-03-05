@@ -27,7 +27,9 @@ export interface PppPricingData {
     // Vietnam plans (VND via Sepay)
     vn_basic: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
     vn_free: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
+    vn_premium: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
     vn_pro: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
+    vn_ultimate: { monthly: number; monthlyPoints: number; monthlyUsd: number; yearly: number };
   };
 }
 
@@ -403,7 +405,9 @@ export function calculatePppPricing(countryCode: string): PppPricingData {
       // Vietnam plans (VND via Sepay) - fixed prices
       vn_basic: { monthly: 69_000, monthlyPoints: 300_000, monthlyUsd: 2.85, yearly: 690_000 },
       vn_free: { monthly: 0, monthlyPoints: 50_000, monthlyUsd: 0, yearly: 0 },
+      vn_premium: { monthly: 129_000, monthlyPoints: 1_000_000, monthlyUsd: 5.34, yearly: 1_290_000 },
       vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, monthlyUsd: 8.25, yearly: 1_990_000 },
+      vn_ultimate: { monthly: 499_000, monthlyPoints: 5_000_000, monthlyUsd: 20.60, yearly: 4_990_000 },
       // Legacy mappings
       premium: {
         monthly: Math.round(premiumMonthly),

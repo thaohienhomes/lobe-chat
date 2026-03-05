@@ -100,12 +100,13 @@ const VietnamPricingCards = memo<VietnamPricingCardsProps>(
   ({ mobile, onSelectPlan, currentPlanId }) => {
     const { styles, cx } = useStyles();
 
-    // Order: Free, Basic, Pro, Ultimate
+    // Order: Free, Basic, Premium, Pro, Ultimate
     const plans = [
       { ...VN_PLANS.vn_free, id: 'vn_free', popular: false },
-      { ...VN_PLANS.vn_basic, id: 'vn_basic', popular: true },
+      { ...VN_PLANS.vn_basic, id: 'vn_basic', popular: false },
+      { ...VN_PLANS.vn_premium, id: 'vn_premium', popular: true },
       { ...VN_PLANS.vn_pro, id: 'vn_pro', popular: false },
-      { ...VN_PLANS.vn_ultimate, id: 'vn_ultimate', isNew: true, popular: false },
+      { ...VN_PLANS.vn_ultimate, id: 'vn_ultimate', popular: false },
     ];
 
     return (
@@ -120,8 +121,8 @@ const VietnamPricingCards = memo<VietnamPricingCardsProps>(
           style={{
             display: 'grid',
             gap: mobile ? 16 : 16,
-            // 220px allows 4 cards on standard screens (220*4 + 16*3 = 928px < 1024px)
-            gridTemplateColumns: mobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))',
+            // 200px allows 5 cards on standard screens (200*5 + 16*4 = 1064px)
+            gridTemplateColumns: mobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
           }}
         >
           {plans.map((plan) => (
