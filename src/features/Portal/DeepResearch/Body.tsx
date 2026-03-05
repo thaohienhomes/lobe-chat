@@ -94,6 +94,15 @@ const GRADE_QUALITY_COLORS: Record<string, { bg: string; emoji: string; text: st
     'Very Low': { bg: 'rgba(239,68,68,0.15)', emoji: '⬇️⬇️', text: '#ef4444' },
 };
 
+interface NetworkRef {
+    authors: string;
+    citationCount: number;
+    paperId: string;
+    title: string;
+    url: string;
+    year: number | null;
+}
+
 const HISTORY_KEY = 'pho-deep-research-history';
 
 const LANGUAGES = [
@@ -506,6 +515,10 @@ const DeepResearchBody = memo(() => {
     const [showGrade, setShowGrade] = useState(false);
     const [isGeneratingGrade, setIsGeneratingGrade] = useState(false);
     const [searchSources, setSearchSources] = useState<Set<string>>(new Set(['pubmed']));
+    const [showNetwork, setShowNetwork] = useState(false);
+    const [networkData, setNetworkData] = useState<Record<string, NetworkRef[]>>({});
+    const [expandedNetworkNode, setExpandedNetworkNode] = useState<string | null>(null);
+    const [loadingNetwork, setLoadingNetwork] = useState<string | null>(null);
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -911,6 +924,29 @@ Generate 3-6 rows for the most important outcomes.`;
         setPhase('outline'); // Go back to outline so user can retry
     }, [question, model, outline, agents, outputLang]);
 
+    /* ── Fetch References for Citation Network ── */
+    const fetchReferences = useCallback(async (paperId: string) => {
+        if (networkData[paperId]) {
+            setExpandedNetworkNode(expandedNetworkNode === paperId ? null : paperId);
+            return;
+        }
+        setLoadingNetwork(paperId);
+        setExpandedNetworkNode(paperId);
+        try {
+            const res = await fetch(`/api/research/semantic-scholar/references?paperId=${encodeURIComponent(paperId)}&limit=8`, {
+                credentials: 'include',
+                signal: AbortSignal.timeout(10_000),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setNetworkData((prev) => ({ ...prev, [paperId]: data.references || [] }));
+            }
+        } catch {
+            console.warn('[DeepResearch] Failed to fetch references for', paperId);
+        }
+        setLoadingNetwork(null);
+    }, [networkData, expandedNetworkNode]);
+
     /* \u2500\u2500 Reset \u2500\u2500 */
     const handleReset = () => {
         abortRef.current = true;
@@ -931,6 +967,9 @@ Generate 3-6 rows for the most important outcomes.`;
         setGradeData([]);
         setShowGrade(false);
         setIsGeneratingGrade(false);
+        setShowNetwork(false);
+        setNetworkData({});
+        setExpandedNetworkNode(null);
     };
 
     /* \u2500\u2500 Stop \u2500\u2500 */
@@ -1629,6 +1668,15 @@ ER  - `;
                         >
                             {isGeneratingGrade ? 'Đang tạo...' : `📊 GRADE${gradeData.length > 0 ? ` (${gradeData.length})` : ''}`}
                         </Button>
+                        {pubmedPapers.length > 0 && (
+                            <Button
+                                icon={<FileText size={14} />}
+                                onClick={() => setShowNetwork(!showNetwork)}
+                                type={showNetwork ? 'primary' : 'default'}
+                            >
+                                🔗 Citation Network
+                            </Button>
+                        )}
                     </Flexbox>
 
                     {/* GRADE Evidence Quality Table */}
@@ -1691,6 +1739,62 @@ ER  - `;
                                     </table>
                                 </div>
                             )}
+                        </Flexbox>
+                    )}
+
+                    {/* Citation Network */}
+                    {showNetwork && pubmedPapers.length > 0 && (
+                        <Flexbox gap={8} style={{ background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: 10, padding: '12px 16px' }}>
+                            <Flexbox align={'center'} gap={6} horizontal>
+                                <span style={{ fontSize: 14, fontWeight: 700 }}>🔗 Citation Network</span>
+                                <Tag color="cyan" style={{ fontSize: 10 }}>References</Tag>
+                            </Flexbox>
+                            <div style={{ display: 'grid', gap: 4, maxHeight: 400, overflowY: 'auto' }}>
+                                {pubmedPapers.slice(0, 10).map((p) => {
+                                    const pid = p.pmid || p.title.slice(0, 30);
+                                    const isExpanded = expandedNetworkNode === pid;
+                                    const refs = networkData[pid];
+                                    const isLoading = loadingNetwork === pid;
+                                    return (
+                                        <div key={pid} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 6 }}>
+                                            <div
+                                                onClick={() => fetchReferences(pid)}
+                                                style={{ alignItems: 'center', cursor: 'pointer', display: 'flex', fontSize: 12, gap: 6 }}
+                                            >
+                                                <span style={{ color: '#3b82f6', fontSize: 10, width: 12 }}>{isExpanded ? '▼' : '▶'}</span>
+                                                <Tag color={p.source === 'semantic_scholar' ? 'purple' : 'blue'} style={{ fontSize: 8 }}>
+                                                    {p.source === 'semantic_scholar' ? 'S2' : 'PM'}
+                                                </Tag>
+                                                <span style={{ flex: 1, fontWeight: 500 }}>{p.title.slice(0, 80)}{p.title.length > 80 ? '...' : ''}</span>
+                                                {p.citationCount ? <Tag style={{ fontSize: 8 }}>📝 {p.citationCount}</Tag> : null}
+                                            </div>
+                                            {isExpanded && (
+                                                <div style={{ borderLeft: '2px solid rgba(59,130,246,0.2)', marginLeft: 16, marginTop: 4, paddingLeft: 10 }}>
+                                                    {isLoading ? (
+                                                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, padding: '4px 0' }}>⏳ Đang tải references...</div>
+                                                    ) : refs && refs.length > 0 ? (
+                                                        refs.map((r: NetworkRef) => (
+                                                            <a
+                                                                href={r.url}
+                                                                key={r.paperId}
+                                                                rel="noreferrer"
+                                                                style={{ color: '#60a5fa', display: 'block', fontSize: 11, padding: '2px 0', textDecoration: 'none' }}
+                                                                target="_blank"
+                                                            >
+                                                                {r.title.slice(0, 70)}{r.title.length > 70 ? '...' : ''}
+                                                                {r.year ? ` (${r.year})` : ''}
+                                                                {r.citationCount > 0 ? ` • ${r.citationCount} citations` : ''}
+                                                            </a>
+                                                        ))
+                                                    ) : refs ? (
+                                                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, padding: '4px 0' }}>Không tìm thấy references</div>
+                                                    ) : null}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </Flexbox>
                     )}
 
