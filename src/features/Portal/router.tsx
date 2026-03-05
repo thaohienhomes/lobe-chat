@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import React, { memo } from 'react';
 
 import { Artifacts } from './Artifacts';
 import { DeepResearch } from './DeepResearch';
@@ -59,14 +59,31 @@ const PortalBody = memo(() => {
     enabledList.push(enabled);
   }
 
-  for (const [i, element] of enabledList.entries()) {
-    const Body = items[i].Body;
-    if (element) {
-      return <Body />;
+  // Deep Research is items[0] — keep it always mounted so article generation
+  // continues when user closes the panel. Hide via CSS when not active.
+  const deepResearchEnabled = enabledList[0];
+  const DeepResearchBody = items[0].Body;
+
+  // Find which other portal item is active
+  let activeBody: React.ReactNode = null;
+  for (let i = 1; i < enabledList.length; i++) {
+    if (enabledList[i]) {
+      const Body = items[i].Body;
+      activeBody = <Body />;
+      break;
     }
   }
 
-  return <HomeBody />;
+  return (
+    <>
+      {/* Deep Research: always mounted, hidden when not the active panel */}
+      <div style={{ display: deepResearchEnabled && !activeBody ? undefined : 'none', height: '100%' }}>
+        <DeepResearchBody />
+      </div>
+      {/* Other portal items render normally */}
+      {activeBody || (!deepResearchEnabled && <HomeBody />)}
+    </>
+  );
 });
 
 export default PortalBody;
