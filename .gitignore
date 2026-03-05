@@ -131,3 +131,8 @@ vietnam-market-testing-config.json
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github\instructions\snyk_rules.instructions.md
+
+# Scientific Skills (cloned repo & generated KB files)
+/scientific-skills/
+/scientific-skills-kb/
+src/scientific-skills/content/

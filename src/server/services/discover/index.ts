@@ -11,6 +11,7 @@ import {
   DEFAULT_DISCOVER_PLUGIN_ITEM,
   DEFAULT_DISCOVER_PROVIDER_ITEM,
 } from '@/const/discover';
+import { scientificAgents } from '@/scientific-skills/agents';
 import { CURRENT_VERSION, isDesktop } from '@/const/version';
 import { normalizeLocale } from '@/locales/resources';
 import { AssistantStore } from '@/server/modules/AssistantStore';
@@ -209,6 +210,31 @@ export class DiscoverService {
 
   // ============================== Assistant Market ==============================
 
+  /**
+   * Build DiscoverAssistantItem entries from local scientific agents
+   */
+  private _getScientificAgentItems = (): DiscoverAssistantItem[] => {
+    return scientificAgents.map((agent) => ({
+      author: 'Phở Chat Scientific',
+      avatar: agent.meta.avatar,
+      category: 'academic' as any,
+      config: {
+        model: agent.config.model,
+        plugins: agent.config.plugins,
+        systemRole: agent.config.systemRole,
+      } as any,
+      createdAt: agent.createdAt,
+      description: agent.meta.description,
+      homepage: 'https://github.com/K-Dense-AI/claude-scientific-skills',
+      identifier: agent.identifier,
+      knowledgeCount: 0,
+      pluginCount: 1,
+      tags: agent.meta.tags,
+      title: agent.meta.title,
+      tokenUsage: agent.config.systemRole.length,
+    }));
+  };
+
   private _getAssistantList = async (locale?: string): Promise<DiscoverAssistantItem[]> => {
     log('_getAssistantList: locale=%s', locale);
     const normalizedLocale = normalizeLocale(locale);
@@ -218,8 +244,12 @@ export class DiscoverService {
       return [];
     }
     const result = list.map(({ meta, ...item }) => ({ ...item, ...meta }));
-    log('_getAssistantList: returning %d items', result.length);
-    return result;
+
+    // Merge local scientific agents into the list
+    const scientificItems = this._getScientificAgentItems();
+    const merged = [...scientificItems, ...result];
+    log('_getAssistantList: returning %d items (%d scientific + %d marketplace)', merged.length, scientificItems.length, result.length);
+    return merged;
   };
 
   getAssistantCategories = async (params: CategoryListQuery = {}): Promise<CategoryItem[]> => {
@@ -260,6 +290,16 @@ export class DiscoverService {
   }): Promise<DiscoverAssistantDetail | undefined> => {
     log('getAssistantDetail: params=%O', params);
     const { locale, identifier } = params;
+
+    // Check if this is a local scientific agent first
+    const sciAgent = this._getScientificAgentItems().find((a) => a.identifier === identifier);
+    if (sciAgent) {
+      const relatedSci = this._getScientificAgentItems()
+        .filter((a) => a.identifier !== identifier)
+        .slice(0, 6);
+      return { ...sciAgent, related: relatedSci } as DiscoverAssistantDetail;
+    }
+
     const normalizedLocale = normalizeLocale(locale);
     let data = await this.assistantStore.getAgent(identifier, normalizedLocale);
     if (!data) {
