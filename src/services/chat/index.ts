@@ -380,6 +380,54 @@ class ChatService {
       headers: { ...createHeadersWithPluginSettings(settings), ...traceHeader },
     });
 
+    // ─── Bundled plugin direct call (bypass gateway to avoid self-referential loop) ──
+    // The gateway proxy calls the plugin URL externally, but for bundled plugins hosted
+    // on the same server, this creates a loop: edge runtime → same host → HTML error.
+    // Instead, call the plugin API route directly via relative URL.
+    // Map: identifier → { apiName → url }
+    const bundledApiMap: Record<string, Record<string, string>> = {
+      'arxiv': { searchArxiv: '/api/plugins/arxiv/search' },
+      'clinical-calculator': {
+        calculate: '/api/plugins/clinical-calc/calculate',
+        getInfo: '/api/plugins/clinical-calc/info',
+      },
+      'doi-resolver': { resolveDOI: '/api/plugins/doi-resolver/resolve' },
+      'drug-interactions': {
+        checkInteraction: '/api/plugins/drug-interactions/check',
+        getAdverseEvents: '/api/plugins/drug-interactions/adverse-events',
+        searchDrug: '/api/plugins/drug-interactions/search',
+      },
+      'pubmed-search': { searchPubMed: '/api/plugins/pubmed/search' },
+      'semantic-scholar': { searchSemanticScholar: '/api/plugins/semantic-scholar/search' },
+    };
+
+    const pluginEndpoints = bundledApiMap[params.identifier];
+    if (pluginEndpoints) {
+      // Resolve the correct endpoint for this apiName, fallback to first entry
+      const directApiUrl = pluginEndpoints[params.apiName]
+        || Object.values(pluginEndpoints)[0];
+
+      // Call the plugin API directly — no gateway proxy needed
+      const args = typeof params.arguments === 'string'
+        ? JSON.parse(params.arguments)
+        : params.arguments;
+
+      const res = await fetch(directApiUrl, {
+        body: JSON.stringify(args),
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        method: 'POST',
+        signal: options?.signal,
+      });
+
+      if (!res.ok) {
+        throw await getMessageError(res);
+      }
+
+      const text = await res.text();
+      return { text, traceId: getTraceId(res) };
+    }
+
+    // ─── External plugins: use gateway proxy as usual ───
     const gatewayURL = manifest?.gateway ?? API_ENDPOINTS.gateway;
 
     const res = await fetch(gatewayURL, {
