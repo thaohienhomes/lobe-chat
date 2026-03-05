@@ -254,9 +254,9 @@ const useStyles = createStyles(({ css, token }) => ({
 
 /* ────────────────────────── helpers ────────────────────────── */
 
-async function callAI(model: string, prompt: string): Promise<string> {
+async function callAI(model: string, prompt: string, retries = 1): Promise<string> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90_000); // 90s timeout
+    const timeoutId = setTimeout(() => controller.abort('Timeout: request took too long'), 180_000); // 3 min timeout
 
     try {
         const res = await fetch('/api/research/ai-summary', {
@@ -273,6 +273,18 @@ async function callAI(model: string, prompt: string): Promise<string> {
         const data = await res.json();
         console.log('[DeepResearch] callAI response:', { length: data.text?.length, model: data.model, provider: data.provider });
         return data.text || '';
+    } catch (e: any) {
+        clearTimeout(timeoutId);
+        // Retry once on abort/timeout
+        if (retries > 0 && (e.name === 'AbortError' || e.message?.includes('abort'))) {
+            console.log('[DeepResearch] Retrying after abort...');
+            return callAI(model, prompt, retries - 1);
+        }
+        // Friendly error message for abort
+        if (e.name === 'AbortError') {
+            throw new Error('Request timed out — server may be overloaded. Please try again.');
+        }
+        throw e;
     } finally {
         clearTimeout(timeoutId);
     }
@@ -917,12 +929,26 @@ ${article.replaceAll('\n', '<br>\n')}
 
     /* ── BibTeX Export ── */
     const handleExportBibtex = () => {
-        if (pubmedPapers.length === 0 && citationResults.length === 0) {
+        // Use pubmedPapers if available, otherwise generate from citationResults
+        let papers = pubmedPapers;
+        if (papers.length === 0 && citationResults.length > 0) {
+            papers = citationResults
+                .filter(r => r.status === 'verified' && r.pmid)
+                .map(r => ({
+                    abstract: '',
+                    authors: r.citation,
+                    journal: '',
+                    pmid: r.pmid || '',
+                    title: r.title || r.citation,
+                    year: r.citation.match(/(\d{4})/)?.[1] || '',
+                }));
+        }
+        if (papers.length === 0) {
             message.warning('Chưa có references để export');
             return;
         }
-        const entries = pubmedPapers.map((p, i) => {
-            const key = `${p.authors.split(' ')[0] || 'Unknown'}${p.year}_${i + 1}`;
+        const entries = papers.map((p, i) => {
+            const key = `${(p.authors || 'Unknown').split(' ')[0]}${p.year}_${i + 1}`;
             return `@article{${key},
   author = {${p.authors}},
   title = {${p.title}},
@@ -937,11 +963,25 @@ ${article.replaceAll('\n', '<br>\n')}
     };
 
     const handleExportRis = () => {
-        if (pubmedPapers.length === 0) {
+        // Use pubmedPapers if available, otherwise generate from citationResults
+        let papers = pubmedPapers;
+        if (papers.length === 0 && citationResults.length > 0) {
+            papers = citationResults
+                .filter(r => r.status === 'verified' && r.pmid)
+                .map(r => ({
+                    abstract: '',
+                    authors: r.citation,
+                    journal: '',
+                    pmid: r.pmid || '',
+                    title: r.title || r.citation,
+                    year: r.citation.match(/(\d{4})/)?.[1] || '',
+                }));
+        }
+        if (papers.length === 0) {
             message.warning('Chưa có references để export');
             return;
         }
-        const entries = pubmedPapers.map((p) => {
+        const entries = papers.map((p) => {
             return `TY  - JOUR
 AU  - ${p.authors}
 TI  - ${p.title}
