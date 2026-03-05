@@ -440,6 +440,7 @@ const DeepResearchBody = memo(() => {
     const [isVerifying, setIsVerifying] = useState(false);
     const [showAllPapers, setShowAllPapers] = useState(false);
     const [showPrisma, setShowPrisma] = useState(false);
+    const [articleWaitLong, setArticleWaitLong] = useState(false);
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -659,6 +660,16 @@ Provide a thorough analysis from your perspective. Use markdown formatting with 
             startResearch();
         }
     }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Show "you can close" hint after 15s of waiting in article phase
+    useEffect(() => {
+        if (phase === 'article') {
+            setArticleWaitLong(false);
+            const timer = setTimeout(() => setArticleWaitLong(true), 15_000);
+            return () => clearTimeout(timer);
+        }
+        setArticleWaitLong(false);
+    }, [phase]);
 
     /* ── Phase 4 → Article (streaming) ── */
     const handleGenerateArticle = useCallback(async () => {
@@ -1392,6 +1403,11 @@ ER  - `;
                             <Tag color="blue" style={{ fontSize: 11 }}>{article.split(/\s+/).length} từ</Tag>
                         )}
                     </Flexbox>
+                    {articleWaitLong && article.length === 0 && (
+                        <div style={{ background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.2)', borderRadius: 8, fontSize: 12, lineHeight: 1.6, padding: '10px 14px' }}>
+                            ⏳ <strong>Quá trình viết bài có thể mất 1–3 phút.</strong> Bạn có thể đóng panel này và làm việc khác — bài viết sẽ tự động hoàn thành và hiển thị khi bạn quay lại.
+                        </div>
+                    )}
                     {article.length > 0 && (
                         <div style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, maxHeight: 400, overflowY: 'auto', padding: '12px 16px' }}>
                             <pre style={{ fontSize: 12, lineHeight: 1.6, margin: 0, opacity: 0.85, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{article.slice(-2000)}</pre>
