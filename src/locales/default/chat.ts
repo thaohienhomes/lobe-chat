@@ -84,6 +84,24 @@ export default {
   intentUnderstanding: {
     title: '正在理解并分析您的意图...',
   },
+  memory: {
+    effort: {
+      desc: '控制 AI 检索和更新记忆的积极程度',
+      high: { title: '高' },
+      low: { title: '低' },
+      medium: { title: '中' },
+      title: '记忆强度',
+    },
+    off: {
+      desc: '关闭此对话的记忆功能',
+      title: '关闭记忆',
+    },
+    on: {
+      desc: '记住对话中的偏好和信息',
+      title: '开启记忆',
+    },
+    title: '记忆',
+  },
   knowledgeBase: {
     all: '所有内容',
     allFiles: '所有文件',

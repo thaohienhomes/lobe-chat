@@ -66,6 +66,14 @@ export interface LobeAgentChatConfig {
    * Whether to enable Artifacts (interactive HTML/JS)
    */
   enableArtifact?: boolean;
+
+  /**
+   * Memory settings per agent
+   */
+  memory?: {
+    enabled?: boolean;
+    effort?: 'low' | 'medium' | 'high';
+  };
 }
 /* eslint-enable */
 
@@ -86,6 +94,12 @@ export const AgentChatConfigSchema = z.object({
     .object({
       model: z.string(),
       provider: z.string(),
+    })
+    .optional(),
+  memory: z
+    .object({
+      effort: z.enum(['low', 'medium', 'high']).optional(),
+      enabled: z.boolean().optional(),
     })
     .optional(),
   searchMode: z.enum(['off', 'on', 'auto']).optional(),

@@ -150,6 +150,53 @@ describe('agentChatConfigSelectors', () => {
     });
   });
 
+  describe('isMemoryEnabled', () => {
+    it('should return false when memory is not defined', () => {
+      const state = createMockState();
+      expect(agentChatConfigSelectors.isMemoryEnabled(state)).toBe(false);
+    });
+
+    it('should return false when memory.enabled is false', () => {
+      const state = createMockState({ memory: { enabled: false } });
+      expect(agentChatConfigSelectors.isMemoryEnabled(state)).toBe(false);
+    });
+
+    it('should return true when memory.enabled is true', () => {
+      const state = createMockState({ memory: { enabled: true } });
+      expect(agentChatConfigSelectors.isMemoryEnabled(state)).toBe(true);
+    });
+  });
+
+  describe('memoryEffort', () => {
+    it('should return "medium" when memory is not defined', () => {
+      const state = createMockState();
+      expect(agentChatConfigSelectors.memoryEffort(state)).toBe('medium');
+    });
+
+    it('should return the effort value when defined', () => {
+      const state = createMockState({ memory: { enabled: true, effort: 'high' } });
+      expect(agentChatConfigSelectors.memoryEffort(state)).toBe('high');
+    });
+
+    it('should return "medium" when effort is not set but memory exists', () => {
+      const state = createMockState({ memory: { enabled: true } });
+      expect(agentChatConfigSelectors.memoryEffort(state)).toBe('medium');
+    });
+  });
+
+  describe('memoryConfig', () => {
+    it('should return undefined when memory is not defined', () => {
+      const state = createMockState();
+      expect(agentChatConfigSelectors.memoryConfig(state)).toBeUndefined();
+    });
+
+    it('should return the full memory config when defined', () => {
+      const memory = { enabled: true, effort: 'high' as const };
+      const state = createMockState({ memory });
+      expect(agentChatConfigSelectors.memoryConfig(state)).toEqual(memory);
+    });
+  });
+
   describe('enableHistoryDivider', () => {
     it('should return false when enableHistoryCount is false', () => {
       const state = createMockState({ enableHistoryCount: false, historyCount: 5 });

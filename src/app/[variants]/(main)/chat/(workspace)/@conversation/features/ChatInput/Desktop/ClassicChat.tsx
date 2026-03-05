@@ -20,6 +20,7 @@ import MessageFromUrl from './MessageFromUrl';
 const leftActions: ActionKeys[] = [
   'model',
   'search',
+  'memory',
   'typo',
   'fileUpload',
   'knowledgeBase',

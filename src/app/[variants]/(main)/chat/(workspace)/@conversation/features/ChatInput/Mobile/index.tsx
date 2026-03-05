@@ -19,6 +19,7 @@ import { useSend } from '../useSend';
 const leftActions: ActionKeys[] = [
   'model',
   'search',
+  'memory',
   'fileUpload',
   'knowledgeBase',
   'tools',

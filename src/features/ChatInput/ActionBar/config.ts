@@ -2,6 +2,7 @@ import Clear from './Clear';
 import DeepResearch from './DeepResearch';
 import History from './History';
 import Knowledge from './Knowledge';
+import Memory from './Memory';
 import Model from './Model';
 import Params from './Params';
 import Research from './Research';
@@ -20,6 +21,7 @@ export const actionMap = {
   history: History,
   knowledgeBase: Knowledge,
   mainToken: MainToken,
+  memory: Memory,
   model: Model,
   params: Params,
   portalToken: PortalToken,
