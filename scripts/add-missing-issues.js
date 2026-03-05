@@ -1,11 +1,11 @@
 const API = 'https://api.linear.app/graphql';
-const KEY = 'REDACTED';
+const KEY = process.env.LINEAR_API_KEY || '';
 
 async function gql(q, v = {}) {
     const r = await fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': KEY },
         body: JSON.stringify({ query: q, variables: v }),
+        headers: { 'Authorization': KEY, 'Content-Type': 'application/json' },
+        method: 'POST',
     });
     const j = await r.json();
     if (j.errors) throw new Error(j.errors[0].message);
@@ -24,26 +24,26 @@ async function main() {
 
     // Create 'growth' label if not exists
     if (!labels.find(l => l.name === 'growth' && l.team?.id === pho.id)) {
-        await gql('mutation($i: IssueLabelCreateInput!) { issueLabelCreate(input: $i) { success } }', { i: { name: 'growth', color: '#eab308', teamId: pho.id } });
+        await gql('mutation($i: IssueLabelCreateInput!) { issueLabelCreate(input: $i) { success } }', { i: { color: '#eab308', name: 'growth', teamId: pho.id } });
         console.log('+ label: growth');
         const d2 = await gql('{ issueLabels(first: 200) { nodes { id name team { id } } } }');
         labels = d2.issueLabels.nodes;
     }
 
     const issues = [
-        { title: 'Weekly email digest', labels: ['feature', 'growth'] },
-        { title: 'Referral bonus automation', labels: ['feature', 'growth'] },
-        { title: 'SEO: programmatic pages for medical AI topics', labels: ['feature', 'growth'] },
-        { title: 'Community forum for medical users', labels: ['feature', 'growth'] },
-        { title: 'Health check dashboard', labels: ['feature', 'infra'] },
-        { title: 'Cost alert system', labels: ['feature', 'infra'] },
+        { labels: ['feature', 'growth'], title: 'Weekly email digest' },
+        { labels: ['feature', 'growth'], title: 'Referral bonus automation' },
+        { labels: ['feature', 'growth'], title: 'SEO: programmatic pages for medical AI topics' },
+        { labels: ['feature', 'growth'], title: 'Community forum for medical users' },
+        { labels: ['feature', 'infra'], title: 'Health check dashboard' },
+        { labels: ['feature', 'infra'], title: 'Cost alert system' },
     ];
 
     for (const issue of issues) {
         const labelIds = issue.labels.map(n => getLabel(n)).filter(Boolean);
         const result = await gql(
             'mutation($i: IssueCreateInput!) { issueCreate(input: $i) { success issue { identifier title } } }',
-            { i: { title: issue.title, teamId: pho.id, priority: 0, labelIds } }
+            { i: { labelIds, priority: 0, teamId: pho.id, title: issue.title } }
         );
         console.log('✅ Created:', issue.title);
     }
