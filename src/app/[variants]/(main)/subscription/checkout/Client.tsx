@@ -339,6 +339,24 @@ const plans = {
     yearlyPriceVND: 0,
   },
 
+  // Standard tier - vn_premium
+  vn_premium: {
+    code: 'vn_premium',
+    description: 'Cho người dùng thường xuyên với nhu cầu nghiên cứu',
+    features: [
+      'Unlimited Tier 1 & 2 models',
+      '20 Tier 3 messages/day',
+      '1,000,000 Phở Points/month',
+      'Scientific Skills (20/ngày)',
+      'Research Mode',
+      'Không quảng cáo',
+    ],
+    monthlyPoints: 1_000_000,
+    monthlyPriceVND: 129_000,
+    name: 'Phở Bò Viên',
+    yearlyPriceVND: 1_290_000,
+  },
+
   // Pro tier - vn_pro
   vn_pro: {
     code: 'vn_pro',
