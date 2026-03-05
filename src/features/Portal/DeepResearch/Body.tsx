@@ -1386,7 +1386,7 @@ ER  - `;
             {phase === 'article' && (
                 <Flexbox gap={12}>
                     <Flexbox align={'center'} gap={8} horizontal style={{ background: 'rgba(100,102,241,0.08)', borderRadius: 8, padding: '10px 16px' }}>
-                        <Loader2 className="animate-spin" size={18} />
+                        <Spin size="small" />
                         <span style={{ fontSize: 14, fontWeight: 600 }}>✍️ Đang viết bài tổng quan...</span>
                         {article.length > 0 && (
                             <Tag color="blue" style={{ fontSize: 11 }}>{article.split(/\s+/).length} từ</Tag>
