@@ -8,6 +8,7 @@ import { ChatMessage } from '@/types/message';
 
 import { RenderMessageExtra } from '../types';
 import ExtraContainer from './ExtraContainer';
+import ResearchSuggestion from './ResearchSuggestion';
 import TTS from './TTS';
 import Translate from './Translate';
 import Usage from './Usage';
@@ -15,6 +16,17 @@ import Usage from './Usage';
 export const AssistantMessageExtra: RenderMessageExtra = memo<ChatMessage>(
   ({ extra, id, content, metadata, tools }) => {
     const loading = useChatStore(chatSelectors.isMessageGenerating(id));
+
+    // Find the user's original question (the message just before this assistant reply)
+    const userQuestion = useChatStore((s) => {
+      const messages = chatSelectors.activeBaseChats(s);
+      const idx = messages.findIndex((m) => m.id === id);
+      if (idx > 0) {
+        const prev = messages[idx - 1];
+        if (prev.role === 'user') return prev.content;
+      }
+      return '';
+    });
 
     return (
       <Flexbox gap={8} style={{ marginTop: !!tools?.length ? 8 : 4 }}>
@@ -37,6 +49,10 @@ export const AssistantMessageExtra: RenderMessageExtra = memo<ChatMessage>(
             </ExtraContainer>
           )}
         </>
+        {/* Research suggestion banner — shown when user question has research intent */}
+        {content !== LOADING_FLAT && !loading && userQuestion && (
+          <ResearchSuggestion userQuestion={userQuestion} />
+        )}
       </Flexbox>
     );
   },

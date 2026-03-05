@@ -6,6 +6,7 @@ import { PortalArtifact } from '@/types/artifact';
 import { PortalFile } from './initialState';
 
 export interface ChatPortalAction {
+  clearPendingResearchQuery: () => void;
   closeArtifact: () => void;
   closeDeepResearch: () => void;
   closeFilePreview: () => void;
@@ -13,10 +14,10 @@ export interface ChatPortalAction {
   closeResearchMode: () => void;
   closeToolUI: () => void;
   openArtifact: (artifact: PortalArtifact) => void;
-  openDeepResearch: () => void;
+  openDeepResearch: (query?: string) => void;
   openFilePreview: (portal: PortalFile) => void;
   openMessageDetail: (messageId: string) => void;
-  openResearchMode: () => void;
+  openResearchMode: (query?: string) => void;
   openToolUI: (messageId: string, identifier: string) => void;
   togglePortal: (open?: boolean) => void;
 }
@@ -27,6 +28,9 @@ export const chatPortalSlice: StateCreator<
   [],
   ChatPortalAction
 > = (set, get) => ({
+  clearPendingResearchQuery: () => {
+    set({ pendingResearchQuery: undefined }, false, 'clearPendingResearchQuery');
+  },
   closeArtifact: () => {
     get().togglePortal(false);
     set({ portalArtifact: undefined }, false, 'closeArtifact');
@@ -53,10 +57,10 @@ export const chatPortalSlice: StateCreator<
 
     set({ portalArtifact: artifact }, false, 'openArtifact');
   },
-  openDeepResearch: () => {
+  openDeepResearch: (query) => {
     get().togglePortal(true);
 
-    set({ portalDeepResearch: true, portalResearch: false }, false, 'openDeepResearch');
+    set({ pendingResearchQuery: query, portalDeepResearch: true, portalResearch: false }, false, 'openDeepResearch');
   },
   openFilePreview: (portal) => {
     get().togglePortal(true);
@@ -68,10 +72,10 @@ export const chatPortalSlice: StateCreator<
 
     set({ portalMessageDetail: messageId }, false, 'openMessageDetail');
   },
-  openResearchMode: () => {
+  openResearchMode: (query) => {
     get().togglePortal(true);
 
-    set({ portalDeepResearch: false, portalResearch: true }, false, 'openResearchMode');
+    set({ pendingResearchQuery: query, portalDeepResearch: false, portalResearch: true }, false, 'openResearchMode');
   },
 
   openToolUI: (id, identifier) => {

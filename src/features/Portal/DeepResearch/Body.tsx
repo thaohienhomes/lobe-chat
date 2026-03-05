@@ -529,6 +529,16 @@ const DeepResearchBody = memo(() => {
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
 
+    // Consume pendingResearchQuery from portal store (auto-fill from chat suggestion)
+    const pendingQuery = useChatStore((s) => s.pendingResearchQuery);
+    const clearPendingQuery = useChatStore((s) => s.clearPendingResearchQuery);
+    useEffect(() => {
+        if (pendingQuery && phase === 'input') {
+            setQuestion(pendingQuery);
+            clearPendingQuery();
+        }
+    }, [pendingQuery, phase]);
+
     // Elapsed timer
     useEffect(() => {
         if (!startTime) { setElapsed(0); return; }

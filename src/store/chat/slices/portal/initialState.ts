@@ -20,11 +20,12 @@ declare module '@/types/artifact' {
 }
 
 export interface ChatPortalState {
+  pendingResearchQuery?: string;
   portalArtifact?: PortalArtifact;
   portalArtifactDisplayMode?: ArtifactDisplayMode;
+  portalDeepResearch?: boolean;
   portalFile?: PortalFile;
   portalMessageDetail?: string;
-  portalDeepResearch?: boolean;
   portalResearch?: boolean;
   portalThreadId?: string;
   portalToolMessage?: { id: string; identifier: string };
