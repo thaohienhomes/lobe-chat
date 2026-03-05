@@ -1014,28 +1014,33 @@ ER  - `;
     /* ── PRISMA Flowchart ── */
     const generatePrismaData = useCallback(() => {
         const totalIdentified = pubmedPapers.length;
-        const verifiedCount = citationResults.filter(r => r.status === 'verified').length;
-        const unverifiedCount = citationResults.filter(r => r.status === 'unverified').length;
-        const totalCitations = citationResults.length;
         const agentsDone = agents.filter(a => a.status === 'done').length;
         const outlineSections = outline.length;
 
+        let verifiedCount = citationResults.filter(r => r.status === 'verified').length;
+        let unverifiedCount = citationResults.filter(r => r.status === 'unverified').length;
+        let totalCitations = citationResults.length;
+
+        // Fallback: extract citations from article text if citationResults is empty
+        if (totalCitations === 0 && article.length > 0) {
+            const citationMatches = article.match(/\[[\s\w,.]+(?:et al\.?)?,?\s*\d{4}]/g);
+            const uniqueCitations = new Set(citationMatches || []);
+            totalCitations = uniqueCitations.size;
+            // When verification hasn't run yet, show all as "pending"
+            verifiedCount = isVerifying ? 0 : totalCitations;
+            unverifiedCount = 0;
+        }
+
         return {
             agentsDone,
-            mermaid: `graph TD
-    A["Records identified<br/>PubMed search: ${totalIdentified} papers"] --> B["Records screened<br/>by ${agentsDone} AI agents"]
-    B --> C["Citations extracted<br/>${totalCitations} unique citations"]
-    C --> D["Citations verified<br/>${verifiedCount} found on PubMed"]
-    C --> E["Citations unverified<br/>${unverifiedCount} not found"]
-    D --> F["Studies included<br/>in final review"]
-    F --> G["Article synthesized<br/>${outlineSections} sections"]`,
+            isVerifying,
             outlineSections,
             totalCitations,
             totalIdentified,
             unverifiedCount,
             verifiedCount,
         };
-    }, [pubmedPapers, citationResults, agents, outline]);
+    }, [pubmedPapers, citationResults, agents, outline, article, isVerifying]);
 
     /* ── Render ── */
     return (
@@ -1461,10 +1466,10 @@ ER  - `;
                                             </div>
                                             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', width: '80%' }}>
                                                 <div style={{ background: '#16a34a', borderRadius: 8, color: 'white', flex: 1, fontSize: 11, fontWeight: 600, padding: '6px 12px', textAlign: 'center' }}>
-                                                    ✅ Verified: {pd.verifiedCount}
+                                                    {pd.isVerifying ? '⏳ Đang xác minh...' : `✅ Verified: ${pd.verifiedCount}`}
                                                 </div>
                                                 <div style={{ background: '#d97706', borderRadius: 8, color: 'white', flex: 1, fontSize: 11, fontWeight: 600, padding: '6px 12px', textAlign: 'center' }}>
-                                                    ⚠️ Unverified: {pd.unverifiedCount}
+                                                    {pd.isVerifying ? '⏳ Chờ...' : `⚠️ Unverified: ${pd.unverifiedCount}`}
                                                 </div>
                                             </div>
                                             <span style={{ color: '#666', fontSize: 16 }}>▼</span>
