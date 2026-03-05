@@ -339,6 +339,7 @@ const nextConfig: NextConfig = {
       '@shikijs/langs',
       '@shikijs/themes',
       '@shikijs/engine-oniguruma',
+      'pdf-parse',
     ]
     : ['@xmldom/xmldom'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
@@ -385,9 +386,20 @@ const nextConfig: NextConfig = {
 
     // to ignore epub2 compile error
     // refs: https://github.com/lobehub/lobe-chat/discussions/6769
+    // pptxgenjs ESM bundle references node: built-ins — stub them for client builds
     config.resolve.fallback = {
       ...config.resolve.fallback,
+      fs: false,
+      http: false,
+      https: false,
+      'node:fs': false,
+      'node:http': false,
+      'node:https': false,
+      'node:stream': false,
+      'node:zlib': false,
+      stream: false,
       zipfile: false,
+      zlib: false,
     };
 
     if (assetPrefix && (assetPrefix.startsWith('http://') || assetPrefix.startsWith('https://'))) {
