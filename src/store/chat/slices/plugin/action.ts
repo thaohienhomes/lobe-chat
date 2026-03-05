@@ -22,6 +22,7 @@ import {
   MessageToolCall,
   ToolsCallingContext,
 } from '@/types/message';
+import { CitationItem } from '@/types/search';
 import { merge } from '@/utils/merge';
 import { safeParseJSON } from '@/utils/safeParseJSON';
 import { setNamespace } from '@/utils/storeDebug';
@@ -115,6 +116,29 @@ export const chatPlugin: StateCreator<
       internal_updateMessageContent,
       internal_updatePluginError,
     } = get();
+
+    // Gate scientific skills by subscription plan
+    if (payload.identifier === 'pho-scientific-skills') {
+      try {
+        const res = await fetch('/api/subscription/check-scientific-access');
+        const result = await res.json();
+        if (!result.allowed) {
+          await internal_updateMessageContent(
+            id,
+            JSON.stringify({
+              error: 'subscription_required',
+              message: result.reason || 'Scientific Skills requires a paid plan.',
+              upgradeUrl: '/settings/subscription',
+            }),
+          );
+          internal_togglePluginApiCalling(false, id);
+          return;
+        }
+      } catch {
+        /* fail open - allow on network error */
+      }
+    }
+
     const params = JSON.parse(payload.arguments);
     internal_togglePluginApiCalling(true, id, n('invokeBuiltinTool/start') as string);
     let data;
@@ -282,6 +306,60 @@ export const chatPlugin: StateCreator<
     });
 
     await Promise.all(messagePools);
+
+    // Extract academic citations from scientific skills tool results
+    // to populate SearchGrounding + BibliographySection (Perplexity-style)
+    const scientificTools = message.tools.filter(
+      (t) => t.identifier === 'pho-scientific-skills',
+    );
+    if (scientificTools.length > 0) {
+      const citations: CitationItem[] = [];
+      const searchQueries: string[] = [];
+
+      for (const tool of scientificTools) {
+        const toolMsg = chatSelectors.getMessageByToolCallId(tool.id)(get());
+        if (!toolMsg?.content || toolMsg.content === LOADING_FLAT) continue;
+
+        try {
+          const content = JSON.parse(toolMsg.content);
+          const papers = content.papers || content.results || [];
+          if (content.query) searchQueries.push(content.query);
+
+          for (const paper of papers) {
+            const paperUrl =
+              paper.url || (paper.doi ? `https://doi.org/${paper.doi}` : undefined);
+            if (!paperUrl) continue;
+
+            citations.push({
+              authors: Array.isArray(paper.authors) ? paper.authors.slice(0, 5) : undefined,
+              citationType: 'academic',
+              doi: paper.doi,
+              journal: paper.venue || paper.journal,
+              title: paper.title,
+              url: paperUrl,
+              year: paper.year,
+            });
+          }
+        } catch {
+          /* skip unparseable tool results */
+        }
+      }
+
+      if (citations.length > 0) {
+        const search = { citations, searchQueries };
+        get().internal_dispatchMessage({
+          id: assistantId,
+          type: 'updateMessage',
+          value: { search },
+        });
+        await messageService.updateMessage(assistantId, { search });
+
+        // Increment scientific skills usage counter (fire-and-forget)
+        fetch('/api/subscription/check-scientific-access', { method: 'POST' }).catch(() => {
+          /* silent */
+        });
+      }
+    }
 
     await get().internal_toggleMessageInToolsCalling(false, assistantId);
 

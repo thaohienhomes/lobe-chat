@@ -31,6 +31,9 @@ export interface PlanConfig {
   priceYearly?: number;
   prioritySupport: boolean;
 
+  /** Scientific Skills queries per day. -1 = unlimited, 0 = not available */
+  scientificSkillsLimit?: number;
+
   // New Feature Flags & Limits (matching Plan Comparison)
   storageGB: number;
   vectorEntries: number;
@@ -90,6 +93,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     priceYearly: 999_000,
 
     prioritySupport: false,
+    scientificSkillsLimit: -1,
     storageGB: 1,
     vectorEntries: 5000,
   },
@@ -108,6 +112,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
       '30 Tier 2 messages/day',
       'Conversation history',
       'File upload support',
+      'Scientific Skills (5/ngày)',
       'No ads',
     ],
 
@@ -121,6 +126,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     priceYearly: 690_000,
 
     prioritySupport: false,
+    scientificSkillsLimit: 5,
     // New Features
     storageGB: 1,
     vectorEntries: 5000,
@@ -149,16 +155,41 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     price: 0,
 
     prioritySupport: false,
+    scientificSkillsLimit: 0,
     // New Features
     storageGB: 0.5,
     vectorEntries: 0,
+  },
+  vn_premium: {
+    advancedAI: true,
+    code: 'vn_premium',
+    dailyTier2Limit: -1, // Unlimited T2
+    dailyTier3Limit: 20,
+    displayName: 'Phở Bò Viên (Standard)',
+    enableCustomAPI: true,
+    enableKnowledgeBase: true,
+    features: [
+      '1M Phở Points/tháng',
+      'Unlimited Tier 1 & 2 models',
+      '20 Tier 3 messages/day',
+      'Scientific Skills (20/ngày)',
+      'Research Mode',
+    ],
+    keyLimits: 'Unlim Tier 1 & 2. 20 Tier 3 msgs/day.',
+    monthlyPoints: 1_000_000,
+    price: 129_000,
+    priceYearly: 1_290_000,
+    prioritySupport: false,
+    scientificSkillsLimit: 20,
+    storageGB: 2,
+    vectorEntries: 10_000,
   },
   vn_pro: {
     advancedAI: false,
     code: 'vn_pro',
     dailyTier2Limit: -1, // Unlimited
     dailyTier3Limit: 50,
-    displayName: 'Phở Đặc Biệt (Premium)',
+    displayName: 'Phở Đặc Biệt (Pro)',
     enableCustomAPI: true,
     enableKnowledgeBase: true,
     features: [
@@ -166,6 +197,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
       '~40 videos hoặc ~200 ảnh',
       'Unlimited Tier 1 & 2 models',
       '50 Tier 3 messages/day',
+      'Scientific Skills không giới hạn',
       'Phở Studio access ✨',
     ],
     keyLimits: 'Unlim Tier 1 & 2. 50 Tier 3 msgs/day.',
@@ -173,6 +205,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     price: 199_000,
     priceYearly: 1_990_000,
     prioritySupport: true,
+    scientificSkillsLimit: -1,
     // New Features
     storageGB: 2,
     vectorEntries: 10_000,
@@ -194,6 +227,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     monthlyPoints: 2_000_000, // Pooled - set to same as Pro per spec interaction
     price: 299_000,
     prioritySupport: true,
+    scientificSkillsLimit: -1,
     // New Features
     storageGB: 4,
     vectorEntries: 20_000,
@@ -203,7 +237,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     code: 'vn_ultimate',
     dailyTier2Limit: -1, // Unlimited
     dailyTier3Limit: 100,
-    displayName: 'Phở Pro (Ultimate)',
+    displayName: 'Phở Siêu Đặc Biệt (Ultra)',
     enableCustomAPI: true,
     enableKnowledgeBase: true,
     features: [
@@ -211,6 +245,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
       '~100 videos hoặc ~500 ảnh',
       'Unlimited Tier 1 & 2 models',
       '100 Tier 3 messages/day',
+      'Scientific Skills không giới hạn',
       'Phở Studio access ✨',
       'Priority support',
     ],
@@ -219,6 +254,7 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     price: 499_000,
     priceYearly: 4_990_000,
     prioritySupport: true,
+    scientificSkillsLimit: -1,
     storageGB: 4,
     vectorEntries: 20_000,
   },
@@ -581,6 +617,15 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   // ============================================================================
   // VIETNAM PLANS - Primary providers: Vercel Gateway, Groq, Cerebras
   // ============================================================================
+  // VN Premium (Phở Bò Viên): All tiers with 20 Tier 3 messages/day
+  vn_premium: {
+    allowedTiers: [1, 2, 3],
+    dailyLimits: { tier2: -1, tier3: 20 },
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
+    models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
+  },
+
   // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
   vn_basic: {
     allowedTiers: [1, 2],
@@ -901,6 +946,16 @@ export const PLAN_USAGE_ESTIMATES = {
     videos: '0 (No Studio)',
   },
 
+  vn_premium: {
+    hasStudio: true,
+    images: '~100',
+    monthlyPoints: 1_000_000,
+    tier1Messages: '~200,000',
+    tier2Messages: '~6,600',
+    tier3Messages: '~1,000',
+    videos: '~20',
+  },
+
 
   // VN Plans
   vn_free: {
@@ -1176,6 +1231,15 @@ export function getRequiredProvidersForPlan(planCode: string): string[] {
   });
 
   return Array.from(providers);
+}
+
+/**
+ * Get Scientific Skills daily limit for a subscription plan
+ * Returns: -1 = unlimited, 0 = not available, N = daily limit
+ */
+export function getScientificSkillsLimit(planCode: string): number {
+  const plan = getPlanByCode(planCode);
+  return plan?.scientificSkillsLimit ?? 0;
 }
 
 /**

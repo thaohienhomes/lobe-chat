@@ -69,8 +69,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreatePay
       starter: 'Starter Plan',
       ultimate: 'Ultimate Plan',
       vn_basic: 'Phở Tái (Starter)',
-      vn_pro: 'Phở Đặc Biệt (Premium)',
-      vn_ultimate: 'Phở Pro (Ultimate)',
+      vn_premium: 'Phở Bò Viên (Standard)',
+      vn_pro: 'Phở Đặc Biệt (Pro)',
+      vn_ultimate: 'Phở Siêu Đặc Biệt (Ultra)',
     };
     const planName = planNames[planId as keyof typeof planNames] || 'Subscription Plan';
     const description = `pho.chat ${planName} - ${billingCycle} billing`;

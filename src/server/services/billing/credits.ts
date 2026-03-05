@@ -168,8 +168,103 @@ export async function processModelUsage(userId: string, cost: number, tier: numb
         );
       }
     }
+
+    // Sync to Upstash Redis for admin Rate Limit Inspector (fire-and-forget)
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      const today = new Date().toISOString().slice(0, 10);
+      const redisKey = `pho:ratelimit:${userId}:tier${tier}:${today}`;
+      fetch(`${process.env.UPSTASH_REDIS_REST_URL}/incr/${redisKey}`, {
+        headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+        method: 'POST',
+      })
+        .then(() => {
+          // Set TTL to 48 hours if key is new
+          fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${redisKey}/172800`, {
+            headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+            method: 'POST',
+          }).catch(() => {
+            /* silent */
+          });
+        })
+        .catch(() => {
+          /* silent */
+        });
+    }
   } catch (e) {
     console.error('❌ Failed to process model usage:', e);
+  }
+}
+
+/**
+ * Check if user can access Scientific Skills based on their plan
+ */
+export async function checkScientificSkillsAccess(
+  userId: string,
+  planId: string,
+): Promise<TierAccessResult> {
+  const { getScientificSkillsLimit } = await import('@/config/pricing');
+  const dailyLimit = getScientificSkillsLimit(planId);
+
+  if (dailyLimit === 0) {
+    return {
+      allowed: false,
+      reason: '🔬 Scientific Skills yêu cầu gói Phở Tái trở lên. Nâng cấp để sử dụng.',
+    };
+  }
+  if (dailyLimit === -1) {
+    return { allowed: true, dailyLimit: -1 };
+  }
+
+  // Check daily usage via Upstash Redis (preferred) or in-memory fallback
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    const today = new Date().toISOString().slice(0, 10);
+    const redisKey = `pho:scientific:${userId}:${today}`;
+    try {
+      const resp = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${redisKey}`, {
+        headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+      });
+      const data = (await resp.json()) as { result: string | null };
+      const currentUsage = data.result ? Number(data.result) : 0;
+      const remaining = dailyLimit - currentUsage;
+
+      if (remaining <= 0) {
+        return {
+          allowed: false,
+          dailyLimit,
+          reason: `🔬 Bạn đã dùng hết ${dailyLimit} lượt Scientific Skills hôm nay. Nâng cấp để có thêm.`,
+          remaining: 0,
+        };
+      }
+      return { allowed: true, dailyLimit, remaining };
+    } catch {
+      // Fall through to allow on Redis error
+      return { allowed: true, dailyLimit };
+    }
+  }
+
+  // No Redis = allow (fail open)
+  return { allowed: true, dailyLimit };
+}
+
+/**
+ * Increment Scientific Skills usage counter in Redis
+ */
+export async function incrementScientificSkillsUsage(userId: string): Promise<void> {
+  if (!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const redisKey = `pho:scientific:${userId}:${today}`;
+  try {
+    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/incr/${redisKey}`, {
+      headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+      method: 'POST',
+    });
+    // Set TTL to 48 hours
+    fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${redisKey}/172800`, {
+      headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+      method: 'POST',
+    }).catch(() => { /* silent */ });
+  } catch {
+    /* silent */
   }
 }
 

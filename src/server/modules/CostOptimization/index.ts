@@ -45,7 +45,7 @@ export const VND_PRICING_TIERS = {
   // Medical Beta tier — activated via promo code
   medical_beta: {
     dailyTier2Limit: 20,
-    dailyTier3Limit: 0,
+    dailyTier3Limit: 5, // Synced with pricing.ts (was 0, fixed to match)
     displayName: 'Phở Medical Beta 🏥',
     monthlyPoints: 500_000,
     monthlyVND: 83_250, // 999k/year ÷ 12
@@ -94,6 +94,15 @@ export const VND_PRICING_TIERS = {
     monthlyVND: 0,
   },
 
+  // Premium tier (Standard)
+  vn_premium: {
+    dailyTier2Limit: -1,
+    dailyTier3Limit: 20,
+    displayName: 'Phở Bò Viên',
+    monthlyPoints: 1_000_000,
+    monthlyVND: 129_000,
+  },
+
   // Pro tier
   vn_pro: {
     dailyTier2Limit: -1, // Unlimited
@@ -102,7 +111,6 @@ export const VND_PRICING_TIERS = {
     monthlyPoints: 2_000_000,
     monthlyVND: 199_000,
   },
-
 
   // Team tier
   vn_team: {
@@ -118,7 +126,7 @@ export const VND_PRICING_TIERS = {
   vn_ultimate: {
     dailyTier2Limit: -1, // Unlimited
     dailyTier3Limit: 100,
-    displayName: 'Phở Pro (Ultimate)',
+    displayName: 'Phở Siêu Đặc Biệt (Ultra)',
     monthlyPoints: 5_000_000,
     monthlyVND: 499_000,
   },
