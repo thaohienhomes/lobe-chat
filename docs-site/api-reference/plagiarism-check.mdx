@@ -1,0 +1,54 @@
+---
+title: API — Plagiarism Check
+description: Kiểm tra tương đồng văn bản với CrossRef database
+---
+
+# POST /api/plagiarism/check
+
+Quét so sánh văn bản với cơ sở dữ liệu học thuật CrossRef.
+
+## Request
+
+<ParamField body="text" type="string" required>
+  Văn bản cần kiểm tra tương đồng.
+</ParamField>
+
+<ParamField body="query" type="string">
+  Từ khóa tìm kiếm bổ sung (tuỳ chọn).
+</ParamField>
+
+## Response
+
+<ResponseField name="score" type="number">
+  Điểm tương đồng (0-100%).
+</ResponseField>
+
+<ResponseField name="sources" type="array">
+  Danh sách nguồn trùng lặp, mỗi source gồm:
+  - `title` — Tiêu đề bài báo
+  - `doi` — DOI link
+  - `similarity` — Mức tương đồng (0-1)
+  - `matched` — Đoạn text trùng lặp
+</ResponseField>
+
+<ResponseField name="provider" type="string">
+  Provider đã dùng: `crossref` hoặc `copyleaks`.
+</ResponseField>
+
+## Example
+
+```json
+// Response
+{
+  "score": 18,
+  "sources": [
+    {
+      "title": "A systematic review of metformin efficacy",
+      "doi": "10.1234/example.2024",
+      "similarity": 0.42,
+      "matched": "Metformin remains the first-line treatment..."
+    }
+  ],
+  "provider": "crossref"
+}
+```

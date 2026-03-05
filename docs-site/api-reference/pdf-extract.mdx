@@ -1,0 +1,53 @@
+---
+title: API — PDF Extract
+description: Trích xuất text từ file PDF
+---
+
+# POST /api/pdf/extract
+
+Trích xuất nội dung text từ file PDF upload hoặc URL.
+
+## Request
+
+<ParamField body="file" type="File" required>
+  File PDF cần trích xuất (multipart/form-data). Tối đa 20MB.
+</ParamField>
+
+<ParamField body="url" type="string">
+  URL đến file PDF (thay thế cho upload trực tiếp).
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Trạng thái xử lý.
+</ResponseField>
+
+<ResponseField name="text" type="string">
+  Nội dung text đã trích xuất. Giới hạn 50,000 ký tự.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Tiêu đề paper (từ metadata hoặc dòng đầu tiên).
+</ResponseField>
+
+<ResponseField name="pages" type="number">
+  Số trang PDF.
+</ResponseField>
+
+<ResponseField name="wordCount" type="number">
+  Số từ trong văn bản.
+</ResponseField>
+
+## Example
+
+```json
+// Response
+{
+  "success": true,
+  "text": "Background: This systematic review examines...",
+  "title": "Efficacy of Metformin in Type 2 Diabetes",
+  "pages": 12,
+  "wordCount": 8450
+}
+```

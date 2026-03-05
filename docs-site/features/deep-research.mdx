@@ -1,0 +1,74 @@
+---
+title: Deep Research
+description: Hệ thống multi-agent tự động thực hiện systematic review
+icon: brain
+---
+
+# Deep Research 🧠
+
+Deep Research là chế độ nghiên cứu **tự động hoàn toàn** sử dụng hệ thống **multi-agent AI**. Chỉ cần nhập câu hỏi, AI sẽ tự động thực hiện toàn bộ quy trình systematic review.
+
+## So sánh với Research Mode
+
+| Tiêu chí | Research Mode | Deep Research |
+|---|---|---|
+| Mức độ tự động | Bán tự động (user điều khiển) | Tự động hoàn toàn |
+| Thời gian | 30-60 phút (tùy user) | 5-15 phút |
+| Kiểm soát | Cao — user quyết định mỗi bước | Thấp — AI tự quyết định |
+| Chất lượng | Cao hơn (human-in-the-loop) | Tốt (AI-driven) |
+| Phù hợp | Nghiên cứu chuyên sâu | Khảo sát nhanh, tổng quan |
+
+## Cách sử dụng
+
+<Steps>
+  <Step title="Mở Deep Research">
+    - **Từ sidebar**: Bấm icon 🧠 Deep Research
+    - **Từ chat**: Khi hỏi về chủ đề nghiên cứu → bấm nút **"Dùng Deep Research"**
+  </Step>
+
+  <Step title="Nhập câu hỏi nghiên cứu">
+    Nhập câu hỏi cần nghiên cứu. Ví dụ:
+    - *"Hiệu quả của metformin trong điều trị đái tháo đường type 2 ở bệnh nhân cao tuổi"*
+    - *"So sánh immunotherapy và chemotherapy trong ung thư phổi không tế bào nhỏ"*
+  </Step>
+
+  <Step title="Chờ AI thực hiện">
+    Hệ thống multi-agent sẽ tự động:
+    1. Phân tích PICO từ câu hỏi
+    2. Tìm kiếm trên PubMed + OpenAlex
+    3. Sàng lọc papers
+    4. Đánh giá chất lượng (GRADE)
+    5. Viết systematic review
+    6. Tạo PRISMA flowchart
+    7. Xuất kết quả
+  </Step>
+
+  <Step title="Xem kết quả">
+    Kết quả bao gồm:
+    - **Bài viết systematic review** hoàn chỉnh
+    - **PRISMA Flow Diagram** (với tiến trình thời gian thực)
+    - **Danh sách references** (BibTeX / RIS)
+    - **Citation verification** (kiểm tra trích dẫn tự động)
+  </Step>
+</Steps>
+
+## Tính năng nổi bật
+
+<CardGroup cols={2}>
+  <Card title="Multi-Agent System" icon="users">
+    Nhiều AI agent phân công làm việc song song — tìm kiếm, phân tích, viết bài — giống một nhóm nghiên cứu thực thụ.
+  </Card>
+  <Card title="PubMed RAG" icon="database">
+    Tích hợp trực tiếp PubMed API với Retrieval-Augmented Generation cho kết quả chính xác nhất.
+  </Card>
+  <Card title="Citation Verification" icon="check-double">
+    Tự động kiểm tra xem mỗi trích dẫn có khớp với paper thực không. Dùng regex fallback nếu AI không chắc chắn.
+  </Card>
+  <Card title="PRISMA Real-time" icon="chart-line">
+    Tiến trình PRISMA flowchart hiển thị real-time khi agent đang làm việc.
+  </Card>
+</CardGroup>
+
+<Warning>
+  Deep Research phù hợp cho khảo sát nhanh và tổng quan tài liệu. Đối với nghiên cứu chính thức cần xuất bản, nên dùng **Research Mode** để kiểm soát từng bước.
+</Warning>

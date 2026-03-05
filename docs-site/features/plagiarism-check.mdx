@@ -1,0 +1,60 @@
+---
+title: Kiểm tra đạo văn
+description: Quét so sánh tương đồng với database học thuật CrossRef
+icon: shield-check
+---
+
+# Kiểm tra đạo văn 🛡️
+
+Tính năng kiểm tra mức độ tương đồng (similarity) của bài viết nghiên cứu với các nguồn trên cơ sở dữ liệu **CrossRef** — bao gồm hàng triệu bài xuất bản học thuật.
+
+## Cách sử dụng
+
+<Steps>
+  <Step title="Hoàn thành viết bài">
+    Hoàn thành giai đoạn **Writing** trong Research Mode.
+  </Step>
+  <Step title="Vào Publishing">
+    Chuyển sang giai đoạn **Publishing** → cuộn xuống phần **Plagiarism Checker**.
+  </Step>
+  <Step title="Bấm Scan">
+    Bấm **"Scan for Similarity"** → hệ thống trích xuất các câu quan trọng → so sánh với CrossRef.
+  </Step>
+  <Step title="Xem kết quả">
+    Kết quả gồm:
+    - **Điểm tương đồng** (0-100%)
+    - **Danh sách nguồn** trùng lặp (với DOI link)
+    - **Phân loại** mức độ theo màu
+  </Step>
+</Steps>
+
+## Phân loại kết quả
+
+| Mức độ | Điểm | Màu | Ý nghĩa |
+|---|---|---|---|
+| Very Low | 0-15% | 🟢 Xanh lá | An toàn — rất ít trùng lặp |
+| Low | 15-25% | 🟡 Vàng | Bình thường — trùng lặp thấp |
+| Moderate | 25-35% | 🟠 Cam | Cần xem xét lại một số đoạn |
+| High | 35-50% | 🔴 Đỏ | Cần chỉnh sửa — trùng lặp cao |
+| Very High | >50% | 🔴 Đỏ đậm | Cần viết lại — rất nhiều trùng lặp |
+
+## Nâng cấp: Copyleaks API
+
+Phiên bản miễn phí sử dụng **CrossRef** cho kiểm tra cơ bản. Để kiểm tra sâu hơn với database lớn hơn:
+
+<Accordion title="Cấu hình Copyleaks (tuỳ chọn)">
+  1. Đăng ký tại [copyleaks.com](https://copyleaks.com)
+  2. Lấy API Key
+  3. Thêm environment variable: `COPYLEAKS_API_KEY=your_key_here`
+  4. Thêm (tuỳ chọn): `COPYLEAKS_EMAIL=your_email`
+
+  **Copyleaks** hỗ trợ:
+  - Quét 16 tỷ+ trang web
+  - Hỗ trợ 100+ ngôn ngữ (bao gồm tiếng Việt)
+  - Phát hiện AI-generated content
+  - Phân tích chi tiết từng đoạn
+</Accordion>
+
+<Warning>
+  Kiểm tra đạo văn chỉ mang tính tham khảo. Luôn kiểm tra thủ công trước khi nộp bài.
+</Warning>

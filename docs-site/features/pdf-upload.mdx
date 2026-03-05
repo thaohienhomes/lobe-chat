@@ -1,0 +1,43 @@
+---
+title: Upload PDF nghiên cứu
+description: Trích xuất nội dung từ PDF và tự động tìm bài liên quan
+icon: file-pdf
+---
+
+# Upload PDF nghiên cứu 📄
+
+Tính năng cho phép bạn upload file PDF nghiên cứu trực tiếp vào Research Mode. Nội dung được trích xuất tự động và bổ sung vào danh sách papers.
+
+## Cách sử dụng
+
+<Steps>
+  <Step title="Mở Research Mode">
+    Bấm icon 🔬 Research trên sidebar → vào giai đoạn **Discovery**.
+  </Step>
+  <Step title="Kéo thả PDF">
+    Trong vùng trống (khi chưa có kết quả tìm kiếm), bạn sẽ thấy ô upload. **Kéo thả** hoặc **bấm chọn** file PDF.
+
+    - Hỗ trợ: PDF (tối đa **20MB**)
+    - Trích xuất: Text, tiêu đề, số trang, metadata
+  </Step>
+  <Step title="Tự động xử lý">
+    Sau khi upload:
+    1. ✅ Trích xuất text từ PDF (server-side)
+    2. ✅ Thêm paper vào danh sách
+    3. ✅ Tự động điền tiêu đề vào ô tìm kiếm
+    4. ✅ Sẵn sàng tìm kiếm bài liên quan
+  </Step>
+</Steps>
+
+## Kỹ thuật
+
+| Thông số | Chi tiết |
+|---|---|
+| Engine | `pdf-parse` (server-side extraction) |
+| Giới hạn file | 20MB |
+| API endpoint | `POST /api/pdf/extract` |
+| Output | Text content, title, page count, word count |
+
+<Tip>
+  **Mẹo:** Sau khi upload, nhấn **Enter** để tìm kiếm bài liên quan trên PubMed + OpenAlex dựa trên tiêu đề paper vừa upload.
+</Tip>

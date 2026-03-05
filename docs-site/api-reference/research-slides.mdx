@@ -1,0 +1,58 @@
+---
+title: API — Research Slides
+description: Tạo bộ slide trình bày từ dữ liệu nghiên cứu
+---
+
+# POST /api/research/slides
+
+Tạo bộ 14 slide học thuật từ kết quả nghiên cứu.
+
+## Request
+
+<ParamField body="query" type="string" required>
+  Câu hỏi nghiên cứu.
+</ParamField>
+
+<ParamField body="pico" type="object">
+  PICO framework: `{ population, intervention, comparison, outcome }`.
+</ParamField>
+
+<ParamField body="papers" type="array" required>
+  Danh sách papers (tối đa 10). Mỗi paper gồm: `title`, `authors`, `journal`, `year`, `doi`.
+</ParamField>
+
+<ParamField body="theme" type="string" default="medical">
+  Theme cho slides: `medical`, `academic`, hoặc `minimal`.
+</ParamField>
+
+<ParamField body="totalScreened" type="number">
+  Tổng số papers đã sàng lọc.
+</ParamField>
+
+<ParamField body="includedCount" type="number">
+  Số papers được chọn.
+</ParamField>
+
+## Response
+
+<ResponseField name="slides" type="array">
+  Mảng 14 slides, mỗi slide gồm:
+  - `title` — Tiêu đề slide
+  - `layout` — Kiểu layout: `title`, `content`, `table`
+  - `bullets` — Danh sách bullet points
+  - `tableData` — Dữ liệu bảng (nếu layout là `table`)
+  - `notes` — Speaker notes
+  - `subtitle` — Phụ đề (cho title slide)
+</ResponseField>
+
+<ResponseField name="theme" type="string">
+  Theme đã chọn.
+</ResponseField>
+
+<ResponseField name="query" type="string">
+  Câu hỏi nghiên cứu.
+</ResponseField>
+
+<ResponseField name="generatedAt" type="string">
+  Thời gian tạo (ISO 8601).
+</ResponseField>
