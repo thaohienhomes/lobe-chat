@@ -75,6 +75,23 @@ interface CitationResult {
     title?: string;
 }
 
+interface GradeRow {
+    imprecision: string;
+    inconsistency: string;
+    indirectness: string;
+    outcome: string;
+    overallQuality: 'High' | 'Moderate' | 'Low' | 'Very Low';
+    riskOfBias: string;
+    studyDesign: string;
+}
+
+const GRADE_QUALITY_COLORS: Record<string, { bg: string; emoji: string; text: string }> = {
+    'High': { bg: 'rgba(34,197,94,0.15)', emoji: '⬆️', text: '#22c55e' },
+    'Low': { bg: 'rgba(249,115,22,0.15)', emoji: '⬇️', text: '#f97316' },
+    'Moderate': { bg: 'rgba(234,179,8,0.15)', emoji: '➡️', text: '#eab308' },
+    'Very Low': { bg: 'rgba(239,68,68,0.15)', emoji: '⬇️⬇️', text: '#ef4444' },
+};
+
 const HISTORY_KEY = 'pho-deep-research-history';
 
 const LANGUAGES = [
@@ -449,6 +466,9 @@ const DeepResearchBody = memo(() => {
     const [showAllPapers, setShowAllPapers] = useState(false);
     const [showPrisma, setShowPrisma] = useState(false);
     const [articleWaitLong, setArticleWaitLong] = useState(false);
+    const [gradeData, setGradeData] = useState<GradeRow[]>([]);
+    const [showGrade, setShowGrade] = useState(false);
+    const [isGeneratingGrade, setIsGeneratingGrade] = useState(false);
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -785,6 +805,49 @@ Write the full article now in markdown format.`;
                     setProgressLines((prev) => [...prev, '⚠️ Không thể xác minh citations']);
                 }
                 setIsVerifying(false);
+
+                // Auto-generate GRADE evidence table
+                setIsGeneratingGrade(true);
+                setProgressLines((prev) => [...prev, '📊 Đang đánh giá chất lượng bằng chứng (GRADE)...']);
+                try {
+                    const agentFindings = agents.filter(a => a.content).map(a => `[${a.name}]: ${a.content.slice(0, 800)}`).join('\n');
+                    const gradePrompt = `You are an expert in evidence-based medicine and the GRADE (Grading of Recommendations, Assessment, Development and Evaluation) methodology.
+
+Based on the following systematic review article and research agent findings, generate a GRADE evidence quality assessment table.
+
+Research Question: ${question}
+
+Agent Findings:
+${agentFindings}
+
+Article excerpt:
+${finalArticle.slice(0, 3000)}
+
+For each key clinical outcome discussed, assess:
+1. Study Design (e.g., RCT, Observational, Case series)
+2. Risk of Bias (Serious/Not serious) 
+3. Inconsistency (Serious/Not serious)
+4. Indirectness (Serious/Not serious)
+5. Imprecision (Serious/Not serious)
+6. Overall Quality (High/Moderate/Low/Very Low)
+
+Respond with ONLY a valid JSON array, no markdown:
+[{"outcome":"...","studyDesign":"...","riskOfBias":"...","inconsistency":"...","indirectness":"...","imprecision":"...","overallQuality":"High|Moderate|Low|Very Low"}]
+
+Generate 3-6 rows for the most important outcomes.`;
+
+                    const gradeResult = await callAI(gradePrompt, model);
+                    const jsonMatch = gradeResult.match(/\[\s*{[\S\s]*?}\s*]/)?.[0];
+                    if (jsonMatch) {
+                        const parsed = JSON.parse(jsonMatch) as GradeRow[];
+                        setGradeData(parsed);
+                        setProgressLines((prev) => [...prev, `✅ GRADE: ${parsed.length} outcomes đã đánh giá`]);
+                    }
+                } catch (gradeErr) {
+                    console.warn('[DeepResearch] GRADE generation failed:', gradeErr);
+                    setProgressLines((prev) => [...prev, '⚠️ Không thể tạo GRADE table']);
+                }
+                setIsGeneratingGrade(false);
                 return; // Success — exit retry loop
             } catch (e: any) {
                 lastError = e;
@@ -815,6 +878,9 @@ Write the full article now in markdown format.`;
         setPubmedPapers([]);
         setCitationResults([]);
         setIsVerifying(false);
+        setGradeData([]);
+        setShowGrade(false);
+        setIsGeneratingGrade(false);
     };
 
     /* \u2500\u2500 Stop \u2500\u2500 */
@@ -1474,7 +1540,78 @@ ER  - `;
                                 PRISMA Flow
                             </Button>
                         )}
+                        <Button
+                            icon={<FileText size={14} />}
+                            loading={isGeneratingGrade}
+                            onClick={() => setShowGrade(!showGrade)}
+                            type={showGrade ? 'primary' : 'default'}
+                        >
+                            {isGeneratingGrade ? 'Đang tạo...' : `📊 GRADE${gradeData.length > 0 ? ` (${gradeData.length})` : ''}`}
+                        </Button>
                     </Flexbox>
+
+                    {/* GRADE Evidence Quality Table */}
+                    {showGrade && (
+                        <Flexbox gap={8} style={{ background: 'rgba(234,179,8,0.04)', border: '1px solid rgba(234,179,8,0.15)', borderRadius: 10, padding: '12px 16px' }}>
+                            <Flexbox align={'center'} gap={6} horizontal>
+                                <span style={{ fontSize: 14, fontWeight: 700 }}>📊 GRADE Evidence Quality</span>
+                                <Tag color="gold" style={{ fontSize: 10 }}>Evidence Assessment</Tag>
+                            </Flexbox>
+                            {gradeData.length === 0 ? (
+                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>
+                                    {isGeneratingGrade ? '⏳ Đang đánh giá chất lượng bằng chứng...' : 'Chưa có dữ liệu GRADE'}
+                                </div>
+                            ) : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ borderCollapse: 'collapse', fontSize: 12, width: '100%' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.15)' }}>
+                                                {['Outcome', 'Study Design', 'Risk of Bias', 'Inconsistency', 'Indirectness', 'Imprecision', 'Quality'].map((h) => (
+                                                    <th key={h} style={{ fontWeight: 700, padding: '6px 8px', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {gradeData.map((row, i) => {
+                                                const qc = GRADE_QUALITY_COLORS[row.overallQuality] || GRADE_QUALITY_COLORS['Very Low'];
+                                                return (
+                                                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                                                        <td style={{ fontWeight: 600, maxWidth: 200, padding: '6px 8px' }}>{row.outcome}</td>
+                                                        <td style={{ padding: '6px 8px' }}>{row.studyDesign}</td>
+                                                        <td style={{ color: row.riskOfBias?.toLowerCase().includes('serious') ? '#f97316' : '#22c55e', padding: '6px 8px' }}>
+                                                            {row.riskOfBias}
+                                                        </td>
+                                                        <td style={{ color: row.inconsistency?.toLowerCase().includes('serious') ? '#f97316' : '#22c55e', padding: '6px 8px' }}>
+                                                            {row.inconsistency}
+                                                        </td>
+                                                        <td style={{ color: row.indirectness?.toLowerCase().includes('serious') ? '#f97316' : '#22c55e', padding: '6px 8px' }}>
+                                                            {row.indirectness}
+                                                        </td>
+                                                        <td style={{ color: row.imprecision?.toLowerCase().includes('serious') ? '#f97316' : '#22c55e', padding: '6px 8px' }}>
+                                                            {row.imprecision}
+                                                        </td>
+                                                        <td style={{ padding: '6px 8px' }}>
+                                                            <span style={{
+                                                                background: qc.bg,
+                                                                borderRadius: 6,
+                                                                color: qc.text,
+                                                                fontSize: 11,
+                                                                fontWeight: 700,
+                                                                padding: '2px 8px',
+                                                                whiteSpace: 'nowrap',
+                                                            }}>
+                                                                {qc.emoji} {row.overallQuality}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </Flexbox>
+                    )}
 
                     {/* PRISMA Flowchart */}
                     {showPrisma && (
