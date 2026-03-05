@@ -4,7 +4,7 @@
  * Creates teams, labels, projects, and issues via GraphQL API
  */
 
-const LINEAR_API_KEY = process.env.LINEAR_API_KEY || 'REDACTED';
+const LINEAR_API_KEY = process.env.LINEAR_API_KEY || '';
 const API_URL = 'https://api.linear.app/graphql';
 
 // ============================================================
@@ -12,12 +12,12 @@ const API_URL = 'https://api.linear.app/graphql';
 // ============================================================
 async function gql(query, variables = {}) {
     const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': LINEAR_API_KEY,
-        },
         body: JSON.stringify({ query, variables }),
+        headers: {
+            'Authorization': LINEAR_API_KEY,
+            'Content-Type': 'application/json',
+        },
+        method: 'POST',
     });
     const json = await res.json();
     if (json.errors) {
@@ -44,16 +44,16 @@ async function verifyAndGetInfo() {
     console.log(`✅ Connected as: ${data.viewer.name} (${data.viewer.email})`);
     console.log(`🏢 Workspace: ${data.organization.name} (${data.organization.urlKey})`);
     console.log(`📋 Existing teams: ${data.teams.nodes.map(t => `${t.name} [${t.key}]`).join(', ')}`);
-    return { org: data.organization, existingTeams: data.teams.nodes };
+    return { existingTeams: data.teams.nodes, org: data.organization };
 }
 
 // ============================================================
 // Step 1: Create Teams
 // ============================================================
 const TEAMS_TO_CREATE = [
-    { name: 'Medical', key: 'MED', description: 'Plugin y khoa, nghiên cứu, drug DB, clinical tools', icon: '🏥', color: '#06b6d4' },
-    { name: 'Growth', key: 'GRO', description: 'Payment, pricing, email, landing page, SEO', icon: '💰', color: '#eab308' },
-    { name: 'Infra', key: 'INF', description: 'Deploy, monitoring, security, performance', icon: '🛡️', color: '#6b7280' },
+    { color: '#06b6d4', description: 'Plugin y khoa, nghiên cứu, drug DB, clinical tools', icon: '🏥', key: 'MED', name: 'Medical' },
+    { color: '#eab308', description: 'Payment, pricing, email, landing page, SEO', icon: '💰', key: 'GRO', name: 'Growth' },
+    { color: '#6b7280', description: 'Deploy, monitoring, security, performance', icon: '🛡️', key: 'INF', name: 'Infra' },
 ];
 
 async function createTeams(existingTeams) {
@@ -81,10 +81,10 @@ async function createTeams(existingTeams) {
         }
       `, {
                 input: {
-                    name: team.name,
-                    key: team.key,
-                    description: team.description,
                     color: team.color,
+                    description: team.description,
+                    key: team.key,
+                    name: team.name,
                 }
             });
             if (data.teamCreate.success) {
@@ -109,13 +109,13 @@ async function createTeams(existingTeams) {
 // Step 2: Create Labels
 // ============================================================
 const LABELS = [
-    { name: 'feature', color: '#22c55e' },
-    { name: 'bug', color: '#ef4444' },
-    { name: 'improvement', color: '#3b82f6' },
-    { name: 'research', color: '#a855f7' },
-    { name: 'infra', color: '#6b7280' },
-    { name: 'urgent', color: '#f97316' },
-    { name: 'medical-plugin', color: '#14b8a6' },
+    { color: '#22c55e', name: 'feature' },
+    { color: '#ef4444', name: 'bug' },
+    { color: '#3b82f6', name: 'improvement' },
+    { color: '#a855f7', name: 'research' },
+    { color: '#6b7280', name: 'infra' },
+    { color: '#f97316', name: 'urgent' },
+    { color: '#14b8a6', name: 'medical-plugin' },
 ];
 
 async function createLabels(teamMap) {
@@ -145,8 +145,8 @@ async function createLabels(teamMap) {
           }
         `, {
                     input: {
-                        name: label.name,
                         color: label.color,
+                        name: label.name,
                         teamId: teamId,
                     }
                 });
@@ -163,14 +163,14 @@ async function createLabels(teamMap) {
 // Step 3: Create Projects
 // ============================================================
 const PROJECTS = [
-    { name: 'Hardening Sprint', teamKey: 'INF', state: 'completed', description: 'Bug fixes, stability, performance hardening' },
-    { name: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', state: 'planned', description: 'PubMed v2, Citation Manager, search results' },
-    { name: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', state: 'planned', description: 'ClinicalTrials.gov, OpenAlex, FDA upgrade, PDF processing' },
-    { name: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', state: 'planned', description: 'Research assistant preset, evidence summary, auto-detect medical context' },
-    { name: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', state: 'planned', description: 'Clinical calculators, research session memory, plugin UX' },
-    { name: 'Admin Roadmap Tracker', teamKey: 'PHO', state: 'backlog', description: 'Admin dashboard & roadmap tracking tools' },
-    { name: 'Admin Second Brain', teamKey: 'PHO', state: 'backlog', description: 'Knowledge management & second brain features' },
-    { name: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', state: 'backlog', description: 'Disease research, variant interpreter, adverse events, rare disease, drug repurposing' },
+    { description: 'Bug fixes, stability, performance hardening', name: 'Hardening Sprint', state: 'completed', teamKey: 'INF' },
+    { description: 'PubMed v2, Citation Manager, search results', name: 'Medical Research Sprint 1: Search + Cite', state: 'planned', teamKey: 'MED' },
+    { description: 'ClinicalTrials.gov, OpenAlex, FDA upgrade, PDF processing', name: 'Medical Research Sprint 2: Read + New DBs', state: 'planned', teamKey: 'MED' },
+    { description: 'Research assistant preset, evidence summary, auto-detect medical context', name: 'Medical Research Sprint 3: Extract + Write', state: 'planned', teamKey: 'MED' },
+    { description: 'Clinical calculators, research session memory, plugin UX', name: 'Medical Research Sprint 4: Polish + Workspace', state: 'planned', teamKey: 'MED' },
+    { description: 'Admin dashboard & roadmap tracking tools', name: 'Admin Roadmap Tracker', state: 'backlog', teamKey: 'PHO' },
+    { description: 'Knowledge management & second brain features', name: 'Admin Second Brain', state: 'backlog', teamKey: 'PHO' },
+    { description: 'Disease research, variant interpreter, adverse events, rare disease, drug repurposing', name: 'Advanced Medical Research (Phase 2)', state: 'backlog', teamKey: 'MED' },
 ];
 
 async function createProjects(teamMap) {
@@ -207,10 +207,10 @@ async function createProjects(teamMap) {
         }
       `, {
                 input: {
-                    name: proj.name,
                     description: proj.description,
-                    teamIds: [teamId],
+                    name: proj.name,
                     state: proj.state,
+                    teamIds: [teamId],
                 }
             });
             if (result.projectCreate.success) {
@@ -232,57 +232,57 @@ async function createProjects(teamMap) {
 // Priority: 0=None, 1=Urgent, 2=High, 3=Medium, 4=Low
 const ISSUES = [
     // Sprint 1: Search + Cite
-    { title: 'PubMed v2: clickable links, MeSH terms, pagination', project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', priority: 2, labels: ['feature', 'medical-plugin'], estimate: 2 },
-    { title: 'Citation Manager plugin (PMID/DOI → APA/BibTeX/Vancouver)', project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', priority: 3, labels: ['feature', 'medical-plugin'], estimate: 3 },
-    { title: 'Search results as markdown table', project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', priority: 3, labels: ['improvement'], estimate: 1 },
-    { title: '"Export all citations" as .bib file', project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', priority: 4, labels: ['feature'], estimate: 1 },
+    { estimate: 2, labels: ['feature', 'medical-plugin'], priority: 2, project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', title: 'PubMed v2: clickable links, MeSH terms, pagination' },
+    { estimate: 3, labels: ['feature', 'medical-plugin'], priority: 3, project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', title: 'Citation Manager plugin (PMID/DOI → APA/BibTeX/Vancouver)' },
+    { estimate: 1, labels: ['improvement'], priority: 3, project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', title: 'Search results as markdown table' },
+    { estimate: 1, labels: ['feature'], priority: 4, project: 'Medical Research Sprint 1: Search + Cite', teamKey: 'MED', title: '"Export all citations" as .bib file' },
 
     // Sprint 2: Read + New DBs
-    { title: 'ClinicalTrials.gov plugin (free API, no auth)', project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', priority: 2, labels: ['feature', 'medical-plugin'], estimate: 3 },
-    { title: 'OpenAlex plugin (citation count, OA PDF links)', project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', priority: 2, labels: ['feature', 'medical-plugin'], estimate: 2 },
-    { title: 'FDA openFDA upgrade (real-time, replace hardcoded 42-drug DB)', project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', priority: 2, labels: ['improvement', 'medical-plugin'], estimate: 3 },
-    { title: 'Medical PDF processing (Gemini multimodal, IMRAD chunking)', project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', priority: 3, labels: ['feature', 'research'], estimate: 5 },
-    { title: 'Background PDF job + progress indicator', project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', priority: 3, labels: ['feature'], estimate: 2 },
+    { estimate: 3, labels: ['feature', 'medical-plugin'], priority: 2, project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', title: 'ClinicalTrials.gov plugin (free API, no auth)' },
+    { estimate: 2, labels: ['feature', 'medical-plugin'], priority: 2, project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', title: 'OpenAlex plugin (citation count, OA PDF links)' },
+    { estimate: 3, labels: ['improvement', 'medical-plugin'], priority: 2, project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', title: 'FDA openFDA upgrade (real-time, replace hardcoded 42-drug DB)' },
+    { estimate: 5, labels: ['feature', 'research'], priority: 3, project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', title: 'Medical PDF processing (Gemini multimodal, IMRAD chunking)' },
+    { estimate: 2, labels: ['feature'], priority: 3, project: 'Medical Research Sprint 2: Read + New DBs', teamKey: 'MED', title: 'Background PDF job + progress indicator' },
 
     // Sprint 3: Extract + Write
-    { title: '"Phở Medical Research" assistant preset (GRADE, PICO, IMRAD)', project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', priority: 3, labels: ['feature'], estimate: 2 },
-    { title: 'Evidence Summary template (auto-formatted after search)', project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', priority: 3, labels: ['feature'], estimate: 2 },
-    { title: 'Auto-detect medical context → suggest plugins', project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', priority: 3, labels: ['improvement'], estimate: 1 },
-    { title: 'Vietnamese summary option for medical responses', project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', priority: 3, labels: ['feature'], estimate: 1 },
-    { title: 'Legal disclaimer system (footer on every medical response)', project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', priority: 2, labels: ['feature'], estimate: 1 },
+    { estimate: 2, labels: ['feature'], priority: 3, project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', title: '"Phở Medical Research" assistant preset (GRADE, PICO, IMRAD)' },
+    { estimate: 2, labels: ['feature'], priority: 3, project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', title: 'Evidence Summary template (auto-formatted after search)' },
+    { estimate: 1, labels: ['improvement'], priority: 3, project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', title: 'Auto-detect medical context → suggest plugins' },
+    { estimate: 1, labels: ['feature'], priority: 3, project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', title: 'Vietnamese summary option for medical responses' },
+    { estimate: 1, labels: ['feature'], priority: 2, project: 'Medical Research Sprint 3: Extract + Write', teamKey: 'MED', title: 'Legal disclaimer system (footer on every medical response)' },
 
     // Sprint 4: Polish + Workspace
-    { title: 'Clinical calculators (eGFR, CHA₂DS₂-VASc, MELD-Na, BMI, NNT)', project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', priority: 3, labels: ['improvement', 'medical-plugin'], estimate: 3 },
-    { title: 'Research Session Memory (tag, save, bibliography)', project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', priority: 3, labels: ['feature'], estimate: 3 },
-    { title: 'Search history for researchers', project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', priority: 4, labels: ['feature'], estimate: 2 },
-    { title: 'Plugin response card rendering (paper cards, severity badges)', project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', priority: 3, labels: ['improvement'], estimate: 3 },
-    { title: 'Mobile quick-action buttons (PubMed, Drug Check, Calculator)', project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', priority: 3, labels: ['improvement'], estimate: 2 },
+    { estimate: 3, labels: ['improvement', 'medical-plugin'], priority: 3, project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', title: 'Clinical calculators (eGFR, CHA₂DS₂-VASc, MELD-Na, BMI, NNT)' },
+    { estimate: 3, labels: ['feature'], priority: 3, project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', title: 'Research Session Memory (tag, save, bibliography)' },
+    { estimate: 2, labels: ['feature'], priority: 4, project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', title: 'Search history for researchers' },
+    { estimate: 3, labels: ['improvement'], priority: 3, project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', title: 'Plugin response card rendering (paper cards, severity badges)' },
+    { estimate: 2, labels: ['improvement'], priority: 3, project: 'Medical Research Sprint 4: Polish + Workspace', teamKey: 'MED', title: 'Mobile quick-action buttons (PubMed, Drug Check, Calculator)' },
 
     // Cross-cutting
-    { title: 'Redis caching for PubMed/OpenAlex (1h TTL)', teamKey: 'MED', priority: 3, labels: ['infra'] },
-    { title: 'Error handling: fallback OpenAlex when PubMed down', teamKey: 'MED', priority: 3, labels: ['improvement'] },
-    { title: 'Drug not found → "Did you mean...?" suggestions', teamKey: 'MED', priority: 4, labels: ['improvement'] },
-    { title: 'VN-EN medical terminology mapping', teamKey: 'MED', priority: 4, labels: ['feature'] },
+    { labels: ['infra'], priority: 3, teamKey: 'MED', title: 'Redis caching for PubMed/OpenAlex (1h TTL)' },
+    { labels: ['improvement'], priority: 3, teamKey: 'MED', title: 'Error handling: fallback OpenAlex when PubMed down' },
+    { labels: ['improvement'], priority: 4, teamKey: 'MED', title: 'Drug not found → "Did you mean...?" suggestions' },
+    { labels: ['feature'], priority: 4, teamKey: 'MED', title: 'VN-EN medical terminology mapping' },
 
     // Backlog: Future
-    { title: 'Weekly email digest', teamKey: 'GRO', priority: 0, labels: ['feature'] },
-    { title: 'API key generation UI (/settings/api)', teamKey: 'PHO', priority: 0, labels: ['feature'] },
-    { title: 'Public changelog page', teamKey: 'PHO', priority: 0, labels: ['feature'] },
-    { title: 'User feedback widget', teamKey: 'PHO', priority: 0, labels: ['feature'] },
-    { title: 'Health check dashboard', teamKey: 'INF', priority: 0, labels: ['feature'] },
-    { title: 'Cost alert system', teamKey: 'INF', priority: 0, labels: ['feature'] },
-    { title: 'Feature flags for beta access', teamKey: 'PHO', priority: 0, labels: ['feature'] },
-    { title: 'Referral bonus automation', teamKey: 'GRO', priority: 0, labels: ['feature'] },
-    { title: 'SEO: programmatic pages for medical AI topics', teamKey: 'GRO', priority: 0, labels: ['feature'] },
-    { title: 'Community forum for medical users', teamKey: 'GRO', priority: 0, labels: ['feature'] },
+    { labels: ['feature'], priority: 0, teamKey: 'GRO', title: 'Weekly email digest' },
+    { labels: ['feature'], priority: 0, teamKey: 'PHO', title: 'API key generation UI (/settings/api)' },
+    { labels: ['feature'], priority: 0, teamKey: 'PHO', title: 'Public changelog page' },
+    { labels: ['feature'], priority: 0, teamKey: 'PHO', title: 'User feedback widget' },
+    { labels: ['feature'], priority: 0, teamKey: 'INF', title: 'Health check dashboard' },
+    { labels: ['feature'], priority: 0, teamKey: 'INF', title: 'Cost alert system' },
+    { labels: ['feature'], priority: 0, teamKey: 'PHO', title: 'Feature flags for beta access' },
+    { labels: ['feature'], priority: 0, teamKey: 'GRO', title: 'Referral bonus automation' },
+    { labels: ['feature'], priority: 0, teamKey: 'GRO', title: 'SEO: programmatic pages for medical AI topics' },
+    { labels: ['feature'], priority: 0, teamKey: 'GRO', title: 'Community forum for medical users' },
 
     // Phase 2: Advanced
-    { title: 'Disease Research plugin (DisGeNET + OMIM API)', project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', priority: 3, labels: ['feature', 'medical-plugin', 'research'] },
-    { title: 'Variant Interpreter plugin (ClinVar + OncoKB)', project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', priority: 3, labels: ['feature', 'medical-plugin', 'research'] },
-    { title: 'Adverse Event Detector plugin (FDA FAERS)', project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', priority: 3, labels: ['feature', 'medical-plugin'] },
-    { title: 'Rare Disease Helper plugin (Orphanet + OMIM)', project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', priority: 4, labels: ['feature', 'medical-plugin', 'research'] },
-    { title: 'Drug Repurposing plugin (DrugBank + DisGeNET)', project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', priority: 4, labels: ['feature', 'medical-plugin', 'research'] },
-    { title: 'Evaluate ToolUniverse MCP integration (Harvard MIMS)', project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', priority: 4, labels: ['research'] },
+    { labels: ['feature', 'medical-plugin', 'research'], priority: 3, project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', title: 'Disease Research plugin (DisGeNET + OMIM API)' },
+    { labels: ['feature', 'medical-plugin', 'research'], priority: 3, project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', title: 'Variant Interpreter plugin (ClinVar + OncoKB)' },
+    { labels: ['feature', 'medical-plugin'], priority: 3, project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', title: 'Adverse Event Detector plugin (FDA FAERS)' },
+    { labels: ['feature', 'medical-plugin', 'research'], priority: 4, project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', title: 'Rare Disease Helper plugin (Orphanet + OMIM)' },
+    { labels: ['feature', 'medical-plugin', 'research'], priority: 4, project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', title: 'Drug Repurposing plugin (DrugBank + DisGeNET)' },
+    { labels: ['research'], priority: 4, project: 'Advanced Medical Research (Phase 2)', teamKey: 'MED', title: 'Evaluate ToolUniverse MCP integration (Harvard MIMS)' },
 ];
 
 async function createIssues(teamMap, projectMap) {
@@ -304,7 +304,7 @@ async function createIssues(teamMap, projectMap) {
 
     for (const issue of ISSUES) {
         if (existingTitles.has(issue.title)) {
-            console.log(`  ⏩ "${issue.title.substring(0, 50)}..." already exists`);
+            console.log(`  ⏩ "${issue.title.slice(0, 50)}..." already exists`);
             skipped++;
             continue;
         }
@@ -326,10 +326,10 @@ async function createIssues(teamMap, projectMap) {
         }
 
         const input = {
-            title: issue.title,
-            teamId: teamId,
-            priority: issue.priority,
             labelIds: labelIds,
+            priority: issue.priority,
+            teamId: teamId,
+            title: issue.title,
         };
 
         if (issue.estimate) input.estimate = issue.estimate;
@@ -346,7 +346,7 @@ async function createIssues(teamMap, projectMap) {
           }
         }
       `, { input });
-            console.log(`  ✅ Created: ${issue.title.substring(0, 60)}`);
+            console.log(`  ✅ Created: ${issue.title.slice(0, 60)}`);
             created++;
         } catch (e) {
             console.error(`  ❌ Failed: ${issue.title} — ${e.message}`);
@@ -379,7 +379,7 @@ async function setupCycles(teamMap) {
             } else {
                 console.log(`  ⚠️  Team ${key}: No cycles. Enable manually in Linear → Team Settings → Cycles`);
             }
-        } catch (e) {
+        } catch {
             console.log(`  ⚠️  Team ${key}: Could not check cycles`);
         }
     }
