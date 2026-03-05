@@ -13,6 +13,7 @@ import {
     Download,
     Eye,
     EyeOff,
+    FileText,
     Loader2,
     MessageSquare,
     Pencil,
@@ -426,6 +427,7 @@ const DeepResearchBody = memo(() => {
     const [citationResults, setCitationResults] = useState<CitationResult[]>([]);
     const [isVerifying, setIsVerifying] = useState(false);
     const [showAllPapers, setShowAllPapers] = useState(false);
+    const [showPrisma, setShowPrisma] = useState(false);
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -913,6 +915,72 @@ ${article.replaceAll('\n', '<br>\n')}
         message.success('Đã sao chép vào clipboard');
     };
 
+    /* ── BibTeX Export ── */
+    const handleExportBibtex = () => {
+        if (pubmedPapers.length === 0 && citationResults.length === 0) {
+            message.warning('Chưa có references để export');
+            return;
+        }
+        const entries = pubmedPapers.map((p, i) => {
+            const key = `${p.authors.split(' ')[0] || 'Unknown'}${p.year}_${i + 1}`;
+            return `@article{${key},
+  author = {${p.authors}},
+  title = {${p.title}},
+  journal = {${p.journal}},
+  year = {${p.year}},
+  pmid = {${p.pmid}},
+  url = {https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/}
+}`;
+        });
+        downloadFile(entries.join('\n\n'), `deep-research-refs-${Date.now()}.bib`, 'application/x-bibtex');
+        message.success(`Đã export ${entries.length} references (BibTeX)`);
+    };
+
+    const handleExportRis = () => {
+        if (pubmedPapers.length === 0) {
+            message.warning('Chưa có references để export');
+            return;
+        }
+        const entries = pubmedPapers.map((p) => {
+            return `TY  - JOUR
+AU  - ${p.authors}
+TI  - ${p.title}
+JO  - ${p.journal}
+PY  - ${p.year}
+AN  - ${p.pmid}
+UR  - https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/
+ER  - `;
+        });
+        downloadFile(entries.join('\n\n'), `deep-research-refs-${Date.now()}.ris`, 'application/x-research-info-systems');
+        message.success(`Đã export ${entries.length} references (RIS)`);
+    };
+
+    /* ── PRISMA Flowchart ── */
+    const generatePrismaData = useCallback(() => {
+        const totalIdentified = pubmedPapers.length;
+        const verifiedCount = citationResults.filter(r => r.status === 'verified').length;
+        const unverifiedCount = citationResults.filter(r => r.status === 'unverified').length;
+        const totalCitations = citationResults.length;
+        const agentsDone = agents.filter(a => a.status === 'done').length;
+        const outlineSections = outline.length;
+
+        return {
+            agentsDone,
+            mermaid: `graph TD
+    A["Records identified<br/>PubMed search: ${totalIdentified} papers"] --> B["Records screened<br/>by ${agentsDone} AI agents"]
+    B --> C["Citations extracted<br/>${totalCitations} unique citations"]
+    C --> D["Citations verified<br/>${verifiedCount} found on PubMed"]
+    C --> E["Citations unverified<br/>${unverifiedCount} not found"]
+    D --> F["Studies included<br/>in final review"]
+    F --> G["Article synthesized<br/>${outlineSections} sections"]`,
+            outlineSections,
+            totalCitations,
+            totalIdentified,
+            unverifiedCount,
+            verifiedCount,
+        };
+    }, [pubmedPapers, citationResults, agents, outline]);
+
     /* ── Render ── */
     return (
         <Flexbox className={styles.container} gap={16}>
@@ -1271,6 +1339,9 @@ ${article.replaceAll('\n', '<br>\n')}
                                     { key: 'md', label: '📄 Markdown (.md)', onClick: handleDownloadMd },
                                     { key: 'html', label: '🌐 HTML (.html)', onClick: handleDownloadHtml },
                                     { key: 'pdf', label: '🖨️ In / PDF', onClick: handlePrintPdf },
+                                    { type: 'divider' as const },
+                                    { key: 'bib', label: '📚 BibTeX (.bib) - Zotero/Mendeley', onClick: handleExportBibtex },
+                                    { key: 'ris', label: '📚 RIS (.ris) - EndNote', onClick: handleExportRis },
                                 ],
                             }}
                         >
@@ -1286,7 +1357,60 @@ ${article.replaceAll('\n', '<br>\n')}
                         <Button icon={<RefreshCw size={14} />} onClick={handleReset}>
                             Nghiên cứu mới
                         </Button>
+                        {pubmedPapers.length > 0 && (
+                            <Button
+                                icon={<FileText size={14} />}
+                                onClick={() => setShowPrisma(!showPrisma)}
+                                type={showPrisma ? 'primary' : 'default'}
+                            >
+                                PRISMA Flow
+                            </Button>
+                        )}
                     </Flexbox>
+
+                    {/* PRISMA Flowchart */}
+                    {showPrisma && (
+                        <Flexbox gap={8} style={{ background: 'rgba(100,102,241,0.06)', border: '1px solid rgba(100,102,241,0.15)', borderRadius: 10, padding: '12px 16px' }}>
+                            <Flexbox align={'center'} gap={6} horizontal>
+                                <FileText size={14} />
+                                <span style={{ fontSize: 14, fontWeight: 700 }}>PRISMA Flow Diagram</span>
+                                <Tag color="purple" style={{ fontSize: 10 }}>Systematic Review</Tag>
+                            </Flexbox>
+                            {(() => {
+                                const pd = generatePrismaData();
+                                return (
+                                    <div style={{ display: 'grid', gap: 6 }}>
+                                        {/* Visual flowchart as styled boxes */}
+                                        <div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            <div style={{ background: '#4f46e5', borderRadius: 8, color: 'white', fontSize: 12, fontWeight: 600, padding: '8px 16px', textAlign: 'center', width: '80%' }}>
+                                                Records identified: {pd.totalIdentified} papers (PubMed)
+                                            </div>
+                                            <span style={{ color: '#666', fontSize: 16 }}>▼</span>
+                                            <div style={{ background: '#7c3aed', borderRadius: 8, color: 'white', fontSize: 12, fontWeight: 600, padding: '8px 16px', textAlign: 'center', width: '80%' }}>
+                                                Screened by {pd.agentsDone} AI Research Agents
+                                            </div>
+                                            <span style={{ color: '#666', fontSize: 16 }}>▼</span>
+                                            <div style={{ background: '#2563eb', borderRadius: 8, color: 'white', fontSize: 12, fontWeight: 600, padding: '8px 16px', textAlign: 'center', width: '80%' }}>
+                                                Citations extracted: {pd.totalCitations} unique citations
+                                            </div>
+                                            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', width: '80%' }}>
+                                                <div style={{ background: '#16a34a', borderRadius: 8, color: 'white', flex: 1, fontSize: 11, fontWeight: 600, padding: '6px 12px', textAlign: 'center' }}>
+                                                    ✅ Verified: {pd.verifiedCount}
+                                                </div>
+                                                <div style={{ background: '#d97706', borderRadius: 8, color: 'white', flex: 1, fontSize: 11, fontWeight: 600, padding: '6px 12px', textAlign: 'center' }}>
+                                                    ⚠️ Unverified: {pd.unverifiedCount}
+                                                </div>
+                                            </div>
+                                            <span style={{ color: '#666', fontSize: 16 }}>▼</span>
+                                            <div style={{ background: '#059669', borderRadius: 8, color: 'white', fontSize: 12, fontWeight: 600, padding: '8px 16px', textAlign: 'center', width: '80%' }}>
+                                                Article synthesized: {pd.outlineSections} sections
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                        </Flexbox>
+                    )}
 
                     {/* Citation Verification */}
                     {(citationResults.length > 0 || isVerifying) && (
