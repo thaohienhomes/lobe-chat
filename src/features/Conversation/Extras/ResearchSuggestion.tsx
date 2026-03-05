@@ -9,35 +9,53 @@ import { Flexbox } from 'react-layout-kit';
 import { useChatStore } from '@/store/chat';
 
 /* ── Research intent detection patterns ── */
-const RESEARCH_PATTERNS = [
-    // Medical/Clinical terms
-    /\b(efficacy|clinical trial|randomized|meta-analysis|systematic review)\b/i,
-    /\b(rct|cohort|case.control|cross.sectional|observational)\b/i,
-    /\b(outcome|mortality|morbidity|survival|hazard ratio|odds ratio|relative risk)\b/i,
-    /\b(pubmed|medline|cochrane|grade|prisma)\b/i,
-    /\b(placebo|double.blind|intervention|treatment arm)\b/i,
-    // Scientific research
-    /\b(research|study|findings|evidence|literature|published|peer.review)\b/i,
-    /\b(hypothesis|methodology|p.value|statistical|significance|confidence interval)\b/i,
-    /\b(sample size|population|inclusion criteria|exclusion criteria)\b/i,
-    // Vietnamese
-    /\b(nghiên cứu|y văn|bằng chứng|lâm sàng|thử nghiệm|tổng quan|phân tích gộp)\b/i,
-    /\b(hiệu quả|điều trị|so sánh|bệnh nhân|kết quả)\b/i,
-    // URLs to research databases
+// "Strong" patterns — a single match is enough to trigger
+const STRONG_RESEARCH_PATTERNS = [
+    /\b(meta-analysis|systematic review|tổng quan hệ thống|phân tích gộp)\b/i,
+    /\b(clinical trial|thử nghiệm lâm sàng|randomized controlled)\b/i,
+    /\b(pubmed|medline|cochrane|prisma)\b/i,
     /pubmed\.ncbi|scholar\.google|doi\.org|arxiv\.org|semanticscholar\.org/i,
 ];
 
+// "Weak" patterns — need ≥2 matches to trigger
+const WEAK_RESEARCH_PATTERNS = [
+    // Medical/Clinical
+    /\b(efficacy|hiệu quả|outcome|kết quả)\b/i,
+    /\b(rct|cohort|case.control|cross.sectional|observational)\b/i,
+    /\b(mortality|morbidity|survival|hazard ratio|odds ratio|relative risk)\b/i,
+    /\b(placebo|double.blind|intervention|treatment arm)\b/i,
+    /\b(therapy|therapeutic|điều trị|liệu pháp|phác đồ)\b/i,
+    /\b(cancer|ung thư|tumor|carcinoma|lymphoma|leukemia)\b/i,
+    /\b(bệnh nhân|patient|disease|syndrome|disorder)\b/i,
+    // Research / comparison language
+    /\b(nghiên cứu|research|study|evidence|bằng chứng|y văn)\b/i,
+    /\b(so sánh|compare|comparison|versus|vs\.?)\b/i,
+    /\b(hypothesis|methodology|p.value|statistical|significance)\b/i,
+    /\b(sample size|population|inclusion criteria|exclusion criteria)\b/i,
+    // Drug / treatment names (common patterns)
+    /\b(monoclonal antibody|kháng thể|bispecific|car-t|chimeric)\b/i,
+    /\b(inhibitor|agonist|antagonist|receptor|pathway)\b/i,
+];
+
 /**
- * Count how many pattern groups the text matches.
- * Returns true if ≥ 2 pattern groups match (high research intent).
+ * Check if text has research intent.
+ * - 1 strong pattern match → true
+ * - 2+ weak pattern matches → true
  */
 function hasResearchIntent(text: string): boolean {
-    if (!text || text.length < 20) return false;
-    let matchCount = 0;
-    for (const pattern of RESEARCH_PATTERNS) {
-        if (pattern.test(text)) {
-            matchCount++;
-            if (matchCount >= 2) return true;
+    if (!text || text.length < 15) return false;
+
+    // Strong patterns: any single match is enough
+    for (const p of STRONG_RESEARCH_PATTERNS) {
+        if (p.test(text)) return true;
+    }
+
+    // Weak patterns: need ≥2
+    let weakCount = 0;
+    for (const p of WEAK_RESEARCH_PATTERNS) {
+        if (p.test(text)) {
+            weakCount++;
+            if (weakCount >= 2) return true;
         }
     }
     return false;
