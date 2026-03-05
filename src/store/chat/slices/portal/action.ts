@@ -32,6 +32,7 @@ export const chatPortalSlice: StateCreator<
     set({ portalArtifact: undefined }, false, 'closeArtifact');
   },
   closeDeepResearch: () => {
+    get().togglePortal(false);
     set({ portalDeepResearch: false }, false, 'closeDeepResearch');
   },
   closeFilePreview: () => {
@@ -41,6 +42,7 @@ export const chatPortalSlice: StateCreator<
     set({ portalMessageDetail: undefined }, false, 'openMessageDetail');
   },
   closeResearchMode: () => {
+    get().togglePortal(false);
     set({ portalResearch: false }, false, 'closeResearchMode');
   },
   closeToolUI: () => {
@@ -69,7 +71,7 @@ export const chatPortalSlice: StateCreator<
   openResearchMode: () => {
     get().togglePortal(true);
 
-    set({ portalResearch: true }, false, 'openResearchMode');
+    set({ portalDeepResearch: false, portalResearch: true }, false, 'openResearchMode');
   },
 
   openToolUI: (id, identifier) => {

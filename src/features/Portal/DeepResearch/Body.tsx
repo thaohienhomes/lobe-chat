@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dropdown, Input, Select, Spin, Tag, Tooltip, message } from 'antd';
+import { Button, Dropdown, Input, Select, Spin, Tag, Tooltip, message, notification } from 'antd';
 import { createStyles } from 'antd-style';
 import {
     ArrowDown,
@@ -742,6 +742,14 @@ Write the full article now in markdown format.`;
                 setPhase('done'); // Only switch to done AFTER successful generation
                 setProgressLines((prev) => [...prev, '✅ Bài tổng quan hoàn thành!']);
                 setStartTime(null);
+
+                // Notify user even if panel is closed
+                notification.success({
+                    description: `Bài viết ${finalArticle.split(/\s+/).length} từ đã sẵn sàng. Mở Deep Research để xem.`,
+                    duration: 8,
+                    message: '✅ Bài tổng quan hoàn thành!',
+                    placement: 'topRight',
+                });
 
                 // Save to history
                 const historyItem: HistoryItem = {
