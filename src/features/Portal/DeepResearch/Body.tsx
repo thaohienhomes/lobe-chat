@@ -31,6 +31,8 @@ import { Flexbox } from 'react-layout-kit';
 
 import { Markdown } from '@lobehub/ui';
 
+import { useChatStore } from '@/store/chat';
+
 const { TextArea } = Input;
 
 /* ────────────────────────── types ────────────────────────── */
@@ -745,10 +747,15 @@ Write the full article now in markdown format.`;
 
                 // Notify user even if panel is closed
                 notification.success({
-                    description: `Bài viết ${finalArticle.split(/\s+/).length} từ đã sẵn sàng. Mở Deep Research để xem.`,
-                    duration: 8,
-                    message: '✅ Bài tổng quan hoàn thành!',
+                    description: 'Bấm vào đây để xem bài viết.',
+                    duration: 10,
+                    message: `✅ Bài tổng quan hoàn thành! (${finalArticle.split(/\s+/).length} từ)`,
+                    onClick: () => {
+                        useChatStore.getState().openDeepResearch();
+                        notification.destroy();
+                    },
                     placement: 'topRight',
+                    style: { cursor: 'pointer' },
                 });
 
                 // Save to history
