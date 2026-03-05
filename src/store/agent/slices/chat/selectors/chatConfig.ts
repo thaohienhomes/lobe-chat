@@ -57,6 +57,14 @@ const enableHistoryDivider =
     );
   };
 
+const isMemoryEnabled = (s: AgentStoreState) =>
+  currentAgentChatConfig(s).memory?.enabled ?? false;
+
+const memoryEffort = (s: AgentStoreState) =>
+  currentAgentChatConfig(s).memory?.effort ?? 'medium';
+
+const memoryConfig = (s: AgentStoreState) => currentAgentChatConfig(s).memory;
+
 export const agentChatConfigSelectors = {
   agentSearchMode,
   currentChatConfig: currentAgentChatConfig,
@@ -65,6 +73,9 @@ export const agentChatConfigSelectors = {
   enableHistoryDivider,
   historyCount,
   isAgentEnableSearch,
+  isMemoryEnabled,
+  memoryConfig,
+  memoryEffort,
   searchFCModel,
   useModelBuiltinSearch,
 };
