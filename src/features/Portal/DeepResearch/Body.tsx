@@ -62,8 +62,10 @@ interface HistoryItem {
 interface PubMedPaper {
     abstract: string;
     authors: string;
+    citationCount?: number;
     journal: string;
     pmid: string;
+    source?: 'pubmed' | 'semantic_scholar';
     title: string;
     year: string;
 }
@@ -392,6 +394,40 @@ async function searchPubMed(query: string, maxResults = 8): Promise<PubMedPaper[
     }
 }
 
+async function searchSemanticScholar(query: string, limit = 10): Promise<PubMedPaper[]> {
+    try {
+        const res = await fetch(`/api/research/semantic-scholar?q=${encodeURIComponent(query)}&limit=${limit}`, {
+            credentials: 'include',
+            signal: AbortSignal.timeout(15_000),
+        });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return (data.papers || []).map((p: any) => ({
+            abstract: p.abstract || '',
+            authors: p.authors || '',
+            citationCount: p.citationCount || 0,
+            journal: '',
+            pmid: p.pmid || p.paperId || '',
+            source: 'semantic_scholar' as const,
+            title: p.title || '',
+            year: p.year || '',
+        }));
+    } catch {
+        console.warn('[DeepResearch] Semantic Scholar search failed');
+        return [];
+    }
+}
+
+function deduplicatePapers(papers: PubMedPaper[]): PubMedPaper[] {
+    const seen = new Set<string>();
+    return papers.filter((p) => {
+        const key = p.title.toLowerCase().replaceAll(/[^\da-z]/g, '').slice(0, 60);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
 async function verifyCitationsAgainstPubMed(article: string): Promise<CitationResult[]> {
     // Extract citations in [Author, Year] format
     const citationRegex = /\[([A-Z][\sA-Za-zÀ-ỹ]+(?:et al\.?)?),?\s*(\d{4}[a-z]?)]/g;
@@ -469,6 +505,7 @@ const DeepResearchBody = memo(() => {
     const [gradeData, setGradeData] = useState<GradeRow[]>([]);
     const [showGrade, setShowGrade] = useState(false);
     const [isGeneratingGrade, setIsGeneratingGrade] = useState(false);
+    const [searchSources, setSearchSources] = useState<Set<string>>(new Set(['pubmed']));
     const abortRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -608,14 +645,27 @@ Return ONLY the JSON array.`;
         setPubmedPapers([]);
         setCitationResults([]);
 
-        // ── PubMed Literature Search ──
-        setProgressLines((prev) => [...prev, '🔍 Đang tìm y văn trên PubMed...']);
-        const papers = await searchPubMed(question, 10);
+        // ── Literature Search (multi-source) ──
+        let allPapers: PubMedPaper[] = [];
+        if (searchSources.has('pubmed')) {
+            setProgressLines((prev) => [...prev, '🔍 Đang tìm y văn trên PubMed...']);
+            const pubmedPapers = await searchPubMed(question, 10);
+            allPapers = [...allPapers, ...pubmedPapers.map(p => ({ ...p, source: 'pubmed' as const }))];
+        }
+        if (searchSources.has('semantic_scholar')) {
+            setProgressLines((prev) => [...prev, '🔍 Đang tìm y văn trên Semantic Scholar...']);
+            const s2Papers = await searchSemanticScholar(question, 10);
+            allPapers = [...allPapers, ...s2Papers];
+        }
+        const papers = deduplicatePapers(allPapers);
         setPubmedPapers(papers);
         if (papers.length > 0) {
-            setProgressLines((prev) => [...prev, `📚 Tìm thấy ${papers.length} bài báo trên PubMed`]);
+            const pubmedCount = papers.filter(p => p.source === 'pubmed').length;
+            const s2Count = papers.filter(p => p.source === 'semantic_scholar').length;
+            const sourceSummary = [pubmedCount > 0 ? `PubMed: ${pubmedCount}` : '', s2Count > 0 ? `S2: ${s2Count}` : ''].filter(Boolean).join(', ');
+            setProgressLines((prev) => [...prev, `📚 Tìm thấy ${papers.length} bài báo (${sourceSummary})`]);
         } else {
-            setProgressLines((prev) => [...prev, '⚠️ Không tìm thấy bài báo PubMed, agents sẽ nghiên cứu từ kiến thức chung']);
+            setProgressLines((prev) => [...prev, '⚠️ Không tìm thấy bài báo, agents sẽ nghiên cứu từ kiến thức chung']);
         }
         if (abortRef.current) return;
 
@@ -1191,6 +1241,33 @@ ER  - `;
                             style={{ width: 140 }}
                             value={outputLang}
                         />
+                        <Flexbox align={'center'} gap={6} horizontal style={{ fontSize: 12 }}>
+                            <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>Nguồn:</span>
+                            <label style={{ alignItems: 'center', cursor: 'pointer', display: 'flex', gap: 3 }}>
+                                <input
+                                    checked={searchSources.has('pubmed')}
+                                    onChange={(e) => {
+                                        const next = new Set(searchSources);
+                                        if (e.target.checked) next.add('pubmed'); else next.delete('pubmed');
+                                        if (next.size > 0) setSearchSources(next);
+                                    }}
+                                    type="checkbox"
+                                />
+                                🔬 PubMed
+                            </label>
+                            <label style={{ alignItems: 'center', cursor: 'pointer', display: 'flex', gap: 3 }}>
+                                <input
+                                    checked={searchSources.has('semantic_scholar')}
+                                    onChange={(e) => {
+                                        const next = new Set(searchSources);
+                                        if (e.target.checked) next.add('semantic_scholar'); else next.delete('semantic_scholar');
+                                        if (next.size > 0) setSearchSources(next);
+                                    }}
+                                    type="checkbox"
+                                />
+                                📚 Semantic Scholar
+                            </label>
+                        </Flexbox>
                         <Button
                             disabled={!question.trim()}
                             icon={<Sparkles size={14} />}
@@ -1365,18 +1442,22 @@ ER  - `;
                 <Flexbox gap={6} style={{ background: 'rgba(0,150,255,0.05)', borderRadius: 8, padding: '8px 12px' }}>
                     <Flexbox align={'center'} gap={6} horizontal>
                         <BookOpen size={14} />
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>Y văn PubMed ({pubmedPapers.length} bài báo)</span>
+                        <span style={{ fontSize: 13, fontWeight: 600 }}>Y văn ({pubmedPapers.length} bài báo)</span>
                     </Flexbox>
                     <div style={{ display: 'grid', gap: 4 }}>
                         {(showAllPapers ? pubmedPapers : pubmedPapers.slice(0, 6)).map((p) => (
                             <a
-                                href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`}
-                                key={p.pmid}
+                                href={p.source === 'semantic_scholar' ? `https://www.semanticscholar.org/paper/${p.pmid}` : `https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`}
+                                key={p.pmid + p.title.slice(0, 20)}
                                 rel="noreferrer"
                                 style={{ color: '#1890ff', cursor: 'pointer', fontSize: 11, textDecoration: 'none' }}
                                 target="_blank"
                             >
-                                <span style={{ fontWeight: 500 }}>{p.authors} ({p.year}).</span> {p.title.slice(0, 100)}{p.title.length > 100 ? '...' : ''} <Tag style={{ fontSize: 9 }}>{p.journal.slice(0, 30)}</Tag>
+                                <Tag color={p.source === 'semantic_scholar' ? 'purple' : 'blue'} style={{ fontSize: 8, marginRight: 4 }}>
+                                    {p.source === 'semantic_scholar' ? 'S2' : 'PM'}
+                                </Tag>
+                                <span style={{ fontWeight: 500 }}>{p.authors} ({p.year}).</span> {p.title.slice(0, 100)}{p.title.length > 100 ? '...' : ''}
+                                {p.citationCount ? <Tag style={{ fontSize: 8, marginLeft: 4 }}>📝 {p.citationCount}</Tag> : null}
                             </a>
                         ))}
                         {pubmedPapers.length > 6 && (
