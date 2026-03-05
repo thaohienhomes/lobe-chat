@@ -1,13 +1,22 @@
+'use client';
+
+import dynamic from 'next/dynamic';
 import { memo } from 'react';
+
+const MedicalBetaFeedback = dynamic(
+  () => import('@/features/MedicalBeta/FeedbackButton'),
+  { ssr: false },
+);
 
 /**
  * BottomActions Component
  *
- * Hidden: GitHub and Docs icons link to upstream LobeChat, not pho.chat.
- * Re-enable when pho.chat has its own documentation.
+ * Sidebar bottom section. Contains the Medical Beta feedback button.
  */
 const BottomActions = memo(() => {
-  return null;
+  return <MedicalBetaFeedback />;
 });
+
+BottomActions.displayName = 'BottomActions';
 
 export default BottomActions;

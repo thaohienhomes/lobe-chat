@@ -1,6 +1,5 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
 import { useTheme } from 'antd-style';
 import dynamic from 'next/dynamic';
 import { PropsWithChildren, Suspense, memo, useEffect, useState } from 'react';
@@ -25,10 +24,7 @@ const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'));
 const OnboardingModal = dynamic(() => import('@/features/Onboarding/OnboardingModal'), {
   ssr: false,
 });
-const MedicalBetaFeedback = dynamic(
-  () => import('@/features/MedicalBeta/FeedbackButton'),
-  { ssr: false },
-);
+
 
 const Layout = memo<PropsWithChildren>(({ children }) => {
   const { isPWA } = usePlatform();
@@ -42,9 +38,7 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
   const isUserStateInit = useUserStore((s) => s.isUserStateInit);
   const isOnboard = useUserStore((s) => s.isOnboard);
 
-  // Medical Beta check — use Clerk's useUser() for publicMetadata access
-  const { user: clerkUser } = useUser();
-  const isMedicalBeta = (clerkUser?.publicMetadata as Record<string, unknown>)?.planId === 'medical_beta';
+
 
   useEffect(() => {
     // Show onboarding only for logged-in users who haven't completed onboarding
@@ -95,8 +89,6 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
       {/* Onboarding Modal for first-time users */}
       <OnboardingModal onComplete={handleOnboardingComplete} open={showOnboarding} />
 
-      {/* Medical Beta Feedback Button — only for medical_beta users */}
-      {isLogin && isMedicalBeta && <MedicalBetaFeedback />}
     </HotkeysProvider>
   );
 });
