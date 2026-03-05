@@ -1,9 +1,10 @@
 'use client';
 
 import { createStyles } from 'antd-style';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+import { useChatStore } from '@/store/chat';
 import { type ResearchPhase, useResearchStore } from '@/store/research';
 
 import AnalysisPhase from './Analysis';
@@ -73,6 +74,19 @@ const ResearchBody = memo(() => {
   const { styles, cx } = useStyles();
   const activePhase = useResearchStore((s) => s.activePhase);
   const setActivePhase = useResearchStore((s) => s.setActivePhase);
+  const setSearchQuery = useResearchStore((s) => s.setSearchQuery);
+
+  // Consume pendingResearchQuery from portal store (auto-fill from chat suggestion)
+  const pendingQuery = useChatStore((s) => s.pendingResearchQuery);
+  const clearPendingQuery = useChatStore((s) => s.clearPendingResearchQuery);
+  useEffect(() => {
+    if (pendingQuery) {
+      setSearchQuery(pendingQuery);
+      clearPendingQuery();
+      // Ensure we're on the discovery phase to show the search input
+      setActivePhase('discovery');
+    }
+  }, [pendingQuery]);
 
   const getPhaseClass = (phaseKey: ResearchPhase) => {
     const phaseIndex = PHASES.findIndex((p) => p.key === phaseKey);

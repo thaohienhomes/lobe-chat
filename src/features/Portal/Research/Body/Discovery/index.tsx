@@ -4,10 +4,9 @@ import { Button, Input, Tag } from '@lobehub/ui';
 import { InputNumber, Select, Slider, Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import { ArrowRight, ExternalLink, Search, SlidersHorizontal } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { useChatStore } from '@/store/chat';
 import { type SearchSource, useResearchStore } from '@/store/research';
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -154,16 +153,6 @@ const DiscoveryPhase = memo(() => {
     const isLoadingMore = useResearchStore((s) => s.isLoadingMore);
 
     const [expandedAbstracts, setExpandedAbstracts] = useState<Set<string>>(new Set());
-
-    // Consume pendingResearchQuery from portal store (auto-fill from chat suggestion)
-    const pendingQuery = useChatStore((s) => s.pendingResearchQuery);
-    const clearPendingQuery = useChatStore((s) => s.clearPendingResearchQuery);
-    useEffect(() => {
-        if (pendingQuery && papers.length === 0 && !isSearching) {
-            setSearchQuery(pendingQuery);
-            clearPendingQuery();
-        }
-    }, [pendingQuery]);
 
     const toggleAbstract = useCallback((paperId: string) => {
         setExpandedAbstracts((prev) => {
