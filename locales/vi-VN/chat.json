@@ -83,6 +83,30 @@
   "intentUnderstanding": {
     "title": "Đang hiểu và phân tích ý định của bạn..."
   },
+  "memory": {
+    "effort": {
+      "desc": "Kiểm soát mức độ tích cực của AI trong việc truy xuất và cập nhật bộ nhớ",
+      "high": {
+        "title": "Cao"
+      },
+      "low": {
+        "title": "Thấp"
+      },
+      "medium": {
+        "title": "Trung bình"
+      },
+      "title": "Mức độ ghi nhớ"
+    },
+    "off": {
+      "desc": "Tắt tính năng ghi nhớ cho cuộc trò chuyện này",
+      "title": "Tắt ghi nhớ"
+    },
+    "on": {
+      "desc": "Ghi nhớ các sở thích và thông tin trong cuộc trò chuyện",
+      "title": "Bật ghi nhớ"
+    },
+    "title": "Ghi nhớ"
+  },
   "knowledgeBase": {
     "all": "Tất cả nội dung",
     "allFiles": "Tất cả tệp",
