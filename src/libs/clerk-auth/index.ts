@@ -1,4 +1,4 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
 export class ClerkAuth {
@@ -11,9 +11,25 @@ export class ClerkAuth {
 
   /**
    * 从请求中获取认证信息和用户ID
-   * Uses auth() (App Router API) instead of deprecated getAuth(request)
+   * Uses clerkClient().authenticateRequest() to avoid dependency on clerkMiddleware() context.
+   * This works in tRPC route handlers where auth() fails because middleware context
+   * isn't propagated through NextResponse.rewrite().
    */
-  async getAuthFromRequest(_request?: NextRequest) {
+  async getAuthFromRequest(request?: NextRequest | Request) {
+    if (request) {
+      try {
+        const client = await clerkClient();
+        const requestState = await client.authenticateRequest(request);
+        const clerkAuth = requestState.toAuth();
+        const userId = this.getMappedUserId(clerkAuth?.userId ?? null);
+
+        return { clerkAuth, userId };
+      } catch (error) {
+        console.warn('[ClerkAuth] authenticateRequest failed, falling back to auth():', error);
+      }
+    }
+
+    // Fallback to auth() for cases without request object
     const clerkAuth = await auth();
     const userId = this.getMappedUserId(clerkAuth.userId);
 
