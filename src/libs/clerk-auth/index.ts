@@ -1,14 +1,6 @@
-import { createClerkClient } from '@clerk/backend';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { AuthObject } from '@clerk/backend';
+import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
-
-// Create a standalone Clerk backend client that doesn't depend on middleware context.
-// This is used in tRPC route handlers where auth() fails because clerkMiddleware()
-// context isn't propagated through NextResponse.rewrite().
-const backendClient = createClerkClient({
-  publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-  secretKey: process.env.CLERK_SECRET_KEY,
-});
 
 export class ClerkAuth {
   private devUserId: string | null = null;
@@ -19,35 +11,39 @@ export class ClerkAuth {
   }
 
   /**
-   * 从请求中获取认证信息和用户ID
-   * Uses @clerk/backend authenticateRequest() to avoid dependency on clerkMiddleware() context.
+   * Get auth from an incoming request using clerkClient().authenticateRequest().
+   * This bypasses the need for clerkMiddleware() context, which is broken
+   * when NextResponse.rewrite() is used in middleware.
    */
-  async getAuthFromRequest(request?: NextRequest | Request) {
+  async getAuthFromRequest(request?: NextRequest | Request): Promise<{
+    clerkAuth: AuthObject | null;
+    userId: string | null;
+  }> {
     if (request) {
       try {
-        const requestState = await backendClient.authenticateRequest(request, {
-          authorizedParties: process.env.CLERK_AUTHORIZED_PARTIES
-            ? process.env.CLERK_AUTHORIZED_PARTIES.split(',')
-            : undefined,
-        });
+        const client = await clerkClient();
+        const requestState = await client.authenticateRequest(request);
         const clerkAuth = requestState.toAuth();
         const userId = this.getMappedUserId(clerkAuth?.userId ?? null);
 
         return { clerkAuth, userId };
       } catch (error) {
-        console.error('[ClerkAuth] authenticateRequest failed:', error);
-        // Return unauthenticated state instead of throwing
-        return { clerkAuth: null, userId: null };
+        console.warn('[ClerkAuth] authenticateRequest failed, falling back to auth():', error);
       }
     }
 
-    // No request object - return unauthenticated
-    return { clerkAuth: null, userId: null };
+    // Fallback to auth() for cases without request object
+    try {
+      const clerkAuth = await auth();
+      const userId = this.getMappedUserId(clerkAuth.userId);
+      return { clerkAuth, userId };
+    } catch {
+      return { clerkAuth: null, userId: null };
+    }
   }
 
   /**
-   * 获取当前认证信息和用户ID
-   * Uses auth() for server components/actions where middleware context is available.
+   * Get current auth info and user ID (for server components / actions)
    */
   async getAuth() {
     const clerkAuth = await auth();
@@ -67,12 +63,12 @@ export class ClerkAuth {
   }
 
   /**
-   * 根据环境变量映射用户ID
+   * Map user ID based on environment variable (dev → prod mapping)
    */
   private getMappedUserId(originalUserId: string | null): string | null {
     if (!originalUserId) return null;
 
-    // 只在开发环境下执行映射
+    // Only map in development environment
     if (
       process.env.NODE_ENV === 'development' &&
       this.devUserId &&
@@ -86,8 +82,8 @@ export class ClerkAuth {
   }
 
   /**
-   * 解析环境变量中的用户ID映射配置
-   * 格式: "dev=prod"
+   * Parse user ID mapping from environment variable
+   * Format: "dev=prod"
    */
   private parseUserIdMapping(): void {
     const mappingStr = process.env.CLERK_DEV_IMPERSONATE_USER || '';

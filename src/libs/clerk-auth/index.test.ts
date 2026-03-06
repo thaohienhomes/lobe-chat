@@ -1,29 +1,26 @@
-import { auth, getAuth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ClerkAuth } from './index';
 
-// 模拟 @clerk/nextjs/server 模块
+// Mock @clerk/nextjs/server module
 vi.mock('@clerk/nextjs/server', () => ({
   auth: vi.fn(),
-  getAuth: vi.fn(),
+  clerkClient: vi.fn(),
+  currentUser: vi.fn(),
 }));
 
-// 模拟 process.env
+// Save original env
 const originalEnv = { ...process.env };
 
 beforeEach(() => {
-  // 重置所有模拟
   vi.resetAllMocks();
-
-  // 重置环境变量
   process.env = { ...originalEnv };
   Object.assign(process.env, { NODE_ENV: 'development' });
 });
 
 afterEach(() => {
-  // 恢复环境变量
   process.env = originalEnv;
 });
 
@@ -33,7 +30,6 @@ describe('ClerkAuth', () => {
       process.env.CLERK_DEV_IMPERSONATE_USER = 'dev_user=prod_user';
       const clerkAuth = new ClerkAuth();
 
-      // 使用私有属性测试，需要使用类型断言
       expect(clerkAuth['devUserId']).toBe('dev_user');
       expect(clerkAuth['prodUserId']).toBe('prod_user');
     });
@@ -64,29 +60,37 @@ describe('ClerkAuth', () => {
   });
 
   describe('getAuthFromRequest', () => {
-    it('should get auth from request and return original user ID when no mapping', () => {
-      // 设置模拟返回值
-      vi.mocked(getAuth).mockReturnValue({ userId: 'original_user_id' } as any);
+    it('should get auth from request using clerkClient().authenticateRequest()', async () => {
+      const mockToAuth = vi.fn().mockReturnValue({ userId: 'original_user_id' });
+      const mockAuthenticateRequest = vi.fn().mockResolvedValue({ toAuth: mockToAuth });
+      vi.mocked(clerkClient).mockResolvedValue({
+        authenticateRequest: mockAuthenticateRequest,
+      } as any);
 
       const clerkAuth = new ClerkAuth();
-      const mockRequest = {} as NextRequest;
-      const result = clerkAuth.getAuthFromRequest(mockRequest);
+      const mockRequest = new Request('https://example.com');
+      const result = await clerkAuth.getAuthFromRequest(mockRequest as any);
 
-      expect(getAuth).toHaveBeenCalledWith(mockRequest);
+      expect(clerkClient).toHaveBeenCalled();
+      expect(mockAuthenticateRequest).toHaveBeenCalledWith(mockRequest);
       expect(result).toEqual({
         clerkAuth: { userId: 'original_user_id' },
         userId: 'original_user_id',
       });
     });
 
-    it('should map user ID in development environment', () => {
-      // 设置环境和模拟
+    it('should map user ID in development environment', async () => {
       process.env.CLERK_DEV_IMPERSONATE_USER = 'dev_user=prod_user';
       Object.assign(process.env, { NODE_ENV: 'development' });
-      vi.mocked(getAuth).mockReturnValue({ userId: 'dev_user' } as any);
+
+      const mockToAuth = vi.fn().mockReturnValue({ userId: 'dev_user' });
+      const mockAuthenticateRequest = vi.fn().mockResolvedValue({ toAuth: mockToAuth });
+      vi.mocked(clerkClient).mockResolvedValue({
+        authenticateRequest: mockAuthenticateRequest,
+      } as any);
 
       const clerkAuth = new ClerkAuth();
-      const result = clerkAuth.getAuthFromRequest({} as NextRequest);
+      const result = await clerkAuth.getAuthFromRequest(new Request('https://example.com') as any);
 
       expect(result).toEqual({
         clerkAuth: { userId: 'dev_user' },
@@ -94,27 +98,28 @@ describe('ClerkAuth', () => {
       });
     });
 
-    it('should not map user ID in production environment', () => {
-      // 设置环境和模拟
-      process.env.CLERK_DEV_IMPERSONATE_USER = 'dev_user=prod_user';
-      Object.assign(process.env, { NODE_ENV: 'production' });
-
-      vi.mocked(getAuth).mockReturnValue({ userId: 'dev_user' } as any);
+    it('should fall back to auth() when authenticateRequest fails', async () => {
+      vi.mocked(clerkClient).mockRejectedValue(new Error('client error'));
+      vi.mocked(auth).mockResolvedValue({ userId: 'fallback_user' } as any);
 
       const clerkAuth = new ClerkAuth();
-      const result = clerkAuth.getAuthFromRequest({} as NextRequest);
+      const result = await clerkAuth.getAuthFromRequest(new Request('https://example.com') as any);
 
       expect(result).toEqual({
-        clerkAuth: { userId: 'dev_user' },
-        userId: 'dev_user',
+        clerkAuth: { userId: 'fallback_user' },
+        userId: 'fallback_user',
       });
     });
 
-    it('should handle null user ID', () => {
-      vi.mocked(getAuth).mockReturnValue({ userId: null } as any);
+    it('should handle null user ID', async () => {
+      const mockToAuth = vi.fn().mockReturnValue({ userId: null });
+      const mockAuthenticateRequest = vi.fn().mockResolvedValue({ toAuth: mockToAuth });
+      vi.mocked(clerkClient).mockResolvedValue({
+        authenticateRequest: mockAuthenticateRequest,
+      } as any);
 
       const clerkAuth = new ClerkAuth();
-      const result = clerkAuth.getAuthFromRequest({} as NextRequest);
+      const result = await clerkAuth.getAuthFromRequest(new Request('https://example.com') as any);
 
       expect(result).toEqual({
         clerkAuth: { userId: null },
