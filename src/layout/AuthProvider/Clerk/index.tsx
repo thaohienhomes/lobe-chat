@@ -54,7 +54,8 @@ const Clerk = memo(({ children }: PropsWithChildren) => {
 
   return (
     <ClerkProvider
-      fallbackRedirectUrl="/"
+      afterSignInUrl="/"
+      afterSignUpUrl="/"
       allowedRedirectOrigins={allowedRedirectOrigins}
       appearance={updatedAppearance}
       localization={localization}

@@ -98,6 +98,7 @@ const UnauthenticatedPrompt = memo<UnauthenticatedPromptProps>(({ mobile }) => {
       />
       <div className={styles.signInWrapper}>
         <SignIn
+          afterSignInUrl="/"
           appearance={{
             ...appearance,
             elements: {
