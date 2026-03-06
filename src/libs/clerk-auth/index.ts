@@ -1,4 +1,4 @@
-import { auth, currentUser, getAuth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
 export class ClerkAuth {
@@ -11,9 +11,10 @@ export class ClerkAuth {
 
   /**
    * 从请求中获取认证信息和用户ID
+   * Uses auth() (App Router API) instead of deprecated getAuth(request)
    */
-  getAuthFromRequest(request: NextRequest) {
-    const clerkAuth = getAuth(request);
+  async getAuthFromRequest(_request?: NextRequest) {
+    const clerkAuth = await auth();
     const userId = this.getMappedUserId(clerkAuth.userId);
 
     return { clerkAuth, userId };
@@ -75,6 +76,6 @@ export class ClerkAuth {
   }
 }
 
-export type IClerkAuth = ReturnType<typeof getAuth>;
+export type IClerkAuth = ClerkAuth;
 
 export const clerkAuth = new ClerkAuth();

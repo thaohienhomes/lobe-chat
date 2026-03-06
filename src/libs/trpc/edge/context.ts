@@ -44,12 +44,11 @@ export const createEdgeContext = async (request: NextRequest): Promise<EdgeConte
   let auth;
 
   if (enableClerk) {
-    const clerkAuth = new ClerkAuth();
-    const result = clerkAuth.getAuthFromRequest(request);
-    auth = result.clerkAuth;
+    const clerkAuthInstance = new ClerkAuth();
+    const result = await clerkAuthInstance.getAuthFromRequest(request);
     userId = result.userId;
 
-    return createContextInner({ authorizationHeader: authorization, clerkAuth: auth, userId });
+    return createContextInner({ authorizationHeader: authorization, clerkAuth: clerkAuthInstance, userId });
   }
 
   if (enableNextAuth) {

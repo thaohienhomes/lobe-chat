@@ -145,14 +145,13 @@ export const createLambdaContext = async (request: NextRequest): Promise<LambdaC
   // If OIDC is not enabled or validation fails, try LobeChat custom Header and other authentication methods
   if (enableClerk) {
     log('Attempting Clerk authentication');
-    const clerkAuth = new ClerkAuth();
-    const result = clerkAuth.getAuthFromRequest(request);
-    auth = result.clerkAuth;
+    const clerkAuthInstance = new ClerkAuth();
+    const result = await clerkAuthInstance.getAuthFromRequest(request);
     userId = result.userId;
     log('Clerk authentication result, userId: %s', userId || 'not authenticated');
 
     return createContextInner({
-      clerkAuth: auth,
+      clerkAuth: clerkAuthInstance,
       ...commonContext,
       userId,
     });

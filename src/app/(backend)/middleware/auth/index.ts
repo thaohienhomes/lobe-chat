@@ -56,9 +56,9 @@ export const checkAuth =
 
       // TODO: V2 完整移除 client 模式下的 clerk 集成代码
       if (enableClerk) {
-        const auth = new ClerkAuth();
-        const data = auth.getAuthFromRequest(req as NextRequest);
-        clerkAuth = data.clerkAuth;
+        const clerkAuthHelper = new ClerkAuth();
+        const data = await clerkAuthHelper.getAuthFromRequest(req as NextRequest);
+        clerkAuth = data.clerkAuth as unknown as AuthObject;
       }
 
       jwtPayload = getXorPayload(authorization);
