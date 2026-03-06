@@ -5,12 +5,18 @@ import { ArtifactsManifest } from './artifacts';
 import { DalleManifest } from './dalle';
 import { LocalSystemManifest } from './local-system';
 import { ScientificSkillsManifest } from './scientific-skills';
+import { SlidesManifest } from './slides';
 import { WebBrowsingManifest } from './web-browsing';
 
 export const builtinTools: LobeBuiltinTool[] = [
   {
     identifier: ArtifactsManifest.identifier,
     manifest: ArtifactsManifest,
+    type: 'builtin',
+  },
+  {
+    identifier: SlidesManifest.identifier,
+    manifest: SlidesManifest,
     type: 'builtin',
   },
   {
