@@ -37,11 +37,19 @@ export const createPluginSlice: StateCreator<
     // if there is no plugins, just skip.
     if (plugins.length === 0) return;
 
-    // Filter out builtin tool identifiers — they are registered via src/tools/index.ts,
-    // not via the plugin store. Trying to install them causes "Plugin not found" warnings.
-    const { builtinTools } = await import('@/tools');
-    const builtinIds = new Set(builtinTools.map((t) => t.identifier));
-    const pluginsToInstall = plugins.filter((id) => !builtinIds.has(id));
+    // Builtin tool identifiers — they are registered via src/tools/index.ts,
+    // not via the plugin store. We hardcode them here to avoid importing
+    // @/tools which depends on browser-only APIs (isDesktop).
+    const BUILTIN_TOOL_IDS = new Set([
+      'lobe-artifacts',
+      'lobe-slides',
+      'dalle-3',
+      'local-system',
+      'web-browsing',
+      'pho-scientific-skills',
+      'lobe-image-designer',
+    ]);
+    const pluginsToInstall = plugins.filter((id) => !BUILTIN_TOOL_IDS.has(id));
 
     // if all plugins are builtins, skip installation
     if (pluginsToInstall.length === 0) return;
