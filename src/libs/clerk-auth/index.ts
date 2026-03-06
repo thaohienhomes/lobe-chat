@@ -1,5 +1,14 @@
-import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
+import { createClerkClient } from '@clerk/backend';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
+
+// Create a standalone Clerk backend client that doesn't depend on middleware context.
+// This is used in tRPC route handlers where auth() fails because clerkMiddleware()
+// context isn't propagated through NextResponse.rewrite().
+const backendClient = createClerkClient({
+  publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
 
 export class ClerkAuth {
   private devUserId: string | null = null;
@@ -11,33 +20,34 @@ export class ClerkAuth {
 
   /**
    * 从请求中获取认证信息和用户ID
-   * Uses clerkClient().authenticateRequest() to avoid dependency on clerkMiddleware() context.
-   * This works in tRPC route handlers where auth() fails because middleware context
-   * isn't propagated through NextResponse.rewrite().
+   * Uses @clerk/backend authenticateRequest() to avoid dependency on clerkMiddleware() context.
    */
   async getAuthFromRequest(request?: NextRequest | Request) {
     if (request) {
       try {
-        const client = await clerkClient();
-        const requestState = await client.authenticateRequest(request);
+        const requestState = await backendClient.authenticateRequest(request, {
+          authorizedParties: process.env.CLERK_AUTHORIZED_PARTIES
+            ? process.env.CLERK_AUTHORIZED_PARTIES.split(',')
+            : undefined,
+        });
         const clerkAuth = requestState.toAuth();
         const userId = this.getMappedUserId(clerkAuth?.userId ?? null);
 
         return { clerkAuth, userId };
       } catch (error) {
-        console.warn('[ClerkAuth] authenticateRequest failed, falling back to auth():', error);
+        console.error('[ClerkAuth] authenticateRequest failed:', error);
+        // Return unauthenticated state instead of throwing
+        return { clerkAuth: null, userId: null };
       }
     }
 
-    // Fallback to auth() for cases without request object
-    const clerkAuth = await auth();
-    const userId = this.getMappedUserId(clerkAuth.userId);
-
-    return { clerkAuth, userId };
+    // No request object - return unauthenticated
+    return { clerkAuth: null, userId: null };
   }
 
   /**
    * 获取当前认证信息和用户ID
+   * Uses auth() for server components/actions where middleware context is available.
    */
   async getAuth() {
     const clerkAuth = await auth();
