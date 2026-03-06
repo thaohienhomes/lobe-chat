@@ -14,9 +14,47 @@ read @.cursor/rules/project-structure.mdc
 
 ### Git Workflow
 
-- use rebase for git pull
-- git commit message should prefix with gitmoji
-- git branch name format example: tj/feat/feature-name
+#### ⚠️ CRITICAL: Branch Strategy for pho.chat Production
+
+**This is a solo-developer project. `main` is the single source of truth for production.**
+
+**MANDATORY steps at the START of every session:**
+```bash
+git checkout main
+git pull origin main   # Always sync with latest main first
+```
+
+**Branch rules:**
+- ✅ **ALWAYS start new features from the latest `main` branch**
+- ✅ **When feature is complete: merge back into `main` and push**
+- ✅ If you must create a feature branch, merge it back to `main` before ending the session
+- ❌ **NEVER leave a feature branch unmerged** - unmerged branches cause incomplete production deployments
+- ❌ **NEVER promote a Preview deployment to Production** without verifying it contains ALL features from `main`
+
+**Why this matters:**
+- Vercel deploys whatever branch you tell it to - a partial branch = partial production
+- `main` must always contain 100% of all shipped features
+- If you're unsure what's in `main`, run: `git log --oneline origin/main -10`
+
+**Preferred workflow:**
+```bash
+# Start of session
+git checkout main && git pull origin main
+
+# Make changes directly on main (for small features)
+# OR create branch + merge back immediately after
+git checkout -b feat/my-feature
+# ... do work ...
+git checkout main
+git merge feat/my-feature
+git push origin main
+```
+
+#### Other Git Rules
+
+- use rebase for git pull (when pulling into a feature branch)
+- git commit message must prefix with gitmoji
+- git branch name format: `claude/feature-description` or `feat/feature-name`
 - use .github/PULL_REQUEST_TEMPLATE.md to generate pull request description
 
 ### Package Management
