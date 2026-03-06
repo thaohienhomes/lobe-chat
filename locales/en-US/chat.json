@@ -83,30 +83,6 @@
   "intentUnderstanding": {
     "title": "Understanding and analyzing your intent..."
   },
-  "memory": {
-    "effort": {
-      "desc": "Control how actively AI retrieves and updates memory",
-      "high": {
-        "title": "High"
-      },
-      "low": {
-        "title": "Low"
-      },
-      "medium": {
-        "title": "Medium"
-      },
-      "title": "Memory Effort"
-    },
-    "off": {
-      "desc": "Disable memory for this conversation",
-      "title": "Memory Off"
-    },
-    "on": {
-      "desc": "Remember preferences and information from conversations",
-      "title": "Memory On"
-    },
-    "title": "Memory"
-  },
   "knowledgeBase": {
     "all": "All Content",
     "allFiles": "All Files",
