@@ -37,6 +37,15 @@ export const createPluginSlice: StateCreator<
     // if there is no plugins, just skip.
     if (plugins.length === 0) return;
 
+    // Filter out builtin tool identifiers — they are registered via src/tools/index.ts,
+    // not via the plugin store. Trying to install them causes "Plugin not found" warnings.
+    const { builtinTools } = await import('@/tools');
+    const builtinIds = new Set(builtinTools.map((t) => t.identifier));
+    const pluginsToInstall = plugins.filter((id) => !builtinIds.has(id));
+
+    // if all plugins are builtins, skip installation
+    if (pluginsToInstall.length === 0) return;
+
     const { loadPluginStore, installPlugins } = get();
 
     // check if the store is empty
@@ -45,7 +54,7 @@ export const createPluginSlice: StateCreator<
       await loadPluginStore();
     }
 
-    await installPlugins(plugins);
+    await installPlugins(pluginsToInstall);
   },
   removeAllPlugins: async () => {
     await pluginService.removeAllPlugins();

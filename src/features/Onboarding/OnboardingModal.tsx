@@ -48,11 +48,16 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
       const { toolService } = await import('@/services/tool');
       const { getBundledPluginById } = await import('@/config/bundledPlugins');
       const { pluginStoreSelectors } = await import('@/store/tool/selectors');
+      const { builtinTools } = await import('@/tools');
       const toolState = useToolStore.getState();
+
+      // Filter out builtin tools — they don't need plugin installation
+      const builtinIds = new Set(builtinTools.map((t) => t.identifier));
+      const pluginsToInstall = selections.enabledPlugins!.filter((id) => !builtinIds.has(id));
 
       // Fetch all manifests in parallel
       const manifestResults = await Promise.allSettled(
-        selections.enabledPlugins.map(async (pluginId) => {
+        pluginsToInstall.map(async (pluginId) => {
           let plugin = pluginStoreSelectors.getPluginById(pluginId)(toolState);
           if (!plugin) {
             const bundled = getBundledPluginById(pluginId);
