@@ -18,9 +18,9 @@ import { getServerDB } from '@/database/server';
 
 // Plan-specific configuration for promo activations
 const PLAN_CONFIGS: Record<string, { billingCycle: 'yearly' | 'lifetime'; monthlyPoints: number }> =
-  {
-    medical_beta: { billingCycle: 'yearly', monthlyPoints: 500_000 },
-  };
+{
+  medical_beta: { billingCycle: 'yearly', monthlyPoints: 1_000_000 },
+};
 
 // Valid promo codes — in production, move to DB or env var
 const VALID_PROMO_CODES: Record<

@@ -165,13 +165,10 @@ export const userRouter = router({
       }
     }
 
-    // Adjust phoPointsBalance if plan upgraded or plan quotas increased
-    // Handles: free→paid upgrades AND plan quota changes (e.g. Medical Beta 500k→1M)
-    let adjustedBalance = state.phoPointsBalance;
-    const planConfig = VN_PLANS[effectivePlanId] || GLOBAL_PLANS[effectivePlanId];
-    if (planConfig && adjustedBalance !== undefined && planConfig.monthlyPoints > 0 && adjustedBalance < planConfig.monthlyPoints) {
-      adjustedBalance = planConfig.monthlyPoints;
-    }
+    // Return the actual DB balance — no auto-adjustment.
+    // One-time balance setting happens at plan activation (promo code / payment webhook),
+    // NOT at every page load, which would override usage deductions.
+    const adjustedBalance = state.phoPointsBalance;
 
     return {
       avatar: state.avatar,
