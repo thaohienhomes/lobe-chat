@@ -44,10 +44,10 @@ export const MODEL_COSTS = {
 export const VND_PRICING_TIERS = {
   // Medical Beta tier — activated via promo code
   medical_beta: {
-    dailyTier2Limit: 20,
-    dailyTier3Limit: 5, // Synced with pricing.ts (was 0, fixed to match)
+    dailyTier2Limit: -1,
+    dailyTier3Limit: 10,
     displayName: 'Phở Medical Beta 🏥',
-    monthlyPoints: 500_000,
+    monthlyPoints: 1_000_000,
     monthlyVND: 83_250, // 999k/year ÷ 12
   },
 
@@ -391,7 +391,7 @@ export class UsageTracker {
   constructor(
     private db: any,
     private userId: string,
-  ) {}
+  ) { }
 
   async trackUsage(request: {
     costUSD: number;

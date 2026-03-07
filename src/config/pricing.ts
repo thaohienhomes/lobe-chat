@@ -67,8 +67,8 @@ export const VN_PLANS: Record<string, PlanConfig> = {
   medical_beta: {
     advancedAI: true,
     code: 'medical_beta',
-    dailyTier2Limit: 20,
-    dailyTier3Limit: 5,
+    dailyTier2Limit: -1,
+    dailyTier3Limit: 10,
     defaultModel: 'llama-3.1-8b-instant',
     defaultProvider: 'groq',
     displayName: 'Phở Medical Beta 🏥',
@@ -77,16 +77,15 @@ export const VN_PLANS: Record<string, PlanConfig> = {
 
     enableKnowledgeBase: true,
     features: [
-      '500k Phở Points/tháng',
-      'Unlimited Tier 1 + 20 Tier 2/ngày',
-      '5 lượt Tier 3/ngày (Claude Opus 4.6, Gemini 3.1 Pro)',
+      '1M Phở Points/tháng',
+      'Unlimited Tier 1 & 2',
+      '10 Tier 3/ngày',
+      'Scientific Skills không giới hạn',
       'PubMed, ArXiv, Drug Interaction, Clinical Calculator',
-      'Semantic Scholar + DOI Resolver',
-      'LaTeX upload & citation',
-      'Medical Founding Team badge 🏥',
+      'Research Mode + Deep Research',
     ],
-    keyLimits: 'Unlim Tier 1. 20 Tier 2. 5 Tier 3/day. Medical plugins.',
-    monthlyPoints: 500_000,
+    keyLimits: 'Unlim Tier 1 & 2. 10 Tier 3/day. Medical plugins.',
+    monthlyPoints: 1_000_000,
     // 999k VNĐ/year — paid via Sepay/VietQR, activated by promo code
     price: 999_000,
 
@@ -605,10 +604,39 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
   // 999K VND/year — doctors plan with flagship model access
   medical_beta: {
     allowedTiers: [1, 2, 3],
-    dailyLimits: { tier2: 20, tier3: 5 },
+    dailyLimits: { tier2: -1, tier3: 10 },
     defaultModel: 'llama-3.1-8b-instant',
     defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
+  },
+
+
+
+
+
+
+
+
+  // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
+  vn_basic: {
+    allowedTiers: [1, 2],
+    dailyLimits: { tier2: 30 },
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
+    models: [...TIER1_MODELS, ...TIER2_MODELS],
+  },
+
+
+
+
+
+
+  // VN Free: Tier 1 ONLY with 50,000 points/month
+  vn_free: {
+    allowedTiers: [1],
+    defaultModel: 'llama-3.1-8b-instant',
+    defaultProvider: 'groq',
+    models: [...TIER1_MODELS],
   },
 
 
@@ -624,25 +652,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     defaultModel: 'llama-3.1-8b-instant',
     defaultProvider: 'groq',
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
-  },
-
-  // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
-  vn_basic: {
-    allowedTiers: [1, 2],
-    dailyLimits: { tier2: 30 },
-    defaultModel: 'llama-3.1-8b-instant',
-    defaultProvider: 'groq',
-    models: [...TIER1_MODELS, ...TIER2_MODELS],
-  },
-
-
-
-  // VN Free: Tier 1 ONLY with 50,000 points/month
-  vn_free: {
-    allowedTiers: [1],
-    defaultModel: 'llama-3.1-8b-instant',
-    defaultProvider: 'groq',
-    models: [...TIER1_MODELS],
   },
 
   // VN Pro (Phở Đặc Biệt): All tiers with 50 Tier 3 messages/day
@@ -924,14 +933,14 @@ export const PLAN_USAGE_ESTIMATES = {
     videos: '0 (No Studio)',
   },
 
-  // Medical Beta
+  // Medical Beta (upgraded March 2026)
   medical_beta: {
     hasStudio: false,
-    images: '~50',
-    monthlyPoints: 500_000,
-    tier1Messages: '~100,000',
-    tier2Messages: '~3,300',
-    tier3Messages: '0',
+    images: '~100',
+    monthlyPoints: 1_000_000,
+    tier1Messages: '~200,000',
+    tier2Messages: '~6,600',
+    tier3Messages: '~1,000',
     videos: '0 (No Studio)',
   },
 
@@ -946,17 +955,6 @@ export const PLAN_USAGE_ESTIMATES = {
     videos: '0 (No Studio)',
   },
 
-  vn_premium: {
-    hasStudio: true,
-    images: '~100',
-    monthlyPoints: 1_000_000,
-    tier1Messages: '~200,000',
-    tier2Messages: '~6,600',
-    tier3Messages: '~1,000',
-    videos: '~20',
-  },
-
-
   // VN Plans
   vn_free: {
     hasStudio: false,
@@ -966,6 +964,18 @@ export const PLAN_USAGE_ESTIMATES = {
     tier2Messages: '~300',
     tier3Messages: '0',
     videos: '0 (No Studio)',
+  },
+
+
+
+  vn_premium: {
+    hasStudio: true,
+    images: '~100',
+    monthlyPoints: 1_000_000,
+    tier1Messages: '~200,000',
+    tier2Messages: '~6,600',
+    tier3Messages: '~1,000',
+    videos: '~20',
   },
   vn_pro: {
     hasStudio: true,

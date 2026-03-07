@@ -169,27 +169,9 @@ export async function processModelUsage(userId: string, cost: number, tier: numb
       }
     }
 
-    // Sync to Upstash Redis for admin Rate Limit Inspector (fire-and-forget)
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      const today = new Date().toISOString().slice(0, 10);
-      const redisKey = `pho:ratelimit:${userId}:tier${tier}:${today}`;
-      fetch(`${process.env.UPSTASH_REDIS_REST_URL}/incr/${redisKey}`, {
-        headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
-        method: 'POST',
-      })
-        .then(() => {
-          // Set TTL to 48 hours if key is new
-          fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${redisKey}/172800`, {
-            headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
-            method: 'POST',
-          }).catch(() => {
-            /* silent */
-          });
-        })
-        .catch(() => {
-          /* silent */
-        });
-    }
+    // NOTE: Redis sync removed — DailyTierRateLimiter.check() already
+    // increments pho:ratelimit:* keys via checkTierAccess() in the chat route.
+    // The duplicate INCR here was causing admin dashboard to show 2x actual usage.
   } catch (e) {
     console.error('❌ Failed to process model usage:', e);
   }

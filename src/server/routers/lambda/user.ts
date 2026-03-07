@@ -165,10 +165,11 @@ export const userRouter = router({
       }
     }
 
-    // Adjust phoPointsBalance if plan upgraded but DB balance still at free-tier level
+    // Adjust phoPointsBalance if plan upgraded or plan quotas increased
+    // Handles: free→paid upgrades AND plan quota changes (e.g. Medical Beta 500k→1M)
     let adjustedBalance = state.phoPointsBalance;
     const planConfig = VN_PLANS[effectivePlanId] || GLOBAL_PLANS[effectivePlanId];
-    if (planConfig && adjustedBalance !== undefined && adjustedBalance <= 50_000 && planConfig.monthlyPoints > 50_000) {
+    if (planConfig && adjustedBalance !== undefined && planConfig.monthlyPoints > 0 && adjustedBalance < planConfig.monthlyPoints) {
       adjustedBalance = planConfig.monthlyPoints;
     }
 
