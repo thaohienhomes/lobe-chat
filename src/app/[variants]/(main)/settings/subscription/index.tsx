@@ -6,7 +6,8 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import CompareSection from './features/CompareSection';
+// CompareSection temporarily hidden — plan data needs to be updated to match current pricing
+// import CompareSection from './features/CompareSection';
 import CreditsSection from './features/CreditsSection';
 import PlansSection from './features/PlansSection';
 
@@ -27,7 +28,7 @@ const SubscriptionPage = memo<SubscriptionPageProps>(({ mobile }) => {
       <Flexbox gap={24} paddingBlock={20} width={'100%'}>
         <CreditsSection />
         <PlansSection mobile={mobile} />
-        <CompareSection mobile={mobile} />
+        {/* CompareSection hidden until plan data is updated */}
       </Flexbox>
     </Form.Group>
   );

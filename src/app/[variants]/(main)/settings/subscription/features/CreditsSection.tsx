@@ -6,7 +6,6 @@ import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { useUserStore } from '@/store/user';
-import { userProfileSelectors } from '@/store/user/slices/auth/selectors';
 
 const { Title } = Typography;
 
@@ -21,9 +20,17 @@ const useStyles = createStyles(({ css, token }) => ({
 
 const CreditsSection = memo(() => {
   const { styles, theme: token } = useStyles();
-  const user = useUserStore(userProfileSelectors.userProfile);
 
-  if (!user) return null;
+  // Read phoPointsBalance from common state (populated by useInitUserState)
+  const phoPointsBalance = useUserStore((s) => s.phoPointsBalance);
+  // Read lifetimeSpent from user object (LobeUser)
+  const lifetimeSpent = useUserStore((s) => s.user?.lifetimeSpent);
+  const isInit = useUserStore((s) => s.isUserStateInit);
+
+  if (!isInit) return null;
+
+  const balance = phoPointsBalance ?? 0;
+  const spent = lifetimeSpent ?? 0;
 
   return (
     <Card className={styles.card} variant={'borderless'}>
@@ -33,26 +40,26 @@ const CreditsSection = memo(() => {
             My Phở Credits
           </Title>
           <Typography.Text style={{ color: token.colorTextDescription }}>
-            Balance available for AI generation
+            Số dư Phở Points khả dụng
           </Typography.Text>
         </Flexbox>
 
         <Flexbox align={'center'} gap={24} horizontal>
           <Statistic
             precision={0}
-            suffix=" Credits"
-            title={<span style={{ color: token.colorTextDescription }}>Current Balance</span>}
-            value={user.phoCreditBalance || 0}
+            suffix=" Points"
+            title={<span style={{ color: token.colorTextDescription }}>Số Dư Hiện Tại</span>}
+            value={balance.toLocaleString('vi-VN')}
             valueStyle={{
-              color: (user.phoCreditBalance || 0) < 0 ? token.colorError : token.colorSuccess,
+              color: balance > 0 ? token.colorSuccess : token.colorError,
               fontWeight: 'bold',
             }}
           />
           <Statistic
             precision={0}
-            suffix=" Credits"
-            title={<span style={{ color: token.colorTextDescription }}>Lifetime Spent</span>}
-            value={user.lifetimeSpent || 0}
+            suffix=" Points"
+            title={<span style={{ color: token.colorTextDescription }}>Đã Sử Dụng</span>}
+            value={spent.toLocaleString('vi-VN')}
             valueStyle={{ color: token.colorText }}
           />
         </Flexbox>
