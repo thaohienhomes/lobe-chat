@@ -41,10 +41,13 @@ interface JournalRec {
 // ── Styles ────────────────────────────────────────────────────────────────────
 const useStyles = createStyles(({ css, token }) => ({
     card: css`
-    padding: 14px 16px;
-    background: ${token.colorFillQuaternary};
+    padding-block: 14px;
+    padding-inline: 16px;
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: ${token.borderRadiusLG}px;
+
+    background: ${token.colorFillQuaternary};
+
     transition: background 0.2s;
     &:hover { background: ${token.colorFillTertiary}; }
   `,
@@ -55,10 +58,12 @@ const useStyles = createStyles(({ css, token }) => ({
     background: linear-gradient(90deg, #52c41a, #1890ff);
   `,
     statsBar: css`
-    padding: 10px 14px;
-    background: linear-gradient(135deg, ${token.colorPrimaryBg}, ${token.colorFillQuaternary});
+    padding-block: 10px;
+    padding-inline: 14px;
     border: 1px solid ${token.colorPrimaryBorder};
     border-radius: ${token.borderRadiusLG}px;
+
+    background: linear-gradient(135deg, ${token.colorPrimaryBg}, ${token.colorFillQuaternary});
   `,
 }));
 
@@ -296,7 +301,7 @@ const JournalRecommender = memo(() => {
                             <Flexbox align={'center'} gap={6} horizontal justify={'space-between'}>
                                 <span style={{ fontSize: 10, opacity: 0.5 }}>Match score: {rec.matchScore}</span>
                                 <Flexbox gap={4} horizontal>
-                                    <span className={styles.metricChip ?? ''}><Star size={9} /> h-index: {rec.hIndex}</span>
+                                    <span><Star size={9} /> h-index: {rec.hIndex}</span>
                                     <span style={{ fontSize: 10, opacity: 0.5 }}>{rec.citedByCount.toLocaleString()} cit.</span>
                                 </Flexbox>
                             </Flexbox>

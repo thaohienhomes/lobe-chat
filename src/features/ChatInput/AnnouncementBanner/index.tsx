@@ -48,7 +48,7 @@ const AnnouncementBanner = memo(() => {
     const [exiting, setExiting] = useState(false);
     const [dismissed, setDismissed] = useState(false);
     const [items, setItems] = useState<Announcement[]>(activeItems);
-    const timerRef = useRef<ReturnType<typeof setInterval>>();
+    const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
     // Auto-rotate
     useEffect(() => {

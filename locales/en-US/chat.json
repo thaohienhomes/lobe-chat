@@ -295,5 +295,6 @@
       "videoSizeExceeded": "Video file size must not exceed 20MB. Current file size is {{actualSize}}."
     }
   },
-  "zenMode": "Zen Mode"
+  "zenMode": "Zen Mode",
+  "copyAll": "Copy All"
 }

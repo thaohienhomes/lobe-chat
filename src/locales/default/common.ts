@@ -369,6 +369,7 @@ export default {
     plans: '订阅方案',
     profile: '账户管理',
     setting: '应用设置',
+    subscription: '订阅管理',
     usages: '用量统计',
   },
   version: '版本',

@@ -21,7 +21,7 @@ async function getWalletBalance(clerkUserId: string): Promise<{ balance: number;
     try {
         const db = await getServerDB();
         const { phoWallet } = await import('@/database/schemas') as any;
-        const [wallet] = await db.select().from(phoWallet).where(eq(phoWallet.clerkUserId, clerkUserId)).limit(1);
+        const [wallet] = await db.select().from(phoWallet).where(eq(phoWallet.clerkUserId, clerkUserId)).limit(1) as any[];
         return wallet || null;
     } catch {
         return null;

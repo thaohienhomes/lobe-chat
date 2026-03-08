@@ -318,4 +318,5 @@ export default {
     },
   },
   zenMode: '专注模式',
+  copyAll: '复制全部',
 };

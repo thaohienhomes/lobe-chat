@@ -418,6 +418,9 @@
       "desc": "Select a voice for the current assistant, different TTS services support different voices",
       "preview": "Voice Preview",
       "title": "Text-to-Speech Voice"
+    },
+    "voiceClone": {
+      "title": "Clone New Voice"
     }
   },
   "storage": {
@@ -593,6 +596,17 @@
     "overview": {
       "title": "Usage Overview"
     },
-    "title": "Usage"
+    "title": "Usage",
+    "promoCode": {
+      "activate": "Activate",
+      "activated": "Phở Medical Beta Activated 🏥",
+      "activating": "Activating...",
+      "description": "Enter a promo code to unlock special features.",
+      "error": "Invalid or expired code",
+      "placeholder": "Enter your code (e.g., PHO-MED-2026-BETA)",
+      "success": "Thank you, Medical Pioneer! System refreshing...",
+      "title": "Promo Code"
+    },
+    "medicalBadge": "MEDICAL PIONEER 🏥"
   }
 }

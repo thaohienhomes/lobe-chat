@@ -30,7 +30,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
   switch (type) {
     case 'user.created': {
       pino.info('creating user due to clerk webhook');
-      const result = await userService.createUser(data.id, data);
+      const result = await userService.createUser(data.id, data as any);
 
       // Also create wallet for new user with 'free' tier
       try {
@@ -66,7 +66,7 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     }
 
     case 'user.updated': {
-      const result = await userService.updateUser(data.id, data);
+      const result = await userService.updateUser(data.id, data as any);
 
       return NextResponse.json(result, { status: 200 });
     }

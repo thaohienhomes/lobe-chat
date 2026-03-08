@@ -388,6 +388,16 @@ export default {
     },
     title: '系统设置',
   },
+  promoCode: {
+    activate: '激活',
+    activated: 'Phở Medical Beta 已激活 🏥',
+    activating: '激活中...',
+    description: '输入促销码以解锁特殊功能。',
+    error: '无效或过期的代码',
+    placeholder: '输入代码 (如 PHO-MED-2026-BETA)',
+    success: '感谢您，系统正在刷新...',
+    title: '促销码',
+  },
   settingTTS: {
     openai: {
       sttModel: 'OpenAI 语音识别模型',
@@ -423,7 +433,11 @@ export default {
       preview: '试听声源',
       title: '语音合成声源',
     },
+    voiceClone: {
+      title: '克隆新声音',
+    },
   },
+  medicalBadge: 'MEDICAL PIONEER 🏥',
   storage: {
     actions: {
       export: {

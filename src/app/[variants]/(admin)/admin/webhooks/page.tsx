@@ -186,7 +186,7 @@ export default async function AdminWebhooksPage() {
                                                 {log.amountUsd ? `$${log.amountUsd}` : '—'}
                                             </td>
                                             <td style={{ padding: '14px 24px' }}>
-                                                {log.payload && (
+                                                {Boolean(log.payload) && (
                                                     <details style={{ cursor: 'pointer' }}>
                                                         <summary style={{ color: '#A78BFA', cursor: 'pointer', fontSize: '11px', userSelect: 'none' }}>
                                                             View payload

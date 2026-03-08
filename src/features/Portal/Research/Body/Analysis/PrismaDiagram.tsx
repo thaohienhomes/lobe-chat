@@ -12,9 +12,10 @@ const useStyles = createStyles(({ css, token }) => ({
     container: css`
     width: 100%;
     padding: 16px;
-    background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: ${token.borderRadiusLG}px;
+
+    background: ${token.colorBgContainer};
   `,
     header: css`
     font-size: 13px;
@@ -359,7 +360,6 @@ const PrismaDiagram = memo(() => {
                     {stats.pending > 0 && (
                         <g>
                             <rect
-                                dashed
                                 fill="#fffbe6"
                                 height={H * 0.7}
                                 rx={BOX_R}

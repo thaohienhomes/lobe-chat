@@ -35,7 +35,7 @@ async function main() {
             RETURNING "id", "current_plan_id", "subscription_status";
         `, [MEDICAL_BETA_MONTHLY_POINTS, pointsResetDate, targetUserId]);
 
-        if (res.rowCount > 0) {
+        if (res.rowCount && res.rowCount > 0) {
             console.log('✅ Database updated successfully:', res.rows[0]);
         } else {
             console.warn('⚠️ User not found in database.');

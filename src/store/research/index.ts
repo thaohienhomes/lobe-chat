@@ -18,9 +18,11 @@ export interface PaperResult {
     id: string;
     isOpenAccess?: boolean;
     journal?: string;
+    pmid?: string;
     pubmedUrl?: string;
     source: 'PubMed' | 'OpenAlex' | 'ArXiv' | 'ClinicalTrials.gov';
     title: string;
+    url?: string;
     year: number;
 }
 
@@ -70,14 +72,14 @@ interface ResearchState {
     getIncludedPapers: () => PaperResult[];
 
     getPendingPapers: () => PaperResult[];
-    includeAllPapers: () => void;
-    isLoadingMore: boolean;
-    isSearching: boolean;
-    loadMoreResults: () => Promise<void>;
-
-    papers: PaperResult[];
     getScreeningStats: () => { excluded: number; included: number; pending: number; total: number };
     hasMore: boolean;
+    includeAllPapers: () => void;
+    isLoadingMore: boolean;
+
+    isSearching: boolean;
+    loadMoreResults: () => Promise<void>;
+    papers: PaperResult[];
     pico: PICOQuery | null;
     removePapers: (ids: string[]) => void;
     reset: () => void;

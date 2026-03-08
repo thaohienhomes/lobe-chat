@@ -4,7 +4,7 @@ import { ScientificSkillsAPIs } from './apis';
 import { scientificSkillsSystemPrompt } from './systemRole';
 
 export const ScientificSkillsManifest: BuiltinToolManifest = {
-  api: ScientificSkillsAPIs,
+  api: ScientificSkillsAPIs as any,
   identifier: 'pho-scientific-skills',
   meta: {
     avatar: '🔬',
