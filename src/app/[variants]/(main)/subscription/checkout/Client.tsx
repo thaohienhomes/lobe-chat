@@ -251,15 +251,17 @@ const plans = {
     code: 'medical_beta',
     description: 'Trợ lý AI lâm sàng cho bác sĩ Việt Nam',
     features: [
-      '500.000 Phở Points/tháng',
-      '6 Medical plugins (PubMed, Drug Check, Calculator...)',
-      'Unlimited Tier 1 + 20 Tier 2/ngày',
+      '1.000.000 Phở Points/tháng',
+      'Scientific Skills (170+ kỹ năng khoa học)',
+      'Research Mode (nghiên cứu có cấu trúc)',
+      'Deep Research (phân tích đa nguồn)',
+      '8 Medical plugins (PubMed, Drug Check, ArXiv, OpenAlex...)',
+      'Unlimited Tier 1 + Tier 2 models',
       'LaTeX & Citation support',
-      'Early Adopter perks',
     ],
-    monthlyPoints: 500_000,
+    monthlyPoints: 1_000_000,
     monthlyPriceVND: 0, // Yearly-only plan
-    name: 'Phở Medical Beta',
+    name: 'Phở Medical',
     yearlyPriceVND: 999_000,
   },
 
