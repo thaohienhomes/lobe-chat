@@ -15,6 +15,15 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
+    category: 'blog',
+    date: '2026-03-08',
+    description:
+      'Ra mắt 3 tính năng mới cho gói Medical: Scientific Skills, Research Mode và Deep Research — công cụ AI mạnh mẽ cho nghiên cứu & học thuật.',
+    emoji: '🔬',
+    slug: 'march-2026-medical-features',
+    title: 'Phở Medical — 3 Tính Năng AI Mới Cho Nghiên Cứu Y Khoa',
+  },
+  {
     category: 'changelog',
     date: '2026-02-25',
     description:
