@@ -1,7 +1,9 @@
 import { Tag, Text } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { BookOpenIcon, QuoteIcon } from 'lucide-react';
-import Link from 'next/link';
+// Use <a> instead of next/link for external URLs (doi.org, pubmed, etc.)
+// Next.js <Link> attempts to prefetch external URLs which causes
+// "Cannot prefetch" errors in PostHog error tracking
 import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
@@ -105,9 +107,9 @@ const PaperResultItem = memo<PaperResult>(
 
     if (href) {
       return (
-        <Link href={href} target={'_blank'}>
+        <a href={href} rel="noopener noreferrer" target="_blank">
           {content}
-        </Link>
+        </a>
       );
     }
 

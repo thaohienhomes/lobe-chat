@@ -1,6 +1,5 @@
 import { Markdown } from '@lobehub/ui';
 import { Empty } from 'antd';
-import Link from 'next/link';
 import { ReactNode, memo } from 'react';
 import { Center } from 'react-layout-kit';
 
@@ -20,7 +19,7 @@ const MarkdownRender = memo<{ children?: string }>(({ children }) => {
       components={{
         a: ({ href, ...rest }: { children: ReactNode; href: string }) => {
           if (href && href.startsWith('http'))
-            return <Link {...rest} href={href} target={'_blank'} />;
+            return <a {...rest} href={href} rel="noopener noreferrer" target="_blank" />;
           return rest?.children;
         },
         h1: H1,

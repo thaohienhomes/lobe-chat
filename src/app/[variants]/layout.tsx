@@ -47,21 +47,21 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
       <head>
         {/* === Critical Resource Hints — Improve FCP/LCP by parallelizing connections === */}
         {/* Clerk auth domain — loads ~200KB+ JS, preconnect saves ~200ms */}
-        <link rel="preconnect" href="https://clerk.pho.chat" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://clerk.pho.chat" />
+        <link crossOrigin="anonymous" href="https://clerk.pho.chat" rel="preconnect" />
+        <link href="https://clerk.pho.chat" rel="dns-prefetch" />
         {/* Clerk CDN for JS bundles */}
-        <link rel="preconnect" href="https://cdn.clerk.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://cdn.clerk.com" />
+        <link crossOrigin="anonymous" href="https://cdn.clerk.com" rel="preconnect" />
+        <link href="https://cdn.clerk.com" rel="dns-prefetch" />
         {/* Google Analytics */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link crossOrigin="anonymous" href="https://www.googletagmanager.com" rel="preconnect" />
+        <link href="https://www.googletagmanager.com" rel="dns-prefetch" />
         {/* Vercel Speed Insights */}
-        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
+        <link href="https://va.vercel-scripts.com" rel="dns-prefetch" />
 
-        {/* === Global Error Handlers (Feb 2026) === */}
+        {/* === Global Error Handlers (Mar 2026) === */}
         {/* 1. Stub zaloJSV2 for Zalo in-app browser */}
         {/* 2. Suppress benign ResizeObserver loop warnings */}
-        {/* 3. Auto-reload on ChunkLoadError (stale Vercel deployments, Clerk JS 404) */}
+        {/* 3. Auto-reload on ChunkLoadError with multi-retry + backoff (Clerk CDN timeout fix) */}
         {/* 4. Gracefully handle unhandled tRPC promise rejections */}
         <script
           dangerouslySetInnerHTML={{
@@ -69,23 +69,32 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
 if(typeof window!=='undefined'){
   if(!window.zaloJSV2)window.zaloJSV2={};
 
+  // Multi-retry helper: allows up to 3 reloads with exponential backoff
+  // Tracks per-page retries to handle Clerk CDN timeouts in slow regions (VN)
+  function _chunkRetry(){
+    var MAX=3,rk='__chunk_retries';
+    try{
+      var c=parseInt(sessionStorage.getItem(rk)||'0',10);
+      if(c<MAX){
+        sessionStorage.setItem(rk,String(c+1));
+        var delay=Math.min(1000*Math.pow(2,c),8000);
+        setTimeout(function(){window.location.reload();},delay);
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+
   // Global error handler
   var _origOnErr=window.onerror;
   window.onerror=function(m,src,line,col,err){
     // Suppress ResizeObserver noise
     if(typeof m==='string'&&m.indexOf('ResizeObserver')!==-1)return true;
 
-    // Auto-reload on ChunkLoadError (stale deployment chunks 404)
+    // Auto-reload on ChunkLoadError with multi-retry
     if(err&&(err.name==='ChunkLoadError'||
       (typeof m==='string'&&(m.indexOf('Loading chunk')!==-1||m.indexOf('Failed to fetch dynamically imported')!==-1)))){
-      var rk='__chunk_reload';
-      try{
-        if(!sessionStorage.getItem(rk)){
-          sessionStorage.setItem(rk,'1');
-          window.location.reload();
-          return true;
-        }
-      }catch(e){}
+      if(_chunkRetry())return true;
     }
     return _origOnErr?_origOnErr.apply(window,arguments):false;
   };
@@ -95,15 +104,9 @@ if(typeof window!=='undefined'){
     var r=e&&e.reason;
     if(!r)return;
     var msg=r.message||'';
-    // Auto-reload on chunk load promises
+    // Auto-reload on chunk load promises with multi-retry
     if(r.name==='ChunkLoadError'||msg.indexOf('Loading chunk')!==-1){
-      var rk='__chunk_reload';
-      try{
-        if(!sessionStorage.getItem(rk)){
-          sessionStorage.setItem(rk,'1');
-          window.location.reload();
-        }
-      }catch(ex){}
+      _chunkRetry();
       e.preventDefault();
       return;
     }
@@ -119,9 +122,9 @@ if(typeof window!=='undefined'){
     }
   });
 
-  // Clear chunk reload flag on successful page load
+  // Clear retry counter on successful page load (all chunks loaded OK)
   window.addEventListener('load',function(){
-    try{sessionStorage.removeItem('__chunk_reload');}catch(e){}
+    try{sessionStorage.removeItem('__chunk_retries');}catch(e){}
   });
 }`,
           }}

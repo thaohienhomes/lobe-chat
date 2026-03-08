@@ -79,6 +79,30 @@ export const LobeAnalyticsProvider = memo(
               (window as any).posthog = posthog;
             }
 
+            // Filter benign exceptions from PostHog error tracking
+            // These are noise that pollute error dashboards without actionable value
+            const benignPatterns = [
+              'ResizeObserver loop',          // Browser layout recalc noise
+              'signal is aborted',            // User navigated away during fetch
+              'zaloJSV2',                     // Zalo in-app browser injection
+              'zalo_h5_event_handler',        // Zalo WebView event handler
+              'Cannot prefetch',              // Next.js external URL prefetch
+              'Attempted to assign to readonly property', // Safari strict mode quirk
+            ];
+            const origCapture = posthog.capture.bind(posthog);
+            posthog.capture = (eventName: string, properties?: any, options?: any) => {
+              if (eventName === '$exception') {
+                const exList = properties?.$exception_list;
+                if (Array.isArray(exList) && exList.length > 0) {
+                  const msg = (exList[0]?.value || '') + ' ' + (exList[0]?.type || '');
+                  if (benignPatterns.some((p) => msg.includes(p))) {
+                    return; // Suppress — do not send to PostHog
+                  }
+                }
+              }
+              return origCapture(eventName, properties, options);
+            };
+
             // Ensure properties are available for instant Feature Flag evaluation
             posthog.setPersonPropertiesForFlags({
               environment,

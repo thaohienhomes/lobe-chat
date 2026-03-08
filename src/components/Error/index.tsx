@@ -16,27 +16,30 @@ interface ErrorCaptureProps {
 }
 
 const ErrorCapture = memo<ErrorCaptureProps>(({ error, reset }) => {
-  // Priority 2: Auto-recover from ChunkLoadError (stale Vercel deployments)
+  // Priority 2: Auto-recover from ChunkLoadError with multi-retry (synced with global handler)
   useEffect(() => {
     if (error?.name === 'ChunkLoadError' && typeof window !== 'undefined') {
-      const key = `chunk-reload-${error.message?.slice(0, 80)}`;
-      let alreadyReloaded = false;
+      const MAX_RETRIES = 3;
+      const rk = '__chunk_retries';
+      let retryCount = 0;
       try {
-        alreadyReloaded = !!sessionStorage.getItem(key);
+        retryCount = parseInt(sessionStorage.getItem(rk) || '0', 10);
       } catch {
         // Safari private browsing may restrict sessionStorage
       }
-      if (!alreadyReloaded) {
+      if (retryCount < MAX_RETRIES) {
         try {
-          sessionStorage.setItem(key, '1');
+          sessionStorage.setItem(rk, String(retryCount + 1));
         } catch {
           // Fall through to reload anyway
         }
-        window.location.reload();
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+        setTimeout(() => window.location.reload(), delay);
       } else {
-        // Auto-reload already attempted — track unrecovered error for alerting
+        // All retries exhausted — track unrecovered error for alerting
         (window as any).posthog?.capture('chunk_load_error_unrecovered', {
           error_message: error.message,
+          retry_count: retryCount,
           url: window.location.href,
         });
       }

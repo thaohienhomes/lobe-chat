@@ -42,10 +42,26 @@ const UserUpdater = memo(() => {
   useEffect(() => {
     if (isLoaded && isSignedIn && user && user.id) {
       if (typeof window !== 'undefined' && (window as any).posthog) {
-        (window as any).posthog.identify(user.id, {
+        const meta = user.publicMetadata as Record<string, any> | undefined;
+        const planId = meta?.planId || 'vn_free';
+        const posthogProps: Record<string, any> = {
           email: user.primaryEmailAddress?.emailAddress,
           name: user.fullName,
-          planId: (user.publicMetadata as any)?.planId,
+          planId,
+        };
+        // Sync subscription metadata for PostHog cohort/filter analysis
+        if (meta?.subscriptionStatus) posthogProps.subscriptionStatus = meta.subscriptionStatus;
+        if (meta?.subscriptionProvider) posthogProps.subscriptionProvider = meta.subscriptionProvider;
+        if (meta?.pointsBalance !== undefined) posthogProps.pointsBalance = meta.pointsBalance;
+        if (meta?.monthlyPoints !== undefined) posthogProps.monthlyPoints = meta.monthlyPoints;
+
+        (window as any).posthog.identify(user.id, posthogProps);
+
+        // Also set as person properties for long-term targeting & cohorts
+        (window as any).posthog.people?.set({
+          planId,
+          ...(meta?.subscriptionStatus && { subscriptionStatus: meta.subscriptionStatus }),
+          ...(meta?.subscriptionProvider && { subscriptionProvider: meta.subscriptionProvider }),
         });
       }
 
