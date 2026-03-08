@@ -10,6 +10,7 @@ export interface PortalArtifact {
 
 export enum ArtifactType {
   Code = 'application/lobe.artifacts.code',
+  ContentVisualizer = 'application/lobe.artifacts.content-visualizer',
   Default = 'html',
   GenerativeDiagram = 'application/lobe.artifacts.generative-diagram',
   Html = 'text/html',
