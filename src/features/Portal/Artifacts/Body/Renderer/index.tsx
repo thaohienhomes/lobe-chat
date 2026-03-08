@@ -9,6 +9,7 @@ import SVGRender from './SVG';
 
 const ReactRenderer = dynamic(() => import('./React'), { ssr: false });
 const InteractiveImageRenderer = dynamic(() => import('./InteractiveImage'), { ssr: false });
+const GenerativeDiagramRenderer = dynamic(() => import('./GenerativeDiagram'), { ssr: false });
 
 const Renderer = memo<{ content: string; type?: string }>(({ content, type }) => {
   switch (type) {
@@ -18,6 +19,10 @@ const Renderer = memo<{ content: string; type?: string }>(({ content, type }) =>
 
     case ArtifactType.InteractiveImage: {
       return <InteractiveImageRenderer content={content} />;
+    }
+
+    case ArtifactType.GenerativeDiagram: {
+      return <GenerativeDiagramRenderer content={content} />;
     }
 
     case ArtifactType.SVG: {

@@ -11,6 +11,7 @@ export interface PortalArtifact {
 export enum ArtifactType {
   Code = 'application/lobe.artifacts.code',
   Default = 'html',
+  GenerativeDiagram = 'application/lobe.artifacts.generative-diagram',
   Html = 'text/html',
   InteractiveImage = 'application/lobe.artifacts.interactive-image',
   Mermaid = 'application/lobe.artifacts.mermaid',
