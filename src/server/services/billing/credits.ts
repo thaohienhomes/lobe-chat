@@ -81,7 +81,7 @@ export async function deductPhoCredits(userId: string, amount: number) {
   }
 }
 
-export async function processModelUsage(userId: string, cost: number, tier: number = 1) {
+export async function processModelUsage(userId: string, cost: number, tier: number = 1, tierSlotAlreadyAcquired: boolean = false) {
   try {
     const db = await getServerDB();
     const now = new Date();
@@ -112,6 +112,24 @@ export async function processModelUsage(userId: string, cost: number, tier: numb
     let newTier1Usage = isSameDay ? user.dailyTier1Usage || 0 : 0;
     let newTier2Usage = isSameDay ? user.dailyTier2Usage || 0 : 0;
     let newTier3Usage = isSameDay ? user.dailyTier3Usage || 0 : 0;
+
+    // If tier 2/3 slot was already acquired atomically by checkTierAccess,
+    // only handle credit deduction — don't touch tier counters or lastUsageDate
+    if (tierSlotAlreadyAcquired && (tier === 2 || tier === 3)) {
+      if (cost > 0) {
+        await db
+          .update(users)
+          .set({
+            lifetimeSpent: sql`${users.lifetimeSpent} + ${cost}`,
+            phoPointsBalance: sql`GREATEST(0, ${users.phoPointsBalance} - ${cost})`,
+          })
+          .where(eq(users.id, userId));
+        console.log(
+          `[Credits] Deducted ${cost} Credits (Tier ${tier}, atomic slot). User: ${userId}`,
+        );
+      }
+      return;
+    }
 
     // 3. Free Tier Logic (Tier 1 only)
     // Free Tier Limit: 5 requests/day for Tier 1 models
@@ -259,6 +277,90 @@ export interface TierAccessResult {
   dailyLimit?: number;
   reason?: string;
   remaining?: number;
+  slotAcquired?: boolean;
+}
+
+/**
+ * Atomically acquire a daily tier usage slot using PostgreSQL conditional UPDATE.
+ * Prevents race conditions by combining the check and increment in a single query.
+ * If the UPDATE matches (returns rows), the slot was acquired.
+ * If no rows returned, the daily limit has been reached.
+ */
+async function atomicAcquireTierSlot(
+  userId: string,
+  tier: 2 | 3,
+  dailyLimit: number,
+): Promise<{ acquired: boolean; newUsage: number }> {
+  const db = await getServerDB();
+
+  try {
+    if (tier === 3) {
+      const result = await db.execute(sql`
+        UPDATE users
+        SET
+          daily_tier3_usage = CASE
+            WHEN (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE) THEN 1
+            ELSE daily_tier3_usage + 1
+          END,
+          daily_tier2_usage = CASE
+            WHEN (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE) THEN 0
+            ELSE daily_tier2_usage
+          END,
+          daily_tier1_usage = CASE
+            WHEN (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE) THEN 0
+            ELSE daily_tier1_usage
+          END,
+          last_usage_date = NOW()
+        WHERE id = ${userId}
+          AND (
+            (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE)
+            OR daily_tier3_usage < ${dailyLimit}
+          )
+        RETURNING daily_tier3_usage
+      `);
+
+      const rows = Array.isArray(result) ? result : (result as any).rows || [];
+      if (rows.length > 0) {
+        return { acquired: true, newUsage: Number(rows[0].daily_tier3_usage) };
+      }
+      return { acquired: false, newUsage: dailyLimit };
+    }
+
+    // Tier 2
+    const result = await db.execute(sql`
+      UPDATE users
+      SET
+        daily_tier2_usage = CASE
+          WHEN (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE) THEN 1
+          ELSE daily_tier2_usage + 1
+        END,
+        daily_tier3_usage = CASE
+          WHEN (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE) THEN 0
+          ELSE daily_tier3_usage
+        END,
+        daily_tier1_usage = CASE
+          WHEN (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE) THEN 0
+          ELSE daily_tier1_usage
+        END,
+        last_usage_date = NOW()
+      WHERE id = ${userId}
+        AND (
+          (last_usage_date IS NULL OR last_usage_date::date < CURRENT_DATE)
+          OR daily_tier2_usage < ${dailyLimit}
+        )
+      RETURNING daily_tier2_usage
+    `);
+
+    const rows = Array.isArray(result) ? result : (result as any).rows || [];
+    if (rows.length > 0) {
+      return { acquired: true, newUsage: Number(rows[0].daily_tier2_usage) };
+    }
+    return { acquired: false, newUsage: dailyLimit };
+  } catch (e) {
+    console.error(`❌ atomicAcquireTierSlot failed (tier ${tier}):`, e);
+    // Fail open to avoid blocking legitimate users on DB errors
+    return { acquired: true, newUsage: 0 };
+  }
 }
 
 export async function checkTierAccess(
@@ -266,7 +368,6 @@ export async function checkTierAccess(
   tier: number,
   planId: string,
 ): Promise<TierAccessResult> {
-  // Import tier access functions from pricing config
   const { canUseTier, getDailyTierLimit } = await import('@/config/pricing');
 
   // 1. Check if plan allows this tier at all
@@ -280,12 +381,10 @@ export async function checkTierAccess(
   // 2. Get daily limit for this tier
   const dailyLimit = getDailyTierLimit(planId, tier);
 
-  // -1 means unlimited
   if (dailyLimit === -1) {
-    return { allowed: true, dailyLimit: -1 };
+    return { allowed: true, dailyLimit: -1, slotAcquired: false };
   }
 
-  // 0 means not allowed (already handled by canUseTier, but double-check)
   if (dailyLimit === 0) {
     return {
       allowed: false,
@@ -294,43 +393,20 @@ export async function checkTierAccess(
     };
   }
 
-  // 3. Get current usage
-  const db = await getServerDB();
-  const now = new Date();
-
-  const userRows = await db
-    .select({
-      dailyTier2Usage: users.dailyTier2Usage,
-      dailyTier3Usage: users.dailyTier3Usage,
-      lastUsageDate: users.lastUsageDate,
-    })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-
-  if (userRows.length === 0) {
-    return { allowed: true, dailyLimit, remaining: dailyLimit };
+  // 3. Tier 1 — no daily rate limiting (handled in processModelUsage free tier)
+  if (tier === 1) {
+    return { allowed: true, dailyLimit, slotAcquired: false };
   }
 
-  const user = userRows[0];
-  const lastDate = new Date(user.lastUsageDate || 0);
-  const isSameDay =
-    lastDate.getDate() === now.getDate() &&
-    lastDate.getMonth() === now.getMonth() &&
-    lastDate.getFullYear() === now.getFullYear();
+  // 4. Tier 2/3 — ATOMIC acquire: increment + check in single SQL query
+  //    This prevents race conditions where concurrent requests bypass the limit.
+  const { acquired, newUsage } = await atomicAcquireTierSlot(
+    userId,
+    tier as 2 | 3,
+    dailyLimit,
+  );
 
-  // Get current usage for the requested tier
-  let currentUsage = 0;
-  if (isSameDay) {
-    if (tier === 2) currentUsage = user.dailyTier2Usage || 0;
-    else if (tier === 3) currentUsage = user.dailyTier3Usage || 0;
-  }
-  // If not same day, usage has reset to 0
-
-  const remaining = dailyLimit - currentUsage;
-
-  if (remaining <= 0) {
-    // Tier-specific model switch suggestions
+  if (!acquired) {
     let reason: string;
     if (tier === 3) {
       reason =
@@ -340,7 +416,7 @@ export async function checkTierAccess(
         `• Gemini 2.5 Pro — 2M context, Google Search\n` +
         `• GPT-5.2 — flagship OpenAI\n\n` +
         `🔄 Hạn mức reset lúc 0:00 mỗi ngày.`;
-    } else if (tier === 2) {
+    } else {
       reason =
         `⚠️ Bạn đã dùng hết ${dailyLimit} lượt Tier 2 hôm nay.\n\n` +
         `💡 Thử các model Tier 1 (miễn phí không giới hạn):\n` +
@@ -349,8 +425,6 @@ export async function checkTierAccess(
         `• Llama 4 Scout — MoE, multi-task mạnh\n` +
         `• Gemma 3 27B — tool calling xuất sắc\n\n` +
         `🔄 Hạn mức reset lúc 0:00 mỗi ngày.`;
-    } else {
-      reason = `Bạn đã dùng hết hạn mức model hôm nay. Hãy thử lại vào ngày mai.`;
     }
 
     return {
@@ -358,12 +432,18 @@ export async function checkTierAccess(
       dailyLimit,
       reason,
       remaining: 0,
+      slotAcquired: false,
     };
   }
+
+  console.log(
+    `🔒 [Atomic Tier ${tier}] Slot acquired for ${userId}: ${newUsage}/${dailyLimit}`,
+  );
 
   return {
     allowed: true,
     dailyLimit,
-    remaining,
+    remaining: dailyLimit - newUsage,
+    slotAcquired: true,
   };
 }

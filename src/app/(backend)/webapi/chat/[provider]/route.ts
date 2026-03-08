@@ -112,6 +112,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
   });
 
   let requestModel = ''; // Hoisted for catch block access
+  let tierSlotAcquired = false; // Whether checkTierAccess atomically acquired a tier slot
 
   try {
     // ============  0. Cost Optimization Setup   ============ //
@@ -239,7 +240,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           const PLUGIN_FALLBACK_PROVIDER = 'vercelaigateway';
           console.log(
             `🔄 [Plugin Fallback] Tier ${modelTier} quota exceeded for user ${jwtPayload.userId}. ` +
-              `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Vercel+Gemini).`,
+            `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Vercel+Gemini).`,
           );
           data.model = PLUGIN_FALLBACK_MODEL;
           // Re-init runtime for the fallback provider
@@ -265,6 +266,9 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           `📊 Tier ${modelTier} usage: ${tierAccess.dailyLimit - (tierAccess.remaining || 0)}/${tierAccess.dailyLimit} (${tierAccess.remaining} remaining)`,
         );
       }
+
+      // Track if slot was atomically acquired (for processModelUsage)
+      tierSlotAcquired = tierAccess.slotAcquired || false;
     }
 
     const tracePayload = getTracePayload(req);
@@ -420,7 +424,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           let accumulatedText = '';
           const decoder = new TextDecoder();
 
-          for (;;) {
+          for (; ;) {
             const { done, value } = await reader.read();
             if (done) break;
             // Decode chunk. Note: chunks might be partial SSE events.
@@ -450,7 +454,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           );
 
           if (cost > 0 && jwtPayload.userId) {
-            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1);
+            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1, tierSlotAcquired);
           }
         } catch (e) {
           console.error('Failed to audits stream:', e);
@@ -495,7 +499,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           );
 
           if (cost > 0 && jwtPayload.userId) {
-            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1);
+            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1, tierSlotAcquired);
             console.log(`📉 Non-Streaming Usage: ${cost} Credits processed.`);
           }
         }
@@ -539,7 +543,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // the inappropriate "Enter custom API key" form.
     const safeErrorType =
       errorType === AgentRuntimeErrorType.InvalidProviderAPIKey ||
-      errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
+        errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
         ? AgentRuntimeErrorType.ProviderBizError
         : errorType;
 
