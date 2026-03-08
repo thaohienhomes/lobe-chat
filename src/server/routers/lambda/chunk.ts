@@ -9,12 +9,28 @@ import { EmbeddingModel } from '@/database/models/embedding';
 import { FileModel } from '@/database/models/file';
 import { MessageModel } from '@/database/models/message';
 import { knowledgeBaseFiles } from '@/database/schemas';
+import { getLLMConfig } from '@/envs/llm';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { keyVaults, serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { getServerDefaultFilesConfig } from '@/server/globalConfig';
 import { initModelRuntimeWithUserPayload } from '@/server/modules/ModelRuntime';
 import { ChunkService } from '@/server/services/chunk';
 import { SemanticSearchSchema } from '@/types/rag';
+
+/**
+ * Resolve embedding provider & model: if configured provider is 'openai'
+ * but OPENAI_API_KEY is not set, remap to vercelaigateway so the request
+ * goes through a provider that actually has credentials.
+ */
+function resolveEmbeddingProvider(provider: string, model: string) {
+  if (provider === 'openai') {
+    const llmConfig = getLLMConfig() as Record<string, any>;
+    if (!llmConfig.OPENAI_API_KEY) {
+      return { model: `openai/${model}`, provider: 'vercelaigateway' };
+    }
+  }
+  return { model, provider };
+}
 
 const chunkProcedure = authedProcedure
   .use(serverDatabase)
@@ -108,8 +124,9 @@ export const chunkRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { model, provider } =
+      const rawConfig =
         getServerDefaultFilesConfig().embeddingModel || DEFAULT_FILE_EMBEDDING_MODEL_ITEM;
+      const { model, provider } = resolveEmbeddingProvider(rawConfig.provider, rawConfig.model);
       const agentRuntime = await initModelRuntimeWithUserPayload(provider, ctx.jwtPayload);
 
       const embeddings = await agentRuntime.embeddings({
@@ -131,8 +148,9 @@ export const chunkRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         const item = await ctx.messageModel.findMessageQueriesById(input.messageId);
-        const { model, provider } =
+        const rawConfig =
           getServerDefaultFilesConfig().embeddingModel || DEFAULT_FILE_EMBEDDING_MODEL_ITEM;
+        const { model, provider } = resolveEmbeddingProvider(rawConfig.provider, rawConfig.model);
         let embedding: number[];
         let ragQueryId: string;
 

@@ -74,6 +74,12 @@ const backendApiEndpoints = ['/api', '/trpc', '/webapi', '/oidc'];
 
 const defaultMiddleware = (request: NextRequest) => {
   const url = new URL(request.url);
+
+  // Security: Block .env file probing (e.g. /api/.env.local, /admin/.env.prod)
+  if (/\/\.env(\.|$)/i.test(url.pathname)) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   logDefault('Processing request: %s %s', request.method, request.url);
 
   // skip all api requests

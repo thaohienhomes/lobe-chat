@@ -239,11 +239,14 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           const PLUGIN_FALLBACK_PROVIDER = 'vercelaigateway';
           console.log(
             `🔄 [Plugin Fallback] Tier ${modelTier} quota exceeded for user ${jwtPayload.userId}. ` +
-            `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Vercel+Gemini).`,
+              `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Vercel+Gemini).`,
           );
           data.model = PLUGIN_FALLBACK_MODEL;
           // Re-init runtime for the fallback provider
-          modelRuntime = await initModelRuntimeWithUserPayload(PLUGIN_FALLBACK_PROVIDER, jwtPayload);
+          modelRuntime = await initModelRuntimeWithUserPayload(
+            PLUGIN_FALLBACK_PROVIDER,
+            jwtPayload,
+          );
         } else {
           console.warn(
             `🚫 Tier access denied: ${tierAccess.reason} (User: ${jwtPayload.userId}, Model: ${data.model})`,
@@ -417,7 +420,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           let accumulatedText = '';
           const decoder = new TextDecoder();
 
-          for (; ;) {
+          for (;;) {
             const { done, value } = await reader.read();
             if (done) break;
             // Decode chunk. Note: chunks might be partial SSE events.
@@ -466,40 +469,36 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     } else {
       // NON-STREAMING
       try {
-        // ... existing tracking logic ...
-        // We can reuse the logic here or keep trackUsageAfterCompletion if it's used elsewhere
-        // But we must deduct credits.
         const responseClone = response.clone();
-        const responseData = await responseClone.json(); // May consume body
+        const responseText = await responseClone.text();
 
-        // Wait, response is returned to user. We can't consume it if we don't clone.
-        // But ModelRuntime.chat returning Response...
-        // If we access .json(), the original response is used?
-        // Actually, for non-streaming, we can just intercept.
-
-        // NOTE: The previous code didn't actually read the response for tracking!
-        // It used "150" as estimated output tokens.
-        // We should try to read it if possible, but cloning might be expensive.
-
-        // Let's stick to estimation or try to read if cheap.
-        const content = responseData.choices?.[0]?.message?.content || '';
-        const outputTokens = countTokens(content);
-        const inputTokens =
-          data.messages?.reduce((acc, msg) => acc + countTokens(String(msg.content || '')), 0) || 0;
-
-        const inputPrice = activePricing.inputPrice ?? 0;
-        const outputPrice = activePricing.outputPrice ?? 0;
-        const cost = Math.ceil((inputTokens * inputPrice + outputTokens * outputPrice) / 1_000_000);
-
-        if (cost > 0 && jwtPayload.userId) {
-          await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1);
-          console.log(`📉 Non-Streaming Usage: ${cost} Credits processed.`);
+        let responseData: any;
+        try {
+          responseData = JSON.parse(responseText);
+        } catch {
+          // Response is SSE/streaming format, not JSON — skip credit tracking
+          console.warn('⚠️ Non-streaming credit tracking skipped: response is not valid JSON');
+          responseData = null;
         }
 
-        // Return a new response from the data we read, to ensure stream isn't locked?
-        // Or just return the response. Since we cloned, the original might be fine?
-        // Response.clone() creates a separate stream.
-        // So we can return `response`.
+        if (responseData) {
+          const content = responseData.choices?.[0]?.message?.content || '';
+          const outputTokens = countTokens(content);
+          const inputTokens =
+            data.messages?.reduce((acc, msg) => acc + countTokens(String(msg.content || '')), 0) ||
+            0;
+
+          const inputPrice = activePricing.inputPrice ?? 0;
+          const outputPrice = activePricing.outputPrice ?? 0;
+          const cost = Math.ceil(
+            (inputTokens * inputPrice + outputTokens * outputPrice) / 1_000_000,
+          );
+
+          if (cost > 0 && jwtPayload.userId) {
+            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1);
+            console.log(`📉 Non-Streaming Usage: ${cost} Credits processed.`);
+          }
+        }
       } catch (e) {
         console.error('Failed to process non-streaming response for credits:', e);
       }
@@ -540,7 +539,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // the inappropriate "Enter custom API key" form.
     const safeErrorType =
       errorType === AgentRuntimeErrorType.InvalidProviderAPIKey ||
-        errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
+      errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
         ? AgentRuntimeErrorType.ProviderBizError
         : errorType;
 
