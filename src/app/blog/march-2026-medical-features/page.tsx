@@ -229,7 +229,7 @@ export default function MarchMedicalFeaturesPage() {
           </Flexbox>
 
           <Flexbox align="center" gap={16} justify="center" style={{ marginTop: 48 }}>
-            <a className="cta-button" href="https://pho.chat/pricing">
+            <a className="cta-button" href="https://pho.chat/subscription/checkout?plan=medical_beta&provider=sepay">
               🔥 Nâng Cấp Phở Medical — 999K/Năm
             </a>
           </Flexbox>

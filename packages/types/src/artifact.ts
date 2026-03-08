@@ -12,6 +12,7 @@ export enum ArtifactType {
   Code = 'application/lobe.artifacts.code',
   Default = 'html',
   Html = 'text/html',
+  InteractiveImage = 'application/lobe.artifacts.interactive-image',
   Mermaid = 'application/lobe.artifacts.mermaid',
   Python = 'python',
   React = 'application/lobe.artifacts.react',

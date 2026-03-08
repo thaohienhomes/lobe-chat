@@ -8,11 +8,16 @@ import HTMLRenderer from './HTML';
 import SVGRender from './SVG';
 
 const ReactRenderer = dynamic(() => import('./React'), { ssr: false });
+const InteractiveImageRenderer = dynamic(() => import('./InteractiveImage'), { ssr: false });
 
 const Renderer = memo<{ content: string; type?: string }>(({ content, type }) => {
   switch (type) {
     case ArtifactType.React: {
       return <ReactRenderer code={content} />;
+    }
+
+    case ArtifactType.InteractiveImage: {
+      return <InteractiveImageRenderer content={content} />;
     }
 
     case ArtifactType.SVG: {

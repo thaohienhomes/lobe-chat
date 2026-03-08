@@ -1,0 +1,2822 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phở Chat — Feature Comparison Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0b0f;
+            --bg-card: #12141c;
+            --bg-card-hover: #1a1d28;
+            --bg-accent: rgba(99, 102, 241, 0.08);
+            --border: rgba(255, 255, 255, 0.06);
+            --border-accent: rgba(99, 102, 241, 0.3);
+            --text-primary: #f0f0f5;
+            --text-secondary: #8b8fa3;
+            --text-muted: #5a5e72;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --green: #22c55e;
+            --green-bg: rgba(34, 197, 94, 0.1);
+            --red: #ef4444;
+            --red-bg: rgba(239, 68, 68, 0.08);
+            --yellow: #f59e0b;
+            --yellow-bg: rgba(245, 158, 11, 0.08);
+            --blue: #3b82f6;
+            --blue-bg: rgba(59, 130, 246, 0.08);
+            --purple: #a855f7;
+            --purple-bg: rgba(168, 85, 247, 0.08);
+            --cyan: #06b6d4;
+            --orange: #f97316;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            padding: 80px 40px 60px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-accent);
+            border: 1px solid var(--border-accent);
+            border-radius: 100px;
+            padding: 6px 16px;
+            font-size: 13px;
+            color: var(--accent);
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero-date {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            padding: 0 40px 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px 32px;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-v1 .stat-number {
+            color: var(--orange);
+        }
+
+        .stat-v2 .stat-number {
+            color: var(--accent);
+        }
+
+        .stat-upstream .stat-number {
+            color: var(--green);
+        }
+
+        .stat-gap .stat-number {
+            color: var(--yellow);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .comparison-table thead th {
+            background: rgba(99, 102, 241, 0.06);
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table thead th:first-child {
+            width: 280px;
+        }
+
+        .comparison-table thead th.col-v1 {
+            color: var(--orange);
+        }
+
+        .comparison-table thead th.col-v2 {
+            color: var(--accent);
+        }
+
+        .comparison-table thead th.col-comp {
+            color: var(--cyan);
+        }
+
+        .comparison-table tbody td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        .comparison-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .comparison-table .feature-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-table .feature-name .emoji {
+            font-size: 18px;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-yes {
+            background: var(--green-bg);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .badge-no {
+            background: var(--red-bg);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .badge-partial {
+            background: var(--yellow-bg);
+            color: var(--yellow);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-new {
+            background: var(--blue-bg);
+            color: var(--blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .badge-exclusive {
+            background: var(--purple-bg);
+            color: var(--purple);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .badge-upgrade {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+            color: #c4b5fd;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .cell-detail {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        /* Platform cards */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .platform-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .platform-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+        }
+
+        .platform-card .card-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .platform-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .platform-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .platform-card .card-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+        }
+
+        /* Competitor row */
+        .competitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .competitor-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .competitor-card:hover {
+            border-color: var(--border-accent);
+        }
+
+        .competitor-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .competitor-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .competitor-card li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .competitor-card li .dot-green {
+            color: var(--green);
+        }
+
+        .competitor-card li .dot-red {
+            color: var(--red);
+        }
+
+        .competitor-card li .dot-yellow {
+            color: var(--yellow);
+        }
+
+        /* Migration roadmap */
+        .roadmap {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 16px;
+        }
+
+        .roadmap-phase {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            min-width: 300px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .roadmap-phase::after {
+            content: '→';
+            position: absolute;
+            right: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--text-muted);
+        }
+
+        .roadmap-phase:last-child::after {
+            display: none;
+        }
+
+        .phase-label {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .phase-1 .phase-label {
+            background: var(--blue-bg);
+            color: var(--blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .phase-2 .phase-label {
+            background: var(--yellow-bg);
+            color: var(--yellow);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .phase-3 .phase-label {
+            background: var(--green-bg);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .phase-4 .phase-label {
+            background: var(--purple-bg);
+            color: var(--purple);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .roadmap-phase h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .roadmap-phase ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .roadmap-phase li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 3px 0;
+        }
+
+        .roadmap-phase li::before {
+            content: '○ ';
+            color: var(--text-muted);
+        }
+
+        /* Verdict */
+        .verdict-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
+            border: 1px solid var(--border-accent);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .verdict-box h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .verdict-box p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Category header row */
+        .cat-row td {
+            background: rgba(99, 102, 241, 0.04) !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent) !important;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15) !important;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        /* Sidebar */
+        .page-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            z-index: 100;
+            padding: 20px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-logo {
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 8px;
+        }
+
+        .sidebar-section {
+            padding: 8px 20px 4px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 2px solid transparent;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            color: var(--text-primary);
+            background: var(--bg-accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar a .nav-emoji {
+            font-size: 14px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 200;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Info box */
+        .info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .info-box h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box p,
+        .info-box li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 3px 0;
+        }
+
+        .info-box li::before {
+            content: '• ';
+            color: var(--accent);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .arch-diagram {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.04), rgba(168, 85, 247, 0.04));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+
+        .cost-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .cost-card .cost-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 8px 0 4px;
+        }
+
+        .cost-card .cost-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .cost-card .cost-detail {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 960px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero {
+                padding: 40px 20px;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .stats-row {
+                gap: 12px;
+            }
+
+            .stat-card {
+                min-width: 140px;
+                padding: 16px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .comparison-table {
+                font-size: 13px;
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+    <div class="page-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-logo">🍜 Phở Chat</div>
+            <div class="sidebar-section">Tổng quan</div>
+            <a href="#hero"><span class="nav-emoji">📊</span> Executive Summary</a>
+            <a href="#techstack"><span class="nav-emoji">⚡</span> Tech Stack</a>
+            <a href="#aifeatures"><span class="nav-emoji">🧠</span> Core AI Features</a>
+            <div class="sidebar-section">Platform</div>
+            <a href="#platform"><span class="nav-emoji">📱</span> Platform & Mobile</a>
+            <a href="#extensibility"><span class="nav-emoji">🔌</span> Extensibility</a>
+            <div class="sidebar-section">Deep Dive (Mới)</div>
+            <a href="#agentic"><span class="nav-emoji">🤖</span> Agentic AI & MCP</a>
+            <a href="#providers"><span class="nav-emoji">🌐</span> AI Provider Mgmt</a>
+            <a href="#branding"><span class="nav-emoji">🎨</span> UI & Branding</a>
+            <a href="#payments"><span class="nav-emoji">💳</span> Payment Integration</a>
+            <a href="#operations"><span class="nav-emoji">💰</span> Chi phí vận hành</a>
+            <div class="sidebar-section">Chiến lược</div>
+            <a href="#competitors"><span class="nav-emoji">🏆</span> Competitive</a>
+            <a href="#roadmap"><span class="nav-emoji">🗺️</span> Migration Roadmap</a>
+            <a href="#upstream"><span class="nav-emoji">🔄</span> Upstream Sync</a>
+            <a href="#reuse"><span class="nav-emoji">♻️</span> Feature Reuse</a>
+            <a href="#designsystem"><span class="nav-emoji">🎨</span> Design System</a>
+            <a href="#aidesign"><span class="nav-emoji">✨</span> AI Design Tools</a>
+            <a href="#brandguide"><span class="nav-emoji">🅿️</span> Brand Style Guide</a>
+            <a href="#research"><span class="nav-emoji">🔬</span> Research Checklist</a>
+            <a href="#claudecli"><span class="nav-emoji">🤖</span> Claude Code CLI</a>
+            <a href="#verdict"><span class="nav-emoji">💎</span> Kết luận</a>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Hero -->
+            <div class="hero" id="hero">
+                <div class="hero-badge">📊 Executive Report / CTO & CEO Review</div>
+                <h1>Phở Chat v1 → v2<br>Feature Comparison Matrix</h1>
+                <p>Phân tích toàn diện tính năng, tech stack, khả năng mở rộng và lộ trình migrate từ Phở Chat hiện tại
+                    sang
+                    phiên bản mới dựa trên lobehub upstream (v2.1.38+)</p>
+                <div class="hero-date">Generated: March 7, 2026 • Data source: Git analysis + lobehub.com</div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card stat-v1">
+                    <div class="stat-number">618</div>
+                    <div class="stat-label">Phở Chat Commits</div>
+                </div>
+                <div class="stat-card stat-upstream">
+                    <div class="stat-number">2,949</div>
+                    <div class="stat-label">Upstream Ahead</div>
+                </div>
+                <div class="stat-card stat-v2">
+                    <div class="stat-number">12,757+</div>
+                    <div class="stat-label">Total PRs Merged</div>
+                </div>
+                <div class="stat-card stat-gap">
+                    <div class="stat-number">v2.1.38</div>
+                    <div class="stat-label">Latest Upstream</div>
+                </div>
+            </div>
+
+            <div class="container">
+
+                <!-- SECTION 1: Tech Stack -->
+                <div class="section" id="techstack">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--blue-bg); border: 1px solid rgba(59,130,246,0.2);">⚡
+                        </div>
+                        <div>
+                            <div class="section-title">Tech Stack Comparison</div>
+                            <div class="section-subtitle">Kiến trúc & công nghệ nền tảng</div>
+                        </div>
+                    </div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Thành phần</th>
+                                <th class="col-v1">Phở Chat v1 (Hiện tại)</th>
+                                <th class="col-v2">Phở Chat v2 (Upstream)</th>
+                                <th>Lợi ích khi Migrate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🏗️</span> Frontend Framework</td>
+                                <td><span class="badge badge-partial">Next.js App Router</span><span
+                                        class="cell-detail">SSR +
+                                        RSC, nặng build, OOM errors</span></td>
+                                <td><span class="badge badge-new">Vite SPA</span><span class="cell-detail">Client-side
+                                        SPA,
+                                        build siêu nhanh</span></td>
+                                <td><span class="badge badge-upgrade">⚡ Major Upgrade</span><span
+                                        class="cell-detail">Build time
+                                        giảm 70%, HMR instant, bundle nhỏ hơn</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🗄️</span> Database</td>
+                                <td><span class="badge badge-yes">Neon + Drizzle ORM</span></td>
+                                <td><span class="badge badge-yes">Neon + Drizzle ORM</span><span class="cell-detail">+
+                                        Redis
+                                        pipeline support</span></td>
+                                <td><span class="cell-detail">Redis pipeline → batch operations nhanh hơn</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🔐</span> Authentication</td>
+                                <td><span class="badge badge-yes">Clerk</span><span class="cell-detail">Custom
+                                        createClerkClient</span></td>
+                                <td><span class="badge badge-new">Better-Auth + Clerk</span><span
+                                        class="cell-detail">Device
+                                        code auth, last used provider, email change</span></td>
+                                <td><span class="badge badge-upgrade">More Options</span><span
+                                        class="cell-detail">Flexible
+                                        auth: Clerk, NextAuth, hoặc Better-Auth</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📦</span> State Management</td>
+                                <td><span class="badge badge-yes">Zustand</span></td>
+                                <td><span class="badge badge-yes">Zustand</span><span class="cell-detail">+ SPA router
+                                        restructure</span></td>
+                                <td><span class="cell-detail">Cleaner route architecture</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🖥️</span> Desktop App</td>
+                                <td><span class="badge badge-no">✗ Không có</span></td>
+                                <td><span class="badge badge-new">Electron</span><span class="cell-detail">macOS Liquid
+                                        Glass,
+                                        page tabs, hotkey manager, S3 auto-update</span></td>
+                                <td><span class="badge badge-upgrade">🆕 Brand New</span><span
+                                        class="cell-detail">Native
+                                        desktop experience trên Win/Mac/Linux</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🛠️</span> CLI Tooling</td>
+                                <td><span class="badge badge-no">✗ Không có</span></td>
+                                <td><span class="badge badge-new">lobehub-cli</span></td>
+                                <td><span class="cell-detail">Dev tooling, scaffolding, automation</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🧪</span> Testing</td>
+                                <td><span class="badge badge-partial">Vitest (partial)</span></td>
+                                <td><span class="badge badge-yes">Vitest + Unit Tests</span><span
+                                        class="cell-detail">Video gen
+                                        tests, comprehensive coverage</span></td>
+                                <td><span class="cell-detail">Better quality assurance</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SECTION 2: Core Features -->
+                <div class="section" id="aifeatures">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--green-bg); border: 1px solid rgba(34,197,94,0.2);">🧠
+                        </div>
+                        <div>
+                            <div class="section-title">Core AI Features</div>
+                            <div class="section-subtitle">Tính năng AI cốt lõi & mô hình hỗ trợ</div>
+                        </div>
+                    </div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Tính năng</th>
+                                <th class="col-v1">Phở Chat v1</th>
+                                <th class="col-v2">Phở Chat v2 (Upstream)</th>
+                                <th class="col-comp">vs. Competitors</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="cat-row">
+                                <td colspan="4">🤖 AI Models</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">💬</span> Multi-Model Chat</td>
+                                <td><span class="badge badge-yes">✓ Có</span><span class="cell-detail">GPT-4o, Claude,
+                                        Gemini,
+                                        DeepSeek + Vertex AI Gateway</span></td>
+                                <td><span class="badge badge-yes">✓ Có</span><span class="cell-detail">+ GPT-5.4, Gemini
+                                        3.1
+                                        Pro, Claude 4.6, Kimi K2, Nano Banana 2</span></td>
+                                <td><span class="cell-detail">Ngang ChatGPT Teams, vượt Claude.ai về model
+                                        variety</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🧠</span> Thinking Mode</td>
+                                <td><span class="badge badge-yes">✓ Có</span></td>
+                                <td><span class="badge badge-yes">✓ Có</span><span class="cell-detail">+ thinkingLevel5
+                                        cho
+                                        Gemini, adaptive thinking logic</span></td>
+                                <td><span class="cell-detail">Tương đương ChatGPT o3, Claude Extended Thinking</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">👁️</span> Vision / Multimodal</td>
+                                <td><span class="badge badge-yes">✓ Có</span></td>
+                                <td><span class="badge badge-yes">✓ Có</span><span class="cell-detail">+ auto aspect
+                                        ratio,
+                                        image search, video gen</span></td>
+                                <td><span class="cell-detail">Ngang GPT-4o vision, vượt Claude về video</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🎬</span> Video Generation</td>
+                                <td><span class="badge badge-exclusive">🔮 Phở Studio</span><span
+                                        class="cell-detail">Kling 3.0,
+                                        Fal.ai pipeline</span></td>
+                                <td><span class="badge badge-new">🆕 Built-in</span><span class="cell-detail">Video tab,
+                                        quota
+                                        system, webhook callbacks</span></td>
+                                <td><span class="cell-detail">Tương đương Sora, RunwayML integration</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🎨</span> Image Generation</td>
+                                <td><span class="badge badge-yes">✓ Có</span></td>
+                                <td><span class="badge badge-yes">✓ Có</span><span class="cell-detail">+ Seedream 5
+                                        Lite, Qwen
+                                        i2i/t2i, multimodal endpoint</span></td>
+                                <td><span class="cell-detail">Nhiều model hơn DALL-E, Midjourney API</span></td>
+                            </tr>
+
+                            <tr class="cat-row">
+                                <td colspan="4">🔧 Agent & Tools</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🤖</span> Agent System</td>
+                                <td><span class="badge badge-yes">✓ Basic</span><span class="cell-detail">Agent
+                                        marketplace,
+                                        custom personas</span></td>
+                                <td><span class="badge badge-new">🆕 Agent Skills</span><span class="cell-detail">Agent
+                                        Skills
+                                        framework, Agent Benchmarks, Agent Harness runtime</span></td>
+                                <td><span class="badge badge-upgrade">Vượt trội</span><span class="cell-detail">Tương
+                                        đương GPTs
+                                        nhưng mở hơn, self-hosted</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🛠️</span> MCP Tools</td>
+                                <td><span class="badge badge-yes">✓ Có</span></td>
+                                <td><span class="badge badge-yes">✓ Có</span><span class="cell-detail">+ Marketplace
+                                        MCPs,
+                                        auto-discovery, WolframAlpha</span></td>
+                                <td><span class="cell-detail">Ngang Claude Desktop MCP, vượt ChatGPT plugins</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🧰</span> Built-in Tools</td>
+                                <td><span class="badge badge-yes">✓ Có</span></td>
+                                <td><span class="badge badge-yes">✓ Có</span><span class="cell-detail">+ Calculator,
+                                        progressive
+                                        disclosure, lobe-tools</span></td>
+                                <td><span class="cell-detail">Calculator, web search, code execution</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🧠</span> Knowledge Base</td>
+                                <td><span class="badge badge-yes">✓ Có</span></td>
+                                <td><span class="badge badge-new">KB 2.0</span><span class="cell-detail">Notion, Google
+                                        Drive
+                                        integration (planned)</span></td>
+                                <td><span class="cell-detail">Tương đương NotebookLM, Custom GPTs knowledge</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">💾</span> User Memory</td>
+                                <td><span class="badge badge-partial">Partial</span></td>
+                                <td><span class="badge badge-new">🆕 Memory UI</span><span class="cell-detail">Memory
+                                        settings,
+                                        inject user persona, identity management</span></td>
+                                <td><span class="cell-detail">Tương đương ChatGPT Memory</span></td>
+                            </tr>
+
+                            <tr class="cat-row">
+                                <td colspan="4">🔬 Phở Chat Exclusive Features</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🔬</span> Research Engine</td>
+                                <td><span class="badge badge-exclusive">🏆 Exclusive</span><span
+                                        class="cell-detail">5-phase
+                                        PICO/GRADE/PRISMA workflow</span></td>
+                                <td><span class="badge badge-no">✗ Không có</span></td>
+                                <td><span class="badge badge-exclusive">Unique</span><span class="cell-detail">Không ai
+                                        có —
+                                        vượt trội cho Y khoa</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🧪</span> Deep Research</td>
+                                <td><span class="badge badge-exclusive">🏆 Exclusive</span><span
+                                        class="cell-detail">Multi-agent
+                                        autonomous synthesis</span></td>
+                                <td><span class="badge badge-no">✗ Không có</span></td>
+                                <td><span class="cell-detail">Tương đương Gemini Deep Research, ChatGPT Deep
+                                        Research</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🔬</span> Scientific Skills</td>
+                                <td><span class="badge badge-exclusive">🏆 170+ Skills</span><span class="cell-detail">8
+                                        specialized agents (PubMed, ArXiv, OpenAlex)</span></td>
+                                <td><span class="badge badge-no">✗ Không có</span></td>
+                                <td><span class="badge badge-exclusive">Unique</span><span class="cell-detail">Không
+                                        competitor
+                                        nào có hệ thống tương đương</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">💊</span> Medical Beta</td>
+                                <td><span class="badge badge-exclusive">🏆 Exclusive</span><span
+                                        class="cell-detail">Biomedical
+                                        plugins, drug interactions</span></td>
+                                <td><span class="badge badge-no">✗ Không có</span></td>
+                                <td><span class="cell-detail">Niche market, high-value vertical</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📊</span> Slides Generator</td>
+                                <td><span class="badge badge-exclusive">🏆 Exclusive</span><span
+                                        class="cell-detail">Inline
+                                        editing, fullscreen, speaker notes</span></td>
+                                <td><span class="badge badge-no">✗ Không có</span></td>
+                                <td><span class="cell-detail">Tương đương Gamma.app, Beautiful.ai</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SECTION 3: Platform & Mobile -->
+                <div class="section" id="platform">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--purple-bg); border: 1px solid rgba(168,85,247,0.2);">
+                            📱</div>
+                        <div>
+                            <div class="section-title">Platform & Mobile Support</div>
+                            <div class="section-subtitle">Hỗ trợ đa nền tảng — một trong những câu hỏi quan trọng nhất
+                            </div>
+                        </div>
+                    </div>
+                    <div class="platform-grid">
+                        <div class="platform-card">
+                            <div class="card-badge"><span class="badge badge-yes">v1 ✓</span></div>
+                            <div class="card-icon">🌐</div>
+                            <h3>Web Browser</h3>
+                            <p><strong>v1:</strong> Next.js SSR — pho.chat<br><strong>v2:</strong> Vite SPA — load nhanh
+                                hơn, UX
+                                mượt hơn</p>
+                        </div>
+                        <div class="platform-card">
+                            <div class="card-badge"><span class="badge badge-partial">v1 PWA</span></div>
+                            <div class="card-icon">📱</div>
+                            <h3>PWA (Progressive Web App)</h3>
+                            <p><strong>v1:</strong> PWA basic<br><strong>v2:</strong> PWA optimized — near-native
+                                experience
+                                trên cả mobile & desktop</p>
+                        </div>
+                        <div class="platform-card">
+                            <div class="card-badge"><span class="badge badge-new">v2 Only</span></div>
+                            <div class="card-icon">🍎</div>
+                            <h3>iOS App</h3>
+                            <p><strong>v1:</strong> ✗ Không có<br><strong>v2:</strong> ✓ TestFlight (beta) — Native iOS
+                                experience<br><em>lobehub đang trong giai đoạn beta testing</em></p>
+                        </div>
+                        <div class="platform-card">
+                            <div class="card-badge"><span class="badge badge-new">v2 Only</span></div>
+                            <div class="card-icon">🤖</div>
+                            <h3>Android App</h3>
+                            <p><strong>v1:</strong> ✗ Không có<br><strong>v2:</strong> ✓ Google Play — Available for
+                                download<br><em>Đã publish trên Google Play Store</em></p>
+                        </div>
+                        <div class="platform-card">
+                            <div class="card-badge"><span class="badge badge-new">v2 Only</span></div>
+                            <div class="card-icon">🖥️</div>
+                            <h3>Desktop (Electron)</h3>
+                            <p><strong>v1:</strong> ✗ Không có<br><strong>v2:</strong> ✓ macOS (Intel + Apple Silicon) +
+                                Windows
+                                + Linux<br><em>Liquid Glass UI, page tabs, hotkeys, auto-update</em></p>
+                        </div>
+                        <div class="platform-card">
+                            <div class="card-badge"><span class="badge badge-new">v2 Only</span></div>
+                            <div class="card-icon">💬</div>
+                            <h3>IM Bot Integration</h3>
+                            <p><strong>v1:</strong> ✗ Không có<br><strong>v2:</strong> ✓ Discord Bot + Telegram
+                                Bot<br><em>Truy
+                                    cập AI qua messaging apps</em></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: Extensibility -->
+                <div class="section" id="extensibility">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--yellow-bg); border: 1px solid rgba(245,158,11,0.2);">
+                            🔌</div>
+                        <div>
+                            <div class="section-title">Extensibility & Integration</div>
+                            <div class="section-subtitle">Khả năng mở rộng & tích hợp</div>
+                        </div>
+                    </div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Khả năng</th>
+                                <th class="col-v1">v1</th>
+                                <th class="col-v2">v2</th>
+                                <th>Tác động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🔌</span> Plugin System</td>
+                                <td><span class="badge badge-yes">✓</span> Marketplace plugins</td>
+                                <td><span class="badge badge-yes">✓</span> + Marketplace MCPs, skew plugin fix</td>
+                                <td>Cloud-hosted plugins, broader ecosystem</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🤖</span> Custom Agents</td>
+                                <td><span class="badge badge-yes">✓</span> Create & share agents</td>
+                                <td><span class="badge badge-new">✓ Enhanced</span><span class="cell-detail">Agent
+                                        Skills, Agent
+                                        Benchmark, Agent Harness runtime, fork agents</span></td>
+                                <td>Agents có thể "học" skills, đánh giá performance</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🌐</span> Provider System</td>
+                                <td><span class="badge badge-yes">✓</span> Vertex AI + Vercel Gateway</td>
+                                <td><span class="badge badge-yes">✓</span><span class="cell-detail">+ Straico, NVIDIA
+                                        NIM,
+                                        NewAPI, model routing</span></td>
+                                <td>Nhiều provider hơn, routing logic thông minh hơn</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📡</span> API / Self-hosted</td>
+                                <td><span class="badge badge-yes">✓</span> Docker, Vercel</td>
+                                <td><span class="badge badge-yes">✓</span><span class="cell-detail">+ Device Gateway,
+                                        M2M
+                                        tokens, trust client</span></td>
+                                <td>Enterprise-ready deployment options</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🏢</span> SSO / Enterprise</td>
+                                <td><span class="badge badge-partial">Clerk only</span></td>
+                                <td><span class="badge badge-new">Better-Auth</span><span class="cell-detail">Last used
+                                        provider, device code auth, email change</span></td>
+                                <td>Flexible enterprise auth options</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🌍</span> i18n</td>
+                                <td><span class="badge badge-yes">✓</span> Vietnamese + English</td>
+                                <td><span class="badge badge-yes">✓</span> 20+ languages<span
+                                        class="cell-detail">Auto-translate
+                                        comments to English workflow</span></td>
+                                <td>Global reach, community translations</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SECTION 5: Competitor Landscape -->
+                <div class="section" id="competitors">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--red-bg); border: 1px solid rgba(239,68,68,0.15);">🏆
+                        </div>
+                        <div>
+                            <div class="section-title">Competitive Landscape</div>
+                            <div class="section-subtitle">So sánh với các "ông lớn" — Phở Chat v2 sẽ đứng ở đâu?</div>
+                        </div>
+                    </div>
+                    <div class="competitor-grid">
+                        <div class="competitor-card">
+                            <h3>💬 vs ChatGPT Plus ($20/mo)</h3>
+                            <ul>
+                                <li><span class="dot-green">✓</span> Multi-model (ChatGPT chỉ có GPT)</li>
+                                <li><span class="dot-green">✓</span> Self-hosted, data privacy</li>
+                                <li><span class="dot-green">✓</span> MCP tools (ChatGPT ko có)</li>
+                                <li><span class="dot-green">✓</span> Open-source, customize được</li>
+                                <li><span class="dot-green">✓</span> 🏆 Research Engine (exclusive)</li>
+                                <li><span class="dot-yellow">~</span> Memory (ChatGPT mạnh hơn)</li>
+                                <li><span class="dot-red">✗</span> Chưa có mobile native (v2 sẽ có)</li>
+                            </ul>
+                        </div>
+                        <div class="competitor-card">
+                            <h3>🟣 vs Claude Pro ($20/mo)</h3>
+                            <ul>
+                                <li><span class="dot-green">✓</span> Multi-model (Claude chỉ có Anthropic)</li>
+                                <li><span class="dot-green">✓</span> Video generation</li>
+                                <li><span class="dot-green">✓</span> Agent marketplace</li>
+                                <li><span class="dot-green">✓</span> 🏆 Deep Research, Scientific Skills</li>
+                                <li><span class="dot-yellow">~</span> Artifacts (Claude mạnh hơn)</li>
+                                <li><span class="dot-yellow">~</span> MCP (Claude Desktop có native MCP)</li>
+                                <li><span class="dot-red">✗</span> Claude Projects mạnh hơn KB hiện tại</li>
+                            </ul>
+                        </div>
+                        <div class="competitor-card">
+                            <h3>🔵 vs Gemini Advanced ($20/mo)</h3>
+                            <ul>
+                                <li><span class="dot-green">✓</span> Multi-model (không bị lock vào Google)</li>
+                                <li><span class="dot-green">✓</span> Self-hosted, privacy</li>
+                                <li><span class="dot-green">✓</span> Plugin ecosystem</li>
+                                <li><span class="dot-green">✓</span> 🏆 Medical Beta (Gemini ko có)</li>
+                                <li><span class="dot-yellow">~</span> Deep Research (Gemini có built-in)</li>
+                                <li><span class="dot-red">✗</span> Google ecosystem integration</li>
+                                <li><span class="dot-red">✗</span> NotebookLM tốt hơn KB</li>
+                            </ul>
+                        </div>
+                        <div class="competitor-card">
+                            <h3>🟢 vs Open-source (LibreChat, Jan.ai)</h3>
+                            <ul>
+                                <li><span class="dot-green">✓</span> Larger community (47k+ stars)</li>
+                                <li><span class="dot-green">✓</span> Better UI/UX</li>
+                                <li><span class="dot-green">✓</span> Desktop + Mobile apps</li>
+                                <li><span class="dot-green">✓</span> Agent Skills & Benchmarks</li>
+                                <li><span class="dot-green">✓</span> 🏆 Research Engine (no competitor has this)</li>
+                                <li><span class="dot-green">✓</span> Video & Image generation</li>
+                                <li><span class="dot-green">✓</span> MCP + Plugin marketplace</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 6: Migration Roadmap -->
+                <div class="section" id="roadmap">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--green-bg); border: 1px solid rgba(34,197,94,0.2);">
+                            🗺️</div>
+                        <div>
+                            <div class="section-title">Migration Roadmap</div>
+                            <div class="section-subtitle">Lộ trình đề xuất để chuyển từ v1 sang v2</div>
+                        </div>
+                    </div>
+                    <div class="roadmap">
+                        <div class="roadmap-phase phase-1">
+                            <span class="phase-label">Phase 1 — Tuần 1-2</span>
+                            <h3>🏗️ Foundation</h3>
+                            <ul>
+                                <li>Fresh fork từ lobehub v2.1.38</li>
+                                <li>Setup Clerk Auth</li>
+                                <li>Copy Vietnamese i18n</li>
+                                <li>VN Premium pricing config</li>
+                                <li>PostHog analytics integration</li>
+                                <li>Deploy staging: v2.pho.chat</li>
+                            </ul>
+                        </div>
+                        <div class="roadmap-phase phase-2">
+                            <span class="phase-label">Phase 2 — Tuần 3-6</span>
+                            <h3>🧠 Core Features</h3>
+                            <ul>
+                                <li>Port Research Engine</li>
+                                <li>Port Deep Research</li>
+                                <li>Port Scientific Skills (170+)</li>
+                                <li>Port Medical Beta plugins</li>
+                                <li>Port Slides Generator</li>
+                                <li>Internal QA & testing</li>
+                            </ul>
+                        </div>
+                        <div class="roadmap-phase phase-3">
+                            <span class="phase-label">Phase 3 — Tuần 7-8</span>
+                            <h3>📱 New Capabilities</h3>
+                            <ul>
+                                <li>Enable iOS/Android apps</li>
+                                <li>Setup Electron desktop</li>
+                                <li>Video generation pipeline</li>
+                                <li>Discord/Telegram bots</li>
+                                <li>Agent Skills configuration</li>
+                                <li>Knowledge Base 2.0 testing</li>
+                            </ul>
+                        </div>
+                        <div class="roadmap-phase phase-4">
+                            <span class="phase-label">Phase 4 — Tuần 9-10</span>
+                            <h3>🚀 Launch</h3>
+                            <ul>
+                                <li>User migration plan</li>
+                                <li>Data migration scripts</li>
+                                <li>Beta testing with Medical users</li>
+                                <li>v2.pho.chat → pho.chat cutover</li>
+                                <li>Archive v1 codebase</li>
+                                <li>Monitor & iterate</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: Agentic AI & MCP -->
+                <div class="section" id="agentic">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--purple-bg); border: 1px solid rgba(168,85,247,0.2);">🤖</div>
+                        <div>
+                            <div class="section-title">Agentic AI & MCP Integration</div>
+                            <div class="section-subtitle">Kiến trúc Agentic, kết nối ứng dụng bên ngoài</div>
+                        </div>
+                    </div>
+                    <div class="arch-diagram">┌─────────────────────────────────────────────┐
+                        │ Agent Harness Runtime │
+                        │ ┌──────────┐ ┌──────────┐ ┌────────────┐ │
+                        │ │ Prompt │ │ Tool │ │ Sub-Agent │ │
+                        │ │ Presets │ │ Handling │ │ Management │ │
+                        │ └──────────┘ └──────────┘ └────────────┘ │
+                        │ ┌──────────┐ ┌──────────┐ ┌────────────┐ │
+                        │ │ Memory │ │ Context │ │ Safety │ │
+                        │ │ System │ │ Lifecycle│ │ Guards │ │
+                        │ └──────────┘ └──────────┘ └────────────┘ │
+                        └──────────────────────┬──────────────────────┘
+                        │ MCP Protocol
+                        ┌──────────────────────┴──────────────────────┐
+                        │ External Tools &amp; Applications │
+                        │ Claude Desktop, Slack, GitHub, DB, APIs... │
+                        └─────────────────────────────────────────────┘</div>
+                    <div class="info-grid" style="margin-top: 16px;">
+                        <div class="info-box">
+                            <h4>✅ Agent Harness Runtime</h4>
+                            <ul>
+                                <li>Server-side agent execution (AWS)</li>
+                                <li>Agent Skills framework — agents "học" skills</li>
+                                <li>Agent Benchmarks — đánh giá performance</li>
+                                <li>Multi-agent orchestration & sub-agents</li>
+                                <li>Context lifecycle & memory management</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>✅ MCP Integration (Model Context Protocol)</h4>
+                            <ul>
+                                <li>MCP Marketplace — hàng trăm connectors sẵn có</li>
+                                <li>Auto-discovery tools từ MCP servers</li>
+                                <li>Tương thích Claude Desktop MCP servers</li>
+                                <li>Custom MCP server — viết connector cho bất kỳ app</li>
+                                <li>WolframAlpha, Brave Search, DB connectors...</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🔗 Tích hợp External Apps</h4>
+                            <ul>
+                                <li><strong>ClawdBot / Claude Desktop:</strong> Chia sẻ MCP servers</li>
+                                <li><strong>Discord / Telegram:</strong> Built-in bot integration</li>
+                                <li><strong>Notion / Google Drive:</strong> KB 2.0 connectors</li>
+                                <li><strong>Database:</strong> PostgreSQL, MySQL, SQLite via MCP</li>
+                                <li><strong>Custom:</strong> Viết MCP server riêng cho Sepay, hospital EHR...</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>📊 So sánh Agentic Capabilities</h4>
+                            <p><span class="badge badge-yes">✓</span> MCP Support — ngang Claude Desktop<br>
+                                <span class="badge badge-yes">✓</span> Agent Skills — vượt ChatGPT GPTs
+                                (open-source)<br>
+                                <span class="badge badge-yes">✓</span> Multi-Agent — vượt tất cả competitors<br>
+                                <span class="badge badge-yes">✓</span> Self-hosted — duy nhất LobeHub có<br>
+                                <span class="badge badge-no">✗</span> ChatGPT, Gemini — không có MCP support
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 8: AI Provider Management -->
+                <div class="section" id="providers">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--blue-bg); border: 1px solid rgba(59,130,246,0.2);">🌐</div>
+                        <div>
+                            <div class="section-title">AI Provider Management</div>
+                            <div class="section-subtitle">Kiến trúc quản lý 40+ AI providers</div>
+                        </div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <h4>🏗️ Model Runtime Architecture</h4>
+                            <p>V2 sử dụng <strong>Model Runtime abstraction layer</strong>
+                                (<code>packages/model-runtime/</code>) — unified <code>LobeRuntimeAI</code> interface
+                                cho tất cả providers.</p>
+                            <ul>
+                                <li><strong>Provider as Plugin:</strong> Mỗi provider là 1 plugin, dễ thêm mới</li>
+                                <li><strong>Factory Pattern:</strong> <code>openaiCompatibleFactory</code> cho
+                                    OpenAI-like APIs</li>
+                                <li><strong>Dynamic Routing:</strong> Route request đến provider dựa trên user config
+                                </li>
+                                <li><strong>Zero Vendor Lock-in:</strong> Switch provider bất kỳ lúc nào</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🔌 40+ Providers Supported</h4>
+                            <ul>
+                                <li><strong>Tier 1:</strong> OpenAI, Anthropic, Google Vertex AI, Azure</li>
+                                <li><strong>Tier 2:</strong> AWS Bedrock, Groq, Together AI, Cerebras</li>
+                                <li><strong>Tier 3:</strong> Straico, NVIDIA NIM, NewAPI, Ollama (local)</li>
+                                <li><strong>Speed:</strong> Groq, Cerebras — sub-second responses</li>
+                                <li><strong>VN Gateway:</strong> Vercel AI Gateway (hiện tại Phở Chat dùng)</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>⚙️ Config & Routing</h4>
+                            <ul>
+                                <li>Environment variables: <code>OPENAI_MODEL_LIST</code> bật/tắt models</li>
+                                <li>Per-user provider config từ database</li>
+                                <li><code>userId</code> in RouteAttemptResult cho tracking</li>
+                                <li>Admin có thể enable/disable providers server-side</li>
+                                <li>Users tự thêm API keys cho personal providers</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🆚 v1 vs v2 Provider Comparison</h4>
+                            <p><strong>v1 (Phở Chat):</strong> Vertex AI + Vercel AI Gateway dual provider. Custom
+                                routing logic, manual model list.<br><br>
+                                <strong>v2 (Upstream):</strong> 40+ providers, automatic routing, factory pattern,
+                                community-contributed providers, M2M tokens, Device Gateway.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 9: UI & Branding -->
+                <div class="section" id="branding">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--green-bg); border: 1px solid rgba(34,197,94,0.2);">🎨</div>
+                        <div>
+                            <div class="section-title">UI Customization & Phở Branding</div>
+                            <div class="section-subtitle">Khả năng tùy biến hoàn toàn theo thương hiệu Phở</div>
+                        </div>
+                    </div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Yếu tố</th>
+                                <th class="col-v1">v1 (Hiện tại)</th>
+                                <th class="col-v2">v2 (Upstream)</th>
+                                <th>Đánh giá</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🎨</span> Theme / Dark Mode</td>
+                                <td><span class="badge badge-partial">Partial</span><span class="cell-detail">Custom
+                                        theme colors, nhưng nhiều hardcoded styles</span></td>
+                                <td><span class="badge badge-yes">✓ Full</span><span class="cell-detail">Light/dark
+                                        auto, custom theme colors, bubble/document mode</span></td>
+                                <td><span class="cell-detail">V2 linh hoạt hơn nhiều</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🏷️</span> Logo / Branding</td>
+                                <td><span class="badge badge-partial">Partial</span><span class="cell-detail">Đã thay
+                                        một số logo, nhưng còn nhiều LobeHub references</span></td>
+                                <td><span class="badge badge-partial">Cần work</span><span class="cell-detail">Apache
+                                        2.0 license cho phép rebrand. Cần commercialization auth để ẩn logo gốc</span>
+                                </td>
+                                <td><span class="badge badge-upgrade">⚠️ Lưu ý</span><span class="cell-detail">LobeHub
+                                        yêu cầu auth cho commercial rebrand</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📝</span> Hardcoded Strings</td>
+                                <td><span class="badge badge-no">Nhiều</span><span class="cell-detail">"LobeHub",
+                                        "LobeChat" trong i18n files, metadata, SEO</span></td>
+                                <td><span class="badge badge-partial">Vẫn có</span><span class="cell-detail">i18n keys
+                                        refactored nhưng brand name vẫn "LobeHub"</span></td>
+                                <td><span class="cell-detail">Cần script find-replace toàn bộ</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🌐</span> PWA / Meta Tags</td>
+                                <td><span class="badge badge-partial">Partial</span></td>
+                                <td><span class="badge badge-yes">✓ Full</span><span class="cell-detail">manifest.json,
+                                        OpenGraph, favicon configurable</span></td>
+                                <td><span class="cell-detail">V2 dễ rebrand PWA hơn</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📱</span> Desktop / Mobile</td>
+                                <td><span class="badge badge-no">N/A</span></td>
+                                <td><span class="badge badge-partial">Electron title</span><span
+                                        class="cell-detail">Electron window title, splash screen cần rebrand</span></td>
+                                <td><span class="cell-detail">Cần customize Electron build config</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box" style="margin-top: 16px; border-color: rgba(245,158,11,0.3);">
+                        <h4>⚠️ Chiến lược Rebrand cho Phở Chat</h4>
+                        <ul>
+                            <li><strong>Apache 2.0 License:</strong> Cho phép fork, modify, rebrand — nhưng phải giữ
+                                license notice</li>
+                            <li><strong>Commercialization Auth:</strong> LobeHub yêu cầu xin phép để ẩn logo gốc & sửa
+                                official links</li>
+                            <li><strong>Giải pháp:</strong> Tạo script tự động find-replace "LobeHub" → "Phở Chat" trong
+                                i18n, metadata, SEO</li>
+                            <li><strong>Ước tính:</strong> ~2-3 ngày cho full rebrand (logo, fonts, colors, strings,
+                                PWA, Electron)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- SECTION 10: Payment Integration -->
+                <div class="section" id="payments">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--yellow-bg); border: 1px solid rgba(245,158,11,0.2);">💳</div>
+                        <div>
+                            <div class="section-title">Payment Integration (Đa phương thức)</div>
+                            <div class="section-subtitle">Stripe, Polar, RevenueCat, Sepay & khả năng mở rộng</div>
+                        </div>
+                    </div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Payment Provider</th>
+                                <th>Khả thi?</th>
+                                <th>Cách tích hợp</th>
+                                <th>Độ phức tạp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">💳</span> Stripe</td>
+                                <td><span class="badge badge-yes">✓ Rất tốt</span></td>
+                                <td>LobeHub Skills Marketplace đã có Stripe skills. Port code v1 hoặc dùng Agent
+                                    Skills<span class="cell-detail">Subscription, usage-based billing, webhooks,
+                                        customer portal</span></td>
+                                <td><span class="badge badge-yes">Low</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🐻‍❄️</span> Polar</td>
+                                <td><span class="badge badge-yes">✓ Tốt</span></td>
+                                <td>API tương thích Stripe-like, dễ tạo adapter<span class="cell-detail">Open-source
+                                        friendly, tốt cho OSS monetization</span></td>
+                                <td><span class="badge badge-yes">Low</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📱</span> RevenueCat</td>
+                                <td><span class="badge badge-yes">✓ Tốt</span></td>
+                                <td>Quản lý In-App Purchases cho iOS/Android<span class="cell-detail">⚠️ BẮT BUỘC nếu
+                                        bán digital goods trên App Store/Google Play (30% fee)</span></td>
+                                <td><span class="badge badge-partial">Medium</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🇻🇳</span> Sepay (VN)</td>
+                                <td><span class="badge badge-yes">✓ Tốt</span></td>
+                                <td>Port webhook system từ Phở Chat v1. Custom MCP server<span class="cell-detail">QR
+                                        bank transfer, VN local payment</span></td>
+                                <td><span class="badge badge-yes">Low</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🔮</span> MoMo / VNPay / ZaloPay</td>
+                                <td><span class="badge badge-partial">Mở rộng</span></td>
+                                <td>Thêm adapter vào Payment Abstraction Layer<span class="cell-detail">Tương lai khi
+                                        scale thị trường VN</span></td>
+                                <td><span class="badge badge-partial">Medium</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box" style="margin-top: 16px; border-color: rgba(239,68,68,0.3);">
+                        <h4>⚠️ Lưu ý quan trọng về Mobile Payment</h4>
+                        <p>Nếu publish app trên <strong>iOS App Store</strong> hoặc <strong>Google Play</strong>:<br>
+                            • Apple/Google <strong>bắt buộc</strong> dùng In-App Purchase cho digital goods (<strong>30%
+                                fee</strong>)<br>
+                            • <strong>RevenueCat</strong> là best solution cho cross-platform subscription
+                            management<br>
+                            • Sepay/Stripe chỉ dùng được cho <strong>web / PWA</strong>, không dùng trong native app
+                            store</p>
+                    </div>
+                </div>
+
+                <!-- SECTION 11: Solo Operations Cost -->
+                <div class="section" id="operations">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--green-bg); border: 1px solid rgba(34,197,94,0.2);">💰</div>
+                        <div>
+                            <div class="section-title">Chi phí vận hành (Solo Operator)</div>
+                            <div class="section-subtitle">Ước tính chi phí cho 1 người vận hành</div>
+                        </div>
+                    </div>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div class="cost-card">
+                            <div class="cost-label">LobeChat License</div>
+                            <div class="cost-value" style="color: var(--green);">$0</div>
+                            <div class="cost-detail">Apache 2.0 — 100% free</div>
+                        </div>
+                        <div class="cost-card">
+                            <div class="cost-label">Hosting (Vercel)</div>
+                            <div class="cost-value" style="color: var(--yellow);">$20</div>
+                            <div class="cost-detail">/tháng — Pro plan</div>
+                        </div>
+                        <div class="cost-card">
+                            <div class="cost-label">Database (Neon)</div>
+                            <div class="cost-value" style="color: var(--blue);">$0-19</div>
+                            <div class="cost-detail">/tháng — Free → Pro</div>
+                        </div>
+                        <div class="cost-card">
+                            <div class="cost-label">Redis (Upstash)</div>
+                            <div class="cost-value" style="color: var(--cyan);">$0-10</div>
+                            <div class="cost-detail">/tháng — Free tier</div>
+                        </div>
+                        <div class="cost-card">
+                            <div class="cost-label">S3 Storage (R2)</div>
+                            <div class="cost-value" style="color: var(--purple);">$0-5</div>
+                            <div class="cost-detail">/tháng — Cloudflare R2</div>
+                        </div>
+                        <div class="cost-card">
+                            <div class="cost-label">AI API Costs</div>
+                            <div class="cost-value" style="color: var(--orange);">$50-200</div>
+                            <div class="cost-detail">/tháng — Pay-as-you-go</div>
+                        </div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <h4>✅ Tối ưu cho Solo Operator</h4>
+                            <ul>
+                                <li><strong>V2 Vite SPA:</strong> Build nhanh 70%, không còn OOM errors → tiết kiệm
+                                    CI/CD</li>
+                                <li><strong>Self-hosted:</strong> Không phụ thuộc LobeHub Cloud</li>
+                                <li><strong>Auto-update:</strong> Electron S3 auto-update cho desktop users</li>
+                                <li><strong>Docker Compose:</strong> 1 command deploy toàn bộ stack</li>
+                                <li><strong>lobehub-cli:</strong> Automate scaffolding, dev tasks</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>💡 So sánh chi phí v1 vs v2</h4>
+                            <ul>
+                                <li><strong>v1:</strong> ~$70-250/tháng (Vercel OOM = Pro plan bắt buộc, Neon, Redis,
+                                    APIs)</li>
+                                <li><strong>v2:</strong> ~$70-234/tháng (tương đương, nhưng build ổn định hơn, ít
+                                    downtime)</li>
+                                <li><strong>Tiết kiệm:</strong> V2 giảm Vercel build minutes ~70%, ít rebuild failures
+                                </li>
+                                <li><strong>Scale:</strong> V2 architecture tốt hơn cho 100+ users concurrent</li>
+                                <li><strong>Monitoring:</strong> PostHog free tier + lobehub analytics built-in</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 12: Upstream Sync Strategy -->
+                <div class="section" id="upstream">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--cyan-bg); border: 1px solid rgba(6,182,212,0.2);">🔄</div>
+                        <div>
+                            <div class="section-title">Upstream Sync Strategy</div>
+                            <div class="section-subtitle">Chiến lược đồng bộ từ lobehub upstream — tránh lặp lại sai lầm
+                                v1</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="border-color: rgba(239,68,68,0.3); margin-bottom: 16px;">
+                        <h4>⚠️ Bài học từ v1</h4>
+                        <p>Phở Chat v1 fork lobehub rồi <strong>diverge 618 commits</strong> — sửa trực tiếp code
+                            upstream, xen kẽ custom features vào core → <strong>không thể merge upstream nữa</strong>.
+                            V2 phải áp dụng <strong>"Thin Fork"</strong> strategy từ đầu.</p>
+                    </div>
+                    <div class="arch-diagram">Upstream Sync Flow:
+
+                        upstream/main ──●──●──●──●──●──●──●──●──●── (LobeHub releases v2.2, v2.3...)
+                        \ \
+                        pho-chat/main ────────●──○──○──●──────────●──○──○──
+                        merge custom merge custom
+                        (tag) (isolated) (tag) (isolated)
+
+                        "Thin Fork" Rule:
+                        ┌──────────────────────────────────────────┐
+                        │ NEVER modify upstream files directly │
+                        │ ALWAYS add custom code in separate dirs │
+                        │ src/features/pho/ ← custom features │
+                        │ src/plugins/pho/ ← custom plugins │
+                        │ src/config/pho/ ← custom config │
+                        │ api/pho/ ← custom routes │
+                        │ drizzle/pho/ ← custom migrations│
+                        └──────────────────────────────────────────┘</div>
+                    <div class="info-grid" style="margin-top: 16px;">
+                        <div class="info-box">
+                            <h4>⏰ Tần suất Merge</h4>
+                            <ul>
+                                <li><strong>Minor release (v2.x.0):</strong> ⭐ Khuyến nghị — mỗi 2-4 tuần</li>
+                                <li><strong>Cherry-pick:</strong> ⭐⭐ Tốt nhất — chỉ pick commit/PR cần</li>
+                                <li><strong>Mỗi tuần:</strong> ⚠️ Quá thường xuyên, nhiều noise</li>
+                                <li><strong>Major release (v3):</strong> 🔴 Rủi ro cao, quá nhiều changes</li>
+                                <li><strong>Quy trình:</strong>
+                                    <code>git fetch upstream → git merge upstream/v2.x.0 --no-commit → test → commit</code>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>💥 Vùng hay gây Conflict</h4>
+                            <ul>
+                                <li><strong>package.json / pnpm-lock:</strong> Accept upstream →
+                                    <code>pnpm install</code>
+                                </li>
+                                <li><strong>src/store/:</strong> Zustand stores → đặt custom tại
+                                    <code>src/store/pho/</code>
+                                </li>
+                                <li><strong>src/config/:</strong> Model lists → extend thay vì override</li>
+                                <li><strong>drizzle/ migrations:</strong> DB schema → <code>drizzle/pho/</code> riêng
+                                </li>
+                                <li><strong>locales/:</strong> i18n keys → Vietnamese overlay, không sửa keys gốc</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>✅ Checklist mỗi lần Merge</h4>
+                            <ul>
+                                <li>1. <code>git fetch upstream && git log --oneline upstream/main...HEAD</code></li>
+                                <li>2. Review CHANGELOG upstream → features nào cần?</li>
+                                <li>3. <code>git merge upstream/v2.x.0 --no-commit</code></li>
+                                <li>4. Resolve conflicts (ưu tiên accept upstream)</li>
+                                <li>5. Chạy <code>pnpm build && pnpm test</code></li>
+                                <li>6. Chạy <code>./scripts/rebrand.sh</code> (find-replace branding)</li>
+                                <li>7. Deploy staging → QA → merge to main</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🛡️ Nguyên tắc "Thin Fork"</h4>
+                            <ul>
+                                <li><strong>Branding:</strong> Script <code>rebrand.sh</code> tự động chạy post-merge
+                                </li>
+                                <li><strong>Features:</strong> Tách riêng tại <code>src/features/pho/</code></li>
+                                <li><strong>Config:</strong> Dùng <code>PHO_</code> prefix cho env vars mới</li>
+                                <li><strong>CSS:</strong> Override bằng CSS custom properties</li>
+                                <li><strong>API routes:</strong> Thêm tại <code>/api/pho/...</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 12B: Feature Reuse Analysis -->
+                <div class="section" id="reuse">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--green-bg); border: 1px solid rgba(34,197,94,0.2);">♻️</div>
+                        <div>
+                            <div class="section-title">Feature Reuse Analysis (v1 → v2)</div>
+                            <div class="section-subtitle">Các features độc quyền v1 có thể tái sử dụng trong v2?</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="border-color: rgba(34,197,94,0.3); margin-bottom: 16px;">
+                        <h4>✅ Tin tốt: V1 và V2 dùng cùng UI stack!</h4>
+                        <p>Cả v1 lẫn v2 đều dùng <strong>Ant Design + antd-style (CSS-in-JS) + @lobehub/ui</strong> +
+                            <strong>Zustand</strong> state management + <strong>TypeScript</strong>. Điều này có nghĩa
+                            là <strong>phần lớn code v1 có thể port sang v2</strong> với chỉnh sửa nhỏ (chủ yếu là
+                            import paths và routing).
+                        </p>
+                    </div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature Độc quyền v1</th>
+                                <th>Files chính</th>
+                                <th>Tái sử dụng?</th>
+                                <th>Công sức Port</th>
+                                <th>Lưu ý</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🔬</span> Research Engine</td>
+                                <td><code>src/features/Portal/Research/</code><br><code>src/store/research/</code><br><code>src/app/api/research/</code>
+                                </td>
+                                <td><span class="badge badge-yes">✅ 85-90%</span></td>
+                                <td><span class="badge badge-yes">~2-3 ngày</span></td>
+                                <td><span class="cell-detail">Đổi import paths, update routing (Next.js → Vite), giữ
+                                        logic nguyên</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🧠</span> Deep Research</td>
+                                <td><code>src/features/Portal/DeepResearch/</code><br><code>src/store/research/</code>
+                                </td>
+                                <td><span class="badge badge-yes">✅ 85-90%</span></td>
+                                <td><span class="badge badge-yes">~2-3 ngày</span></td>
+                                <td><span class="cell-detail">Multi-agent logic giữ nguyên, API route cần chuyển sang
+                                        Vite server</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📚</span> Scientific Skills (170+)</td>
+                                <td><code>src/tools/scientific-skills/</code><br>6 files (apis, systemRole, Render)</td>
+                                <td><span class="badge badge-yes">✅ 95%</span></td>
+                                <td><span class="badge badge-yes">~1 ngày</span></td>
+                                <td><span class="cell-detail">Tool definitions giữ nguyên, chỉ update registration
+                                        mechanism</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🏥</span> Medical Beta (Drug DB)</td>
+                                <td><code>src/app/api/plugins/drug-interactions/</code><br>search/ + adverse-events/
+                                </td>
+                                <td><span class="badge badge-yes">✅ 90%</span></td>
+                                <td><span class="badge badge-yes">~1-2 ngày</span></td>
+                                <td><span class="cell-detail">API routes port sang v2, có thể chuyển thành MCP server
+                                        riêng</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">💳</span> Sepay Payment</td>
+                                <td><code>src/app/api/payment/</code><br>Webhook handlers</td>
+                                <td><span class="badge badge-yes">✅ 80%</span></td>
+                                <td><span class="badge badge-partial">~2 ngày</span></td>
+                                <td><span class="cell-detail">Webhook logic giữ nguyên, DB schema cần align với v2
+                                        Drizzle</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🇻🇳</span> VN Premium Pricing</td>
+                                <td><code>src/config/pricing.ts</code><br>Plan definitions</td>
+                                <td><span class="badge badge-yes">✅ 70%</span></td>
+                                <td><span class="badge badge-partial">~2 ngày</span></td>
+                                <td><span class="cell-detail">Logic giữ, cần align với v2 subscription system (nếu
+                                        có)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🎞️</span> Slides Generator</td>
+                                <td>Artifact render components</td>
+                                <td><span class="badge badge-partial">~60%</span></td>
+                                <td><span class="badge badge-partial">~3-4 ngày</span></td>
+                                <td><span class="cell-detail">V2 có Artifact system mới, cần adapt rendering
+                                        logic</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🌐</span> Vietnamese i18n</td>
+                                <td><code>src/locales/vi-VN/</code><br>Tất cả translation files</td>
+                                <td><span class="badge badge-yes">✅ 50-70%</span></td>
+                                <td><span class="badge badge-partial">~2 ngày</span></td>
+                                <td><span class="cell-detail">V2 có keys mới, cần merge translations + dịch keys
+                                        mới</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">📊</span> PostHog Analytics</td>
+                                <td>Config + hooks + feature flags</td>
+                                <td><span class="badge badge-yes">✅ 90%</span></td>
+                                <td><span class="badge badge-yes">~0.5 ngày</span></td>
+                                <td><span class="cell-detail">Config copy, hooks port trực tiếp</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="info-grid" style="margin-top: 16px;">
+                        <div class="info-box">
+                            <h4>✅ Những gì PORT TRỰC TI᯼P</h4>
+                            <ul>
+                                <li><strong>Business logic:</strong> Tất cả store slices, API logic, algorithms</li>
+                                <li><strong>Tool definitions:</strong> Scientific skills, Drug DB queries</li>
+                                <li><strong>Type definitions:</strong> TypeScript interfaces/types</li>
+                                <li><strong>Test files:</strong> Unit tests (Vitest cả 2 versions)</li>
+                                <li><strong>i18n strings:</strong> Vietnamese translations (merge với v2 keys)</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>⚠️ Những gì CẦN CHỈNH SỬa</h4>
+                            <ul>
+                                <li><strong>Import paths:</strong> V2 có cấu trúc khác (Vite aliases)</li>
+                                <li><strong>API routes:</strong> Next.js <code>app/api/</code> → Vite server routes</li>
+                                <li><strong>Auth hooks:</strong> Clerk → Better-Auth (session/user APIs khác)</li>
+                                <li><strong>DB queries:</strong> Schema v2 có thể khác table names</li>
+                                <li><strong>CSS:</strong> antd-style giữ nguyên, nhưng theme tokens có thể đổi</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 12C: Design System Guide for Figma/Pencil -->
+                <div class="section" id="designsystem">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--purple-bg); border: 1px solid rgba(168,85,247,0.2);">🎨</div>
+                        <div>
+                            <div class="section-title">Design System Guide cho Figma / Pencil</div>
+                            <div class="section-subtitle">Tất cả thông tin cần để thiết kế UI/UX đúng với codebase v2
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="border-color: rgba(99,102,241,0.3); margin-bottom: 16px;">
+                        <h4>💡 Tại sao cần Design Brief?</h4>
+                        <p>Khi thiết kế UI/UX cho v2 trên Figma/Pencil, design tool cần hiểu: <strong>(1) Component
+                                library đang dùng</strong>, <strong>(2) Design tokens (colors, spacing,
+                                typography)</strong>, <strong>(3) Screen flows &amp; navigation patterns</strong>,
+                            <strong>(4) Responsive breakpoints</strong>. Nếu thiết kế không match với code, developers
+                            sẽ mất thời gian tái implement.
+                        </p>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <h4>🎨 1. Component Library</h4>
+                            <p>V2 dùng 3 lớp component:</p>
+                            <ul>
+                                <li><strong>Ant Design 5.x:</strong> Base components (Button, Input, Select, Modal,
+                                    Table, Form, Drawer...)</li>
+                                <li><strong>@lobehub/ui:</strong> Custom chat components (ChatList, Avatar, Markdown,
+                                    EditableMessage, PluginStore...)</li>
+                                <li><strong>Custom components:</strong> Conversation, Portal, Agent panels</li>
+                                <li><strong>Icons:</strong> @lobehub/icons (AI provider logos, tool icons)</li>
+                            </ul>
+                            <p style="margin-top: 8px;"><em>→ Figma: Import Ant Design 5 UI Kit + tạo custom components
+                                    từ @lobehub/ui</em></p>
+                        </div>
+                        <div class="info-box">
+                            <h4>🎨 2. Design Tokens</h4>
+                            <ul>
+                                <li><strong>Theming engine:</strong> antd-style (CSS-in-JS, token-based)</li>
+                                <li><strong>Colors:</strong> Ant Design token system — <code>colorPrimary</code>,
+                                    <code>colorBgContainer</code>, <code>colorText</code>...
+                                </li>
+                                <li><strong>Dark/Light:</strong> Auto theme switching với <code>ThemeProvider</code>
+                                </li>
+                                <li><strong>Typography:</strong> System font stack
+                                    (<code>-apple-system, BlinkMacSystemFont, Segoe UI</code>)</li>
+                                <li><strong>Border Radius:</strong> 8px (cards), 12px (modals), 50% (avatars)</li>
+                                <li><strong>Spacing:</strong> 4px base unit (4, 8, 12, 16, 24, 32, 48)</li>
+                            </ul>
+                            <p style="margin-top: 8px;"><em>→ Figma: Tạo Design Tokens library match với antd token
+                                    names</em></p>
+                        </div>
+                        <div class="info-box">
+                            <h4>📏 3. Layout Patterns</h4>
+                            <ul>
+                                <li><strong>Desktop:</strong> 3-panel layout (Sidebar 280px | Chat | Portal 400px)</li>
+                                <li><strong>Mobile:</strong> Stack layout, bottom navigation, swipe panels</li>
+                                <li><strong>Chat modes:</strong> Bubble mode vs Document mode</li>
+                                <li><strong>Portal panel:</strong> Slide-in right panel (file preview, agent config)
+                                </li>
+                                <li><strong>Mobile breakpoint:</strong> 768px</li>
+                                <li><strong>Tablet breakpoint:</strong> 1024px</li>
+                            </ul>
+                            <p style="margin-top: 8px;"><em>→ Figma: Tạo frames cho Desktop (1440px), Tablet (768px),
+                                    Mobile (390px)</em></p>
+                        </div>
+                        <div class="info-box">
+                            <h4>📱 4. Core Screen Flows</h4>
+                            <ul>
+                                <li><strong>Onboarding:</strong> Welcome → Login → Setup profile → First chat</li>
+                                <li><strong>Chat flow:</strong> New chat → Select model → Type/Voice → Response</li>
+                                <li><strong>Agent flow:</strong> Browse agents → Install → Configure skills → Chat</li>
+                                <li><strong>Research flow:</strong> New research → PICO form → Sources → Report</li>
+                                <li><strong>Settings:</strong> Profile | AI Providers | Plugins | Theme</li>
+                                <li><strong>Knowledge Base:</strong> Upload docs → Chunk → Embed → RAG</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🖌️ 5. Ngôn ngữ Thiết kế (Design Language)</h4>
+                            <ul>
+                                <li><strong>Style:</strong> Modern flat + subtle glassmorphism (dark mode)</li>
+                                <li><strong>Tone:</strong> Professional, clean, minimal chrome</li>
+                                <li><strong>Animations:</strong> Smooth transitions (200-300ms ease), skeleton loading
+                                </li>
+                                <li><strong>Elevation:</strong> Subtle box-shadows, không dùng nhiều depth</li>
+                                <li><strong>Primary:</strong> LobeHub blue (#1677ff) → Phở dự kiến custom</li>
+                                <li><strong>Success/Error:</strong> Ant Design green/red defaults</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>📝 6. Design Brief cho Figma/Pencil</h4>
+                            <p>File cần chuẩn bị cho designer (hoặc AI design tool):</p>
+                            <ul>
+                                <li><strong>design-tokens.json:</strong> Export từ antd theme config</li>
+                                <li><strong>component-inventory.md:</strong> Liệt kê tất cả components đang dùng</li>
+                                <li><strong>screen-map.md:</strong> Sitemap của app (tất cả screens)</li>
+                                <li><strong>user-flows.md:</strong> Flowcharts cho từng feature chính</li>
+                                <li><strong>brand-guide.md:</strong> Phở Branding (colors, logo, tone)</li>
+                                <li><strong>screenshots/:</strong> Capture từng screen của v2 upstream làm reference
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="arch-diagram" style="margin-top: 16px;">Design System Architecture:
+
+                        ┌─────────────────────────────────────────────────┐
+                        │ 🎨 Figma / Pencil.dev (Design) │
+                        │ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
+                        │ │ Design │ │ Component │ │ Screen │ │
+                        │ │ Tokens │ │ Library │ │ Flows │ │
+                        │ └────────────┘ └────────────┘ └────────────┘ │
+                        └──────────────────────┬──────────────────────────┘
+                        │ Handoff
+                        ┌──────────────────────┴──────────────────────────┐
+                        │ 💻 Code (Implementation) │
+                        │ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
+                        │ │ antd-style │ │ Ant Design │ │ @lobehub/ │ │
+                        │ │ Tokens │ │ 5.x │ │ ui │ │
+                        │ └────────────┘ └────────────┘ └────────────┘ │
+                        └─────────────────────────────────────────────────┘
+
+                        Key: Design tokens MUST match antd-style tokens
+                        → Ensures pixel-perfect design-to-code handoff</div>
+                </div>
+
+                <!-- SECTION 12D: AI Design Tools & Component Customization -->
+                <div class="section" id="aidesign">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.15)); border: 1px solid rgba(168,85,247,0.2);">
+                            ✨</div>
+                        <div>
+                            <div class="section-title">AI Design Tools & Component Customization</div>
+                            <div class="section-subtitle">Tạo và customize UI components không cần kỹ năng thiết kế
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="border-color: rgba(34,197,94,0.3); margin-bottom: 16px;">
+                        <h4>✅ @lobehub/ui có thể customize hoàn toàn!</h4>
+                        <p>@lobehub/ui dùng <strong>Ant Design Token System</strong> — tất cả components đều đọc màu,
+                            font, spacing từ <strong>theme tokens</strong>. Chỉ cần đổi tokens tại 1 file duy nhất là
+                            <strong>toàn bộ app thay đổi</strong> theo Phở Branding — không cần sửa từng component.
+                        </p>
+                    </div>
+
+                    <div class="arch-diagram">Customize @lobehub/ui cho Phở Branding:
+
+                        1️⃣ Thay đổi Theme Tokens (1 file duy nhất):
+                        ┌───────────────────────────────────────────────┐
+                        │ // src/config/theme.ts │
+                        │ const phoTheme = { │
+                        │ token: { │
+                        │ colorPrimary: '#E8590C', // Phở Orange │
+                        │ colorBgBase: '#0c0c0c', // Dark bg │
+                        │ borderRadius: 12, // Rounder │
+                        │ fontFamily: 'Inter, ...', // Custom font │
+                        │ }, │
+                        │ algorithm: theme.darkAlgorithm, │
+                        │ }; │
+                        └───────────────────────────────────────────────┘
+                        │
+                        ▼ Tự động apply cho:
+                        ┌───────────────┬───────────────┬───────────────┐
+                        │ All Buttons │ All Inputs │ All Cards │
+                        │ All Modals │ All Icons │ Chat UI │
+                        │ Sidebar │ Avatars │ Agent Panels│
+                        └───────────────┴───────────────┴───────────────┘
+                        0 components cần sửa manually ✔️</div>
+
+                    <h3 style="color: #e2e8f0; margin: 24px 0 16px; font-size: 20px;">🤖 AI Tools tạo UI từ Prompts
+                        (không cần kỹ năng design)</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Công cụ</th>
+                                <th>Loại</th>
+                                <th>Output</th>
+                                <th>Phù hợp cho Phở?</th>
+                                <th>Giá</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">▲</span> v0.dev (Vercel)</td>
+                                <td>AI Code Generator</td>
+                                <td>React + Tailwind/shadcn components từ prompts<span class="cell-detail">Copy-paste
+                                        code vào project</span></td>
+                                <td><span class="badge badge-yes">⭐⭐⭐ Rất tốt</span></td>
+                                <td><span class="cell-detail">Free tier + $20/tháng Pro</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">⚡</span> Bolt.new (StackBlitz)</td>
+                                <td>Full-stack AI Builder</td>
+                                <td>Full app từ prompt, deploy instant<span class="cell-detail">Tạo prototype nhanh,
+                                        test ý tưởng</span></td>
+                                <td><span class="badge badge-yes">⭐⭐ Tốt</span></td>
+                                <td><span class="cell-detail">Free tier + $20/tháng</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">✏️</span> Pencil.dev</td>
+                                <td>AI Design Tool</td>
+                                <td>Design mockups từ prompts (.pen files)<span class="cell-detail">Anh đã có quyền truy
+                                        cập qua MCP!</span></td>
+                                <td><span class="badge badge-yes">⭐⭐⭐ Tuyệt vời</span></td>
+                                <td><span class="cell-detail">Đã tích hợp sẵn</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🧵</span> Stitch (Google)</td>
+                                <td>AI Screen Generator</td>
+                                <td>Full screens từ text prompts<span class="cell-detail">Anh đã có quyền truy cập qua
+                                        MCP!</span></td>
+                                <td><span class="badge badge-yes">⭐⭐⭐ Tuyệt vời</span></td>
+                                <td><span class="cell-detail">Đã tích hợp sẵn</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">💜</span> Claude Artifacts</td>
+                                <td>AI Code in Chat</td>
+                                <td>React components live trong chat<span class="cell-detail">Tạo, preview, iterate ngay
+                                        trong conversation</span></td>
+                                <td><span class="badge badge-yes">⭐⭐ Tốt</span></td>
+                                <td><span class="cell-detail">$20/tháng Claude Pro</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🌟</span> Lovable.dev</td>
+                                <td>AI Full-stack Builder</td>
+                                <td>Full web app từ prompt với Supabase<span class="cell-detail">Prototype đẹp, deploy
+                                        nhanh</span></td>
+                                <td><span class="badge badge-partial">⭐ Prototype</span></td>
+                                <td><span class="cell-detail">Free tier + $20/tháng</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🎨</span> Figma AI (beta)</td>
+                                <td>AI trong Figma</td>
+                                <td>Generate designs, auto-layout, rename layers<span class="cell-detail">Tới 2026 sẽ
+                                        mạnh hơn nhiều</span></td>
+                                <td><span class="badge badge-partial">⭐ Basic</span></td>
+                                <td><span class="cell-detail">Gói Figma ($15/tháng+)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-name"><span class="emoji">🛠️</span> Claude Code CLI</td>
+                                <td>AI Coding Agent</td>
+                                <td>Tạo components trực tiếp trong codebase<span class="cell-detail">Hiểu context của dự
+                                        án, tạo đúng theo patterns</span></td>
+                                <td><span class="badge badge-yes">⭐⭐⭐ Tối ưu</span></td>
+                                <td><span class="cell-detail">$20/tháng Claude Pro</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="info-grid" style="margin-top: 16px;">
+                        <div class="info-box" style="border-color: rgba(34,197,94,0.3);">
+                            <h4>✅ Workflow đề xuất cho anh (không cần design skills)</h4>
+                            <ul>
+                                <li><strong>Bước 1:</strong> Dùng <strong>Pencil.dev / Stitch</strong> (đã có MCP) để
+                                    tạo mockups từ prompts</li>
+                                <li><strong>Bước 2:</strong> Dùng <strong>v0.dev</strong> để generate React components
+                                    từ mockups</li>
+                                <li><strong>Bước 3:</strong> Dùng <strong>Claude Code CLI</strong> để integrate vào
+                                    codebase v2</li>
+                                <li><strong>Bước 4:</strong> Đổi antd theme tokens → tự động apply Phở Branding</li>
+                                <li><strong>Bước 5:</strong> Preview + iterate cho đến khi hài lòng</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🎨 Prompt mẫu cho AI Design Tools</h4>
+                            <ul>
+                                <li><strong>Mockup:</strong> <em>"Design a dark-mode AI chat interface with sidebar
+                                        navigation, model selector dropdown, and message bubbles. Use orange (#E8590C)
+                                        as primary color."</em></li>
+                                <li><strong>Component:</strong> <em>"Create a React model selector component with
+                                        search, categories (Text/Image/Video), and provider icons. Use Ant Design 5
+                                        tokens."</em></li>
+                                <li><strong>Screen:</strong> <em>"Generate a settings page with tabs: Profile, AI
+                                        Providers, Plugins, Theme. Dark mode, modern flat design."</em></li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🔑 Lưu ý khi dùng AI Design Tools</h4>
+                            <ul>
+                                <li><strong>Consistency:</strong> Luôn cung cấp design tokens (colors, fonts) trong
+                                    prompts</li>
+                                <li><strong>Component match:</strong> Yêu cầu output dùng Ant Design components</li>
+                                <li><strong>Responsive:</strong> Yêu cầu cả desktop và mobile versions</li>
+                                <li><strong>Dark mode:</strong> V2 mặc định dark — luôn test trên dark mode</li>
+                                <li><strong>Export:</strong> Dùng code output (React/TSX) thay vì image mockups</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>💰 Chi phí đề xuất</h4>
+                            <ul>
+                                <li><strong>Miễn phí:</strong> Pencil.dev + Stitch (đã có MCP)</li>
+                                <li><strong>$20/tháng:</strong> Claude Pro (Artifacts + Claude Code CLI)</li>
+                                <li><strong>$20/tháng:</strong> v0.dev Pro (nếu cần generation nhiều)</li>
+                                <li><strong>Tổng tối thiểu:</strong> <strong>$0-40/tháng</strong> cho full design
+                                    workflow</li>
+                                <li><em>So với thê designer: $500-2000/tháng → tiết kiệm 95%</em></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 13: V2 Research Checklist -->
+                <div class="section" id="research">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--yellow-bg); border: 1px solid rgba(245,158,11,0.2);">🔬</div>
+                        <div>
+                            <div class="section-title">V2 Research Checklist</div>
+                            <div class="section-subtitle">Những gì cần tìm hiểu thêm trước khi bắt đầu migrate</div>
+                        </div>
+                    </div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Lĩnh vực</th>
+                                <th>Cần tìm hiểu</th>
+                                <th>Ưu tiên</th>
+                                <th>Cách nghiên cứu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td class="feature-name"><span class="emoji">🏗️</span> Vite SPA Architecture</td>
+                                <td>Cấu trúc thư mục v2, routing, code splitting, SSR vs CSR trade-offs<span
+                                        class="cell-detail">Hiểu rõ app shell, lazy loading patterns</span></td>
+                                <td><span class="badge badge-yes">P0 — Bắt buộc</span></td>
+                                <td><span class="cell-detail">Clone upstream → <code>pnpm dev</code> → explore</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td class="feature-name"><span class="emoji">🔐</span> Auth System</td>
+                                <td>Better-Auth vs Clerk — migration path, session management, OAuth providers<span
+                                        class="cell-detail">V2 dùng Better-Auth (self-hosted) thay vì Clerk</span></td>
+                                <td><span class="badge badge-yes">P0 — Bắt buộc</span></td>
+                                <td><span class="cell-detail">Docs Better-Auth + test deployment</span></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td class="feature-name"><span class="emoji">🗄️</span> Database Schema</td>
+                                <td>Drizzle ORM schema v2, migration strategy, data migration scripts<span
+                                        class="cell-detail">Schema changes giữa v1 → v2</span></td>
+                                <td><span class="badge badge-yes">P0 — Bắt buộc</span></td>
+                                <td><span class="cell-detail">So sánh <code>drizzle/</code> giữa 2 versions</span></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td class="feature-name"><span class="emoji">🤖</span> Agent Runtime</td>
+                                <td>Agent Harness, Skills framework, Benchmarks API, multi-agent orchestration<span
+                                        class="cell-detail">Cách port Scientific Skills sang Agent Skills v2</span></td>
+                                <td><span class="badge badge-upgrade">P1 — Quan trọng</span></td>
+                                <td><span class="cell-detail">Đọc <code>src/features/Agent/</code> + docs</span></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td class="feature-name"><span class="emoji">🛠️</span> MCP Ecosystem</td>
+                                <td>MCP server development, marketplace integration, custom tool creation<span
+                                        class="cell-detail">Viết MCP server cho Sepay, Medical DB</span></td>
+                                <td><span class="badge badge-upgrade">P1 — Quan trọng</span></td>
+                                <td><span class="cell-detail">MCP SDK docs + example servers</span></td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td class="feature-name"><span class="emoji">📚</span> Knowledge Base 2.0</td>
+                                <td>RAG pipeline, embedding strategy, document connectors, chunk management<span
+                                        class="cell-detail">So sánh với Research Engine hiện tại</span></td>
+                                <td><span class="badge badge-upgrade">P1 — Quan trọng</span></td>
+                                <td><span class="cell-detail"><code>src/features/KnowledgeBase/</code></span></td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td class="feature-name"><span class="emoji">📱</span> Mobile Build</td>
+                                <td>Capacitor/Tauri config, iOS provisioning, Play Store listing, PWA manifest<span
+                                        class="cell-detail">Build pipeline cho TestFlight &amp; Google Play</span></td>
+                                <td><span class="badge badge-partial">P2 — Phase 3</span></td>
+                                <td><span class="cell-detail">Upstream mobile docs + Xcode/AS setup</span></td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td class="feature-name"><span class="emoji">🖥️</span> Electron Desktop</td>
+                                <td>Electron Forge setup, auto-update (S3), code signing, tray integration<span
+                                        class="cell-detail">Desktop app distribution</span></td>
+                                <td><span class="badge badge-partial">P2 — Phase 3</span></td>
+                                <td><span class="cell-detail"><code>electron/</code> folder exploration</span></td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td class="feature-name"><span class="emoji">🎥</span> Video Generation</td>
+                                <td>Veo 2, Kling 3.0 pipeline trong v2, progress tracking, async processing<span
+                                        class="cell-detail">Port Phở Studio pipeline sang v2</span></td>
+                                <td><span class="badge badge-partial">P2 — Phase 3</span></td>
+                                <td><span class="cell-detail">Compare Fal.ai integration patterns</span></td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td class="feature-name"><span class="emoji">🧪</span> Testing Strategy</td>
+                                <td>Vitest setup, E2E tests, component testing, CI pipeline<span
+                                        class="cell-detail">Test coverage requirements</span></td>
+                                <td><span class="badge badge-partial">P2 — Ongoing</span></td>
+                                <td><span class="cell-detail"><code>vitest.config.ts</code> + existing tests</span></td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td class="feature-name"><span class="emoji">🔌</span> Plugin System</td>
+                                <td>Plugin architecture v2, marketplace API, plugin development SDK<span
+                                        class="cell-detail">Port Drug Interaction plugin</span></td>
+                                <td><span class="badge badge-partial">P2 — Phase 2</span></td>
+                                <td><span class="cell-detail">Plugin docs + marketplace API</span></td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td class="feature-name"><span class="emoji">📊</span> Analytics & Monitoring</td>
+                                <td>PostHog integration v2, built-in analytics, error tracking, performance<span
+                                        class="cell-detail">Monitoring strategy cho production</span></td>
+                                <td><span class="badge badge-partial">P2 — Ongoing</span></td>
+                                <td><span class="cell-detail">Port PostHog config từ v1</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SECTION 14: Claude Code CLI Preparation -->
+                <div class="section" id="claudecli">
+                    <div class="section-header">
+                        <div class="section-icon"
+                            style="background: var(--purple-bg); border: 1px solid rgba(168,85,247,0.2);">🤖</div>
+                        <div>
+                            <div class="section-title">Claude Code CLI — Chiến lược chuẩn bị</div>
+                            <div class="section-subtitle">Chuẩn bị context để Claude Code hiểu toàn bộ dự án v2</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="border-color: rgba(99,102,241,0.3); margin-bottom: 16px;">
+                        <h4>💡 Tại sao Claude Code CLI cần chuẩn bị?</h4>
+                        <p>Claude Code CLI đọc context từ file system. Khi fork v2 (~2,000+ files), Claude cần "bản đồ"
+                            để hiểu <strong>architecture, conventions, và Phở-specific requirements</strong> mà không
+                            phải đọc từng file.</p>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <h4>📄 1. CLAUDE.md (Bắt buộc)</h4>
+                            <p>File root-level mà Claude Code CLI đọc đầu tiên:</p>
+                            <ul>
+                                <li><strong>Project Overview:</strong> "Phở Chat v2 — fork of LobeHub v2.1.38+"</li>
+                                <li><strong>Tech Stack:</strong> Vite SPA, Zustand, Drizzle ORM, Better-Auth</li>
+                                <li><strong>Directory Structure:</strong> Map key folders và purpose</li>
+                                <li><strong>Coding Conventions:</strong> TypeScript strict, i18n patterns, styling rules
+                                </li>
+                                <li><strong>Phở-specific:</strong> Custom dirs <code>src/features/pho/</code>, env
+                                    prefix <code>PHO_</code></li>
+                                <li><strong>Don'ts:</strong> "NEVER modify upstream files directly"</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>📁 2. .claude/ Directory</h4>
+                            <p>Context files cho từng domain:</p>
+                            <ul>
+                                <li><code>.claude/architecture.md</code> — module map, data flow</li>
+                                <li><code>.claude/providers.md</code> — AI provider config & routing</li>
+                                <li><code>.claude/auth.md</code> — Auth system (Better-Auth) patterns</li>
+                                <li><code>.claude/database.md</code> — Drizzle schema, migrations</li>
+                                <li><code>.claude/pho-features.md</code> — Phở exclusive features spec</li>
+                                <li><code>.claude/upstream-sync.md</code> — Merge rules & thin-fork guide</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>📋 3. Context Loading Trước khi Code</h4>
+                            <ul>
+                                <li><strong>Step 1:</strong> Clone v2 upstream + <code>pnpm install</code></li>
+                                <li><strong>Step 2:</strong> Chạy <code>pnpm dev</code> để hiểu app hoạt động</li>
+                                <li><strong>Step 3:</strong> Tạo <code>CLAUDE.md</code> + <code>.claude/</code> docs
+                                </li>
+                                <li><strong>Step 4:</strong> Export Knowledge Items từ current session</li>
+                                <li><strong>Step 5:</strong> <code>claude</code> CLI → "Read CLAUDE.md and explore the
+                                    codebase"</li>
+                                <li><strong>Step 6:</strong> Start từng task nhỏ — rebrand → auth → features</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <h4>🗂️ 4. Knowledge Files cần chuẩn bị</h4>
+                            <ul>
+                                <li><strong>Phở Chat v1 docs:</strong> Research Engine, Deep Research, Scientific Skills
+                                    architecture</li>
+                                <li><strong>API specs:</strong> Sepay webhook, Drug Interaction API, Vertex AI config
+                                </li>
+                                <li><strong>Branding guide:</strong> Colors, fonts, logos, tone of voice</li>
+                                <li><strong>User data:</strong> DB schema export, migration requirements</li>
+                                <li><strong>Deploy config:</strong> Vercel, Neon, Upstash, Cloudflare R2 settings</li>
+                                <li><strong>Feature Comparison Matrix:</strong> This report — as migration reference
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="arch-diagram" style="margin-top: 16px;">Claude Code CLI Workflow:
+
+                        ┌─────────────────────────────────────────────────┐
+                        │ 1. PREPARE CONTEXT │
+                        │ CLAUDE.md + .claude/ docs + Knowledge Items │
+                        └──────────────────────┬──────────────────────────┘
+                        ▼
+                        ┌─────────────────────────────────────────────────┐
+                        │ 2. FORK &amp; SETUP │
+                        │ git clone → pnpm install → pnpm dev │
+                        │ Create src/features/pho/ structure │
+                        └──────────────────────┬──────────────────────────┘
+                        ▼
+                        ┌─────────────────────────────────────────────────┐
+                        │ 3. PHASE 1: Foundation (Claude Code CLI) │
+                        │ Rebrand script → Auth setup → i18n → Deploy │
+                        └──────────────────────┬──────────────────────────┘
+                        ▼
+                        ┌─────────────────────────────────────────────────┐
+                        │ 4. PHASE 2-4: Features + Test + Launch │
+                        │ Port features → MCP setup → Mobile → Launch │
+                        └─────────────────────────────────────────────────┘
+
+                        Estimated Claude Code CLI sessions:
+                        Phase 1: ~5-8 sessions (rebrand, auth, deploy)
+                        Phase 2: ~10-15 sessions (port features)
+                        Phase 3: ~5-8 sessions (mobile, desktop)
+                        Phase 4: ~3-5 sessions (migration, QA)</div>
+                </div>
+
+                <!-- Brand Style Guide -->
+                <div class="card" id="brandguide">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                        <span style="font-size:28px">🅿️</span>
+                        <div>
+                            <h2 style="margin:0">Brand Style Guide — Phở Chat v2</h2>
+                            <p style="margin:4px 0 0;opacity:.7">Logo, màu sắc, typography & asset guidelines cho AI
+                                agents tái tạo chính xác</p>
+                        </div>
+                    </div>
+
+                    <!-- Finalized Logo -->
+                    <div
+                        style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:12px;padding:24px;margin:20px 0">
+                        <h3 style="color:#059669;margin-top:0">✅ Logo chính thức (Confirmed)</h3>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+                            <div style="background:#000;border-radius:8px;padding:16px;text-align:center">
+                                <div style="color:#888;font-size:12px;margin-bottom:8px">ICON MARK</div>
+                                <div
+                                    style="font-size:72px;color:#059669;font-family:'Brush Script MT',cursive;font-style:italic">
+                                    p</div>
+                                <div style="color:#666;font-size:11px;margin-top:8px">Favicon, App Icon, Avatar</div>
+                            </div>
+                            <div style="background:#000;border-radius:8px;padding:16px;text-align:center">
+                                <div style="color:#888;font-size:12px;margin-bottom:8px">WORDMARK</div>
+                                <div
+                                    style="font-size:64px;color:#059669;font-family:'Brush Script MT',cursive;font-style:italic">
+                                    phở</div>
+                                <div style="color:#666;font-size:11px;margin-top:8px">Landing Page, Splash, OG Image
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI-Reproducible Logo Description -->
+                    <div
+                        style="background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);border-radius:12px;padding:20px;margin:16px 0">
+                        <h3 style="color:#059669;margin-top:0">🤖 Mô tả Logo cho AI Agent tái tạo</h3>
+                        <div style="font-size:13px;color:#ccc;line-height:1.8">
+                            <strong style="color:#fff">Icon Mark "p":</strong><br>
+                            Chữ "p" viết thường (lowercase) theo phong cách calligraphic — vẽ bằng một nét bút liên tục,
+                            chảy mượt (single continuous flowing stroke). Nét bút mảnh, đều, có độ dày-mỏng tự nhiên
+                            (natural thick-to-thin) như bút brush pen. Chữ p có phần thân dọc (vertical stem) chảy xuống
+                            dưới (descender) và phần bụng tròn (bowl) uốn cong thanh lịch. Không có nét trang trí thừa,
+                            không có loop phức tạp — chỉ giữ những đường cong essential. Màu Jade Green #059669 trên nền
+                            đen #000000.
+                            <br><br>
+                            <strong style="color:#fff">Wordmark "phở":</strong><br>
+                            Chữ "phở" viết cùng phong cách calligraphic với chữ p icon — các ký tự p, h, ở nối liền nhau
+                            thành một dòng chảy liên tục. Chữ "h" kết nối tự nhiên từ chữ "p", chữ "ở" với dấu hỏi (hook
+                            above) được vẽ như một nét accent nhỏ gọn phía trên. Toàn bộ wordmark trông như viết bằng
+                            tay trong một hơi — elegant, flowing, không có nét lặp hay rườm rà. Cùng màu Jade Green
+                            #059669, cùng line weight với icon mark.
+                            <br><br>
+                            <strong style="color:#fff">Style Keywords:</strong> calligraphic, single-stroke, flowing,
+                            thin, elegant, minimal, brush-pen, continuous, jade green, black background, luxury monogram
+                        </div>
+                    </div>
+
+                    <!-- AI Prompt Templates -->
+                    <div style="background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:20px;margin:16px 0">
+                        <h3 style="color:#fff;margin-top:0">📋 Prompt Templates cho AI</h3>
+                        <div style="font-size:12px;color:#888;margin-bottom:12px">Copy các prompt này khi cần AI vẽ lại
+                            logo</div>
+                        <pre
+                            style="background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:16px;color:#059669;font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-x:auto"><strong style="color:#fff">ICON PROMPT:</strong>
+A lowercase letter "p" drawn with a single continuous flowing brushstroke on pure black (#000000) background. Jade green color (#059669). Thin, elegant calligraphic style with natural thick-to-thin variation like a brush pen. The stroke flows gracefully — a vertical stem descending below the baseline and a smooth rounded bowl. Minimal, no extra decoration, no loops, no flourishes. Just one beautiful continuous stroke. Centered with generous whitespace.
+
+<strong style="color:#fff">WORDMARK PROMPT:</strong>
+The Vietnamese word "phở" written as one continuous flowing brushstroke on pure black (#000000) background. Jade green (#059669). Same calligraphic brush-pen style as the "p" icon — thin, elegant, natural thick-to-thin variation. All three characters (p, h, ở) flow together as connected letterforms. The diacritic hook above (dấu hỏi) on ở is a small, minimal accent mark. No extra decoration. Like writing the word in one breath without lifting the pen. Centered, generous whitespace.
+
+<strong style="color:#fff">COMBINED PROMPT:</strong>
+Horizontal logo lockup: jade green (#059669) calligraphic "p" icon mark on the left, followed by "Phở Chat" in white (#FAFAFA) thin sans-serif (Inter Light) on the right. Pure black (#000000) background. The p icon uses flowing brushstroke style, the text is clean and modern. Generous spacing between icon and text.</pre>
+                    </div>
+
+                    <!-- Color System -->
+                    <h3>🎨 Color System — Jade Mist</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Token</th>
+                                <th>Hex</th>
+                                <th>Preview</th>
+                                <th>Dùng cho</th>
+                                <th>antd Token</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Primary</strong></td>
+                                <td><code>#059669</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#059669"></span>
+                                </td>
+                                <td>Buttons, links, accents, send button</td>
+                                <td><code>colorPrimary</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Primary Hover</strong></td>
+                                <td><code>#047857</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#047857"></span>
+                                </td>
+                                <td>Button hover, active states</td>
+                                <td><code>colorPrimaryHover</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Primary Subtle</strong></td>
+                                <td><code>rgba(5,150,105,0.12)</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:rgba(5,150,105,0.12);border:1px solid rgba(5,150,105,0.3)"></span>
+                                </td>
+                                <td>User message bg, active sidebar item</td>
+                                <td><code>colorPrimaryBg</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Background</strong></td>
+                                <td><code>#0A0A0A</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#0A0A0A;border:1px solid #333"></span>
+                                </td>
+                                <td>Main background</td>
+                                <td><code>colorBgBase</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Surface</strong></td>
+                                <td><code>#141414</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#141414;border:1px solid #333"></span>
+                                </td>
+                                <td>Cards, sidebar, panels</td>
+                                <td><code>colorBgContainer</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Surface Elevated</strong></td>
+                                <td><code>#1A1A1A</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#1A1A1A;border:1px solid #333"></span>
+                                </td>
+                                <td>Input fields, dropdowns, modals</td>
+                                <td><code>colorBgElevated</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Border</strong></td>
+                                <td><code>#1E1E1E</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#1E1E1E;border:1px solid #333"></span>
+                                </td>
+                                <td>Borders, dividers</td>
+                                <td><code>colorBorder</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Text Primary</strong></td>
+                                <td><code>#F1F5F9</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#F1F5F9"></span>
+                                </td>
+                                <td>Body text, headings</td>
+                                <td><code>colorText</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Text Muted</strong></td>
+                                <td><code>#94A3B8</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#94A3B8"></span>
+                                </td>
+                                <td>Captions, timestamps, placeholders</td>
+                                <td><code>colorTextSecondary</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Error</strong></td>
+                                <td><code>#EF4444</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#EF4444"></span>
+                                </td>
+                                <td>Error states, destructive actions</td>
+                                <td><code>colorError</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Warning</strong></td>
+                                <td><code>#F59E0B</code></td>
+                                <td><span
+                                        style="display:inline-block;width:24px;height:24px;border-radius:6px;background:#F59E0B"></span>
+                                </td>
+                                <td>Warnings, rate limits</td>
+                                <td><code>colorWarning</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Typography -->
+                    <h3>🔤 Typography</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                        <div style="background:#111;border-radius:8px;padding:16px">
+                            <div style="color:#059669;font-size:12px;margin-bottom:8px">UI FONT</div>
+                            <div style="font-family:Inter,sans-serif;font-size:24px;color:#fff">Inter</div>
+                            <div style="color:#888;font-size:12px;margin-top:4px">Body: 15px • Line-height:
+                                1.6<br>Headings: Semi-bold (600)<br>Body: Regular (400)</div>
+                        </div>
+                        <div style="background:#111;border-radius:8px;padding:16px">
+                            <div style="color:#059669;font-size:12px;margin-bottom:8px">CODE FONT</div>
+                            <div style="font-family:'JetBrains Mono',monospace;font-size:22px;color:#fff">JetBrains Mono
+                            </div>
+                            <div style="color:#888;font-size:12px;margin-top:4px">Code blocks: 13px<br>Weight: Regular
+                                (400)<br>Ligatures: enabled</div>
+                        </div>
+                    </div>
+
+                    <!-- Design Tokens for antd -->
+                    <h3>⚙️ antd Theme Config (1 file)</h3>
+                    <pre
+                        style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:16px;color:#e2e8f0;font-size:12px;line-height:1.6;overflow-x:auto"><span style="color:#059669">// src/config/theme.ts</span>
+const phoTheme = {
+  token: {
+    colorPrimary: <span style="color:#059669">'#059669'</span>,      <span style="color:#666">// Jade Mist</span>
+    colorBgBase: <span style="color:#888">'#0A0A0A'</span>,        <span style="color:#666">// Deep Black</span>
+    colorBgContainer: <span style="color:#888">'#141414'</span>,  <span style="color:#666">// Surface</span>
+    colorBgElevated: <span style="color:#888">'#1A1A1A'</span>,   <span style="color:#666">// Elevated</span>
+    colorBorder: <span style="color:#888">'#1E1E1E'</span>,       <span style="color:#666">// Borders</span>
+    colorText: <span style="color:#fff">'#F1F5F9'</span>,          <span style="color:#666">// Text</span>
+    colorTextSecondary: <span style="color:#94A3B8">'#94A3B8'</span>,
+    borderRadius: <span style="color:#F59E0B">12</span>,
+    fontFamily: <span style="color:#fff">'Inter, -apple-system, sans-serif'</span>,
+  },
+  algorithm: theme.darkAlgorithm,
+};</pre>
+
+                    <!-- Asset Specifications -->
+                    <h3>📦 Asset Specifications</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Kích thước</th>
+                                <th>Nội dung</th>
+                                <th>Format</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Favicon</strong></td>
+                                <td>32×32, 16×16</td>
+                                <td>"p" icon jade green trên transparent</td>
+                                <td>.ico, .png</td>
+                                <td>Cần bản simplified cho 16px</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Apple Touch Icon</strong></td>
+                                <td>180×180</td>
+                                <td>"p" icon jade trên #0A0A0A bg</td>
+                                <td>.png</td>
+                                <td>Corner radius tự động bởi iOS</td>
+                            </tr>
+                            <tr>
+                                <td><strong>OG Image</strong></td>
+                                <td>1200×630</td>
+                                <td>"phở" wordmark + tagline trên dark gradient</td>
+                                <td>.png</td>
+                                <td>Social sharing, SEO</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PWA Icon</strong></td>
+                                <td>512×512, 192×192</td>
+                                <td>"p" icon jade trên #0A0A0A bg</td>
+                                <td>.png</td>
+                                <td>manifest.json</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Splash Screen</strong></td>
+                                <td>1170×2532 (iPhone)</td>
+                                <td>"phở" wordmark centered trên #0A0A0A</td>
+                                <td>.png</td>
+                                <td>Mobile app launch</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Loading Animation</strong></td>
+                                <td>120×120</td>
+                                <td>"p" icon stroke-dasharray animate</td>
+                                <td>.svg (animated)</td>
+                                <td>CSS animation: stroke draw-on 1.2s</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email Header</strong></td>
+                                <td>600×120</td>
+                                <td>"p" icon + "Phở Chat" text trên dark</td>
+                                <td>.png</td>
+                                <td>Transactional emails</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Design Principles -->
+                    <h3>💡 Design Principles</h3>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                        <div style="background:#111;border-radius:8px;padding:16px;border-left:3px solid #059669">
+                            <div style="font-weight:600;color:#fff;margin-bottom:4px">Quiet Luxury</div>
+                            <div style="font-size:12px;color:#888">Tối giản nhưng có chiều sâu. Ẩn UI không cần thiết.
+                                Để content nói lên tất cả.</div>
+                        </div>
+                        <div style="background:#111;border-radius:8px;padding:16px;border-left:3px solid #059669">
+                            <div style="font-weight:600;color:#fff;margin-bottom:4px">One Accent</div>
+                            <div style="font-size:12px;color:#888">Chỉ dùng Jade Green #059669 làm điểm nhấn duy nhất.
+                                Không dùng nhiều màu accent.</div>
+                        </div>
+                        <div style="background:#111;border-radius:8px;padding:16px;border-left:3px solid #059669">
+                            <div style="font-weight:600;color:#fff;margin-bottom:4px">Dark-First</div>
+                            <div style="font-size:12px;color:#888">Dark mode là mặc định. Light mode là secondary.
+                                #0A0A0A background chủ đạo.</div>
+                        </div>
+                        <div style="background:#111;border-radius:8px;padding:16px;border-left:3px solid #059669">
+                            <div style="font-weight:600;color:#fff;margin-bottom:4px">Generous Space</div>
+                            <div style="font-size:12px;color:#888">Whitespace rộng rãi. Padding 24-32px. Gap 16-24px.
+                                Không chật chội.</div>
+                        </div>
+                        <div style="background:#111;border-radius:8px;padding:16px;border-left:3px solid #059669">
+                            <div style="font-weight:600;color:#fff;margin-bottom:4px">Smooth Motion</div>
+                            <div style="font-size:12px;color:#888">Transitions 200-300ms ease. Skeleton loading. Không
+                                có animation giật.</div>
+                        </div>
+                        <div style="background:#111;border-radius:8px;padding:16px;border-left:3px solid #059669">
+                            <div style="font-weight:600;color:#fff;margin-bottom:4px">Clean like Claude</div>
+                            <div style="font-size:12px;color:#888">Messages không bubble nổi bật. Input bar floating.
+                                Model selector subtle ở top.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verdict -->
+                <div class="verdict-box" id="verdict">
+                    <h2>💎 Kết luận</h2>
+                    <p>
+                        <strong>Phở Chat v1</strong> đã xây dựng được những tính năng <strong
+                            style="color: var(--purple);">độc
+                            quyền vượt trội</strong> (Research Engine, Deep Research, Scientific Skills, Medical Beta) —
+                        đây là
+                        competitive moat không ai có.
+                        <br><br>
+                        <strong>Fresh fork v2</strong> sẽ mang lại <strong style="color: var(--accent);">nền tảng hiện
+                            đại</strong> (Vite SPA, Desktop App, Mobile App, Agent Skills) + giữ nguyên khả năng sync
+                        upstream.
+                        <br><br>
+                        <strong style="color: var(--green);">Chiến lược tối ưu:</strong> Dual-track — v1 maintain cho
+                        users hiện
+                        tại, v2 fresh fork + migrate dần features exclusive → ra mắt khi sẵn sàng.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="footer">
+                Phở Chat Feature Comparison Matrix • Private Report for CTO/CEO • March 2026<br>
+                Data source: Git analysis (618 vs 2,949 commits) • lobehub.com • sourcegraph.com
+            </div>
+
+        </div><!-- /main-content -->
+    </div><!-- /page-wrapper -->
+
+    <script>
+        // Sidebar scroll-spy
+        const links = document.querySelectorAll('.sidebar a[href^="#"]');
+        const sections = [...links].map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => { if (s.getBoundingClientRect().top <= 120) current = s.id; });
+            links.forEach(l => {
+                l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+            });
+        });
+        // Mobile sidebar close on link click
+        links.forEach(l => l.addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.remove('open');
+        }));
+    </script>
+</body>
+
+</html>

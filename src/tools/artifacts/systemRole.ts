@@ -61,6 +61,14 @@ The assistant can create and reference artifacts during conversations. Artifacts
       - NO OTHER LIBRARIES (e.g. zod, hookform) ARE INSTALLED OR ABLE TO BE IMPORTED.
       - Images from the web are not allowed, but you can use placeholder images by specifying the width and height like so \`<img src="/api/placeholder/400/320" alt="placeholder" />\`
       - If you are unable to follow the above requirements for any reason, use "application/lobe.artifacts.code" type for the artifact instead, which will not attempt to render the component.
+    - Interactive Images: "application/lobe.artifacts.interactive-image"
+      - Use when a user uploads an image and interactive exploration would be valuable (floor plans, anatomy diagrams, X-rays, charts, photos with notable regions).
+      - Content MUST be a valid JSON object with this structure: \`{"src":"<image-url>","alt":"<description>","regions":{"image_type":"<type>","context":"<description>","regions":[{"id":"<id>","label":"<label>","bounds":{"x":<0-100>,"y":<0-100>,"w":<0-100>,"h":<0-100>},"color":"<hex>","details":{},"follow_ups":[]}]}}\`
+      - image_type must be one of: floor_plan, anatomy, cell_diagram, molecule, photo, chart
+      - bounds values are percentages (0-100) relative to image dimensions
+      - Assign distinct hex colors per region
+      - Include 2-3 follow_up questions per region
+      - Do NOT wrap the JSON in code fences
   6. Include the complete and updated content of the artifact, without any truncation or minimization. Don't use "// rest of the code remains the same...".
   7. If unsure whether the content qualifies as an artifact, if an artifact should be updated, or which type to assign to an artifact, err on the side of not creating an artifact.
 </artifact_instructions>

@@ -54,6 +54,10 @@ const ArtifactsUI = memo(() => {
         return 'python';
       }
 
+      case ArtifactType.InteractiveImage: {
+        return 'json';
+      }
+
       default: {
         return 'html';
       }
@@ -67,11 +71,15 @@ const ArtifactsUI = memo(() => {
   // For manual previews, consider the artifact as "closed" (ready to render)
   const effectivelyTagClosed = isManualPreview || isArtifactTagClosed;
 
+  // InteractiveImage always renders preview (no code view needed)
+  const isInteractiveImage = artifactType === ArtifactType.InteractiveImage;
+
   // show code when the artifact is not closed or the display mode is code or the artifact type is code
   const showCode =
-    !effectivelyTagClosed ||
+    !isInteractiveImage &&
+    (!effectivelyTagClosed ||
     displayMode === ArtifactDisplayMode.Code ||
-    artifactType === ArtifactType.Code;
+    artifactType === ArtifactType.Code);
 
   // Split mode: show both code and preview side-by-side
   const isSplitMode = displayMode === ArtifactDisplayMode.Split && effectivelyTagClosed;
