@@ -6,6 +6,13 @@ export type {
   VisualizationType,
 } from './concept-map';
 export type {
+  ArtifactLayout,
+  ArtifactSection,
+  ContentVisualizerArtifact,
+  QuizQuestion,
+  VisualizationEntry,
+} from './content-visualizer-artifact';
+export type {
   CodeLanguage,
   CodeTrack,
   GeneratedCode,
