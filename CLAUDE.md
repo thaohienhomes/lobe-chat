@@ -19,12 +19,14 @@ read @.cursor/rules/project-structure.mdc
 **This is a solo-developer project. `main` is the single source of truth for production.**
 
 **MANDATORY steps at the START of every session:**
+
 ```bash
 git checkout main
-git pull origin main   # Always sync with latest main first
+git pull origin main # Always sync with latest main first
 ```
 
 **Branch rules:**
+
 - ✅ **ALWAYS start new features from the latest `main` branch**
 - ✅ **When feature is complete: merge back into `main` and push**
 - ✅ If you must create a feature branch, merge it back to `main` before ending the session
@@ -32,11 +34,13 @@ git pull origin main   # Always sync with latest main first
 - ❌ **NEVER promote a Preview deployment to Production** without verifying it contains ALL features from `main`
 
 **Why this matters:**
+
 - Vercel deploys whatever branch you tell it to - a partial branch = partial production
 - `main` must always contain 100% of all shipped features
 - If you're unsure what's in `main`, run: `git log --oneline origin/main -10`
 
 **Preferred workflow:**
+
 ```bash
 # Start of session
 git checkout main && git pull origin main
@@ -136,3 +140,45 @@ Some useful rules of this project. Read them when needed.
 - `desktop-menu-configuration.mdc` - App menu, context menu, tray menu
 - `desktop-window-management.mdc` - Window creation, state management, multi-window
 - `desktop-controller-tests.mdc` - Controller unit testing guide
+
+---
+
+## Product Requirements Documents
+
+PRD files nằm tại `docs/prd/`. Agent PHẢI đọc PRD trước khi implement bất kỳ feature nào
+thuộc Interactive & Generative UI.
+
+### Danh sách PRD
+
+- `docs/prd/prd-interactive-generative-ui.md` — Tổng quan 5 phases + kiến trúc tích hợp
+- `docs/prd/phase-2.5-content-visualizer.md` — Chi tiết 7-agent pipeline, schemas, file structure
+
+### Implementation Priority
+
+Bắt đầu từ Phase 1 (Interactive Images) trừ khi được chỉ định khác.
+Đọc section "Implementation Priority" trong mỗi PRD để biết thứ tự triển khai.
+
+### 5 Phases Overview
+
+| Phase | Codename                                  | Timeline    |
+| ----- | ----------------------------------------- | ----------- |
+| 1     | Interactive Images (Tap-to-Explore)       | Month 1–2   |
+| 2     | Generative Diagrams (Text-to-Interactive) | Month 3–4   |
+| 2.5   | Content Visualizer (Paper-to-Visual)      | Month 4–5   |
+| 3     | AI Rendering & Virtual Staging            | Month 5–7   |
+| 4     | Full Generative UI Engine                 | Month 8–10  |
+| 5     | Creator Studio & Collaboration            | Month 11–12 |
+
+### Coding Conventions cho Interactive UI features
+
+- Tất cả components mới đặt trong `src/components/InteractiveUI/` (Phase 1-2)
+  hoặc `src/components/ContentVisualizer/` (Phase 2.5)
+- Services đặt trong `src/services/content-visualizer/`
+- Type definitions đặt trong `src/services/content-visualizer/types/`
+- System prompts đặt trong `src/prompts/`
+- Dùng Tailwind CSS only trong Artifact components (không custom CSS)
+- Tất cả schemas phải match TypeScript interfaces trong PRD
+- React functional components with hooks, single file, default export
+- Dark theme (#0F172A family)
+- Mobile responsive (touch support) + ARIA labels
+- NEVER use localStorage/sessionStorage in Artifact components
