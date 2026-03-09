@@ -595,6 +595,17 @@ const DeepResearchBody = memo(() => {
   const [networkData, setNetworkData] = useState<Record<string, NetworkRef[]>>({});
   const [expandedNetworkNode, setExpandedNetworkNode] = useState<string | null>(null);
   const [loadingNetwork, setLoadingNetwork] = useState<string | null>(null);
+
+  // ── Research Idea Evaluator state ──
+  const [evaluatorMode, setEvaluatorMode] = useState<
+    'hidden' | 'pitch' | 'troubleshoot' | 'strategic'
+  >('hidden');
+  const [evaluatorStep, setEvaluatorStep] = useState(0);
+  const [evaluatorInput, setEvaluatorInput] = useState('');
+  const [evaluatorAnswers, setEvaluatorAnswers] = useState<string[]>([]);
+  const [evaluatorResult, setEvaluatorResult] = useState('');
+  const [isEvaluating, setIsEvaluating] = useState(false);
+
   const abortRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const startResearchRef = useRef<(() => void) | undefined>(undefined);
@@ -1129,6 +1140,105 @@ Generate 3-6 rows for the most important outcomes.`;
     setShowNetwork(false);
     setNetworkData({});
     setExpandedNetworkNode(null);
+    setEvaluatorMode('hidden');
+    setEvaluatorStep(0);
+    setEvaluatorInput('');
+    setEvaluatorAnswers([]);
+    setEvaluatorResult('');
+    setIsEvaluating(false);
+  };
+
+  /* ────── Evaluator constants & handlers ────── */
+  const EVALUATOR_SYSTEM_PROMPT = `You are a research strategy advisor using the Fischbach & Walsh framework (Cell 2024). Evaluate research ideas on two axes: Feasibility (X) × Impact (Y).
+
+Key rules:
+- No risk = incremental work (bad). Multiple miracles needed = avoid/refine.
+- Fix ONE meaningful constraint, keep rest flexible.
+- Output format: Restatement → Feasibility: [H/M/L] → Impact: [H/M/L] → Risks (1-3 bullets) → Recommendation: ✅ Go / 🔄 Refine / 🔀 Pivot → Specific suggestions.
+- Respond in the same language as the user's input.`;
+
+  const PITCH_QUESTIONS = [
+    'Bạn muốn làm gì? (Mô tả ý tưởng nghiên cứu)',
+    'Plan thực hiện như thế nào?',
+    'Nếu thành công, tại sao đây là đột phá?',
+    'Risk chính là gì?',
+  ];
+
+  const handleEvaluatorSubmitPitch = useCallback(async () => {
+    if (evaluatorStep < PITCH_QUESTIONS.length - 1) {
+      setEvaluatorAnswers((prev) => [...prev, evaluatorInput]);
+      setEvaluatorInput('');
+      setEvaluatorStep((s) => s + 1);
+      return;
+    }
+    const allAnswers = [...evaluatorAnswers, evaluatorInput];
+    setIsEvaluating(true);
+    try {
+      const prompt = `${EVALUATOR_SYSTEM_PROMPT}
+
+The researcher pitched an idea:
+Idea: "${allAnswers[0]}"
+Plan: "${allAnswers[1]}"
+Why breakthrough: "${allAnswers[2]}"
+Main risk: "${allAnswers[3]}"
+
+Evaluate this research idea. Provide your assessment with Feasibility × Impact ratings and a clear recommendation.`;
+      const result = await callAI(model, prompt);
+      setEvaluatorResult(result);
+      if (result.includes('\u2705') || result.toLowerCase().includes('go')) {
+        setQuestion(allAnswers[0]);
+      }
+    } catch (e: any) {
+      message.error(`Lỗi đánh giá: ${e.message}`);
+    } finally {
+      setIsEvaluating(false);
+    }
+  }, [evaluatorStep, evaluatorInput, evaluatorAnswers, model]);
+
+  const handleEvaluatorSubmitTroubleshoot = useCallback(async () => {
+    setIsEvaluating(true);
+    try {
+      const prompt = `${EVALUATOR_SYSTEM_PROMPT}
+
+The researcher is troubleshooting a problem:
+"${evaluatorInput}"
+
+First, classify this problem as: Conceptual / Technical / Strategic.
+Then guide them step-by-step through a decision tree to resolve it. Be specific and actionable.`;
+      const result = await callAI(model, prompt);
+      setEvaluatorResult(result);
+    } catch (e: any) {
+      message.error(`Lỗi: ${e.message}`);
+    } finally {
+      setIsEvaluating(false);
+    }
+  }, [evaluatorInput, model]);
+
+  const handleEvaluatorSubmitStrategic = useCallback(async () => {
+    setIsEvaluating(true);
+    try {
+      const prompt = `${EVALUATOR_SYSTEM_PROMPT}
+
+The researcher asks a strategic question:
+"${evaluatorInput}"
+
+Use the "altitude dance" framework: zoom out to see the big picture (field trends, unmet needs, paradigm shifts), then zoom in to specific actionable advice. Balance ambition with pragmatism.`;
+      const result = await callAI(model, prompt);
+      setEvaluatorResult(result);
+    } catch (e: any) {
+      message.error(`Lỗi: ${e.message}`);
+    } finally {
+      setIsEvaluating(false);
+    }
+  }, [evaluatorInput, model]);
+
+  const handleEvaluatorReset = () => {
+    setEvaluatorMode('hidden');
+    setEvaluatorStep(0);
+    setEvaluatorInput('');
+    setEvaluatorAnswers([]);
+    setEvaluatorResult('');
+    setIsEvaluating(false);
   };
 
   /* \u2500\u2500 Stop \u2500\u2500 */
@@ -1434,6 +1544,213 @@ ER  - `;
       {/* ────── PHASE: INPUT ────── */}
       {phase === 'input' && (
         <Flexbox gap={12}>
+          {/* ── Research Idea Evaluator ── */}
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08))',
+              border: '1px solid rgba(102,126,234,0.2)',
+              borderRadius: 12,
+              padding: 12,
+            }}
+          >
+            <Flexbox align={'center'} gap={8} horizontal justify={'space-between'}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>
+                {'\uD83D\uDCA1'} Đánh giá ý tưởng nghiên cứu
+              </span>
+              {evaluatorMode !== 'hidden' && (
+                <Button onClick={handleEvaluatorReset} size="small" type="text">
+                  <X size={12} /> Bỏ qua
+                </Button>
+              )}
+            </Flexbox>
+            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 4 }}>
+              Fischbach & Walsh (Cell 2024) — Problem Choice {'>'} Execution Quality
+            </div>
+
+            {evaluatorMode === 'hidden' && (
+              <Flexbox gap={6} horizontal style={{ marginTop: 8 }}>
+                <Button
+                  icon={<Sparkles size={12} />}
+                  onClick={() => {
+                    setEvaluatorMode('pitch');
+                    setEvaluatorStep(0);
+                    setEvaluatorAnswers([]);
+                    setEvaluatorInput('');
+                    setEvaluatorResult('');
+                  }}
+                  size="small"
+                >
+                  Pitch an Idea
+                </Button>
+                <Button
+                  icon={<RefreshCw size={12} />}
+                  onClick={() => {
+                    setEvaluatorMode('troubleshoot');
+                    setEvaluatorInput('');
+                    setEvaluatorResult('');
+                  }}
+                  size="small"
+                >
+                  Troubleshoot
+                </Button>
+                <Button
+                  icon={<MessageSquare size={12} />}
+                  onClick={() => {
+                    setEvaluatorMode('strategic');
+                    setEvaluatorInput('');
+                    setEvaluatorResult('');
+                  }}
+                  size="small"
+                >
+                  Strategic Q
+                </Button>
+              </Flexbox>
+            )}
+
+            {/* Pitch mode */}
+            {evaluatorMode === 'pitch' && !evaluatorResult && (
+              <Flexbox gap={8} style={{ marginTop: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 500 }}>
+                  {evaluatorStep + 1}/{PITCH_QUESTIONS.length}: {PITCH_QUESTIONS[evaluatorStep]}
+                </span>
+                <TextArea
+                  autoSize={{ maxRows: 4, minRows: 2 }}
+                  disabled={isEvaluating}
+                  onChange={(e) => setEvaluatorInput(e.target.value)}
+                  onPressEnter={(e) => {
+                    if (!e.shiftKey) {
+                      e.preventDefault();
+                      handleEvaluatorSubmitPitch();
+                    }
+                  }}
+                  placeholder="Nhập câu trả lời..."
+                  style={{ fontSize: 13 }}
+                  value={evaluatorInput}
+                />
+                <Button
+                  disabled={!evaluatorInput.trim()}
+                  loading={isEvaluating}
+                  onClick={handleEvaluatorSubmitPitch}
+                  size="small"
+                  type="primary"
+                >
+                  {evaluatorStep < PITCH_QUESTIONS.length - 1 ? 'Tiếp →' : 'Đánh giá'}
+                </Button>
+              </Flexbox>
+            )}
+
+            {/* Troubleshoot mode */}
+            {evaluatorMode === 'troubleshoot' && !evaluatorResult && (
+              <Flexbox gap={8} style={{ marginTop: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 500 }}>
+                  Bạn đang gặp vấn đề gì trong nghiên cứu?
+                </span>
+                <TextArea
+                  autoSize={{ maxRows: 4, minRows: 2 }}
+                  disabled={isEvaluating}
+                  onChange={(e) => setEvaluatorInput(e.target.value)}
+                  onPressEnter={(e) => {
+                    if (!e.shiftKey) {
+                      e.preventDefault();
+                      handleEvaluatorSubmitTroubleshoot();
+                    }
+                  }}
+                  placeholder="Mô tả vấn đề bạn đang gặp..."
+                  style={{ fontSize: 13 }}
+                  value={evaluatorInput}
+                />
+                <Button
+                  disabled={!evaluatorInput.trim()}
+                  loading={isEvaluating}
+                  onClick={handleEvaluatorSubmitTroubleshoot}
+                  size="small"
+                  type="primary"
+                >
+                  Phân tích
+                </Button>
+              </Flexbox>
+            )}
+
+            {/* Strategic mode */}
+            {evaluatorMode === 'strategic' && !evaluatorResult && (
+              <Flexbox gap={8} style={{ marginTop: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 500 }}>
+                  Câu hỏi chiến lược nghiên cứu của bạn?
+                </span>
+                <TextArea
+                  autoSize={{ maxRows: 4, minRows: 2 }}
+                  disabled={isEvaluating}
+                  onChange={(e) => setEvaluatorInput(e.target.value)}
+                  onPressEnter={(e) => {
+                    if (!e.shiftKey) {
+                      e.preventDefault();
+                      handleEvaluatorSubmitStrategic();
+                    }
+                  }}
+                  placeholder="Hỏi về chiến lược nghiên cứu..."
+                  style={{ fontSize: 13 }}
+                  value={evaluatorInput}
+                />
+                <Button
+                  disabled={!evaluatorInput.trim()}
+                  loading={isEvaluating}
+                  onClick={handleEvaluatorSubmitStrategic}
+                  size="small"
+                  type="primary"
+                >
+                  Tư vấn
+                </Button>
+              </Flexbox>
+            )}
+
+            {/* Evaluator result */}
+            {evaluatorResult && (
+              <Flexbox gap={8} style={{ marginTop: 8 }}>
+                <div
+                  style={{
+                    background: 'rgba(0,0,0,0.2)',
+                    borderRadius: 8,
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                    padding: 12,
+                  }}
+                >
+                  <Markdown>{evaluatorResult}</Markdown>
+                </div>
+                <Flexbox gap={6} horizontal>
+                  <Button onClick={handleEvaluatorReset} size="small">
+                    Đánh giá lại
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (
+                        !question.trim() &&
+                        evaluatorMode === 'pitch' &&
+                        evaluatorAnswers.length > 0
+                      ) {
+                        setQuestion(evaluatorAnswers[0]);
+                      }
+                      handleEvaluatorReset();
+                    }}
+                    size="small"
+                    type="primary"
+                  >
+                    → Tiếp tục nghiên cứu
+                  </Button>
+                </Flexbox>
+              </Flexbox>
+            )}
+
+            {isEvaluating && (
+              <Flexbox align={'center'} gap={6} horizontal style={{ marginTop: 8 }}>
+                <Spin size="small" />
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+                  Đang đánh giá...
+                </span>
+              </Flexbox>
+            )}
+          </div>
+
           <TextArea
             autoSize={{ maxRows: 6, minRows: 3 }}
             onChange={(e) => setQuestion(e.target.value)}
