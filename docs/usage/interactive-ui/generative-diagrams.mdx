@@ -1,0 +1,112 @@
+---
+title: Generative Diagrams
+description: >-
+  Gõ prompt → AI tạo sơ đồ tương tác. 6 loại: Timeline, Comparison, Process Flow, Structural, Map-based, Simulation.
+
+tags:
+  - Generative Diagrams
+  - Data Visualization
+  - Interactive Charts
+---
+
+# 📊 Generative Diagrams
+
+**Generative Diagrams** cho phép AI tạo sơ đồ tương tác phong phú từ mô tả văn bản, với animation và khả năng click khám phá từng phần.
+
+## 6 Loại Sơ Đồ
+
+<CardGroup cols={3}>
+  <Card title="🏗️ Structural" icon="sitemap">
+    Cấu trúc hệ thống, phân cấp tổ chức, cây phả hệ
+  </Card>
+  <Card title="⏱️ Timeline" icon="timeline">
+    Lịch sử, tiến trình, chronological events
+  </Card>
+  <Card title="⚖️ Comparison" icon="scale-balanced">
+    So sánh sản phẩm, phương án, đặc điểm
+  </Card>
+  <Card title="🔄 Process Flow" icon="diagram-project">
+    Quy trình, workflow, CI/CD, business process
+  </Card>
+  <Card title="🗺️ Map-based" icon="map">
+    Phân bố địa lý, thị trường, dịch tễ học
+  </Card>
+  <Card title="🎛️ Simulation" icon="sliders">
+    Tham số điều chỉnh, mô phỏng, real-time preview
+  </Card>
+</CardGroup>
+
+## Prompts mẫu
+
+### ⏱️ Timeline
+
+```
+Vẽ timeline lịch sử hệ mặt trời từ 4.6 tỷ năm trước đến nay, có thể click từng mốc thời gian để hiện chi tiết.
+```
+
+```
+Tạo timeline phát triển của AI từ 1950 đến 2025 — click từng dấu mốc để xem: tên, năm, tác giả, và tầm quan trọng.
+```
+
+```
+Vẽ timeline lịch sử Việt Nam từ 1945-1975, phân chia theo giai đoạn lịch sử. Click mỗi sự kiện để xem mô tả tiếng Việt đầy đủ.
+```
+
+### ⚖️ Comparison
+
+```
+Tạo sơ đồ so sánh 3 loại vaccine COVID-19: Pfizer, Moderna, AstraZeneca — so sánh hiệu quả, tác dụng phụ, và đối tượng dùng.
+```
+
+```
+So sánh 3 mô hình AI: GPT-4o vs Claude 3.5 Sonnet vs Gemini 2.0 Pro — benchmark, giá, context window, strengths.
+```
+
+```
+Tạo bảng so sánh 3 gói thuê nhà: Studio, 1PN, 2PN — giá, diện tích, tiện ích, phù hợp đối tượng nào.
+```
+
+### 🔄 Process Flow
+
+```
+Tạo sơ đồ quy trình học máy (ML pipeline) từ data collection đến deployment, có animation từng bước.
+```
+
+```
+Vẽ sơ đồ DevOps CI/CD pipeline: commit → build → test → staging → production. Click từng stage để xem tools phổ biến.
+```
+
+```
+Sơ đồ quy trình khám bệnh tại bệnh viện: đăng ký → chờ → khám → xét nghiệm → kết quả → thanh toán. Animation theo thứ tự.
+```
+
+### 🏗️ Structural
+
+```
+Tạo sơ đồ cấu trúc hệ tuần hoàn người — phân cấp từ tim → động mạch → mao mạch → tĩnh mạch. Click node để xem chức năng.
+```
+
+```
+Vẽ sơ đồ kiến trúc microservices cho e-commerce: API Gateway, Auth, Product, Order, Payment, Notification services.
+```
+
+### 🎛️ Simulation
+
+```
+Tạo simulation về lây lan dịch bệnh (SIR model). Cho phép điều chỉnh hệ số lây nhiễm R₀ và tỷ lệ phục hồi. Hiển thị đồ thị real-time.
+```
+
+```
+Mô phỏng dao động con lắc đơn với thanh trượt để điều chỉnh chiều dài dây (0.1-2m), góc ban đầu (10-80°). Vẽ đồ thị vận tốc vs thời gian.
+```
+
+## Tính năng Animation
+
+- **Play/Pause**: Kiểm soát animation từng bước
+- **Step controls**: Tiến/lùi từng bước trong process flow
+- **Speed control**: Điều chỉnh tốc độ animation
+- **Auto-play**: Tự động chạy qua các bước
+
+<Note>
+  Để có animation mượt mà nhất, dùng loại **Process Flow** khi mô tả quy trình có thứ tự rõ ràng.
+</Note>

@@ -1,0 +1,117 @@
+---
+title: AI Rendering
+description: >-
+  Upload ảnh phòng trống → AI tạo virtual staging với phong cách nội thất tùy chọn. Render floor plan thành phòng 3D realistic.
+
+tags:
+  - AI Rendering
+  - Virtual Staging
+  - Interior Design
+  - Real Estate
+  - Fal.ai
+---
+
+# 🏠 AI Rendering
+
+**AI Rendering** sử dụng Fal.ai ControlNet để biến ảnh phòng trống thành không gian sống hoàn chỉnh, hoặc render floor plan 2D thành phòng 3D realistic.
+
+## Tính năng
+
+- **Virtual Staging**: Điền đầy nội thất ảo vào phòng trống
+- **Style Transform**: Thay đổi phong cách nội thất (Scandinavian, Industrial, Japanese...)
+- **Floor Plan → 3D**: Render bản vẽ 2D thành phòng nhìn từ góc 3D
+- **Before/After Slider**: So sánh ảnh gốc và ảnh sau rendering
+
+## Cách dùng
+
+<Steps>
+  <Step title="Upload ảnh phòng">
+    Đính kèm ảnh phòng trống hoặc floor plan vào chat.
+  </Step>
+  <Step title="Gõ prompt AI Rendering">
+    Mô tả phong cách, ánh sáng, và màu sắc mong muốn.
+  </Step>
+  <Step title="Tương tác với Before/After">
+    Kéo slider để so sánh ảnh gốc và ảnh đã được AI render.
+  </Step>
+</Steps>
+
+## Prompts mẫu
+
+### 🛋️ Virtual Staging
+
+```
+Tôi có ảnh phòng khách trống này. Tạo artifact ai-rendering để staging phòng với phong cách Scandinavian hiện đại:
+- Sofa vải màu ghi sáng
+- Bàn cà phê gỗ sồi
+- Thảm len màu kem
+- Đèn sàn Nordic
+- Cây xanh góc phòng
+
+Giữ nguyên cấu trúc phòng, ánh sáng tự nhiên.
+```
+
+```
+[Upload ảnh phòng ngủ trống] Stage phòng ngủ này theo phong cách Japanese minimalist:
+- Giường tatami thấp
+- Futon màu trắng
+- Shoji screen partition
+- Bamboo accent
+
+Ánh sáng ấm buổi tối.
+```
+
+```
+[Upload ảnh căn phòng cũ] Renovate virtually:
+- Sơn tường màu sage green (#87AE73)
+- Thay sàn gỗ cũ bằng herringbone pattern
+- Thêm built-in bookshelf trắng
+- Ánh sáng buổi chiều vàng ấm
+```
+
+### 🏗️ Floor Plan → 3D
+
+```
+[Upload floor plan 2D] Render bản vẽ tầng trệt này thành hình ảnh 3D nhìn từ góc bird's eye 45°. Phong cách nội thất hiện đại Việt Nam, ánh sáng ban ngày.
+```
+
+```
+[Upload floor plan] Tạo 3 góc nhìn khác nhau cho căn hộ này:
+1. Bird's eye view (từ trên xuống)
+2. Corner view (góc phòng khách)
+3. Eye-level view (đứng trong phòng)
+
+Thêm nội thất Scandinavian, cây xanh, ánh sáng tự nhiên.
+```
+
+### 🎨 Style Transformation
+
+```
+[Upload ảnh phòng Industrial] Biến phòng này thành phong cách Japandi (Japan + Scandinavian):
+- Giữ ceiling cao và cửa sổ lớn
+- Thay nội thất thô ráp bằng đồ gỗ sáng màu
+- Thêm textile mềm
+- Cây xanh Nhật Bản (bonsai, bamboo)
+```
+
+## Phong cách Virtual Staging
+
+| Style | Đặc điểm | Phù hợp với |
+|-------|----------|-------------|
+| Scandinavian | Trắng, gỗ sáng, clean lines | Căn hộ nhỏ, hiện đại |
+| Industrial | Bê tông, kim loại, tối màu | Loft, studio |
+| Japanese | Minimalist, thiên nhiên, calm | Phòng thiền, spa |
+| Japandi | Kết hợp Japan + Scandinavian | Trend 2025-2026 |
+| Vietnamese Modern | Gỗ teak, màu đất, tropical | Nhà phố, villa |
+| Luxury | Marble, vàng, dark tone, velvet | Penthouse, villa |
+
+<Note>
+  AI Rendering cần **FAL_KEY** được cấu hình. Liên hệ admin nếu tính năng chưa hoạt động.
+</Note>
+
+## Tips để có kết quả tốt nhất
+
+1. **Ảnh rõ nét**: Upload ảnh chất lượng cao, đủ sáng
+2. **Phòng trống rõ ràng**: Ít đồ đặn trong phòng hiện tại = AI dễ staging hơn
+3. **Mô tả chi tiết**: Nêu cụ thể màu sắc, vật liệu, phong cách
+4. **Ánh sáng**: Ghi rõ muốn ánh sáng nào (ban ngày, buổi tối, ấm/lạnh)
