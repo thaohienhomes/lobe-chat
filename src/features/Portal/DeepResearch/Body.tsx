@@ -1055,7 +1055,7 @@ Respond with ONLY a valid JSON array, no markdown:
 
 Generate 3-6 rows for the most important outcomes.`;
 
-          const gradeResult = await callAI(gradePrompt, model);
+          const gradeResult = await callAI(model, gradePrompt);
           const jsonMatch = gradeResult.match(/\[\s*{[\S\s]*?}\s*]/)?.[0];
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch) as GradeRow[];
