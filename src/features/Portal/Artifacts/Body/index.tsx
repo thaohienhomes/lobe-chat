@@ -1,5 +1,5 @@
 import { Highlighter } from '@lobehub/ui';
-import { memo, useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { useChatStore } from '@/store/chat';
@@ -8,6 +8,20 @@ import { ArtifactDisplayMode } from '@/store/chat/slices/portal/initialState';
 import { ArtifactType } from '@/types/artifact';
 
 import Renderer from './Renderer';
+
+// Artifact types that have a live Preview (not pure code)
+const PREVIEWABLE_ARTIFACT_TYPES = new Set<string>([
+  ArtifactType.React,
+  ArtifactType.Mermaid,
+  ArtifactType.SVG,
+  ArtifactType.InteractiveImage,
+  ArtifactType.GenerativeDiagram,
+  ArtifactType.ContentVisualizer,
+  ArtifactType.AIRendering,
+  // text/html falls through to default HTMLRenderer — match by string
+  'text/html',
+]);
+
 
 const ArtifactsUI = memo(() => {
   const [
@@ -32,13 +46,29 @@ const ArtifactsUI = memo(() => {
     ];
   });
 
+  const isPreviewable = artifactType ? PREVIEWABLE_ARTIFACT_TYPES.has(artifactType) : false;
+
+  // ── Claude-style UX: Split during generation → Preview after ─────────────
+  // Track previous isArtifactTagClosed to detect the false→true transition
+  const prevTagClosedRef = useRef<boolean>(isArtifactTagClosed);
+
   useEffect(() => {
-    // when message generating , check whether the artifact is closed
-    // if close, move the display mode to preview
-    if (isMessageGenerating && isArtifactTagClosed && displayMode === ArtifactDisplayMode.Code) {
-      useChatStore.setState({ portalArtifactDisplayMode: ArtifactDisplayMode.Preview });
+    if (!isPreviewable || !artifactType) return;
+
+    const wasStreaming = !prevTagClosedRef.current;  // tag was open (still generating)
+    const isNowClosed = isArtifactTagClosed;          // tag just closed
+
+    if (wasStreaming && isNowClosed) {
+      // Artifact just finished generating → switch to full Preview
+      useChatStore.setState(
+        { portalArtifactDisplayMode: ArtifactDisplayMode.Preview },
+        false,
+        'autoSwitchToPreview',
+      );
     }
-  }, [isMessageGenerating, displayMode, isArtifactTagClosed]);
+
+    prevTagClosedRef.current = isArtifactTagClosed;
+  }, [isArtifactTagClosed, artifactType, isPreviewable]);
 
   const language = useMemo(() => {
     switch (artifactType) {
@@ -74,6 +104,14 @@ const ArtifactsUI = memo(() => {
   // InteractiveImage always renders preview (no code view needed)
   const isInteractiveImage = artifactType === ArtifactType.InteractiveImage;
 
+  // Split mode: show code + preview side-by-side (available while streaming too)
+  const isSplitMode = displayMode === ArtifactDisplayMode.Split;
+
+  // During streaming of a previewable artifact: auto-use Split so user sees both code + preview
+  // (matches Claude.ai behaviour — code streams on left, preview renders on right)
+  const effectiveSplitMode =
+    isSplitMode || (isMessageGenerating && !isArtifactTagClosed && isPreviewable);
+
   // show code when the artifact is not closed or the display mode is code or the artifact type is code
   const showCode =
     !isInteractiveImage &&
@@ -81,10 +119,7 @@ const ArtifactsUI = memo(() => {
     displayMode === ArtifactDisplayMode.Code ||
     artifactType === ArtifactType.Code);
 
-  // Split mode: show both code and preview side-by-side
-  const isSplitMode = displayMode === ArtifactDisplayMode.Split && effectivelyTagClosed;
-
-  if (isSplitMode) {
+  if (effectiveSplitMode) {
     return (
       <Flexbox
         className={'portal-artifact'}
@@ -94,7 +129,7 @@ const ArtifactsUI = memo(() => {
         horizontal
         style={{ overflow: 'hidden' }}
       >
-        {/* Code Panel */}
+        {/* Code Panel — left */}
         <Flexbox
           flex={1}
           paddingInline={8}
@@ -110,7 +145,7 @@ const ArtifactsUI = memo(() => {
             {artifactContent}
           </Highlighter>
         </Flexbox>
-        {/* Preview Panel */}
+        {/* Preview Panel — right */}
         <Flexbox flex={1} paddingInline={8} style={{ overflow: 'auto' }}>
           <Renderer content={artifactContent} type={artifactType} />
         </Flexbox>

@@ -1,9 +1,22 @@
 import { StateCreator } from 'zustand/vanilla';
 
 import { ChatStore } from '@/store/chat/store';
-import { PortalArtifact } from '@/types/artifact';
+import { ArtifactType, PortalArtifact } from '@/types/artifact';
 
-import { PortalFile } from './initialState';
+import { ArtifactDisplayMode, PortalFile } from './initialState';
+
+// Artifact types that support live preview (used to decide initial display mode)
+const PREVIEWABLE_ARTIFACT_TYPES = new Set<string>([
+  ArtifactType.React,
+  ArtifactType.Mermaid,
+  ArtifactType.SVG,
+  ArtifactType.InteractiveImage,
+  ArtifactType.GenerativeDiagram,
+  ArtifactType.ContentVisualizer,
+  ArtifactType.AIRendering,
+  // Also match raw MIME strings that may be used before enum mapping
+  'text/html',
+]);
 
 export interface ChatPortalAction {
   clearPendingResearchQuery: () => void;
@@ -55,7 +68,18 @@ export const chatPortalSlice: StateCreator<
   openArtifact: (artifact) => {
     get().togglePortal(true);
 
-    set({ portalArtifact: artifact }, false, 'openArtifact');
+    // For previewable types: start in Split mode (code left + live preview right)
+    // matching Claude.ai UX where user sees preview building in real-time.
+    // After generation ends, Body/index.tsx auto-switches to full Preview mode.
+    const initialDisplayMode = artifact.type && PREVIEWABLE_ARTIFACT_TYPES.has(artifact.type)
+      ? ArtifactDisplayMode.Split
+      : ArtifactDisplayMode.Code;
+
+    set(
+      { portalArtifact: artifact, portalArtifactDisplayMode: initialDisplayMode },
+      false,
+      'openArtifact',
+    );
   },
   openDeepResearch: (query) => {
     get().togglePortal(true);
