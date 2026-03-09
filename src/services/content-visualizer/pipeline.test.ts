@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { runAssemblyOrchestrator } from './agents/assembly-orchestrator';
+import { runConceptAnalyzer } from './agents/concept-analyzer';
+import { runContentIngestion } from './agents/content-ingestion';
+import { runQualityValidator } from './agents/quality-validator';
+import { runVisualizationPlanner } from './agents/visualization-planner';
 import type { LlmCallFn, PipelineInput, PipelineOutput, PipelineStage } from './pipeline';
+import { runPipeline } from './pipeline';
 
 // ---------------------------------------------------------------------------
 // Mock all agents
@@ -25,13 +31,6 @@ vi.mock('./agents/quality-validator', () => ({
 vi.mock('./agents/assembly-orchestrator', () => ({
   runAssemblyOrchestrator: vi.fn(),
 }));
-
-import { runContentIngestion } from './agents/content-ingestion';
-import { runConceptAnalyzer } from './agents/concept-analyzer';
-import { runVisualizationPlanner } from './agents/visualization-planner';
-import { runQualityValidator } from './agents/quality-validator';
-import { runAssemblyOrchestrator } from './agents/assembly-orchestrator';
-import { runPipeline } from './pipeline';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -86,7 +85,12 @@ const mockStoryboards = [
         sceneNumber: 1,
         title: 'Intro',
         visualElements: [
-          { description: 'Shape', position: { x: 50, y: 50 }, timing: { duration: 2, start: 0 }, type: 'shape' as const },
+          {
+            description: 'Shape',
+            position: { x: 50, y: 50 },
+            timing: { duration: 2, start: 0 },
+            type: 'shape' as const,
+          },
         ],
       },
     ],
@@ -187,11 +191,7 @@ describe('Pipeline Orchestrator', () => {
       );
 
       // QualityValidator receives storyboards
-      expect(runQualityValidator).toHaveBeenCalledWith(
-        mockStoryboards,
-        mockLlm,
-        undefined,
-      );
+      expect(runQualityValidator).toHaveBeenCalledWith(mockStoryboards, mockLlm, undefined);
 
       // AssemblyOrchestrator receives combined data
       expect(runAssemblyOrchestrator).toHaveBeenCalledWith(
@@ -220,11 +220,7 @@ describe('Pipeline Orchestrator', () => {
 
       await runPipeline(input, mockLlm);
 
-      expect(runQualityValidator).toHaveBeenCalledWith(
-        mockStoryboards,
-        mockLlm,
-        true,
-      );
+      expect(runQualityValidator).toHaveBeenCalledWith(mockStoryboards, mockLlm, true);
     });
 
     it('uses language from input when metadata does not provide it', async () => {
@@ -257,7 +253,7 @@ describe('Pipeline Orchestrator', () => {
       await runPipeline(input, mockLlm, onProgress);
 
       const calls = onProgress.mock.calls;
-      const stages = calls.map(([stage]: [PipelineStage, number]) => stage);
+      const stages = calls.map(([stage]: any[]) => stage as PipelineStage);
 
       expect(stages).toContain('ingestion');
       expect(stages).toContain('analysis');
@@ -272,7 +268,7 @@ describe('Pipeline Orchestrator', () => {
 
       await runPipeline(input, mockLlm, onProgress);
 
-      const percents = onProgress.mock.calls.map(([, pct]: [string, number]) => pct);
+      const percents = onProgress.mock.calls.map(([, pct]: any[]) => pct as number);
 
       // Each percent should be >= the previous
       for (let i = 1; i < percents.length; i++) {
@@ -308,9 +304,7 @@ describe('Pipeline Orchestrator', () => {
     });
 
     it('propagates concept analyzer errors', async () => {
-      (runConceptAnalyzer as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error('LLM timeout'),
-      );
+      (runConceptAnalyzer as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('LLM timeout'));
 
       const input: PipelineInput = { text: 'Content' };
 

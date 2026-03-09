@@ -1,0 +1,100 @@
+---
+title: Interactive Images
+description: >-
+  Upload ảnh bất kỳ và biến nó thành trải nghiệm tương tác — click từng vùng để hiện thông tin chi tiết.
+
+tags:
+  - Interactive Images
+  - Vision AI
+  - Hotspots
+---
+
+# 🖼️ Interactive Images
+
+Tính năng **Interactive Images** phân tích ảnh bằng Vision AI, tự động phát hiện các vùng quan trọng và biến chúng thành hotspots có thể click.
+
+## Cách dùng
+
+<Steps>
+  <Step title="Upload ảnh">
+    Đính kèm ảnh vào cuộc hội thoại (click biểu tượng 📎 hoặc kéo thả ảnh vào chat).
+  </Step>
+
+  <Step title="Dùng prompt gợi ý">
+    Gõ một trong các prompt bên dưới để AI tạo interactive image.
+  </Step>
+
+  <Step title="Tương tác với kết quả">
+    Click vào từng vùng để xem thông tin chi tiết, follow-up questions, và gợi ý khám phá thêm.
+  </Step>
+</Steps>
+
+## Prompts mẫu
+
+### 🩺 Y tế & Giải phẫu
+
+```
+Tạo sơ đồ giải phẫu tim người có thể click từng bộ phận. Hiển thị dưới dạng interactive-image artifact với ít nhất 5 vùng: tâm nhĩ trái/phải, tâm thất trái/phải, động mạch chủ.
+```
+
+```
+Tạo sơ đồ hệ tuần hoàn người — phân biệt vòng tuần hoàn phổi và vòng tuần hoàn hệ thống. Click từng bộ phận để hiện chức năng và dòng máu.
+```
+
+```
+[Upload X-ray phổi] Phân tích hình ảnh X-ray này, đánh dấu các vùng có thể click: thùy phổi, xương sườn, tim, cơ hoành. Mỗi vùng hiện thông tin giải phẫu khi click.
+```
+
+### 🏠 Bất động sản
+
+```
+Tạo sơ đồ tầng lầu (floor plan) căn hộ 2 phòng ngủ hiện đại, có thể click để xem diện tích, orientation, và mô tả từng phòng.
+```
+
+```
+[Upload floor plan] Tạo interactive image từ bản vẽ này. Click từng phòng để hiện: diện tích (m²), hướng cửa sổ, và gợi ý nội thất phù hợp.
+```
+
+### 🔬 Khoa học & Nghiên cứu
+
+```
+Tạo sơ đồ cấu trúc tế bào nhân thật (eukaryotic cell) có thể click. Mỗi bào quan hiện tên, chức năng, và so sánh với tế bào nhân sơ.
+```
+
+```
+Vẽ sơ đồ cấu trúc phân tử DNA double helix. Click từng thành phần (base pairs, sugar-phosphate backbone, hydrogen bonds) để hiện chi tiết.
+```
+
+### 🎓 Giáo dục
+
+```
+Tạo bản đồ Việt Nam tương tác — click từng vùng miền để hiện: dân số, GDP, đặc sản, và điểm du lịch nổi bật.
+```
+
+## Tính năng nổi bật
+
+- **Zoom & Pan**: Cuộn chuột để zoom, kéo để di chuyển ảnh
+- **Keyboard navigation**: Dùng phím mũi tên để di chuyển giữa các hotspots
+- **Follow-up chips**: Gợi ý câu hỏi tiếp theo sau mỗi click
+- **Mobile friendly**: Touch gesture hỗ trợ đầy đủ
+
+## Model được khuyến nghị
+
+<Tip>
+  Dùng **GPT-4o** hoặc **Claude Sonnet 4** để có kết quả tốt nhất. Model nhỏ hơn có thể không tạo được đúng artifact format.
+</Tip>
+
+## 3D Interactive (Nâng cao)
+
+Tạo mô hình 3D xoay tròn với Three.js:
+
+```
+Tạo mô hình tim người 3D tương tác bằng Three.js trong React artifact. Yêu cầu:
+- 4 buồng tim rõ ràng, xoay 360° bằng OrbitControls
+- Animation đập nhịp tim 72 BPM (systole + diastole)
+- Click từng phần → popup thông tin tiếng Việt
+- Color: đỏ tươi (máu giàu O₂), xanh tím (máu nghèo O₂)
+- Dark theme, responsive
+
+Tạo dưới dạng text/html artifact với Three.js CDN.
+```

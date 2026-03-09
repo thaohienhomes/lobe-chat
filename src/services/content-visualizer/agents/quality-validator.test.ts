@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Storyboard } from '../types/storyboard';
-
 import {
   type ValidationResult,
   runQualityValidator,
   runValidationPipeline,
   validateWithRetry,
 } from './quality-validator';
+import { generateReactArtifact, generateReactArtifactWithRetry } from './react-artifact-generator';
 
 // ---------------------------------------------------------------------------
 // Mock external modules
@@ -17,11 +17,6 @@ vi.mock('./react-artifact-generator', () => ({
   generateReactArtifact: vi.fn(),
   generateReactArtifactWithRetry: vi.fn(),
 }));
-
-import {
-  generateReactArtifact,
-  generateReactArtifactWithRetry,
-} from './react-artifact-generator';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -79,7 +74,7 @@ const makeStoryboard = (overrides?: Partial<Storyboard>): Storyboard => ({
       visualElements: [
         {
           description: 'A cell splitting',
-          position: { x: 50, y: 50 },
+          position: { x: '50%', y: '50%' },
           timing: { duration: 2, start: 0 },
           type: 'shape',
         },
@@ -93,7 +88,7 @@ const makeStoryboard = (overrides?: Partial<Storyboard>): Storyboard => ({
       visualElements: [
         {
           description: 'Factory analogy',
-          position: { x: 50, y: 50 },
+          position: { x: '50%', y: '50%' },
           timing: { duration: 2, start: 0 },
           type: 'shape',
         },
@@ -319,9 +314,7 @@ export default function Empty() {
     });
 
     it('returns empty array when no storyboards match artifact track', async () => {
-      const storyboards: Storyboard[] = [
-        makeStoryboard({ renderTrack: 'manim' }),
-      ];
+      const storyboards: Storyboard[] = [makeStoryboard({ renderTrack: 'manim' })];
 
       const results = await runQualityValidator(storyboards, mockLlm);
 

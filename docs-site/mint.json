@@ -1,125 +1,132 @@
 {
-    "$schema": "https://mintlify.com/schema.json",
-    "name": "Phở Chat Docs",
-    "logo": {
-        "dark": "/logo/dark.svg",
-        "light": "/logo/light.svg"
-    },
-    "favicon": "/favicon.svg",
-    "colors": {
-        "primary": "#7c3aed",
-        "light": "#a78bfa",
-        "dark": "#5b21b6",
-        "anchors": {
-            "from": "#7c3aed",
-            "to": "#ec4899"
-        }
-    },
-    "topbarLinks": [
-        {
-            "name": "Phở Chat",
-            "url": "https://pho.chat"
-        }
-    ],
-    "topbarCtaButton": {
-        "name": "Bắt đầu miễn phí",
-        "url": "https://pho.chat"
-    },
-    "tabs": [
-        {
-            "name": "Tính năng",
-            "url": "features"
-        },
-        {
-            "name": "Scientific Agents",
-            "url": "agents"
-        },
-        {
-            "name": "API Reference",
-            "url": "api-reference"
-        },
-        {
-            "name": "Changelog",
-            "url": "changelog"
-        }
-    ],
-    "anchors": [
-        {
-            "name": "Discord Community",
-            "icon": "discord",
-            "url": "https://discord.gg/phochat"
-        },
-        {
-            "name": "GitHub",
-            "icon": "github",
-            "url": "https://github.com/thaohienhomes/lobe-chat"
-        }
-    ],
-    "navigation": [
-        {
-            "group": "Bắt đầu",
-            "pages": [
-                "introduction",
-                "quickstart"
-            ]
-        },
-        {
-            "group": "Tính năng nghiên cứu",
-            "pages": [
-                "features/research-mode",
-                "features/deep-research",
-                "features/pdf-upload",
-                "features/plagiarism-check",
-                "features/research-slides"
-            ]
-        },
-        {
-            "group": "AI khoa học",
-            "pages": [
-                "features/scientific-skills",
-                "features/research-suggestions"
-            ]
-        },
-        {
-            "group": "Scientific Agents",
-            "pages": [
-                "agents/overview",
-                "agents/drug-discovery",
-                "agents/bioinformatics",
-                "agents/clinical-research",
-                "agents/data-science",
-                "agents/scientific-writer",
-                "agents/protein-engineer",
-                "agents/materials-scientist",
-                "agents/lab-automation"
-            ]
-        },
-        {
-            "group": "API Reference",
-            "pages": [
-                "api-reference/pdf-extract",
-                "api-reference/plagiarism-check",
-                "api-reference/research-slides"
-            ]
-        },
-        {
-            "group": "Changelog",
-            "pages": [
-                "changelog/march-2026"
-            ]
-        }
-    ],
-    "footerSocials": {
-        "github": "https://github.com/thaohienhomes/lobe-chat",
-        "discord": "https://discord.gg/phochat"
-    },
-    "feedback": {
-        "thumbsRating": true,
-        "suggestEdit": true
-    },
-    "analytics": {
-        "posthog": {
-            "apiKey": ""
-        }
+  "$schema": "https://mintlify.com/schema.json",
+  "analytics": {
+    "posthog": {
+      "apiKey": ""
     }
+  },
+  "anchors": [
+    {
+      "name": "Discord Community",
+      "icon": "discord",
+      "url": "https://discord.gg/phochat"
+    },
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/thaohienhomes/lobe-chat"
+    }
+  ],
+  "colors": {
+    "primary": "#7c3aed",
+    "light": "#a78bfa",
+    "dark": "#5b21b6",
+    "anchors": {
+      "from": "#7c3aed",
+      "to": "#ec4899"
+    }
+  },
+  "favicon": "/favicon.svg",
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true
+  },
+  "footerSocials": {
+    "github": "https://github.com/thaohienhomes/lobe-chat",
+    "discord": "https://discord.gg/phochat"
+  },
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "name": "Phở Chat Docs",
+  "navigation": [
+    {
+      "group": "Bắt đầu",
+      "pages": ["introduction", "quickstart"]
+    },
+    {
+      "group": "Tính năng nghiên cứu",
+      "pages": [
+        "features/research-mode",
+        "features/deep-research",
+        "features/pdf-upload",
+        "features/plagiarism-check",
+        "features/research-slides"
+      ]
+    },
+    {
+      "group": "AI khoa học",
+      "pages": ["features/scientific-skills", "features/research-suggestions"]
+    },
+    {
+      "group": "Scientific Agents",
+      "pages": [
+        "agents/overview",
+        "agents/drug-discovery",
+        "agents/bioinformatics",
+        "agents/clinical-research",
+        "agents/data-science",
+        "agents/scientific-writer",
+        "agents/protein-engineer",
+        "agents/materials-scientist",
+        "agents/lab-automation"
+      ]
+    },
+    {
+      "group": "✨ Interactive UI",
+      "pages": [
+        "usage/interactive-ui/index",
+        "usage/interactive-ui/interactive-images",
+        "usage/interactive-ui/generative-diagrams",
+        "usage/interactive-ui/content-visualizer",
+        "usage/interactive-ui/ai-rendering",
+        "usage/interactive-ui/use-cases"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/pdf-extract",
+        "api-reference/plagiarism-check",
+        "api-reference/research-slides"
+      ]
+    },
+    {
+      "group": "Changelog",
+      "pages": ["changelog/march-2026"]
+    }
+  ],
+  "tabs": [
+    {
+      "name": "Tính năng",
+      "url": "features"
+    },
+    {
+      "name": "Scientific Agents",
+      "url": "agents"
+    },
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    },
+    {
+      "name": "✨ Interactive UI",
+      "url": "usage/interactive-ui"
+    },
+    {
+      "name": "Changelog",
+      "url": "changelog"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Bắt đầu miễn phí",
+    "url": "https://pho.chat"
+  },
+  "topbarLinks": [
+    {
+      "name": "Phở Chat",
+      "url": "https://pho.chat"
+    }
+  ]
 }
