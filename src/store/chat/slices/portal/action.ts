@@ -75,8 +75,15 @@ export const chatPortalSlice: StateCreator<
       ? ArtifactDisplayMode.Split
       : ArtifactDisplayMode.Code;
 
+    // Dismiss Deep Research / Research panels so artifact panel takes priority
+    // in the router (DeepResearch is at index 0, Artifacts at index 4 — first enabled wins).
     set(
-      { portalArtifact: artifact, portalArtifactDisplayMode: initialDisplayMode },
+      {
+        portalArtifact: artifact,
+        portalArtifactDisplayMode: initialDisplayMode,
+        portalDeepResearch: false,
+        portalResearch: false,
+      },
       false,
       'openArtifact',
     );
