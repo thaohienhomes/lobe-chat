@@ -5,7 +5,7 @@ import { useChatStore } from '@/store/chat';
 import { chatPortalSelectors } from '@/store/chat/selectors';
 import { ArtifactDisplayMode } from '@/store/chat/slices/portal/initialState';
 
-import { buildIframeHtml, encodeBase64 } from './buildIframeHtml';
+import { buildIframeHtml, encodeBase64, stripArtifactWrapper } from './buildIframeHtml';
 import { escapeJsxTextContent } from './escapeJsx';
 
 interface ReactRendererProps {
@@ -40,8 +40,9 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
     return () => clearTimeout(timer);
   }, [code]);
 
-  // Pre-process and build iframe HTML
-  const processedCode = useMemo(() => escapeJsxTextContent(debouncedCode), [debouncedCode]);
+  // Pre-process: strip leaked wrapper tags (safety net) → escape JSX text content
+  const strippedCode = useMemo(() => stripArtifactWrapper(debouncedCode), [debouncedCode]);
+  const processedCode = useMemo(() => escapeJsxTextContent(strippedCode), [strippedCode]);
   const encodedCode = useMemo(() => encodeBase64(processedCode), [processedCode]);
 
   const blobUrl = useMemo(() => {
@@ -199,7 +200,7 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
 
       <iframe
         ref={iframeRef}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-same-origin"
         src={blobUrl}
         style={{ border: 'none', height: '100%', width: '100%' }}
         title="react-artifact"

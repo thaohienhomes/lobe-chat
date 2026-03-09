@@ -9,9 +9,18 @@
  * stubs for libraries without UMD builds (lucide-react, framer-motion, Radix UI).
  */
 
-// Encode string to base64, handling Unicode correctly
+// Encode string to base64, handling full Unicode correctly
 export function encodeBase64(str: string): string {
-  return btoa(unescape(encodeURIComponent(str)));
+  const bytes = new TextEncoder().encode(str);
+  const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join('');
+  return btoa(binString);
+}
+
+// Strip <lobeArtifact> wrapper tags if they leaked through the selector layer
+const ARTIFACT_WRAPPER_RE = /^\s*<lobeArtifact\b[^>]*>([\S\s]*?)(?:<\/lobeArtifact>\s*)?$/;
+export function stripArtifactWrapper(code: string): string {
+  const match = code.match(ARTIFACT_WRAPPER_RE);
+  return match ? match[1].trim() : code;
 }
 
 export function buildIframeHtml(encodedCode: string, title: string): string {
@@ -273,12 +282,43 @@ export function buildIframeHtml(encodedCode: string, title: string): string {
     // ── Decode, compile, and run ───────────────────────────────────────
     try {
       var encoded = document.getElementById('_artifact_code').textContent;
-      var code = decodeURIComponent(escape(atob(encoded)));
+      if (!encoded || !encoded.trim()) {
+        document.getElementById('root').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:14px;">No code to preview</div>';
+        window.parent.postMessage({ type: 'artifact-ready' }, '*');
+        return;
+      }
 
-      var compiled = Babel.transform(code, {
-        presets: ['env', 'react', 'typescript'],
-        filename: 'App.tsx'
-      }).code;
+      // Decode base64 with full Unicode support (matches TextEncoder in parent)
+      var rawBytes = atob(encoded);
+      var uint8 = new Uint8Array(rawBytes.length);
+      for (var i = 0; i < rawBytes.length; i++) { uint8[i] = rawBytes.charCodeAt(i); }
+      var code = new TextDecoder().decode(uint8);
+
+      if (!code.trim()) {
+        document.getElementById('root').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:14px;">No code to preview</div>';
+        window.parent.postMessage({ type: 'artifact-ready' }, '*');
+        return;
+      }
+
+      // Compile with Babel — wrap to provide better error context
+      var compiled;
+      try {
+        compiled = Babel.transform(code, {
+          presets: ['env', 'react', 'typescript'],
+          filename: 'App.tsx'
+        }).code;
+      } catch (babelErr) {
+        var errMsg = (babelErr && babelErr.message) || String(babelErr);
+        if (babelErr && babelErr.loc && babelErr.loc.line) {
+          var lines = code.split('\\n');
+          var lineNum = babelErr.loc.line;
+          var failingLine = lines[lineNum - 1];
+          if (failingLine) {
+            errMsg += '\\n\\nLine ' + lineNum + ': ' + failingLine.trim();
+          }
+        }
+        throw new Error(errMsg);
+      }
 
       // Execute in a function scope with module/exports/require available
       var fn = new Function('module', 'exports', 'require', 'React', 'ReactDOM', compiled);
