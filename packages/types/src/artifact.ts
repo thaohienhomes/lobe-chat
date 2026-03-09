@@ -9,6 +9,7 @@ export interface PortalArtifact {
 }
 
 export enum ArtifactType {
+  AIRendering = 'application/lobe.artifacts.ai-rendering',
   Code = 'application/lobe.artifacts.code',
   ContentVisualizer = 'application/lobe.artifacts.content-visualizer',
   Default = 'html',

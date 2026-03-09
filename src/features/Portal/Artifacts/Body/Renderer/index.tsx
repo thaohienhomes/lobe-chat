@@ -11,6 +11,7 @@ const ReactRenderer = dynamic(() => import('./React'), { ssr: false });
 const InteractiveImageRenderer = dynamic(() => import('./InteractiveImage'), { ssr: false });
 const GenerativeDiagramRenderer = dynamic(() => import('./GenerativeDiagram'), { ssr: false });
 const ContentVisualizerRenderer = dynamic(() => import('./ContentVisualizer'), { ssr: false });
+const AIRenderingRenderer = dynamic(() => import('./AIRendering'), { ssr: false });
 
 const Renderer = memo<{ content: string; type?: string }>(({ content, type }) => {
   switch (type) {
@@ -28,6 +29,10 @@ const Renderer = memo<{ content: string; type?: string }>(({ content, type }) =>
 
     case ArtifactType.ContentVisualizer: {
       return <ContentVisualizerRenderer content={content} />;
+    }
+
+    case ArtifactType.AIRendering: {
+      return <AIRenderingRenderer content={content} />;
     }
 
     case ArtifactType.SVG: {

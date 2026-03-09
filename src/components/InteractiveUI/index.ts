@@ -11,6 +11,9 @@ export { default as InteractiveImage } from './InteractiveImage';
 // Phase 2: Generative Diagrams
 export { AnimationController, DiagramRenderer } from './GenerativeDiagram';
 
+// Phase 3: AI Rendering
+export { default as BeforeAfterView } from './BeforeAfterView';
+
 // Shared components
 export { default as ComparisonSlider } from './shared/ComparisonSlider';
 export { default as LegendBar } from './shared/LegendBar';
