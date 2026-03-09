@@ -79,12 +79,12 @@ const Render = memo<ArtifactProps>(({ identifier, title, type, language, childre
 
   const inThread = useContext(InPortalThreadContext);
   const { message } = App.useApp();
-  const [isGenerating, isArtifactTagClosed, openArtifact, closeArtifact] = useChatStore((s) => {
+  const [isGenerating, isArtifactTagClosed, openArtifact, displayMode] = useChatStore((s) => {
     return [
       chatSelectors.isMessageGenerating(id)(s),
       chatPortalSelectors.isArtifactTagClosed(id)(s),
       s.openArtifact,
-      s.closeArtifact,
+      s.portalArtifactDisplayMode,
     ];
   });
 
@@ -127,7 +127,16 @@ const Render = memo<ArtifactProps>(({ identifier, title, type, language, childre
           useChatStore.getState(),
         );
         if (currentArtifactMessageId === id) {
-          closeArtifact();
+          // Artifact already open → toggle between Preview and Code
+          const nextMode =
+            displayMode === ArtifactDisplayMode.Preview
+              ? ArtifactDisplayMode.Code
+              : ArtifactDisplayMode.Preview;
+          useChatStore.setState(
+            { portalArtifactDisplayMode: nextMode },
+            false,
+            'toggleArtifactDisplayMode',
+          );
         } else {
           if (inThread) {
             message.info(t('artifact.inThread'));

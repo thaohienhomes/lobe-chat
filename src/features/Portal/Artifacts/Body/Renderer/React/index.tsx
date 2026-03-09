@@ -1,10 +1,12 @@
 import dynamic from 'next/dynamic';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 import CircleLoading from '@/components/Loading/CircleLoading';
 import { useChatStore } from '@/store/chat';
 import { chatPortalSelectors } from '@/store/chat/selectors';
 
+import ErrorOverlay from './ErrorOverlay';
+import { escapeJsxTextContent } from './escapeJsx';
 import { createTemplateFiles } from './template';
 
 // Lazy load Sandpack components for better bundle size (~3MB savings)
@@ -30,6 +32,9 @@ interface ReactRendererProps {
 
 const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
   const title = useChatStore(chatPortalSelectors.artifactTitle);
+
+  // Pre-process JSX to escape bare > < in text content (prevents parse errors)
+  const processedCode = useMemo(() => escapeJsxTextContent(code), [code]);
 
   return (
     <SandpackProvider
@@ -79,21 +84,24 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
         },
       }}
       files={{
-        '/App.tsx': code,
+        '/App.tsx': processedCode,
         ...createTemplateFiles({ title }),
       }}
       options={{
         externalResources: ['https://cdn.tailwindcss.com'],
       }}
-      style={{ height: '100%' }}
+      style={{ height: '100%', position: 'relative' }}
       template="vite-react-ts"
       theme="auto"
     >
+      {/* Custom error overlay with Copy Error + View Code actions */}
+      <ErrorOverlay />
       {/* Preview-only mode: no code editor, maximize preview space */}
       <SandpackPreview
         showNavigator={false}
         showOpenInCodeSandbox={false}
         showRefreshButton
+        showSandpackErrorOverlay={false}
         style={{ height: '100%', width: '100%' }}
       />
     </SandpackProvider>
