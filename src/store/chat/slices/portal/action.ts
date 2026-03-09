@@ -66,8 +66,6 @@ export const chatPortalSlice: StateCreator<
     set({ portalToolMessage: undefined }, false, 'closeToolUI');
   },
   openArtifact: (artifact) => {
-    get().togglePortal(true);
-
     // For previewable types: start in Split mode (code left + live preview right)
     // matching Claude.ai UX where user sees preview building in real-time.
     // After generation ends, Body/index.tsx auto-switches to full Preview mode.
@@ -75,14 +73,20 @@ export const chatPortalSlice: StateCreator<
       ? ArtifactDisplayMode.Split
       : ArtifactDisplayMode.Code;
 
-    // Dismiss Deep Research / Research panels so artifact panel takes priority
-    // in the router (DeepResearch is at index 0, Artifacts at index 4 — first enabled wins).
+    // Single atomic set: open portal + set artifact + dismiss ALL competing panels.
+    // Portal router priority: [DeepResearch, Research, Thread, MessageDetail, Artifacts, ...]
+    // Every higher-priority panel must be cleared or Artifacts body never renders.
     set(
       {
         portalArtifact: artifact,
         portalArtifactDisplayMode: initialDisplayMode,
         portalDeepResearch: false,
+        portalMessageDetail: undefined,
         portalResearch: false,
+        portalThreadId: undefined,
+        portalToolMessage: undefined,
+        showPortal: true,
+        threadStartMessageId: undefined,
       },
       false,
       'openArtifact',

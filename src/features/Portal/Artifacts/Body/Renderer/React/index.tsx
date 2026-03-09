@@ -103,7 +103,7 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
           showNavigator={false}
           showOpenInCodeSandbox={false}
           showRefreshButton
-          showSandpackErrorOverlay={false}
+          showSandpackErrorOverlay
           style={{ height: '100%', width: '100%' }}
         />
       </SandpackProvider>
