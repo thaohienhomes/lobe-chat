@@ -4,17 +4,30 @@ import { Icon } from '@lobehub/ui';
 import { App } from 'antd';
 import { createStyles } from 'antd-style';
 import { Loader2 } from 'lucide-react';
-import { memo, useContext, useEffect } from 'react';
+import { memo, useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 
 import { useChatStore } from '@/store/chat';
 import { chatPortalSelectors, chatSelectors } from '@/store/chat/selectors';
+import { ArtifactDisplayMode } from '@/store/chat/slices/portal/initialState';
 import { dotLoading } from '@/styles/loading';
 
 import { InPortalThreadContext } from '../../../ChatItem/InPortalThreadContext';
 import { MarkdownElementProps } from '../../type';
 import ArtifactIcon from './Icon';
+
+// Artifact types that have a renderable Preview tab (non-code-only types)
+const PREVIEWABLE_TYPES = new Set([
+  'text/html',
+  'image/svg+xml',
+  'application/lobe.artifacts.react',
+  'application/lobe.artifacts.mermaid',
+  'application/lobe.artifacts.interactive-image',
+  'application/lobe.artifacts.generative-diagram',
+  'application/lobe.artifacts.content-visualizer',
+  'application/lobe.artifacts.ai-rendering',
+]);
 
 const useStyles = createStyles(({ css, token, isDarkMode }) => ({
   avatar: css`
@@ -79,11 +92,31 @@ const Render = memo<ArtifactProps>(({ identifier, title, type, language, childre
     openArtifact({ id, identifier, language, title, type });
   };
 
+  // ── Auto-open artifact panel while streaming ──────────────────────────────
   useEffect(() => {
     if (!hasChildren || !isGenerating) return;
 
     openArtifactUI();
   }, [isGenerating, hasChildren, str, identifier, title, type, id, language]);
+
+  // ── Auto-switch to Preview tab when generation finishes ───────────────────
+  // Tracks the previous value of isArtifactTagClosed to detect false → true transition.
+  const prevTagClosedRef = useRef<boolean>(isArtifactTagClosed);
+  useEffect(() => {
+    const wasOpen = !prevTagClosedRef.current;   // previously generating (tag not yet closed)
+    const isNowClosed = isArtifactTagClosed;
+
+    if (wasOpen && isNowClosed && PREVIEWABLE_TYPES.has(type)) {
+      // Generation just finished for a previewable artifact → switch to Preview
+      useChatStore.setState(
+        { portalArtifactDisplayMode: ArtifactDisplayMode.Preview },
+        false,
+        'autoSwitchToPreview',
+      );
+    }
+
+    prevTagClosedRef.current = isArtifactTagClosed;
+  }, [isArtifactTagClosed, type]);
 
   return (
     <Flexbox
