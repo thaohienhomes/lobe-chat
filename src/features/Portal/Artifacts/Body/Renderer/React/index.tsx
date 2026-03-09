@@ -56,47 +56,33 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
       <SandpackProvider
         customSetup={{
           dependencies: {
-            // UI Libraries
-            '@ant-design/icons': 'latest',
-            '@lshay/ui': 'latest',
-            '@radix-ui/react-alert-dialog': 'latest',
-            '@radix-ui/react-dialog': 'latest',
-            '@radix-ui/react-icons': 'latest',
-
-            '@react-spring/three': 'latest',
-
-            // 3D Graphics (Three.js ecosystem)
-            '@react-three/drei': 'latest',
-
-            '@react-three/fiber': 'latest',
-
-            'antd': 'latest',
-
-            'class-variance-authority': 'latest',
-
-            'clsx': 'latest',
-
-            // Interactive math visualization library
-            'd3': 'latest',
-
             // Data visualization
+            'recharts': '^2.12.7',
+            'd3': '^7.9.0',
+
+            // UI Components
+            'lucide-react': '^0.469.0',
+            '@radix-ui/react-alert-dialog': '^1.1.4',
+            '@radix-ui/react-dialog': '^1.1.4',
+            '@radix-ui/react-icons': '^1.3.2',
+
             // Animation
-            'framer-motion': 'latest',
+            'framer-motion': '^11.15.0',
 
-            // Mathematics & Visualization
-            'katex': 'latest',
+            // Utility
+            'clsx': '^2.1.1',
+            'class-variance-authority': '^0.7.1',
+            'tailwind-merge': '^2.6.0',
 
-            'lucide-react': 'latest',
+            // Math / Katex
+            'katex': '^0.16.11',
+            'react-katex': '^3.0.1',
 
-            'mafs': 'latest',
-
-            'react-katex': 'latest',
-
-            'recharts': 'latest',
-
-            'tailwind-merge': 'latest',
-
-            'three': 'latest',
+            // 3D (Three.js ecosystem)
+            'three': '^0.170.0',
+            '@react-three/fiber': '^8.17.14',
+            '@react-three/drei': '^9.122.0',
+            '@react-spring/three': '^9.7.5',
           },
         }}
         files={{
