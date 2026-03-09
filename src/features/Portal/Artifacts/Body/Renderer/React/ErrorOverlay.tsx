@@ -1,19 +1,33 @@
 import { useSandpack } from '@codesandbox/sandpack-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { useChatStore } from '@/store/chat';
 import { ArtifactDisplayMode } from '@/store/chat/slices/portal/initialState';
 
 /**
- * Custom error overlay for React artifact Sandpack renderer.
- * Shows a readable error message with Copy Error and View Code actions.
+ * Custom error overlay + loading state for React artifact Sandpack renderer.
+ * Shows loading spinner while building, readable error on failure,
+ * and smooth fade-in when preview is ready.
  * Must be rendered inside a SandpackProvider.
  */
 const ErrorOverlay = memo(() => {
   const { sandpack } = useSandpack();
   const { error, status } = sandpack;
   const [copied, setCopied] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
+
+  // Fade out the loading overlay once Sandpack is running
+  useEffect(() => {
+    if (status === 'running' && !error) {
+      // Small delay so the preview iframe has time to paint before we fade out
+      const timer = setTimeout(() => setShowLoading(false), 400);
+      return () => clearTimeout(timer);
+    }
+    if (status !== 'running') {
+      setShowLoading(true);
+    }
+  }, [status, error]);
 
   const switchToCode = useCallback(() => {
     useChatStore.setState(
@@ -31,52 +45,55 @@ const ErrorOverlay = memo(() => {
     }
   }, [error?.message]);
 
-  // Loading state
-  if (status === 'initial' || status === 'idle') {
+  // ── Loading state ─────────────────────────────────────────────────────
+  const isLoading = status !== 'running' || showLoading;
+
+  if (isLoading && !error) {
     return (
       <Flexbox
         align={'center'}
-        gap={8}
+        gap={12}
         justify={'center'}
         style={{
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: '#0f172a',
           inset: 0,
+          opacity: showLoading ? 1 : 0,
           pointerEvents: 'none',
           position: 'absolute',
+          transition: 'opacity 0.3s ease-out',
           zIndex: 5,
         }}
       >
         <div
           style={{
-            animation: 'spin 1s linear infinite',
-            border: '2px solid rgba(148, 163, 184, 0.3)',
+            animation: 'sp-spin 1s linear infinite',
+            border: '2px solid rgba(148, 163, 184, 0.2)',
             borderRadius: '50%',
             borderTopColor: '#60a5fa',
-            height: 24,
-            width: 24,
+            height: 28,
+            width: 28,
           }}
         />
         <div style={{ color: '#94a3b8', fontSize: 13 }}>Building preview…</div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+        <style>{`@keyframes sp-spin { to { transform: rotate(360deg) } }`}</style>
       </Flexbox>
     );
   }
 
+  // ── No error → hide overlay ───────────────────────────────────────────
   if (!error) return null;
 
-  // Parse error for display
+  // ── Error state ───────────────────────────────────────────────────────
   const errorMsg = error.message || 'Unknown compilation error';
   const lineMatch = errorMsg.match(/\((\d+):(\d+)\)/);
   const lineInfo = lineMatch ? `Line ${lineMatch[1]}, Column ${lineMatch[2]}` : '';
-
-  // Extract a short summary (first line or first sentence)
   const shortMsg = errorMsg.split('\n')[0].slice(0, 200);
 
   return (
     <Flexbox
       gap={12}
       style={{
-        background: 'rgba(15, 23, 42, 0.97)',
+        background: '#0f172a',
         inset: 0,
         overflow: 'auto',
         padding: 20,
@@ -120,6 +137,7 @@ const ErrorOverlay = memo(() => {
             fontSize: 12,
             padding: '5px 12px',
           }}
+          type="button"
         >
           {copied ? 'Copied!' : 'Copy Error'}
         </button>
@@ -134,6 +152,7 @@ const ErrorOverlay = memo(() => {
             fontSize: 12,
             padding: '5px 12px',
           }}
+          type="button"
         >
           View Code
         </button>

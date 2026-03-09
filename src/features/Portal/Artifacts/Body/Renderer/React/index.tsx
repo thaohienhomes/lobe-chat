@@ -26,6 +26,21 @@ const SandpackPreview = dynamic(
   },
 );
 
+// Dark theme matching the app's dark UI — prevents white flash in iframe
+const DARK_THEME = {
+  colors: {
+    accent: '#60a5fa',
+    surface1: '#0f172a',
+    surface2: '#1e293b',
+    surface3: '#334155',
+  },
+  font: {
+    body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    mono: '"Fira Code", "Fira Mono", Menlo, Consolas, monospace',
+    size: '13px',
+  },
+} as const;
+
 interface ReactRendererProps {
   code: string;
 }
@@ -37,74 +52,76 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
   const processedCode = useMemo(() => escapeJsxTextContent(code), [code]);
 
   return (
-    <SandpackProvider
-      customSetup={{
-        dependencies: {
-          // UI Libraries
-          '@ant-design/icons': 'latest',
-          '@lshay/ui': 'latest',
-          '@radix-ui/react-alert-dialog': 'latest',
-          '@radix-ui/react-dialog': 'latest',
-          '@radix-ui/react-icons': 'latest',
+    <div style={{ background: '#0f172a', height: '100%', position: 'relative', width: '100%' }}>
+      <SandpackProvider
+        customSetup={{
+          dependencies: {
+            // UI Libraries
+            '@ant-design/icons': 'latest',
+            '@lshay/ui': 'latest',
+            '@radix-ui/react-alert-dialog': 'latest',
+            '@radix-ui/react-dialog': 'latest',
+            '@radix-ui/react-icons': 'latest',
 
-          '@react-spring/three': 'latest',
+            '@react-spring/three': 'latest',
 
-          // 3D Graphics (Three.js ecosystem)
-          '@react-three/drei': 'latest',
+            // 3D Graphics (Three.js ecosystem)
+            '@react-three/drei': 'latest',
 
-          '@react-three/fiber': 'latest',
+            '@react-three/fiber': 'latest',
 
-          'antd': 'latest',
+            'antd': 'latest',
 
-          'class-variance-authority': 'latest',
+            'class-variance-authority': 'latest',
 
-          'clsx': 'latest',
+            'clsx': 'latest',
 
-          // Interactive math visualization library
-          'd3': 'latest',
+            // Interactive math visualization library
+            'd3': 'latest',
 
-          // Data visualization
-          // Animation
-          'framer-motion': 'latest',
+            // Data visualization
+            // Animation
+            'framer-motion': 'latest',
 
-          // Mathematics & Visualization
-          'katex': 'latest',
+            // Mathematics & Visualization
+            'katex': 'latest',
 
-          'lucide-react': 'latest',
+            'lucide-react': 'latest',
 
-          'mafs': 'latest',
+            'mafs': 'latest',
 
-          'react-katex': 'latest',
+            'react-katex': 'latest',
 
-          'recharts': 'latest',
+            'recharts': 'latest',
 
-          'tailwind-merge': 'latest',
+            'tailwind-merge': 'latest',
 
-          'three': 'latest',
-        },
-      }}
-      files={{
-        '/App.tsx': processedCode,
-        ...createTemplateFiles({ title }),
-      }}
-      options={{
-        externalResources: ['https://cdn.tailwindcss.com'],
-      }}
-      style={{ height: '100%', position: 'relative' }}
-      template="vite-react-ts"
-      theme="auto"
-    >
-      {/* Custom error overlay with Copy Error + View Code actions */}
-      <ErrorOverlay />
-      {/* Preview-only mode: no code editor, maximize preview space */}
-      <SandpackPreview
-        showNavigator={false}
-        showOpenInCodeSandbox={false}
-        showRefreshButton
-        showSandpackErrorOverlay={false}
-        style={{ height: '100%', width: '100%' }}
-      />
-    </SandpackProvider>
+            'three': 'latest',
+          },
+        }}
+        files={{
+          '/App.tsx': processedCode,
+          ...createTemplateFiles({ title }),
+        }}
+        options={{
+          externalResources: ['https://cdn.tailwindcss.com'],
+        }}
+        style={{ height: '100%', position: 'relative' }}
+        template="vite-react-ts"
+        theme={DARK_THEME}
+      >
+        {/* Custom error overlay with Copy Error + View Code actions */}
+        <ErrorOverlay />
+        {/* Preview-only mode: no code editor, maximize preview space */}
+        <SandpackPreview
+          showNavigator={false}
+          showOpenInCodeSandbox={false}
+          showRefreshButton
+          showSandpackErrorOverlay={false}
+          style={{ height: '100%', width: '100%' }}
+        />
+      </SandpackProvider>
+    </div>
   );
 });
 

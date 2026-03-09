@@ -10,7 +10,7 @@ export const createTemplateFiles = ({ title }: TemplateFilesParams = {}) => ({
     <title>${title || 'Phở Artifact'}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      html, body, #root { height: 100%; margin: 0; padding: 0; }
+      html, body, #root { height: 100%; margin: 0; padding: 0; background: #0f172a; color: #e2e8f0; }
     </style>
   </head>
   <body>
