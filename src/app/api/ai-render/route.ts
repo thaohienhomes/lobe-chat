@@ -2,7 +2,11 @@ import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 import { render } from '@/services/ai-rendering/fal-client';
-import type { AIRenderRequestBody, AIRenderResponse, RenderOperation } from '@/services/ai-rendering/types';
+import type {
+  AIRenderRequestBody,
+  AIRenderResponse,
+  RenderOperation,
+} from '@/services/ai-rendering/types';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -22,6 +26,12 @@ export async function POST(request: Request): Promise<NextResponse<AIRenderRespo
 
   // Validate FAL_KEY
   if (!process.env.FAL_KEY) {
+    console.error(
+      '[ai-render] FAL_KEY missing. Available env keys with FAL:',
+      Object.keys(process.env)
+        .filter((k) => k.includes('FAL'))
+        .join(', ') || '(none)',
+    );
     return NextResponse.json(
       { error: 'AI rendering is not configured', success: false },
       { status: 503 },
@@ -33,25 +43,16 @@ export async function POST(request: Request): Promise<NextResponse<AIRenderRespo
   try {
     body = (await request.json()) as AIRenderRequestBody;
   } catch {
-    return NextResponse.json(
-      { error: 'Invalid JSON body', success: false },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'Invalid JSON body', success: false }, { status: 400 });
   }
 
   // Validate required fields
   if (!body.imageUrl || typeof body.imageUrl !== 'string') {
-    return NextResponse.json(
-      { error: 'imageUrl is required', success: false },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'imageUrl is required', success: false }, { status: 400 });
   }
 
   if (!body.renderStyle || typeof body.renderStyle !== 'string') {
-    return NextResponse.json(
-      { error: 'renderStyle is required', success: false },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'renderStyle is required', success: false }, { status: 400 });
   }
 
   // Validate URL format

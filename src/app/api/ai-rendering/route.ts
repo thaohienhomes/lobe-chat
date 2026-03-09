@@ -142,6 +142,15 @@ const RENDER_COSTS: Record<RenderAction, number> = {
   'virtual-stage': 80,
 };
 
+// ─── Startup validation ─────────────────────────────────────────────
+
+console.log(
+  '[ai-rendering] FAL_KEY present:',
+  !!process.env.FAL_KEY,
+  'length:',
+  process.env.FAL_KEY?.length ?? 0,
+);
+
 // ─── Route Handler ──────────────────────────────────────────────────
 
 export async function POST(request: Request): Promise<NextResponse<AIRenderResponse>> {
@@ -153,6 +162,12 @@ export async function POST(request: Request): Promise<NextResponse<AIRenderRespo
 
   // 2. Check FAL_KEY is configured
   if (!process.env.FAL_KEY) {
+    console.error(
+      '[ai-rendering] FAL_KEY missing at request time. Available env keys with FAL:',
+      Object.keys(process.env)
+        .filter((k) => k.includes('FAL'))
+        .join(', ') || '(none)',
+    );
     return NextResponse.json(
       { error: 'AI rendering is not configured on this server', success: false },
       { status: 503 },
