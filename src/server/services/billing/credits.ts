@@ -81,7 +81,23 @@ export async function deductPhoCredits(userId: string, amount: number) {
   }
 }
 
-export async function processModelUsage(userId: string, cost: number, tier: number = 1, tierSlotAlreadyAcquired: boolean = false) {
+export interface UsageLogParams {
+  costUSD?: number;
+  inputTokens: number;
+  model: string;
+  outputTokens: number;
+  provider: string;
+  responseTimeMs?: number;
+  sessionId?: string;
+}
+
+export async function processModelUsage(
+  userId: string,
+  cost: number,
+  tier: number = 1,
+  tierSlotAlreadyAcquired: boolean = false,
+  usageLog?: UsageLogParams,
+) {
   try {
     const db = await getServerDB();
     const now = new Date();
@@ -190,6 +206,31 @@ export async function processModelUsage(userId: string, cost: number, tier: numb
     // NOTE: Redis sync removed — DailyTierRateLimiter.check() already
     // increments pho:ratelimit:* keys via checkTierAccess() in the chat route.
     // The duplicate INCR here was causing admin dashboard to show 2x actual usage.
+
+    // 5. Log to usage_logs with actual model/tier/tokens
+    if (usageLog) {
+      try {
+        const { usageLogs } = await import('@/database/schemas/usage');
+        const VND_RATE = 24_167;
+        const costUSD = usageLog.costUSD ?? finalCost * 0.000_04; // fallback: 1 point ≈ $0.00004
+        await db.insert(usageLogs).values({
+          costUSD,
+          costVND: costUSD * VND_RATE,
+          inputTokens: usageLog.inputTokens,
+          model: usageLog.model,
+          modelTier: tier,
+          outputTokens: usageLog.outputTokens,
+          pointsDeducted: finalCost,
+          provider: usageLog.provider,
+          responseTimeMs: usageLog.responseTimeMs ?? null,
+          sessionId: usageLog.sessionId ?? null,
+          totalTokens: usageLog.inputTokens + usageLog.outputTokens,
+          userId,
+        });
+      } catch (logErr) {
+        console.warn('⚠️ Failed to insert usage_logs:', logErr);
+      }
+    }
   } catch (e) {
     console.error('❌ Failed to process model usage:', e);
   }
@@ -262,7 +303,9 @@ export async function incrementScientificSkillsUsage(userId: string): Promise<vo
     fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${redisKey}/172800`, {
       headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
       method: 'POST',
-    }).catch(() => { /* silent */ });
+    }).catch(() => {
+      /* silent */
+    });
   } catch {
     /* silent */
   }
@@ -400,11 +443,7 @@ export async function checkTierAccess(
 
   // 4. Tier 2/3 — ATOMIC acquire: increment + check in single SQL query
   //    This prevents race conditions where concurrent requests bypass the limit.
-  const { acquired, newUsage } = await atomicAcquireTierSlot(
-    userId,
-    tier as 2 | 3,
-    dailyLimit,
-  );
+  const { acquired, newUsage } = await atomicAcquireTierSlot(userId, tier as 2 | 3, dailyLimit);
 
   if (!acquired) {
     let reason: string;
@@ -436,9 +475,7 @@ export async function checkTierAccess(
     };
   }
 
-  console.log(
-    `🔒 [Atomic Tier ${tier}] Slot acquired for ${userId}: ${newUsage}/${dailyLimit}`,
-  );
+  console.log(`🔒 [Atomic Tier ${tier}] Slot acquired for ${userId}: ${newUsage}/${dailyLimit}`);
 
   return {
     allowed: true,

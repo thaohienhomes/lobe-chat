@@ -97,8 +97,7 @@ export const checkAuth =
         });
       }
 
-      const { errorType = ChatErrorType.InternalServerError } =
-        e as ChatCompletionErrorPayload;
+      const { errorType = ChatErrorType.InternalServerError } = e as ChatCompletionErrorPayload;
 
       return createErrorResponse(errorType, {
         error: { message: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' },
@@ -123,62 +122,36 @@ export const checkAuth =
 
         if (!trialAccess.allowed) {
           const plan = await subscriptionService.getSubscriptionPlan(jwtPayload.userId);
-          console.warn(
-            '[Subscription Auth] Trial expired - user needs to upgrade:',
-            {
-              messagesRemaining: trialAccess.messagesRemaining,
-              planId: plan.planId,
-              reason: trialAccess.reason,
-              tokensRemaining: trialAccess.tokensRemaining,
-              userId: jwtPayload.userId,
-            },
-          );
+          console.warn('[Subscription Auth] Trial expired - user needs to upgrade:', {
+            messagesRemaining: trialAccess.messagesRemaining,
+            planId: plan.planId,
+            reason: trialAccess.reason,
+            tokensRemaining: trialAccess.tokensRemaining,
+            userId: jwtPayload.userId,
+          });
 
           return createErrorResponse(ChatErrorType.Unauthorized, {
             error: new Error(trialAccess.reason || 'Free trial expired. Please upgrade your plan.'),
             isTrialExpired: true,
-            message: trialAccess.reason || 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat.',
+            message:
+              trialAccess.reason || 'Bạn đã sử dụng hết quota miễn phí. Nâng cấp để tiếp tục chat.',
             upgradeUrl: '/settings/subscription',
           });
         }
 
         // Log and track trial user access
         if (trialAccess.isTrialUser) {
-          console.log(
-            '[Subscription Auth] 🆓 Trial user access granted:',
-            {
-              messagesRemaining: trialAccess.messagesRemaining,
-              tokensRemaining: trialAccess.tokensRemaining,
-              userId: jwtPayload.userId,
-            },
-          );
+          console.log('[Subscription Auth] 🆓 Trial user access granted:', {
+            messagesRemaining: trialAccess.messagesRemaining,
+            tokensRemaining: trialAccess.tokensRemaining,
+            userId: jwtPayload.userId,
+          });
 
-          // Track usage for trial users (increment message count)
-          // This ensures the counter updates even for streaming responses
-          try {
-            const { usageLogs } = await import('@/database/schemas/usage');
-
-            await db.insert(usageLogs).values({
-              costUSD: 0.001, // Minimal cost for trial tracking
-              costVND: 24.167,
-              createdAt: new Date(),
-              inputTokens: 100,
-              model: trialAccess.model || 'meta-llama/llama-3.1-8b-instruct',
-              outputTokens: 200,
-              provider: 'pho-chat',
-              queryComplexity: 'simple',
-              sessionId: `trial-${Date.now()}`,
-              totalTokens: 300,
-              updatedAt: new Date(),
-              userId: jwtPayload.userId,
-            });
-
-            const remaining = (trialAccess.messagesRemaining ?? 0) - 1;
-            console.log(`📊 Trial usage tracked for user: ${jwtPayload.userId} (${remaining} messages remaining)`);
-          } catch (trackingError) {
-            console.warn('⚠️ Failed to track trial usage:', trackingError);
-            // Don't block the request if tracking fails
-          }
+          // Trial usage is tracked as a pre-flight marker only.
+          // Actual token counts, model tier, and response time are logged
+          // by processModelUsage() after the chat completion finishes.
+          const remaining = (trialAccess.messagesRemaining ?? 0) - 1;
+          console.log(`📊 Trial user: ${jwtPayload.userId} (${remaining} messages remaining)`);
         } else {
           console.log(
             '[Subscription Auth] ✅ Paid subscription validated for user:',

@@ -240,7 +240,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           const PLUGIN_FALLBACK_PROVIDER = 'vercelaigateway';
           console.log(
             `🔄 [Plugin Fallback] Tier ${modelTier} quota exceeded for user ${jwtPayload.userId}. ` +
-            `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Vercel+Gemini).`,
+              `Rerouting plugin call from "${data.model}" → "${PLUGIN_FALLBACK_MODEL}" (Tier 1 Vercel+Gemini).`,
           );
           data.model = PLUGIN_FALLBACK_MODEL;
           // Re-init runtime for the fallback provider
@@ -413,6 +413,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       );
     }
 
+    const requestStartTime = Date.now();
+
     if (data.stream && response.body) {
       // STREAMING: Tee the stream to audit usage
       const [stream1, stream2] = response.body.tee();
@@ -424,16 +426,13 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           let accumulatedText = '';
           const decoder = new TextDecoder();
 
-          for (; ;) {
+          for (;;) {
             const { done, value } = await reader.read();
             if (done) break;
-            // Decode chunk. Note: chunks might be partial SSE events.
-            // But raw length count is decent proxy for tokens across languages?
-            // AI SDK might send 'data: "..."'.
-            // We just count everything for now as a rough "usage unit".
-            // Better: try to clean it?
             accumulatedText += decoder.decode(value, { stream: true });
           }
+
+          const responseTimeMs = Date.now() - requestStartTime;
 
           // Calculate tokens
           const outputTokens = countTokens(accumulatedText);
@@ -450,11 +449,23 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
           );
 
           console.log(
-            `📉 Streaming Usage: ${inputTokens} in / ${outputTokens} out. Cost: ${cost} Credits.`,
+            `📉 Streaming Usage: ${inputTokens} in / ${outputTokens} out. Cost: ${cost} Credits. Time: ${responseTimeMs}ms`,
           );
 
-          if (cost > 0 && jwtPayload.userId) {
-            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1, tierSlotAcquired);
+          if (jwtPayload.userId) {
+            await processModelUsage(
+              jwtPayload.userId,
+              cost,
+              activePricing.tier || 1,
+              tierSlotAcquired,
+              {
+                inputTokens,
+                model: actualModelUsed,
+                outputTokens,
+                provider: actualProviderUsed,
+                responseTimeMs,
+              },
+            );
           }
         } catch (e) {
           console.error('Failed to audits stream:', e);
@@ -486,11 +497,16 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
         }
 
         if (responseData) {
+          const responseTimeMs = Date.now() - requestStartTime;
           const content = responseData.choices?.[0]?.message?.content || '';
-          const outputTokens = countTokens(content);
+
+          // Prefer actual token counts from provider response, fall back to estimation
+          const providerUsage = responseData.usage;
+          const outputTokens = providerUsage?.completion_tokens ?? countTokens(content);
           const inputTokens =
-            data.messages?.reduce((acc, msg) => acc + countTokens(String(msg.content || '')), 0) ||
-            0;
+            providerUsage?.prompt_tokens ??
+            (data.messages?.reduce((acc, msg) => acc + countTokens(String(msg.content || '')), 0) ||
+              0);
 
           const inputPrice = activePricing.inputPrice ?? 0;
           const outputPrice = activePricing.outputPrice ?? 0;
@@ -498,9 +514,21 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
             (inputTokens * inputPrice + outputTokens * outputPrice) / 1_000_000,
           );
 
-          if (cost > 0 && jwtPayload.userId) {
-            await processModelUsage(jwtPayload.userId, cost, activePricing.tier || 1, tierSlotAcquired);
-            console.log(`📉 Non-Streaming Usage: ${cost} Credits processed.`);
+          if (jwtPayload.userId) {
+            await processModelUsage(
+              jwtPayload.userId,
+              cost,
+              activePricing.tier || 1,
+              tierSlotAcquired,
+              {
+                inputTokens,
+                model: actualModelUsed,
+                outputTokens,
+                provider: actualProviderUsed,
+                responseTimeMs,
+              },
+            );
+            console.log(`📉 Non-Streaming Usage: ${cost} Credits. Time: ${responseTimeMs}ms`);
           }
         }
       } catch (e) {
@@ -543,7 +571,7 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // the inappropriate "Enter custom API key" form.
     const safeErrorType =
       errorType === AgentRuntimeErrorType.InvalidProviderAPIKey ||
-        errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
+      errorType === AgentRuntimeErrorType.NoOpenAIAPIKey
         ? AgentRuntimeErrorType.ProviderBizError
         : errorType;
 
