@@ -145,10 +145,10 @@ const RENDER_COSTS: Record<RenderAction, number> = {
 // ─── Startup validation ─────────────────────────────────────────────
 
 console.log(
-  '[ai-rendering] FAL_KEY present:',
-  !!process.env.FAL_KEY,
+  '[ai-rendering] FAL_API_KEY present:',
+  !!process.env.FAL_API_KEY,
   'length:',
-  process.env.FAL_KEY?.length ?? 0,
+  process.env.FAL_API_KEY?.length ?? 0,
 );
 
 // ─── Route Handler ──────────────────────────────────────────────────
@@ -160,10 +160,10 @@ export async function POST(request: Request): Promise<NextResponse<AIRenderRespo
     return NextResponse.json({ error: 'Unauthorized', success: false }, { status: 401 });
   }
 
-  // 2. Check FAL_KEY is configured
-  if (!process.env.FAL_KEY) {
+  // 2. Check FAL_API_KEY is configured
+  if (!process.env.FAL_API_KEY) {
     console.error(
-      '[ai-rendering] FAL_KEY missing at request time. Available env keys with FAL:',
+      '[ai-rendering] FAL_API_KEY missing at request time. Available env keys with FAL:',
       Object.keys(process.env)
         .filter((k) => k.includes('FAL'))
         .join(', ') || '(none)',
@@ -296,7 +296,7 @@ export async function POST(request: Request): Promise<NextResponse<AIRenderRespo
     const clientIp = getClientIp(request);
     console.log(
       `[ai-rendering] ✅ ${body.action} completed for user ${userId} (${clientIp}) in ${result.duration}ms. ` +
-        `Remaining today: ${rateCheck.remaining}`,
+      `Remaining today: ${rateCheck.remaining}`,
     );
 
     return NextResponse.json({

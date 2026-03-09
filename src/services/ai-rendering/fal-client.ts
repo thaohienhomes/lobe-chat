@@ -124,9 +124,9 @@ async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES): Promis
 // ─── Fal.ai SDK Client ─────────────────────────────────────────────
 
 function getFalClient() {
-  const falKey = process.env.FAL_KEY;
+  const falKey = process.env.FAL_API_KEY;
   if (!falKey) {
-    throw new Error('FAL_KEY environment variable is not set');
+    throw new Error('FAL_API_KEY environment variable is not set');
   }
   return createFalClient({ credentials: falKey });
 }

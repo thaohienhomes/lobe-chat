@@ -24,10 +24,10 @@ export async function POST(request: Request): Promise<NextResponse<AIRenderRespo
     return NextResponse.json({ error: 'Unauthorized', success: false }, { status: 401 });
   }
 
-  // Validate FAL_KEY
-  if (!process.env.FAL_KEY) {
+  // Validate FAL_API_KEY
+  if (!process.env.FAL_API_KEY) {
     console.error(
-      '[ai-render] FAL_KEY missing. Available env keys with FAL:',
+      '[ai-render] FAL_API_KEY missing. Available env keys with FAL:',
       Object.keys(process.env)
         .filter((k) => k.includes('FAL'))
         .join(', ') || '(none)',
