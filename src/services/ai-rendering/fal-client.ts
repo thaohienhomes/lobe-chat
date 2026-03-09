@@ -20,11 +20,11 @@ import type {
 
 export const FAL_MODELS = {
   controlnetCanny: 'fal-ai/fast-sdxl-controlnet-canny',
-  controlnetDepth: 'fal-ai/fast-sdxl-controlnet-depth',
+  controlnetDepth: 'fal-ai/sd15-depth-controlnet',
   fluxSchnell: 'fal-ai/flux/schnell',
   inpaint: 'fal-ai/inpaint',
   ipAdapter: 'fal-ai/ip-adapter-face-id',
-  realEsrgan: 'fal-ai/real-esrgan',
+  realEsrgan: 'fal-ai/esrgan',  // was: fal-ai/real-esrgan (404)
   sdxl: 'fal-ai/fast-sdxl',
 } as const;
 
@@ -174,7 +174,21 @@ export async function render(request: RenderRequest): Promise<RenderResult> {
 
     // Set image fields based on operation
     if (request.operation === 'upscale') {
-      input.image_url = request.imageUrl;
+      // Esrgan only needs image_url — no prompt/steps/guidance needed
+      const fal = getFalClient();
+      const result = await withRetry(
+        () => fal.subscribe(modelId, { input: { image_url: request.imageUrl } }) as Promise<{ data: FalOutput }>,
+      );
+      const imageUrl = result.data.image?.url ?? result.data.images?.[0]?.url;
+      if (!imageUrl) throw new Error('No image returned from Fal.ai upscale');
+      return {
+        duration: Date.now() - startTime,
+        imageUrl,
+        metadata: { dimensions: { height: 0, width: 0 }, model: modelId, parameters: { guidanceScale, numInferenceSteps, strength } },
+        operation: request.operation,
+        seed,
+        success: true,
+      };
     } else if (request.operation === 'inpainting') {
       input.image_url = request.imageUrl;
       input.mask_url = request.maskUrl;
@@ -186,7 +200,7 @@ export async function render(request: RenderRequest): Promise<RenderResult> {
 
     const fal = getFalClient();
     const result = await withRetry(
-      () => fal.run(modelId, { input }) as Promise<{ data: FalOutput }>,
+      () => fal.subscribe(modelId, { input }) as Promise<{ data: FalOutput }>,
     );
 
     const imageUrl = result.data.images?.[0]?.url ?? result.data.image?.url;
