@@ -259,4 +259,111 @@ describe('DiagramRenderer', () => {
       expect(screen.getByText(/Unsupported diagram type/)).toBeInTheDocument();
     });
   });
+
+  describe('empty regions handling', () => {
+    it('renders structural diagram with empty nodes', () => {
+      const data: DiagramData = {
+        context: 'Empty structural',
+        nodes: [],
+        title: 'Empty Structural',
+        type: 'structural',
+      };
+      render(<DiagramRenderer data={data} />);
+      expect(screen.getByText('Empty Structural')).toBeInTheDocument();
+    });
+
+    it('renders structural diagram with undefined nodes', () => {
+      const data: DiagramData = {
+        context: 'No nodes',
+        title: 'No Nodes',
+        type: 'structural',
+      };
+      render(<DiagramRenderer data={data} />);
+      expect(screen.getByText('No Nodes')).toBeInTheDocument();
+    });
+
+    it('renders comparison diagram with empty items', () => {
+      const data: DiagramData = {
+        comparisonItems: [],
+        context: 'Empty comparison',
+        title: 'Empty Comparison',
+        type: 'comparison',
+      };
+      render(<DiagramRenderer data={data} />);
+      expect(screen.getByText('Empty Comparison')).toBeInTheDocument();
+    });
+
+    it('renders timeline diagram with empty events', () => {
+      const data: DiagramData = {
+        context: 'Empty timeline',
+        timelineEvents: [],
+        title: 'Empty Timeline',
+        type: 'timeline',
+      };
+      render(<DiagramRenderer data={data} />);
+      expect(screen.getByText('Empty Timeline')).toBeInTheDocument();
+    });
+
+    it('renders process_flow without animation steps', () => {
+      const data: DiagramData = {
+        context: 'No animation',
+        edges: [],
+        nodes: [
+          { color: '#EF4444', id: 'n1', label: 'Step 1', position: { x: 30, y: 50 } },
+        ],
+        title: 'No Animation Flow',
+        type: 'process_flow',
+      };
+      render(<DiagramRenderer data={data} />);
+      expect(screen.getByText('No Animation Flow')).toBeInTheDocument();
+      expect(screen.getByText('Step 1')).toBeInTheDocument();
+      // No animation controller when no animation steps
+      expect(screen.queryByRole('toolbar', { name: 'Animation controls' })).not.toBeInTheDocument();
+    });
+
+    it('renders simulation diagram with empty params', () => {
+      const data: DiagramData = {
+        context: 'Empty simulation',
+        nodes: [],
+        simulationParams: [],
+        title: 'Empty Simulation',
+        type: 'simulation',
+      };
+      render(<DiagramRenderer data={data} />);
+      expect(screen.getByText('Empty Simulation')).toBeInTheDocument();
+    });
+
+    it('renders map_based diagram with empty nodes', () => {
+      const data: DiagramData = {
+        context: 'Empty map',
+        nodes: [],
+        title: 'Empty Map',
+        type: 'map_based',
+      };
+      render(<DiagramRenderer data={data} />);
+      expect(screen.getByText('Empty Map')).toBeInTheDocument();
+    });
+  });
+
+  describe('screen reader accessibility', () => {
+    it('includes context text as sr-only', () => {
+      render(<DiagramRenderer data={structuralData} />);
+      const srElement = document.querySelector('.sr-only');
+      expect(srElement).toBeTruthy();
+      expect(srElement!.textContent).toBe('A simple structural diagram with two nodes');
+    });
+
+    it('includes sr-only context in generatedCode mode', () => {
+      const data: DiagramData = {
+        context: 'Custom SVG context',
+        generatedCode: '<svg><rect width="10" height="10" fill="blue"/></svg>',
+        title: 'Custom',
+        type: 'structural',
+      };
+      render(<DiagramRenderer data={data} />);
+      const srElement = document.querySelector('.sr-only');
+      expect(srElement).toBeTruthy();
+      expect(srElement!.textContent).toBe('Custom SVG context');
+    });
+  });
 });
