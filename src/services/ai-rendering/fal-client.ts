@@ -1,11 +1,12 @@
 /**
  * Fal.ai Client — AI Rendering Integration
  *
- * Provides ControlNet image-to-image, inpainting, virtual staging,
- * and upscaling via the Fal.ai API.
+ * Wrapper for @fal-ai/client with retry logic, model selection,
+ * and style-to-prompt mapping.
  *
  * Phase 3: "See Your Space"
  */
+import { createFalClient } from '@fal-ai/client';
 
 import type {
   RenderMetadata,
@@ -17,26 +18,37 @@ import type {
 
 // ─── Fal.ai Model IDs ──────────────────────────────────────────────
 
-const FAL_MODELS = {
+export const FAL_MODELS = {
+  controlnetCanny: 'fal-ai/fast-sdxl-controlnet-canny',
   controlnetDepth: 'fal-ai/fast-sdxl-controlnet-depth',
-  controlnetInpaint: 'fal-ai/inpaint',
-  imageToImage: 'fal-ai/fast-sdxl-controlnet-canny',
-  styleTransfer: 'fal-ai/ip-adapter-face-id',
-  upscale: 'fal-ai/real-esrgan',
+  fluxSchnell: 'fal-ai/flux/schnell',
+  inpaint: 'fal-ai/inpaint',
+  ipAdapter: 'fal-ai/ip-adapter-face-id',
+  realEsrgan: 'fal-ai/real-esrgan',
+  sdxl: 'fal-ai/fast-sdxl',
 } as const;
 
 // ─── Style → Prompt Mapping ────────────────────────────────────────
 
 const STYLE_PROMPTS: Record<RenderStyle, string> = {
-  contemporary: 'contemporary interior design, clean lines, neutral tones, open layout, high-end finishes',
-  industrial: 'industrial loft interior, exposed brick, metal beams, concrete floors, Edison bulbs',
-  japandi: 'japandi interior design, wabi-sabi aesthetics, natural materials, warm neutrals, minimal furniture',
-  'mid-century-modern': 'mid-century modern interior, retro furniture, warm wood tones, geometric patterns',
-  minimalist: 'minimalist interior design, white walls, clean surfaces, essential furniture only, natural light',
-  modern: 'modern interior design, sleek furniture, warm lighting, neutral palette, photorealistic',
-  rustic: 'rustic interior design, reclaimed wood, stone fireplace, cozy textiles, warm ambient lighting',
-  scandinavian: 'scandinavian interior design, light wood, white walls, hygge atmosphere, functional furniture',
-  traditional: 'traditional interior design, classic furniture, rich fabrics, crown molding, elegant decor',
+  'contemporary':
+    'contemporary interior design, clean lines, neutral tones, open layout, high-end finishes',
+  'industrial':
+    'industrial loft interior, exposed brick, metal beams, concrete floors, Edison bulbs',
+  'japandi':
+    'japandi interior design, wabi-sabi aesthetics, natural materials, warm neutrals, minimal furniture',
+  'mid-century-modern':
+    'mid-century modern interior, retro furniture, warm wood tones, geometric patterns',
+  'minimalist':
+    'minimalist interior design, white walls, clean surfaces, essential furniture only, natural light',
+  'modern':
+    'modern interior design, sleek furniture, warm lighting, neutral palette, photorealistic',
+  'rustic':
+    'rustic interior design, reclaimed wood, stone fireplace, cozy textiles, warm ambient lighting',
+  'scandinavian':
+    'scandinavian interior design, light wood, white walls, hygge atmosphere, functional furniture',
+  'traditional':
+    'traditional interior design, classic furniture, rich fabrics, crown molding, elegant decor',
 };
 
 // ─── Helper ─────────────────────────────────────────────────────────
@@ -68,21 +80,56 @@ function selectModel(operation: RenderOperation): string {
     }
     case 'image-to-image':
     case 'virtual-staging': {
-      return FAL_MODELS.imageToImage;
+      return FAL_MODELS.controlnetCanny;
     }
     case 'inpainting': {
-      return FAL_MODELS.controlnetInpaint;
+      return FAL_MODELS.inpaint;
     }
     case 'style-transfer': {
-      return FAL_MODELS.styleTransfer;
+      return FAL_MODELS.ipAdapter;
     }
     case 'upscale': {
-      return FAL_MODELS.upscale;
+      return FAL_MODELS.realEsrgan;
     }
   }
 }
 
-// ─── Fal.ai API Call ────────────────────────────────────────────────
+// ─── Retry Logic ───────────────────────────────────────────────────
+
+const MAX_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 1000;
+
+async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES): Promise<T> {
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Don't retry on client errors (4xx)
+      if (lastError.message.includes('(4')) break;
+
+      if (attempt < retries - 1) {
+        const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
+        await new Promise((resolve) => {
+          setTimeout(resolve, delay);
+        });
+      }
+    }
+  }
+  throw lastError;
+}
+
+// ─── Fal.ai SDK Client ─────────────────────────────────────────────
+
+function getFalClient() {
+  const falKey = process.env.FAL_KEY;
+  if (!falKey) {
+    throw new Error('FAL_KEY environment variable is not set');
+  }
+  return createFalClient({ credentials: falKey });
+}
 
 interface FalInput {
   control_image_url?: string;
@@ -95,39 +142,16 @@ interface FalInput {
   strength?: number;
 }
 
-interface FalResponse {
-  images?: Array<{ url: string }>;
+interface FalOutput {
   image?: { url: string };
+  images?: Array<{ url: string }>;
   seed?: number;
-}
-
-async function callFalApi(modelId: string, input: FalInput): Promise<FalResponse> {
-  const falKey = process.env.FAL_KEY;
-  if (!falKey) {
-    throw new Error('FAL_KEY environment variable is not set');
-  }
-
-  const response = await fetch(`https://fal.run/${modelId}`, {
-    body: JSON.stringify(input),
-    headers: {
-      'Authorization': `Key ${falKey}`,
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Fal.ai API error (${response.status}): ${errorText}`);
-  }
-
-  return response.json() as Promise<FalResponse>;
 }
 
 // ─── Public API ─────────────────────────────────────────────────────
 
 /**
- * Execute an AI rendering operation via Fal.ai.
+ * Execute an AI rendering operation via Fal.ai SDK with retry logic.
  */
 export async function render(request: RenderRequest): Promise<RenderResult> {
   const startTime = Date.now();
@@ -160,9 +184,12 @@ export async function render(request: RenderRequest): Promise<RenderResult> {
       input.image_url = request.imageUrl;
     }
 
-    const result = await callFalApi(modelId, input);
+    const fal = getFalClient();
+    const result = await withRetry(
+      () => fal.run(modelId, { input }) as Promise<{ data: FalOutput }>,
+    );
 
-    const imageUrl = result.images?.[0]?.url ?? result.image?.url;
+    const imageUrl = result.data.images?.[0]?.url ?? result.data.image?.url;
     if (!imageUrl) {
       throw new Error('No image returned from Fal.ai');
     }
@@ -192,7 +219,7 @@ export async function render(request: RenderRequest): Promise<RenderResult> {
       imageUrl,
       metadata,
       operation: request.operation,
-      seed: result.seed ?? seed,
+      seed: result.data.seed ?? seed,
       success: true,
     };
   } catch (error) {
@@ -243,5 +270,15 @@ export async function inpaint(
     operation: 'inpainting',
     prompt,
     renderStyle,
+  });
+}
+
+/**
+ * Upscale an image using Real-ESRGAN.
+ */
+export async function upscale(imageUrl: string): Promise<RenderResult> {
+  return render({
+    imageUrl,
+    operation: 'upscale',
   });
 }
