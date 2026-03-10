@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, Send, Zap } from 'lucide-react';
+import { Bot, Code, Gamepad2, Hash, MessageCircle, Send, Zap } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
@@ -11,10 +11,10 @@ const { Title, Paragraph, Text } = Typography;
 
 const CHANNEL_ICONS = [
   { channel: 'Telegram', free: true, icon: Send },
-  { channel: 'WhatsApp', free: false, icon: Send },
-  { channel: 'Slack', free: false, icon: Send },
-  { channel: 'Discord', free: false, icon: Send },
-  { channel: 'REST API', free: false, icon: Send },
+  { channel: 'WhatsApp', free: false, icon: MessageCircle },
+  { channel: 'Slack', free: false, icon: Hash },
+  { channel: 'Discord', free: false, icon: Gamepad2 },
+  { channel: 'REST API', free: false, icon: Code },
 ];
 
 const useStyles = createStyles(({ css, token }) => ({
@@ -22,9 +22,10 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: 2px 8px;
 
     font-size: 11px;
-    color: ${token.colorSuccessText};
+    font-weight: 600;
+    color: #10b981;
 
-    background: ${token.colorSuccessBg};
+    background: rgba(16, 185, 129, 0.15);
     border-radius: 4px;
   `,
   badgePaid: css`
@@ -41,53 +42,104 @@ const useStyles = createStyles(({ css, token }) => ({
 
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     align-items: center;
 
-    padding: 12px 16px;
+    padding: 14px 18px;
 
-    border-radius: 8px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
 
     &:hover {
       background: ${token.colorFillQuaternary};
+      transform: translateY(-2px);
     }
   `,
   channelsRow: css`
     flex-wrap: wrap;
   `,
   container: css`
-    padding: 48px 32px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorBgElevated} 100%);
+    padding: 56px 32px 48px;
+    border-radius: 20px;
+    background: linear-gradient(
+      160deg,
+      rgba(59, 130, 246, 0.08) 0%,
+      ${token.colorBgElevated} 50%,
+      rgba(139, 92, 246, 0.06) 100%
+    );
+
+    @media (max-width: 640px) {
+      padding: 40px 20px 36px;
+    }
   `,
   deployBox: css`
-    padding: 24px;
+    width: 100%;
+    max-width: 480px;
+    padding: 28px;
+
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
-    border-radius: 12px;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    }
   `,
   deployButton: css`
     height: 48px;
     font-size: 16px;
     font-weight: 600;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5);
+      transform: translateY(-1px);
+    }
+  `,
+  iconGlow: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 72px;
+    height: 72px;
+
+    color: #3b82f6;
+
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 0 32px rgba(59, 130, 246, 0.2);
   `,
   socialProof: css`
     font-size: 13px;
     color: ${token.colorTextSecondary};
   `,
   subtitle: css`
+    max-width: 560px;
     font-size: 18px;
     color: ${token.colorTextSecondary};
+    text-align: center;
+
+    @media (max-width: 640px) {
+      font-size: 16px;
+    }
   `,
   title: css`
     margin: 0 !important;
-    font-size: 36px;
-    background: linear-gradient(135deg, ${token.colorPrimary}, ${token.colorPrimaryHover});
+    font-size: 40px;
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
     @media (max-width: 768px) {
-      font-size: 28px;
+      font-size: 30px;
     }
   `,
 }));
@@ -113,8 +165,10 @@ const HeroSection = memo(() => {
 
   return (
     <Flexbox align="center" className={styles.container} gap={32}>
-      <Flexbox align="center" gap={16}>
-        <Bot size={48} />
+      <Flexbox align="center" gap={20}>
+        <div className={styles.iconGlow}>
+          <Bot size={36} />
+        </div>
         <Title className={styles.title} level={1}>
           {t('hero.title')}
         </Title>
@@ -122,9 +176,9 @@ const HeroSection = memo(() => {
       </Flexbox>
 
       <Flexbox className={styles.channelsRow} gap={16} horizontal justify="center">
-        {CHANNEL_ICONS.map(({ channel, free }) => (
-          <Flexbox align="center" className={styles.channelCard} gap={4} key={channel}>
-            <Send size={20} />
+        {CHANNEL_ICONS.map(({ channel, free, icon: Icon }) => (
+          <Flexbox align="center" className={styles.channelCard} gap={6} key={channel}>
+            <Icon size={22} />
             <Text>{channel}</Text>
             <span className={free ? styles.badge : styles.badgePaid}>
               {free ? 'FREE' : '$5/mo'}
@@ -135,7 +189,7 @@ const HeroSection = memo(() => {
 
       <Flexbox className={styles.deployBox} gap={16}>
         <Flexbox align="center" gap={8} horizontal>
-          <Zap size={20} />
+          <Zap size={20} style={{ color: '#3b82f6' }} />
           <Text strong>{t('hero.deployTitle')}</Text>
         </Flexbox>
         <Paragraph type="secondary">{t('hero.tokenLabel')}</Paragraph>

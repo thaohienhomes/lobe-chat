@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
@@ -13,13 +13,31 @@ const useStyles = createStyles(({ css, token }) => ({
   container: css`
     padding: 48px 32px;
     text-align: center;
-    background: linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorBgElevated} 100%);
-    border-radius: 16px;
+    background: linear-gradient(
+      160deg,
+      rgba(59, 130, 246, 0.08) 0%,
+      ${token.colorBgElevated} 50%,
+      rgba(139, 92, 246, 0.06) 100%
+    );
+    border-radius: 20px;
+
+    @media (max-width: 640px) {
+      padding: 36px 20px;
+    }
   `,
   deployButton: css`
     height: 48px;
     font-size: 16px;
     font-weight: 600;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5);
+      transform: translateY(-1px);
+    }
   `,
   faqAnswer: css`
     color: ${token.colorTextSecondary};
@@ -50,10 +68,26 @@ const FinalCTASection = memo(() => {
   };
 
   const faqItems = [
-    { key: 'noCode', label: t('faq.noCode.q'), children: <Text className={styles.faqAnswer}>{t('faq.noCode.a')}</Text> },
-    { key: 'aiModel', label: t('faq.aiModel.q'), children: <Text className={styles.faqAnswer}>{t('faq.aiModel.a')}</Text> },
-    { key: 'limits', label: t('faq.limits.q'), children: <Text className={styles.faqAnswer}>{t('faq.limits.a')}</Text> },
-    { key: 'cancel', label: t('faq.cancel.q'), children: <Text className={styles.faqAnswer}>{t('faq.cancel.a')}</Text> },
+    {
+      children: <Text className={styles.faqAnswer}>{t('faq.noCode.a')}</Text>,
+      key: 'noCode',
+      label: t('faq.noCode.q'),
+    },
+    {
+      children: <Text className={styles.faqAnswer}>{t('faq.aiModel.a')}</Text>,
+      key: 'aiModel',
+      label: t('faq.aiModel.q'),
+    },
+    {
+      children: <Text className={styles.faqAnswer}>{t('faq.limits.a')}</Text>,
+      key: 'limits',
+      label: t('faq.limits.q'),
+    },
+    {
+      children: <Text className={styles.faqAnswer}>{t('faq.cancel.a')}</Text>,
+      key: 'cancel',
+      label: t('faq.cancel.q'),
+    },
   ];
 
   return (

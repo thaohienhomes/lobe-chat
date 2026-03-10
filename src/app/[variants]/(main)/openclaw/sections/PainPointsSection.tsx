@@ -17,6 +17,13 @@ const useStyles = createStyles(({ css, token }) => ({
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: 12px;
+    transition: all 0.25s ease;
+
+    &:hover {
+      border-color: ${token.colorBorder};
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
   `,
   grid: css`
     display: grid;
@@ -31,10 +38,11 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: 16px 24px;
     font-size: 16px;
     font-weight: 600;
-    color: ${token.colorPrimary};
+    color: #3b82f6;
     text-align: center;
-    background: ${token.colorPrimaryBg};
-    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 10px;
   `,
 }));
 

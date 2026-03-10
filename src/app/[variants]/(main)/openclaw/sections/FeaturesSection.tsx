@@ -15,10 +15,12 @@ const useStyles = createStyles(({ css, token }) => ({
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: 12px;
-    transition: border-color 0.2s;
+    transition: all 0.25s ease;
 
     &:hover {
-      border-color: ${token.colorPrimary};
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
     }
   `,
   iconWrap: css`

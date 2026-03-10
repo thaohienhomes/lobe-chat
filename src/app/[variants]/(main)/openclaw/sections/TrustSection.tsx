@@ -15,6 +15,13 @@ const useStyles = createStyles(({ css, token }) => ({
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: 12px;
+    transition: all 0.25s ease;
+
+    &:hover {
+      border-color: ${token.colorBorder};
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
   `,
   checkItem: css`
     color: ${token.colorSuccessText};

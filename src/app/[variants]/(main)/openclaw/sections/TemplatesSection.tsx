@@ -1,12 +1,11 @@
 'use client';
 
-import { BookOpen, Dumbbell, Home, ShoppingBag, Utensils, Headphones } from 'lucide-react';
+import { BookOpen, Dumbbell, Headphones, Home, ShoppingBag, Utensils, Zap } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 import { createStyles } from 'antd-style';
 import { Button, Typography } from 'antd';
-import { Zap } from 'lucide-react';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -18,10 +17,12 @@ const useStyles = createStyles(({ css, token }) => ({
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: 12px;
-    transition: border-color 0.2s;
+    transition: all 0.25s ease;
 
     &:hover {
-      border-color: ${token.colorPrimary};
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
     }
   `,
   grid: css`
@@ -35,15 +36,16 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
   iconWrap: css`
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
 
     width: 40px;
     height: 40px;
 
-    color: ${token.colorPrimary};
+    color: #3b82f6;
 
-    background: ${token.colorPrimaryBg};
+    background: rgba(59, 130, 246, 0.1);
     border-radius: 10px;
   `,
 }));

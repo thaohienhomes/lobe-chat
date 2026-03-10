@@ -7,7 +7,7 @@ import { Flexbox } from 'react-layout-kit';
 import { createStyles } from 'antd-style';
 import { Button, Segmented, Typography } from 'antd';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const useStyles = createStyles(({ css, token }) => ({
   bestBadge: css`
@@ -25,7 +25,7 @@ const useStyles = createStyles(({ css, token }) => ({
     font-weight: 600;
     color: #fff;
 
-    background: linear-gradient(135deg, ${token.colorPrimary}, ${token.colorPrimaryHover});
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
     border-radius: 20px;
   `,
   card: css`
@@ -35,7 +35,14 @@ const useStyles = createStyles(({ css, token }) => ({
     padding: 28px 24px;
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
-    border-radius: 12px;
+    border-radius: 14px;
+    transition: all 0.25s ease;
+
+    &:hover {
+      border-color: ${token.colorBorder};
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
   `,
   cardHighlight: css`
     position: relative;
@@ -43,9 +50,19 @@ const useStyles = createStyles(({ css, token }) => ({
     min-width: 250px;
     padding: 28px 24px;
     background: ${token.colorBgContainer};
-    border: 2px solid ${token.colorPrimary};
-    border-radius: 12px;
-    box-shadow: 0 0 24px ${token.colorPrimaryBg};
+    border: 2px solid rgba(59, 130, 246, 0.6);
+    border-radius: 14px;
+    box-shadow:
+      0 0 32px rgba(59, 130, 246, 0.15),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.25s ease;
+
+    &:hover {
+      box-shadow:
+        0 0 40px rgba(59, 130, 246, 0.25),
+        0 8px 24px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
+    }
   `,
   feature: css`
     color: ${token.colorTextSecondary};
@@ -70,9 +87,9 @@ const useStyles = createStyles(({ css, token }) => ({
 
     font-size: 12px;
     font-weight: 600;
-    color: ${token.colorSuccessText};
+    color: #10b981;
 
-    background: ${token.colorSuccessBg};
+    background: rgba(16, 185, 129, 0.15);
     border-radius: 4px;
   `,
   vnPrice: css`
@@ -81,7 +98,7 @@ const useStyles = createStyles(({ css, token }) => ({
     color: ${token.colorTextSecondary};
     text-align: center;
     background: ${token.colorFillQuaternary};
-    border-radius: 8px;
+    border-radius: 10px;
   `,
 }));
 
@@ -177,7 +194,9 @@ const PricingSection = memo(() => {
               <Text strong>{t(`pricing.plans.${plan.key}.name`)}</Text>
               <Flexbox align="baseline" gap={4} horizontal>
                 <span className={styles.price}>
-                  {billing === 'yearly' && plan.key !== 'free' ? plan.yearlyPrice : plan.monthlyPrice}
+                  {billing === 'yearly' && plan.key !== 'free'
+                    ? plan.yearlyPrice
+                    : plan.monthlyPrice}
                 </span>
                 <Text type="secondary">
                   {plan.key === 'free'
@@ -195,7 +214,7 @@ const PricingSection = memo(() => {
             <Flexbox gap={8}>
               {plan.features.map((feature) => (
                 <Flexbox className={styles.feature} gap={8} horizontal key={feature}>
-                  <Check size={16} />
+                  <Check size={16} style={{ color: '#10b981' }} />
                   <Text>{t(`pricing.features.${feature}`)}</Text>
                 </Flexbox>
               ))}

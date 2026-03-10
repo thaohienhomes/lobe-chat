@@ -5,8 +5,7 @@ import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 import { createStyles } from 'antd-style';
-import { Button, Input, message } from 'antd';
-import { Typography } from 'antd';
+import { Button, Input, Typography, message } from 'antd';
 
 const { Text } = Typography;
 
@@ -19,9 +18,10 @@ const useStyles = createStyles(({ css, token }) => ({
 
     padding: 12px 24px;
 
-    background: ${token.colorBgElevated};
+    background: rgba(${token.colorBgElevated === '#fff' ? '255, 255, 255' : '20, 20, 20'}, 0.85);
+    backdrop-filter: blur(12px);
     border-block-start: 1px solid ${token.colorBorderSecondary};
-    box-shadow: 0 -4px 16px ${token.colorBgLayout};
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
 
     transition: transform 0.3s ease;
   `,
@@ -54,7 +54,7 @@ const StickyBottomBar = memo<StickyBottomBarProps>(({ visible }) => {
     <div className={cx(styles.bar, visible ? styles.visible : styles.hidden)}>
       <Flexbox align="center" gap={12} horizontal justify="center">
         <Flexbox align="center" gap={6} horizontal>
-          <Bot size={18} />
+          <Bot size={18} style={{ color: '#3b82f6' }} />
           <Text strong>{t('sticky.label')}</Text>
         </Flexbox>
         <Input
