@@ -95,6 +95,58 @@ function countTokens(text: string): number {
   return Math.ceil(byteLength / 3);
 }
 
+// ============  Tool Schema Sanitization   ============ //
+
+/**
+ * Recursively sanitize a single property schema for strict providers (Groq, etc.)
+ * Removes unsupported constructs: items.enum, items.description inside arrays
+ */
+function sanitizePropertySchema(schema: any): any {
+  if (!schema || typeof schema !== 'object') return schema;
+
+  const result = { ...schema };
+
+  // For array types with items.enum, simplify to just items.type
+  // Groq doesn't support enum constraints inside array items
+  if (result.type === 'array' && result.items) {
+    const items = { ...result.items };
+    delete items.enum;
+    delete items.description;
+    result.items = items;
+  }
+
+  // Recursively handle nested object properties
+  if (result.properties) {
+    const sanitizedProps: any = {};
+    for (const [key, value] of Object.entries(result.properties)) {
+      sanitizedProps[key] = sanitizePropertySchema(value);
+    }
+    result.properties = sanitizedProps;
+  }
+
+  return result;
+}
+
+/**
+ * Sanitize tool parameter schemas for providers with strict validation (Groq).
+ * Strips unsupported JSON Schema constructs that cause "tool call validation failed" errors.
+ */
+function sanitizeToolParameters(params: any): any {
+  if (!params || typeof params !== 'object') return params;
+
+  const result = { ...params };
+
+  if (result.properties) {
+    const sanitizedProps: any = {};
+    for (const [key, value] of Object.entries(result.properties)) {
+      sanitizedProps[key] = sanitizePropertySchema(value);
+    }
+    result.properties = sanitizedProps;
+  }
+
+  return result;
+}
+
 export const POST = checkAuth(async (req: Request, { params, jwtPayload, createRuntime }) => {
   const { provider } = await params;
 
@@ -186,6 +238,19 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
     if (activeProvider !== provider) {
       console.log(`[Provider Override] ${provider} → ${activeProvider}, model: ${data.model}`);
+    }
+
+    // Sanitize tool schemas for providers with strict validation (Groq, etc.)
+    // Groq rejects items.enum arrays, nested descriptions inside array items, etc.
+    if (activeProvider === 'groq' && Array.isArray(data.tools)) {
+      data.tools = data.tools.map((tool: any) => ({
+        ...tool,
+        function: {
+          ...tool.function,
+          parameters: sanitizeToolParameters(tool.function?.parameters),
+        },
+      }));
+      console.log(`[Tool Sanitization] Sanitized ${data.tools.length} tool schemas for Groq`);
     }
 
     // ============  1.1. Init chat model   ============ //
@@ -311,13 +376,28 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
         // Sanitize messages for Gemini-based providers (require non-empty content)
         let sanitizedData = data;
+
+        // Sanitize tool schemas for strict providers during failover
+        if (targetProvider === 'groq' && Array.isArray(sanitizedData.tools)) {
+          sanitizedData = {
+            ...sanitizedData,
+            tools: sanitizedData.tools.map((tool: any) => ({
+              ...tool,
+              function: {
+                ...tool.function,
+                parameters: sanitizeToolParameters(tool.function?.parameters),
+              },
+            })),
+          };
+        }
+
         if (targetProvider === 'vercelaigateway' && targetModelId.startsWith('google/')) {
           const filteredMessages = data.messages?.filter((msg) => {
             if (typeof msg.content === 'string') return msg.content.trim().length > 0;
             if (Array.isArray(msg.content)) return msg.content.length > 0;
             return msg.content !== null && msg.content !== undefined;
           });
-          sanitizedData = { ...data, messages: filteredMessages };
+          sanitizedData = { ...sanitizedData, messages: filteredMessages };
         }
 
         const response = await currentRuntime.chat(
@@ -475,6 +555,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       const headers = new Headers(response.headers);
       headers.set('X-Pho-Provider', actualProviderUsed);
       headers.set('X-Pho-Model-ID', actualModelUsed);
+      // Ensure UTF-8 charset for Vietnamese/CJK text in streaming responses
+      headers.set('Content-Type', 'text/event-stream; charset=utf-8');
 
       return new Response(stream1, {
         headers,
@@ -541,6 +623,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       const headers = new Headers(response.headers);
       headers.set('X-Pho-Provider', actualProviderUsed);
       headers.set('X-Pho-Model-ID', actualModelUsed);
+      // Ensure UTF-8 charset for Vietnamese/CJK text in non-streaming responses
+      headers.set('Content-Type', 'application/json; charset=utf-8');
 
       return new Response(response.body, {
         headers,
