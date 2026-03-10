@@ -40,18 +40,7 @@ const Ai302: ModelProviderCard = {
       enabled: true,
       id: 'gemini-2.0-flash',
     },
-    {
-      contextWindowTokens: 200_000,
-      displayName: 'claude-3-7-sonnet-20250219',
-      enabled: true,
-      id: 'claude-3-7-sonnet-20250219',
-    },
-    {
-      contextWindowTokens: 200_000,
-      displayName: 'claude-3-7-sonnet-latest',
-      enabled: true,
-      id: 'claude-3-7-sonnet-latest',
-    },
+    // claude-3-7-sonnet entries removed (deprecated, redirected via phoGateway)
     {
       contextWindowTokens: 131_072,
       displayName: 'grok-3-beta',

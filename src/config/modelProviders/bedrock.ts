@@ -26,28 +26,7 @@ const Bedrock: ModelProviderCard = {
       tokens: 32_000,
     },
 */
-    {
-      contextWindowTokens: 200_000,
-      description:
-        'Claude 3.7 sonnet 是 Anthropic 最快的下一代模型。与 Claude 3 Haiku 相比，Claude 3.7 Sonnet 在各项技能上都有所提升，并在许多智力基准测试中超越了上一代最大的模型 Claude 3 Opus。',
-      displayName: 'Claude 3.7 Sonnet',
-      enabled: true,
-      functionCall: true,
-      id: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
-      maxOutput: 8192,
-      releasedAt: '2025-02-24',
-    },
-    {
-      contextWindowTokens: 200_000,
-      description:
-        'Claude 3.7 sonnet Extended thinking 是 Anthropic 最快的下一代模型。与 Claude 3 Haiku 相比，Claude 3.7 Sonnet 在各项技能上都有所提升，并在许多智力基准测试中超越了上一代最大的模型 Claude 3 Opus。',
-      displayName: 'Claude 3.7 Sonnet Extended thinking',
-      enabled: true,
-      functionCall: true,
-      id: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
-      maxOutput: 64_000,
-      releasedAt: '2025-02-24',
-    },
+    // claude-3-7-sonnet Bedrock entries removed (deprecated by Anthropic)
     {
       contextWindowTokens: 200_000,
       description:
