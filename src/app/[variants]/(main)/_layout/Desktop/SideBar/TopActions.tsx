@@ -1,5 +1,5 @@
 import { ActionIcon, ActionIconProps, Hotkey } from '@lobehub/ui';
-import { Compass, FolderClosed, MessageSquare, Palette, Video } from 'lucide-react';
+import { Bot, Compass, FolderClosed, MessageSquare, Palette, Video } from 'lucide-react';
 import Link from 'next/link';
 import { CSSProperties, memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +35,7 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
   const isFilesActive = tab === SidebarTabKey.Files;
   const isDiscoverActive = tab === SidebarTabKey.Discover;
   const isImageActive = tab === SidebarTabKey.Image;
+  const isOpenClawActive = tab === SidebarTabKey.OpenClaw;
 
   return (
     <Flexbox gap={8}>
@@ -98,6 +99,38 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           />
         </Link>
       )}
+      <Link aria-label={t('tab.openclaw')} href={'/openclaw'}>
+        <ActionIcon
+          active={isOpenClawActive}
+          icon={Bot}
+          size={ICON_SIZE}
+          style={
+            {
+              border: '1px solid rgba(16, 185, 129, 0.6)',
+              borderRadius: 8,
+              boxShadow: '0 0 12px 2px rgba(16, 185, 129, 0.4)',
+            } as CSSProperties
+          }
+          title={
+            <Flexbox align={'center'} gap={8} horizontal>
+              <span>{t('tab.openclaw')}</span>
+              <span
+                style={{
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  borderRadius: 4,
+                  color: '#fff',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: '1px 6px',
+                }}
+              >
+                NEW
+              </span>
+            </Flexbox>
+          }
+          tooltipProps={{ placement: 'right' }}
+        />
+      </Link>
       <a
         aria-label="Phở Studio"
         href="https://studio.pho.chat"

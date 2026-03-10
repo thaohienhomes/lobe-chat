@@ -334,6 +334,7 @@ export default {
     discover: '发现',
     files: '文件',
     me: '我',
+    openclaw: 'OpenClaw',
     setting: '设置',
   },
   telemetry: {

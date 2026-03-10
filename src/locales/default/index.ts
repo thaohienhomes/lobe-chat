@@ -19,6 +19,7 @@ import migration from './migration';
 import modelProvider from './modelProvider';
 import models from './models';
 import oauth from './oauth';
+import openclaw from './openclaw';
 import onboarding from './onboarding';
 import payment from './payment';
 import plugin from './plugin';
@@ -55,6 +56,7 @@ const resources = {
   models,
   oauth,
   onboarding,
+  openclaw,
   payment,
   plugin,
   portal,

@@ -1,0 +1,188 @@
+{
+  "faq": {
+    "aiModel": {
+      "a": "Claude, GPT-4o — 自动选择最佳模型。",
+      "q": "用什么 AI 模型？"
+    },
+    "cancel": {
+      "a": "随时取消，零取消费。",
+      "q": "可以取消吗？"
+    },
+    "limits": {
+      "a": "免费版：100条/天。升级即可无限制。",
+      "q": "有什么限制吗？"
+    },
+    "noCode": {
+      "a": "不需要。只需粘贴一个 token，你的 bot 即刻上线。",
+      "q": "需要会写代码吗？"
+    }
+  },
+  "features": {
+    "dashboard": {
+      "desc": "监控消息量、响应时间和活跃渠道。在一个地方控制你的 bot。",
+      "title": "仪表盘 — 追踪一切"
+    },
+    "multiChannel": {
+      "desc": "Telegram、WhatsApp、Slack、Discord、Email、REST API。一个 AI 大脑，全平台一致回复。",
+      "title": "多渠道 — 一个 AI，所有平台"
+    },
+    "quickDeploy": {
+      "desc": "粘贴 token，bot 即刻上线。无需代码、无需服务器、无需运维。",
+      "title": "30 秒部署"
+    },
+    "smartAI": {
+      "desc": "你的 bot 使用顶级 AI 模型。理解上下文，像人一样自然回复。",
+      "title": "智能 AI — Claude & GPT-4o 驱动"
+    },
+    "title": "为什么选择 pho.chat OpenClaw？"
+  },
+  "finalCTA": {
+    "noCreditCard": "无需信用卡。Bot 30 秒上线。",
+    "title": "立即开始 — 免费",
+    "urgency": "本周已有 2,847 个 bot 被部署。下一个可以是你的。"
+  },
+  "hero": {
+    "deployButton": "立即部署 — 永久免费",
+    "deploySuccess": "Bot 部署成功！去 Telegram 看看吧。",
+    "deployTitle": "部署免费 Telegram Bot",
+    "socialProof": "已有 2,847 个 bot 在 pho.chat 部署",
+    "subtitle": "免费部署个人 AI 助手到 Telegram。之后可添加 WhatsApp、Slack 等。",
+    "title": "你的 AI Bot — 30 秒上线",
+    "tokenHint": "在 Telegram 找 @BotFather 2 分钟即可获取 token",
+    "tokenLabel": "粘贴你的 Telegram Bot Token：",
+    "tokenRequired": "请输入你的 Telegram Bot Token"
+  },
+  "meta": {
+    "description": "30 秒将你的 AI 聊天机器人部署到 Telegram、WhatsApp、Slack 等平台。永久免费。由 {{appName}} 提供支持。",
+    "title": "OpenClaw — AI Bot 部署"
+  },
+  "painPoints": {
+    "complexSetup": {
+      "desc": "试过 ChatGPT API 但代码太复杂，不知从何下手？",
+      "title": "设置复杂"
+    },
+    "security": {
+      "desc": "担心使用第三方 AI 时客户数据的安全？",
+      "title": "安全顾虑"
+    },
+    "solution": "pho.chat OpenClaw 解决所有这些问题。",
+    "support247": {
+      "desc": "24/7 回复客户消息？精疲力竭，下班后错过客户。",
+      "title": "24/7 客服疲劳"
+    },
+    "title": "听起来很熟悉？",
+    "wantAI": {
+      "desc": "想用 AI 但担心太复杂、太贵？",
+      "title": "AI 看起来很难"
+    }
+  },
+  "pricing": {
+    "deployFree": "部署免费 Bot",
+    "features": {
+      "autoScaling": "自动扩缩容",
+      "customPrompt": "自定义系统提示词",
+      "defaultAI": "默认 AI 模型",
+      "hundredMsg": "100 条消息/天",
+      "managedHosting": "托管服务",
+      "noWatermark": "无水印",
+      "oneTelegram": "1 个 Telegram bot",
+      "prioritySupport": "优先支持",
+      "selfHost": "可自托管",
+      "sla": "99.9% 可用性 SLA",
+      "thousandMsg": "1,000 条消息/天",
+      "threeChannels": "3 个渠道",
+      "unlimitedChannels": "无限渠道",
+      "unlimitedMsg": "无限消息"
+    },
+    "forever": "永久",
+    "month": "月",
+    "monthly": "月付",
+    "paymentMethods": "支持 Visa、MasterCard、Momo、VietQR、银行转账",
+    "plans": {
+      "free": { "name": "免费版" },
+      "premium": { "name": "高级版" },
+      "starter": { "name": "入门版" }
+    },
+    "startTrial": "开始 14 天免费试用",
+    "title": "选择你的方案",
+    "trialNote": "所有付费方案均含 14 天免费试用。无需信用卡。",
+    "year": "年",
+    "yearly": "年付"
+  },
+  "social": {
+    "stats": {
+      "botsLive": "在线 Bot 数",
+      "messagesProcessed": "处理消息数",
+      "uptime": "在线率"
+    },
+    "testimonial1": {
+      "author": "— Linh，店主，胡志明市",
+      "text": "2 分钟为我的服装店设置了 Telegram bot。现在 bot 24/7 回复客户，我睡得更好了！"
+    },
+    "testimonial2": {
+      "author": "— Minh，创业者，河内",
+      "text": "我们用高级版连接了 4 个渠道。平均响应时间 1.2 秒。客户都很喜欢。"
+    },
+    "title": "社区信赖"
+  },
+  "sticky": {
+    "deploy": "部署",
+    "label": "免费部署 AI Bot",
+    "placeholder": "粘贴 Token..."
+  },
+  "templates": {
+    "coachBot": {
+      "desc": "安排锻炼，追踪进度。",
+      "name": "教练 Bot"
+    },
+    "csAgent": {
+      "desc": "处理工单、FAQ、升级。",
+      "name": "客服 Agent"
+    },
+    "deployFree": "免费部署",
+    "fnbOrderBot": {
+      "desc": "通过聊天接单、确认、追加销售。",
+      "name": "餐饮下单 Bot"
+    },
+    "realEstate": {
+      "desc": "房产咨询，按条件筛选，预约看房。",
+      "name": "房产助手"
+    },
+    "shopAssistant": {
+      "desc": "回答产品、价格、订单问题。",
+      "name": "店铺助手"
+    },
+    "studyBuddy": {
+      "desc": "解题、总结课程、备考。",
+      "name": "学习伙伴"
+    },
+    "title": "现成模板 — 一键部署"
+  },
+  "trust": {
+    "easyUse": {
+      "community": "社区 + 完整文档",
+      "question": "我不会写代码，能用吗？",
+      "templates": "每个场景都有现成模板",
+      "viSupport": "中文支持，直观 UI",
+      "zeroCode": "零代码 — 只需粘贴一个 token"
+    },
+    "pricing": {
+      "cancelAnytime": "随时取消，无承诺",
+      "clearPricing": "价格透明：$5/月 或 $19/月",
+      "freeTier": "免费版：$0，永久免费，无需绑卡",
+      "freeTrial": "所有付费方案均含 14 天免费试用",
+      "noHiddenFees": "无设置费，无隐藏收费",
+      "question": "有隐藏费用吗？"
+    },
+    "security": {
+      "encryption": "所有渠道 token 端到端加密",
+      "gdpr": "GDPR 合规 — 随时删除数据",
+      "noStorage": "不存储聊天内容 — 仅元数据",
+      "openSource": "开源核心 (MIT) — 代码透明",
+      "question": "我的数据安全吗？",
+      "selfHost": "自托管选项：你保留 100% 数据",
+      "soc2": "SOC 2 合规基础设施"
+    },
+    "title": "安全与隐私"
+  }
+}
