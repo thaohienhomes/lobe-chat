@@ -15,6 +15,7 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
   const { t } = await translation('openclaw', locale);
   return metadataModule.generate({
     description: t('meta.description', { appName: BRANDING_NAME }),
+    locale,
     title: t('meta.title'),
     url: '/openclaw',
   });
@@ -25,6 +26,7 @@ const OpenClawPage = async (props: DynamicLayoutProps) => {
   const { t } = await translation('openclaw', locale);
   const ld = ldModule.generate({
     description: t('meta.description', { appName: BRANDING_NAME }),
+    locale,
     title: t('meta.title'),
     url: '/openclaw',
   });

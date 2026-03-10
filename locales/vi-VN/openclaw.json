@@ -1,0 +1,189 @@
+{
+  "faq": {
+    "aiModel": {
+      "a": "Claude, GPT-4o — tự động chọn model tốt nhất cho nhu cầu của bạn.",
+      "q": "Dùng model AI nào?"
+    },
+    "cancel": {
+      "a": "Bất cứ lúc nào, không phí huỷ.",
+      "q": "Có thể huỷ không?"
+    },
+    "limits": {
+      "a": "Miễn phí: 100 tin nhắn/ngày. Nâng cấp để không giới hạn.",
+      "q": "Có giới hạn gì không?"
+    },
+    "noCode": {
+      "a": "Không. Chỉ cần dán một token là bot hoạt động ngay.",
+      "q": "Tôi có cần biết lập trình không?"
+    }
+  },
+  "features": {
+    "dashboard": {
+      "desc": "Theo dõi tin nhắn, thời gian phản hồi và các kênh đang hoạt động. Quản lý bot từ một nơi duy nhất.",
+      "title": "Dashboard — Theo Dõi Mọi Thứ"
+    },
+    "multiChannel": {
+      "desc": "Telegram, WhatsApp, Slack, Discord, Email, REST API. Một bộ não AI, phản hồi nhất quán trên mọi nền tảng.",
+      "title": "Đa Kênh — Một AI, Mọi Nền Tảng"
+    },
+    "quickDeploy": {
+      "desc": "Dán token, bot hoạt động ngay. Không cần code, không cần server, không cần DevOps.",
+      "title": "Triển Khai 30 Giây"
+    },
+    "smartAI": {
+      "desc": "Bot của bạn sử dụng model AI hàng đầu. Hiểu ngữ cảnh, trả lời tự nhiên như người thật. Hỗ trợ tiếng Việt hoàn hảo.",
+      "title": "AI Thông Minh — Chạy bằng Claude & GPT-4o"
+    },
+    "title": "Tại sao chọn pho.chat OpenClaw?"
+  },
+  "finalCTA": {
+    "noCreditCard": "Không cần thẻ tín dụng. Bot hoạt động trong 30 giây.",
+    "title": "Bắt Đầu Ngay — Miễn Phí",
+    "urgency": "2.847 bot đã được triển khai tuần này. Bot tiếp theo có thể là của bạn."
+  },
+  "hero": {
+    "deployButton": "Triển Khai Ngay — Miễn Phí Mãi Mãi",
+    "deploySuccess": "Bot đã triển khai thành công! Kiểm tra Telegram của bạn.",
+    "deployTitle": "Triển Khai Bot Telegram Miễn Phí",
+    "socialProof": "2.847 bot đã được triển khai trên pho.chat",
+    "subtitle": "Triển khai trợ lý AI cá nhân lên Telegram MIỄN PHÍ. Thêm WhatsApp, Slack và nhiều hơn sau.",
+    "title": "Bot AI Của Bạn — Hoạt Động Trong 30 Giây",
+    "tokenHint": "Lấy token từ @BotFather trên Telegram trong 2 phút",
+    "tokenLabel": "Dán Telegram Bot Token của bạn:",
+    "tokenRequired": "Vui lòng nhập Telegram Bot Token"
+  },
+  "meta": {
+    "description": "Triển khai chatbot AI của riêng bạn lên Telegram, WhatsApp, Slack và nhiều nền tảng khác trong 30 giây. Miễn phí mãi mãi. Được hỗ trợ bởi {{appName}}.",
+    "title": "OpenClaw — Triển Khai Bot AI"
+  },
+  "painPoints": {
+    "complexSetup": {
+      "desc": "Đã thử ChatGPT API nhưng code phức tạp, không biết bắt đầu từ đâu?",
+      "title": "Cài Đặt Phức Tạp"
+    },
+    "security": {
+      "desc": "Lo lắng về bảo mật dữ liệu khách hàng khi dùng AI bên thứ ba?",
+      "title": "Lo Ngại Bảo Mật"
+    },
+    "solution": "pho.chat OpenClaw giải quyết TẤT CẢ những vấn đề này.",
+    "support247": {
+      "desc": "Trả lời tin nhắn khách 24/7? Kiệt sức, bỏ lỡ khách ngoài giờ làm việc.",
+      "title": "Mệt Mỏi Hỗ Trợ 24/7"
+    },
+    "title": "Nghe quen không?",
+    "wantAI": {
+      "desc": "Muốn dùng AI nhưng sợ phức tạp và tốn kém?",
+      "title": "AI Có Vẻ Khó"
+    }
+  },
+  "pricing": {
+    "deployFree": "Triển Khai Bot Miễn Phí",
+    "features": {
+      "autoScaling": "Tự động mở rộng",
+      "customPrompt": "Tuỳ chỉnh system prompt",
+      "defaultAI": "Model AI mặc định",
+      "hundredMsg": "100 tin nhắn/ngày",
+      "managedHosting": "Hosting được quản lý",
+      "noWatermark": "Không watermark",
+      "oneTelegram": "1 bot Telegram",
+      "watermark": "Có watermark",
+      "prioritySupport": "Hỗ trợ ưu tiên",
+      "selfHost": "Có thể tự host",
+      "sla": "SLA uptime 99.9%",
+      "thousandMsg": "1.000 tin nhắn/ngày",
+      "threeChannels": "3 kênh",
+      "unlimitedChannels": "Không giới hạn kênh",
+      "unlimitedMsg": "Không giới hạn tin nhắn"
+    },
+    "forever": "mãi mãi",
+    "month": "tháng",
+    "monthly": "Theo Tháng",
+    "paymentMethods": "Visa, MasterCard, Momo, VietQR, Chuyển khoản ngân hàng",
+    "plans": {
+      "free": { "name": "MIỄN PHÍ" },
+      "premium": { "name": "CAO CẤP" },
+      "starter": { "name": "KHỞI ĐẦU" }
+    },
+    "startTrial": "Dùng Thử 14 Ngày Miễn Phí",
+    "title": "Chọn Gói Của Bạn",
+    "trialNote": "Tất cả gói trả phí đều có 14 ngày dùng thử miễn phí. Không cần thẻ tín dụng.",
+    "year": "năm",
+    "yearly": "Theo Năm"
+  },
+  "social": {
+    "stats": {
+      "botsLive": "Bot Đang Hoạt Động",
+      "messagesProcessed": "Tin Nhắn Đã Xử Lý",
+      "uptime": "Uptime"
+    },
+    "testimonial1": {
+      "author": "— Linh, chủ shop, TP.HCM",
+      "text": "Setup bot Telegram cho shop quần áo trong 2 phút. Giờ bot trả lời khách 24/7, mình ngủ ngon hơn hẳn!"
+    },
+    "testimonial2": {
+      "author": "— Minh, founder startup, Hà Nội",
+      "text": "Team mình dùng gói Cao Cấp với 4 kênh kết nối. Thời gian phản hồi trung bình 1.2 giây. Khách hàng rất thích."
+    },
+    "title": "Được Cộng Đồng Tin Tưởng"
+  },
+  "sticky": {
+    "deploy": "Triển Khai",
+    "label": "Triển Khai Bot AI Miễn Phí",
+    "placeholder": "Dán Token..."
+  },
+  "templates": {
+    "coachBot": {
+      "desc": "Lên lịch tập luyện, theo dõi tiến độ.",
+      "name": "Bot Huấn Luyện"
+    },
+    "csAgent": {
+      "desc": "Xử lý ticket, FAQ, chuyển tiếp.",
+      "name": "Bot Chăm Sóc Khách Hàng"
+    },
+    "deployFree": "Triển Khai Miễn Phí",
+    "fnbOrderBot": {
+      "desc": "Nhận đơn qua chat, xác nhận, gợi ý thêm.",
+      "name": "Bot Đặt Đồ Ăn"
+    },
+    "realEstate": {
+      "desc": "Tư vấn bất động sản, lọc theo tiêu chí, đặt lịch xem nhà.",
+      "name": "Trợ Lý Bất Động Sản"
+    },
+    "shopAssistant": {
+      "desc": "Trả lời câu hỏi về sản phẩm, giá cả, đơn hàng.",
+      "name": "Trợ Lý Cửa Hàng"
+    },
+    "studyBuddy": {
+      "desc": "Giải bài tập, tóm tắt bài giảng, ôn thi.",
+      "name": "Bạn Học Tập"
+    },
+    "title": "Mẫu Có Sẵn — Triển Khai 1 Click"
+  },
+  "trust": {
+    "easyUse": {
+      "community": "Cộng đồng + tài liệu đầy đủ",
+      "question": "Tôi không biết code, có dùng được không?",
+      "templates": "Mẫu có sẵn cho từng trường hợp sử dụng",
+      "viSupport": "Hỗ trợ tiếng Việt, giao diện trực quan",
+      "zeroCode": "Không cần code — chỉ cần dán một token"
+    },
+    "pricing": {
+      "cancelAnytime": "Huỷ bất cứ lúc nào, không ràng buộc",
+      "clearPricing": "Giá minh bạch: $5/tháng hoặc $19/tháng",
+      "freeTier": "Gói miễn phí: $0, miễn phí mãi mãi, không cần thẻ",
+      "freeTrial": "14 ngày dùng thử miễn phí cho tất cả gói trả phí",
+      "noHiddenFees": "Không phí cài đặt, không phí ẩn",
+      "question": "Có phí ẩn không?"
+    },
+    "security": {
+      "encryption": "Mã hoá end-to-end cho tất cả token kênh",
+      "gdpr": "Tuân thủ GDPR — xoá dữ liệu bất cứ lúc nào",
+      "noStorage": "Không lưu trữ nội dung chat — chỉ metadata",
+      "openSource": "Mã nguồn mở (MIT) — code minh bạch",
+      "question": "Dữ liệu của tôi có an toàn không?",
+      "selfHost": "Tùy chọn tự host: bạn giữ 100% dữ liệu",
+      "soc2": "Hạ tầng tuân thủ SOC 2"
+    },
+    "title": "Bảo Mật & Quyền Riêng Tư"
+  }
+}
