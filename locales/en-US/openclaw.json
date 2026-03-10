@@ -1,0 +1,195 @@
+{
+  "faq": {
+    "aiModel": {
+      "a": "Claude, GPT-4o — auto-selects the best model for your use case.",
+      "q": "Which AI model does it use?"
+    },
+    "cancel": {
+      "a": "Anytime, zero cancellation fee.",
+      "q": "Can I cancel?"
+    },
+    "limits": {
+      "a": "Free: 100 messages/day. Upgrade for unlimited.",
+      "q": "Are there any limits?"
+    },
+    "noCode": {
+      "a": "No. Just paste one token and your bot is live.",
+      "q": "Do I need to know how to code?"
+    }
+  },
+  "features": {
+    "dashboard": {
+      "desc": "Monitor messages, response time, and active channels. Control your bot from one place.",
+      "title": "Dashboard — Track Everything"
+    },
+    "multiChannel": {
+      "desc": "Telegram, WhatsApp, Slack, Discord, Email, REST API. One AI brain, consistent responses everywhere.",
+      "title": "Multi-Channel — One AI, Every Platform"
+    },
+    "quickDeploy": {
+      "desc": "Paste token, bot is live. No code, no server, no DevOps.",
+      "title": "30-Second Deploy"
+    },
+    "smartAI": {
+      "desc": "Your bot uses top-tier AI models. Understands context, responds naturally like a human. Perfect Vietnamese support.",
+      "title": "Smart AI — Powered by Claude & GPT-4o"
+    },
+    "title": "Why choose pho.chat OpenClaw?"
+  },
+  "finalCTA": {
+    "noCreditCard": "No credit card required. Bot live in 30 seconds.",
+    "title": "Start Now — Free",
+    "urgency": "2,847 bots deployed this week. Yours could be next."
+  },
+  "hero": {
+    "deployButton": "Deploy Now — Free Forever",
+    "deploySuccess": "Bot deployed successfully! Check your Telegram.",
+    "deployTitle": "Deploy Free Telegram Bot",
+    "socialProof": "2,847 bots already deployed on pho.chat",
+    "subtitle": "Deploy a personal AI assistant to Telegram for FREE. Add WhatsApp, Slack & more later.",
+    "title": "Your AI Bot — Live in 30 Seconds",
+    "tokenHint": "Get token from @BotFather on Telegram in 2 minutes",
+    "tokenLabel": "Paste your Telegram Bot Token:",
+    "tokenRequired": "Please enter your Telegram Bot Token"
+  },
+  "meta": {
+    "description": "Deploy your own AI chatbot to Telegram, WhatsApp, Slack & more in 30 seconds. Free forever. Powered by {{appName}}.",
+    "title": "OpenClaw — AI Bot Deployment"
+  },
+  "painPoints": {
+    "complexSetup": {
+      "desc": "Tried ChatGPT API but the code is complex, no idea where to start?",
+      "title": "Complex Setup"
+    },
+    "security": {
+      "desc": "Worried about customer data security when using third-party AI?",
+      "title": "Security Concerns"
+    },
+    "solution": "pho.chat OpenClaw solves ALL of these problems.",
+    "support247": {
+      "desc": "Answering customer messages 24/7? Exhausted, missing customers after hours.",
+      "title": "24/7 Support Fatigue"
+    },
+    "title": "Sound familiar?",
+    "wantAI": {
+      "desc": "Want to use AI but afraid it is too complex and expensive?",
+      "title": "AI Seems Hard"
+    }
+  },
+  "pricing": {
+    "deployFree": "Deploy Free Bot",
+    "features": {
+      "autoScaling": "Auto-scaling",
+      "customPrompt": "Custom system prompt",
+      "defaultAI": "Default AI model",
+      "hundredMsg": "100 messages/day",
+      "managedHosting": "Managed hosting",
+      "noWatermark": "No watermark",
+      "oneTelegram": "1 Telegram bot",
+      "prioritySupport": "Priority support",
+      "selfHost": "Self-host available",
+      "sla": "99.9% uptime SLA",
+      "thousandMsg": "1,000 messages/day",
+      "threeChannels": "3 channels",
+      "unlimitedChannels": "Unlimited channels",
+      "unlimitedMsg": "Unlimited messages",
+      "watermark": "Watermark"
+    },
+    "forever": "forever",
+    "month": "mo",
+    "monthly": "Monthly",
+    "paymentMethods": "Visa, MasterCard, Momo, VietQR, Bank Transfer",
+    "plans": {
+      "free": {
+        "name": "FREE"
+      },
+      "premium": {
+        "name": "PREMIUM"
+      },
+      "starter": {
+        "name": "STARTER"
+      }
+    },
+    "startTrial": "Start Free 14-Day Trial",
+    "title": "Choose Your Plan",
+    "trialNote": "All paid plans include a 14-day free trial. No credit card required.",
+    "year": "year",
+    "yearly": "Yearly"
+  },
+  "social": {
+    "stats": {
+      "botsLive": "Bots Live",
+      "messagesProcessed": "Messages Processed",
+      "uptime": "Uptime"
+    },
+    "testimonial1": {
+      "author": "— Linh, shop owner, HCM",
+      "text": "Set up a Telegram bot for my clothing shop in 2 minutes. Now the bot answers customers 24/7, I sleep better!"
+    },
+    "testimonial2": {
+      "author": "— Minh, startup founder, HN",
+      "text": "We use Premium with 4 channels connected. Average response time 1.2s. Customers love it."
+    },
+    "title": "Trusted by the Community"
+  },
+  "sticky": {
+    "deploy": "Deploy",
+    "label": "Deploy AI Bot Free",
+    "placeholder": "Paste Token..."
+  },
+  "templates": {
+    "coachBot": {
+      "desc": "Schedule workouts, track progress.",
+      "name": "Coach Bot"
+    },
+    "csAgent": {
+      "desc": "Handle tickets, FAQ, escalation.",
+      "name": "CS Agent"
+    },
+    "deployFree": "Deploy Free",
+    "fnbOrderBot": {
+      "desc": "Take orders via chat, confirm, upsell.",
+      "name": "F&B Order Bot"
+    },
+    "realEstate": {
+      "desc": "Property consultation, filter by criteria, schedule viewings.",
+      "name": "Real Estate Assistant"
+    },
+    "shopAssistant": {
+      "desc": "Answer questions about products, pricing, orders.",
+      "name": "Shop Assistant"
+    },
+    "studyBuddy": {
+      "desc": "Solve problems, summarize lectures, exam prep.",
+      "name": "Study Buddy"
+    },
+    "title": "Ready-Made Templates — 1-Click Deploy"
+  },
+  "trust": {
+    "easyUse": {
+      "community": "Community + comprehensive docs",
+      "question": "I do not know how to code, can I use it?",
+      "templates": "Ready-made templates for each use case",
+      "viSupport": "Vietnamese support, intuitive UI",
+      "zeroCode": "Zero code — just paste one token"
+    },
+    "pricing": {
+      "cancelAnytime": "Cancel anytime, no commitment",
+      "clearPricing": "Clear pricing: $5/mo or $19/mo",
+      "freeTier": "Free tier: $0, free forever, no card needed",
+      "freeTrial": "14-day free trial for all paid plans",
+      "noHiddenFees": "No setup fees, no hidden charges",
+      "question": "Are there hidden fees?"
+    },
+    "security": {
+      "encryption": "End-to-end encryption for all channel tokens",
+      "gdpr": "GDPR ready — delete data anytime",
+      "noStorage": "No chat content storage — metadata only",
+      "openSource": "Open-source core (MIT) — transparent code",
+      "question": "Is my data safe?",
+      "selfHost": "Self-host option: you keep 100% of data",
+      "soc2": "SOC 2 compliant infrastructure"
+    },
+    "title": "Security & Privacy"
+  }
+}
