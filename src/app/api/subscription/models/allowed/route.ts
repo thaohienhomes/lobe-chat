@@ -4,9 +4,13 @@
  *
  * GET /api/subscription/models/allowed - Get allowed models for current user
  */
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
+import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
+import { PLAN_MODEL_ACCESS, getAllowedTiersForPlan } from '@/config/pricing';
+import { subscriptions } from '@/database/schemas/billing';
+import { serverDB } from '@/database/server';
 import { pino } from '@/libs/logger';
 import { subscriptionModelAccessService } from '@/services/subscription/modelAccess';
 
@@ -57,7 +61,6 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
 
     // If no user, return default free tier models
     if (!userId) {
-      const { PLAN_MODEL_ACCESS, getAllowedTiersForPlan } = await import('@/config/pricing');
       const planCode = 'vn_free';
 
       return NextResponse.json({
@@ -80,20 +83,16 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
       'Fetching allowed models for user',
     );
 
-    // Get allowed models for user
-    const allowedModels = await subscriptionModelAccessService.getAllowedModelsForUser(userId);
-    const defaultModel = await subscriptionModelAccessService.getDefaultModelForUser(userId);
-
-    // Get user's current subscription to determine plan
-    const { serverDB } = await import('@/database/server');
-    const { subscriptions } = await import('@/database/schemas/billing');
-    const { eq, and } = await import('drizzle-orm');
-
+    // Fetch allowed models, default model, and subscriptions in parallel
     const db = await serverDB;
-    const allSubscriptions = await db
-      .select()
-      .from(subscriptions)
-      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')));
+    const [allowedModels, defaultModel, allSubscriptions] = await Promise.all([
+      subscriptionModelAccessService.getAllowedModelsForUser(userId),
+      subscriptionModelAccessService.getDefaultModelForUser(userId),
+      db
+        .select()
+        .from(subscriptions)
+        .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active'))),
+    ]);
 
     // Prioritize paid plans over free plan
     const freePlans = new Set(['free', 'trial']);
@@ -114,7 +113,6 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
     const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter', 'vn_free', 'gl_starter']);
     if (FREE_PLAN_IDS.has(planCode.toLowerCase())) {
       try {
-        const { clerkClient } = await import('@clerk/nextjs/server');
         const client = await clerkClient();
         const clerkUser = await client.users.getUser(userId);
         const clerkPlanId = (clerkUser.publicMetadata as any)?.planId;
@@ -127,7 +125,6 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
     }
 
     // Get plan details
-    const { PLAN_MODEL_ACCESS, getAllowedTiersForPlan } = await import('@/config/pricing');
     const planAccess = PLAN_MODEL_ACCESS[planCode];
     const allowedTiers = getAllowedTiersForPlan(planCode);
 
@@ -143,7 +140,7 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
       'Successfully fetched allowed models for user',
     );
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       data: {
         allowedModels,
         allowedTiers,
@@ -154,6 +151,11 @@ export async function GET(): Promise<NextResponse<AllowedModelsResponse>> {
       },
       success: true,
     });
+
+    // Cache for 5 minutes on client, allow stale-while-revalidate for 10 minutes
+    response.headers.set('Cache-Control', 'private, max-age=300, stale-while-revalidate=600');
+
+    return response;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 

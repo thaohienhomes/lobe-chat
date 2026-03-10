@@ -2,7 +2,7 @@ import { ModelIcon } from '@lobehub/icons';
 import { Popover } from 'antd';
 import { createStyles, useThemeMode } from 'antd-style';
 import { Eye, Plug, Search } from 'lucide-react';
-import { type ReactNode, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getModelTier } from '@/config/pricing';
@@ -13,6 +13,7 @@ import {
   type TierGroup,
   useEnabledChatModels,
 } from '@/hooks/useEnabledChatModels';
+import { useModelAccess } from '@/hooks/useModelAccess';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
 
@@ -47,31 +48,6 @@ const TIER = {
     quotaKey: 'ModelSwitchPanel.quotaHint' as const,
   },
 } as const;
-
-/* ──────────── Model-access hook ──────────── */
-const useModelAccess = () => {
-  const [allowed, setAllowed] = useState<number[]>([1]);
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await fetch('/api/subscription/models/allowed');
-        if (r.ok) {
-          const d = await r.json();
-          if (d.success && d.data) setAllowed(d.data.allowedTiers || [1]);
-        }
-      } catch {
-        /* default [1] */
-      }
-    })();
-  }, []);
-  return useCallback(
-    (id: string) => {
-      const tier = id.toLowerCase().includes('auto') ? 0 : getModelTier(id);
-      return tier === 0 || allowed.includes(tier);
-    },
-    [allowed],
-  );
-};
 
 /* ──────────── Helpers ──────────── */
 const ctxLabel = (n?: number) =>
@@ -482,7 +458,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
   const model = useAgentStore((s) => agentSelectors.currentAgentModel(s));
   const updateAgentConfig = useAgentStore((s) => s.updateAgentConfig);
   const tiers = useEnabledChatModels() as TierGroup[];
-  const canUse = useModelAccess();
+  const { canUseTier: canUse } = useModelAccess();
   const [q, setQ] = useState('');
 
   /* ── internal open state ── */

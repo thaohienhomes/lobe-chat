@@ -58,6 +58,11 @@ const applyRecommendations = async (selections: RecommendationSelections) => {
             const bundled = getBundledPluginById(pluginId);
             if (bundled) plugin = bundled;
           }
+          // Skip builtin tools — they are already registered, no install needed
+          if (!plugin) {
+            const builtinTool = toolState.builtinTools?.find((t) => t.identifier === pluginId);
+            if (builtinTool) return null;
+          }
           if (!plugin) {
             console.warn(`Plugin not found: ${pluginId}`);
             return null;
@@ -185,7 +190,9 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
       const { getValidModelIds } = await import('@/config/modelCatalog');
       const validIds = getValidModelIds();
       if (selections.defaultModel && !validIds.includes(selections.defaultModel)) {
-        console.warn(`[Onboarding] Model "${selections.defaultModel}" not in catalog, falling back`);
+        console.warn(
+          `[Onboarding] Model "${selections.defaultModel}" not in catalog, falling back`,
+        );
         selections.defaultModel = validIds[0]; // fallback to first available
       }
 
@@ -264,10 +271,7 @@ const OnboardingModal = memo<OnboardingModalProps>(({ open, onComplete }) => {
             />
           )}
           {step === 'tips' && (
-            <WelcomeTips
-              loading={isSubmitting}
-              onComplete={handleTipsComplete}
-            />
+            <WelcomeTips loading={isSubmitting} onComplete={handleTipsComplete} />
           )}
         </>
       )}

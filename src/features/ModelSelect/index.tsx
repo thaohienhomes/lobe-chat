@@ -2,13 +2,13 @@ import { Select, type SelectProps } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { ModelItemRender, ProviderItemRender, TAG_CLASSNAME } from '@/components/ModelSelect';
-import { getModelTier } from '@/config/pricing';
 import { useEnabledChatModels } from '@/hooks/useEnabledChatModels';
+import { useModelAccess } from '@/hooks/useModelAccess';
 import { usePricingGeo } from '@/hooks/usePricingGeo';
 import { useUserStore } from '@/store/user';
 import { EnabledProviderWithModels } from '@/types/aiProvider';
@@ -123,65 +123,6 @@ interface ModelOption {
   provider: string;
   value: string;
 }
-
-/**
- * Hook to check if user can access a specific model based on subscription tier
- */
-const useModelAccess = () => {
-  const [allowedTiers, setAllowedTiers] = useState<number[]>([1]);
-  const [loading, setLoading] = useState(true);
-  const [isGuest, setIsGuest] = useState(false);
-
-  useEffect(() => {
-    const checkModelAccess = async () => {
-      try {
-        const response = await fetch('/api/subscription/models/allowed');
-
-        if (response.status === 401) {
-          setAllowedTiers([1]);
-          setIsGuest(true);
-          setLoading(false);
-          return;
-        }
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            setAllowedTiers(data.data.allowedTiers || [1]);
-            setIsGuest(false);
-          }
-        } else {
-          setAllowedTiers([1]);
-          setIsGuest(true);
-        }
-      } catch {
-        setAllowedTiers([1]);
-        setIsGuest(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkModelAccess();
-  }, []);
-
-  const canUseModel = useCallback(
-    (modelId: string) => {
-      if (modelId.toLowerCase().includes('auto')) {
-        return allowedTiers.includes(2);
-      }
-      const tier = getModelTier(modelId);
-      return allowedTiers.includes(tier);
-    },
-    [allowedTiers],
-  );
-
-  const needsUpgrade = useMemo(() => {
-    return isGuest || (allowedTiers.length === 1 && allowedTiers[0] === 1);
-  }, [allowedTiers, isGuest]);
-
-  return { allowedTiers, canUseModel, isGuest, loading, needsUpgrade };
-};
 
 /**
  * Upgrade Banner Component

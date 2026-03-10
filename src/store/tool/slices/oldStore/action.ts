@@ -122,10 +122,21 @@ export const createPluginStoreSlice: StateCreator<
       const bundledPlugin = getBundledPluginById(name);
       if (bundledPlugin) {
         plugin = bundledPlugin;
-      } else {
-        console.warn(`Plugin not found: ${name}`);
+      }
+    }
+
+    // Fallback to builtin tools (lobe-artifacts, lobe-slides, pho-scientific-skills, etc.)
+    if (!plugin) {
+      const builtinTool = get().builtinTools.find((t) => t.identifier === name);
+      if (builtinTool) {
+        // Builtin tools are already registered — no installation needed
         return;
       }
+    }
+
+    if (!plugin) {
+      console.warn(`Plugin not found: ${name}`);
+      return;
     }
 
     const { updateInstallLoadingState, refreshPlugins } = get();

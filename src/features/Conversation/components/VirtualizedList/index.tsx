@@ -20,7 +20,7 @@ interface VirtualizedListProps {
 
 const List = forwardRef(({ ...props }, ref) => {
   return (
-    <Flexbox>
+    <Flexbox height={'100%'} style={{ minHeight: 0 }}>
       <WideScreenContainer id={'chatlist-list'} ref={ref} {...props} />
     </Flexbox>
   );
