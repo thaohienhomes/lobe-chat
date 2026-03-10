@@ -140,6 +140,7 @@
     },
     "waitingForMore": "Có thêm mô hình đang <1>được lên kế hoạch tích hợp</1>, hãy chờ đợi"
   },
+  "medicalBadge": "MEDICAL PIONEER 🏥",
   "plugin": {
     "addMCPPlugin": "Thêm plugin MCP",
     "addTooltip": "Thêm tiện ích",
@@ -154,6 +155,16 @@
       "tooltip": "Cấu hình tiện ích"
     },
     "store": "Cửa hàng tiện ích"
+  },
+  "promoCode": {
+    "activate": "Kích hoạt",
+    "activated": "Đã kích hoạt Phở Medical Beta 🏥",
+    "activating": "Đang kích hoạt...",
+    "description": "Nhập mã khuyến mãi để mở khóa các tính năng đặc biệt.",
+    "error": "Mã không hợp lệ hoặc đã hết hạn",
+    "placeholder": "Nhập mã của bạn (ví dụ: PHO-MED-2026-BETA)",
+    "success": "Chân thành cảm ơn Medical Pioneer! Hệ thống đang làm mới...",
+    "title": "Mã khuyến mãi"
   },
   "settingAgent": {
     "avatar": {
@@ -593,17 +604,6 @@
     "overview": {
       "title": "Tổng quan sử dụng"
     },
-    "title": "Sử dụng",
-    "promoCode": {
-      "activate": "Kích hoạt",
-      "activated": "Đã kích hoạt Phở Medical Beta 🏥",
-      "activating": "Đang kích hoạt...",
-      "description": "Nhập mã khuyến mãi để mở khóa các tính năng đặc biệt.",
-      "error": "Mã không hợp lệ hoặc đã hết hạn",
-      "placeholder": "Nhập mã của bạn (ví dụ: PHO-MED-2026-BETA)",
-      "success": "Chân thành cảm ơn Medical Pioneer! Hệ thống đang làm mới...",
-      "title": "Mã khuyến mãi"
-    },
-    "medicalBadge": "MEDICAL PIONEER 🏥"
+    "title": "Sử dụng"
   }
 }

@@ -12,6 +12,13 @@ interface AllowedModelsData {
   planCode: string;
 }
 
+interface UsageStatsData {
+  dailyTier2Count: number;
+  dailyTier2Limit: number;
+  dailyTier3Count: number;
+  dailyTier3Limit: number;
+}
+
 const fetchModelAccess = async (): Promise<AllowedModelsData | null> => {
   const response = await fetch('/api/subscription/models/allowed');
   if (!response.ok) return null;
@@ -20,15 +27,33 @@ const fetchModelAccess = async (): Promise<AllowedModelsData | null> => {
   return null;
 };
 
+const fetchUsageStats = async (): Promise<UsageStatsData | null> => {
+  try {
+    const response = await fetch('/api/subscription/usage-stats');
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Shared hook for model access checks.
  * Uses SWR to deduplicate and cache the /api/subscription/models/allowed call
  * across all components that mount simultaneously.
+ *
+ * Also fetches daily usage stats to enforce daily quota limits client-side.
  */
 export const useModelAccess = () => {
   const { data, isLoading } = useSWR('model-access-allowed', fetchModelAccess, {
     dedupingInterval: 300_000, // 5 minutes — don't refetch within this window
     revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
+
+  const { data: usageStats } = useSWR('model-access-usage-stats', fetchUsageStats, {
+    dedupingInterval: 60_000, // 1 minute — usage changes more frequently
+    revalidateOnFocus: true,
     revalidateOnReconnect: false,
   });
 
@@ -41,23 +66,52 @@ export const useModelAccess = () => {
         return allowedTiers.includes(2);
       }
       const tier = getModelTier(modelId);
-      return allowedTiers.includes(tier);
+      if (!allowedTiers.includes(tier)) return false;
+
+      // Check daily quota for Tier 2/3
+      if (usageStats && tier === 2 && usageStats.dailyTier2Limit > 0) {
+        if (usageStats.dailyTier2Count >= usageStats.dailyTier2Limit) return false;
+      }
+      if (usageStats && tier === 3 && usageStats.dailyTier3Limit > 0) {
+        if (usageStats.dailyTier3Count >= usageStats.dailyTier3Limit) return false;
+      }
+
+      return true;
     },
-    [allowedTiers],
+    [allowedTiers, usageStats],
   );
 
-  // Simpler version: just check tier number
+  // Check tier access including daily quota
   const canUseTier = useCallback(
     (modelId: string) => {
       const tier = modelId.toLowerCase().includes('auto') ? 0 : getModelTier(modelId);
-      return tier === 0 || allowedTiers.includes(tier);
+      if (tier === 0) return true;
+      if (!allowedTiers.includes(tier)) return false;
+
+      // Check daily quota for Tier 2/3
+      if (usageStats && tier === 2 && usageStats.dailyTier2Limit > 0) {
+        if (usageStats.dailyTier2Count >= usageStats.dailyTier2Limit) return false;
+      }
+      if (usageStats && tier === 3 && usageStats.dailyTier3Limit > 0) {
+        if (usageStats.dailyTier3Count >= usageStats.dailyTier3Limit) return false;
+      }
+
+      return true;
     },
-    [allowedTiers],
+    [allowedTiers, usageStats],
   );
 
   const needsUpgrade = useMemo(() => {
     return isGuest || (allowedTiers.length === 1 && allowedTiers[0] === 1);
   }, [allowedTiers, isGuest]);
 
-  return { allowedTiers, canUseModel, canUseTier, isGuest, loading: isLoading, needsUpgrade };
+  return {
+    allowedTiers,
+    canUseModel,
+    canUseTier,
+    isGuest,
+    loading: isLoading,
+    needsUpgrade,
+    usageStats,
+  };
 };

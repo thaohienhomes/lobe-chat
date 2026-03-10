@@ -140,6 +140,7 @@
     },
     "waitingForMore": "更多模型正在 <1>计划接入</1> 中，敬请期待"
   },
+  "medicalBadge": "MEDICAL PIONEER 🏥",
   "plugin": {
     "addMCPPlugin": "添加 MCP 插件",
     "addTooltip": "自定义插件",
@@ -154,6 +155,16 @@
       "tooltip": "插件配置"
     },
     "store": "插件商店"
+  },
+  "promoCode": {
+    "activate": "激活",
+    "activated": "Phở Medical Beta 已激活 🏥",
+    "activating": "激活中...",
+    "description": "输入促销码以解锁特殊功能。",
+    "error": "无效或过期的代码",
+    "placeholder": "输入代码 (如 PHO-MED-2026-BETA)",
+    "success": "感谢您，系统正在刷新...",
+    "title": "促销码"
   },
   "settingAgent": {
     "avatar": {
