@@ -202,10 +202,11 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     }
 
     // ============  0.5. Credit Check (Pre-flight)   ============ //
-    // Check if user has sufficient credits to start the request
+    // Fetch credit balance once — reuse for both pre-flight and tier access checks
+    let prefetchedCreditStatus: Awaited<ReturnType<typeof getUserCreditBalance>> = null;
     if (jwtPayload.userId) {
-      const creditStatus = await getUserCreditBalance(jwtPayload.userId);
-      const balance = creditStatus?.balance || 0;
+      prefetchedCreditStatus = await getUserCreditBalance(jwtPayload.userId);
+      const balance = prefetchedCreditStatus?.balance || 0;
 
       // Allow small overdraft (e.g. -10k VND) to prevent cutoff mid-sentence
       // But block if significantly negative
@@ -269,7 +270,8 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // Check if user's plan allows access to this model tier and daily limits
     let userPlanId = 'vn_free';
     if (jwtPayload.userId) {
-      const creditStatus = await getUserCreditBalance(jwtPayload.userId);
+      // Reuse prefetched credit status — avoids duplicate DB query
+      const creditStatus = prefetchedCreditStatus;
       userPlanId = creditStatus?.currentPlanId || 'vn_free';
 
       // Clerk metadata fallback for promo-activated users (medical_beta, etc.)

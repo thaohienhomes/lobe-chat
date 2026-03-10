@@ -4,7 +4,9 @@
  */
 import { eq, sql } from 'drizzle-orm';
 
+import { canUseTier, getDailyTierLimit, getScientificSkillsLimit } from '@/config/pricing';
 import { users } from '@/database/schemas';
+import { usageLogs } from '@/database/schemas/usage';
 import { getServerDB } from '@/database/server';
 
 export async function addPhoCredits(userId: string, amount: number) {
@@ -210,7 +212,6 @@ export async function processModelUsage(
     // 5. Log to usage_logs with actual model/tier/tokens
     if (usageLog) {
       try {
-        const { usageLogs } = await import('@/database/schemas/usage');
         const VND_RATE = 24_167;
         const costUSD = usageLog.costUSD ?? finalCost * 0.000_04; // fallback: 1 point ≈ $0.00004
         await db.insert(usageLogs).values({
@@ -243,7 +244,6 @@ export async function checkScientificSkillsAccess(
   userId: string,
   planId: string,
 ): Promise<TierAccessResult> {
-  const { getScientificSkillsLimit } = await import('@/config/pricing');
   const dailyLimit = getScientificSkillsLimit(planId);
 
   if (dailyLimit === 0) {
@@ -411,7 +411,7 @@ export async function checkTierAccess(
   tier: number,
   planId: string,
 ): Promise<TierAccessResult> {
-  const { canUseTier, getDailyTierLimit } = await import('@/config/pricing');
+  // canUseTier and getDailyTierLimit are statically imported at top
 
   // 1. Check if plan allows this tier at all
   if (!canUseTier(planId, tier)) {

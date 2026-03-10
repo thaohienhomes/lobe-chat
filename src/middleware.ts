@@ -298,14 +298,8 @@ const clerkAuthMiddleware = clerkMiddleware(
 
       logClerk('Route protection status: %s, %s', req.url, isProtected ? 'protected' : 'public');
 
-      // Get auth data first before creating response
-      const data = await auth();
-      logClerk('Clerk auth status: %O', {
-        isSignedIn: !!data.userId,
-        userId: data.userId,
-      });
-
-      // Protect route if needed (this will redirect to login if not authenticated)
+      // Only call auth() when the route is protected or OIDC needs session info
+      // For public routes without OIDC, skip the Clerk API round-trip entirely
       if (isProtected) {
         logClerk('Protecting route: %s', req.url);
         await auth.protect();
@@ -314,12 +308,13 @@ const clerkAuthMiddleware = clerkMiddleware(
       // Create the response after auth checks
       const response = defaultMiddleware(req);
 
-      // If OIDC is enabled and Clerk user is logged in, add OIDC session pre-sync header
-      if (oidcEnv.ENABLE_OIDC && data.userId) {
-        logClerk('OIDC session pre-sync: Setting %s = %s', OIDC_SESSION_HEADER, data.userId);
-        response.headers.set(OIDC_SESSION_HEADER, data.userId);
-      } else if (oidcEnv.ENABLE_OIDC) {
-        logClerk('No Clerk user detected, not setting OIDC session sync header');
+      // If OIDC is enabled, resolve auth to set session header
+      if (oidcEnv.ENABLE_OIDC) {
+        const data = await auth();
+        if (data.userId) {
+          logClerk('OIDC session pre-sync: Setting %s = %s', OIDC_SESSION_HEADER, data.userId);
+          response.headers.set(OIDC_SESSION_HEADER, data.userId);
+        }
       }
 
       return response;
