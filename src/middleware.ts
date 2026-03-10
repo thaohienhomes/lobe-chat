@@ -225,6 +225,8 @@ const isPublicRoute = createRouteMatcher([
   // Auth is handled at component level via Clerk's useUser() hook
   '/subscription/checkout',
   '/subscription/plans',
+  // OpenClaw bot deployment & webhook APIs (public - no auth needed)
+  '/api/openclaw(.*)',
   // Public API endpoints
   '/api/health',
   '/api/v1(.*)',

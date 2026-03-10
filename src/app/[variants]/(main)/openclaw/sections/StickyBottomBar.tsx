@@ -1,11 +1,13 @@
 'use client';
 
 import { Bot, Zap } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 import { createStyles } from 'antd-style';
-import { Button, Input, Typography, message } from 'antd';
+import { Button, Input, Typography } from 'antd';
+
+import { useOpenClawDeploy } from '../hooks/useOpenClawDeploy';
 
 const { Text } = Typography;
 
@@ -40,15 +42,7 @@ interface StickyBottomBarProps {
 const StickyBottomBar = memo<StickyBottomBarProps>(({ visible }) => {
   const { t } = useTranslation('openclaw');
   const { styles, cx } = useStyles();
-  const [token, setToken] = useState('');
-
-  const handleDeploy = () => {
-    if (!token.trim()) {
-      message.warning(t('hero.tokenRequired'));
-      return;
-    }
-    message.success(t('hero.deploySuccess'));
-  };
+  const { token, setToken, deploying, handleDeploy } = useOpenClawDeploy();
 
   return (
     <div className={cx(styles.bar, visible ? styles.visible : styles.hidden)}>
@@ -63,7 +57,7 @@ const StickyBottomBar = memo<StickyBottomBarProps>(({ visible }) => {
           style={{ maxWidth: 280 }}
           value={token}
         />
-        <Button icon={<Zap size={14} />} onClick={handleDeploy} type="primary">
+        <Button icon={<Zap size={14} />} loading={deploying} onClick={handleDeploy} type="primary">
           {t('sticky.deploy')}
         </Button>
       </Flexbox>

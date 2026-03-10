@@ -13,6 +13,7 @@ export * from './generation';
 export * from './message';
 export * from './nextauth';
 export * from './oidc';
+export * from './openclawBot';
 export * from './pricing';
 export * from './providerBalances';
 export * from './rag';

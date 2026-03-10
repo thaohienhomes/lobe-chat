@@ -1,11 +1,13 @@
 'use client';
 
 import { Zap } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 import { createStyles } from 'antd-style';
-import { Button, Collapse, Input, Typography, message } from 'antd';
+import { Button, Collapse, Input, Typography } from 'antd';
+
+import { useOpenClawDeploy } from '../hooks/useOpenClawDeploy';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -52,20 +54,7 @@ const useStyles = createStyles(({ css, token }) => ({
 const FinalCTASection = memo(() => {
   const { t } = useTranslation('openclaw');
   const { styles } = useStyles();
-  const [token, setToken] = useState('');
-  const [deploying, setDeploying] = useState(false);
-
-  const handleDeploy = () => {
-    if (!token.trim()) {
-      message.warning(t('hero.tokenRequired'));
-      return;
-    }
-    setDeploying(true);
-    setTimeout(() => {
-      message.success(t('hero.deploySuccess'));
-      setDeploying(false);
-    }, 2000);
-  };
+  const { token, setToken, deploying, handleDeploy } = useOpenClawDeploy();
 
   const faqItems = [
     {
