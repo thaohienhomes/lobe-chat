@@ -1,11 +1,11 @@
 'use client';
 
+import { Button, Input, Typography } from 'antd';
+import { createStyles } from 'antd-style';
 import { Bot, Code, Gamepad2, Hash, MessageCircle, Send, Zap } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
-import { createStyles } from 'antd-style';
-import { Button, Input, Typography } from 'antd';
 
 import { useOpenClawDeploy } from '../hooks/useOpenClawDeploy';
 
@@ -149,7 +149,18 @@ const useStyles = createStyles(({ css, token }) => ({
 const HeroSection = memo(() => {
   const { t } = useTranslation('openclaw');
   const { styles } = useStyles();
-  const { token, setToken, deploying, handleDeploy } = useOpenClawDeploy();
+  const { token, setToken, deploying, handleDeploy, setSystemPrompt } = useOpenClawDeploy();
+
+  // Pick up template prompt from sessionStorage (set by TemplatesSection)
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('openclaw_template_prompt');
+      if (stored) {
+        setSystemPrompt(stored);
+        sessionStorage.removeItem('openclaw_template_prompt');
+      }
+    } catch { /* ignore */ }
+  }, [setSystemPrompt]);
 
   return (
     <Flexbox align="center" className={styles.container} gap={32}>

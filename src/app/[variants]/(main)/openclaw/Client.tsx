@@ -102,7 +102,7 @@ const Client = memo(() => {
   }, []);
 
   return (
-    <div className={styles.wrapper} onScroll={handleScroll}>
+    <div className={styles.wrapper} data-openclaw-wrapper onScroll={handleScroll}>
       <Flexbox className={styles.container} gap={72}>
         <div className={styles.heroFade}>
           <HeroSection />

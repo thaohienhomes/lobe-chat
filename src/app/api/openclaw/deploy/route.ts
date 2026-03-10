@@ -13,10 +13,20 @@ function getWebhookBaseUrl(): string {
   return 'https://pho.chat';
 }
 
+async function getClerkUserId(): Promise<string | null> {
+  try {
+    const { auth } = await import('@clerk/nextjs/server');
+    const { userId } = await auth();
+    return userId;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { token } = body;
+    const { systemPrompt, token } = body;
 
     if (!token || typeof token !== 'string' || !token.includes(':')) {
       return NextResponse.json(
@@ -40,8 +50,29 @@ export async function POST(req: Request) {
     const botUsername = botInfo.username;
     const botName = botInfo.first_name;
 
-    // 2. Check if this bot is already deployed
+    // 2. Get authenticated user (optional — anonymous deploy allowed)
+    const userId = await getClerkUserId();
+
     const db = await getServerDB();
+
+    // 3. Check bot limit for authenticated users (Free = 1 bot)
+    if (userId) {
+      const { and, count: countFn } = await import('drizzle-orm');
+      const userBots = await db
+        .select({ count: countFn() })
+        .from(openclawBots)
+        .where(and(eq(openclawBots.userId, userId), eq(openclawBots.status, 'active')));
+
+      const botCount = userBots[0]?.count || 0;
+      if (botCount >= 1) {
+        return NextResponse.json(
+          { error: 'Free plan allows 1 bot. Upgrade for more.', success: false },
+          { status: 403 },
+        );
+      }
+    }
+
+    // 4. Check if this bot is already deployed
     const [existing] = await db
       .select()
       .from(openclawBots)
@@ -57,11 +88,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3. Generate bot ID and webhook secret
+    // 5. Generate bot ID and webhook secret
     const botId = `ocbot_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const webhookSecret = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
 
-    // 4. Set webhook with Telegram
+    // 6. Set webhook with Telegram
     const baseUrl = getWebhookBaseUrl();
     const webhookUrl = `${baseUrl}/api/openclaw/webhook/${botId}`;
 
@@ -77,7 +108,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. Store in database
+    // 7. Store in database
     const now = new Date();
     const dailyResetAt = new Date(now);
     dailyResetAt.setHours(23, 59, 59, 999);
@@ -88,11 +119,12 @@ export async function POST(req: Request) {
       botUsername,
       dailyResetAt,
       id: botId,
-      systemPrompt: null, // uses default prompt in webhook handler
+      systemPrompt: systemPrompt || null,
+      userId: userId || null,
       webhookSecret,
     });
 
-    console.log(`[OpenClaw] Bot @${botUsername} deployed with ID ${botId}`);
+    console.log(`[OpenClaw] Bot @${botUsername} deployed with ID ${botId}${userId ? ` by user ${userId}` : ' (anonymous)'}`);
 
     return NextResponse.json({
       botId,

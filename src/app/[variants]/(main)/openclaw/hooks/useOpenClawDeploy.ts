@@ -16,6 +16,7 @@ export const useOpenClawDeploy = () => {
   const { t } = useTranslation('openclaw');
   const [token, setToken] = useState('');
   const [deploying, setDeploying] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState<string | null>(null);
 
   const handleDeploy = useCallback(async () => {
     if (!token.trim()) {
@@ -26,7 +27,7 @@ export const useOpenClawDeploy = () => {
     setDeploying(true);
     try {
       const res = await fetch('/api/openclaw/deploy', {
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ systemPrompt, token }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
       });
@@ -36,6 +37,7 @@ export const useOpenClawDeploy = () => {
       if (data.success) {
         message.success(`Bot @${data.botUsername} deployed! ${t('hero.deploySuccess')}`);
         setToken('');
+        setSystemPrompt(null);
       } else {
         message.error(data.error || 'Deploy failed');
       }
@@ -44,7 +46,7 @@ export const useOpenClawDeploy = () => {
     } finally {
       setDeploying(false);
     }
-  }, [token, t]);
+  }, [token, systemPrompt, t]);
 
-  return { deploying, handleDeploy, setToken, token };
+  return { deploying, handleDeploy, setSystemPrompt, setToken, systemPrompt, token };
 };
