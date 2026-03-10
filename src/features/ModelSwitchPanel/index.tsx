@@ -1,6 +1,6 @@
 import { ModelIcon } from '@lobehub/icons';
 import { createStyles, useThemeMode } from 'antd-style';
-import { Plug, Search, Eye } from 'lucide-react';
+import { Eye, Plug, Search } from 'lucide-react';
 import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,10 +17,34 @@ import { agentSelectors } from '@/store/agent/slices/chat';
 
 /* ──────────── Tier palette ──────────── */
 const TIER = {
-  0: { accent: '#ec4899', icon: '✨', labelKey: 'ModelSwitchPanel.tierAuto' as const, quotaCount: 0, quotaKey: '' },
-  1: { accent: '#22c55e', icon: '⚡', labelKey: 'ModelSwitchPanel.tierFree' as const, quotaCount: 0, quotaKey: '' },
-  2: { accent: '#a78bfa', icon: '🔮', labelKey: 'ModelSwitchPanel.tierPro' as const, quotaCount: 20, quotaKey: 'ModelSwitchPanel.quotaHint' as const },
-  3: { accent: '#f59e0b', icon: '👑', labelKey: 'ModelSwitchPanel.tierFlagship' as const, quotaCount: 5, quotaKey: 'ModelSwitchPanel.quotaHint' as const },
+  0: {
+    accent: '#ec4899',
+    icon: '✨',
+    labelKey: 'ModelSwitchPanel.tierAuto' as const,
+    quotaCount: 0,
+    quotaKey: '',
+  },
+  1: {
+    accent: '#22c55e',
+    icon: '⚡',
+    labelKey: 'ModelSwitchPanel.tierFree' as const,
+    quotaCount: 0,
+    quotaKey: '',
+  },
+  2: {
+    accent: '#a78bfa',
+    icon: '🔮',
+    labelKey: 'ModelSwitchPanel.tierPro' as const,
+    quotaCount: 20,
+    quotaKey: 'ModelSwitchPanel.quotaHint' as const,
+  },
+  3: {
+    accent: '#f59e0b',
+    icon: '👑',
+    labelKey: 'ModelSwitchPanel.tierFlagship' as const,
+    quotaCount: 5,
+    quotaKey: 'ModelSwitchPanel.quotaHint' as const,
+  },
 } as const;
 
 /* ──────────── Model-access hook ──────────── */
@@ -34,7 +58,9 @@ const useModelAccess = () => {
           const d = await r.json();
           if (d.success && d.data) setAllowed(d.data.allowedTiers || [1]);
         }
-      } catch { /* default [1] */ }
+      } catch {
+        /* default [1] */
+      }
     })();
   }, []);
   return useCallback(
@@ -52,11 +78,21 @@ const ctxLabel = (n?: number) =>
   !n ? '' : n >= 1e6 ? `${Math.round(n / 1e6)}M` : `${Math.round(n / 1e3)}K`;
 
 const iconBg = (tier: number, isDark: boolean) => {
-  if (tier === 0) { return isDark ? 'rgba(236,72,153,0.18)' : 'rgba(236,72,153,0.1)'; }
-  if (isDark) {
-    return tier === 1 ? 'rgba(34,197,94,0.15)' : tier === 2 ? 'rgba(139,92,246,0.15)' : 'rgba(245,158,11,0.15)';
+  if (tier === 0) {
+    return isDark ? 'rgba(236,72,153,0.18)' : 'rgba(236,72,153,0.1)';
   }
-  return tier === 1 ? 'rgba(34,197,94,0.1)' : tier === 2 ? 'rgba(139,92,246,0.1)' : 'rgba(245,158,11,0.1)';
+  if (isDark) {
+    return tier === 1
+      ? 'rgba(34,197,94,0.15)'
+      : tier === 2
+        ? 'rgba(139,92,246,0.15)'
+        : 'rgba(245,158,11,0.15)';
+  }
+  return tier === 1
+    ? 'rgba(34,197,94,0.1)'
+    : tier === 2
+      ? 'rgba(139,92,246,0.1)'
+      : 'rgba(245,158,11,0.1)';
 };
 
 /* ──────────── Styles ──────────── */
@@ -78,84 +114,99 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
   return {
     backdrop: css`
       position: fixed;
-      inset: 0;
       z-index: 1000;
+      inset: 0;
     `,
 
     capIcon: css`
-      width: 20px;
-      height: 20px;
-      border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: ${capBg};
-      color: ${capColor};
+
+      width: 20px;
+      height: 20px;
       border: 1px solid ${capBorder};
+      border-radius: 5px;
+
+      color: ${capColor};
+
+      background: ${capBg};
     `,
 
     ctx: css`
-      font-size: 10px;
-      color: ${subtleText};
-      font-weight: 500;
-      min-width: 30px;
-      text-align: right;
       flex-shrink: 0;
+
+      min-width: 30px;
+
+      font-size: 10px;
+      font-weight: 500;
       font-variant-numeric: tabular-nums;
+      color: ${subtleText};
+      text-align: end;
     `,
 
     dot: css`
+      flex-shrink: 0;
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      flex-shrink: 0;
     `,
 
     empty: css`
-      padding: 28px 16px;
-      text-align: center;
+      padding-block: 28px;
+      padding-inline: 16px;
+
       font-size: 13px;
       color: ${mutedText};
+      text-align: center;
     `,
 
     footer: css`
-      padding: 10px 16px;
-      border-top: 1px solid ${sectionBorder};
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+
+      padding-block: 10px;
+      padding-inline: 16px;
+      border-block-start: 1px solid ${sectionBorder};
     `,
 
-
-
     modelIcon: css`
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+
       transition: transform 0.15s;
     `,
 
     modelName: css`
+      display: flex;
+      gap: 6px;
+      align-items: center;
+
       font-size: 13px;
       font-weight: 600;
-      color: ${token.colorText};
-      display: flex;
-      align-items: center;
-      gap: 6px;
       line-height: 1.3;
+      color: ${token.colorText};
     `,
 
     modelRow: css`
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
       cursor: pointer;
+
       position: relative;
+
+      display: flex;
+      gap: 10px;
+      align-items: center;
+
+      padding-block: 8px;
+      padding-inline: 16px;
+
       transition: background 0.15s ease;
 
       &:hover {
@@ -170,66 +221,83 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
     modelRowDisabled: css`
       pointer-events: none;
       cursor: not-allowed;
-      filter: grayscale(0.8);
       opacity: 0.4;
+      filter: grayscale(0.8);
     `,
 
     modelSub: css`
+      overflow: hidden;
+
+      margin-block-start: 2px;
+
       font-size: 11px;
       color: ${mutedText};
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     `,
 
     newBadge: css`
       display: inline-flex;
-      padding: 2px 7px;
+
+      padding-block: 2px;
+      padding-inline: 7px;
       border-radius: 4px;
+
       font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.3px;
-      background: ${isDark ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.1)'};
       color: ${isDark ? '#f87171' : '#dc2626'};
+      letter-spacing: 0.3px;
+
+      background: ${isDark ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.1)'};
+
       animation: moi-pulse 2s ease-in-out infinite;
 
       @keyframes moi-pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.55; }
+        0%,
+        100% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0.55;
+        }
       }
     `,
 
     panel: css`
       position: fixed;
       z-index: 1001;
-      width: 380px;
-      max-height: 540px;
-      background: ${token.colorBgElevated};
-      border: 1px solid ${panelBorder};
-      border-radius: 16px;
-      box-shadow: ${panelShadow};
+
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+
+      width: 380px;
+      max-height: 540px;
+      border: 1px solid ${panelBorder};
+      border-radius: 16px;
+
+      background: ${token.colorBgElevated};
+      box-shadow: ${panelShadow};
+
       animation: panel-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       @keyframes panel-in {
         from {
-          opacity: 0;
           transform: translateY(8px) scale(0.98);
+          opacity: 0;
         }
+
         to {
-          opacity: 1;
           transform: translateY(0) scale(1);
+          opacity: 1;
         }
       }
     `,
 
     scroll: css`
+      overflow: hidden auto;
       flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
 
       &::-webkit-scrollbar {
         width: 5px;
@@ -240,8 +308,8 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
       }
 
       &::-webkit-scrollbar-thumb {
-        background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'};
         border-radius: 4px;
+        background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'};
 
         &:hover {
           background: ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)'};
@@ -250,31 +318,40 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
     `,
 
     search: css`
-      padding: 12px 16px;
-      border-bottom: 1px solid ${sectionBorder};
       position: relative;
+      padding-block: 12px;
+      padding-inline: 16px;
+      border-block-end: 1px solid ${sectionBorder};
     `,
 
     searchIcon: css`
-      position: absolute;
-      left: 28px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: ${token.colorTextQuaternary};
       pointer-events: none;
+
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 28px;
+      transform: translateY(-50%);
+
+      color: ${token.colorTextQuaternary};
     `,
 
     searchInput: css`
       width: 100%;
-      padding: 10px 14px 10px 38px;
-      background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.035)'};
+      padding-block: 10px;
+      padding-inline: 38px 14px;
       border: 1px solid ${panelBorder};
       border-radius: 10px;
-      color: ${token.colorText};
-      font-size: 13px;
+
       font-family: inherit;
+      font-size: 13px;
+      color: ${token.colorText};
+
+      background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.035)'};
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
 
       &::placeholder {
         color: ${token.colorTextQuaternary};
@@ -287,18 +364,22 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
     `,
 
     section: css`
-      padding: 4px 0;
+      padding-block: 4px;
+      padding-inline: 0;
 
       & + & {
-        border-top: 1px solid ${sectionBorder};
+        border-block-start: 1px solid ${sectionBorder};
       }
     `,
 
     sectionHeader: css`
       display: flex;
-      align-items: center;
       gap: 6px;
-      padding: 10px 16px 6px;
+      align-items: center;
+
+      padding-block: 10px 6px;
+      padding-inline: 16px;
+
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
@@ -311,29 +392,33 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
 
     selectedBar: css`
       position: absolute;
-      left: 0;
-      top: 4px;
-      bottom: 4px;
+      inset-block: 4px 4px;
+      inset-inline-start: 0;
+
       width: 3px;
       border-radius: 0 3px 3px 0;
     `,
 
     speedBadge: css`
       display: inline-flex;
-      align-items: center;
       gap: 2px;
-      padding: 2px 6px;
+      align-items: center;
+
+      padding-block: 2px;
+      padding-inline: 6px;
       border-radius: 4px;
+
       font-size: 8px;
       font-weight: 700;
-      background: linear-gradient(135deg, #eab308, #f97316);
       color: #000;
+
+      background: linear-gradient(135deg, #eab308, #f97316);
     `,
 
     speedBar: css`
+      flex-shrink: 0;
       height: 3px;
       border-radius: 2px;
-      flex-shrink: 0;
     `,
 
     speedLabel: css`
@@ -349,8 +434,8 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
 
       & > span {
         display: flex;
-        align-items: center;
         gap: 3px;
+        align-items: center;
       }
     `,
 
@@ -431,6 +516,9 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
   const canUse = useModelAccess();
   const [q, setQ] = useState('');
   const trigRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ── internal open state ── */
   const [intOpen, setIntOpen] = useState(false);
@@ -486,14 +574,47 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
 
   return (
     <>
-      <div className={styles.trigger} onClick={() => setOpen(!isOpen)} ref={trigRef}>
+      <div
+        className={styles.trigger}
+        onClick={() => setOpen(!isOpen)}
+        onMouseEnter={() => {
+          if (closeTimerRef.current) {
+            clearTimeout(closeTimerRef.current);
+            closeTimerRef.current = null;
+          }
+          if (!isOpen) {
+            hoverTimerRef.current = setTimeout(() => setOpen(true), 200);
+          }
+        }}
+        onMouseLeave={() => {
+          if (hoverTimerRef.current) {
+            clearTimeout(hoverTimerRef.current);
+            hoverTimerRef.current = null;
+          }
+          closeTimerRef.current = setTimeout(() => setOpen(false), 300);
+        }}
+        ref={trigRef}
+      >
         {children}
       </div>
 
       {isOpen && (
         <>
           <div className={styles.backdrop} onClick={() => setOpen(false)} />
-          <div className={styles.panel} style={{ left: pos.x, top: pos.y }}>
+          <div
+            className={styles.panel}
+            onMouseEnter={() => {
+              if (closeTimerRef.current) {
+                clearTimeout(closeTimerRef.current);
+                closeTimerRef.current = null;
+              }
+            }}
+            onMouseLeave={() => {
+              closeTimerRef.current = setTimeout(() => setOpen(false), 300);
+            }}
+            ref={panelRef}
+            style={{ left: pos.x, top: pos.y }}
+          >
             {/* ── Search ── */}
             <div className={styles.search}>
               <Search className={styles.searchIcon} size={15} />
@@ -529,7 +650,9 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                               textTransform: 'none',
                             }}
                           >
-                            {t(cfg.quotaKey as 'ModelSwitchPanel.quotaHint', { count: cfg.quotaCount })}
+                            {t(cfg.quotaKey as 'ModelSwitchPanel.quotaHint', {
+                              count: cfg.quotaCount,
+                            })}
                           </span>
                         )}
                       </div>
@@ -583,9 +706,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
                             <div className={styles.modelName}>
                               {m.displayName}
                               {mTier > 1 && <TierBadge isDark={isDark} tier={mTier} />}
-                              {speed && (
-                                <span className={styles.speedBadge}>⚡ {speed} tok/s</span>
-                              )}
+                              {speed && <span className={styles.speedBadge}>⚡ {speed} tok/s</span>}
                               {isNew && <span className={styles.newBadge}>MỚI</span>}
                             </div>
                             {/* Subtitle or speed indicator */}
@@ -652,13 +773,16 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
             <div className={styles.footer}>
               <div className={styles.tierLegend}>
                 <span>
-                  <span className={styles.dot} style={{ background: '#22c55e' }} /> {t('ModelSwitchPanel.legendFree')}
+                  <span className={styles.dot} style={{ background: '#22c55e' }} />{' '}
+                  {t('ModelSwitchPanel.legendFree')}
                 </span>
                 <span>
-                  <span className={styles.dot} style={{ background: '#a78bfa' }} /> {t('ModelSwitchPanel.legendPro')}
+                  <span className={styles.dot} style={{ background: '#a78bfa' }} />{' '}
+                  {t('ModelSwitchPanel.legendPro')}
                 </span>
                 <span>
-                  <span className={styles.dot} style={{ background: '#f59e0b' }} /> {t('ModelSwitchPanel.legendMax')}
+                  <span className={styles.dot} style={{ background: '#f59e0b' }} />{' '}
+                  {t('ModelSwitchPanel.legendMax')}
                 </span>
               </div>
             </div>
