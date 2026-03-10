@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw Integration — UI Mockups for pho.chat</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1c1c1e;
+    --surface3: #2c2c2e;
+    --border: #2c2c2e;
+    --border-accent: #3b82f6;
+    --text: #f5f5f5;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --green: #22c55e;
+    --green-bg: rgba(34, 197, 94, 0.1);
+    --orange: #f97316;
+    --purple: #a855f7;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --gradient-start: #3b82f6;
+    --gradient-end: #8b5cf6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: #050505;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .page-header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, transparent 100%);
+  }
+  .page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .page-header p { color: var(--text-secondary); font-size: 1.1rem; }
+
+  .screen-section {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .screen-label {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+  .screen-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .screen-desc {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+
+  /* App Frame */
+  .app-frame {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  /* Top Nav */
+  .topnav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .topnav-brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .topnav-links { display: flex; gap: 8px; }
+  .topnav-link {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .topnav-link:hover { color: var(--text); background: var(--surface2); }
+  .topnav-link.active {
+    color: var(--accent);
+    background: rgba(59,130,246,0.1);
+    font-weight: 500;
+  }
+  .topnav-link .new-badge {
+    font-size: 0.65rem;
+    background: var(--green);
+    color: black;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 4px;
+    font-weight: 700;
+  }
+  .topnav-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  /* App Layout with Sidebar */
+  .app-layout {
+    display: flex;
+    min-height: 700px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+    flex-shrink: 0;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+  }
+  .sidebar-item:hover { color: var(--text); background: var(--surface2); }
+  .sidebar-item.active { color: var(--accent); background: rgba(59,130,246,0.1); font-weight: 500; }
+  .sidebar-divider { height: 1px; background: var(--border); margin: 8px 4px; }
+
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 48px 32px;
+    background: linear-gradient(180deg, rgba(59,130,246,0.06) 0%, transparent 100%);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .hero h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    max-width: 500px;
+    margin: 0 auto 24px;
+  }
+
+  /* Channel Icons */
+  .channel-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .channel-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .channel-icon span {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-lg { padding: 14px 28px; font-size: 1rem; }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+  .btn-ghost { background: transparent; color: var(--text-secondary); }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .btn-danger { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+  .btn-success { background: rgba(34,197,94,0.1); color: var(--green); }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+  .card:hover { border-color: var(--surface3); }
+  .card-selected { border-color: var(--accent) !important; box-shadow: 0 0 0 1px var(--accent); }
+
+  /* Section Headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  /* Gate Card */
+  .gate-card {
+    background: var(--surface);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 14px;
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .gate-card .lock-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  .gate-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .gate-card p { color: var(--text-secondary); margin-bottom: 20px; }
+
+  /* Pricing Cards */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .pricing-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+  }
+  .pricing-card.featured { border-color: var(--accent); position: relative; }
+  .pricing-card.featured::before {
+    content: '⭐ Recommended';
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .pricing-card h4 { font-size: 1rem; margin-bottom: 4px; }
+  .pricing-card .price { font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .pricing-card ul { list-style: none; font-size: 0.8rem; color: var(--text-secondary); }
+  .pricing-card ul li { margin-bottom: 4px; }
+  .pricing-card ul li::before { content: '✓ '; color: var(--green); }
+
+  /* Steps */
+  .steps-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-top: 32px;
+  }
+  .step-item { text-align: center; }
+  .step-num {
+    display: inline-flex;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.1);
+    color: var(--accent);
+    align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  .step-item h4 { font-size: 0.9rem; margin-bottom: 4px; }
+  .step-item p { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* Wizard */
+  .wizard-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .wizard-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+  .wizard-step-label { font-size: 0.8rem; color: var(--text-muted); }
+
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 16px 32px 0;
+  }
+  .progress-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--surface3);
+    flex-shrink: 0;
+  }
+  .progress-dot.active { background: var(--accent); }
+  .progress-dot.done { background: var(--green); }
+  .progress-line {
+    flex: 1;
+    height: 2px;
+    background: var(--surface3);
+  }
+  .progress-line.done { background: var(--green); }
+  .progress-line.active { background: var(--accent); }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 32px 16px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .progress-labels span.active { color: var(--accent); font-weight: 500; }
+  .progress-labels span.done { color: var(--green); }
+
+  .wizard-content { padding: 32px; }
+  .wizard-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Deployment Options */
+  .deploy-option {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .deploy-option:hover { border-color: var(--surface3); }
+  .deploy-option.selected { border-color: var(--accent); background: rgba(59,130,246,0.03); }
+  .deploy-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .deploy-option-header h4 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+  .deploy-option-header .badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .badge-premium { background: rgba(168,85,247,0.15); color: var(--purple); }
+  .badge-starter { background: rgba(59,130,246,0.15); color: var(--accent); }
+  .badge-any { background: rgba(34,197,94,0.15); color: var(--green); }
+  .deploy-option-body {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  .feature-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .feature-list span::before { content: '✓ '; color: var(--green); }
+  .radio-circle {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .radio-circle.selected { border-color: var(--accent); }
+  .radio-circle.selected::after {
+    content: '';
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Channel Grid */
+  .channel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .channel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .channel-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .channel-card-header .icon { font-size: 1.3rem; }
+  .channel-card-header h4 { font-size: 0.95rem; }
+  .channel-card .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .toggle-switch {
+    width: 36px; height: 20px;
+    background: var(--surface3);
+    border-radius: 10px;
+    position: relative;
+    display: inline-block;
+  }
+  .toggle-switch.on { background: var(--accent); }
+  .toggle-switch::after {
+    content: '';
+    width: 16px; height: 16px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px; left: 2px;
+    transition: all 0.2s;
+  }
+  .toggle-switch.on::after { left: 18px; }
+  .input-group { margin-top: 12px; }
+  .input-group label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  .input-field {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .input-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* LLM Config */
+  .llm-option {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .llm-option.selected { border-color: var(--accent); background: rgba(59,130,246,0.03); }
+  .llm-option h4 { margin-bottom: 8px; font-size: 0.95rem; }
+  .llm-option p { font-size: 0.85rem; color: var(--text-secondary); }
+  .llm-detail {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* Deploy Progress */
+  .deploy-steps { margin: 20px 0; }
+  .deploy-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    font-size: 0.9rem;
+  }
+  .deploy-step .icon { font-size: 1.2rem; width: 24px; text-align: center; }
+  .deploy-step .label { flex: 1; }
+  .deploy-step .status { font-size: 0.8rem; color: var(--text-muted); }
+  .deploy-step .status.done { color: var(--green); }
+  .deploy-step .status.working { color: var(--yellow); }
+
+  .deploy-progress {
+    width: 100%;
+    height: 8px;
+    background: var(--surface3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .deploy-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+
+  /* Success Screen */
+  .success-banner {
+    text-align: center;
+    padding: 48px;
+    background: linear-gradient(180deg, rgba(34,197,94,0.08) 0%, transparent 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(34,197,94,0.2);
+    margin-bottom: 24px;
+  }
+  .success-banner .emoji { font-size: 3rem; margin-bottom: 12px; }
+  .success-banner h2 { font-size: 1.5rem; margin-bottom: 8px; }
+  .success-banner p { color: var(--text-secondary); }
+
+  .quickstart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .quickstart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .quickstart-card h4 { font-size: 0.95rem; margin-bottom: 8px; }
+  .quickstart-card p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; }
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    color: var(--green);
+    overflow-x: auto;
+  }
+
+  /* Dashboard */
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .dash-header h2 { font-size: 1.3rem; font-weight: 600; }
+
+  .instance-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+  }
+  .instance-info h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .instance-meta { font-size: 0.8rem; color: var(--text-muted); }
+  .instance-meta div { margin-bottom: 4px; }
+  .instance-status { text-align: right; }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .status-running { background: var(--green-bg); color: var(--green); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+  /* Channel Table */
+  .channel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .channel-table th {
+    text-align: left;
+    padding: 10px 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .channel-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .channel-table tr:last-child td { border-bottom: none; }
+  .ch-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+  }
+  .ch-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .ch-dot.live { background: var(--green); }
+  .ch-dot.off { background: var(--surface3); }
+
+  /* Activity Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .stat-card .value { font-size: 1.5rem; font-weight: 700; }
+  .stat-card .label { font-size: 0.75rem; color: var(--text-muted); }
+  .stat-card .change { font-size: 0.75rem; color: var(--green); }
+
+  .chart-placeholder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    height: 120px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    justify-content: center;
+  }
+  .chart-bar {
+    width: 12px;
+    background: linear-gradient(180deg, var(--accent), rgba(59,130,246,0.3));
+    border-radius: 3px 3px 0 0;
+    transition: height 0.3s;
+  }
+
+  /* Config Row */
+  .config-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .config-row:last-child { border-bottom: none; }
+  .config-label { color: var(--text-muted); }
+  .config-value { display: flex; align-items: center; gap: 8px; }
+
+  /* Self-host code */
+  .code-editor {
+    background: #1a1a2e;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .code-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .code-editor-body {
+    padding: 16px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: #e2e8f0;
+    overflow-x: auto;
+  }
+  .code-editor-body .key { color: #7dd3fc; }
+  .code-editor-body .string { color: #86efac; }
+  .code-editor-body .comment { color: #64748b; }
+
+  /* Template cards */
+  .template-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .template-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+  .template-card:hover { border-color: var(--accent); }
+  .template-card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .template-card p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
+
+  /* Text area */
+  .textarea-field {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.85rem;
+    resize: vertical;
+    font-family: inherit;
+  }
+
+  /* Select */
+  .select-field {
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.85rem;
+    min-width: 200px;
+  }
+
+  /* Spacer */
+  .spacer { height: 60px; }
+
+  /* Summary Row */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.85rem;
+  }
+  .summary-row .label { color: var(--text-muted); }
+  .summary-row .value { font-weight: 500; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .pricing-grid, .channel-grid, .quickstart-grid, .template-grid, .stats-grid { grid-template-columns: 1fr; }
+    .steps-row { grid-template-columns: 1fr; gap: 16px; }
+    .feature-list { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>OpenClaw Integration — UI Mockups</h1>
+  <p>pho.chat x OpenClaw — Personal AI Agent on Every Messaging Platform</p>
+</div>
+
+<!-- ============================================ -->
+<!-- SCREEN 1: Landing Page — Free User Gate -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 1</div>
+  <h2 class="screen-title">Landing Page — Free User (Upgrade Gate)</h2>
+  <p class="screen-desc">Khi user Free truy cập /openclaw, thấy preview tính năng + CTA nâng cấp</p>
+
+  <div class="app-frame">
+    <div class="topnav">
+      <span class="topnav-brand">pho.chat</span>
+      <div class="topnav-links">
+        <span class="topnav-link">Chat</span>
+        <span class="topnav-link">Discover</span>
+        <span class="topnav-link">Files</span>
+        <span class="topnav-link active">OpenClaw <span class="new-badge">NEW</span></span>
+        <span class="topnav-link">Settings</span>
+      </div>
+      <div class="topnav-avatar">👤</div>
+    </div>
+    <div class="main-content">
+      <div class="hero">
+        <h2>🤖 Your AI Agent — Everywhere You Chat</h2>
+        <p>Deploy a personal AI assistant to WhatsApp, Telegram, Slack, Discord and more — powered by your pho.chat AI models.</p>
+        <div class="channel-icons">
+          <div class="channel-icon">📱<span>WhatsApp</span></div>
+          <div class="channel-icon">✈️<span>Telegram</span></div>
+          <div class="channel-icon">💬<span>Slack</span></div>
+          <div class="channel-icon">🎮<span>Discord</span></div>
+          <div class="channel-icon">📧<span>Email</span></div>
+        </div>
+      </div>
+
+      <div class="gate-card">
+        <div class="lock-icon">🔒</div>
+        <h3>Premium Feature</h3>
+        <p>OpenClaw integration is available on Starter plan and above.<br>Upgrade to deploy your AI agent across messaging platforms.</p>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h4>Starter</h4>
+            <div class="price">$9/mo</div>
+            <ul>
+              <li>Self-host guide</li>
+              <li>1 channel</li>
+              <li>Community support</li>
+            </ul>
+            <br>
+            <button class="btn btn-secondary" style="width:100%">Upgrade</button>
+          </div>
+          <div class="pricing-card featured">
+            <h4>Premium</h4>
+            <div class="price">$19/mo</div>
+            <ul>
+              <li>Managed hosting</li>
+              <li>Unlimited channels</li>
+              <li>Auto-scaling</li>
+              <li>Priority support</li>
+            </ul>
+            <button class="btn btn-primary" style="width:100%">Upgrade</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header"><h3>How it works</h3></div>
+      <div class="steps-row">
+        <div class="step-item">
+          <div class="step-num">①</div>
+          <h4>Choose channels</h4>
+          <p>Select WhatsApp, Telegram, Discord, Slack or any supported platform</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">②</div>
+          <h4>Connect your AI</h4>
+          <p>Use models from your pho.chat configuration — no extra API keys</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">③</div>
+          <h4>Deploy & Chat</h4>
+          <p>One-click deploy or self-host with a generated Docker guide</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 2: Landing Page — Paid User -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 2</div>
+  <h2 class="screen-title">Landing Page — Paid User (Has Access)</h2>
+  <p class="screen-desc">User đã subscribe thấy CTA setup + template gallery</p>
+
+  <div class="app-frame">
+    <div class="topnav">
+      <span class="topnav-brand">pho.chat</span>
+      <div class="topnav-links">
+        <span class="topnav-link">Chat</span>
+        <span class="topnav-link">Discover</span>
+        <span class="topnav-link">Files</span>
+        <span class="topnav-link active">OpenClaw <span class="new-badge">NEW</span></span>
+        <span class="topnav-link">Settings</span>
+      </div>
+      <div class="topnav-avatar">👤</div>
+    </div>
+    <div class="main-content">
+      <div class="hero">
+        <h2>🤖 Your AI Agent — Everywhere You Chat</h2>
+        <p>Deploy a personal AI assistant to your favorite messaging platforms.</p>
+        <div class="channel-icons">
+          <div class="channel-icon">📱<span>WhatsApp</span></div>
+          <div class="channel-icon">✈️<span>Telegram</span></div>
+          <div class="channel-icon">💬<span>Slack</span></div>
+          <div class="channel-icon">🎮<span>Discord</span></div>
+          <div class="channel-icon">📧<span>Email</span></div>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 8px;">
+          <button class="btn btn-primary btn-lg">🚀 Setup AI Agent</button>
+          <button class="btn btn-secondary btn-lg">📖 Documentation</button>
+        </div>
+      </div>
+
+      <div class="section-header"><h3>Your Instances</h3></div>
+      <div style="text-align: center; padding: 32px; color: var(--text-muted); font-size: 0.9rem;">
+        No instances yet. Click "Setup AI Agent" to get started.
+      </div>
+
+      <div class="section-header"><h3>Popular Setups</h3></div>
+      <div class="template-grid">
+        <div class="template-card">
+          <h4>✈️ Telegram Bot</h4>
+          <p>Quick setup for personal use. Chat with your AI on Telegram.</p>
+          <button class="btn btn-sm btn-outline">Use Template</button>
+        </div>
+        <div class="template-card">
+          <h4>📱 WhatsApp Agent</h4>
+          <p>Business-ready AI for customer support on WhatsApp.</p>
+          <button class="btn btn-sm btn-outline">Use Template</button>
+        </div>
+        <div class="template-card">
+          <h4>🌐 Multi-Channel</h4>
+          <p>All platforms, one AI brain. Maximum reach.</p>
+          <button class="btn btn-sm btn-outline">Use Template</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 3: Wizard Step 1 — Choose Deployment -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 3</div>
+  <h2 class="screen-title">Setup Wizard — Step 1: Choose Deployment</h2>
+  <p class="screen-desc">User chọn hình thức deploy: Managed / Self-host / Cloud</p>
+
+  <div class="app-frame">
+    <div class="wizard-header">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <span style="cursor: pointer; color: var(--text-muted);">← Back to OpenClaw Hub</span>
+      </div>
+      <div class="wizard-title">Setup Your AI Agent</div>
+      <div class="wizard-step-label">Step 1 of 4</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-dot active"></div>
+      <div class="progress-line"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-line"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-line"></div>
+      <div class="progress-dot"></div>
+    </div>
+    <div class="progress-labels">
+      <span class="active">Deploy</span>
+      <span>Channels</span>
+      <span>LLM Config</span>
+      <span>Verify</span>
+    </div>
+    <div class="wizard-content">
+      <div class="section-header"><h3>Choose how to deploy your AI agent</h3></div>
+
+      <div class="deploy-option selected">
+        <div class="deploy-option-header">
+          <h4>⭐ Managed Hosting <span class="badge badge-premium">Premium+</span></h4>
+          <div class="radio-circle selected"></div>
+        </div>
+        <div class="deploy-option-body">We handle everything — deploy, scale, monitor. Your agent runs on pho.chat infrastructure.</div>
+        <div class="feature-list">
+          <span>One-click deploy</span>
+          <span>Auto-scaling</span>
+          <span>99.9% uptime SLA</span>
+          <span>Auto-updates</span>
+          <span>Monitoring dashboard</span>
+          <span>Included in Premium</span>
+        </div>
+      </div>
+
+      <div class="deploy-option">
+        <div class="deploy-option-header">
+          <h4>🛠️ Self-Host <span class="badge badge-starter">Starter+</span></h4>
+          <div class="radio-circle"></div>
+        </div>
+        <div class="deploy-option-body">Run on your own server. We generate a custom Docker Compose config with your settings.</div>
+        <div class="feature-list">
+          <span>Full control</span>
+          <span>Custom domain</span>
+          <span>Docker Compose ready</span>
+          <span>Step-by-step guide</span>
+        </div>
+      </div>
+
+      <div class="deploy-option">
+        <div class="deploy-option-header">
+          <h4>☁️ OpenClaw Cloud <span class="badge badge-any">Any plan</span></h4>
+          <div class="radio-circle"></div>
+        </div>
+        <div class="deploy-option-body">Use OpenClaw's official cloud service. We'll redirect you with pre-filled settings.</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">Starts at $6/month on OpenClaw Cloud</div>
+      </div>
+    </div>
+    <div class="wizard-footer">
+      <button class="btn btn-ghost">Cancel</button>
+      <button class="btn btn-primary">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 4: Wizard Step 2 — Configure Channels -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 4</div>
+  <h2 class="screen-title">Setup Wizard — Step 2: Configure Channels</h2>
+  <p class="screen-desc">User chọn và config các messaging channels</p>
+
+  <div class="app-frame">
+    <div class="wizard-header">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <span style="cursor: pointer; color: var(--text-muted);">← Back to OpenClaw Hub</span>
+      </div>
+      <div class="wizard-title">Setup Your AI Agent</div>
+      <div class="wizard-step-label">Step 2 of 4</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-dot done"></div>
+      <div class="progress-line done"></div>
+      <div class="progress-dot active"></div>
+      <div class="progress-line"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-line"></div>
+      <div class="progress-dot"></div>
+    </div>
+    <div class="progress-labels">
+      <span class="done">Deploy ✓</span>
+      <span class="active">Channels</span>
+      <span>LLM Config</span>
+      <span>Verify</span>
+    </div>
+    <div class="wizard-content">
+      <div class="section-header"><h3>Select messaging channels</h3></div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">You can add more channels later from the dashboard.</p>
+
+      <div class="channel-grid">
+        <div class="channel-card" style="border-color: var(--accent);">
+          <div class="channel-card-header">
+            <span class="icon">✈️</span>
+            <h4>Telegram</h4>
+            <span class="toggle"><span class="toggle-switch on"></span> Enabled</span>
+          </div>
+          <div class="input-group">
+            <label>Bot Token</label>
+            <input class="input-field" value="7123456789:AAF-abc123..." readonly>
+            <div class="input-hint">ℹ️ Get token from <a href="#" style="color: var(--accent);">@BotFather</a></div>
+          </div>
+        </div>
+
+        <div class="channel-card">
+          <div class="channel-card-header">
+            <span class="icon">📱</span>
+            <h4>WhatsApp</h4>
+            <span class="toggle"><span class="toggle-switch"></span> Disabled</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">Setup requires WhatsApp Business API access.</p>
+          <a href="#" style="font-size: 0.8rem; color: var(--accent);">Learn How →</a>
+        </div>
+
+        <div class="channel-card">
+          <div class="channel-card-header">
+            <span class="icon">🎮</span>
+            <h4>Discord</h4>
+            <span class="toggle"><span class="toggle-switch"></span> Disabled</span>
+          </div>
+          <div class="input-group">
+            <label>Bot Token</label>
+            <input class="input-field" placeholder="Paste Discord bot token..." readonly>
+          </div>
+        </div>
+
+        <div class="channel-card">
+          <div class="channel-card-header">
+            <span class="icon">💬</span>
+            <h4>Slack</h4>
+            <span class="toggle"><span class="toggle-switch"></span> Disabled</span>
+          </div>
+          <div class="input-group">
+            <label>App Token</label>
+            <input class="input-field" placeholder="xapp-1-..." readonly>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <div class="channel-card" style="border-color: var(--accent);">
+          <div class="channel-card-header">
+            <span class="icon">🌐</span>
+            <h4>REST API</h4>
+            <span class="toggle"><span class="toggle-switch on"></span> Enabled (default)</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Webhook URL will be generated after deployment.</p>
+        </div>
+      </div>
+    </div>
+    <div class="wizard-footer">
+      <button class="btn btn-ghost">← Back</button>
+      <button class="btn btn-ghost">Cancel</button>
+      <button class="btn btn-primary">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 5: Wizard Step 3 — Connect LLM -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 5</div>
+  <h2 class="screen-title">Setup Wizard — Step 3: Connect LLM</h2>
+  <p class="screen-desc">User chọn AI model + tùy chỉnh system prompt cho agent</p>
+
+  <div class="app-frame">
+    <div class="wizard-header">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <span style="cursor: pointer; color: var(--text-muted);">← Back to OpenClaw Hub</span>
+      </div>
+      <div class="wizard-title">Setup Your AI Agent</div>
+      <div class="wizard-step-label">Step 3 of 4</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-dot done"></div>
+      <div class="progress-line done"></div>
+      <div class="progress-dot done"></div>
+      <div class="progress-line done"></div>
+      <div class="progress-dot active"></div>
+      <div class="progress-line"></div>
+      <div class="progress-dot"></div>
+    </div>
+    <div class="progress-labels">
+      <span class="done">Deploy ✓</span>
+      <span class="done">Channels ✓</span>
+      <span class="active">LLM Config</span>
+      <span>Verify</span>
+    </div>
+    <div class="wizard-content">
+      <div class="section-header"><h3>Configure AI Model</h3></div>
+
+      <div class="llm-option selected">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4>⭐ Use pho.chat Models (Recommended)</h4>
+          <div class="radio-circle selected"></div>
+        </div>
+        <p>Your agent will use the same AI models configured in your pho.chat account. No extra API keys needed.</p>
+        <div class="llm-detail">
+          Current model: <strong>Claude 3.5 Sonnet</strong> (via pho.chat API)<br>
+          Plan: <strong>Premium</strong> — Tier 1-3 access
+        </div>
+      </div>
+
+      <div class="llm-option">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4>🔑 Use Your Own API Key</h4>
+          <div class="radio-circle"></div>
+        </div>
+        <p>Bring your own API key from OpenAI, Anthropic, or any supported provider.</p>
+        <div style="display: flex; gap: 12px; margin-top: 12px;">
+          <div class="input-group" style="flex: 1;">
+            <label>Provider</label>
+            <select class="select-field" style="width: 100%;">
+              <option>OpenAI</option>
+              <option>Anthropic</option>
+              <option>Google</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex: 1;">
+            <label>Model</label>
+            <select class="select-field" style="width: 100%;">
+              <option>gpt-4o</option>
+              <option>gpt-4o-mini</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>API Key</label>
+          <input class="input-field" placeholder="sk-..." style="width: 100%;">
+        </div>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <div class="section-header"><h3>Agent Personality</h3></div>
+        <div class="input-group">
+          <label>System Prompt (optional)</label>
+          <textarea class="textarea-field">You are a helpful personal assistant. You respond concisely and helpfully in the user's language.</textarea>
+        </div>
+      </div>
+    </div>
+    <div class="wizard-footer">
+      <button class="btn btn-ghost">← Back</button>
+      <button class="btn btn-ghost">Cancel</button>
+      <button class="btn btn-primary">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 6: Wizard Step 4 — Deploy Progress -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 6</div>
+  <h2 class="screen-title">Setup Wizard — Step 4: Deploy & Verify</h2>
+  <p class="screen-desc">Deployment progress real-time</p>
+
+  <div class="app-frame">
+    <div class="wizard-header">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <span style="cursor: pointer; color: var(--text-muted);">← Back to OpenClaw Hub</span>
+      </div>
+      <div class="wizard-title">Setup Your AI Agent</div>
+      <div class="wizard-step-label">Step 4 of 4</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-dot done"></div>
+      <div class="progress-line done"></div>
+      <div class="progress-dot done"></div>
+      <div class="progress-line done"></div>
+      <div class="progress-dot done"></div>
+      <div class="progress-line active"></div>
+      <div class="progress-dot active"></div>
+    </div>
+    <div class="progress-labels">
+      <span class="done">Deploy ✓</span>
+      <span class="done">Channels ✓</span>
+      <span class="done">LLM ✓</span>
+      <span class="active">Verify</span>
+    </div>
+    <div class="wizard-content">
+      <div class="section-header"><h3>Deploying your AI agent...</h3></div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="deploy-steps">
+          <div class="deploy-step">
+            <span class="icon">✅</span>
+            <span class="label">Creating instance configuration...</span>
+            <span class="status done">Done</span>
+          </div>
+          <div class="deploy-step">
+            <span class="icon">✅</span>
+            <span class="label">Provisioning container...</span>
+            <span class="status done">Done</span>
+          </div>
+          <div class="deploy-step">
+            <span class="icon">✅</span>
+            <span class="label">Starting OpenClaw Gateway...</span>
+            <span class="status done">Done</span>
+          </div>
+          <div class="deploy-step">
+            <span class="icon">⏳</span>
+            <span class="label">Connecting Telegram channel...</span>
+            <span class="status working">Working</span>
+          </div>
+          <div class="deploy-step">
+            <span class="icon" style="color: var(--text-muted);">○</span>
+            <span class="label" style="color: var(--text-muted);">Running health check...</span>
+            <span class="status">Pending</span>
+          </div>
+        </div>
+        <div class="deploy-progress">
+          <div class="deploy-progress-fill" style="width: 72%;"></div>
+        </div>
+        <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">72%</div>
+      </div>
+
+      <div class="summary-card">
+        <h4 style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text-muted);">Summary</h4>
+        <div class="summary-row">
+          <span class="label">Deployment</span>
+          <span class="value">Managed Hosting</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Channels</span>
+          <span class="value">Telegram, REST API</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">AI Model</span>
+          <span class="value">Claude 3.5 Sonnet (via pho.chat)</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Gateway</span>
+          <span class="value" style="color: var(--accent);">https://agent-abc123.pho.chat</span>
+        </div>
+      </div>
+    </div>
+    <div class="wizard-footer">
+      <button class="btn btn-danger btn-sm">Cancel Deployment</button>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 7: Deploy Success -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 7</div>
+  <h2 class="screen-title">Deploy Complete — Success</h2>
+  <p class="screen-desc">Agent đã live, hướng dẫn user test trên channel</p>
+
+  <div class="app-frame">
+    <div class="topnav">
+      <span class="topnav-brand">pho.chat</span>
+      <div class="topnav-links">
+        <span class="topnav-link">Chat</span>
+        <span class="topnav-link">Discover</span>
+        <span class="topnav-link">Files</span>
+        <span class="topnav-link active">OpenClaw</span>
+        <span class="topnav-link">Settings</span>
+      </div>
+      <div class="topnav-avatar">👤</div>
+    </div>
+    <div class="main-content">
+      <div class="success-banner">
+        <div class="emoji">🎉</div>
+        <h2>Your AI Agent is Live!</h2>
+        <p>Your personal AI assistant is now running and ready to chat on your connected channels.</p>
+      </div>
+
+      <div class="section-header"><h3>Quick Start</h3></div>
+      <div class="quickstart-grid">
+        <div class="quickstart-card">
+          <h4>✈️ Try on Telegram</h4>
+          <p>Search <strong>@YourAIBot</strong> on Telegram and send a message!</p>
+          <button class="btn btn-primary btn-sm">Open Telegram →</button>
+        </div>
+        <div class="quickstart-card">
+          <h4>🌐 Try via REST API</h4>
+          <p>Send a test request to your agent's API endpoint:</p>
+          <div class="code-block">
+            curl -X POST https://agent-abc123.pho.chat/api/chat \<br>
+            &nbsp;&nbsp;-d '{"text":"Hello!"}'
+          </div>
+          <br>
+          <button class="btn btn-sm btn-outline">📋 Copy URL</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn btn-primary btn-lg">📊 Go to Dashboard</button>
+        <button class="btn btn-secondary btn-lg">⚙️ Configure Channels</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 8: Self-Host Guide Download -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 8</div>
+  <h2 class="screen-title">Self-Host — Guide & Config Download</h2>
+  <p class="screen-desc">Cho developer/power user tự deploy với generated Docker config</p>
+
+  <div class="app-frame">
+    <div class="wizard-header">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <span style="cursor: pointer; color: var(--text-muted);">← Back to OpenClaw Hub</span>
+      </div>
+      <div class="wizard-title">Self-Host Setup Guide</div>
+      <div class="wizard-step-label">Step 4 of 4</div>
+    </div>
+    <div class="wizard-content">
+      <p style="color: var(--text-secondary); margin-bottom: 20px;">We've generated a custom Docker setup based on your configuration.</p>
+
+      <div class="card">
+        <h4 style="margin-bottom: 16px;">📦 Your Configuration Files</h4>
+
+        <div class="code-editor">
+          <div class="code-editor-header">
+            <span>docker-compose.yml</span>
+            <button class="btn btn-sm btn-ghost">📋 Copy</button>
+          </div>
+          <div class="code-editor-body">
+            <span class="key">version</span>: <span class="string">'3.8'</span><br>
+            <span class="key">services</span>:<br>
+            &nbsp;&nbsp;<span class="key">openclaw</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">image</span>: <span class="string">openclaw/openclaw:latest</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">ports</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="string">"18789:18789"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">env_file</span>: <span class="string">.env</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">restart</span>: <span class="string">unless-stopped</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">volumes</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="string">./data:/app/data</span><br>
+          </div>
+        </div>
+
+        <div class="code-editor">
+          <div class="code-editor-header">
+            <span>.env</span>
+            <button class="btn btn-sm btn-ghost">📋 Copy</button>
+          </div>
+          <div class="code-editor-body">
+            <span class="comment"># Generated by pho.chat OpenClaw Setup</span><br>
+            <span class="key">OPENCLAW_LLM_PROVIDER</span>=<span class="string">anthropic</span><br>
+            <span class="key">OPENCLAW_API_KEY</span>=<span class="string">sk-ant-***</span><br>
+            <span class="key">OPENCLAW_MODEL</span>=<span class="string">claude-3-5-sonnet-20241022</span><br>
+            <span class="key">TELEGRAM_BOT_TOKEN</span>=<span class="string">7123456789:AAF-abc123</span><br>
+            <span class="key">OPENCLAW_SYSTEM_PROMPT</span>=<span class="string">"You are a helpful assistant..."</span><br>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button class="btn btn-primary btn-sm">📥 Download docker-compose.yml</button>
+          <button class="btn btn-primary btn-sm">📥 Download .env</button>
+          <button class="btn btn-secondary btn-sm">📋 Copy All</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <div class="section-header"><h3>Deployment Steps</h3></div>
+        <div style="font-size: 0.9rem; color: var(--text-secondary);">
+          <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;">
+            <div class="step-num" style="flex-shrink: 0;">1</div>
+            <div>Download files above to your server</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;">
+            <div class="step-num" style="flex-shrink: 0;">2</div>
+            <div>Run: <code class="code-block" style="display: inline; padding: 2px 8px;">docker compose up -d</code></div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;">
+            <div class="step-num" style="flex-shrink: 0;">3</div>
+            <div>Verify: <code class="code-block" style="display: inline; padding: 2px 8px;">curl http://localhost:18789/health</code></div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 20px;">
+            <div class="step-num" style="flex-shrink: 0;">4</div>
+            <div>Come back here and paste your Gateway URL to verify connection:</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <input class="input-field" placeholder="https://my-server.com:18789" style="flex: 1;">
+          <button class="btn btn-primary">Verify Connection</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 9: Dashboard — Instance Running -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 9</div>
+  <h2 class="screen-title">Dashboard — Instance Management</h2>
+  <p class="screen-desc">Sau khi deploy xong, user quản lý instance từ dashboard</p>
+
+  <div class="app-frame">
+    <div class="topnav">
+      <span class="topnav-brand">pho.chat</span>
+      <div class="topnav-links">
+        <span class="topnav-link">Chat</span>
+        <span class="topnav-link">Discover</span>
+        <span class="topnav-link">Files</span>
+        <span class="topnav-link active">OpenClaw</span>
+        <span class="topnav-link">Settings</span>
+      </div>
+      <div class="topnav-avatar">👤</div>
+    </div>
+    <div class="main-content">
+      <div class="dash-header">
+        <h2>OpenClaw Dashboard</h2>
+        <button class="btn btn-primary btn-sm">+ New Instance</button>
+      </div>
+
+      <!-- Instance Card -->
+      <div class="instance-card">
+        <div class="instance-info">
+          <h3>My Personal Agent</h3>
+          <div class="instance-meta">
+            <div><strong>ID:</strong> agent-abc123</div>
+            <div><strong>Type:</strong> Managed Hosting</div>
+            <div><strong>Created:</strong> 2026-02-24</div>
+            <div><strong>Gateway:</strong> <span style="color: var(--accent);">agent-abc123.pho.chat</span></div>
+          </div>
+        </div>
+        <div class="instance-status">
+          <div class="status-badge status-running">
+            <span class="status-dot"></span> Running
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Uptime: 14d 6h</div>
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button class="btn btn-sm btn-outline">Stop</button>
+            <button class="btn btn-sm btn-outline">Restart</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connected Channels -->
+      <div class="section-header"><h3>Connected Channels</h3></div>
+      <div class="card" style="margin-bottom: 24px; padding: 0;">
+        <table class="channel-table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Identifier</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>✈️ Telegram</td>
+              <td>@MyAIBot</td>
+              <td><span class="ch-status"><span class="ch-dot live"></span> Live</span></td>
+              <td>
+                <button class="btn btn-sm btn-ghost">Configure</button>
+                <button class="btn btn-sm btn-ghost" style="color: var(--red);">✕</button>
+              </td>
+            </tr>
+            <tr>
+              <td>🌐 REST API</td>
+              <td>/api/chat</td>
+              <td><span class="ch-status"><span class="ch-dot live"></span> Live</span></td>
+              <td>
+                <button class="btn btn-sm btn-ghost">Copy URL</button>
+                <button class="btn btn-sm btn-ghost" style="color: var(--red);">✕</button>
+              </td>
+            </tr>
+            <tr>
+              <td>💬 Slack</td>
+              <td>—</td>
+              <td><span class="ch-status"><span class="ch-dot off"></span> Off</span></td>
+              <td>
+                <button class="btn btn-sm btn-success">+ Connect</button>
+              </td>
+            </tr>
+            <tr>
+              <td>🎮 Discord</td>
+              <td>—</td>
+              <td><span class="ch-status"><span class="ch-dot off"></span> Off</span></td>
+              <td>
+                <button class="btn btn-sm btn-success">+ Connect</button>
+              </td>
+            </tr>
+            <tr>
+              <td>📱 WhatsApp</td>
+              <td>—</td>
+              <td><span class="ch-status"><span class="ch-dot off"></span> Off</span></td>
+              <td>
+                <button class="btn btn-sm btn-success">+ Connect</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Activity -->
+      <div class="section-header"><h3>Activity (Last 7 Days)</h3></div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="value">342</div>
+          <div class="label">Messages</div>
+          <div class="change">▲ 23% vs last week</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">2/5</div>
+          <div class="label">Active Channels</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">1.2s</div>
+          <div class="label">Avg Response Time</div>
+        </div>
+      </div>
+      <div class="chart-placeholder">
+        <div class="chart-bar" style="height: 20%"></div>
+        <div class="chart-bar" style="height: 35%"></div>
+        <div class="chart-bar" style="height: 50%"></div>
+        <div class="chart-bar" style="height: 70%"></div>
+        <div class="chart-bar" style="height: 85%"></div>
+        <div class="chart-bar" style="height: 95%"></div>
+        <div class="chart-bar" style="height: 100%"></div>
+        <div class="chart-bar" style="height: 90%"></div>
+        <div class="chart-bar" style="height: 65%"></div>
+        <div class="chart-bar" style="height: 45%"></div>
+        <div class="chart-bar" style="height: 30%"></div>
+        <div class="chart-bar" style="height: 20%"></div>
+        <div class="chart-bar" style="height: 35%"></div>
+        <div class="chart-bar" style="height: 50%"></div>
+        <div class="chart-bar" style="height: 70%"></div>
+        <div class="chart-bar" style="height: 85%"></div>
+        <div class="chart-bar" style="height: 95%"></div>
+        <div class="chart-bar" style="height: 80%"></div>
+        <div class="chart-bar" style="height: 65%"></div>
+        <div class="chart-bar" style="height: 45%"></div>
+        <div class="chart-bar" style="height: 30%"></div>
+        <div class="chart-bar" style="height: 35%"></div>
+        <div class="chart-bar" style="height: 55%"></div>
+        <div class="chart-bar" style="height: 75%"></div>
+        <div class="chart-bar" style="height: 90%"></div>
+        <div class="chart-bar" style="height: 100%"></div>
+        <div class="chart-bar" style="height: 85%"></div>
+        <div class="chart-bar" style="height: 70%"></div>
+      </div>
+
+      <!-- Agent Config -->
+      <div style="margin-top: 24px;">
+        <div class="section-header"><h3>Agent Configuration</h3></div>
+        <div class="card" style="padding: 0 20px;">
+          <div class="config-row">
+            <span class="config-label">AI Model</span>
+            <span class="config-value">Claude 3.5 Sonnet (via pho.chat) <button class="btn btn-sm btn-ghost">Change</button></span>
+          </div>
+          <div class="config-row">
+            <span class="config-label">System Prompt</span>
+            <span class="config-value">"You are a helpful personal..." <button class="btn btn-sm btn-ghost">Edit</button></span>
+          </div>
+          <div class="config-row">
+            <span class="config-label">Skills</span>
+            <span class="config-value">3 active <button class="btn btn-sm btn-ghost">Manage</button></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ============================================ -->
+<!-- SCREEN 10: Sidebar Navigation -->
+<!-- ============================================ -->
+<div class="screen-section">
+  <div class="screen-label">SCREEN 10</div>
+  <h2 class="screen-title">Sidebar Navigation Integration</h2>
+  <p class="screen-desc">OpenClaw xuất hiện trong sidebar của pho.chat</p>
+
+  <div class="app-frame">
+    <div class="app-layout" style="min-height: 500px;">
+      <div class="sidebar">
+        <div class="sidebar-item">💬 Chat</div>
+        <div class="sidebar-item">🔍 Discover</div>
+        <div class="sidebar-item">📁 Files</div>
+        <div class="sidebar-item">🖼️ Image</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item active">
+          🤖 OpenClaw
+          <span style="font-size: 0.6rem; background: var(--green); color: black; padding: 1px 6px; border-radius: 4px; font-weight: 700; margin-left: auto;">NEW</span>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item">⚙️ Settings</div>
+        <div class="sidebar-item">👤 Profile</div>
+      </div>
+      <div class="main-content" style="display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+        <div style="text-align: center;">
+          <div style="font-size: 3rem; margin-bottom: 12px;">🤖</div>
+          <div style="font-size: 1.1rem; color: var(--text);">OpenClaw integration lives here</div>
+          <div style="font-size: 0.9rem; margin-top: 4px;">Accessible from the main navigation sidebar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+<div class="spacer"></div>
+
+<div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.85rem;">
+  pho.chat × OpenClaw Integration — UI Mockups v1.0<br>
+  Generated for review — March 2026
+</div>
+
+</body>
+</html>
