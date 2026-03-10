@@ -129,6 +129,70 @@ if(typeof window!=='undefined'){
 }`,
           }}
         />
+        {/* === Client-side Error Reporter (Mar 2026) === */}
+        {/* Catches JS errors, unhandled rejections, and fetch 500s */}
+        {/* Deduplicates and sends to /api/error-report + PostHog */}
+        {/* Production only (pho.chat hostname) — 0 bundle size */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+if(typeof window!=='undefined'&&window.location.hostname.indexOf('pho.chat')!==-1){
+  var _errMap={},_errReset=Date.now(),_ERR_MAX=100,_ERR_WIN=300000;
+
+  function _errHash(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
+
+  function _errClean(){var n=Date.now();if(n-_errReset>600000){_errMap={};_errReset=n;}}
+
+  function _errReport(type,msg,stack,url){
+    if(!msg)return;
+    _errClean();
+    var k=_errHash(type+':'+msg);
+    var e=_errMap[k];
+    if(!e){
+      if(Object.keys(_errMap).length>=_ERR_MAX)return;
+      e={c:0,t:Date.now()};_errMap[k]=e;
+    }
+    if(Date.now()-e.t>_ERR_WIN){e.c=0;e.t=Date.now();}
+    e.c++;
+    if(e.c>3)return;
+    try{
+      var body=JSON.stringify({type:type,message:msg.slice(0,500),stack:(stack||'').slice(0,1000),url:url||window.location.pathname,userAgent:navigator.userAgent,timestamp:new Date().toISOString()});
+      if(navigator.sendBeacon){navigator.sendBeacon('/api/error-report',new Blob([body],{type:'application/json'}));}
+      else{fetch('/api/error-report',{method:'POST',body:body,headers:{'Content-Type':'application/json'},keepalive:true}).catch(function(){});}
+    }catch(x){}
+    try{if(window.posthog&&window.posthog.capture){window.posthog.capture('$exception',{$exception_type:type,$exception_message:msg,$exception_stack_trace_raw:stack});}}catch(x){}
+  }
+
+  // Catch JS errors (skip ResizeObserver & ChunkLoadError — handled above)
+  var _prevErr=window.onerror;
+  window.onerror=function(m,src,line,col,err){
+    if(typeof m==='string'&&(m.indexOf('ResizeObserver')!==-1||m.indexOf('Loading chunk')!==-1||m.indexOf('ChunkLoadError')!==-1))return _prevErr?_prevErr.apply(window,arguments):false;
+    _errReport('js_error',typeof m==='string'?m:(err&&err.message)||'Unknown',err&&err.stack,src);
+    return _prevErr?_prevErr.apply(window,arguments):false;
+  };
+
+  // Catch unhandled promise rejections (skip tRPC & ChunkLoadError — handled above)
+  window.addEventListener('unhandledrejection',function(ev){
+    var r=ev&&ev.reason;if(!r)return;
+    var msg=r.message||String(r);
+    if(r.name==='ChunkLoadError'||msg.indexOf('Loading chunk')!==-1)return;
+    if(msg==='UNAUTHORIZED'||msg==='Failed to fetch')return;
+    _errReport('js_error',msg,r.stack);
+  });
+
+  // Intercept fetch for 500+ errors
+  var _origFetch=window.fetch;
+  window.fetch=function(){
+    return _origFetch.apply(this,arguments).then(function(res){
+      if(res.status>=500){
+        _errReport('api_error','HTTP '+res.status+' '+res.url.split('?')[0],null,res.url.split('?')[0]);
+      }
+      return res;
+    });
+  };
+}`,
+          }}
+        />
         {/* Google Site Verification */}
         <meta content="PLACEHOLDER_REPLACE_WITH_ACTUAL_CODE" name="google-site-verification" />
         {process.env.DEBUG_REACT_SCAN === '1' && (

@@ -227,6 +227,8 @@ const isPublicRoute = createRouteMatcher([
   '/subscription/plans',
   // OpenClaw bot deployment & webhook APIs (public - no auth needed)
   '/api/openclaw(.*)',
+  // Error reporting (anonymous, no auth needed)
+  '/api/error-report',
   // Public API endpoints
   '/api/health',
   '/api/v1(.*)',

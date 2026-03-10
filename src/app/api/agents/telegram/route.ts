@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { count, eq, gt, lt, sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { users } from '@/database/schemas';
@@ -11,6 +11,8 @@ You must output ONLY raw JSON, with no markdown formatting or extra text.
 Available actions:
 - check_user_status: When the admin wants to look up a user by email or id. Requires "email" or "id" field.
 - sync_subscription: When the admin wants to force fix/sync a user's subscription. Requires "email" or "id" field.
+- error_summary: When the admin wants to see recent error/anomaly summary. No parameters needed.
+- health_check: When the admin wants to check overall system health status. No parameters needed.
 - unknown: When the request does not match available commands. Include a "reply" field with a conversational response asking for clarification.
 
 Example input: "Check user hung@gmail.com"
@@ -18,6 +20,12 @@ Example output: {"action": "check_user_status", "email": "hung@gmail.com"}
 
 Example input: "Fix sync for user 12345"
 Example output: {"action": "sync_subscription", "id": "12345"}
+
+Example input: "error summary"
+Example output: {"action": "error_summary"}
+
+Example input: "health check"
+Example output: {"action": "health_check"}
 `;
 
 async function sendTelegramMessage(chatId: string | number, text: string) {
@@ -190,6 +198,94 @@ The user's Phở Points balance has also been topped up. They now have full acce
                     }
                 }
 
+                break;
+            }
+            case 'error_summary': {
+                await sendTelegramMessage(chatId, '🔍 Running error checks...');
+                const db = await getServerDB();
+                const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+                const checks: string[] = [];
+
+                // Negative balances
+                const negBal = await db.select({ count: count() }).from(users).where(lt(users.phoPointsBalance, 0));
+                const negCount = negBal[0]?.count || 0;
+                checks.push(negCount > 0 ? `🔴 ${negCount} negative balance(s)` : '✅ No negative balances');
+
+                // Stuck payments
+                try {
+                    const { sepayPayments } = await import('@/database/schemas');
+                    const { and } = await import('drizzle-orm');
+                    const stuck = await db.select({ count: count() }).from(sepayPayments)
+                        .where(and(eq(sepayPayments.status, 'pending'), lt(sepayPayments.createdAt, oneHourAgo)));
+                    const stuckCount = stuck[0]?.count || 0;
+                    checks.push(stuckCount > 0 ? `🟡 ${stuckCount} stuck payment(s)` : '✅ No stuck payments');
+                } catch { checks.push('⚪ Payments table N/A'); }
+
+                // API errors
+                try {
+                    const { usageLogs } = await import('@/database/schemas');
+                    const { and, isNotNull } = await import('drizzle-orm');
+                    const errs = await db.select({ count: count() }).from(usageLogs)
+                        .where(and(gt(usageLogs.createdAt, oneHourAgo), isNotNull(sql`${usageLogs.metadata}->>'errorCode'`)));
+                    const errCount = errs[0]?.count || 0;
+                    checks.push(errCount > 0 ? `🔴 ${errCount} API error(s) (1h)` : '✅ No API errors');
+                } catch { checks.push('⚪ Usage logs N/A'); }
+
+                // Slow responses
+                try {
+                    const { usageLogs } = await import('@/database/schemas');
+                    const { and, isNotNull } = await import('drizzle-orm');
+                    const slow = await db.select({ avgMs: sql<number>`AVG(${usageLogs.responseTimeMs})` }).from(usageLogs)
+                        .where(and(gt(usageLogs.createdAt, oneHourAgo), isNotNull(usageLogs.responseTimeMs)));
+                    const avgMs = slow[0]?.avgMs || 0;
+                    checks.push(avgMs > 10_000 ? `🟡 Slow avg: ${Math.round(avgMs)}ms` : `✅ Avg response: ${Math.round(avgMs)}ms`);
+                } catch { checks.push('⚪ Response times N/A'); }
+
+                const summary = [`<b>📊 Error Summary</b>`, '', ...checks, '', `<i>${new Date().toISOString()}</i>`].join('\n');
+                await sendTelegramMessage(chatId, summary);
+                break;
+            }
+            case 'health_check': {
+                await sendTelegramMessage(chatId, '🏥 Running health checks...');
+                const results: string[] = [];
+
+                // DB check
+                try {
+                    const db = await getServerDB();
+                    await db.execute(sql`SELECT 1`);
+                    const userCount = await db.select({ count: count() }).from(users);
+                    results.push(`✅ DB: OK (${userCount[0]?.count || 0} users)`);
+                } catch {
+                    results.push('❌ DB: FAILED');
+                }
+
+                // Telegram Bot check
+                try {
+                    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+                    const res = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+                    const data = await res.json();
+                    results.push(data.ok ? `✅ Bot: @${data.result.username}` : '❌ Bot: FAILED');
+                } catch {
+                    results.push('❌ Bot: FAILED');
+                }
+
+                // AI Gateway check
+                try {
+                    const aiKey = process.env.VERCELAIGATEWAY_API_KEY;
+                    if (aiKey) {
+                        const res = await fetch('https://ai-gateway.vercel.sh/v1/models', {
+                            headers: { 'Authorization': `Bearer ${aiKey}` },
+                        });
+                        results.push(res.ok ? '✅ AI Gateway: OK' : `⚠️ AI Gateway: ${res.status}`);
+                    } else {
+                        results.push('⚪ AI Gateway: No key');
+                    }
+                } catch {
+                    results.push('❌ AI Gateway: FAILED');
+                }
+
+                const reply = [`<b>🏥 Health Check</b>`, '', ...results, '', `<i>${new Date().toISOString()}</i>`].join('\n');
+                await sendTelegramMessage(chatId, reply);
                 break;
             }
             default: {
