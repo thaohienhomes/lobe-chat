@@ -18,6 +18,15 @@ const ErrorResponse = memo<ErrorResponseProps>(({ id, type, body, message, plugi
     return <PluginSettings id={id} plugin={plugin} />;
   }
 
+  const errorKey = type ? `response.${type}` : undefined;
+  const displayMessage = errorKey
+    ? t(errorKey as any)
+    : message || 'Plugin error occurred';
+
+  // If the i18n key wasn't found (returns the key itself), fallback to raw message
+  const finalMessage =
+    displayMessage === errorKey ? message || type || 'Unknown error' : displayMessage;
+
   return (
     <Alert
       extra={
@@ -27,7 +36,7 @@ const ErrorResponse = memo<ErrorResponseProps>(({ id, type, body, message, plugi
           </Highlighter>
         </Flexbox>
       }
-      message={t(`response.${type}` as any)}
+      message={finalMessage}
       showIcon
       type={'error'}
     />
