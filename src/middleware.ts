@@ -66,6 +66,8 @@ export const config = {
     '/usage',
     '/invite',
     '/affiliate',
+    '/openclaw',
+    '/openclaw(.*)',
     // ↓ cloud ↓
   ],
 };
@@ -217,6 +219,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/payment(.*)',
   // Public pages
   '/models',
+  '/openclaw',
+  '/openclaw(.*)',
   // Subscription checkout & plans - must be public so landing page CTAs work
   // Auth is handled at component level via Clerk's useUser() hook
   '/subscription/checkout',
