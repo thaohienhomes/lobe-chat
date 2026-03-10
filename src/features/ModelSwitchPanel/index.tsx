@@ -1,7 +1,8 @@
 import { ModelIcon } from '@lobehub/icons';
+import { Popover } from 'antd';
 import { createStyles, useThemeMode } from 'antd-style';
 import { Eye, Plug, Search } from 'lucide-react';
-import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getModelTier } from '@/config/pricing';
@@ -66,7 +67,6 @@ const useModelAccess = () => {
   return useCallback(
     (id: string) => {
       const tier = id.toLowerCase().includes('auto') ? 0 : getModelTier(id);
-      // Tier 0 (Phở Auto) is always accessible
       return tier === 0 || allowed.includes(tier);
     },
     [allowed],
@@ -78,9 +78,7 @@ const ctxLabel = (n?: number) =>
   !n ? '' : n >= 1e6 ? `${Math.round(n / 1e6)}M` : `${Math.round(n / 1e3)}K`;
 
 const iconBg = (tier: number, isDark: boolean) => {
-  if (tier === 0) {
-    return isDark ? 'rgba(236,72,153,0.18)' : 'rgba(236,72,153,0.1)';
-  }
+  if (tier === 0) return isDark ? 'rgba(236,72,153,0.18)' : 'rgba(236,72,153,0.1)';
   if (isDark) {
     return tier === 1
       ? 'rgba(34,197,94,0.15)'
@@ -102,22 +100,13 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
   const subtleText = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.32)';
   const hoverBg = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)';
   const selectedBg = isDark ? 'rgba(139,92,246,0.14)' : 'rgba(139,92,246,0.08)';
-  const panelBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
   const sectionBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  const panelShadow = isDark
-    ? '0 20px 60px rgba(0,0,0,0.7), 0 0 1px rgba(255,255,255,0.1)'
-    : '0 16px 48px rgba(0,0,0,0.14), 0 0 1px rgba(0,0,0,0.12)';
   const capBg = isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.1)';
   const capColor = isDark ? 'rgba(167,139,250,0.9)' : 'rgba(109,40,217,0.7)';
   const capBorder = isDark ? 'rgba(139,92,246,0.2)' : 'rgba(139,92,246,0.15)';
+  const panelBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
 
   return {
-    backdrop: css`
-      position: fixed;
-      z-index: 1000;
-      inset: 0;
-    `,
-
     capIcon: css`
       display: flex;
       align-items: center;
@@ -264,35 +253,15 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => {
       }
     `,
 
-    panel: css`
-      position: fixed;
-      z-index: 1001;
-
+    panelContent: css`
       overflow: hidden;
       display: flex;
       flex-direction: column;
 
       width: 380px;
-      max-height: 540px;
-      border: 1px solid ${panelBorder};
-      border-radius: 16px;
-
-      background: ${token.colorBgElevated};
-      box-shadow: ${panelShadow};
-
-      animation: panel-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-      @keyframes panel-in {
-        from {
-          transform: translateY(8px) scale(0.98);
-          opacity: 0;
-        }
-
-        to {
-          transform: translateY(0) scale(1);
-          opacity: 1;
-        }
-      }
+      max-height: 480px;
+      margin-block: -12px;
+      margin-inline: -16px;
     `,
 
     scroll: css`
@@ -515,10 +484,6 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
   const tiers = useEnabledChatModels() as TierGroup[];
   const canUse = useModelAccess();
   const [q, setQ] = useState('');
-  const trigRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ── internal open state ── */
   const [intOpen, setIntOpen] = useState(false);
@@ -531,18 +496,6 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
     },
     [onOpenChange],
   );
-
-  /* ── position ── */
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  useEffect(() => {
-    if (!isOpen || !trigRef.current) return;
-    const r = trigRef.current.getBoundingClientRect();
-    const h = 540;
-    setPos({
-      x: Math.max(8, Math.min(r.left, window.innerWidth - 396)),
-      y: r.top > h + 16 ? r.top - h - 8 : r.bottom + 8,
-    });
-  }, [isOpen]);
 
   /* ── search filter ── */
   const filtered = useMemo(() => {
@@ -572,224 +525,170 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open: extOpen }
   /* ── quota hint color ── */
   const quotaColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.3)';
 
-  return (
-    <>
-      <div
-        className={styles.trigger}
-        onClick={() => setOpen(!isOpen)}
-        onMouseEnter={() => {
-          if (closeTimerRef.current) {
-            clearTimeout(closeTimerRef.current);
-            closeTimerRef.current = null;
-          }
-          if (!isOpen) {
-            hoverTimerRef.current = setTimeout(() => setOpen(true), 200);
-          }
-        }}
-        onMouseLeave={() => {
-          if (hoverTimerRef.current) {
-            clearTimeout(hoverTimerRef.current);
-            hoverTimerRef.current = null;
-          }
-          closeTimerRef.current = setTimeout(() => setOpen(false), 300);
-        }}
-        ref={trigRef}
-      >
-        {children}
+  /* ── Panel content (used as Popover content) ── */
+  const panelContent = (
+    <div className={styles.panelContent}>
+      {/* ── Search ── */}
+      <div className={styles.search}>
+        <Search className={styles.searchIcon} size={15} />
+        <input
+          autoFocus
+          className={styles.searchInput}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={t('ModelSwitchPanel.searchPlaceholder')}
+          type="text"
+          value={q}
+        />
       </div>
 
-      {isOpen && (
-        <>
-          <div className={styles.backdrop} onClick={() => setOpen(false)} />
-          <div
-            className={styles.panel}
-            onMouseEnter={() => {
-              if (closeTimerRef.current) {
-                clearTimeout(closeTimerRef.current);
-                closeTimerRef.current = null;
-              }
-            }}
-            onMouseLeave={() => {
-              closeTimerRef.current = setTimeout(() => setOpen(false), 300);
-            }}
-            ref={panelRef}
-            style={{ left: pos.x, top: pos.y }}
-          >
-            {/* ── Search ── */}
-            <div className={styles.search}>
-              <Search className={styles.searchIcon} size={15} />
-              <input
-                autoFocus
-                className={styles.searchInput}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder={t('ModelSwitchPanel.searchPlaceholder')}
-                type="text"
-                value={q}
-              />
-            </div>
+      {/* ── Scroll ── */}
+      <div className={styles.scroll}>
+        {filtered.map((tier) => {
+          const tierNum = (tier.tierGroup ?? 1) as 0 | 1 | 2 | 3;
+          const cfg = TIER[tierNum];
+          return (
+            <div className={styles.section} key={tier.id}>
+              {tierNum !== 0 && (
+                <div className={styles.sectionHeader} style={{ color: cfg.accent }}>
+                  <span style={{ fontSize: 13 }}>{cfg.icon}</span>
+                  {t(cfg.labelKey)}
+                  {cfg.quotaKey && (
+                    <span
+                      style={{
+                        color: quotaColor,
+                        fontSize: 9,
+                        fontWeight: 400,
+                        marginLeft: 'auto',
+                        textTransform: 'none',
+                      }}
+                    >
+                      {t(cfg.quotaKey as 'ModelSwitchPanel.quotaHint', { count: cfg.quotaCount })}
+                    </span>
+                  )}
+                </div>
+              )}
 
-            {/* ── Scroll ── */}
-            <div className={styles.scroll}>
-              {filtered.map((tier) => {
-                const tierNum = (tier.tierGroup ?? 1) as 0 | 1 | 2 | 3;
-                const cfg = TIER[tierNum];
+              {tier.children.map((m) => {
+                const ok = canUse(m.id);
+                const prov = (m as any).originProvider || tier.id;
+                const sel = model === m.id;
+                const isNew = NEW_MODEL_IDS.has(m.id);
+                const speed = SPEED_MODELS[m.id];
+                const desc = MODEL_DESCRIPTIONS[m.id];
+                const ctx = ctxLabel(m.contextWindowTokens);
+                const mTier = getModelTier(m.id);
+
                 return (
-                  <div className={styles.section} key={tier.id}>
-                    {/* Section header — skip for tier 0 (Phở Auto) */}
-                    {tierNum !== 0 && (
-                      <div className={styles.sectionHeader} style={{ color: cfg.accent }}>
-                        <span style={{ fontSize: 13 }}>{cfg.icon}</span>
-                        {t(cfg.labelKey)}
-                        {cfg.quotaKey && (
-                          <span
-                            style={{
-                              color: quotaColor,
-                              fontSize: 9,
-                              fontWeight: 400,
-                              marginLeft: 'auto',
-                              textTransform: 'none',
-                            }}
-                          >
-                            {t(cfg.quotaKey as 'ModelSwitchPanel.quotaHint', {
-                              count: cfg.quotaCount,
-                            })}
-                          </span>
-                        )}
-                      </div>
+                  <div
+                    className={cx(
+                      styles.modelRow,
+                      sel && styles.selected,
+                      !ok && styles.modelRowDisabled,
+                    )}
+                    key={m.id}
+                    onClick={ok ? () => onSelect(m.id, prov) : undefined}
+                  >
+                    {sel && (
+                      <div className={styles.selectedBar} style={{ background: cfg.accent }} />
                     )}
 
-                    {/* Model rows */}
-                    {tier.children.map((m) => {
-                      const ok = canUse(m.id);
-                      const prov = (m as any).originProvider || tier.id;
-                      const sel = model === m.id;
-                      const isNew = NEW_MODEL_IDS.has(m.id);
-                      const speed = SPEED_MODELS[m.id];
-                      const desc = MODEL_DESCRIPTIONS[m.id];
-                      const ctx = ctxLabel(m.contextWindowTokens);
-                      const mTier = getModelTier(m.id);
+                    <div
+                      className={styles.modelIcon}
+                      style={{
+                        background: speed
+                          ? isDark
+                            ? 'linear-gradient(135deg,rgba(250,204,21,0.15),rgba(251,146,60,0.12))'
+                            : 'linear-gradient(135deg,rgba(250,204,21,0.12),rgba(251,146,60,0.08))'
+                          : iconBg(tierNum, isDark),
+                      }}
+                    >
+                      <ModelIcon model={m.id} size={18} />
+                    </div>
 
-                      return (
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className={styles.modelName}>
+                        {m.displayName}
+                        {mTier > 1 && <TierBadge isDark={isDark} tier={mTier} />}
+                        {speed && <span className={styles.speedBadge}>⚡ {speed} tok/s</span>}
+                        {isNew && <span className={styles.newBadge}>MỚI</span>}
+                      </div>
+                      {speed ? (
                         <div
-                          className={cx(
-                            styles.modelRow,
-                            sel && styles.selected,
-                            !ok && styles.modelRowDisabled,
-                          )}
-                          key={m.id}
-                          onClick={ok ? () => onSelect(m.id, prov) : undefined}
+                          style={{ alignItems: 'center', display: 'flex', gap: 4, marginTop: 3 }}
                         >
-                          {/* Selected accent bar */}
-                          {sel && (
-                            <div
-                              className={styles.selectedBar}
-                              style={{ background: cfg.accent }}
-                            />
-                          )}
-
-                          {/* Model icon */}
                           <div
-                            className={styles.modelIcon}
+                            className={styles.speedBar}
                             style={{
-                              background: speed
-                                ? isDark
-                                  ? 'linear-gradient(135deg,rgba(250,204,21,0.15),rgba(251,146,60,0.12))'
-                                  : 'linear-gradient(135deg,rgba(250,204,21,0.12),rgba(251,146,60,0.08))'
-                                : iconBg(tierNum, isDark),
+                              background: 'linear-gradient(90deg,#eab308,#f97316)',
+                              width: 36,
                             }}
-                          >
-                            <ModelIcon model={m.id} size={18} />
-                          </div>
-
-                          {/* Model info */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div className={styles.modelName}>
-                              {m.displayName}
-                              {mTier > 1 && <TierBadge isDark={isDark} tier={mTier} />}
-                              {speed && <span className={styles.speedBadge}>⚡ {speed} tok/s</span>}
-                              {isNew && <span className={styles.newBadge}>MỚI</span>}
-                            </div>
-                            {/* Subtitle or speed indicator */}
-                            {speed ? (
-                              <div
-                                style={{
-                                  alignItems: 'center',
-                                  display: 'flex',
-                                  gap: 4,
-                                  marginTop: 3,
-                                }}
-                              >
-                                <div
-                                  className={styles.speedBar}
-                                  style={{
-                                    background: 'linear-gradient(90deg,#eab308,#f97316)',
-                                    width: 36,
-                                  }}
-                                />
-                                <span className={styles.speedLabel}>
-                                  {desc || 'Instant generation'}
-                                </span>
-                              </div>
-                            ) : desc ? (
-                              <div className={styles.modelSub}>{desc}</div>
-                            ) : null}
-                          </div>
-
-                          {/* Capability icons (SVG via lucide) */}
-                          <div
-                            style={{
-                              alignItems: 'center',
-                              display: 'flex',
-                              flexShrink: 0,
-                              gap: 4,
-                            }}
-                          >
-                            {m.abilities?.functionCall && (
-                              <div className={styles.capIcon} title="Plugins">
-                                <Plug size={11} />
-                              </div>
-                            )}
-                            {m.abilities?.vision && (
-                              <div className={styles.capIcon} title="Vision">
-                                <Eye size={11} />
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Context size */}
-                          {ctx && <span className={styles.ctx}>{ctx}</span>}
+                          />
+                          <span className={styles.speedLabel}>{desc || 'Instant generation'}</span>
                         </div>
-                      );
-                    })}
+                      ) : desc ? (
+                        <div className={styles.modelSub}>{desc}</div>
+                      ) : null}
+                    </div>
+
+                    <div style={{ alignItems: 'center', display: 'flex', flexShrink: 0, gap: 4 }}>
+                      {m.abilities?.functionCall && (
+                        <div className={styles.capIcon} title="Plugins">
+                          <Plug size={11} />
+                        </div>
+                      )}
+                      {m.abilities?.vision && (
+                        <div className={styles.capIcon} title="Vision">
+                          <Eye size={11} />
+                        </div>
+                      )}
+                    </div>
+
+                    {ctx && <span className={styles.ctx}>{ctx}</span>}
                   </div>
                 );
               })}
-              {filtered.length === 0 && (
-                <div className={styles.empty}>{t('ModelSwitchPanel.emptySearch')}</div>
-              )}
             </div>
+          );
+        })}
+        {filtered.length === 0 && (
+          <div className={styles.empty}>{t('ModelSwitchPanel.emptySearch')}</div>
+        )}
+      </div>
 
-            {/* ── Footer ── */}
-            <div className={styles.footer}>
-              <div className={styles.tierLegend}>
-                <span>
-                  <span className={styles.dot} style={{ background: '#22c55e' }} />{' '}
-                  {t('ModelSwitchPanel.legendFree')}
-                </span>
-                <span>
-                  <span className={styles.dot} style={{ background: '#a78bfa' }} />{' '}
-                  {t('ModelSwitchPanel.legendPro')}
-                </span>
-                <span>
-                  <span className={styles.dot} style={{ background: '#f59e0b' }} />{' '}
-                  {t('ModelSwitchPanel.legendMax')}
-                </span>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </>
+      {/* ── Footer ── */}
+      <div className={styles.footer}>
+        <div className={styles.tierLegend}>
+          <span>
+            <span className={styles.dot} style={{ background: '#22c55e' }} />{' '}
+            {t('ModelSwitchPanel.legendFree')}
+          </span>
+          <span>
+            <span className={styles.dot} style={{ background: '#a78bfa' }} />{' '}
+            {t('ModelSwitchPanel.legendPro')}
+          </span>
+          <span>
+            <span className={styles.dot} style={{ background: '#f59e0b' }} />{' '}
+            {t('ModelSwitchPanel.legendMax')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <Popover
+      arrow={false}
+      content={panelContent}
+      mouseEnterDelay={0.15}
+      mouseLeaveDelay={0.4}
+      onOpenChange={setOpen}
+      open={isOpen}
+      overlayInnerStyle={{ padding: '12px 16px' }}
+      placement="topLeft"
+      trigger="hover"
+    >
+      <div className={styles.trigger}>{children}</div>
+    </Popover>
   );
 });
 
