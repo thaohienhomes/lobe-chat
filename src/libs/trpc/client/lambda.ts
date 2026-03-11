@@ -63,9 +63,8 @@ const errorHandlingLink: TRPCLink<LambdaRouter> = () => {
           // Don't show notifications for abort errors
           if (showError && !isAbortError) {
             const status = err.data?.httpStatus as number;
-            const { fetchErrorNotification } = await import(
-              '@/components/Error/fetchErrorNotification'
-            );
+            const { fetchErrorNotification } =
+              await import('@/components/Error/fetchErrorNotification');
 
             // Don't show notification for 401 errors - let the message error handler display ClerkLogin component
             // This allows proper error handling in the catch block to create ChatErrorType.InvalidClerkUser
@@ -120,9 +119,8 @@ const customHttpBatchLink = httpBatchLink({
     log('Getting provider from store for image page: %s', location.pathname);
     if (location.pathname === '/image') {
       const { getImageStoreState } = await import('@/store/image');
-      const { imageGenerationConfigSelectors } = await import(
-        '@/store/image/slices/generationConfig/selectors'
-      );
+      const { imageGenerationConfigSelectors } =
+        await import('@/store/image/slices/generationConfig/selectors');
       provider = imageGenerationConfigSelectors.provider(getImageStoreState()) as ModelProvider;
       log('Getting provider from store for image page: %s', provider);
     }
