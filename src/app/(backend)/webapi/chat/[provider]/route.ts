@@ -95,6 +95,104 @@ function countTokens(text: string): number {
   return Math.ceil(byteLength / 3);
 }
 
+// ============  UTF-8 Repair for Vercel AI Gateway + Anthropic  ============ //
+//
+// When the Vercel AI Gateway proxies Anthropic's API, the SSE response
+// sometimes arrives with UTF-8 bytes mis-interpreted as Latin-1/Windows-1252,
+// causing Vietnamese/CJK diacritics to display as mojibake
+// (e.g. "ấ" → "áº¥", "Đ" → "Ä\x90").
+//
+// This TransformStream detects and repairs double-encoded UTF-8 in SSE
+// data payloads by re-encoding the garbled string back through Latin-1
+// and decoding the result as proper UTF-8.
+
+/**
+ * Detect whether a string likely contains double-encoded UTF-8.
+ * Checks for common Latin-1 byte patterns that result from interpreting
+ * UTF-8 continuation bytes (0x80-0xBF) as Latin-1 characters.
+ */
+function looksLikeDoublyEncodedUtf8(text: string): boolean {
+  // Pattern: Ã followed by a character in the 0x80-0xBF range (Latin-1 representations
+  // of UTF-8 lead bytes 0xC3 + continuation byte). Common in Vietnamese/European text.
+  // Also check for Ä, Å (0xC4, 0xC5) which appear in Vietnamese Đ, ă, etc.
+  // eslint-disable-next-line no-control-regex
+  return /[\u00C0-\u00C5][\u0080-\u00BF]/.test(text);
+}
+
+/**
+ * Repair a double-encoded UTF-8 string.
+ * Converts the string back to Latin-1 bytes, then decodes those bytes as UTF-8.
+ */
+function repairDoublyEncodedUtf8(text: string): string {
+  try {
+    // Convert each char code to a byte (Latin-1 identity mapping)
+    const bytes = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) {
+      const code = text.charCodeAt(i);
+      // Only safe for chars in 0x00-0xFF range (Latin-1)
+      if (code > 0xFF) return text; // Contains non-Latin-1 chars, abort repair
+      bytes[i] = code;
+    }
+    // Decode the bytes as UTF-8
+    const decoded = new TextDecoder('utf8', { fatal: true }).decode(bytes);
+    return decoded;
+  } catch {
+    // If decoding fails, the text wasn't actually double-encoded
+    return text;
+  }
+}
+
+/**
+ * Create a TransformStream that repairs double-encoded UTF-8 in SSE data payloads.
+ * Only processes `data: ` lines in the SSE stream; passes through all other lines unchanged.
+ */
+function createUtf8RepairStream(): TransformStream<Uint8Array, Uint8Array> {
+  const decoder = new TextDecoder('utf8', { fatal: false });
+  const encoder = new TextEncoder();
+  let partialLine = '';
+
+  return new TransformStream({
+    flush(controller) {
+      // Handle any remaining partial data
+      if (partialLine) {
+        controller.enqueue(encoder.encode(partialLine));
+        partialLine = '';
+      }
+    },
+    transform(chunk, controller) {
+      const text = partialLine + decoder.decode(chunk, { stream: true });
+      const lines = text.split('\n');
+
+      // The last element might be an incomplete line
+      partialLine = lines.pop() || '';
+
+      for (const line of lines) {
+        let outputLine = line;
+
+        // Only repair `data: ` lines that contain JSON string payloads
+        if (line.startsWith('data: ') && !line.startsWith('data: [DONE]')) {
+          try {
+            const jsonStr = line.slice(6);
+            const parsed = JSON.parse(jsonStr);
+
+            // Check if this is an SSE text event with string data
+            if (typeof parsed === 'string' && looksLikeDoublyEncodedUtf8(parsed)) {
+              const repaired = repairDoublyEncodedUtf8(parsed);
+              outputLine = `data: ${JSON.stringify(repaired)}`;
+              // Log first occurrence for debugging
+              console.log(`[UTF-8 Repair] Fixed double-encoded text in SSE data`);
+            }
+          } catch {
+            // Not valid JSON or parsing failed, pass through unchanged
+          }
+        }
+
+        controller.enqueue(encoder.encode(outputLine + '\n'));
+      }
+    },
+  });
+}
+
 // ============  Tool Schema Sanitization   ============ //
 
 /**
@@ -498,8 +596,19 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     const requestStartTime = Date.now();
 
     if (data.stream && response.body) {
+      // ── UTF-8 Repair for Anthropic via Vercel AI Gateway ──
+      // The Vercel AI Gateway sometimes returns Anthropic responses with
+      // UTF-8 bytes mis-interpreted as Latin-1, causing Vietnamese/CJK mojibake.
+      // Pipe through a repair stream to detect and fix double-encoded UTF-8.
+      const needsUtf8Repair =
+        actualProviderUsed === 'vercelaigateway' && actualModelUsed.startsWith('anthropic/');
+
+      const bodyStream = needsUtf8Repair
+        ? response.body.pipeThrough(createUtf8RepairStream())
+        : response.body;
+
       // STREAMING: Tee the stream to audit usage
-      const [stream1, stream2] = response.body.tee();
+      const [stream1, stream2] = bodyStream.tee();
 
       // Process audit in background (don't await)
       (async () => {
