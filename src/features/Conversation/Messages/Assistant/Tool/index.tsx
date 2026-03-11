@@ -24,7 +24,7 @@ export interface InspectorProps {
 
 const Tool = memo<InspectorProps>(
   ({ arguments: requestArgs, apiName, messageId, id, index, identifier, style, payload, type }) => {
-    const [showDetail, setShowDetail] = useState(type !== 'mcp');
+    const [showDetail, setShowDetail] = useState(false);
     const [showPluginRender, setShowPluginRender] = useState(false);
     const isLoading = useChatStore(chatSelectors.isInToolsCalling(messageId, index));
 

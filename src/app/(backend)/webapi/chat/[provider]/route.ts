@@ -111,11 +111,12 @@ function countTokens(text: string): number {
  * UTF-8 continuation bytes (0x80-0xBF) as Latin-1 characters.
  */
 function looksLikeDoublyEncodedUtf8(text: string): boolean {
-  // Pattern: Latin-1 lead bytes (0xC0-0xC5, 0xC3, 0xE1-0xE2) followed by
-  // continuation byte range (0x80-0xBF) rendered as Latin-1 chars.
-  // Common in Vietnamese: Ã (0xC3), Ä (0xC4), Æ (0xC6), á (0xE1), â (0xE2)
+  // Detect double-encoded UTF-8 by looking for UTF-8 lead bytes followed by
+  // continuation bytes, all rendered as Latin-1/Unicode code points.
+  // Lead byte ranges: 0xC0-0xDF (2-byte), 0xE0-0xEF (3-byte), 0xF0-0xF4 (4-byte/emoji)
+  // Continuation bytes: 0x80-0xBF
   // eslint-disable-next-line no-control-regex
-  return /[\u00C0-\u00C6\u00E0-\u00E2][\u0080-\u00BF]/.test(text);
+  return /[\u00C0-\u00F4][\u0080-\u00BF]/.test(text);
 }
 
 /**
