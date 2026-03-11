@@ -20,6 +20,7 @@ export const LobeAnalyticsProviderWrapper = memo<Props>(({ children }) => {
         measurementId: analyticsEnv.GOOGLE_ANALYTICS_MEASUREMENT_ID ?? '',
       }}
       postHogConfig={{
+        capture_performance: { web_vitals: true },
         debug: analyticsEnv.DEBUG_POSTHOG_ANALYTICS,
         enabled: analyticsEnv.NEXT_PUBLIC_POSTHOG_ENABLED,
         // Use local proxy to bypass ad blockers

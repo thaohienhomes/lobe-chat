@@ -89,12 +89,23 @@ export const naive: CrawlImpl = async (url, { filterOptions }) => {
       return;
     }
 
-    // it's blocked by cloudflare
-    if (result.title !== 'Just a moment...') {
+    // Detect WAF/bot challenge pages that return HTML but no useful content
+    const blockedTitles = [
+      'Just a moment...',           // Cloudflare challenge
+      'Checking your browser...',   // Generic bot check
+      'Azure WAF JS Challenge',     // Azure WAF
+      'Attention Required!',        // Cloudflare block page
+      'Access Denied',              // Generic WAF block
+      'Please Wait...',             // Various bot challenges
+    ];
+
+    const titleLower = (result.title || '').toLowerCase();
+    const isBlocked = blockedTitles.some((t) => titleLower === t.toLowerCase());
+
+    if (isBlocked) {
       return;
     }
 
-    // just return
     return {
       content: result.content,
       contentType: 'text',

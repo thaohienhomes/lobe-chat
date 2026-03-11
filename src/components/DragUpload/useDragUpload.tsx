@@ -155,13 +155,22 @@ export const useDragUpload = (onUploadFiles: (files: File[]) => Promise<void>) =
   };
 
   useEffect(() => {
-    if (getContainer()) return;
+    const existing = getContainer();
+    if (existing) return;
+
     const root = document.createElement('div');
     root.id = DRAGGING_ROOT_ID;
     document.body.append(root);
 
     return () => {
-      root.remove();
+      // Guard against "removeChild" DOMException when parent is already detached
+      try {
+        if (root.parentNode) {
+          root.remove();
+        }
+      } catch {
+        // Node already removed from DOM — safe to ignore
+      }
     };
   }, []);
 

@@ -10,6 +10,40 @@ import type { LambdaRouter } from '@/server/routers/lambda';
 
 const log = debug('lobe-image:lambda-client');
 
+// Retry once on UNAUTHORIZED — waits for Clerk auth hydration via store polling
+// Prevents SSO callback race condition where Lambda calls fire before token is ready
+const retryOnUnauthorizedLink: TRPCLink<LambdaRouter> = () => {
+  return ({ op, next }) =>
+    observable((observer) => {
+      let retried = false;
+      const attempt = () =>
+        next(op).subscribe({
+          complete: () => observer.complete(),
+          error: async (err) => {
+            const status = (err as any).data?.httpStatus as number | undefined;
+            if (status === 401 && !retried) {
+              retried = true;
+              // Poll useUserStore for Clerk auth readiness instead of fixed delay
+              const { useUserStore } = await import('@/store/user');
+              await new Promise<void>((resolve) => {
+                const check = () => {
+                  if (useUserStore.getState().isLoaded) return resolve();
+                  setTimeout(check, 200);
+                };
+                check();
+                setTimeout(resolve, 5000); // Safety: max 5s wait
+              });
+              attempt();
+              return;
+            }
+            observer.error(err);
+          },
+          next: (value) => observer.next(value),
+        });
+      attempt();
+    });
+};
+
 // handle error
 const errorHandlingLink: TRPCLink<LambdaRouter> = () => {
   return ({ op, next }) =>
@@ -104,7 +138,7 @@ const customHttpBatchLink = httpBatchLink({
 });
 
 // 3. assembly links
-const links = [errorHandlingLink, customHttpBatchLink];
+const links = [retryOnUnauthorizedLink, errorHandlingLink, customHttpBatchLink];
 
 export const lambdaClient = createTRPCClient<LambdaRouter>({
   links,
