@@ -10,6 +10,7 @@ import { chatPortalSelectors, chatSelectors } from '@/store/chat/selectors';
 import { ArtifactDisplayMode } from '@/store/chat/slices/portal/initialState';
 import { ArtifactType } from '@/types/artifact';
 
+import QuickActions from '../QuickActions';
 import Renderer from './Renderer';
 
 const ARTIFACT_CODE_FONT_SIZE = 12;
@@ -203,7 +204,7 @@ const ArtifactsUI = memo(() => {
         gap={0}
         height={'100%'}
         horizontal
-        style={{ overflow: 'hidden' }}
+        style={{ overflow: 'hidden', position: 'relative' }}
       >
         {/* Code Panel — left */}
         <Flexbox
@@ -229,6 +230,7 @@ const ArtifactsUI = memo(() => {
             <Renderer content={artifactContent} type={artifactType} />
           )}
         </Flexbox>
+        {!isStreamingSplit && <QuickActions />}
       </Flexbox>
     );
   }
@@ -240,7 +242,7 @@ const ArtifactsUI = memo(() => {
       gap={8}
       height={'100%'}
       paddingInline={12}
-      style={{ overflow: 'hidden' }}
+      style={{ overflow: 'hidden', position: 'relative' }}
     >
       {showCode ? (
         <Highlighter
@@ -252,6 +254,7 @@ const ArtifactsUI = memo(() => {
       ) : (
         <Renderer content={artifactContent} type={artifactType} />
       )}
+      {isArtifactTagClosed && <QuickActions />}
     </Flexbox>
   );
 });
