@@ -1,3 +1,5 @@
+'use client';
+
 /* eslint-disable no-undef */
 import { Icon } from '@lobehub/ui';
 import { createStyles } from 'antd-style';

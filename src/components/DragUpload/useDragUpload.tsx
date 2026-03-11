@@ -1,3 +1,5 @@
+'use client';
+
 /* eslint-disable no-undef */
 import { App } from 'antd';
 import { useEffect, useRef, useState } from 'react';
