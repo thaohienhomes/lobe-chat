@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { HtmlPreviewAction } from '@/components/HtmlPreview';
+import { LOADING_FLAT } from '@/const/message';
 import { isDesktop } from '@/const/version';
 import ChatItem from '@/features/ChatItem';
 import { VirtuosoContext } from '@/features/Conversation/components/VirtualizedList/VirtuosoContext';
@@ -303,6 +304,13 @@ const Item = memo<ChatListItemProps>(
     const errorMessage = useMemo(() => item && <ErrorMessageExtra data={item} />, [item]);
     const messageExtra = useMemo(() => item && <MessageExtra data={item} />, [item]);
 
+    // Tool-call-only messages (tools present but no text content) should render
+    // compact without avatar, timestamp, or actions — Perplexity-style
+    const isToolCallOnly =
+      item?.role === 'assistant' &&
+      !!item?.tools?.length &&
+      (!item?.content || item?.content === LOADING_FLAT);
+
     return (
       item && (
         <InPortalThreadContext.Provider value={inPortalThread}>
@@ -312,8 +320,8 @@ const Item = memo<ChatListItemProps>(
             onContextMenu={onContextMenu}
           >
             <ChatItem
-              actions={actionBar}
-              avatar={item.meta}
+              actions={isToolCallOnly ? undefined : actionBar}
+              avatar={isToolCallOnly ? { backgroundColor: 'transparent', title: ' ' } : item.meta}
               belowMessage={belowMessage}
               editing={editing}
               error={error}
@@ -322,7 +330,7 @@ const Item = memo<ChatListItemProps>(
               markdownProps={markdownProps}
               message={message}
               messageExtra={messageExtra}
-              onAvatarClick={onAvatarsClick}
+              onAvatarClick={isToolCallOnly ? undefined : onAvatarsClick}
               onChange={onChange}
               onDoubleClick={onDoubleClick}
               onEditingChange={onEditingChange}
@@ -330,7 +338,7 @@ const Item = memo<ChatListItemProps>(
               primary={item.role === 'user'}
               renderMessage={renderMessage}
               text={text}
-              time={item.updatedAt || item.createdAt}
+              time={isToolCallOnly ? undefined : item.updatedAt || item.createdAt}
               variant={type === 'chat' ? 'bubble' : 'docs'}
             />
             {endRender}
