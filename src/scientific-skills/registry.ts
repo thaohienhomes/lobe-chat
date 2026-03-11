@@ -58,9 +58,7 @@ export const buildSkillsSummary = (): string => {
     const domainSkills = allSkills.filter((s) => domain.skills.includes(s.slug));
     if (domainSkills.length === 0) continue;
 
-    lines.push(`### ${domain.avatar} ${domain.name}`);
-    lines.push(domain.description);
-    lines.push('');
+    lines.push(`### ${domain.avatar} ${domain.name}`, domain.description, '');
     for (const skill of domainSkills) {
       lines.push(`- **${skill.name}**: ${skill.description.slice(0, 120)}${skill.description.length > 120 ? '...' : ''}`);
     }

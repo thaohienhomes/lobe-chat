@@ -275,7 +275,7 @@ const ConsortStrobe = memo(() => {
             {/* Checklist table */}
             <div className={styles.table}>
                 {/* Column header */}
-                <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr 140px', gap: 10, padding: '6px 12px', borderBottom: '2px solid', opacity: 0.6, fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
+                <div style={{ borderBottom: '2px solid', display: 'grid', fontSize: 10, fontWeight: 700, gap: 10, gridTemplateColumns: '24px 1fr 140px', opacity: 0.6, padding: '6px 12px', textTransform: 'uppercase' }}>
                     <span>✓</span><span>Item</span><span>Location in manuscript</span>
                 </div>
 
@@ -293,7 +293,7 @@ const ConsortStrobe = memo(() => {
 
                                 {/* Label */}
                                 <Flexbox gap={2}>
-                                    <span style={{ fontSize: 12, fontWeight: checked[item.id] ? 400 : 600, textDecoration: checked[item.id] ? 'line-through' : 'none', opacity: checked[item.id] ? 0.5 : 1 }}>
+                                    <span style={{ fontSize: 12, fontWeight: checked[item.id] ? 400 : 600, opacity: checked[item.id] ? 0.5 : 1, textDecoration: checked[item.id] ? 'line-through' : 'none' }}>
                                         {item.label}
                                     </span>
                                     <span style={{ fontSize: 10, opacity: 0.4 }}>{item.note}</span>

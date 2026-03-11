@@ -33,7 +33,7 @@ interface PlagiarismResult {
 // Extract key sentences for matching (first/last sentences of each paragraph)
 const extractKeySentences = (text: string, maxSentences = 5): string[] => {
     const sentences = text
-        .split(/[.!?]+/)
+        .split(/[!.?]+/)
         .map((s) => s.trim())
         .filter((s) => s.length > 40 && s.length < 300);
 

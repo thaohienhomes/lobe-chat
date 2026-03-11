@@ -5,7 +5,7 @@
  * Output matches Storyboard interface from types/storyboard.ts.
  */
 
-import type { Concept, ConceptMap, RenderTrack } from '../types/concept-map';
+import type { Concept, ConceptMap } from '../types/concept-map';
 import type { DifficultyLevel } from '../types/parsed-content';
 import type { Scene, Storyboard, TargetAudience } from '../types/storyboard';
 

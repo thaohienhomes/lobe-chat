@@ -137,7 +137,7 @@ const EvidenceSummarizer = memo(() => {
                 throw new Error((errJson as any).error || `Server error ${res.status}`);
             }
 
-            const json = await res.json() as { text: string; model?: string; provider?: string };
+            const json = await res.json() as { model?: string; provider?: string, text: string; };
             setOutput(json.text || '(No content returned)');
         } catch (err) {
             setOutput(`⚠️ Error calling AI: ${String(err)}\n\nAi Synthesis requires a valid session and at least one configured AI provider.`);

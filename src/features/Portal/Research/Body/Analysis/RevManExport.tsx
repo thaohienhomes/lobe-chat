@@ -42,9 +42,9 @@ interface OutcomeEntry {
     ci_start: string;
     effect: string;
     id: string;
-    name: string;
     n_control: string;
     n_intervention: string;
+    name: string;
     type: 'dichotomous' | 'continuous';
     weight: string;
 }
@@ -85,7 +85,7 @@ const RevManExport = memo(() => {
         : '';
 
     const generateXML = useMemo(() => {
-        const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const esc = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
         const now = new Date().toISOString().slice(0, 10);
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
@@ -154,7 +154,7 @@ const RevManExport = memo(() => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${(reviewTitle || 'review').replace(/\s+/g, '_')}.rm5`;
+        a.download = `${(reviewTitle || 'review').replaceAll(/\s+/g, '_')}.rm5`;
         a.click();
         URL.revokeObjectURL(url);
     }, [generateXML, reviewTitle]);

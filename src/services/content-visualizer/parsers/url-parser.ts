@@ -230,7 +230,7 @@ function splitIntoSections(htmlContent: string, textContent: string): ContentSec
  */
 function detectLanguage(text: string): 'en' | 'vi' | string {
   // Vietnamese character detection
-  const viChars = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
+  const viChars = /[àáâãèéêìíòóôõùúýăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i;
   const viCount = (text.match(viChars) || []).length;
   if (viCount > text.length * 0.01) return 'vi';
   return 'en';

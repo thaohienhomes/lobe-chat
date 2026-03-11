@@ -119,10 +119,10 @@ const GanttChart = ({ phases, startDate }: { phases: Phase[]; startDate: Dayjs }
     }
 
     return (
-        <svg height={svgH} style={{ minWidth: GANTT_W, display: 'block' }} viewBox={`0 0 ${GANTT_W} ${svgH}`} width="100%">
+        <svg height={svgH} style={{ display: 'block', minWidth: GANTT_W }} viewBox={`0 0 ${GANTT_W} ${svgH}`} width="100%">
             {/* Background stripes */}
             {rows.map((r, i) => (
-                <rect key={r.id} fill={i % 2 === 0 ? 'rgba(0,0,0,0.02)' : 'transparent'} height={ROW_H} width={GANTT_W} x={0} y={r.y} />
+                <rect fill={i % 2 === 0 ? 'rgba(0,0,0,0.02)' : 'transparent'} height={ROW_H} key={r.id} width={GANTT_W} x={0} y={r.y} />
             ))}
 
             {/* Month grid lines */}
@@ -253,7 +253,7 @@ const ManuscriptTimeline = memo(() => {
                 {phases.map((phase) => (
                     <div className={styles.phaseRow} key={phase.id}>
                         <Flexbox align={'center'} gap={6} horizontal>
-                            <div style={{ width: 10, height: 10, borderRadius: 2, background: phase.color, flexShrink: 0 }} />
+                            <div style={{ background: phase.color, borderRadius: 2, flexShrink: 0, height: 10, width: 10 }} />
                             <span style={{ fontSize: 11, fontWeight: 600 }}>{phase.emoji} {phase.label}</span>
                         </Flexbox>
                         <Flexbox align={'center'} gap={4} horizontal>

@@ -166,10 +166,10 @@ export interface AIRenderRequestBody {
   furnitureStyle?: FurnitureStyle;
   /** Source image URL */
   imageUrl: string;
-  /** Additional prompt */
-  prompt?: string;
   /** Render operation */
   operation?: RenderOperation;
+  /** Additional prompt */
+  prompt?: string;
   /** Target render style */
   renderStyle: RenderStyle;
   /** Room type hint */

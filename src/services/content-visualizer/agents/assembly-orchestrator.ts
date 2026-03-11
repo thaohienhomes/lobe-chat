@@ -54,40 +54,40 @@ function markdownToHtml(markdown: string): string {
   let html = markdown;
 
   // Code blocks (```...```)
-  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+  html = html.replaceAll(/```(\w*)\n([\S\s]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
 
   // Inline code (`...`)
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replaceAll(/`([^`]+)`/g, '<code>$1</code>');
 
   // LaTeX blocks ($$...$$)
-  html = html.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="katex-block">$1</div>');
+  html = html.replaceAll(/\$\$([\S\s]*?)\$\$/g, '<div class="katex-block">$1</div>');
 
   // Inline LaTeX ($...$)
-  html = html.replace(/\$([^$]+)\$/g, '<span class="katex-inline">$1</span>');
+  html = html.replaceAll(/\$([^$]+)\$/g, '<span class="katex-inline">$1</span>');
 
   // Headers
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  html = html.replaceAll(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replaceAll(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replaceAll(/^# (.+)$/gm, '<h1>$1</h1>');
 
   // Bold and italic
-  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replaceAll(/\*{3}(.+?)\*{3}/g, '<strong><em>$1</em></strong>');
+  html = html.replaceAll(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replaceAll(/\*(.+?)\*/g, '<em>$1</em>');
 
   // Links
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  html = html.replaceAll(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 
   // Unordered lists
-  html = html.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+  html = html.replaceAll(/^[*-] (.+)$/gm, '<li>$1</li>');
+  html = html.replaceAll(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
 
   // Paragraphs (double newline)
-  html = html.replace(/\n\n+/g, '</p><p>');
+  html = html.replaceAll(/\n\n+/g, '</p><p>');
   html = `<p>${html}</p>`;
 
   // Clean up empty paragraphs
-  html = html.replace(/<p>\s*<\/p>/g, '');
+  html = html.replaceAll(/<p>\s*<\/p>/g, '');
 
   return html;
 }

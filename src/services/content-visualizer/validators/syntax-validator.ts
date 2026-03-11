@@ -29,9 +29,9 @@ const BANNED_APIS = [
  * Banned import patterns — no external CSS, no Node.js modules.
  */
 const BANNED_IMPORTS = [
-  /import\s+.*\.css['"]/,
-  /import\s+.*\.scss['"]/,
-  /import\s+.*\.less['"]/,
+  /import\s+.*\.css["']/,
+  /import\s+.*\.scss["']/,
+  /import\s+.*\.less["']/,
   /require\s*\(/,
 ];
 
@@ -85,7 +85,7 @@ function checkBannedApis(code: string): string[] {
 function checkDefaultExport(code: string): string[] {
   const hasDefaultExport =
     /export\s+default\s+/.test(code) ||
-    /export\s*\{\s*\w+\s+as\s+default\s*\}/.test(code);
+    /export\s*{\s*\w+\s+as\s+default\s*}/.test(code);
 
   if (!hasDefaultExport) {
     return ['Missing default export. Artifact components must have a default export.'];
@@ -97,7 +97,7 @@ function checkDefaultExport(code: string): string[] {
  * Check that React is imported or used (basic sanity check).
  */
 function checkReactUsage(code: string): string[] {
-  const hasReactImport = /import\s+.*React/.test(code) || /from\s+['"]react['"]/.test(code);
+  const hasReactImport = /import\s+.*React/.test(code) || /from\s+["']react["']/.test(code);
   const hasJsx = /<\w/.test(code);
 
   if (hasJsx && !hasReactImport) {

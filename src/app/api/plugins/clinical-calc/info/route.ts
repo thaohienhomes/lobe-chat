@@ -102,17 +102,6 @@ const FORMULA_INFO: Record<
     normalRange: '6-40 points',
     references: ['Kamath PS, et al. Hepatology 2001', 'Used for liver transplant prioritization'],
   },
-  osmolality: {
-    description: 'Calculated Serum Osmolality for fluid/electrolyte assessment',
-    inputs: [
-      { description: 'Serum sodium', name: 'sodium', type: 'number', unit: 'mEq/L' },
-      { description: 'Blood glucose', name: 'glucose', type: 'number', unit: 'mg/dL' },
-      { description: 'Blood urea nitrogen', name: 'bun', type: 'number', unit: 'mg/dL' },
-    ],
-    name: 'Serum Osmolality',
-    normalRange: '275-295 mOsm/kg',
-    references: ['Formula: 2×Na + Glucose/18 + BUN/2.8'],
-  },
   meld_na: {
     description: 'MELD-Na (Sodium-adjusted) — better predicts 90-day mortality than original MELD',
     inputs: [
@@ -135,6 +124,17 @@ const FORMULA_INFO: Record<
     name: 'NNT (Number Needed to Treat)',
     normalRange: 'Lower = more effective treatment',
     references: ['Laupacis A, et al. NEJM 1988', 'NNT = 1 / ARR'],
+  },
+  osmolality: {
+    description: 'Calculated Serum Osmolality for fluid/electrolyte assessment',
+    inputs: [
+      { description: 'Serum sodium', name: 'sodium', type: 'number', unit: 'mEq/L' },
+      { description: 'Blood glucose', name: 'glucose', type: 'number', unit: 'mg/dL' },
+      { description: 'Blood urea nitrogen', name: 'bun', type: 'number', unit: 'mg/dL' },
+    ],
+    name: 'Serum Osmolality',
+    normalRange: '275-295 mOsm/kg',
+    references: ['Formula: 2×Na + Glucose/18 + BUN/2.8'],
   },
 };
 

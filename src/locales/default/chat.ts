@@ -84,24 +84,6 @@ export default {
   intentUnderstanding: {
     title: '正在理解并分析您的意图...',
   },
-  memory: {
-    effort: {
-      desc: '控制 AI 检索和更新记忆的积极程度',
-      high: { title: '高' },
-      low: { title: '低' },
-      medium: { title: '中' },
-      title: '记忆强度',
-    },
-    off: {
-      desc: '关闭此对话的记忆功能',
-      title: '关闭记忆',
-    },
-    on: {
-      desc: '记住对话中的偏好和信息',
-      title: '开启记忆',
-    },
-    title: '记忆',
-  },
   knowledgeBase: {
     all: '所有内容',
     allFiles: '所有文件',
@@ -120,6 +102,24 @@ export default {
     title: '知识库',
     uploadGuide: '上传过的文件可以在「知识库」中查看哦',
     viewMore: '查看更多',
+  },
+  memory: {
+    effort: {
+      desc: '控制 AI 检索和更新记忆的积极程度',
+      high: { title: '高' },
+      low: { title: '低' },
+      medium: { title: '中' },
+      title: '记忆强度',
+    },
+    off: {
+      desc: '关闭此对话的记忆功能',
+      title: '关闭记忆',
+    },
+    on: {
+      desc: '记住对话中的偏好和信息',
+      title: '开启记忆',
+    },
+    title: '记忆',
   },
   messageAction: {
     delAndRegenerate: '删除并重新生成',
@@ -252,6 +252,7 @@ export default {
     loading: '识别中...',
     prettifying: '润色中...',
   },
+  copyAll: '复制全部',
   thread: {
     divider: '子话题',
     threadMessageCount: '{{messageCount}} 条消息',
@@ -318,5 +319,4 @@ export default {
     },
   },
   zenMode: '专注模式',
-  copyAll: '复制全部',
 };

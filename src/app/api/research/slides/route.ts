@@ -55,10 +55,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
         notes: 'Welcome the audience. State your name, institution, and the purpose of this presentation.',
         subtitle: `Systematic Review Presentation · ${today}`,
         title: `Systematic Review:\n${query}`,
-    });
-
-    // Slide 2: Agenda
-    slides.push({
+    }, {
         bullets: [
             '1. Background & Rationale',
             '2. Research Question & PICO',
@@ -72,10 +69,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
         layout: 'content',
         notes: 'Briefly walk through the agenda. This presentation will cover approximately 15-20 minutes.',
         title: 'Agenda',
-    });
-
-    // Slide 3: Background
-    slides.push({
+    }, {
         bullets: [
             `Topic: ${query}`,
             'Current clinical/scientific gap this review addresses',
@@ -129,10 +123,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
         layout: 'content',
         notes: 'Explain the systematic search methodology. Emphasize the comprehensive multi-database approach and adherence to PRISMA standards.',
         title: 'Methods: Search Strategy',
-    });
-
-    // Slide 6: PRISMA flow
-    slides.push({
+    }, {
         bullets: [
             `📥 Records identified: ${totalScreened} (across all databases)`,
             `🔍 Records screened: ${totalScreened}`,
@@ -175,10 +166,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
         layout: 'content',
         notes: 'This slide requires researcher input. Fill in the actual findings from the included studies. Use specific numbers and effect measures.',
         title: 'Key Findings',
-    });
-
-    // Slide 9: GRADE / Evidence Quality
-    slides.push({
+    }, {
         layout: 'table',
         notes: 'GRADE assessment helps the audience understand the certainty of the evidence. Explain each domain briefly.',
         tableData: {
@@ -193,10 +181,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
             ],
         },
         title: 'Quality of Evidence (GRADE)',
-    });
-
-    // Slide 10: Limitations
-    slides.push({
+    }, {
         bullets: [
             'Geographic/language limitations of included studies',
             'Heterogeneity in study populations and interventions',
@@ -207,10 +192,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
         layout: 'content',
         notes: 'Be transparent about limitations. This builds credibility and helps the audience contextualize the findings.',
         title: 'Limitations',
-    });
-
-    // Slide 11: Clinical Implications
-    slides.push({
+    }, {
         bullets: [
             '[Key takeaway for clinical practice]',
             '[Recommendation strength based on GRADE]',
@@ -221,10 +203,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
         layout: 'content',
         notes: 'Connect the evidence to practical clinical or policy decisions. What should change in practice based on this evidence?',
         title: 'Clinical & Policy Implications',
-    });
-
-    // Slide 12: Conclusions
-    slides.push({
+    }, {
         bullets: [
             `This systematic review of ${includedCount} studies examined: ${query}`,
             '[Main conclusion stated clearly]',
@@ -246,10 +225,7 @@ const buildSlideDeck = (body: RequestBody): SlideDeck => {
         layout: 'content',
         notes: 'Full reference list. Ensure all references are complete before the presentation.',
         title: 'References (Selected)',
-    });
-
-    // Slide 14: Q&A
-    slides.push({
+    }, {
         layout: 'title',
         notes: 'Open the floor for questions. Be prepared to elaborate on methodology, specific findings, or clinical applications.',
         subtitle: 'Thank you for your attention',

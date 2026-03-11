@@ -108,8 +108,7 @@ export async function GET() {
     const userTierMap: Record<string, Record<number, number>> = {};
     let totalMessages = 0;
 
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
+    for (const [i, key] of keys.entries()) {
         const count = values[i] ?? 0;
         if (count === 0) continue;
 

@@ -80,12 +80,16 @@ export const rateLimiter = {
  * Default rate limit configs per plugin type
  */
 export const RATE_LIMITS = {
-    /** External API calls (PubMed, OpenAlex, ClinicalTrials, CrossRef) */
-    external: { maxRequests: 30, windowMs: 60 * 1000 },
-    /** Local computation (clinical calculators) */
-    local: { maxRequests: 60, windowMs: 60 * 1000 },
+    
     /** Batch operations (citation export) */
-    batch: { maxRequests: 10, windowMs: 60 * 1000 },
+batch: { maxRequests: 10, windowMs: 60 * 1000 },
+    
+    
+/** External API calls (PubMed, OpenAlex, ClinicalTrials, CrossRef) */
+external: { maxRequests: 30, windowMs: 60 * 1000 },
+    
+    /** Local computation (clinical calculators) */
+local: { maxRequests: 60, windowMs: 60 * 1000 },
 } as const;
 
 /**
@@ -110,7 +114,7 @@ export function sanitizeInput(input: unknown, maxLength: number = 500): string {
     return input
         .trim()
         .slice(0, maxLength)
-        .replace(/[<>]/g, ''); // Strip HTML tags
+        .replaceAll(/[<>]/g, ''); // Strip HTML tags
 }
 
 /**

@@ -16,7 +16,7 @@ import { cachedQuery } from '@/libs/cache';
  */
 export async function GET(): Promise<NextResponse> {
     const start = Date.now();
-    const checks: Record<string, { latencyMs: number; ok: boolean; error?: string }> = {};
+    const checks: Record<string, { error?: string, latencyMs: number; ok: boolean; }> = {};
 
     // 1. Database check
     try {

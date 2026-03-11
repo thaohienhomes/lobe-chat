@@ -90,7 +90,7 @@ export default function ContentVisualization() {
 export function runValidationPipeline(
   code: GeneratedCode,
   llmCall?: LlmCallFn,
-): { stages: ValidationStageResult[]; allErrors: string[] } {
+): { allErrors: string[], stages: ValidationStageResult[]; } {
   const stages: ValidationStageResult[] = [];
   const allErrors: string[] = [];
 

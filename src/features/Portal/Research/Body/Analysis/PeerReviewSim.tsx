@@ -261,7 +261,7 @@ const PeerReviewSim = memo(() => {
                             style={{ alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', gap: 8, justifyContent: 'space-between', padding: 0, width: '100%' }}
                             type="button">
                             <Flexbox align={'center'} gap={8}>
-                                <span style={{ fontWeight: 700, fontSize: 13 }}>{cat}</span>
+                                <span style={{ fontSize: 13, fontWeight: 700 }}>{cat}</span>
                                 <Tag style={{ fontSize: 10 }}>{catAnswered}/{items.length}</Tag>
                                 {items.some((c) => answers[c.id] === 'no' && c.weight >= 3) && (
                                     <Tag color="red" style={{ fontSize: 10 }}>⚠️ critical gap</Tag>
@@ -275,9 +275,9 @@ const PeerReviewSim = memo(() => {
                                 <div className={styles.checkRow} key={item.id}>
                                     <Flexbox gap={2}>
                                         <Flexbox align={'center'} gap={4} horizontal>
-                                            {item.weight === 3 && <span title="Critical item" style={{ color: '#ff4d4f', fontSize: 10 }}>★★★</span>}
-                                            {item.weight === 2 && <span title="Important" style={{ color: '#faad14', fontSize: 10 }}>★★</span>}
-                                            {item.weight === 1 && <span title="Nice to have" style={{ color: '#52c41a', fontSize: 10 }}>★</span>}
+                                            {item.weight === 3 && <span style={{ color: '#ff4d4f', fontSize: 10 }} title="Critical item">★★★</span>}
+                                            {item.weight === 2 && <span style={{ color: '#faad14', fontSize: 10 }} title="Important">★★</span>}
+                                            {item.weight === 1 && <span style={{ color: '#52c41a', fontSize: 10 }} title="Nice to have">★</span>}
                                             <span style={{ fontSize: 12 }}>{item.label}</span>
                                         </Flexbox>
                                         {ans === null && <span style={{ fontSize: 10, opacity: 0.4 }}>{item.tip}</span>}
@@ -286,10 +286,10 @@ const PeerReviewSim = memo(() => {
                                         {(['yes', 'partial', 'no'] as AnswerValue[]).map((val) => (
                                             <button key={val} onClick={() => setAnswer(item.id, val)}
                                                 style={{
+                                                    background: ans === val ? (val === 'yes' ? 'rgba(82,196,26,0.15)' : val === 'partial' ? 'rgba(250,173,20,0.15)' : 'rgba(255,77,79,0.15)') : 'transparent',
                                                     border: '1px solid',
                                                     borderColor: ans === val ? (val === 'yes' ? '#52c41a' : val === 'partial' ? '#faad14' : '#ff4d4f') : 'rgba(128,128,128,0.3)',
                                                     borderRadius: 4,
-                                                    background: ans === val ? (val === 'yes' ? 'rgba(82,196,26,0.15)' : val === 'partial' ? 'rgba(250,173,20,0.15)' : 'rgba(255,77,79,0.15)') : 'transparent',
                                                     color: ans === val ? (val === 'yes' ? '#52c41a' : val === 'partial' ? '#faad14' : '#ff4d4f') : 'inherit',
                                                     cursor: 'pointer', fontSize: 10, fontWeight: ans === val ? 700 : 400, padding: '2px 7px',
                                                 }}
@@ -310,7 +310,7 @@ const PeerReviewSim = memo(() => {
                 <Flexbox gap={8}>
                     <Flexbox align={'center'} gap={6} horizontal>
                         <MessageSquare size={14} />
-                        <span style={{ fontWeight: 700, fontSize: 13 }}>{REVIEWER_PERSONAS[persona]} — Review Comments</span>
+                        <span style={{ fontSize: 13, fontWeight: 700 }}>{REVIEWER_PERSONAS[persona]} — Review Comments</span>
                         <Tag color="red">{majors} major</Tag>
                         <Tag color="orange">{minors} minor</Tag>
                     </Flexbox>
@@ -326,9 +326,9 @@ const PeerReviewSim = memo(() => {
                                         {f.severity.toUpperCase()}
                                     </Tag>
                                 </Flexbox>
-                                <p style={{ fontSize: 12, margin: 0, lineHeight: 1.5 }}>{f.comment}</p>
+                                <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>{f.comment}</p>
                                 {f.severity !== 'info' && (
-                                    <p style={{ fontSize: 11, margin: 0, opacity: 0.6, fontStyle: 'italic' }}>
+                                    <p style={{ fontSize: 11, fontStyle: 'italic', margin: 0, opacity: 0.6 }}>
                                         💡 <strong>Suggestion:</strong> {f.suggestion}
                                     </p>
                                 )}
@@ -339,9 +339,9 @@ const PeerReviewSim = memo(() => {
             )}
 
             {submitted && feedback.length === 0 && (
-                <div style={{ padding: 16, textAlign: 'center', background: 'rgba(82,196,26,0.08)', borderRadius: 8, border: '1px solid rgba(82,196,26,0.3)' }}>
+                <div style={{ background: 'rgba(82,196,26,0.08)', border: '1px solid rgba(82,196,26,0.3)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
                     <CheckCircle size={24} style={{ color: '#52c41a' }} />
-                    <p style={{ margin: '8px 0 0', fontSize: 13, color: '#52c41a' }}>
+                    <p style={{ color: '#52c41a', fontSize: 13, margin: '8px 0 0' }}>
                         ✅ No critical issues from {REVIEWER_PERSONAS[persona]}. Your manuscript appears well-prepared!
                     </p>
                 </div>

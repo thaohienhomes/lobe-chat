@@ -143,7 +143,7 @@ export async function parsePdf(filePath: string): Promise<ParsedContent> {
   const sections = splitIntoSections(markdown);
 
   // Extract abstract if present (common in academic papers)
-  const abstractMatch = /(?:^|\n)(?:#+\s*)?abstract\s*\n([\s\S]*?)(?=\n#|\n\n\n)/i.exec(markdown);
+  const abstractMatch = /(?:^|\n)(?:#+\s*)?abstract\s*\n([\S\s]*?)(?=\n#|\n{3})/i.exec(markdown);
 
   return {
     abstract: abstractMatch?.[1]?.trim(),

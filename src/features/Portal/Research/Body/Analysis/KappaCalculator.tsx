@@ -42,8 +42,8 @@ interface KappaResult {
     interpretationColor: string;
     kappa: number;
     n: number;
-    pabak: number;
     pAgreement: number;
+    pabak: number;
     pe: number;
     po: number;
     se: number;
@@ -89,7 +89,7 @@ const computeKappa = (a: number, b: number, c: number, d: number): KappaResult |
     else if (kappa < 0.81) { interpretation = 'Substantial'; interpretationColor = '#73d13d'; }
     else { interpretation = 'Almost Perfect'; interpretationColor = '#52c41a'; }
 
-    return { CI_high, CI_low, interpretation, interpretationColor, kappa, n, pabak, pAgreement, pe, po, se };
+    return { CI_high, CI_low, interpretation, interpretationColor, kappa, n, pAgreement, pabak, pe, po, se };
 };
 
 const KappaCalculator = memo(() => {

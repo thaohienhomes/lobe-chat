@@ -103,10 +103,10 @@ const runForceLayout = (nodes: GraphNode[], edges: GraphEdge[]): GraphNode[] => 
     // Initialize positions
     const ns = nodes.map((n, i) => ({
         ...n,
-        x: W / 2 + (Math.random() - 0.5) * W * 0.6,
-        y: H / 2 + (Math.random() - 0.5) * H * 0.6,
         vx: 0,
         vy: 0,
+        x: W / 2 + (Math.random() - 0.5) * W * 0.6,
+        y: H / 2 + (Math.random() - 0.5) * H * 0.6,
     }));
 
     const idx: Record<string, number> = {};
@@ -361,14 +361,14 @@ const CitationNetwork = memo(() => {
                 style={{ position: 'relative' }}
             >
                 {loading && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13, opacity: 0.6 }}>
+                    <div style={{ alignItems: 'center', display: 'flex', fontSize: 13, gap: 8, inset: 0, justifyContent: 'center', opacity: 0.6, position: 'absolute' }}>
                         <Loader2 className="animate-spin" size={20} />
                         Building graph from included papers…
                     </div>
                 )}
 
                 {!loading && nodes.length === 0 && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8, opacity: 0.4 }}>
+                    <div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', gap: 8, inset: 0, justifyContent: 'center', opacity: 0.4, position: 'absolute' }}>
                         <span style={{ fontSize: 36 }}>🕸️</span>
                         <span style={{ fontSize: 13 }}>Include papers in Screening to build network</span>
                     </div>
@@ -421,9 +421,9 @@ const CitationNetwork = memo(() => {
                                         style={{ cursor: 'pointer' }}
                                     >
                                         <circle
-                                            cx={node.x} cy={node.y} r={r}
-                                            fill={color}
+                                            cx={node.x} cy={node.y} fill={color}
                                             opacity={dimmed ? 0.15 : 0.85}
+                                            r={r}
                                             stroke={isSelected ? '#fff' : 'rgba(255,255,255,0.3)'}
                                             strokeWidth={isSelected ? 2.5 : 1}
                                         />
@@ -463,7 +463,7 @@ const CitationNetwork = memo(() => {
                         <div style={{ fontWeight: 700, marginBottom: 3 }}>{tooltip.node.title.slice(0, 80)}</div>
                         <div style={{ opacity: 0.7 }}>Year: {tooltip.node.year}</div>
                         <div style={{ opacity: 0.7 }}>Citations: {tooltip.node.citations}</div>
-                        {tooltip.node.doi && <div style={{ opacity: 0.5, fontSize: 10 }}>doi:{tooltip.node.doi}</div>}
+                        {tooltip.node.doi && <div style={{ fontSize: 10, opacity: 0.5 }}>doi:{tooltip.node.doi}</div>}
                     </div>
                 )}
             </div>

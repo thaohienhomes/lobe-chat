@@ -2,14 +2,14 @@ import { webhookLogs } from '@/database/schemas';
 import { getServerDB } from '@/database/server';
 
 export interface WebhookLogEntry {
-    provider: 'sepay' | 'polar';
-    eventType: string;
-    status: 'received' | 'success' | 'error' | 'ignored';
-    orderId?: string;
-    userId?: string;
     amountUsd?: string;
-    payload?: Record<string, any>;
     errorMessage?: string;
+    eventType: string;
+    orderId?: string;
+    payload?: Record<string, any>;
+    provider: 'sepay' | 'polar';
+    status: 'received' | 'success' | 'error' | 'ignored';
+    userId?: string;
 }
 
 /**

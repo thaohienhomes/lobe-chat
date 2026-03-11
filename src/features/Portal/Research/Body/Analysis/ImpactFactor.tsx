@@ -142,7 +142,7 @@ const ImpactFactor = memo(() => {
                     </Flexbox>
                     {manualResult && !manualResult.error && (
                         <Flexbox gap={6}>
-                            <span style={{ fontWeight: 700, fontSize: 13 }}>{manualResult.name}</span>
+                            <span style={{ fontSize: 13, fontWeight: 700 }}>{manualResult.name}</span>
                             <Flexbox gap={8} horizontal wrap={'wrap'}>
                                 {manualResult.hIndex !== undefined && <span className={styles.metricChip}><Star size={10} /> h-index: {manualResult.hIndex}</span>}
                                 <span className={styles.metricChip}><BarChart2 size={10} /> {manualResult.citedByCount.toLocaleString()} cit.</span>
@@ -160,7 +160,7 @@ const ImpactFactor = memo(() => {
             {ranked.length > 0 && (
                 <Flexbox gap={6}>
                     <Flexbox gap={6} horizontal wrap={'wrap'}>
-                        <span style={{ fontWeight: 700, fontSize: 13 }}>📈 Journals in review — ranked by h-index</span>
+                        <span style={{ fontSize: 13, fontWeight: 700 }}>📈 Journals in review — ranked by h-index</span>
                         <Tag>{ranked.length} journals fetched</Tag>
                     </Flexbox>
                     <div className={styles.tableWrap}>

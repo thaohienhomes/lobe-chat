@@ -18,7 +18,6 @@ import { S3 } from '@/server/modules/S3';
 import { FileService } from '@/server/services/file';
 import { NextAuthUserService } from '@/server/services/nextAuthUser';
 import { UserService } from '@/server/services/user';
-import { VN_PLANS, GLOBAL_PLANS } from '@/config/pricing';
 import {
   NextAuthAccountSchame,
   UserGuideSchema,

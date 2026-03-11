@@ -163,7 +163,7 @@ const NntCalculator = memo(() => {
                 {/* Input panel */}
                 <div className={styles.card} style={{ flex: '1', minWidth: 260 }}>
                     <Flexbox gap={10}>
-                        <span style={{ fontWeight: 700, fontSize: 13 }}>⚙️ Parameters</span>
+                        <span style={{ fontSize: 13, fontWeight: 700 }}>⚙️ Parameters</span>
 
                         <div className={styles.fieldRow}>
                             <span style={{ fontSize: 12, fontWeight: 600 }}>Input mode</span>
@@ -284,13 +284,13 @@ const NntCalculator = memo(() => {
                     <span style={{ fontSize: 11, fontWeight: 700 }}>📐 Clinical benchmarks (Laupacis 1988):</span>
                     <Flexbox gap={4} horizontal wrap={'wrap'}>
                         {[
-                            { label: 'NNT ≤5', color: '#52c41a', text: 'Excellent' },
-                            { label: 'NNT 6–15', color: '#1890ff', text: 'Good' },
-                            { label: 'NNT 16–50', color: '#faad14', text: 'Moderate' },
-                            { label: 'NNT >50', color: '#ff4d4f', text: 'Marginal' },
+                            { color: '#52c41a', label: 'NNT ≤5', text: 'Excellent' },
+                            { color: '#1890ff', label: 'NNT 6–15', text: 'Good' },
+                            { color: '#faad14', label: 'NNT 16–50', text: 'Moderate' },
+                            { color: '#ff4d4f', label: 'NNT >50', text: 'Marginal' },
                         ].map(({ label, color, text }) => (
                             <Flexbox align={'center'} gap={4} horizontal key={label}
-                                style={{ border: `1px solid ${color}44`, borderRadius: 4, padding: '2px 8px', background: `${color}12` }}>
+                                style={{ background: `${color}12`, border: `1px solid ${color}44`, borderRadius: 4, padding: '2px 8px' }}>
                                 <span style={{ color, fontSize: 10, fontWeight: 700 }}>{label}</span>
                                 <span style={{ fontSize: 10, opacity: 0.7 }}>{text}</span>
                             </Flexbox>

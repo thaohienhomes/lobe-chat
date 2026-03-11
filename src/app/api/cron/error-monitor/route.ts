@@ -88,13 +88,13 @@ export async function GET(request: Request): Promise<NextResponse> {
         try {
             const { subscriptions } = await import('@/database/schemas/billing');
             const desyncCheck = await db.execute(sql`
-                SELECT COUNT(*) as count FROM users u
-                WHERE u.current_plan_id IS NOT NULL
-                AND u.current_plan_id NOT IN ('free', 'vn_free', 'gl_starter', 'trial')
-                AND NOT EXISTS (
-                    SELECT 1 FROM subscriptions s
-                    WHERE s.user_id = u.id AND s.status = 'active'
-                )
+              SELECT COUNT(*) as count FROM users u
+              WHERE u.current_plan_id IS NOT NULL
+              AND u.current_plan_id NOT IN ('free', 'vn_free', 'gl_starter', 'trial')
+              AND NOT EXISTS (
+                  SELECT 1 FROM subscriptions s
+                  WHERE s.user_id = u.id AND s.status = 'active'
+              )
             `);
             const desyncCount = (desyncCheck as any)?.[0]?.count || 0;
             if (desyncCount > 0) {

@@ -4,166 +4,166 @@
  */
 
 export const ScientificApiNames = {
-  searchPubMed: 'searchPubMed',
-  queryChEMBL: 'queryChEMBL',
-  fetchUniProt: 'fetchUniProt',
-  searchClinicalTrials: 'searchClinicalTrials',
-  queryGene: 'queryGene',
   checkAlphaFold: 'checkAlphaFold',
+  fetchUniProt: 'fetchUniProt',
+  queryChEMBL: 'queryChEMBL',
+  queryGene: 'queryGene',
+  searchClinicalTrials: 'searchClinicalTrials',
+  searchPubMed: 'searchPubMed',
 };
 
 export const ScientificSkillsAPIs = [
   {
-    name: ScientificApiNames.searchPubMed,
     description:
       'Search PubMed biomedical literature database for research papers. Returns article titles, authors, abstracts, and DOIs.',
+    name: ScientificApiNames.searchPubMed,
     parameters: {
-      type: 'object',
       properties: {
         keywords: {
-          type: 'string',
           description: 'Search keywords (e.g., "BRCA1 cancer", "machine learning protein")',
-        },
-        yearFrom: {
-          type: 'integer',
-          description: 'Year from which to search (e.g., 2020)',
-        },
-        yearTo: {
-          type: 'integer',
-          description: 'Year until which to search (default: current year)',
+          type: 'string',
         },
         limit: {
-          type: 'integer',
-          description: 'Maximum number of results to return (default: 10, max: 50)',
           default: 10,
+          description: 'Maximum number of results to return (default: 10, max: 50)',
+          type: 'integer',
+        },
+        yearFrom: {
+          description: 'Year from which to search (e.g., 2020)',
+          type: 'integer',
+        },
+        yearTo: {
+          description: 'Year until which to search (default: current year)',
+          type: 'integer',
         },
       },
       required: ['keywords'],
+      type: 'object',
     },
   },
   {
-    name: ScientificApiNames.queryChEMBL,
     description:
       'Query ChEMBL bioactivity database for compounds, targets, and drug properties. Search by SMILES, compound ID, or protein target.',
+    name: ScientificApiNames.queryChEMBL,
     parameters: {
-      type: 'object',
       properties: {
+        limit: {
+          default: 10,
+          description: 'Maximum number of results (default: 10)',
+          type: 'integer',
+        },
         query: {
-          type: 'string',
           description: 'SMILES notation, compound ID, protein name, or target name',
+          type: 'string',
         },
         queryType: {
-          type: 'string',
-          enum: ['smiles', 'compound_id', 'target', 'activity'],
-          description: 'Type of query to perform',
           default: 'compound_id',
-        },
-        limit: {
-          type: 'integer',
-          description: 'Maximum number of results (default: 10)',
-          default: 10,
+          description: 'Type of query to perform',
+          enum: ['smiles', 'compound_id', 'target', 'activity'],
+          type: 'string',
         },
       },
       required: ['query'],
+      type: 'object',
     },
   },
   {
-    name: ScientificApiNames.fetchUniProt,
     description:
       'Fetch protein sequence, structure, and functional information from UniProt. Requires UniProt accession ID (e.g., P04637).',
+    name: ScientificApiNames.fetchUniProt,
     parameters: {
-      type: 'object',
       properties: {
-        proteinId: {
-          type: 'string',
-          description: 'UniProt accession ID (e.g., P04637 for p53)',
-        },
         includeSequence: {
-          type: 'boolean',
-          description: 'Include full protein sequence (default: true)',
           default: true,
+          description: 'Include full protein sequence (default: true)',
+          type: 'boolean',
         },
         includeStructure: {
-          type: 'boolean',
-          description: 'Include known structure information (default: true)',
           default: true,
+          description: 'Include known structure information (default: true)',
+          type: 'boolean',
+        },
+        proteinId: {
+          description: 'UniProt accession ID (e.g., P04637 for p53)',
+          type: 'string',
         },
       },
       required: ['proteinId'],
+      type: 'object',
     },
   },
   {
-    name: ScientificApiNames.searchClinicalTrials,
     description:
       'Search ClinicalTrials.gov for clinical trials. Find ongoing, completed, or recruiting trials by condition, intervention, or status.',
+    name: ScientificApiNames.searchClinicalTrials,
     parameters: {
-      type: 'object',
       properties: {
         condition: {
-          type: 'string',
           description: 'Disease or condition to search (e.g., "Type 2 Diabetes")',
+          type: 'string',
         },
         intervention: {
-          type: 'string',
           description: 'Drug, therapy, or intervention name',
-        },
-        status: {
           type: 'string',
-          enum: ['recruiting', 'active', 'completed', 'enrolling_by_invitation'],
-          description: 'Trial recruitment status',
         },
         limit: {
-          type: 'integer',
-          description: 'Maximum trials to return (default: 10)',
           default: 10,
+          description: 'Maximum trials to return (default: 10)',
+          type: 'integer',
+        },
+        status: {
+          description: 'Trial recruitment status',
+          enum: ['recruiting', 'active', 'completed', 'enrolling_by_invitation'],
+          type: 'string',
         },
       },
       required: [],
+      type: 'object',
     },
   },
   {
-    name: ScientificApiNames.queryGene,
     description:
       'Query NCBI Gene and Ensembl databases for gene information, including function, variants, and expression data.',
+    name: ScientificApiNames.queryGene,
     parameters: {
-      type: 'object',
       properties: {
         geneSymbol: {
-          type: 'string',
           description: 'Gene symbol or name (e.g., "TP53", "BRCA1")',
-        },
-        includeVariants: {
-          type: 'boolean',
-          description: 'Include known genetic variants (default: true)',
-          default: true,
+          type: 'string',
         },
         includeExpression: {
-          type: 'boolean',
-          description: 'Include tissue expression data from GTEx (default: false)',
           default: false,
+          description: 'Include tissue expression data from GTEx (default: false)',
+          type: 'boolean',
+        },
+        includeVariants: {
+          default: true,
+          description: 'Include known genetic variants (default: true)',
+          type: 'boolean',
         },
       },
       required: ['geneSymbol'],
+      type: 'object',
     },
   },
   {
-    name: ScientificApiNames.checkAlphaFold,
     description:
       'Retrieve protein structure predictions from AlphaFold DB. Returns predicted 3D structure and confidence scores.',
+    name: ScientificApiNames.checkAlphaFold,
     parameters: {
-      type: 'object',
       properties: {
-        proteinId: {
-          type: 'string',
-          description: 'UniProt accession ID or protein name',
-        },
         includePdb: {
-          type: 'boolean',
-          description: 'Compare with known PDB structures if available (default: true)',
           default: true,
+          description: 'Compare with known PDB structures if available (default: true)',
+          type: 'boolean',
+        },
+        proteinId: {
+          description: 'UniProt accession ID or protein name',
+          type: 'string',
         },
       },
       required: ['proteinId'],
+      type: 'object',
     },
   },
 ];

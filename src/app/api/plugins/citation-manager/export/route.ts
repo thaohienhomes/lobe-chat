@@ -27,7 +27,7 @@ async function fetchCitationForId(identifier: string, format: 'bibtex' | 'ris'):
             `${a.given || ''} ${a.family || ''}`.trim()
         );
         const year = w.published?.['date-parts']?.[0]?.[0]?.toString() || '';
-        const firstAuthor = (w.author?.[0]?.family || 'Unknown').replace(/\s/g, '');
+        const firstAuthor = (w.author?.[0]?.family || 'Unknown').replaceAll(/\s/g, '');
 
         if (format === 'bibtex') {
             let bib = `@article{${firstAuthor}${year},\n`;
@@ -85,7 +85,7 @@ async function fetchCitationForId(identifier: string, format: 'bibtex' | 'ris'):
     const volume = extractTag('Volume');
     const issue = extractTag('Issue');
     const pages = extractTag('MedlinePgn');
-    const firstAuthor = (authors[0]?.split(' ').pop() || 'Unknown').replace(/\s/g, '');
+    const firstAuthor = (authors[0]?.split(' ').pop() || 'Unknown').replaceAll(/\s/g, '');
 
     if (format === 'bibtex') {
         let bib = `@article{${firstAuthor}${year},\n`;

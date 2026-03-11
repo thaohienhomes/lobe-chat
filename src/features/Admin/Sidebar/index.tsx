@@ -25,7 +25,7 @@ export function AdminSidebar() {
         fetch('/api/admin/anomaly-count')
             .then(r => r.json())
             .then(d => setAnomalyCount(d.count || 0))
-            .catch(() => { });
+            .catch(() => {});
     }, []);
 
     // Strip variant prefix to get the clean path for matching

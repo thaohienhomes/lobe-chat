@@ -103,14 +103,17 @@ async function callQueryChEMBL(params: ChEMBLParams) {
 
   let url: string;
   switch (params.queryType) {
-    case 'target':
+    case 'target': {
       url = `${base}/target/search.json?q=${encodeURIComponent(params.query)}&limit=${limit}`;
       break;
-    case 'activity':
+    }
+    case 'activity': {
       url = `${base}/activity.json?molecule_chembl_id=${encodeURIComponent(params.query)}&limit=${limit}`;
       break;
-    default:
+    }
+    default: {
       url = `${base}/molecule/search.json?q=${encodeURIComponent(params.query)}&limit=${limit}`;
+    }
   }
 
   const res = await fetch(url);
@@ -120,6 +123,7 @@ async function callQueryChEMBL(params: ChEMBLParams) {
   const items = data.molecules || data.targets || data.activities || [];
 
   return {
+    query: params.query,
     results: items.slice(0, limit).map((item: any) => ({
       doi: undefined,
       name: item.pref_name || item.molecule_chembl_id || item.target_chembl_id,
@@ -134,7 +138,6 @@ async function callQueryChEMBL(params: ChEMBLParams) {
         ? `https://www.ebi.ac.uk/chembl/compound_report_card/${item.molecule_chembl_id}/`
         : undefined,
     })),
-    query: params.query,
     totalResults: data.page_meta?.total_count || items.length,
   };
 }

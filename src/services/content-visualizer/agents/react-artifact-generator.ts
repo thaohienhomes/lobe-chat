@@ -116,13 +116,13 @@ function extractCode(response: string): string {
 function detectDependencies(code: string): string[] {
   const deps = [...ARTIFACT_DEPENDENCIES];
 
-  if (/\bimport\b.*\bfrom\s+['"]d3['"]/.test(code) || /\bd3\./.test(code)) deps.push('d3');
-  if (/\bimport\b.*\bfrom\s+['"]recharts['"]/.test(code)) deps.push('recharts');
-  if (/\bimport\b.*\bfrom\s+['"]chart\.js['"]/.test(code)) deps.push('chart.js');
-  if (/\bimport\b.*\bfrom\s+['"]three['"]/.test(code) || /\bTHREE\./.test(code)) deps.push('three');
-  if (/\bimport\b.*\bfrom\s+['"]lucide-react['"]/.test(code)) deps.push('lucide-react');
-  if (/\bimport\b.*\bfrom\s+['"]lodash['"]/.test(code)) deps.push('lodash');
-  if (/\bimport\b.*\bfrom\s+['"]mathjs['"]/.test(code)) deps.push('mathjs');
+  if (/\bimport\b.*\bfrom\s+["']d3["']/.test(code) || /\bd3\./.test(code)) deps.push('d3');
+  if (/\bimport\b.*\bfrom\s+["']recharts["']/.test(code)) deps.push('recharts');
+  if (/\bimport\b.*\bfrom\s+["']chart\.js["']/.test(code)) deps.push('chart.js');
+  if (/\bimport\b.*\bfrom\s+["']three["']/.test(code) || /\bTHREE\./.test(code)) deps.push('three');
+  if (/\bimport\b.*\bfrom\s+["']lucide-react["']/.test(code)) deps.push('lucide-react');
+  if (/\bimport\b.*\bfrom\s+["']lodash["']/.test(code)) deps.push('lodash');
+  if (/\bimport\b.*\bfrom\s+["']mathjs["']/.test(code)) deps.push('mathjs');
 
   return [...new Set(deps)];
 }

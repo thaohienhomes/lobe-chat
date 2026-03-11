@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-import { getServerDB } from '@/database/server';
 
 export const metadata = {
     description: 'Track your referral conversions and affiliate earnings on Phở Chat.',
@@ -84,7 +83,7 @@ export default async function AffiliatePage() {
                         { desc: 'Both you and your friend receive bonus Phở Points', icon: '3️⃣', title: 'Earn rewards' },
                     ].map(step => (
                         <div key={step.title} style={{ alignItems: 'flex-start', display: 'flex', gap: '16px', padding: '14px 0' }}>
-                            <span style={{ fontSize: '24px', flexShrink: 0 }}>{step.icon}</span>
+                            <span style={{ flexShrink: 0, fontSize: '24px' }}>{step.icon}</span>
                             <div>
                                 <div style={{ fontWeight: 700, marginBottom: '2px' }}>{step.title}</div>
                                 <div style={{ color: '#71717A', fontSize: '13px' }}>{step.desc}</div>

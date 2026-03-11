@@ -54,15 +54,15 @@ const useStyles = createStyles(({ css, token }) => ({
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: ${token.borderRadius}px;
   `,
-    fieldLabel: css`
-    font-size: 12px;
-    font-weight: 700;
-    color: ${token.colorText};
-  `,
     fieldHelp: css`
     font-size: 10px;
     color: ${token.colorTextTertiary};
     margin-top: 2px;
+  `,
+    fieldLabel: css`
+    font-size: 12px;
+    font-weight: 700;
+    color: ${token.colorText};
   `,
     preview: css`
     padding: 16px;
@@ -430,7 +430,7 @@ const ProsperoHelper = memo(() => {
             )}
 
             {/* Footer note */}
-            <div style={{ fontSize: 11, opacity: 0.5, borderTop: '1px solid', paddingTop: 8 }}>
+            <div style={{ borderTop: '1px solid', fontSize: 11, opacity: 0.5, paddingTop: 8 }}>
                 💡 <strong>Tip:</strong> Register your review <em>before</em> starting data extraction to avoid duplicate reviews.
                 PROSPERO is free, hosted by University of York.
                 Pre-registration helps prevent selective reporting and increases research credibility.

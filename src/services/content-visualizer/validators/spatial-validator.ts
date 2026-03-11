@@ -16,9 +16,9 @@ export interface SpatialValidationResult {
  */
 const PERCENTAGE_PATTERNS = [
   // Tailwind classes with arbitrary values: top-[120%], left-[-10%]
-  /(?:top|left|right|bottom)-\[(-?\d+(?:\.\d+)?)%\]/g,
+  /(?:top|left|right|bottom)-\[(-?\d+(?:\.\d+)?)%]/g,
   // Inline style percentages: top: '120%', left: '-10%'
-  /(?:top|left|right|bottom)\s*:\s*['"](-?\d+(?:\.\d+)?)%['"]/g,
+  /(?:top|left|right|bottom)\s*:\s*["'](-?\d+(?:\.\d+)?)%["']/g,
 ];
 
 /**
@@ -27,11 +27,11 @@ const PERCENTAGE_PATTERNS = [
  */
 const PIXEL_PATTERNS = [
   // Tailwind classes: top-[2000px], left-[-500px]
-  /(?:top|left|right|bottom)-\[(-?\d+(?:\.\d+)?)px\]/g,
+  /(?:top|left|right|bottom)-\[(-?\d+(?:\.\d+)?)px]/g,
   // Inline style pixels: top: '2000px'
-  /(?:top|left|right|bottom)\s*:\s*['"](-?\d+(?:\.\d+)?)px['"]/g,
+  /(?:top|left|right|bottom)\s*:\s*["'](-?\d+(?:\.\d+)?)px["']/g,
   // Inline style numbers: top: 2000
-  /(?:top|left|right|bottom)\s*:\s*(-?\d+(?:\.\d+)?)[,}\s]/g,
+  /(?:top|left|right|bottom)\s*:\s*(-?\d+(?:\.\d+)?)[\s,}]/g,
 ];
 
 /**
@@ -41,7 +41,7 @@ const SVG_PATTERNS = [
   // viewBox="0 0 width height"
   /viewBox\s*=\s*["'](-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)["']/g,
   // SVG x/y/cx/cy attributes
-  /\b(?:cx|cy|x1|x2|y1|y2|x|y)\s*=\s*[{"](-?\d+(?:\.\d+)?)/g,
+  /\b(?:cx|cy|x1|x2|y1|y2|x|y)\s*=\s*["{](-?\d+(?:\.\d+)?)/g,
   // transform translate
   /translate\((-?\d+(?:\.\d+)?)\s*,?\s*(-?\d+(?:\.\d+)?)\)/g,
 ];

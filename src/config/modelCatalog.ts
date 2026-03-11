@@ -11,16 +11,16 @@
 export type ModelTier = 'free' | 'budget' | 'standard' | 'premium';
 
 export interface ModelEntry {
+    /** If true, model is available in the public API */
+    apiEnabled?: boolean;
+    costPerMessage: number;
+    description: string;
     id: string;
     name: string;
     provider: string;
     providerLabel: string;
-    tier: ModelTier;
-    costPerMessage: number;
-    description: string;
     tags?: string[];
-    /** If true, model is available in the public API */
-    apiEnabled?: boolean;
+    tier: ModelTier;
 }
 
 export const MODEL_CATALOG: ModelEntry[] = [

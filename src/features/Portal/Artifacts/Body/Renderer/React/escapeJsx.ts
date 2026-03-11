@@ -45,7 +45,7 @@ function isJsxStart(code: string, i: number, next: string): boolean {
   const prevChar = code[j];
 
   // After operators / punctuation → definitely JSX
-  if (/[=({[,:;?&|!+\-*/%~^]/.test(prevChar)) return true;
+  if (/[!%&(*+,/:;=?[^{|~\-]/.test(prevChar)) return true;
   // After `>` could be chained JSX or `>>` — treat as JSX for safety
   if (prevChar === '>') return true;
 
@@ -110,21 +110,32 @@ export function escapeJsxTextContent(code: string): string {
 
       // ── Inside a JSX opening / self-closing tag ───────────────────────
       case 'tag-open': {
-        if (ch === '"' || ch === "'") {
+        switch (ch) {
+        case '"': 
+        case "'": {
           stateStack.push('tag-open');
           state = 'string';
           stringDelim = ch;
           result.push(ch);
-        } else if (ch === '`') {
+        
+        break;
+        }
+        case '`': {
           stateStack.push('tag-open');
           state = 'template';
           result.push(ch);
-        } else if (ch === '{') {
+        
+        break;
+        }
+        case '{': {
           stateStack.push('tag-open');
           state = 'jsx-expr';
           braceDepth = 1;
           result.push(ch);
-        } else if (ch === '/' && next === '>') {
+        
+        break;
+        }
+        default: { if (ch === '/' && next === '>') {
           // Self-closing: <Tag />
           result.push('/>');
           i++;
@@ -135,6 +146,8 @@ export function escapeJsxTextContent(code: string): string {
           state = 'jsx-text';
         } else {
           result.push(ch);
+        }
+        }
         }
         break;
       }
@@ -152,7 +165,8 @@ export function escapeJsxTextContent(code: string): string {
 
       // ── JSX text content (between tags) — THIS IS WHERE WE ESCAPE ────
       case 'jsx-text': {
-        if (ch === '<') {
+        switch (ch) {
+        case '<': {
           if (next === '/') {
             // Closing tag: </Tag> or fragment </>
             state = 'tag-close';
@@ -166,37 +180,59 @@ export function escapeJsxTextContent(code: string): string {
             // Bare `<` in text content → escape
             result.push('&lt;');
           }
-        } else if (ch === '{') {
+        
+        break;
+        }
+        case '{': {
           stateStack.push('jsx-text');
           state = 'jsx-expr';
           braceDepth = 1;
           result.push(ch);
-        } else if (ch === '>') {
+        
+        break;
+        }
+        case '>': {
           // Bare `>` in text content → ESCAPE
           result.push('&gt;');
-        } else {
+        
+        break;
+        }
+        default: {
           result.push(ch);
+        }
         }
         break;
       }
 
       // ── Inside a JSX expression { ... } ───────────────────────────────
       case 'jsx-expr': {
-        if (ch === '"' || ch === "'" || ch === '`') {
+        switch (ch) {
+        case '"': 
+        case "'": 
+        case '`': {
           stateStack.push('jsx-expr');
           state = ch === '`' ? 'template' : 'string';
           stringDelim = ch;
           result.push(ch);
-        } else if (ch === '{') {
+        
+        break;
+        }
+        case '{': {
           braceDepth++;
           result.push(ch);
-        } else if (ch === '}') {
+        
+        break;
+        }
+        case '}': {
           braceDepth--;
           result.push(ch);
           if (braceDepth === 0) {
             state = stateStack.pop() || 'code';
           }
-        } else if (ch === '<' && (/[A-Za-z]/.test(next) || next === '>')) {
+        
+        break;
+        }
+        default: { if (ch === '<' && (/[A-Za-z]/.test(next) || next === '>')) {
           // JSX inside expression: {flag && <Tag>...</Tag>}
           parentBeforeTag = 'jsx-expr';
           state = 'tag-open';
@@ -217,6 +253,8 @@ export function escapeJsxTextContent(code: string): string {
           }
         } else {
           result.push(ch);
+        }
+        }
         }
         break;
       }

@@ -126,12 +126,12 @@ function Toast({ ok, msg }: { msg: string; ok: boolean }) {
             background: ok ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)',
             border: `1px solid ${ok ? 'rgba(52,211,153,0.3)' : 'rgba(239,68,68,0.3)'}`,
             borderRadius: '10px',
-            bottom: 0, left: 0, right: 0,
-            color: ok ? '#34D399' : '#F87171',
-            fontSize: '13px', fontWeight: 500,
-            margin: '16px',
+            bottom: 0, color: ok ? '#34D399' : '#F87171', fontSize: '13px',
+            fontWeight: 500,
+            left: 0, margin: '16px',
             padding: '10px 16px',
             position: 'absolute',
+            right: 0,
         }}>
             {ok ? '✅' : '❌'} {msg}
         </div>
@@ -212,15 +212,15 @@ function OverviewPanel() {
                     <div style={{ color: '#71717A', fontSize: '12px', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                         Breakdown by Tier
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                         {tiers.map((t) => {
                             const c = TIER_COLORS[t.tier] ?? TIER_DEFAULT;
                             return (
                                 <div key={t.tier} style={{
                                     alignItems: 'center',
                                     background: c.bg, border: `1px solid ${c.border}`,
-                                    borderRadius: '10px', display: 'flex', gap: '10px',
-                                    flex: '1 1 140px', padding: '12px 16px',
+                                    borderRadius: '10px', display: 'flex', flex: '1 1 140px',
+                                    gap: '10px', padding: '12px 16px',
                                 }}>
                                     <TierBadge tier={t.tier} />
                                     <div>
@@ -243,10 +243,10 @@ function OverviewPanel() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {data.topUsers.map((u, i) => (
                             <div key={u.userId} style={{
-                                alignItems: 'center', display: 'flex', gap: '10px',
-                                background: 'rgba(255,255,255,0.03)',
-                                border: '1px solid rgba(255,255,255,0.05)',
-                                borderRadius: '8px', padding: '8px 12px',
+                                alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                gap: '10px', padding: '8px 12px',
                             }}>
                                 <span style={{ color: '#52525B', fontSize: '12px', fontWeight: 700, minWidth: '20px' }}>
                                     #{i + 1}
@@ -345,10 +345,10 @@ function UserSearchPanel() {
             {data && (
                 <div>
                     <div style={{
-                        alignItems: 'center', display: 'flex', justifyContent: 'space-between',
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        borderRadius: '10px', marginBottom: '12px', padding: '10px 14px',
+                        alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        justifyContent: 'space-between', marginBottom: '12px', padding: '10px 14px',
                     }}>
                         <span style={{ color: '#A1A1AA', fontSize: '13px' }}>
                             <b style={{ color: '#FAFAFA' }}>{data.totalKeys}</b> key{data.totalKeys !== 1 ? 's' : ''} · <b style={{ color: '#FAFAFA' }}>{data.date}</b>
@@ -377,11 +377,11 @@ function UserSearchPanel() {
                             const colors = TIER_COLORS[tier] ?? TIER_DEFAULT;
                             return (
                                 <div key={c.key} style={{
-                                    alignItems: 'center', display: 'flex', gap: '12px', justifyContent: 'space-between',
-                                    background: colors.bg, border: `1px solid ${colors.border}`,
-                                    borderRadius: '10px', padding: '10px 14px',
+                                    alignItems: 'center', background: colors.bg, border: `1px solid ${colors.border}`, borderRadius: '10px',
+                                    display: 'flex', gap: '12px',
+                                    justifyContent: 'space-between', padding: '10px 14px',
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                                    <div style={{ alignItems: 'center', display: 'flex', flex: 1, gap: '10px', minWidth: 0 }}>
                                         <TierBadge tier={tier} />
                                         <span style={{ color: '#FAFAFA', fontSize: '20px', fontWeight: 700 }}>{c.count}</span>
                                         <span style={{ color: '#71717A', fontSize: '12px' }}>msgs today</span>
@@ -404,7 +404,7 @@ function UserSearchPanel() {
                 </div>
             )}
 
-            {toast && <Toast ok={toast.ok} msg={toast.msg} />}
+            {toast && <Toast msg={toast.msg} ok={toast.ok} />}
         </div>
     );
 }

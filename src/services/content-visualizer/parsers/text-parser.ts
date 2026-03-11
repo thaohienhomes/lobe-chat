@@ -180,7 +180,7 @@ function parseTextHeuristic(text: string): ContentSection[] {
  * Detect language from text (simple heuristic).
  */
 function detectLanguage(text: string): 'en' | 'vi' {
-  const viChars = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/gi;
+  const viChars = /[àáâãèéêìíòóôõùúýăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/gi;
   const viCount = (text.match(viChars) || []).length;
   return viCount > text.length * 0.01 ? 'vi' : 'en';
 }

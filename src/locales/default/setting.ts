@@ -157,6 +157,19 @@ export default {
     },
     store: '插件商店',
   },
+  promoCode: {
+    activate: '激活',
+    activated: 'Phở Medical Beta 已激活 🏥',
+    activating: '激活中...',
+    description: '输入促销码以解锁特殊功能。',
+    error: '无效或过期的代码',
+    placeholder: '输入代码 (如 PHO-MED-2026-BETA)',
+    success: '感谢您，系统正在刷新...',
+    title: '促销码',
+  },
+
+  medicalBadge: 'MEDICAL PIONEER 🏥',
+
   settingAgent: {
     avatar: {
       title: '助手头像',
@@ -185,7 +198,6 @@ export default {
     },
     title: '助手信息',
   },
-
   settingAppearance: {
     animationMode: {
       agile: '敏捷',
@@ -211,7 +223,6 @@ export default {
     },
     title: '应用外观',
   },
-
   settingChat: {
     autoCreateTopicThreshold: {
       desc: '当前消息数超过设定该值后，将自动创建话题',
@@ -388,16 +399,6 @@ export default {
     },
     title: '系统设置',
   },
-  promoCode: {
-    activate: '激活',
-    activated: 'Phở Medical Beta 已激活 🏥',
-    activating: '激活中...',
-    description: '输入促销码以解锁特殊功能。',
-    error: '无效或过期的代码',
-    placeholder: '输入代码 (如 PHO-MED-2026-BETA)',
-    success: '感谢您，系统正在刷新...',
-    title: '促销码',
-  },
   settingTTS: {
     openai: {
       sttModel: 'OpenAI 语音识别模型',
@@ -437,7 +438,6 @@ export default {
       title: '克隆新声音',
     },
   },
-  medicalBadge: 'MEDICAL PIONEER 🏥',
   storage: {
     actions: {
       export: {

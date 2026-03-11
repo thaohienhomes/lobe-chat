@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
-import type { AnimationControllerProps, AnimationStep, PlaybackState } from './types';
+import type { AnimationControllerProps, PlaybackState } from './types';
 
 /**
  * AnimationController — step-by-step animation controls for process/flow diagrams.

@@ -69,12 +69,8 @@ export const useModelAccess = () => {
       if (!allowedTiers.includes(tier)) return false;
 
       // Check daily quota for Tier 2/3
-      if (usageStats && tier === 2 && usageStats.dailyTier2Limit > 0) {
-        if (usageStats.dailyTier2Count >= usageStats.dailyTier2Limit) return false;
-      }
-      if (usageStats && tier === 3 && usageStats.dailyTier3Limit > 0) {
-        if (usageStats.dailyTier3Count >= usageStats.dailyTier3Limit) return false;
-      }
+      if (usageStats && tier === 2 && usageStats.dailyTier2Limit > 0 && usageStats.dailyTier2Count >= usageStats.dailyTier2Limit) return false;
+      if (usageStats && tier === 3 && usageStats.dailyTier3Limit > 0 && usageStats.dailyTier3Count >= usageStats.dailyTier3Limit) return false;
 
       return true;
     },
@@ -89,12 +85,8 @@ export const useModelAccess = () => {
       if (!allowedTiers.includes(tier)) return false;
 
       // Check daily quota for Tier 2/3
-      if (usageStats && tier === 2 && usageStats.dailyTier2Limit > 0) {
-        if (usageStats.dailyTier2Count >= usageStats.dailyTier2Limit) return false;
-      }
-      if (usageStats && tier === 3 && usageStats.dailyTier3Limit > 0) {
-        if (usageStats.dailyTier3Count >= usageStats.dailyTier3Limit) return false;
-      }
+      if (usageStats && tier === 2 && usageStats.dailyTier2Limit > 0 && usageStats.dailyTier2Count >= usageStats.dailyTier2Limit) return false;
+      if (usageStats && tier === 3 && usageStats.dailyTier3Limit > 0 && usageStats.dailyTier3Count >= usageStats.dailyTier3Limit) return false;
 
       return true;
     },

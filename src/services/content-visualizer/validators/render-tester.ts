@@ -22,7 +22,7 @@ function checkReturnsJsx(code: string): string[] {
 
   // Must have a return statement with JSX
   const hasReturnJsx =
-    /return\s*\([\s\S]*?</.test(code) ||
+    /return\s*\([\S\s]*?</.test(code) ||
     /return\s+</.test(code);
 
   if (!hasReturnJsx) {
@@ -40,7 +40,7 @@ function checkRuntimePatterns(code: string): string[] {
   const warnings: string[] = [];
 
   // Undefined variable access patterns
-  if (/\.map\(/.test(code) && !/\?\.\s*map\(/.test(code) && !/\|\|\s*\[\]/.test(code)) {
+  if (/\.map\(/.test(code) && !/\?\.\s*map\(/.test(code) && !/\|\|\s*\[]/.test(code)) {
     // .map() without optional chaining or default — could throw on undefined
     // Only warn, not error, since the variable may be initialized
     warnings.push('Potential null .map() call without optional chaining or default array.');
@@ -55,10 +55,10 @@ function checkRuntimePatterns(code: string): string[] {
   }
 
   // Infinite useEffect without deps
-  if (/useEffect\(\s*\(\)\s*=>\s*\{[\s\S]*?\}\s*\)(?!\s*;?\s*\/\/)/.test(code)) {
+  if (/useEffect\(\s*\(\)\s*=>\s*{[\S\s]*?}\s*\)(?!\s*;?\s*\/\/)/.test(code)) {
     // useEffect without dependency array — check if it's the no-deps version
-    const effectWithoutDeps = /useEffect\(\s*(?:function|\(\))\s*(?:=>)?\s*\{[\s\S]*?\}\s*\)\s*;/g;
-    const effectWithDeps = /useEffect\(\s*(?:function|\(\))\s*(?:=>)?\s*\{[\s\S]*?\}\s*,\s*\[/g;
+    const effectWithoutDeps = /useEffect\(\s*(?:function|\(\))\s*(?:=>)?\s*{[\S\s]*?}\s*\)\s*;/g;
+    const effectWithDeps = /useEffect\(\s*(?:function|\(\))\s*(?:=>)?\s*{[\S\s]*?}\s*,\s*\[/g;
     const withoutCount = (code.match(effectWithoutDeps) || []).length;
     const withCount = (code.match(effectWithDeps) || []).length;
 
@@ -111,10 +111,10 @@ function checkEventHandlers(code: string): string[] {
   const warnings: string[] = [];
 
   // Check for undefined handler references
-  const handlerRefs = code.match(/on(?:Click|MouseEnter|MouseLeave|TouchStart|Change)\s*=\s*\{(\w+)\}/g) || [];
+  const handlerRefs = code.match(/on(?:Click|MouseEnter|MouseLeave|TouchStart|Change)\s*=\s*{(\w+)}/g) || [];
 
   for (const ref of handlerRefs) {
-    const fnName = ref.match(/\{(\w+)\}/)![1];
+    const fnName = ref.match(/{(\w+)}/)![1];
     // Check if function is defined
     const isDefined =
       new RegExp(`(?:const|let|var|function)\\s+${fnName}\\b`).test(code) ||

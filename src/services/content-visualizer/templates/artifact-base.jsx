@@ -103,11 +103,11 @@ export default function ContentVisualization() {
         <div className="flex gap-2" role="tablist">
           {scenes.map((_, i) => (
             <button
-              key={i}
               aria-label={`Go to scene ${i + 1}`}
               className={`h-3 w-3 rounded-full transition-colors ${
                 i === currentScene ? 'bg-blue-500' : 'bg-slate-600 hover:bg-slate-500'
               }`}
+              key={i}
               onClick={() => goToScene(i)}
               role="tab"
             />

@@ -102,7 +102,7 @@ If insufficient information, default to "Some concerns" and note in justificatio
 
             // Extract JSON from response (handle markdown code blocks)
             let raw = json.text.trim();
-            const jsonMatch = raw.match(/\{[\s\S]*\}/);
+            const jsonMatch = raw.match(/{[\S\s]*}/);
             if (jsonMatch) raw = jsonMatch[0];
             const parsed = JSON.parse(raw) as RoBAssessment;
             setAssessments((prev) => ({ ...prev, [paperId]: parsed }));
