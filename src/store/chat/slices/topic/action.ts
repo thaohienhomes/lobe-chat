@@ -229,7 +229,18 @@ export const chatTopic: StateCreator<
     ),
   switchTopic: async (id, skipRefreshMessage) => {
     set(
-      { activeTopicId: !id ? (null as any) : id, activeThreadId: undefined },
+      {
+        activeTopicId: !id ? (null as any) : id,
+        activeThreadId: undefined,
+        // Clear portal panels when switching topics so artifacts from
+        // old conversations don't persist into new chats
+        showPortal: false,
+        portalArtifact: undefined,
+        portalToolMessage: undefined,
+        portalMessageDetail: undefined,
+        portalDeepResearch: false,
+        portalResearch: false,
+      },
       false,
       n('toggleTopic'),
     );
