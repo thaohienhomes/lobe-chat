@@ -103,7 +103,7 @@ const Render = memo<ArtifactProps>(({ identifier, title, type, language, childre
   // Tracks the previous value of isArtifactTagClosed to detect false → true transition.
   const prevTagClosedRef = useRef<boolean>(isArtifactTagClosed);
   useEffect(() => {
-    const wasOpen = !prevTagClosedRef.current;   // previously generating (tag not yet closed)
+    const wasOpen = !prevTagClosedRef.current; // previously generating (tag not yet closed)
     const isNowClosed = isArtifactTagClosed;
 
     if (wasOpen && isNowClosed && PREVIEWABLE_TYPES.has(type)) {
@@ -123,11 +123,12 @@ const Render = memo<ArtifactProps>(({ identifier, title, type, language, childre
       className={styles.container}
       gap={16}
       onClick={() => {
-        const currentArtifactMessageId = chatPortalSelectors.artifactMessageId(
-          useChatStore.getState(),
-        );
-        if (currentArtifactMessageId === id) {
-          // Artifact already open → toggle between Preview and Code
+        const state = useChatStore.getState();
+        const currentArtifactMessageId = chatPortalSelectors.artifactMessageId(state);
+        const isPortalOpen = state.showPortal;
+
+        if (isPortalOpen && currentArtifactMessageId === id) {
+          // Artifact panel is open AND showing the same artifact → toggle display mode
           const nextMode =
             displayMode === ArtifactDisplayMode.Preview
               ? ArtifactDisplayMode.Code
