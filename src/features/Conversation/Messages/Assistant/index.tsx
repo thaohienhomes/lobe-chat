@@ -73,7 +73,7 @@ export const AssistantMessage = memo<
       {showVideoItems && <VideoFileListViewer items={videoList} />}
       <BibliographySection citations={search?.citations} />
       {tools && (
-        <Flexbox gap={8}>
+        <Flexbox gap={4} horizontal style={{ flexWrap: 'wrap' }}>
           {tools.map((toolCall, index) => (
             <Tool
               apiName={toolCall.apiName}
