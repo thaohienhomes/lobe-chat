@@ -8,7 +8,8 @@ import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
 
 const DRAGGING_ROOT_ID = 'dragging-root';
-export const getContainer = () => document.querySelector(`#${DRAGGING_ROOT_ID}`);
+export const getContainer = () =>
+  typeof document === 'undefined' ? null : document.querySelector(`#${DRAGGING_ROOT_ID}`);
 
 const handleDragOver = (e: DragEvent) => {
   if (!e.dataTransfer?.items || e.dataTransfer.items.length === 0) return;
