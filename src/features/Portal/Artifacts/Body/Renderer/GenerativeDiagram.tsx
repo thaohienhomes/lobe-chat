@@ -3,6 +3,8 @@ import { memo, useCallback, useMemo } from 'react';
 import { DiagramRenderer } from '@/components/InteractiveUI/GenerativeDiagram';
 import type { DiagramData, DiagramNode } from '@/components/InteractiveUI/GenerativeDiagram/types';
 
+import JsonParseError from './JsonParseError';
+
 /**
  * Parse the artifact content JSON into DiagramData.
  * Returns null if parsing fails.
@@ -40,11 +42,7 @@ const GenerativeDiagramRenderer = memo<{ content: string }>(({ content }) => {
   }, []);
 
   if (!data) {
-    return (
-      <div className="flex h-full items-center justify-center p-8 text-slate-400">
-        <p>Failed to parse Generative Diagram data. Check the artifact content format.</p>
-      </div>
-    );
+    return <JsonParseError content={content} typeName="Generative Diagram" />;
   }
 
   return (
@@ -58,10 +56,7 @@ const GenerativeDiagramRenderer = memo<{ content: string }>(({ content }) => {
         padding: 8,
       }}
     >
-      <DiagramRenderer
-        data={data}
-        onNodeClick={handleNodeClick}
-      />
+      <DiagramRenderer data={data} onNodeClick={handleNodeClick} />
     </div>
   );
 });

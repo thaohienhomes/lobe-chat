@@ -1,8 +1,10 @@
 import { memo, useCallback, useMemo } from 'react';
 
-import InteractiveImageComponent from '@/components/InteractiveUI/InteractiveImage';
 import { LegendBar } from '@/components/InteractiveUI';
+import InteractiveImageComponent from '@/components/InteractiveUI/InteractiveImage';
 import type { InteractiveRegion, InteractiveRegions } from '@/components/InteractiveUI/types';
+
+import JsonParseError from './JsonParseError';
 
 interface InteractiveImageArtifactData {
   alt?: string;
@@ -58,11 +60,7 @@ const InteractiveImageRenderer = memo<{ content: string }>(({ content }) => {
   }, []);
 
   if (!data) {
-    return (
-      <div className="flex h-full items-center justify-center p-8 text-slate-400">
-        <p>Failed to parse Interactive Image data. Check the artifact content format.</p>
-      </div>
-    );
+    return <JsonParseError content={content} typeName="Interactive Image" />;
   }
 
   return (

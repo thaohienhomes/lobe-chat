@@ -3,6 +3,8 @@ import { memo, useMemo } from 'react';
 import { ScrollytellingViewer } from '@/components/ContentVisualizer';
 import type { ContentVisualizerArtifact } from '@/services/content-visualizer/types';
 
+import JsonParseError from './JsonParseError';
+
 /**
  * Parse the artifact content JSON into ContentVisualizerArtifact.
  * Returns null if parsing fails.
@@ -37,11 +39,7 @@ const ContentVisualizerRenderer = memo<{ content: string }>(({ content }) => {
   const artifact = useMemo(() => parseArtifactContent(content), [content]);
 
   if (!artifact) {
-    return (
-      <div className="flex h-full items-center justify-center p-8 text-slate-400">
-        <p>Failed to parse Content Visualizer data. Check the artifact content format.</p>
-      </div>
-    );
+    return <JsonParseError content={content} typeName="Content Visualizer" />;
   }
 
   return (
