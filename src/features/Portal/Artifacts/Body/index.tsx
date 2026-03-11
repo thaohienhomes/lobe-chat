@@ -1,7 +1,9 @@
 import { Highlighter } from '@lobehub/ui';
-import { useTheme } from 'antd-style';
+import { Skeleton } from 'antd';
+import { createStyles, useTheme } from 'antd-style';
+import { Loader2 } from 'lucide-react';
 import { memo, useEffect, useMemo, useRef } from 'react';
-import { Flexbox } from 'react-layout-kit';
+import { Center, Flexbox } from 'react-layout-kit';
 
 import { useChatStore } from '@/store/chat';
 import { chatPortalSelectors, chatSelectors } from '@/store/chat/selectors';
@@ -24,6 +26,56 @@ const PREVIEWABLE_ARTIFACT_TYPES = new Set<string>([
   // text/html falls through to default HTMLRenderer — match by string
   'text/html',
 ]);
+
+const useStyles = createStyles(({ css, token }) => ({
+  placeholderBox: css`
+    padding-block: 32px;
+    padding-inline: 24px;
+
+    font-size: 13px;
+    color: ${token.colorTextTertiary};
+    text-align: center;
+  `,
+  skeletonWrap: css`
+    width: 100%;
+    padding: 24px;
+  `,
+  spinIcon: css`
+    color: ${token.colorPrimary};
+    animation: spin 1.2s linear infinite;
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  `,
+}));
+
+// ── Skeleton Loader ─────────────────────────────────────────────────────────
+const ArtifactSkeleton = memo(() => {
+  const { styles } = useStyles();
+  return (
+    <Center flex={1} gap={16} height={'100%'}>
+      <Loader2 className={styles.spinIcon} size={28} />
+      <span style={{ color: 'inherit', fontSize: 13, opacity: 0.7 }}>Generating artifact...</span>
+      <div className={styles.skeletonWrap}>
+        <Skeleton active paragraph={{ rows: 6 }} title={false} />
+      </div>
+    </Center>
+  );
+});
+
+// ── Streaming placeholder for preview panel ─────────────────────────────────
+const StreamingPreviewPlaceholder = memo(() => {
+  const { styles } = useStyles();
+  return (
+    <Center className={styles.placeholderBox} flex={1} gap={8} height={'100%'}>
+      <Loader2 className={styles.spinIcon} size={20} />
+      <span>Preview will appear when generation completes</span>
+    </Center>
+  );
+});
 
 const ArtifactsUI = memo(() => {
   const token = useTheme();
@@ -50,6 +102,10 @@ const ArtifactsUI = memo(() => {
   });
 
   const isPreviewable = artifactType ? PREVIEWABLE_ARTIFACT_TYPES.has(artifactType) : false;
+
+  // ── Task 1.2: Loading state — show skeleton when content is minimal ───────
+  const isLoadingSkeleton =
+    isMessageGenerating && artifactContent.length < 50 && !isArtifactTagClosed;
 
   // ── Claude-style UX: Split during generation → Preview after ─────────────
   // Track previous isArtifactTagClosed to detect the false→true transition
@@ -101,6 +157,20 @@ const ArtifactsUI = memo(() => {
   const isManualPreview = messageId === 'manual-preview';
   if (!messageId && !isManualPreview) return;
 
+  // ── Task 1.2: Show skeleton if content hasn't started yet ─────────────────
+  if (isLoadingSkeleton) {
+    return (
+      <Flexbox
+        className={'portal-artifact'}
+        flex={1}
+        height={'100%'}
+        style={{ overflow: 'hidden' }}
+      >
+        <ArtifactSkeleton />
+      </Flexbox>
+    );
+  }
+
   // For manual previews, consider the artifact as "closed" (ready to render)
   const effectivelyTagClosed = isManualPreview || isArtifactTagClosed;
 
@@ -114,6 +184,9 @@ const ArtifactsUI = memo(() => {
   // (matches Claude.ai behaviour — code streams on left, preview renders on right)
   const effectiveSplitMode =
     isSplitMode || (isMessageGenerating && !isArtifactTagClosed && isPreviewable);
+
+  // ── Task 1.6: During streaming, don't live-render in split preview (causes flicker) ──
+  const isStreamingSplit = isMessageGenerating && !isArtifactTagClosed && isPreviewable;
 
   // show code when the artifact is not closed or the display mode is code or the artifact type is code
   const showCode =
@@ -150,7 +223,11 @@ const ArtifactsUI = memo(() => {
         </Flexbox>
         {/* Preview Panel — right */}
         <Flexbox flex={1} paddingInline={8} style={{ overflow: 'auto' }}>
-          <Renderer content={artifactContent} type={artifactType} />
+          {isStreamingSplit ? (
+            <StreamingPreviewPlaceholder />
+          ) : (
+            <Renderer content={artifactContent} type={artifactType} />
+          )}
         </Flexbox>
       </Flexbox>
     );
