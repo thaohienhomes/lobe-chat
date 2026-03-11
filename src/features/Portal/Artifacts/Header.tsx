@@ -181,28 +181,60 @@ const Header = () => {
       return;
     }
 
-    // For Mermaid artifacts: find the rendered SVG in the portal DOM
+    // For Mermaid artifacts: find the rendered SVG in the portal DOM (may be in iframe)
     if (artifactType === ArtifactType.Mermaid) {
       const portalEl = document.querySelector('.portal-artifact');
-      const svgEl = portalEl?.querySelector('svg');
+      let svgEl: SVGSVGElement | null = null;
+
+      // First, try direct DOM
+      svgEl = portalEl?.querySelector('svg') || null;
+
+      // If not found, search inside iframes (Renderer uses iframe for preview)
+      if (!svgEl && portalEl) {
+        const iframes = portalEl.querySelectorAll('iframe');
+        for (const iframe of iframes) {
+          try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (iframeDoc) {
+              svgEl = iframeDoc.querySelector('svg');
+              if (svgEl) break;
+            }
+          } catch {
+            // Cross-origin iframe — skip
+          }
+        }
+      }
+
       if (!svgEl) {
         message.warning('No rendered diagram found. Try switching to Preview mode first.');
         return;
       }
+
       const serializer = new XMLSerializer();
       const svgString = serializer.serializeToString(svgEl);
+      // Get dimensions from the SVG's viewBox or bounding rect
+      const bbox = svgEl.getBoundingClientRect();
+      const width = svgEl.getAttribute('width')
+        ? Number.parseInt(svgEl.getAttribute('width')!, 10)
+        : bbox.width || 800;
+      const height = svgEl.getAttribute('height')
+        ? Number.parseInt(svgEl.getAttribute('height')!, 10)
+        : bbox.height || 600;
+
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(svgBlob);
       const img = new window.Image();
       img.addEventListener('load', () => {
         const canvas = document.createElement('canvas');
         const scale = 2;
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
+        canvas.width = width * scale;
+        canvas.height = height * scale;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale);
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, width, height);
         canvas.toBlob((blob) => {
           if (blob) triggerDownload(blob, `${getTitle()}.png`);
         }, 'image/png');

@@ -160,17 +160,8 @@ const SelectionToolbar = memo<SelectionToolbarProps>(({ containerRef }) => {
 
       const fullPrompt = `Here is the full artifact "${artifactTitle || 'Untitled'}":\n\`\`\`\n${artifactCode.slice(0, 8000)}\n\`\`\`\n\nThe user has selected this portion:\n\`\`\`\n${selectedText}\n\`\`\`\n\nUser instruction: ${instruction}\n\nPlease update ONLY the selected portion. Return the complete updated artifact.`;
 
-      // Set chat input
-      const inputElement = document.querySelector('textarea') as HTMLTextAreaElement;
-      if (inputElement) {
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-          window.HTMLTextAreaElement.prototype,
-          'value',
-        )?.set;
-        nativeInputValueSetter?.call(inputElement, fullPrompt);
-        inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-        inputElement.focus();
-      }
+      // Use chat store to set the input message
+      useChatStore.getState().updateInputMessage(fullPrompt);
 
       // Close toolbar
       handleClose();

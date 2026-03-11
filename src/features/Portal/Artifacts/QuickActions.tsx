@@ -201,17 +201,8 @@ const QuickActions = memo(() => {
       // Build full prompt with artifact context
       const fullPrompt = `Here is the current artifact "${artifactTitle || 'Untitled'}":\n\`\`\`\n${artifactCode.slice(0, 8000)}\n\`\`\`\n\n${action.prompt}`;
 
-      // Set chat input with the prompt
-      const inputElement = document.querySelector('textarea') as HTMLTextAreaElement;
-      if (inputElement) {
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-          window.HTMLTextAreaElement.prototype,
-          'value',
-        )?.set;
-        nativeInputValueSetter?.call(inputElement, fullPrompt);
-        inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-        inputElement.focus();
-      }
+      // Use chat store to set the input message
+      useChatStore.getState().updateInputMessage(fullPrompt);
     },
     [artifactTitle],
   );
