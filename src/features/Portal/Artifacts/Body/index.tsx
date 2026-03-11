@@ -12,6 +12,7 @@ import { ArtifactType } from '@/types/artifact';
 
 import QuickActions from '../QuickActions';
 import Renderer from './Renderer';
+import SelectionToolbar from './SelectionToolbar';
 
 const ARTIFACT_CODE_FONT_SIZE = 12;
 
@@ -80,6 +81,7 @@ const StreamingPreviewPlaceholder = memo(() => {
 
 const ArtifactsUI = memo(() => {
   const token = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [
     messageId,
     displayMode,
@@ -204,6 +206,7 @@ const ArtifactsUI = memo(() => {
         gap={0}
         height={'100%'}
         horizontal
+        ref={containerRef}
         style={{ overflow: 'hidden', position: 'relative' }}
       >
         {/* Code Panel — left */}
@@ -231,6 +234,7 @@ const ArtifactsUI = memo(() => {
           )}
         </Flexbox>
         {!isStreamingSplit && <QuickActions />}
+        {!isStreamingSplit && <SelectionToolbar containerRef={containerRef} />}
       </Flexbox>
     );
   }
@@ -242,6 +246,7 @@ const ArtifactsUI = memo(() => {
       gap={8}
       height={'100%'}
       paddingInline={12}
+      ref={containerRef}
       style={{ overflow: 'hidden', position: 'relative' }}
     >
       {showCode ? (
@@ -255,6 +260,7 @@ const ArtifactsUI = memo(() => {
         <Renderer content={artifactContent} type={artifactType} />
       )}
       {isArtifactTagClosed && <QuickActions />}
+      {isArtifactTagClosed && <SelectionToolbar containerRef={containerRef} />}
     </Flexbox>
   );
 });
