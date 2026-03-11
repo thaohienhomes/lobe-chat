@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     api: [
       {
         description:
-          'Search for academic papers from Semantic Scholar. Returns paper titles, abstracts, authors, publication years, venues, citation counts, and DOI links. Covers all major scientific fields. IMPORTANT: After receiving the search results, you MUST format them as a clean, readable list for the user. For each paper, show: 1) Title (linked to the paper URL or DOI), 2) Authors (first 3, then "et al." if more), 3) Venue/Journal, Year, 4) A brief 1-2 sentence summary from the abstract, 5) Citation count if available. Do NOT show raw JSON to the user. Do NOT show the API parameters or response structure. Present results in a natural, readable format.',
+          'Search for academic papers from Semantic Scholar. Returns paper titles, abstracts, authors, publication years, venues, citation counts, and DOI links. Covers all major scientific fields. IMPORTANT: The response includes a "formattedResults" field containing a pre-formatted markdown summary. You MUST use the formattedResults text directly in your response to the user. Do NOT show raw JSON, API parameters, or response structure. If you want to add more context, you may supplement the formatted results with your own commentary.',
         name: 'searchSemanticScholar',
         parameters: {
           properties: {

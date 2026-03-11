@@ -126,6 +126,44 @@ function parseArticlesFromXml(xml: string): PubMedArticle[] {
   return articles;
 }
 
+/**
+ * Format articles into a readable markdown string for the AI model to present directly.
+ */
+function formatArticlesAsMarkdown(
+  articles: PubMedArticle[],
+  query: string,
+  totalResults: number,
+): string {
+  if (articles.length === 0) return `No PubMed results found for "${query}".`;
+
+  const lines: string[] = [`📄 **PubMed Results for "${query}"** (${totalResults} total)\n`];
+
+  for (const [i, a] of articles.entries()) {
+    const authorStr =
+      a.authors.length > 3 ? `${a.authors.slice(0, 3).join(', ')} et al.` : a.authors.join(', ');
+    const links = [
+      a.pubmedUrl ? `[PubMed](${a.pubmedUrl})` : '',
+      a.doiUrl ? `[DOI](${a.doiUrl})` : '',
+    ]
+      .filter(Boolean)
+      .join(' | ');
+
+    const abstractSummary = a.abstract
+      ? a.abstract.slice(0, 200) + (a.abstract.length > 200 ? '...' : '')
+      : '';
+
+    lines.push(`**${i + 1}. ${a.title}**`, 
+      `   Authors: ${authorStr || 'N/A'} — *${a.journal || 'Unknown Journal'}*, ${a.pubDate || 'N/A'}`,
+    );
+    if (abstractSummary) lines.push(`   ${abstractSummary}`);
+    if (a.keywords && a.keywords.length > 0)
+      lines.push(`   Keywords: ${a.keywords.slice(0, 5).join(', ')}`);
+    lines.push(`   🔗 ${links}`, '');
+  }
+
+  return lines.join('\n');
+}
+
 // Search PubMed and get list of PMIDs + total count
 async function searchPubMed(
   query: string,
@@ -169,8 +207,14 @@ export async function POST(request: NextRequest) {
   const rl = rateLimiter.check('pubmed', ip, RATE_LIMITS.external);
   if (!rl.allowed) {
     return NextResponse.json(
-      { error: 'Too many requests. Please try again later.', retryAfterSeconds: Math.ceil((rl.resetAt - Date.now()) / 1000) },
-      { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } },
+      {
+        error: 'Too many requests. Please try again later.',
+        retryAfterSeconds: Math.ceil((rl.resetAt - Date.now()) / 1000),
+      },
+      {
+        headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) },
+        status: 429,
+      },
     );
   }
 
@@ -187,18 +231,18 @@ export async function POST(request: NextRequest) {
     const retstart = (Math.max(1, page) - 1) * limitedMaxResults;
 
     // Search PubMed
-    const { count, idlist: pmids } = await searchPubMed(
-      query,
-      limitedMaxResults,
-      sortBy,
-      retstart,
-    );
+    const { count, idlist: pmids } = await searchPubMed(query, limitedMaxResults, sortBy, retstart);
 
     if (pmids.length === 0) {
       return NextResponse.json({
         articles: [],
         message: `No results found for "${query}"`,
-        pagination: { currentPage: page, perPage: limitedMaxResults, totalPages: 0, totalResults: 0 },
+        pagination: {
+          currentPage: page,
+          perPage: limitedMaxResults,
+          totalPages: 0,
+          totalResults: 0,
+        },
         query,
         searchTips: [
           'Try using MeSH terms: "diabetes mellitus"[MeSH Terms]',
@@ -216,6 +260,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       articles,
+      formattedResults: formatArticlesAsMarkdown(articles, query, count),
       pagination: {
         currentPage: page,
         hasMore: page < totalPages,
@@ -244,7 +289,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Query parameter is required',
-        usage: '/api/plugins/pubmed/search?query=metformin+diabetes&maxResults=5&sortBy=date&page=1',
+        usage:
+          '/api/plugins/pubmed/search?query=metformin+diabetes&maxResults=5&sortBy=date&page=1',
       },
       { status: 400 },
     );

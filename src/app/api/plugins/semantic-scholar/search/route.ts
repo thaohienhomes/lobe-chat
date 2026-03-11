@@ -39,6 +39,52 @@ interface SearchParams {
 
 const S2_API_URL = 'https://api.semanticscholar.org/graph/v1/paper/search';
 
+/**
+ * Format papers into a readable markdown string for the AI model to present directly.
+ */
+function formatPapersAsMarkdown(
+  papers: {
+    abstract: string;
+    authors: string[];
+    citationCount?: number;
+    doi?: string;
+    title: string;
+    url?: string;
+    venue?: string;
+    year?: number;
+  }[],
+  query: string,
+  totalResults: number,
+): string {
+  if (papers.length === 0) return `No Semantic Scholar results found for "${query}".`;
+
+  const lines: string[] = [
+    `🎓 **Semantic Scholar Results for "${query}"** (${totalResults} total)\n`,
+  ];
+
+  for (const [i, p] of papers.entries()) {
+    const authorStr =
+      p.authors.length > 3 ? `${p.authors.slice(0, 3).join(', ')} et al.` : p.authors.join(', ');
+    const link = p.url ? `[Paper](${p.url})` : p.doi ? `[DOI](https://doi.org/${p.doi})` : '';
+    const citations =
+      p.citationCount !== null && p.citationCount !== undefined
+        ? ` — ${p.citationCount} citations`
+        : '';
+    const abstractSummary = p.abstract
+      ? p.abstract.slice(0, 200) + (p.abstract.length > 200 ? '...' : '')
+      : '';
+
+    lines.push(`**${i + 1}. ${p.title}**`, 
+      `   Authors: ${authorStr || 'N/A'} — *${p.venue || 'Unknown Venue'}*, ${p.year || 'N/A'}${citations}`,
+    );
+    if (abstractSummary) lines.push(`   ${abstractSummary}`);
+    if (link) lines.push(`   🔗 ${link}`);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
 // ---------------------------------------------------------------------------
 // Retry helper — exponential backoff for Semantic Scholar rate limits (1 req/s)
 // Retries up to 3 times with delays: 1s → 2s → 4s
@@ -64,7 +110,9 @@ async function fetchWithRetry(
       `[Semantic Scholar] Rate limited (429). Retry ${attempt + 1}/${retries} in ${Math.round(delay)}ms`,
     );
     await new Promise<void>((resolve) => {
-      setTimeout(() => { resolve(); }, delay);
+      setTimeout(() => {
+        resolve();
+      }, delay);
     });
   }
 
@@ -149,6 +197,7 @@ export async function POST(request: NextRequest) {
     }));
 
     return NextResponse.json({
+      formattedResults: formatPapersAsMarkdown(results, query, data.total || results.length),
       papers: results,
       query,
       totalResults: data.total || results.length,
