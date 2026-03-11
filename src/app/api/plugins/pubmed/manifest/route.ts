@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     api: [
       {
         description:
-          'Search PubMed for biomedical research articles. Returns articles with clickable PubMed links, DOI links, abstracts, authors, journals, MeSH keywords, and pagination. Supports boolean operators (AND, OR, NOT), MeSH terms, and field tags. IMPORTANT: Always include pubmedUrl and doiUrl links in your response so users can click to read the full paper.',
+          'Search PubMed for biomedical research articles. Returns articles with clickable PubMed links, DOI links, abstracts, authors, journals, MeSH keywords, and pagination. Supports boolean operators (AND, OR, NOT), MeSH terms, and field tags. IMPORTANT: After receiving the search results, you MUST format them as a clean, readable list for the user. For each article, show: 1) Title (linked to the pubmedUrl or doiUrl), 2) Authors (first 3, then "et al." if more), 3) Journal, Year, 4) A brief 1-2 sentence summary from the abstract, 5) Citation count if available. Do NOT show raw JSON to the user. Do NOT show the API parameters or response structure. Present results in a natural, readable format.',
         name: 'searchPubMed',
         parameters: {
           properties: {
@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
             },
             page: {
               default: 1,
-              description: 'Page number for pagination (starts at 1). Use this to load more results.',
+              description:
+                'Page number for pagination (starts at 1). Use this to load more results.',
               type: 'number',
             },
             query: {

@@ -143,20 +143,61 @@ function repairDoublyEncodedUtf8(text: string): string {
 }
 
 /**
+ * Recursively find and repair all double-encoded UTF-8 strings in a JSON value.
+ * Returns the repaired value and whether any repairs were made.
+ */
+function repairStringsInObject(value: unknown): { repaired: boolean; value: unknown } {
+  if (typeof value === 'string') {
+    if (looksLikeDoublyEncodedUtf8(value)) {
+      return { repaired: true, value: repairDoublyEncodedUtf8(value) };
+    }
+    return { repaired: false, value };
+  }
+
+  if (Array.isArray(value)) {
+    let anyRepaired = false;
+    const result = value.map((item) => {
+      const r = repairStringsInObject(item);
+      if (r.repaired) anyRepaired = true;
+      return r.value;
+    });
+    return { repaired: anyRepaired, value: result };
+  }
+
+  if (value !== null && typeof value === 'object') {
+    let anyRepaired = false;
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      const r = repairStringsInObject(val);
+      if (r.repaired) anyRepaired = true;
+      result[key] = r.value;
+    }
+    return { repaired: anyRepaired, value: result };
+  }
+
+  return { repaired: false, value };
+}
+
+/**
  * Create a TransformStream that repairs double-encoded UTF-8 in SSE data payloads.
+ * Handles nested JSON objects (Anthropic `content_block_delta.delta.text`,
+ * OpenAI-compatible `choices[].delta.content`, and any other string fields).
  * Only processes `data: ` lines in the SSE stream; passes through all other lines unchanged.
  */
 function createUtf8RepairStream(): TransformStream<Uint8Array, Uint8Array> {
   const decoder = new TextDecoder('utf8', { fatal: false });
   const encoder = new TextEncoder();
   let partialLine = '';
+  let repairCount = 0;
 
   return new TransformStream({
     flush(controller) {
-      // Handle any remaining partial data
       if (partialLine) {
         controller.enqueue(encoder.encode(partialLine));
         partialLine = '';
+      }
+      if (repairCount > 0) {
+        console.log(`[UTF-8 Repair] Total repairs in this stream: ${repairCount}`);
       }
     },
     transform(chunk, controller) {
@@ -169,18 +210,21 @@ function createUtf8RepairStream(): TransformStream<Uint8Array, Uint8Array> {
       for (const line of lines) {
         let outputLine = line;
 
-        // Only repair `data: ` lines that contain JSON string payloads
+        // Only repair `data: ` lines that contain JSON payloads
         if (line.startsWith('data: ') && !line.startsWith('data: [DONE]')) {
           try {
             const jsonStr = line.slice(6);
             const parsed = JSON.parse(jsonStr);
 
-            // Check if this is an SSE text event with string data
-            if (typeof parsed === 'string' && looksLikeDoublyEncodedUtf8(parsed)) {
-              const repaired = repairDoublyEncodedUtf8(parsed);
-              outputLine = `data: ${JSON.stringify(repaired)}`;
-              // Log first occurrence for debugging
-              console.log(`[UTF-8 Repair] Fixed double-encoded text in SSE data`);
+            // Recursively find and repair all string values in the parsed object
+            const { repaired, value } = repairStringsInObject(parsed);
+
+            if (repaired) {
+              outputLine = `data: ${JSON.stringify(value)}`;
+              repairCount++;
+              if (repairCount === 1) {
+                console.log(`[UTF-8 Repair] Fixed double-encoded text in SSE JSON payload`);
+              }
             }
           } catch {
             // Not valid JSON or parsing failed, pass through unchanged
