@@ -95,6 +95,143 @@ function countTokens(text: string): number {
   return Math.ceil(byteLength / 3);
 }
 
+// ============  UTF-8 Repair for Vercel AI Gateway + Anthropic  ============ //
+//
+// When the Vercel AI Gateway proxies Anthropic's API, the SSE response
+// sometimes arrives with UTF-8 bytes mis-interpreted as Latin-1/Windows-1252,
+// causing Vietnamese/CJK diacritics to display as mojibake
+// (e.g. "ấ" → "áº¥", "Đ" → "Ä\x90", "ư" → "Æ°").
+//
+// This TransformStream detects and repairs double-encoded UTF-8 in the
+// LobeChat SSE protocol data payloads.
+
+/**
+ * Detect whether a string likely contains double-encoded UTF-8.
+ * Checks for common Latin-1 byte patterns that result from interpreting
+ * UTF-8 continuation bytes (0x80-0xBF) as Latin-1 characters.
+ */
+function looksLikeDoublyEncodedUtf8(text: string): boolean {
+  // Pattern: Latin-1 lead bytes (0xC0-0xC5, 0xC3, 0xE1-0xE2) followed by
+  // continuation byte range (0x80-0xBF) rendered as Latin-1 chars.
+  // Common in Vietnamese: Ã (0xC3), Ä (0xC4), Æ (0xC6), á (0xE1), â (0xE2)
+  // eslint-disable-next-line no-control-regex
+  return /[\u00C0-\u00C6\u00E0-\u00E2][\u0080-\u00BF]/.test(text);
+}
+
+/**
+ * Repair a double-encoded UTF-8 string.
+ * charCodeAt() returns 0x00-0xFF for Latin-1 chars (identity mapping),
+ * so we can treat each char code as a raw byte and re-decode as UTF-8.
+ */
+function repairDoublyEncodedUtf8(text: string): string {
+  try {
+    const bytes = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) {
+      const code = text.charCodeAt(i);
+      if (code > 0xFF) return text; // Non-Latin-1 char → abort
+      bytes[i] = code;
+    }
+    return new TextDecoder('utf8', { fatal: true }).decode(bytes);
+  } catch {
+    return text; // Not actually double-encoded
+  }
+}
+
+/**
+ * Recursively find and repair all double-encoded UTF-8 strings in a value.
+ */
+function repairStringsInValue(value: unknown): { repaired: boolean; value: unknown } {
+  if (typeof value === 'string') {
+    if (looksLikeDoublyEncodedUtf8(value)) {
+      return { repaired: true, value: repairDoublyEncodedUtf8(value) };
+    }
+    return { repaired: false, value };
+  }
+  if (Array.isArray(value)) {
+    let any = false;
+    const result = value.map((item) => {
+      const r = repairStringsInValue(item);
+      if (r.repaired) any = true;
+      return r.value;
+    });
+    return { repaired: any, value: result };
+  }
+  if (value !== null && typeof value === 'object') {
+    let any = false;
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      const r = repairStringsInValue(val);
+      if (r.repaired) any = true;
+      result[key] = r.value;
+    }
+    return { repaired: any, value: result };
+  }
+  return { repaired: false, value };
+}
+
+/**
+ * Create a TransformStream that repairs double-encoded UTF-8 in SSE data payloads.
+ * Handles LobeChat SSE protocol format:
+ *   id: xxx\n
+ *   event: text\n
+ *   data: "string or JSON"\n\n
+ */
+function createUtf8RepairStream(): TransformStream<Uint8Array, Uint8Array> {
+  const decoder = new TextDecoder('utf8', { fatal: false });
+  const encoder = new TextEncoder();
+  let buffer = '';
+  let repairCount = 0;
+
+  return new TransformStream({
+    flush(controller) {
+      if (buffer) {
+        controller.enqueue(encoder.encode(buffer));
+        buffer = '';
+      }
+      if (repairCount > 0) {
+        console.log(`[UTF-8 Repair] Total repairs in this stream: ${repairCount}`);
+      }
+    },
+    transform(chunk, controller) {
+      buffer += decoder.decode(chunk, { stream: true });
+
+      // Process complete SSE events (terminated by \n\n)
+      let eventEnd: number;
+      while ((eventEnd = buffer.indexOf('\n\n')) !== -1) {
+        const event = buffer.slice(0, eventEnd + 2);
+        buffer = buffer.slice(eventEnd + 2);
+
+        // Find and repair data: lines within this event
+        const lines = event.split('\n');
+        const outputLines: string[] = [];
+
+        for (const line of lines) {
+          if (line.startsWith('data: ') && !line.startsWith('data: [DONE]')) {
+            try {
+              const jsonStr = line.slice(6);
+              const parsed = JSON.parse(jsonStr);
+              const { repaired, value } = repairStringsInValue(parsed);
+              if (repaired) {
+                outputLines.push(`data: ${JSON.stringify(value)}`);
+                repairCount++;
+                if (repairCount === 1) {
+                  console.log('[UTF-8 Repair] Fixed double-encoded Vietnamese/CJK text');
+                }
+                continue;
+              }
+            } catch {
+              // Not valid JSON, pass through
+            }
+          }
+          outputLines.push(line);
+        }
+
+        controller.enqueue(encoder.encode(outputLines.join('\n')));
+      }
+    },
+  });
+}
+
 // ============  Tool Schema Sanitization   ============ //
 
 /**
@@ -498,8 +635,17 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     const requestStartTime = Date.now();
 
     if (data.stream && response.body) {
+      // ── UTF-8 Repair for Anthropic via Vercel AI Gateway ──
+      // Pipe through repair stream to fix double-encoded Vietnamese/CJK diacritics
+      const needsUtf8Repair =
+        actualProviderUsed === 'vercelaigateway' && actualModelUsed.startsWith('anthropic/');
+
+      const bodyStream = needsUtf8Repair
+        ? response.body.pipeThrough(createUtf8RepairStream())
+        : response.body;
+
       // STREAMING: Tee the stream to audit usage
-      const [stream1, stream2] = response.body.tee();
+      const [stream1, stream2] = bodyStream.tee();
 
       // Process audit in background (don't await)
       (async () => {
