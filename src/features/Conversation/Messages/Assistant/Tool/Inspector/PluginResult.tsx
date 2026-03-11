@@ -19,6 +19,17 @@ const PluginResult = memo<FunctionMessageProps>(({ toolCallId, variant }) => {
       if (typeof parsed === 'string') {
         return { data: parsed, language: 'plaintext' }; // Return the parsed string directly, do not re-serialize
       }
+
+      // If the response has a formattedResults field (e.g. from PubMed/Semantic Scholar),
+      // show that pre-rendered markdown instead of raw JSON for better UX
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof parsed.formattedResults === 'string'
+      ) {
+        return { data: parsed.formattedResults, language: 'plaintext' };
+      }
+
       return { data: JSON.stringify(parsed, null, 2), language: 'json' };
     } catch {
       return { data: toolMessage?.content || '', language: 'plaintext' };
