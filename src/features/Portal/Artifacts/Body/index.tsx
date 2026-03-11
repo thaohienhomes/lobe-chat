@@ -1,4 +1,5 @@
 import { Highlighter } from '@lobehub/ui';
+import { useTheme } from 'antd-style';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
@@ -8,6 +9,8 @@ import { ArtifactDisplayMode } from '@/store/chat/slices/portal/initialState';
 import { ArtifactType } from '@/types/artifact';
 
 import Renderer from './Renderer';
+
+const ARTIFACT_CODE_FONT_SIZE = 12;
 
 // Artifact types that have a live Preview (not pure code)
 const PREVIEWABLE_ARTIFACT_TYPES = new Set<string>([
@@ -22,8 +25,8 @@ const PREVIEWABLE_ARTIFACT_TYPES = new Set<string>([
   'text/html',
 ]);
 
-
 const ArtifactsUI = memo(() => {
+  const token = useTheme();
   const [
     messageId,
     displayMode,
@@ -55,8 +58,8 @@ const ArtifactsUI = memo(() => {
   useEffect(() => {
     if (!isPreviewable || !artifactType) return;
 
-    const wasStreaming = !prevTagClosedRef.current;  // tag was open (still generating)
-    const isNowClosed = isArtifactTagClosed;          // tag just closed
+    const wasStreaming = !prevTagClosedRef.current; // tag was open (still generating)
+    const isNowClosed = isArtifactTagClosed; // tag just closed
 
     if (wasStreaming && isNowClosed) {
       // Artifact just finished generating → switch to full Preview
@@ -116,8 +119,8 @@ const ArtifactsUI = memo(() => {
   const showCode =
     !isInteractiveImage &&
     (!effectivelyTagClosed ||
-    displayMode === ArtifactDisplayMode.Code ||
-    artifactType === ArtifactType.Code);
+      displayMode === ArtifactDisplayMode.Code ||
+      artifactType === ArtifactType.Code);
 
   if (effectiveSplitMode) {
     return (
@@ -134,13 +137,13 @@ const ArtifactsUI = memo(() => {
           flex={1}
           paddingInline={8}
           style={{
-            borderRight: '1px solid rgba(255,255,255,0.1)',
+            borderRight: `1px solid ${token.colorSplit}`,
             overflow: 'auto',
           }}
         >
           <Highlighter
             language={language || 'txt'}
-            style={{ fontSize: 11, height: '100%', overflow: 'auto' }}
+            style={{ fontSize: ARTIFACT_CODE_FONT_SIZE, height: '100%', overflow: 'auto' }}
           >
             {artifactContent}
           </Highlighter>
@@ -165,7 +168,7 @@ const ArtifactsUI = memo(() => {
       {showCode ? (
         <Highlighter
           language={language || 'txt'}
-          style={{ fontSize: 12, height: '100%', overflow: 'auto' }}
+          style={{ fontSize: ARTIFACT_CODE_FONT_SIZE, height: '100%', overflow: 'auto' }}
         >
           {artifactContent}
         </Highlighter>

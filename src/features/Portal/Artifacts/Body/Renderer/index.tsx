@@ -2,8 +2,11 @@ import { Markdown, Mermaid } from '@lobehub/ui';
 import dynamic from 'next/dynamic';
 import { memo } from 'react';
 
+import { useChatStore } from '@/store/chat';
+import { chatPortalSelectors } from '@/store/chat/selectors';
 import { ArtifactType } from '@/types/artifact';
 
+import ArtifactErrorBoundary from './ErrorBoundary';
 import HTMLRenderer from './HTML';
 import SVGRender from './SVG';
 
@@ -13,7 +16,7 @@ const GenerativeDiagramRenderer = dynamic(() => import('./GenerativeDiagram'), {
 const ContentVisualizerRenderer = dynamic(() => import('./ContentVisualizer'), { ssr: false });
 const AIRenderingRenderer = dynamic(() => import('./AIRendering'), { ssr: false });
 
-const Renderer = memo<{ content: string; type?: string }>(({ content, type }) => {
+const RendererInner = memo<{ content: string; type?: string }>(({ content, type }) => {
   switch (type) {
     case ArtifactType.React: {
       return <ReactRenderer code={content} />;
@@ -51,6 +54,16 @@ const Renderer = memo<{ content: string; type?: string }>(({ content, type }) =>
       return <HTMLRenderer htmlContent={content} />;
     }
   }
+});
+
+const Renderer = memo<{ content: string; type?: string }>(({ content, type }) => {
+  const artifactTitle = useChatStore((s) => chatPortalSelectors.artifactTitle(s));
+
+  return (
+    <ArtifactErrorBoundary artifactTitle={artifactTitle}>
+      <RendererInner content={content} type={type} />
+    </ArtifactErrorBoundary>
+  );
 });
 
 export default Renderer;
