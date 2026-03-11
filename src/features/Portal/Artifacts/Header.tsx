@@ -1,6 +1,6 @@
 import { ArtifactType } from '@lobechat/types';
 import { ActionIcon, Icon, Segmented, Text } from '@lobehub/ui';
-import { ConfigProvider, Dropdown, type MenuProps } from 'antd';
+import { ConfigProvider, Dropdown, type MenuProps, message } from 'antd';
 import { createStyles, cx } from 'antd-style';
 import {
   ArrowLeft,
@@ -10,6 +10,8 @@ import {
   Download,
   ExternalLink,
   EyeIcon,
+  FileText,
+  Image,
 } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,6 +53,30 @@ const useStyles = createStyles(({ css, token }) => ({
   `,
 }));
 
+// ── File extension map ────────────────────────────────────────────────────
+const EXT_MAP: Record<string, string> = {
+  [ArtifactType.Code]: 'txt',
+  [ArtifactType.Mermaid]: 'mmd',
+  [ArtifactType.Python]: 'py',
+  [ArtifactType.React]: 'tsx',
+  [ArtifactType.SVG]: 'svg',
+};
+
+// ── Helper: trigger browser download ─────────────────────────────────────
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Helper: get artifact title for filenames ─────────────────────────────
+function getTitle() {
+  return chatPortalSelectors.artifactTitle(useChatStore.getState()) || 'artifact';
+}
+
 const Header = () => {
   const { t } = useTranslation('portal');
   const { styles } = useStyles();
@@ -75,7 +101,6 @@ const Header = () => {
     ];
   });
 
-  // show switch only when artifact is closed and the type is not code
   const showSwitch = isArtifactTagClosed && artifactType !== ArtifactType.Code;
   const isStreaming = isGenerating && !isArtifactTagClosed;
 
@@ -91,31 +116,22 @@ const Header = () => {
     const code = getArtifactCode();
     if (!code) return;
     navigator.clipboard.writeText(code);
+    message.success('Copied to clipboard');
   }, [getArtifactCode]);
 
   const handleDownloadCode = useCallback(() => {
     const code = getArtifactCode();
     if (!code) return;
-
-    // Determine file extension based on artifact type
-    const extMap: Record<string, string> = {
-      [ArtifactType.React]: 'tsx',
-      [ArtifactType.Python]: 'py',
-      [ArtifactType.SVG]: 'svg',
-      [ArtifactType.Mermaid]: 'mmd',
-      [ArtifactType.Code]: 'txt',
-    };
-    const ext = (artifactType && extMap[artifactType]) || 'html';
+    const ext = (artifactType && EXT_MAP[artifactType]) || 'html';
     const mime = ext === 'html' ? 'text/html;charset=utf-8' : 'text/plain;charset=utf-8';
-
-    const blob = new Blob([code], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${chatPortalSelectors.artifactTitle(useChatStore.getState()) || 'artifact'}.${ext}`;
-    a.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(new Blob([code], { type: mime }), `${getTitle()}.${ext}`);
   }, [getArtifactCode, artifactType]);
+
+  const handleDownloadMarkdown = useCallback(() => {
+    const code = getArtifactCode();
+    if (!code) return;
+    triggerDownload(new Blob([code], { type: 'text/markdown;charset=utf-8' }), `${getTitle()}.md`);
+  }, [getArtifactCode]);
 
   const handlePrintPDF = useCallback(() => {
     const code = getArtifactCode();
@@ -125,9 +141,7 @@ const Header = () => {
     printWindow.document.write(code);
     printWindow.document.close();
     printWindow.addEventListener('load', () => {
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
+      setTimeout(() => printWindow.print(), 500);
     });
   }, [getArtifactCode]);
 
@@ -135,9 +149,72 @@ const Header = () => {
     const code = getArtifactCode();
     if (!code) return;
     const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    window.open(URL.createObjectURL(blob), '_blank');
   }, [getArtifactCode]);
+
+  // ── PNG export for SVG & Mermaid ──────────────────────────────────────────
+  const handleDownloadPNG = useCallback(() => {
+    const code = getArtifactCode();
+    if (!code) return;
+
+    // For SVG artifacts: render SVG string directly to canvas
+    if (artifactType === ArtifactType.SVG) {
+      const svgBlob = new Blob([code], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new window.Image();
+      img.addEventListener('load', () => {
+        const canvas = document.createElement('canvas');
+        // Use higher resolution for crisp exports
+        const scale = 2;
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) triggerDownload(blob, `${getTitle()}.png`);
+        }, 'image/png');
+        URL.revokeObjectURL(url);
+      });
+      img.src = url;
+      return;
+    }
+
+    // For Mermaid artifacts: find the rendered SVG in the portal DOM
+    if (artifactType === ArtifactType.Mermaid) {
+      const portalEl = document.querySelector('.portal-artifact');
+      const svgEl = portalEl?.querySelector('svg');
+      if (!svgEl) {
+        message.warning('No rendered diagram found. Try switching to Preview mode first.');
+        return;
+      }
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgEl);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new window.Image();
+      img.addEventListener('load', () => {
+        const canvas = document.createElement('canvas');
+        const scale = 2;
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) triggerDownload(blob, `${getTitle()}.png`);
+        }, 'image/png');
+        URL.revokeObjectURL(url);
+      });
+      img.src = url;
+    }
+  }, [getArtifactCode, artifactType]);
+
+  // ── Build conditional menu ────────────────────────────────────────────────
+  const isSvgOrMermaid = artifactType === ArtifactType.SVG || artifactType === ArtifactType.Mermaid;
+  const isPreviewable = artifactType !== ArtifactType.Code && artifactType !== ArtifactType.Python;
 
   const downloadMenuItems: MenuProps['items'] = useMemo(
     () =>
@@ -148,26 +225,50 @@ const Header = () => {
           label: 'Copy to clipboard',
           onClick: handleCopyToClipboard,
         },
+        { type: 'divider' as const },
         {
           icon: <Icon icon={Download} size={'small'} />,
           key: 'code',
-          label: 'Download file',
+          label: `Download .${(artifactType && EXT_MAP[artifactType]) || 'html'}`,
           onClick: handleDownloadCode,
         },
         {
+          icon: <Icon icon={FileText} size={'small'} />,
+          key: 'md',
+          label: 'Download .md',
+          onClick: handleDownloadMarkdown,
+        },
+        isSvgOrMermaid && {
+          icon: <Icon icon={Image} size={'small'} />,
+          key: 'png',
+          label: 'Download PNG',
+          onClick: handleDownloadPNG,
+        },
+        isPreviewable && {
           icon: <Icon icon={Download} size={'small'} />,
           key: 'pdf',
           label: 'Download PDF',
           onClick: handlePrintPDF,
         },
-        {
+        { type: 'divider' as const },
+        isPreviewable && {
           icon: <Icon icon={ExternalLink} size={'small'} />,
           key: 'newtab',
           label: 'Open in new tab',
           onClick: handleOpenNewTab,
         },
-      ].filter(Boolean),
-    [handleCopyToClipboard, handleDownloadCode, handlePrintPDF, handleOpenNewTab],
+      ].filter(Boolean) as MenuProps['items'],
+    [
+      handleCopyToClipboard,
+      handleDownloadCode,
+      handleDownloadMarkdown,
+      handlePrintPDF,
+      handleOpenNewTab,
+      handleDownloadPNG,
+      artifactType,
+      isSvgOrMermaid,
+      isPreviewable,
+    ],
   );
 
   const showDownload = isArtifactTagClosed;
