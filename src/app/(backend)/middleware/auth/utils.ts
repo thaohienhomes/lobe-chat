@@ -9,6 +9,8 @@ interface CheckAuthParams {
   accessCode?: string;
   apiKey?: string;
   clerkAuth?: AuthObject;
+  /** Fallback userId from XOR-encoded client token, used when Clerk session expires */
+  fallbackUserId?: string;
   nextAuthAuthorized?: boolean;
 }
 /**
@@ -24,14 +26,27 @@ export const checkAuthMethod = ({
   nextAuthAuthorized,
   accessCode,
   clerkAuth,
+  fallbackUserId,
 }: CheckAuthParams) => {
   // clerk auth handler
   if (AUTH_CONFIG.clerk.enabled) {
-    // if there is no userId, means the use is not login, just throw error
-    if (!(clerkAuth as any)?.userId)
-      throw AgentRuntimeError.createError(ChatErrorType.InvalidClerkUser);
-    // if the user is login, just return
-    else return;
+    if ((clerkAuth as any)?.userId) {
+      // Clerk session is valid — proceed
+      return;
+    }
+
+    // Clerk session expired or missing — check for fallback userId from client token
+    // This prevents false "not logged in" errors during multi-round tool calling chains
+    // where Clerk session cookies may expire between rounds
+    if (fallbackUserId) {
+      console.warn(
+        `[Auth] Clerk session expired but XOR token has userId=${fallbackUserId}. Allowing request.`,
+      );
+      return;
+    }
+
+    // No Clerk auth AND no fallback — user truly not logged in
+    throw AgentRuntimeError.createError(ChatErrorType.InvalidClerkUser);
   }
 
   // if next auth handler is provided

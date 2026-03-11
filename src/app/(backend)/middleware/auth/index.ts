@@ -81,6 +81,7 @@ export const checkAuth =
           accessCode: jwtPayload.accessCode,
           apiKey: jwtPayload.apiKey,
           clerkAuth,
+          fallbackUserId: jwtPayload.userId,
           nextAuthAuthorized: oauthAuthorized,
         });
     } catch (e) {
