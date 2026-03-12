@@ -1,7 +1,7 @@
 'use client';
 
 import { ActionIcon, Icon } from '@lobehub/ui';
-import { Dropdown, type MenuProps } from 'antd';
+import { Dropdown, type MenuProps, message } from 'antd';
 import {
   BarChart3,
   ClipboardList,
@@ -63,11 +63,9 @@ const VISUALIZE_FORMATS: VisualFormat[] = [
 
 const DeepResearchHeader = memo(() => {
   const handleVisualize = useCallback((format: VisualFormat) => {
-    const store = useChatStore.getState();
-    // Inject prompt into chat input
-    store.updateInputMessage(format.prompt);
-    // Close Deep Research portal so user can see the chat input
-    store.closeDeepResearch();
+    // Inject prompt into chat input (don't close portal — would abort research)
+    useChatStore.getState().updateInputMessage(format.prompt);
+    message.info('✅ Prompt ready in chat — switch to chat and press Enter');
   }, []);
 
   const menuItems: MenuProps['items'] = useMemo(
