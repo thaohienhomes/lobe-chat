@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { DocumentTranslationService } from '@/services/document-translation';
 
+// Allow longer execution for file processing + AI translation
+export const maxDuration = 120;
+
 /**
  * Document Translation Plugin - Gateway
  *

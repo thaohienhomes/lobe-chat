@@ -11,6 +11,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { DocumentTranslationService } from '@/services/document-translation';
 
+// Allow longer execution for large documents
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     // Parse multipart form data
@@ -70,10 +73,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[DocTranslation/extract] Error:', error);
+    const message =
+      error instanceof Error
+        ? `${error.message}\n${error.stack}`
+        : 'Failed to extract text from document';
 
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Failed to extract text from document',
+        stack: process.env.NODE_ENV === 'development' ? message : undefined,
       },
       { status: 500 },
     );
