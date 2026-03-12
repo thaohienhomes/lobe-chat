@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Document Translation Plugin - Manifest
  *
- * Returns the plugin manifest for LobeChat plugin system.
- * Provides 3 tools: extract → translate → apply
+ * Single tool: translateDocument — downloads file, translates, returns result.
+ * Fully stateless (no job IDs), works on Vercel serverless.
  */
 export async function GET(request: NextRequest) {
   const host = request.headers.get('host') || 'localhost:3010';
@@ -16,36 +16,20 @@ export async function GET(request: NextRequest) {
     api: [
       {
         description:
-          'Extract translatable text from a Word document (.docx). Upload the file first, then call this with the file URL. Returns extracted text elements from shapes, textboxes, diagrams, and paragraphs, along with a jobId for subsequent steps.',
-        name: 'extractDocumentText',
+          'Translate a Word document (.docx) to another language. Upload the file first, then call this with the file URL and target language. Returns translated text samples and a base64-encoded translated .docx file. Preserves 100% of original layout, shapes, diagrams, and formatting.',
+        name: 'translateDocument',
         parameters: {
           properties: {
             fileUrl: {
               description:
-                'URL of the uploaded .docx file (from file upload), or base64-encoded file data',
+                'URL of the uploaded .docx file (from file upload). Can be an S3 URL, a relative path like /api/file/..., or base64 data URL.',
               type: 'string',
             },
-          },
-          required: ['fileUrl'],
-          type: 'object',
-        },
-        url: `${baseUrl}/api/plugins/document-translation/gateway`,
-      },
-      {
-        description:
-          'Translate extracted text elements from a document. Requires a jobId from extractDocumentText. Supports Chinese, Vietnamese, English, Japanese, Korean and more. Automatically detects domain (construction, engineering) and applies specialized glossary.',
-        name: 'translateDocumentText',
-        parameters: {
-          properties: {
             glossary: {
               additionalProperties: { type: 'string' },
               description:
-                'Optional custom glossary overrides (key: original term, value: translation)',
+                'Optional custom glossary (key: original term, value: preferred translation)',
               type: 'object',
-            },
-            jobId: {
-              description: 'Job ID returned from extractDocumentText',
-              type: 'string',
             },
             sourceLang: {
               description:
@@ -54,39 +38,11 @@ export async function GET(request: NextRequest) {
             },
             targetLang: {
               description:
-                'Target language for translation. Examples: vi (Vietnamese), en (English), zh (Chinese)',
+                'Target language. Examples: vi (Vietnamese), en (English), zh (Chinese), ja (Japanese)',
               type: 'string',
             },
           },
-          required: ['jobId', 'targetLang'],
-          type: 'object',
-        },
-        url: `${baseUrl}/api/plugins/document-translation/gateway`,
-      },
-      {
-        description:
-          'Apply translations back to the document and generate the downloadable .docx file. Preserves 100% of original layout, shapes, and formatting. Returns a download URL for the translated file.',
-        name: 'applyDocumentTranslation',
-        parameters: {
-          properties: {
-            jobId: {
-              description: 'Job ID from the previous steps',
-              type: 'string',
-            },
-            translations: {
-              description: 'Optional user-edited translations to override AI results',
-              items: {
-                properties: {
-                  id: { description: 'Text element ID', type: 'string' },
-                  translated: { description: 'User-edited translation', type: 'string' },
-                },
-                required: ['id', 'translated'],
-                type: 'object',
-              },
-              type: 'array',
-            },
-          },
-          required: ['jobId'],
+          required: ['fileUrl', 'targetLang'],
           type: 'object',
         },
         url: `${baseUrl}/api/plugins/document-translation/gateway`,
@@ -110,20 +66,20 @@ export async function GET(request: NextRequest) {
 
 When the user uploads a .docx file and asks to translate it:
 
-1. Call \`extractDocumentText\` with the file URL to extract all text from shapes, textboxes, and paragraphs
-2. Review the extracted elements and report what was found (number of shapes, text elements, detected language)
-3. Call \`translateDocumentText\` with the jobId and target language
-4. Present the translations showing original → translated for key terms
-5. Call \`applyDocumentTranslation\` to generate the final .docx download
+1. Call \`translateDocument\` with the file URL and target language
+2. Show key translation samples (original → translated) from the result
+3. The response includes a base64-encoded translated .docx file
+4. Tell the user the translation is complete and show the stats
 
 IMPORTANT RULES:
-- Always detect the source language automatically from the extracted text
-- For construction/engineering documents, the built-in glossary will be auto-applied
-- Show key translation results to the user before generating the final file
+- The tool does everything in one call: extract text → translate → generate output file
+- Source language is auto-detected from the content
+- For construction/engineering documents, a specialized glossary is auto-applied  
 - The output .docx preserves 100% of the original layout, shapes, colors, and formatting
-- If the user doesn't specify a target language, ask them which language they want`,
+- If the user doesn't specify a target language, ask them which language they want
+- If fileUrl is a relative path (starts with /), the tool will convert it to an absolute URL automatically`,
     type: 'default',
-    version: '1.0',
+    version: '2.0',
   };
 
   return NextResponse.json(manifest);

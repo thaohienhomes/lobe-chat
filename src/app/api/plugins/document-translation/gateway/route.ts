@@ -6,175 +6,96 @@ import { DocumentTranslationService } from '@/services/document-translation';
 export const maxDuration = 120;
 
 /**
- * Document Translation Plugin - Gateway
+ * Document Translation Plugin — Gateway (One-Shot)
  *
- * Single endpoint that handles all 3 tool actions:
- * - extractDocumentText: Download file → extract text
- * - translateDocumentText: Translate with AI + glossary
- * - applyDocumentTranslation: Write back → return download URL
+ * Simplified single-action gateway. The AI calls this with:
+ * - fileUrl: URL of the uploaded .docx file
+ * - targetLang: target language for translation
  *
- * The LobeChat plugin system calls this with the tool name in the request.
+ * Returns translated text + download instructions.
+ * Stateless — no in-memory job storage needed.
  */
 
 interface PluginRequest {
   fileUrl?: string;
   glossary?: Record<string, string>;
-  jobId?: string;
   sourceLang?: string;
   targetLang?: string;
-  translations?: Array<{ id: string; translated: string }>;
 }
 
-// ─── Handler functions (defined before POST to satisfy no-use-before-define) ───
-
 /**
- * Extract text from uploaded .docx file
+ * Download a file from URL and return as Buffer.
  */
-async function handleExtract(body: PluginRequest, request: NextRequest) {
-  const { fileUrl } = body;
-  if (!fileUrl) {
-    return NextResponse.json({ error: 'fileUrl is required' }, { status: 400 });
-  }
-
-  let fileBuffer: Buffer;
-
+async function downloadFile(fileUrl: string, request: NextRequest): Promise<Buffer> {
   if (fileUrl.startsWith('data:')) {
-    // Base64 data URL
     const base64Data = fileUrl.split(',')[1];
-    if (!base64Data) {
-      return NextResponse.json({ error: 'Invalid base64 data URL' }, { status: 400 });
-    }
-    fileBuffer = Buffer.from(base64Data, 'base64');
-  } else {
-    // HTTP URL — download the file
-    try {
-      const absoluteUrl = fileUrl.startsWith('http')
-        ? fileUrl
-        : `${request.headers.get('x-forwarded-proto') || 'https'}://${request.headers.get('host')}${fileUrl}`;
-
-      const response = await fetch(absoluteUrl);
-      if (!response.ok) {
-        return NextResponse.json(
-          { error: `Failed to download file: ${response.statusText}` },
-          { status: 400 },
-        );
-      }
-      const arrayBuffer = await response.arrayBuffer();
-      fileBuffer = Buffer.from(arrayBuffer);
-    } catch (downloadError) {
-      return NextResponse.json(
-        { error: `Failed to download file: ${(downloadError as Error).message}` },
-        { status: 400 },
-      );
-    }
+    if (!base64Data) throw new Error('Invalid base64 data URL');
+    return Buffer.from(base64Data, 'base64');
   }
 
-  // Validate file size
-  const MAX_SIZE = 50 * 1024 * 1024; // 50MB
-  if (fileBuffer.length > MAX_SIZE) {
-    return NextResponse.json({ error: 'File too large. Maximum size is 50MB.' }, { status: 400 });
+  const absoluteUrl = fileUrl.startsWith('http')
+    ? fileUrl
+    : `${request.headers.get('x-forwarded-proto') || 'https'}://${request.headers.get('host')}${fileUrl}`;
+
+  const response = await fetch(absoluteUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
   }
-
-  const result = await DocumentTranslationService.extract(fileBuffer);
-
-  return NextResponse.json({
-    detectedDomain: result.detectedDomain,
-    detectedLanguage: result.detectedLanguage,
-    diagramType: result.parseResult.diagramType,
-    jobId: result.jobId,
-    route: result.detection.route,
-    routeDetails: result.detection.details,
-    stats: {
-      estimatedTokens: Math.ceil(
-        result.parseResult.texts.reduce((sum, t) => sum + t.text.length, 0) * 1.5,
-      ),
-      totalElements: result.parseResult.texts.length,
-      ...result.parseResult.stats,
-    },
-    texts: result.parseResult.texts.slice(0, 50).map((t) => ({
-      id: t.id,
-      text: t.text,
-      type: t.type,
-    })),
-    totalTexts: result.parseResult.texts.length,
-  });
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }
-
-/**
- * Translate extracted texts
- */
-async function handleTranslate(body: PluginRequest) {
-  const { glossary, jobId, sourceLang, targetLang } = body;
-
-  if (!jobId || !targetLang) {
-    return NextResponse.json({ error: 'jobId and targetLang are required' }, { status: 400 });
-  }
-
-  const translations = await DocumentTranslationService.translate(jobId, {
-    glossary,
-    sourceLang: sourceLang || 'auto',
-    targetLang,
-  });
-
-  return NextResponse.json({
-    jobId,
-    sampleTranslations: translations.slice(0, 20).map((t) => ({
-      id: t.id,
-      original: t.original,
-      translated: t.translated,
-    })),
-    targetLang,
-    totalTranslated: translations.length,
-  });
-}
-
-/**
- * Apply translations and return download info
- */
-async function handleApply(body: PluginRequest, request: NextRequest) {
-  const { jobId, translations: userTranslations } = body;
-
-  if (!jobId) {
-    return NextResponse.json({ error: 'jobId is required' }, { status: 400 });
-  }
-
-  const result = await DocumentTranslationService.apply(jobId, userTranslations);
-
-  const host = request.headers.get('host') || 'localhost:3010';
-  const protocol = request.headers.get('x-forwarded-proto') || 'https';
-  const downloadUrl = `${protocol}://${host}/api/document-translation/apply`;
-
-  return NextResponse.json({
-    downloadUrl,
-    jobId,
-    message:
-      'Translation applied successfully. The translated document preserves 100% of the original layout.',
-    stats: result.stats,
-  });
-}
-
-// ─── Exported POST handler ──────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as PluginRequest;
+    const { fileUrl, glossary, sourceLang, targetLang = 'vi' } = body;
 
-    // Route to the correct handler based on parameters
-    if (body.fileUrl) {
-      return handleExtract(body, request);
-    } else if (body.jobId && body.targetLang) {
-      return handleTranslate(body);
-    } else if (body.jobId && !body.targetLang) {
-      return handleApply(body, request);
+    if (!fileUrl) {
+      return NextResponse.json(
+        { error: 'fileUrl is required. Provide the URL of the uploaded .docx file.' },
+        { status: 400 },
+      );
     }
 
-    return NextResponse.json(
-      {
-        error:
-          'Invalid request. Provide either fileUrl (extract), jobId+targetLang (translate), or jobId (apply).',
-      },
-      { status: 400 },
+    // Step 1: Download the file
+    console.log(`[DocTranslation/gateway] Downloading file: ${fileUrl.slice(0, 100)}...`);
+    const fileBuffer = await downloadFile(fileUrl, request);
+
+    // Validate file size
+    const MAX_SIZE = 50 * 1024 * 1024;
+    if (fileBuffer.length > MAX_SIZE) {
+      return NextResponse.json({ error: 'File too large. Maximum 50MB.' }, { status: 400 });
+    }
+
+    console.log(
+      `[DocTranslation/gateway] File downloaded: ${fileBuffer.length} bytes, translating to ${targetLang}...`,
     );
+
+    // Step 2: One-shot translate (extract → translate → apply)
+    const result = await DocumentTranslationService.translateFile(fileBuffer, targetLang, {
+      glossary,
+      sourceLang,
+    });
+
+    console.log(
+      `[DocTranslation/gateway] Translation complete: ${result.translations.length} items, ${result.stats.replacements} replacements`,
+    );
+
+    // Step 3: Return results with base64 file data
+
+    return NextResponse.json({
+      downloadInstructions:
+        'The translated file has been generated. Ask the user to use the Download button below, or copy the base64 data to create the file.',
+      fileBase64: result.buffer.toString('base64'),
+      fileName: `translated_${targetLang}.docx`,
+      message: `Successfully translated ${result.translations.length} text elements to ${targetLang}. ${result.stats.replacements} replacements applied. Document layout preserved 100%.`,
+      sampleTranslations: result.translations.slice(0, 15).map((t) => ({
+        original: t.original,
+        translated: t.translated,
+      })),
+      stats: result.stats,
+      totalTranslations: result.translations.length,
+    });
   } catch (error) {
     console.error('[DocTranslation/gateway] Error:', error);
     return NextResponse.json(
