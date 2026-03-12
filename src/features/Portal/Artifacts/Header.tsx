@@ -375,15 +375,29 @@ const Header = () => {
                 title: artifactTitle || 'Untitled',
                 type: artifactType || 'text/html',
               });
-              // base64url encode
-              const encoded = btoa(payload)
+              // Unicode-safe base64url encode
+              const bytes = new TextEncoder().encode(payload);
+              const binStr = Array.from(bytes, (b) => String.fromCodePoint(b)).join('');
+              const encoded = btoa(binStr)
                 .replaceAll('+', '-')
                 .replaceAll('/', '_')
                 .replaceAll('=', '');
               const url = `${window.location.origin}/artifact?d=${encoded}`;
-              navigator.clipboard.writeText(url).then(() => {
-                message.success('Share link copied!');
-              });
+              navigator.clipboard
+                .writeText(url)
+                .then(() => {
+                  message.success('Share link copied!');
+                })
+                .catch(() => {
+                  // Fallback: select text for manual copy
+                  const ta = document.createElement('textarea');
+                  ta.value = url;
+                  document.body.append(ta);
+                  ta.select();
+                  document.execCommand('copy');
+                  ta.remove();
+                  message.success('Share link copied!');
+                });
             }}
             size={'small'}
             title={'Share'}

@@ -47,9 +47,11 @@ const useStyles = createStyles(({ css, token }) => ({
  */
 function decodeArtifact(encoded: string): { content: string; title: string; type: string } | null {
   try {
-    // base64url → base64 → JSON
+    // base64url → base64 → binary → Uint8Array → UTF-8 string
     const base64 = encoded.replaceAll('-', '+').replaceAll('_', '/');
-    const json = atob(base64);
+    const binStr = atob(base64);
+    const bytes = Uint8Array.from(binStr, (c) => c.codePointAt(0)!);
+    const json = new TextDecoder().decode(bytes);
     return JSON.parse(json);
   } catch {
     return null;

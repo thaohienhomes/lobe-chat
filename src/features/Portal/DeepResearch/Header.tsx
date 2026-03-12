@@ -63,7 +63,11 @@ const VISUALIZE_FORMATS: VisualFormat[] = [
 
 const DeepResearchHeader = memo(() => {
   const handleVisualize = useCallback((format: VisualFormat) => {
-    useChatStore.getState().updateInputMessage(format.prompt);
+    const store = useChatStore.getState();
+    // Inject prompt into chat input
+    store.updateInputMessage(format.prompt);
+    // Close Deep Research portal so user can see the chat input
+    store.closeDeepResearch();
   }, []);
 
   const menuItems: MenuProps['items'] = useMemo(
