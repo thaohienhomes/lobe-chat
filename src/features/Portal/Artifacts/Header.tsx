@@ -12,6 +12,7 @@ import {
   EyeIcon,
   FileText,
   Image,
+  Share2,
 } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -360,6 +361,33 @@ const Header = () => {
           <Dropdown menu={{ items: downloadMenuItems }} trigger={['click']}>
             <ActionIcon icon={Download} size={'small'} title={'Download'} />
           </Dropdown>
+        )}
+        {showDownload && (
+          <ActionIcon
+            icon={Share2}
+            onClick={() => {
+              const state = useChatStore.getState();
+              const msgId = chatPortalSelectors.artifactMessageId(state) || '';
+              const code = chatPortalSelectors.artifactCode(msgId)(state);
+              if (!code) return;
+              const payload = JSON.stringify({
+                content: code,
+                title: artifactTitle || 'Untitled',
+                type: artifactType || 'text/html',
+              });
+              // base64url encode
+              const encoded = btoa(payload)
+                .replaceAll('+', '-')
+                .replaceAll('/', '_')
+                .replaceAll('=', '');
+              const url = `${window.location.origin}/artifact?d=${encoded}`;
+              navigator.clipboard.writeText(url).then(() => {
+                message.success('Share link copied!');
+              });
+            }}
+            size={'small'}
+            title={'Share'}
+          />
         )}
       </Flexbox>
     </Flexbox>

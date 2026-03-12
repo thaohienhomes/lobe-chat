@@ -5,8 +5,11 @@ import { ActionIcon, Icon } from '@lobehub/ui';
 import { Dropdown, type MenuProps } from 'antd';
 import { createStyles } from 'antd-style';
 import {
+  AlertTriangle,
   BookOpenCheck,
   Bug,
+  ClipboardList,
+  Crosshair,
   FileText,
   MessageSquarePlus,
   Minimize2,
@@ -138,9 +141,9 @@ const RESEARCH_ACTIONS: QuickAction[] = [
   {
     icon: ShieldCheck,
     key: 'grade-evidence',
-    label: 'Grade evidence',
+    label: 'Grade evidence (GRADE)',
     prompt:
-      'Assess the quality of evidence presented using the GRADE framework. Rate each key finding as High, Moderate, Low, or Very Low certainty.',
+      'Assess the quality of evidence presented using the GRADE framework. Rate each key finding as High, Moderate, Low, or Very Low certainty. Show a summary table.',
   },
   {
     icon: BookOpenCheck,
@@ -148,6 +151,27 @@ const RESEARCH_ACTIONS: QuickAction[] = [
     label: 'Check methodology',
     prompt:
       'Review the methodology section against CONSORT/STROBE reporting guidelines. Highlight any gaps or areas that need improvement.',
+  },
+  {
+    icon: Crosshair,
+    key: 'extract-pico',
+    label: 'Extract PICO',
+    prompt:
+      'Extract the PICO elements from this research: Population (who), Intervention (what treatment/exposure), Comparison (versus what), Outcome (measured results). Present in a structured table.',
+  },
+  {
+    icon: ClipboardList,
+    key: 'check-prisma',
+    label: 'Check PRISMA',
+    prompt:
+      'Validate this content against the PRISMA 2020 checklist. List each checklist item, whether it is adequately addressed (✅), partially addressed (⚠️), or missing (❌), with specific suggestions for improvement.',
+  },
+  {
+    icon: AlertTriangle,
+    key: 'risk-of-bias',
+    label: 'Risk of Bias',
+    prompt:
+      'Assess the risk of bias using the RoB 2 framework (for RCTs) or ROBINS-I (for non-randomized studies). Evaluate each domain: randomization, deviations from intervention, missing data, outcome measurement, selection of reported results. Rate overall bias as Low, Some Concerns, or High.',
   },
 ];
 
