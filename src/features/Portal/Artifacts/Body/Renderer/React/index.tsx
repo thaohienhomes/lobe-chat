@@ -28,6 +28,7 @@ interface ReactRendererProps {
  */
 const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
   const title = useChatStore(chatPortalSelectors.artifactTitle) || 'Artifact';
+  const artifactIdentifier = useChatStore(chatPortalSelectors.artifactIdentifier) || 'default';
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,10 +47,10 @@ const ReactRenderer = memo<ReactRendererProps>(({ code }) => {
   const encodedCode = useMemo(() => encodeBase64(processedCode), [processedCode]);
 
   const blobUrl = useMemo(() => {
-    const html = buildIframeHtml(encodedCode, title);
+    const html = buildIframeHtml(encodedCode, title, artifactIdentifier);
     const blob = new Blob([html], { type: 'text/html' });
     return URL.createObjectURL(blob);
-  }, [encodedCode, title]);
+  }, [encodedCode, title, artifactIdentifier]);
 
   // Cleanup blob URL
   useEffect(() => {

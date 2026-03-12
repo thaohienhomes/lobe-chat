@@ -23,8 +23,9 @@ export function stripArtifactWrapper(code: string): string {
   return match ? match[1].trim() : code;
 }
 
-export function buildIframeHtml(encodedCode: string, title: string): string {
+export function buildIframeHtml(encodedCode: string, title: string, identifier?: string): string {
   const safeTitle = title.replaceAll('<', '&lt;').replaceAll('"', '&quot;');
+  const safeIdentifier = (identifier || 'default').replaceAll('"', '');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -262,6 +263,49 @@ export function buildIframeHtml(encodedCode: string, title: string): string {
         }
       });
     }
+
+    // ── Pho.Chat SDK: window.phoChat ─────────────────────────────────
+    var _AID = "${safeIdentifier}";
+    window.phoChat = {
+      storage: {
+        get: function(key) {
+          try {
+            var raw = localStorage.getItem('artifact:' + _AID + ':' + key);
+            return raw ? JSON.parse(raw) : null;
+          } catch(e) { return null; }
+        },
+        set: function(key, value) {
+          try { localStorage.setItem('artifact:' + _AID + ':' + key, JSON.stringify(value)); }
+          catch(e) { console.warn('[phoChat.storage] set failed:', e); }
+        },
+        delete: function(key) {
+          localStorage.removeItem('artifact:' + _AID + ':' + key);
+        },
+        list: function(prefix) {
+          var pfx = 'artifact:' + _AID + ':' + (prefix || '');
+          var keys = [];
+          for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && k.startsWith(pfx)) keys.push(k.slice(('artifact:' + _AID + ':').length));
+          }
+          return keys;
+        }
+      },
+      askAI: function(prompt, options) {
+        options = options || {};
+        return fetch('/api/artifact-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: prompt,
+            systemPrompt: options.systemPrompt || '',
+            model: options.model || 'gemini-2.5-flash'
+          })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { return d.text || d.error || 'No response'; });
+      }
+    };
 
     // ── Error forwarding to parent ─────────────────────────────────────
     window.onerror = function(msg, _url, line, col) {
