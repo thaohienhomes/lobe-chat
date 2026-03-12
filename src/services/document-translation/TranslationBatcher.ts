@@ -1,8 +1,8 @@
 /**
  * TranslationBatcher — Batch AI translation for diagram labels
  *
- * Sends extracted texts to the AI model for translation in batches.
- * Uses the existing model runtime infrastructure from Pho.Chat.
+ * Uses Google Gemini API directly (via @google/genai SDK) for server-side
+ * translation. Does NOT require user auth context.
  *
  * System prompt is optimized for:
  * - Short diagram labels (not full sentences)
@@ -15,13 +15,6 @@ import type { ExtractedText, Translation, TranslationOptions } from './types';
 
 /** Maximum texts per batch to stay within token limits */
 const BATCH_SIZE = 50;
-
-/** AI models to try, in priority order */
-const TRANSLATION_MODELS = [
-  { model: 'google/gemini-2.5-flash', provider: 'vercelaigateway' },
-  { model: 'anthropic/claude-sonnet-4-6', provider: 'vercelaigateway' },
-  { model: 'openai/gpt-5.2', provider: 'vercelaigateway' },
-] as const;
 
 // ─── Prompt Templates ───────────────────────────────────────────────
 
@@ -70,53 +63,6 @@ function detectLanguage(texts: string[]): string {
   return 'English';
 }
 
-// ─── SSE/Stream parsing (reused from vision-analysis.ts pattern) ────
-
-function extractContentFromSSE(raw: string): string {
-  const lines = raw.split('\n');
-  const textParts: string[] = [];
-
-  for (const line of lines) {
-    if (!line.startsWith('data: ')) continue;
-    const data = line.slice(6).trim();
-    if (data === '[DONE]') break;
-
-    try {
-      const parsed = JSON.parse(data);
-      const content = parsed.choices?.[0]?.delta?.content;
-      if (content) textParts.push(content);
-    } catch {
-      if (data && data !== '[DONE]') textParts.push(data);
-    }
-  }
-
-  return textParts.join('');
-}
-
-async function streamToText(response: any): Promise<string> {
-  if (typeof response === 'string') return response;
-
-  if (response instanceof Response) {
-    const reader = response.body?.getReader();
-    if (!reader) return '';
-
-    const decoder = new TextDecoder();
-    const chunks: string[] = [];
-
-    let done = false;
-    while (!done) {
-      const result = await reader.read();
-      done = result.done;
-      if (done) break;
-      chunks.push(decoder.decode(result.value, { stream: true }));
-    }
-
-    return extractContentFromSSE(chunks.join(''));
-  }
-
-  return String(response || '');
-}
-
 // ─── JSON Response Parser ───────────────────────────────────────────
 
 function parseTranslationResponse(raw: string): Array<{ id: string; translated: string }> {
@@ -151,18 +97,13 @@ function parseTranslationResponse(raw: string): Array<{ id: string; translated: 
 
 export class TranslationBatcher {
   /**
-   * Translate a batch of extracted texts using the AI model.
-   *
-   * @param texts - Extracted text elements to translate
-   * @param options - Translation options (target lang, model, glossary)
-   * @returns Array of Translation objects with original + translated text
+   * Translate a batch of extracted texts using Google Gemini API directly.
+   * Uses server-side GOOGLE_API_KEY — no user auth context needed.
    */
   async translateBatch(
     texts: ExtractedText[],
     options: TranslationOptions,
   ): Promise<Translation[]> {
-    const { initModelRuntimeWithUserPayload } = await import('@/server/modules/ModelRuntime');
-
     // Auto-detect source language if not provided
     const sourceLang = options.sourceLang || detectLanguage(texts.map((t) => t.text));
     const targetLang = options.targetLang;
@@ -203,68 +144,19 @@ export class TranslationBatcher {
       // Skip AI call if all texts were in glossary
       if (batchItems.length === 0) continue;
 
-      // Try each model in priority order
-      let translated = false;
+      // Call Gemini API directly
+      const result = await this.callGeminiDirect(batchItems, sourceLang, targetLang);
 
-      for (const { model, provider } of TRANSLATION_MODELS) {
-        try {
-          const runtime = await initModelRuntimeWithUserPayload(provider, {});
-
-          const response = await runtime.chat({
-            messages: [
-              {
-                content: buildSystemPrompt(sourceLang, targetLang),
-                role: 'system' as const,
-              },
-              {
-                content: buildBatchPrompt(batchItems),
-                role: 'user' as const,
-              },
-            ],
-            model,
-            temperature: 0.2,
-          });
-
-          const text = await streamToText(response);
-          if (!text) {
-            console.warn(`[DocTranslation] Empty response from ${model}, trying next`);
-            continue;
-          }
-
-          const results = parseTranslationResponse(text);
-
-          // Map results back to Translation objects
-          for (const result of results) {
-            const original = batchItems.find((b) => b.id === result.id);
-            if (original) {
-              allTranslations.push({
-                confidence: 0.9,
-                id: result.id,
-                original: original.text,
-                translated: result.translated,
-              });
-            }
-          }
-
-          translated = true;
-          break; // Success — don't try other models
-        } catch (error) {
-          console.warn(
-            `[DocTranslation] ${model} failed:`,
-            error instanceof Error ? error.message : error,
-          );
-          continue;
-        }
-      }
-
-      if (!translated) {
-        // All models failed for this batch — add untranslated entries
+      if (result) {
+        allTranslations.push(...result);
+      } else {
+        // Fallback: keep original text
         for (const item of batchItems) {
           allTranslations.push({
             confidence: 0,
             id: item.id,
             original: item.text,
-            translated: item.text, // Keep original if translation fails
+            translated: item.text,
           });
         }
       }
@@ -278,5 +170,137 @@ export class TranslationBatcher {
    */
   detectSourceLanguage(texts: ExtractedText[]): string {
     return detectLanguage(texts.map((t) => t.text));
+  }
+
+  /**
+   * Call Google Gemini API directly using @google/genai SDK.
+   * Falls back to fetch-based API call if SDK fails.
+   */
+  private async callGeminiDirect(
+    batchItems: Array<{ id: string; text: string }>,
+    sourceLang: string,
+    targetLang: string,
+  ): Promise<Translation[] | null> {
+    const apiKey = process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+      console.error('[DocTranslation] GOOGLE_API_KEY not configured');
+      return null;
+    }
+
+    const systemPrompt = buildSystemPrompt(sourceLang, targetLang);
+    const userPrompt = buildBatchPrompt(batchItems);
+
+    try {
+      // Use @google/genai SDK
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey });
+
+      const response = await ai.models.generateContent({
+        config: {
+          responseMimeType: 'application/json',
+          systemInstruction: systemPrompt,
+          temperature: 0.2,
+        },
+        contents: [
+          {
+            parts: [{ text: userPrompt }],
+            role: 'user',
+          },
+        ],
+        model: 'gemini-2.5-flash',
+      });
+
+      const text = response.text;
+      if (!text) {
+        console.warn('[DocTranslation] Empty response from Gemini API');
+        return null;
+      }
+
+      console.log(`[DocTranslation] Gemini response length: ${text.length} chars`);
+
+      const results = parseTranslationResponse(text);
+
+      return results.map((result) => {
+        const original = batchItems.find((b) => b.id === result.id);
+        return {
+          confidence: 0.9,
+          id: result.id,
+          original: original?.text || '',
+          translated: result.translated,
+        };
+      });
+    } catch (error) {
+      console.error(
+        '[DocTranslation] Gemini API error:',
+        error instanceof Error ? error.message : error,
+      );
+
+      // Fallback: try with direct fetch to Gemini REST API
+      try {
+        return await this.callGeminiREST(apiKey, batchItems, sourceLang, targetLang);
+      } catch (fallbackError) {
+        console.error(
+          '[DocTranslation] Gemini REST fallback failed:',
+          fallbackError instanceof Error ? fallbackError.message : fallbackError,
+        );
+        return null;
+      }
+    }
+  }
+
+  /**
+   * Direct REST API fallback for Gemini.
+   */
+  private async callGeminiREST(
+    apiKey: string,
+    batchItems: Array<{ id: string; text: string }>,
+    sourceLang: string,
+    targetLang: string,
+  ): Promise<Translation[] | null> {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(url, {
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: buildBatchPrompt(batchItems) }],
+            role: 'user',
+          },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.2,
+        },
+        systemInstruction: {
+          parts: [{ text: buildSystemPrompt(sourceLang, targetLang) }],
+        },
+      }),
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gemini REST API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      console.warn('[DocTranslation] Empty Gemini REST response');
+      return null;
+    }
+
+    const results = parseTranslationResponse(text);
+
+    return results.map((result) => {
+      const original = batchItems.find((b) => b.id === result.id);
+      return {
+        confidence: 0.85,
+        id: result.id,
+        original: original?.text || '',
+        translated: result.translated,
+      };
+    });
   }
 }
