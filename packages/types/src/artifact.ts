@@ -20,4 +20,5 @@ export enum ArtifactType {
   Python = 'python',
   React = 'application/lobe.artifacts.react',
   SVG = 'image/svg+xml',
+  TranslatedDocument = 'application/lobe.artifacts.translated-document',
 }

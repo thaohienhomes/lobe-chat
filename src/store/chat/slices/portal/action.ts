@@ -14,6 +14,7 @@ const PREVIEWABLE_ARTIFACT_TYPES = new Set<string>([
   ArtifactType.GenerativeDiagram,
   ArtifactType.ContentVisualizer,
   ArtifactType.AIRendering,
+  ArtifactType.TranslatedDocument,
   // Also match raw MIME strings that may be used before enum mapping
   'text/html',
 ]);
@@ -69,9 +70,10 @@ export const chatPortalSlice: StateCreator<
     // For previewable types: start in Split mode (code left + live preview right)
     // matching Claude.ai UX where user sees preview building in real-time.
     // After generation ends, Body/index.tsx auto-switches to full Preview mode.
-    const initialDisplayMode = artifact.type && PREVIEWABLE_ARTIFACT_TYPES.has(artifact.type)
-      ? ArtifactDisplayMode.Split
-      : ArtifactDisplayMode.Code;
+    const initialDisplayMode =
+      artifact.type && PREVIEWABLE_ARTIFACT_TYPES.has(artifact.type)
+        ? ArtifactDisplayMode.Split
+        : ArtifactDisplayMode.Code;
 
     // Single atomic set: open portal + set artifact + dismiss ALL competing panels.
     // Portal router priority: [DeepResearch, Research, Thread, MessageDetail, Artifacts, ...]
@@ -95,7 +97,11 @@ export const chatPortalSlice: StateCreator<
   openDeepResearch: (query) => {
     get().togglePortal(true);
 
-    set({ pendingResearchQuery: query, portalDeepResearch: true, portalResearch: false }, false, 'openDeepResearch');
+    set(
+      { pendingResearchQuery: query, portalDeepResearch: true, portalResearch: false },
+      false,
+      'openDeepResearch',
+    );
   },
   openFilePreview: (portal) => {
     get().togglePortal(true);
@@ -110,7 +116,11 @@ export const chatPortalSlice: StateCreator<
   openResearchMode: (query) => {
     get().togglePortal(true);
 
-    set({ pendingResearchQuery: query, portalDeepResearch: false, portalResearch: true }, false, 'openResearchMode');
+    set(
+      { pendingResearchQuery: query, portalDeepResearch: false, portalResearch: true },
+      false,
+      'openResearchMode',
+    );
   },
 
   openToolUI: (id, identifier) => {
