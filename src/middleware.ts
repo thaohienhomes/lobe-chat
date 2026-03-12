@@ -225,6 +225,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/health',
   '/api/v1(.*)',
   '/api/plugins(.*)',
+  // Document translation API (auth handled via server-side API keys)
+  '/api/document-translation(.*)',
   // Research mode API (auth handled internally via Clerk auth())
   '/api/research(.*)',
 ]);
