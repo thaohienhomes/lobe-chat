@@ -185,6 +185,71 @@ export const DocumentTranslationService = {
 
     return translations;
   },
+
+  /**
+   * One-shot: Extract → Translate → Apply in a single function invocation.
+   * Avoids the in-memory storage problem on Vercel serverless.
+   */
+  async translateFile(
+    fileBuffer: Buffer,
+    targetLang: string,
+    options?: { glossary?: Record<string, string>; sourceLang?: string },
+  ): Promise<{
+    buffer: Buffer;
+    stats: { fontAdjustments: number; replacements: number; unchanged: number };
+    translations: Translation[];
+  }> {
+    // Step 1: Parse DOCX
+    const parser = new DocxDiagramParser();
+    const parseResult = await parser.parse(fileBuffer);
+
+    // Detect diagram type
+    const detector = new DiagramTypeDetector();
+    const detection = await detector.detect(parseResult.fileStructure);
+
+    // Vision AI for embedded images (if needed)
+    if (detection.route === 'vision_ai' || detection.route === 'hybrid') {
+      try {
+        const visionAnalyzer = new VisionDiagramAnalyzer();
+        const images = await visionAnalyzer.extractEmbeddedImages(parseResult.fileStructure);
+        for (const image of images) {
+          if (image.mimeType.includes('emf') || image.mimeType.includes('wmf')) continue;
+          const visionResult = await visionAnalyzer.analyzeImage(image.base64, image.mimeType);
+          if (visionResult.texts.length > 0) {
+            parseResult.texts.push(...visionResult.texts);
+          }
+        }
+      } catch (error) {
+        console.warn('[DocTranslation] Vision AI fallback failed:', error);
+      }
+    }
+
+    // Step 2: Translate with glossary
+    const batcher = new TranslationBatcher();
+    const detectedLanguage = options?.sourceLang || batcher.detectSourceLanguage(parseResult.texts);
+
+    const glossaryManager = new GlossaryManager();
+    const detectedDomain = GlossaryManager.detectDomain(parseResult.texts.map((t) => t.text));
+    const mergedGlossary = glossaryManager.getGlossary(
+      detectedDomain,
+      detectedLanguage,
+      targetLang,
+      options?.glossary,
+    );
+
+    const translations = await batcher.translateBatch(parseResult.texts, {
+      glossary: mergedGlossary,
+      sourceLang: detectedLanguage,
+      targetLang,
+    });
+
+    // Step 3: Write back to DOCX
+    const writer = new DocxDiagramWriter();
+    const buffer = await writer.apply(parseResult, translations);
+    const stats = DocxDiagramWriter.getStats(translations, translations.length);
+
+    return { buffer, stats, translations };
+  },
 };
 
 // Re-export types for convenience
