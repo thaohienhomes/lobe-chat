@@ -115,20 +115,6 @@ export const BUNDLED_PLUGINS: BundledPlugin[] = [
     tags: ['doi', 'citation', 'reference', 'crossref', 'academic'],
     title: 'DOI Resolver',
   },
-  {
-    author: 'Phở Chat',
-    avatar: '📄',
-    category: PluginCategory.Tools,
-    createdAt: '2026-03-12',
-    description:
-      'Translate Word documents (.docx) while preserving 100% layout, shapes, and diagrams. Supports Chinese ↔ Vietnamese ↔ English with domain-specific glossaries.',
-    homepage: 'https://pho.chat/plugins/document-translation',
-    identifier: 'document-translation',
-    manifest: getManifestUrl('document-translation'),
-    schemaVersion: 1,
-    tags: ['translation', 'document', 'docx', 'diagram', 'construction'],
-    title: 'Document Translation',
-  },
 ];
 
 /**
