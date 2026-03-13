@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { ReactNode, forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
@@ -12,10 +11,6 @@ import { chatSelectors } from '@/store/chat/selectors';
 import AutoScroll from '../AutoScroll';
 import SkeletonList from '../SkeletonList';
 import { VirtuosoContext } from './VirtuosoContext';
-
-// TODO: REMOVE THIS DEMO — Visualizer Sprint 1 test
-const DemoWidgetLazy = dynamic(() => import('@/features/visualizer/DemoWidget'), { ssr: false });
-const DemoFooter = () => <DemoWidgetLazy />;
 
 interface VirtualizedListProps {
   dataSource: string[];
@@ -74,8 +69,6 @@ const VirtualizedList = memo<VirtualizedListProps>(({ mobile, dataSource, itemCo
         atBottomStateChange={setAtBottom}
         atBottomThreshold={50 * (mobile ? 2 : 1)}
         components={{
-          // TODO: REMOVE THIS DEMO — Visualizer Sprint 1 test
-          Footer: DemoFooter,
           List,
         }}
         computeItemKey={(_, item) => item}

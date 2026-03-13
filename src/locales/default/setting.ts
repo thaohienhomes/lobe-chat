@@ -142,7 +142,6 @@ export default {
     },
     waitingForMore: '更多模型正在 <1>计划接入</1> 中，敬请期待',
   },
-  medicalBadge: 'MEDICAL PIONEER 🏥',
   plugin: {
     addMCPPlugin: '添加 MCP 插件',
     addTooltip: '自定义插件',
@@ -158,7 +157,6 @@ export default {
     },
     store: '插件商店',
   },
-
   promoCode: {
     activate: '激活',
     activated: 'Phở Medical Beta 已激活 🏥',
@@ -169,6 +167,8 @@ export default {
     success: '感谢您，系统正在刷新...',
     title: '促销码',
   },
+
+  medicalBadge: 'MEDICAL PIONEER 🏥',
 
   settingAgent: {
     avatar: {
