@@ -97,8 +97,6 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     vectorEntries: 5000,
   },
 
-
-
   vn_basic: {
     advancedAI: false,
     code: 'vn_basic',
@@ -130,9 +128,6 @@ export const VN_PLANS: Record<string, PlanConfig> = {
     storageGB: 1,
     vectorEntries: 5000,
   },
-
-
-
 
   vn_free: {
     advancedAI: false,
@@ -428,17 +423,17 @@ const TIER1_MODELS = [
   'pho-fast',
   // Vercel AI Gateway (Primary for Gemini)
   'google/gemini-2.0-flash',
-  'google/gemini-2.5-flash-lite',
+  'google/gemini-3.1-flash-lite-preview',
   'deepseek/deepseek-chat',
   // Groq (via CF Gateway)
   'llama-3.1-8b-instant',
   'llama-3.3-70b-versatile',
   'mixtral-8x7b-32768',
   'gemma2-9b-it',
-  'gemma-3-27b-it',              // Gemma 3 27B — NEW: strong tool calling, cheap
+  'gemma-3-27b-it', // Gemma 3 27B — NEW: strong tool calling, cheap
   'mistral-saba-24b',
   'meta-llama/llama-4-scout-17b-16e-instruct', // Llama 4 Scout — moved from Tier 2: fast & cheap
-  'llama-4-scout-17b',           // Logical alias used in phochat picker
+  'llama-4-scout-17b', // Logical alias used in phochat picker
   // Cerebras (via CF Gateway)
   'llama3.1-8b',
   'llama3.1-70b',
@@ -447,16 +442,16 @@ const TIER1_MODELS = [
   'accounts/fireworks/models/llama-v3p1-70b-instruct',
   // Legacy short IDs (for backward compat & tier lookup)
   'gemini-2.0-flash',
-  'gemini-2.5-flash-lite',
+  'gemini-3.1-flash-lite-preview',
   'gpt-4o-mini',
   'gemini-1.5-flash',
   'claude-3-haiku',
   'deepseek-chat',
   'qwen-turbo',
-  'llama-4-scout',               // Legacy short ID for Llama 4 Scout
+  'llama-4-scout', // Legacy short ID for Llama 4 Scout
   // InceptionLabs Mercury — ultra-fast diffusion LLM (1000+ tok/s)
-  'mercury-coder-small-2-2',     // Mercury 2
-  'mercury-coder-small-2',       // Mercury Coder Small
+  'mercury-coder-small-2-2', // Mercury 2
+  'mercury-coder-small-2', // Mercury Coder Small
 ] as const;
 
 /** Tier 2: Standard models — available to Basic/Starter+ plans */
@@ -484,8 +479,8 @@ const TIER2_MODELS = [
   'meta-llama/llama-4-maverick-17b-128e-instruct', // Scout moved to Tier 1
   'qwen/qwen3-32b',
   // Together AI — Kimi K2
-  'moonshotai/Kimi-K2-Instruct',  // NEW: Kimi K2 — excellent tool calling, 128K ctx
-  'kimi-k2',                     // Logical alias used in phochat picker
+  'moonshotai/Kimi-K2-Instruct', // NEW: Kimi K2 — excellent tool calling, 128K ctx
+  'kimi-k2', // Logical alias used in phochat picker
   // Together AI (via CF Gateway)
   'Qwen/Qwen2.5-72B-Instruct-Turbo',
   'deepseek-ai/DeepSeek-R1',
@@ -595,11 +590,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
-
-
-
-
-
   // Medical Beta: Tier 1 + Tier 2 + Tier 3 (limited), Groq primary
   // 999K VND/year — doctors plan with flagship model access
   medical_beta: {
@@ -610,13 +600,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     models: [...TIER1_MODELS, ...TIER2_MODELS, ...TIER3_MODELS],
   },
 
-
-
-
-
-
-
-
   // VN Basic (Phở Tái): Tier 1 + Tier 2 with 30 messages/day limit
   vn_basic: {
     allowedTiers: [1, 2],
@@ -626,11 +609,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     models: [...TIER1_MODELS, ...TIER2_MODELS],
   },
 
-
-
-
-
-
   // VN Free: Tier 1 ONLY with 50,000 points/month
   vn_free: {
     allowedTiers: [1],
@@ -638,9 +616,6 @@ export const PLAN_MODEL_ACCESS: Record<string, PlanModelAccess> = {
     defaultProvider: 'groq',
     models: [...TIER1_MODELS],
   },
-
-
-
 
   // ============================================================================
   // VIETNAM PLANS - Primary providers: Vercel Gateway, Groq, Cerebras
@@ -732,7 +707,7 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // Legacy Tier 1 Models
       // ============================================
       'gemini-2.0-flash', // Fast, reliable
-      'gemini-2.5-flash-lite', // Fastest response
+      'gemini-3.1-flash-lite-preview', // Fastest response (upgraded from 2.5 Lite)
       // ============================================
       // Vercel AI Gateway Tier 1 Models
       // ============================================
@@ -944,7 +919,6 @@ export const PLAN_USAGE_ESTIMATES = {
     videos: '0 (No Studio)',
   },
 
-
   vn_basic: {
     hasStudio: false,
     images: '~30',
@@ -965,8 +939,6 @@ export const PLAN_USAGE_ESTIMATES = {
     tier3Messages: '0',
     videos: '0 (No Studio)',
   },
-
-
 
   vn_premium: {
     hasStudio: true,

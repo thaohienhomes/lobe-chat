@@ -10,7 +10,8 @@ const VercelAIGateway: ModelProviderCard = {
     // --- Anthropic Models ---
     {
       contextWindowTokens: 200_000,
-      description: 'Claude Opus 4.6 - Mô hình mạnh nhất của Anthropic với 1M context beta, agentic coding xuất sắc',
+      description:
+        'Claude Opus 4.6 - Mô hình mạnh nhất của Anthropic với 1M context beta, agentic coding xuất sắc',
       displayName: 'Claude Opus 4.6',
       enabled: true,
       functionCall: true,
@@ -52,7 +53,8 @@ const VercelAIGateway: ModelProviderCard = {
     // --- Google Models ---
     {
       contextWindowTokens: 2_000_000,
-      description: 'Gemini 3.1 Pro - Suy luận nâng cao, agentic workflows, native multimodal code gen',
+      description:
+        'Gemini 3.1 Pro - Suy luận nâng cao, agentic workflows, native multimodal code gen',
       displayName: 'Gemini 3.1 Pro',
       enabled: true,
       functionCall: true,
@@ -63,7 +65,8 @@ const VercelAIGateway: ModelProviderCard = {
     },
     {
       contextWindowTokens: 1_000_000,
-      description: 'Gemini 3 Flash - Mô hình mới nhất, nhanh, multimodal với Google Search grounding',
+      description:
+        'Gemini 3 Flash - Mô hình mới nhất, nhanh, multimodal với Google Search grounding',
       displayName: 'Gemini 3 Flash',
       enabled: true,
       functionCall: true,
@@ -84,11 +87,12 @@ const VercelAIGateway: ModelProviderCard = {
     },
     {
       contextWindowTokens: 1_000_000,
-      description: 'Gemini 2.5 Flash Lite - Nhẹ, nhanh, tiết kiệm chi phí',
-      displayName: 'Gemini 2.5 Flash Lite',
+      description:
+        'Gemini 3.1 Flash Lite - Nhẹ nhất, nhanh nhất dòng Gemini 3, chất lượng vượt trội so với 2.5 Lite',
+      displayName: 'Gemini 3.1 Flash Lite',
       enabled: true,
       functionCall: true,
-      id: 'google/gemini-2.5-flash-lite',
+      id: 'google/gemini-3.1-flash-lite-preview',
       maxOutput: 8192,
       vision: true,
     },
@@ -116,7 +120,8 @@ const VercelAIGateway: ModelProviderCard = {
     // --- OpenAI Models ---
     {
       contextWindowTokens: 128_000,
-      description: 'GPT-5.3 Codex — Model coding flagship mới nhất của OpenAI, nhanh hơn 25%, tích hợp Codex + GPT-5 training stacks',
+      description:
+        'GPT-5.3 Codex — Model coding flagship mới nhất của OpenAI, nhanh hơn 25%, tích hợp Codex + GPT-5 training stacks',
       displayName: 'GPT-5.3 Codex',
       enabled: true,
       functionCall: true,
@@ -157,7 +162,8 @@ const VercelAIGateway: ModelProviderCard = {
     // --- xAI Models ---
     {
       contextWindowTokens: 128_000,
-      description: 'Grok 4.2 — Kiến trúc 4-agent (Harper, Benjamin, Lucas), giảm 65% hallucination, chuyên gia y khoa & kỹ thuật',
+      description:
+        'Grok 4.2 — Kiến trúc 4-agent (Harper, Benjamin, Lucas), giảm 65% hallucination, chuyên gia y khoa & kỹ thuật',
       displayName: 'Grok 4.2',
       enabled: true,
       functionCall: true,
@@ -168,7 +174,8 @@ const VercelAIGateway: ModelProviderCard = {
     // --- Moonshot Models ---
     {
       contextWindowTokens: 128_000,
-      description: 'Kimi K2.5 — Agent Swarm (100 agents đồng thời), 1T params MoE, multimodal, visual coding xuất sắc',
+      description:
+        'Kimi K2.5 — Agent Swarm (100 agents đồng thời), 1T params MoE, multimodal, visual coding xuất sắc',
       displayName: 'Kimi K2.5',
       enabled: true,
       functionCall: true,
