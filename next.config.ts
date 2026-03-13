@@ -373,6 +373,15 @@ const nextConfig: NextConfig = {
 
     config.resolve.alias.canvas = false;
 
+    // Alias node:-prefixed modules to false for client builds.
+    // Handles dynamic import('node:fs') inside pptxgenjs that
+    // NormalModuleReplacementPlugin cannot intercept.
+    config.resolve.alias['node:fs'] = false;
+    config.resolve.alias['node:https'] = false;
+    config.resolve.alias['node:http'] = false;
+    config.resolve.alias['node:stream'] = false;
+    config.resolve.alias['node:zlib'] = false;
+
     // Fix SWR react-server export stripping useSWR/mutate
     // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
     // which causes "does not contain a default export" errors during build.
@@ -380,9 +389,10 @@ const nextConfig: NextConfig = {
     const path = require('node:path');
     config.resolve.alias['swr$'] = path.resolve(__dirname, 'node_modules/swr/dist/index/index.mjs');
 
-    // Strip `node:` prefix from imports so resolve.fallback can handle them
-    // pptxgenjs ESM bundle uses `node:https`, `node:fs` etc. which cause
-    // UnhandledSchemeError in webpack client builds
+    // pptxgenjs ESM bundle uses dynamic import('node:fs'), import('node:https')
+    // which cause UnhandledSchemeError in webpack client builds.
+    // NormalModuleReplacementPlugin handles static require/import but NOT dynamic import().
+    // We must also alias node:-prefixed modules so webpack resolves them to false.
     const webpack = require('webpack');
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: any) => {
