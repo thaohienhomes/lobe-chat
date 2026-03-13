@@ -67,7 +67,24 @@ const RootLayout = async ({ children, params, modal }: RootLayoutProps) => {
           dangerouslySetInnerHTML={{
             __html: `
 if(typeof window!=='undefined'){
+  // Stub zaloJSV2 with no-op methods for Zalo in-app browser
   if(!window.zaloJSV2)window.zaloJSV2={};
+  if(typeof window.zaloJSV2.zalo_h5_event_handler!=='function'){
+    window.zaloJSV2.zalo_h5_event_handler=function(){};
+  }
+
+  // Monkey-patch btoa to handle Unicode strings (Vietnamese text)
+  var _origBtoa=window.btoa;
+  window.btoa=function(s){
+    try{return _origBtoa.call(window,s);}catch(e){
+      if(e instanceof DOMException){
+        var bytes=new TextEncoder().encode(s);
+        var bin='';for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
+        return _origBtoa.call(window,bin);
+      }
+      throw e;
+    }
+  };
 
   // Multi-retry helper: allows up to 3 reloads with exponential backoff
   // Tracks per-page retries to handle Clerk CDN timeouts in slow regions (VN)
@@ -158,7 +175,10 @@ if(typeof window!=='undefined'){
         </NuqsAdapter>
         <Analytics />
         {/* Google tag (gtag.js) - deferred to avoid blocking LCP */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=AW-17766075190" strategy="afterInteractive" />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17766075190"
+          strategy="afterInteractive"
+        />
         <Script id="gtag-init" strategy="afterInteractive">
           {`window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}

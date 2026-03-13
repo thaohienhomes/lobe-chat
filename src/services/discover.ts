@@ -298,9 +298,11 @@ class DiscoverService {
       clientId = clientInfo.clientId;
       clientSecret = clientInfo.clientSecret;
 
-      // 3. Base64 编码并保存到 localStorage
+      // 3. Base64 编码并保存到 localStorage (Unicode-safe)
       const clientData = JSON.stringify({ clientId, clientSecret });
-      const encodedData = btoa(clientData);
+      const encodedData = btoa(
+        Array.from(new TextEncoder().encode(clientData), (b) => String.fromCodePoint(b)).join(''),
+      );
       localStorage.setItem('_mpc', encodedData);
     } else {
       // 4. 如果有，则解码获取客户端信息
@@ -317,7 +319,9 @@ class DiscoverService {
         clientSecret = clientInfo.clientSecret;
 
         const clientData = JSON.stringify({ clientId, clientSecret });
-        const encodedData = btoa(clientData);
+        const encodedData = btoa(
+          Array.from(new TextEncoder().encode(clientData), (b) => String.fromCodePoint(b)).join(''),
+        );
         localStorage.setItem('_mpc', encodedData);
       }
     }
