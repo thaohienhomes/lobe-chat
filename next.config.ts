@@ -9,6 +9,7 @@ const isDesktop = process.env.NEXT_PUBLIC_IS_DESKTOP_APP === '1';
 const enableReactScan = !!process.env.REACT_SCAN_MONITOR_API_KEY;
 const isUsePglite = process.env.NEXT_PUBLIC_CLIENT_DB === 'pglite';
 const shouldUseCSP = process.env.ENABLED_CSP === '1';
+const uploadSourceMaps = process.env.UPLOAD_SOURCEMAPS === '1';
 
 // if you need to proxy the api endpoint to remote server
 
@@ -31,7 +32,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-
 
   experimental: {
     optimizePackageImports: [
@@ -68,7 +68,6 @@ const nextConfig: NextConfig = {
     webVitalsAttribution: ['CLS', 'LCP'],
     webpackMemoryOptimizations: true,
   },
-
 
   async headers() {
     const securityHeaders = [
@@ -329,18 +328,18 @@ const nextConfig: NextConfig = {
   // node_modules at runtime on Vercel).
   serverExternalPackages: isProd
     ? [
-      '@electric-sql/pglite',
-      '@xmldom/xmldom',
-      '@aws-sdk/client-s3',
-      '@aws-sdk/s3-request-presigner',
-      'sharp',
-      '@img/sharp-libvips-linux-x64',
-      '@img/sharp-libvips-linuxmusl-x64',
-      '@shikijs/langs',
-      '@shikijs/themes',
-      '@shikijs/engine-oniguruma',
-      'pdf-parse',
-    ]
+        '@electric-sql/pglite',
+        '@xmldom/xmldom',
+        '@aws-sdk/client-s3',
+        '@aws-sdk/s3-request-presigner',
+        'sharp',
+        '@img/sharp-libvips-linux-x64',
+        '@img/sharp-libvips-linuxmusl-x64',
+        '@shikijs/langs',
+        '@shikijs/themes',
+        '@shikijs/engine-oniguruma',
+        'pdf-parse',
+      ]
     : ['@xmldom/xmldom'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
@@ -348,11 +347,19 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  webpack(config) {
+  // Generate hidden source maps for PostHog error tracking (no sourceMappingURL in JS files)
+  ...(uploadSourceMaps ? { productionBrowserSourceMaps: true } : {}),
+
+  webpack(config, { isServer }) {
     config.experiments = {
       asyncWebAssembly: true,
       layers: true,
     };
+
+    // Use hidden-source-map so .map files are generated but never referenced in JS output
+    if (uploadSourceMaps && !isServer) {
+      config.devtool = 'hidden-source-map';
+    }
 
     // 开启该插件会导致 pglite 的 fs bundler 被改表
     if (enableReactScan && !isUsePglite) {
@@ -379,10 +386,7 @@ const nextConfig: NextConfig = {
     // which causes "does not contain a default export" errors during build.
     // Force all SWR imports to resolve to the full client entry.
     const path = require('node:path');
-    config.resolve.alias['swr$'] = path.resolve(
-      __dirname,
-      'node_modules/swr/dist/index/index.mjs',
-    );
+    config.resolve.alias['swr$'] = path.resolve(__dirname, 'node_modules/swr/dist/index/index.mjs');
 
     // Strip `node:` prefix from imports so resolve.fallback can handle them
     // pptxgenjs ESM bundle uses `node:https`, `node:fs` etc. which cause
@@ -432,16 +436,16 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true' ? analyzer() : noWrapp
 const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
-      // Allow precaching of large PGLite assets for offline functionality
-      // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
-      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Allow precaching of large PGLite assets for offline functionality
+        // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 
-      register: false,
+        register: false,
 
-      swDest: 'public/sw.js',
+        swDest: 'public/sw.js',
 
-      swSrc: 'src/app/sw.ts', // 5MB
-    })
+        swSrc: 'src/app/sw.ts', // 5MB
+      })
     : noWrapper;
 
 // Conditionally wrap with Sentry based on environment variable
