@@ -113,6 +113,10 @@ if(typeof window!=='undefined'){
       (typeof m==='string'&&(m.indexOf('Loading chunk')!==-1||m.indexOf('Failed to fetch dynamically imported')!==-1)))){
       if(_chunkRetry())return true;
     }
+    // Auto-reload on Clerk script load failure (clerk.pho.chat timeout)
+    if(typeof m==='string'&&(m.indexOf('failed_to_load_clerk_js')!==-1||m.indexOf('Failed to load Clerk')!==-1)){
+      if(_chunkRetry())return true;
+    }
     return _origOnErr?_origOnErr.apply(window,arguments):false;
   };
 
@@ -123,6 +127,12 @@ if(typeof window!=='undefined'){
     var msg=r.message||'';
     // Auto-reload on chunk load promises with multi-retry
     if(r.name==='ChunkLoadError'||msg.indexOf('Loading chunk')!==-1){
+      _chunkRetry();
+      e.preventDefault();
+      return;
+    }
+    // Auto-reload on Clerk script load failure (clerk.pho.chat timeout)
+    if(msg.indexOf('failed_to_load_clerk_js')!==-1||msg.indexOf('Failed to load Clerk')!==-1){
       _chunkRetry();
       e.preventDefault();
       return;

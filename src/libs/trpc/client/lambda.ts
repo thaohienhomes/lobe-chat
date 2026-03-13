@@ -23,18 +23,32 @@ const retryOnUnauthorizedLink: TRPCLink<LambdaRouter> = () => {
             const status = (err as any).data?.httpStatus as number | undefined;
             if (status === 401 && !retried) {
               retried = true;
-              // Poll useUserStore for Clerk auth readiness instead of fixed delay
               const { useUserStore } = await import('@/store/user');
+              const state = useUserStore.getState();
+
+              // If Clerk already loaded but user not signed in, don't retry — genuinely unauthenticated
+              if (state.isLoaded && !state.isSignedIn) {
+                observer.error(err);
+                return;
+              }
+
+              // Poll useUserStore for Clerk auth readiness (extended timeout for slow regions)
               await new Promise<void>((resolve) => {
                 const check = () => {
-                  if (useUserStore.getState().isLoaded) return resolve();
+                  const s = useUserStore.getState();
+                  if (s.isLoaded) return resolve();
                   setTimeout(check, 200);
                 };
                 check();
-                setTimeout(resolve, 5000); // Safety: max 5s wait
+                setTimeout(resolve, 8000); // Max 8s wait (Clerk CDN slow in VN)
               });
-              attempt();
-              return;
+
+              // After waiting, only retry if user is actually signed in
+              const updated = useUserStore.getState();
+              if (updated.isSignedIn) {
+                attempt();
+                return;
+              }
             }
             observer.error(err);
           },
