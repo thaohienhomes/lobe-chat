@@ -182,3 +182,86 @@ Bắt đầu từ Phase 1 (Interactive Images) trừ khi được chỉ định 
 - Dark theme (#0F172A family)
 - Mobile responsive (touch support) + ARIA labels
 - NEVER use localStorage/sessionStorage in Artifact components
+
+CLAUDE.md Snippet — Content Visualizer Engine
+> Copy-paste this entire block into your project's CLAUDE.md file.
+> This gives every Claude Code session the context it needs.
+---
+```markdown
+## Content Visualizer Engine (v2.0)
+
+### What it is
+An inline Generative UI system that renders interactive HTML/SVG visualizations
+directly within chat messages. Modeled after Claude.ai's Visualizer (show_widget)
+architecture, reverse-engineered from production.
+
+### Architecture summary
+- Tool-based: AI calls `show_widget` tool → frontend renders in sandboxed iframe
+- Streaming: partial HTML streamed via morphdom DOM diffing for progressive rendering
+- Guidelines: domain-specific design modules loaded lazily via `read_me` pattern
+- Separate from Artifacts: inline + ephemeral vs side-panel + persistent
+
+### Key files
+- src/features/visualizer/                    — Core engine
+- src/features/visualizer/shellHTML.ts         — iframe shell with morphdom + CSP + bridges
+- src/features/visualizer/VisualizerRenderer.tsx — Main React component
+- src/features/visualizer/StreamingManager.ts  — 150ms debounced morphdom streaming
+- src/features/visualizer/LoadingOverlay.tsx    — Loading messages display
+- src/features/visualizer/modules/             — Design guideline modules
+- src/features/visualizer/modules/general/     — chart, diagram, interactive, mockup, art
+- src/features/visualizer/modules/medical/     — prisma, consort, forest-plot, drug-interaction, kaplan-meier, rob
+- src/features/visualizer/modules/academic/    — citation-network, methodology-flow, stats-dashboard
+- src/features/visualizer/modules/education/   — step-by-step, quiz, math-plot
+- src/features/visualizer/modules/ModuleManager.ts — Lazy loader + auto-suggest
+- docs/prd/content-visualizer-v2.md            — Full PRD
+- docs/prd/visualizer-kickstart.md             — Sprint-by-sprint implementation guide
+
+### Implementation rules
+1. All visualizer output renders inside sandboxed iframe (CSP enforced)
+2. iframe sandbox="allow-scripts" — NO allow-same-origin, NO allow-forms, NO allow-popups
+3. morphdom for streaming DOM diff (NOT innerHTML replacement)
+4. CSS variables for theming — inherit from parent app theme via postMessage
+5. Scripts execute ONLY after streaming completes (_runScripts clones script tags)
+6. CDN allowlist: cdnjs.cloudflare.com, cdn.jsdelivr.net, unpkg.com, esm.sh
+7. Widget code structure: style → HTML content → script (progressive rendering order)
+8. sendPrompt(text) available inside widgets to send messages back to chat
+9. ResizeObserver in iframe reports height to parent for auto-sizing
+10. 150ms debounce on streaming updates to prevent visual jitter
+
+### Tool definitions
+Two built-in tools (not external plugins):
+
+show_widget:
+  parameters: i_have_seen_read_me (bool), title (string), loading_messages (string[]), widget_code (string)
+  client-side only — rendering happens in frontend, backend just confirms success
+
+visualizer_read_me:
+  parameters: modules (string[])
+  returns: concatenated guideline text for requested modules
+  silent — no UI rendered for this tool call
+
+### Module system
+General: chart, diagram, interactive, mockup, art
+Medical: prisma, consort, forest-plot, drug-interaction, kaplan-meier, rob-assessment
+Academic: citation-network, methodology-flow, stats-dashboard
+Education: step-by-step, quiz, math-plot
+
+Modules loaded lazily via ModuleManager — only requested modules enter context (token efficiency).
+
+### Integration points in lobe-chat
+- Message rendering: MessageItem/MessageContent — detect show_widget tool calls, render VisualizerRenderer inline
+- Streaming: SSE/WebSocket handler — intercept toolcall_delta for show_widget, feed to StreamingManager
+- Tool registration: plugin/tool system — register show_widget and visualizer_read_me as built-in
+- System prompt: add Visualizer instructions conditionally (NEXT_PUBLIC_VISUALIZER_ENABLED=true)
+
+### Feature flag
+NEXT_PUBLIC_VISUALIZER_ENABLED=true/false — master toggle
+NEXT_PUBLIC_VISUALIZER_CDN_ALLOWLIST — override CDN domains
+NEXT_PUBLIC_VISUALIZER_MAX_WIDGETS=3 — max per message
+
+### Relationship with Artifacts
+Visualizer and Artifacts coexist:
+- Visualizer: inline in chat, ephemeral, for understanding/explanation
+- Artifacts: side panel, persistent, for deliverables/downloads
+- Routing: "build me X" → Artifact, "show me how X works" → Visualizer, "visualize X" → Visualizer
+```

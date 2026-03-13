@@ -328,18 +328,18 @@ const nextConfig: NextConfig = {
   // node_modules at runtime on Vercel).
   serverExternalPackages: isProd
     ? [
-        '@electric-sql/pglite',
-        '@xmldom/xmldom',
-        '@aws-sdk/client-s3',
-        '@aws-sdk/s3-request-presigner',
-        'sharp',
-        '@img/sharp-libvips-linux-x64',
-        '@img/sharp-libvips-linuxmusl-x64',
-        '@shikijs/langs',
-        '@shikijs/themes',
-        '@shikijs/engine-oniguruma',
-        'pdf-parse',
-      ]
+      '@electric-sql/pglite',
+      '@xmldom/xmldom',
+      '@aws-sdk/client-s3',
+      '@aws-sdk/s3-request-presigner',
+      'sharp',
+      '@img/sharp-libvips-linux-x64',
+      '@img/sharp-libvips-linuxmusl-x64',
+      '@shikijs/langs',
+      '@shikijs/themes',
+      '@shikijs/engine-oniguruma',
+      'pdf-parse',
+    ]
     : ['@xmldom/xmldom'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
@@ -347,19 +347,11 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // Generate hidden source maps for PostHog error tracking (no sourceMappingURL in JS files)
-  ...(uploadSourceMaps ? { productionBrowserSourceMaps: true } : {}),
-
-  webpack(config, { isServer }) {
+  webpack(config) {
     config.experiments = {
       asyncWebAssembly: true,
       layers: true,
     };
-
-    // Use hidden-source-map so .map files are generated but never referenced in JS output
-    if (uploadSourceMaps && !isServer) {
-      config.devtool = 'hidden-source-map';
-    }
 
     // 开启该插件会导致 pglite 的 fs bundler 被改表
     if (enableReactScan && !isUsePglite) {
@@ -436,21 +428,34 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true' ? analyzer() : noWrapp
 const withPWA =
   isProd && !isDesktop
     ? withSerwistInit({
-        // Allow precaching of large PGLite assets for offline functionality
-        // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      // Allow precaching of large PGLite assets for offline functionality
+      // Reduced from 10MB to 5MB to optimize build memory usage on Vercel
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 
-        register: false,
+      register: false,
 
-        swDest: 'public/sw.js',
+      swDest: 'public/sw.js',
 
-        swSrc: 'src/app/sw.ts', // 5MB
-      })
+      swSrc: 'src/app/sw.ts', // 5MB
+    })
     : noWrapper;
 
-// Conditionally wrap with Sentry based on environment variable
-// NOTE: Sentry has been fully removed for performance optimization
-// The entire @sentry/nextjs package was adding ~200KB+ to the client bundle
-// and causing ~8s of main thread blocking time on the /chat page
+// Conditionally wrap with PostHog source map upload
+// Use require() to avoid TypeScript errors when @posthog/nextjs-config is not installed locally
+const withPostHog = uploadSourceMaps
+  ? (config: NextConfig) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { withPostHogConfig } = require('@posthog/nextjs-config');
+    return withPostHogConfig(config, {
+      host: 'https://us.posthog.com',
+      personalApiKey: process.env.POSTHOG_SOURCEMAP_API_KEY!,
+      projectId: process.env.POSTHOG_PROJECT_ID || '306983',
+      sourcemaps: {
+        deleteAfterUpload: true,
+        enabled: true,
+      },
+    });
+  }
+  : noWrapper;
 
-export default withBundleAnalyzer(withPWA(nextConfig as NextConfig));
+export default withBundleAnalyzer(withPWA(withPostHog(nextConfig as NextConfig)));

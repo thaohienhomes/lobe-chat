@@ -174,6 +174,7 @@ export default {
   },
   newAgent: '新建助手',
   pin: '置顶',
+  copyAll: '复制全部',
   pinOff: '取消置顶',
   rag: {
     referenceChunks: '引用源',
@@ -252,7 +253,6 @@ export default {
     loading: '识别中...',
     prettifying: '润色中...',
   },
-  copyAll: '复制全部',
   thread: {
     divider: '子话题',
     threadMessageCount: '{{messageCount}} 条消息',
