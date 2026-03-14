@@ -376,15 +376,12 @@ const nextConfig: NextConfig = {
     // Fix SWR react-server export stripping useSWR/mutate
     // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
     // which causes "does not contain a default export" errors during build.
-    // Force-alias the react-server entries to their full client counterparts.
+    // Alias the 'swr' import request directly to the full client entry point,
+    // bypassing webpack's exports-field condition resolution entirely.
+    // The '$' suffix ensures only exact 'swr' imports are aliased (not subpaths).
     const path = require('path');
     const swrDir = path.dirname(require.resolve('swr/package.json'));
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      [path.join(swrDir, 'dist/index/react-server.mjs')]: path.join(swrDir, 'dist/index/index.mjs'),
-      [path.join(swrDir, 'dist/infinite/react-server.mjs')]: path.join(swrDir, 'dist/infinite/index.mjs'),
-      [path.join(swrDir, 'dist/_internal/index.react-server.mjs')]: path.join(swrDir, 'dist/_internal/index.mjs'),
-    };
+    config.resolve.alias['swr$'] = path.join(swrDir, 'dist', 'index', 'index.mjs');
 
     // pptxgenjs ESM bundle uses dynamic import('node:fs'), import('node:https')
     // which cause UnhandledSchemeError in webpack client builds.
