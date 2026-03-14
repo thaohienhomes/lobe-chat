@@ -69,15 +69,17 @@ const VISUALIZER_GUIDELINES = `# Visualizer Design Guidelines
 Guidelines loaded for modules: `;
 
 function handleShowWidget(params: ShowWidgetParams) {
-  // The actual rendering is done client-side by VisualizerRenderer.
-  // This handler just returns a confirmation string that goes back to the LLM
-  // as the tool result, so it knows the widget was accepted.
-  return `Widget rendered: ${params.title}`;
+  // Must return valid JSON — BuiltinType checks isJSON and bails out otherwise.
+  // The actual widget rendering uses `args` (tool arguments), not `content` (tool result).
+  return JSON.stringify({ status: 'rendered', title: params.title });
 }
 
 function handleVisualizerReadMe(params: VisualizerReadMeParams) {
-  // Return guidelines text as the tool result for the LLM to consume
-  return VISUALIZER_GUIDELINES + params.modules.join(', ');
+  // Return guidelines as JSON so BuiltinType's isJSON check passes
+  return JSON.stringify({
+    guidelines: VISUALIZER_GUIDELINES + params.modules.join(', '),
+    modules: params.modules,
+  });
 }
 
 export interface VisualizerToolAction {
