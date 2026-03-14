@@ -29,8 +29,9 @@ const Tool = memo<InspectorProps>(
     const isLoading = useChatStore(chatSelectors.isInToolsCalling(messageId, index));
 
     useEffect(() => {
-      if (!type || isLoading) return;
+      if (!type) return;
 
+      // MCP tools: expand while loading, collapse 1.5s after completion
       if (type === 'mcp') {
         setTimeout(
           () => {
@@ -38,11 +39,12 @@ const Tool = memo<InspectorProps>(
           },
           isLoading ? 1 : 1500,
         );
+        return;
       }
 
-      // Auto-expand builtin tools (Visualizer, DALL-E, etc.) so their rendered content
-      // is visible by default without requiring the user to click the header.
-      if (type === 'builtin') {
+      // Builtin tools (Visualizer, DALL-E, etc.): auto-expand once loading completes
+      // so their rendered content (widget, image) is visible by default
+      if (type === 'builtin' && !isLoading) {
         setShowDetail(true);
       }
     }, [isLoading, type]);
