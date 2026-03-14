@@ -375,22 +375,40 @@ const nextConfig: NextConfig = {
 
     config.resolve.alias.canvas = false;
 
-    // Fix SWR react-server export stripping useSWR/mutate
-    // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
-    // which causes "does not contain a default export" errors during build.
-    // Alias the import requests directly to the full client entry points,
-    // bypassing webpack's exports-field condition resolution entirely.
-    // The '$' suffix ensures only exact imports are aliased (not subpaths).
     const path = require('path');
-    const swrDir = path.dirname(require.resolve('swr/package.json'));
-    config.resolve.alias['swr$'] = path.join(swrDir, 'dist', 'index', 'index.mjs');
-    config.resolve.alias['swr/_internal$'] = path.join(swrDir, 'dist', '_internal', 'index.mjs');
+    const webpack = require('webpack');
+
+    // Fix SWR react-server export condition stripping useSWR/mutate
+    //
+    // Problem: SWR v2's package.json "react-server" export condition resolves to
+    // react-server.mjs containing only SWRConfig + unstable_serialize — NOT useSWR
+    // or mutate. Next.js RSC compilation uses this condition, causing build errors.
+    //
+    // Solution: Custom resolve plugin that hooks into the 'result' stage (AFTER full
+    // resolution including package.json exports). When the resolved path ends with
+    // react-server.mjs from SWR, we swap it to the full client entry (index.mjs).
+    config.resolve.plugins = config.resolve.plugins || [];
+    config.resolve.plugins.push({
+      apply(resolver: any) {
+        resolver.getHook('result').tapAsync('SwrReactServerFix', (request: any, resolveContext: any, callback: any) => {
+          const resolvedPath = request.path;
+          if (
+            resolvedPath &&
+            /[/\\]swr[/\\]dist[/\\](index|_internal|infinite)[/\\]react-server\.mjs$/.test(resolvedPath)
+          ) {
+            const newPath = resolvedPath.replace('react-server.mjs', 'index.mjs');
+            const newRequest = { ...request, path: newPath };
+            return callback(null, newRequest);
+          }
+          return callback(null, request);
+        });
+      },
+    });
 
     // pptxgenjs ESM bundle uses dynamic import('node:fs'), import('node:https')
     // which cause UnhandledSchemeError in webpack client builds.
     // NormalModuleReplacementPlugin handles static require/import but NOT dynamic import().
     // We must also alias node:-prefixed modules so webpack resolves them to false.
-    const webpack = require('webpack');
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: any) => {
         resource.request = resource.request.replace(/^node:/, '');
