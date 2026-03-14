@@ -18,8 +18,9 @@ const cardStyle = {
     transition: 'all 0.3s ease',
 };
 
-export default async function AdminUsersPage({ searchParams }: { searchParams: { q?: string } }) {
-    const q = searchParams.q || '';
+export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+    const resolvedParams = await searchParams;
+    const q = resolvedParams.q || '';
     const db = await getServerDB();
 
     let usersData;

@@ -55,12 +55,13 @@ const filterChipBase = {
 export default async function AdminTicketsPage({
     searchParams,
 }: {
-    searchParams: { priority?: string, status?: string; };
+    searchParams: Promise<{ priority?: string, status?: string; }>;
 }) {
     const db = await getServerDB();
 
-    const filterStatus = searchParams?.status || 'all';
-    const filterPriority = searchParams?.priority || 'all';
+    const resolvedParams = await searchParams;
+    const filterStatus = resolvedParams?.status || 'all';
+    const filterPriority = resolvedParams?.priority || 'all';
 
     // Build conditions
     const conditions = [];
