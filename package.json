@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "assets:all": "npm run generate:assets && npm run capture:screenshots && npm run assets:optimize",
+    "postinstall": "node scripts/patch-swr.js",
     "assets:optimize": "tsx ./scripts/optimize-assets.ts",
     "prebuild": "tsx scripts/prebuild.mts && node -e \"process.exit(process.env.VERCEL?0:1)\" || bun run lint",
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=16384 next build",

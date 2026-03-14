@@ -384,9 +384,29 @@ const nextConfig: NextConfig = {
     // react-server.mjs containing only SWRConfig + unstable_serialize — NOT useSWR
     // or mutate. Next.js RSC compilation uses this condition, causing build errors.
     //
-    // Solution: Custom resolve plugin that hooks into the 'result' stage (AFTER full
-    // resolution including package.json exports). When the resolved path ends with
-    // react-server.mjs from SWR, we swap it to the full client entry (index.mjs).
+    // Primary fix: postinstall script (scripts/patch-swr.js) removes the
+    // react-server conditions from SWR's package.json after install.
+    //
+    // Backup fix: resolve.alias forces SWR imports to the full entry points,
+    // and a resolve plugin catches any remaining react-server.mjs resolutions.
+    try {
+      const swrDir = path.dirname(require.resolve('swr/package.json'));
+      config.resolve.alias['swr$'] = path.join(swrDir, 'dist', 'index', 'index.mjs');
+      config.resolve.alias['swr/_internal$'] = path.join(swrDir, 'dist', '_internal', 'index.mjs');
+      config.resolve.alias['swr/_internal'] = path.join(swrDir, 'dist', '_internal', 'index.mjs');
+      config.resolve.alias['swr/infinite$'] = path.join(swrDir, 'dist', 'infinite', 'index.mjs');
+      config.resolve.alias['swr/infinite'] = path.join(swrDir, 'dist', 'infinite', 'index.mjs');
+      config.resolve.alias['swr/mutation$'] = path.join(swrDir, 'dist', 'mutation', 'index.mjs');
+      config.resolve.alias['swr/mutation'] = path.join(swrDir, 'dist', 'mutation', 'index.mjs');
+      config.resolve.alias['swr/immutable$'] = path.join(swrDir, 'dist', 'immutable', 'index.mjs');
+      config.resolve.alias['swr/immutable'] = path.join(swrDir, 'dist', 'immutable', 'index.mjs');
+      config.resolve.alias['swr/subscription$'] = path.join(swrDir, 'dist', 'subscription', 'index.mjs');
+      config.resolve.alias['swr/subscription'] = path.join(swrDir, 'dist', 'subscription', 'index.mjs');
+    } catch {
+      // SWR not installed yet — postinstall patch will handle it
+    }
+
+    // Backup: resolve plugin catches react-server.mjs after exports map resolution
     config.resolve.plugins = config.resolve.plugins || [];
     config.resolve.plugins.push({
       apply(resolver: any) {
@@ -397,8 +417,7 @@ const nextConfig: NextConfig = {
             /[/\\]swr[/\\]dist[/\\](index|_internal|infinite)[/\\]react-server\.mjs$/.test(resolvedPath)
           ) {
             const newPath = resolvedPath.replace('react-server.mjs', 'index.mjs');
-            const newRequest = { ...request, path: newPath };
-            return callback(null, newRequest);
+            return callback(null, { ...request, path: newPath, relativePath: request.relativePath?.replace('react-server.mjs', 'index.mjs') });
           }
           return callback(null, request);
         });
