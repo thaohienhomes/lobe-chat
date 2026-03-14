@@ -376,16 +376,15 @@ const nextConfig: NextConfig = {
     // Fix SWR react-server export stripping useSWR/mutate
     // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
     // which causes "does not contain a default export" errors during build.
-    // Use NormalModuleReplacementPlugin for robust path-independent resolution.
-
-    config.plugins.push(
-      new (require('webpack')).NormalModuleReplacementPlugin(
-        /swr[\\/]dist[\\/](?:index|_internal)[\\/]react-server\.mjs$/,
-        (resource: any) => {
-          resource.request = resource.request.replace('react-server.mjs', 'index.mjs');
-        },
-      ),
-    );
+    // Force-alias the react-server entries to their full client counterparts.
+    const path = require('path');
+    const swrDir = path.dirname(require.resolve('swr/package.json'));
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      [path.join(swrDir, 'dist/index/react-server.mjs')]: path.join(swrDir, 'dist/index/index.mjs'),
+      [path.join(swrDir, 'dist/infinite/react-server.mjs')]: path.join(swrDir, 'dist/infinite/index.mjs'),
+      [path.join(swrDir, 'dist/_internal/index.react-server.mjs')]: path.join(swrDir, 'dist/_internal/index.mjs'),
+    };
 
     // pptxgenjs ESM bundle uses dynamic import('node:fs'), import('node:https')
     // which cause UnhandledSchemeError in webpack client builds.
