@@ -443,9 +443,12 @@ const nextConfig: NextConfig = {
       http: false,
       https: false,
       stream: false,
-      zipfile: false,
       zlib: false,
     };
+
+    // zipfile is a native addon (not a Node.js built-in), so resolve.fallback
+    // doesn't work for it. Use resolve.alias instead to stub it out.
+    config.resolve.alias.zipfile = false;
 
     if (assetPrefix && (assetPrefix.startsWith('http://') || assetPrefix.startsWith('https://'))) {
       // fix the Worker URL cross-origin issue
