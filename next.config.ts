@@ -342,8 +342,10 @@ const nextConfig: NextConfig = {
       '@shikijs/themes',
       '@shikijs/engine-oniguruma',
       'pdf-parse',
+      // epub2 depends on native 'zipfile' module which can't be bundled by webpack
+      'epub2',
     ]
-    : ['@xmldom/xmldom'],
+    : ['@xmldom/xmldom', 'epub2'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
 
@@ -376,12 +378,13 @@ const nextConfig: NextConfig = {
     // Fix SWR react-server export stripping useSWR/mutate
     // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
     // which causes "does not contain a default export" errors during build.
-    // Alias the 'swr' import request directly to the full client entry point,
+    // Alias the import requests directly to the full client entry points,
     // bypassing webpack's exports-field condition resolution entirely.
-    // The '$' suffix ensures only exact 'swr' imports are aliased (not subpaths).
+    // The '$' suffix ensures only exact imports are aliased (not subpaths).
     const path = require('path');
     const swrDir = path.dirname(require.resolve('swr/package.json'));
     config.resolve.alias['swr$'] = path.join(swrDir, 'dist', 'index', 'index.mjs');
+    config.resolve.alias['swr/_internal$'] = path.join(swrDir, 'dist', '_internal', 'index.mjs');
 
     // pptxgenjs ESM bundle uses dynamic import('node:fs'), import('node:https')
     // which cause UnhandledSchemeError in webpack client builds.
