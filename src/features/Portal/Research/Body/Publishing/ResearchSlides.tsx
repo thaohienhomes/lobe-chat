@@ -15,6 +15,33 @@ import { Flexbox } from 'react-layout-kit';
 
 import { type PaperResult, useResearchStore } from '@/store/research';
 
+/**
+ * Load pptxgenjs from CDN at runtime to avoid webpack bundling it.
+ * pptxgenjs uses import('node:fs') / import('node:https') internally
+ * which cause UnhandledSchemeError in webpack 5 client builds.
+ */
+const PPTXGENJS_CDN = 'https://cdn.jsdelivr.net/npm/pptxgenjs@4/dist/pptxgen.bundle.js';
+let pptxPromise: Promise<any> | null = null;
+
+const loadPptxGenJS = (): Promise<any> => {
+  if (pptxPromise) return pptxPromise;
+  pptxPromise = new Promise((resolve, reject) => {
+    if (typeof (globalThis as any).PptxGenJS !== 'undefined') {
+      resolve((globalThis as any).PptxGenJS);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = PPTXGENJS_CDN;
+    script.addEventListener('load', () => resolve((globalThis as any).PptxGenJS));
+    script.addEventListener('error', () => {
+      pptxPromise = null;
+      reject(new Error('Failed to load pptxgenjs from CDN'));
+    });
+    document.head.append(script);
+  });
+  return pptxPromise;
+};
+
 const useStyles = createStyles(({ css, token }) => ({
     card: css`
     padding: 16px;
@@ -163,8 +190,10 @@ const ResearchSlides = memo(({ papers }: Props) => {
         if (!deck) return;
         setExporting(true);
         try {
-            const pptxModule = await import('pptxgenjs');
-            const PptxGenJS = pptxModule.default;
+            // Load pptxgenjs from CDN at runtime to avoid webpack bundling it.
+            // pptxgenjs internally uses import('node:fs') / import('node:https') which
+            // cause UnhandledSchemeError in webpack 5 client builds.
+            const PptxGenJS = await loadPptxGenJS();
             const prs = new PptxGenJS();
 
             // Theme colors

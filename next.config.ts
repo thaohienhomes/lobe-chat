@@ -373,15 +373,6 @@ const nextConfig: NextConfig = {
 
     config.resolve.alias.canvas = false;
 
-    // Alias node:-prefixed modules to false for client builds.
-    // Handles dynamic import('node:fs') inside pptxgenjs that
-    // NormalModuleReplacementPlugin cannot intercept.
-    config.resolve.alias['node:fs'] = false;
-    config.resolve.alias['node:https'] = false;
-    config.resolve.alias['node:http'] = false;
-    config.resolve.alias['node:stream'] = false;
-    config.resolve.alias['node:zlib'] = false;
-
     // Fix SWR react-server export stripping useSWR/mutate
     // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
     // which causes "does not contain a default export" errors during build.
