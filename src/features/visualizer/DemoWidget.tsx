@@ -17,7 +17,7 @@ const DEMO_WIDGET_CODE = `
   <div class="title">Pho.Chat Revenue Demo</div>
   <div class="chart-wrap"><canvas id="c"></canvas></div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><` + `/script>
 <script>
 new Chart(document.getElementById('c'), {
   type: 'bar',
@@ -36,7 +36,7 @@ new Chart(document.getElementById('c'), {
     scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + v; } } } }
   }
 });
-<\/script>
+<` + `/script>
 `.trim();
 
 const DEMO_LOADING_MESSAGES = ['Brewing the chart...', 'Pouring data into bars'];

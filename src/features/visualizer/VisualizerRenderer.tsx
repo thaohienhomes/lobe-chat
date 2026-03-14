@@ -48,7 +48,8 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     widgetCode,
     title,
     loadingMessages,
-    isStreaming,
+    // isStreaming is consumed by parent but kept in props interface for future use
+    isStreaming: _isStreaming,
     isComplete,
     theme,
     onInteraction,
