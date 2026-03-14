@@ -373,6 +373,12 @@ const nextConfig: NextConfig = {
     // https://github.com/pinojs/pino/issues/688#issuecomment-637763276
     config.externals.push('pino-pretty');
 
+    // epub2 depends on native 'zipfile' addon which can't be resolved/bundled
+    // by webpack. serverExternalPackages only controls server bundling but
+    // webpack still tries to resolve during module graph traversal.
+    // Pushing to externals tells webpack to skip resolution entirely.
+    config.externals.push('zipfile');
+
     config.resolve.alias.canvas = false;
 
     const path = require('path');
@@ -445,10 +451,6 @@ const nextConfig: NextConfig = {
       stream: false,
       zlib: false,
     };
-
-    // zipfile is a native addon (not a Node.js built-in), so resolve.fallback
-    // doesn't work for it. Use resolve.alias instead to stub it out.
-    config.resolve.alias.zipfile = false;
 
     if (assetPrefix && (assetPrefix.startsWith('http://') || assetPrefix.startsWith('https://'))) {
       // fix the Worker URL cross-origin issue
