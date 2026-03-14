@@ -29,15 +29,23 @@ const Tool = memo<InspectorProps>(
     const isLoading = useChatStore(chatSelectors.isInToolsCalling(messageId, index));
 
     useEffect(() => {
-      if (type !== 'mcp') return;
+      if (!type || isLoading) return;
 
-      setTimeout(
-        () => {
-          setShowDetail(isLoading);
-        },
-        isLoading ? 1 : 1500,
-      );
-    }, [isLoading]);
+      if (type === 'mcp') {
+        setTimeout(
+          () => {
+            setShowDetail(isLoading);
+          },
+          isLoading ? 1 : 1500,
+        );
+      }
+
+      // Auto-expand builtin tools (Visualizer, DALL-E, etc.) so their rendered content
+      // is visible by default without requiring the user to click the header.
+      if (type === 'builtin') {
+        setShowDetail(true);
+      }
+    }, [isLoading, type]);
 
     return (
       <Flexbox gap={8} style={style}>
