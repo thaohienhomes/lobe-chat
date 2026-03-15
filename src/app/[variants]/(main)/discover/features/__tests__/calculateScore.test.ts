@@ -8,15 +8,15 @@ describe('calculateScore', () => {
   describe('Grade A scenarios', () => {
     it('should return grade A for perfect score', () => {
       const scoreItems = createScoreItems({
-        hasReadme: true,
-        hasLicense: true,
-        hasDeployment: true,
-        hasDeployMoreThanManual: true,
-        hasValidated: true,
-        hasTools: true,
-        hasPrompts: true,
-        hasResources: true,
         hasClaimed: true,
+        hasDeployMoreThanManual: true,
+        hasDeployment: true,
+        hasLicense: true,
+        hasPrompts: true,
+        hasReadme: true,
+        hasResources: true,
+        hasTools: true,
+        hasValidated: true,
       });
 
       const result = calculateScore(scoreItems);
@@ -29,15 +29,15 @@ describe('calculateScore', () => {
 
     it('should return grade A for 85% score with all required items', () => {
       const scoreItems = createScoreItems({
-        hasReadme: true,
-        hasLicense: true,
-        hasDeployment: true,
+        hasClaimed: false,
         hasDeployMoreThanManual: true,
-        hasValidated: true,
-        hasTools: true,
+        hasDeployment: true,
+        hasLicense: true,
         hasPrompts: true,
+        hasReadme: true,
         hasResources: true,
-        hasClaimed: false, // 缺少这项
+        hasTools: true,
+        hasValidated: true, // 缺少这项
       });
 
       const result = calculateScore(scoreItems);
@@ -50,15 +50,34 @@ describe('calculateScore', () => {
   describe('Grade B scenarios', () => {
     it('should return grade B for 65-84% score with all required items', () => {
       const scoreItems = createScoreItems({
-        hasReadme: true,
-        hasLicense: false, // 缺少这项
-        hasDeployment: true,
-        hasDeployMoreThanManual: false, // 缺少这项
-        hasValidated: true,
-        hasTools: true,
-        hasPrompts: false, // 缺少这项
-        hasResources: false, // 缺少这项
-        hasClaimed: false, // 缺少这项
+        // 缺少这项
+hasClaimed: false,
+        
+
+hasDeployMoreThanManual: false, 
+        
+
+// 缺少这项
+hasDeployment: true,
+        
+
+hasLicense: false, 
+        
+hasPrompts: false,
+        
+
+hasReadme: true,
+        
+
+// 缺少这项
+hasResources: false, 
+        
+
+
+hasTools: true, 
+        
+// 缺少这项
+hasValidated: true, // 缺少这项
       });
 
       const result = calculateScore(scoreItems);
@@ -72,15 +91,19 @@ describe('calculateScore', () => {
   describe('Grade F scenarios', () => {
     it('should return grade F when required items are missing', () => {
       const scoreItems = createScoreItems({
-        hasReadme: false, // 必需项缺失
-        hasLicense: true,
-        hasDeployment: true,
-        hasDeployMoreThanManual: true,
-        hasValidated: true,
-        hasTools: true,
+        
+hasClaimed: true, 
+        
+hasDeployMoreThanManual: true,
+        
+hasDeployment: true,
+        // 必需项缺失
+hasLicense: true,
         hasPrompts: true,
+        hasReadme: false,
         hasResources: true,
-        hasClaimed: true,
+        hasTools: true,
+        hasValidated: true,
       });
 
       const result = calculateScore(scoreItems);
@@ -90,15 +113,19 @@ describe('calculateScore', () => {
 
     it('should return grade F when validation is missing', () => {
       const scoreItems = createScoreItems({
-        hasReadme: true,
-        hasLicense: true,
-        hasDeployment: true,
-        hasDeployMoreThanManual: true,
-        hasValidated: false, // 必需项缺失
-        hasTools: true,
-        hasPrompts: true,
-        hasResources: true,
         hasClaimed: true,
+        hasDeployMoreThanManual: true,
+        hasDeployment: true,
+        hasLicense: true,
+        
+hasPrompts: true, 
+        
+hasReadme: true,
+        
+hasResources: true,
+        // 必需项缺失
+hasTools: true,
+        hasValidated: false,
       });
 
       const result = calculateScore(scoreItems);
@@ -108,24 +135,24 @@ describe('calculateScore', () => {
 
     it('should return grade F for very low score even with required items', () => {
       const scoreItems = createScoreItems({
-        hasReadme: true,
-        hasLicense: false,
-        hasDeployment: true,
-        hasDeployMoreThanManual: false,
-        hasValidated: true,
-        hasTools: true,
-        hasPrompts: false,
-        hasResources: false,
         hasClaimed: false,
+        hasDeployMoreThanManual: false,
+        hasDeployment: true,
+        hasLicense: false,
+        hasPrompts: false,
+        hasReadme: true,
+        hasResources: false,
+        hasTools: true,
+        hasValidated: true,
       });
 
       // 手动设置更低的权重来测试低分情况
       const lowWeights = {
         ...DEFAULT_WEIGHTS,
-        readme: 5,
         deployment: 5,
-        validated: 5,
+        readme: 5,
         tools: 5,
+        validated: 5,
       };
 
       const result = calculateScore(scoreItems, lowWeights);
@@ -138,15 +165,15 @@ describe('calculateScore', () => {
   describe('createScoreItems', () => {
     it('should create correct score items with required flags', () => {
       const data = {
-        hasReadme: true,
-        hasLicense: false,
-        hasDeployment: true,
-        hasDeployMoreThanManual: false,
-        hasValidated: true,
-        hasTools: true,
-        hasPrompts: false,
-        hasResources: false,
         hasClaimed: false,
+        hasDeployMoreThanManual: false,
+        hasDeployment: true,
+        hasLicense: false,
+        hasPrompts: false,
+        hasReadme: true,
+        hasResources: false,
+        hasTools: true,
+        hasValidated: true,
       };
 
       const items = createScoreItems(data);

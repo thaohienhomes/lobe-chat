@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { AiModelModel } from '@/database/models/aiModel';
-import { UserModel } from '@/database/models/user';
 import { AiInfraRepos } from '@/database/repositories/aiInfra';
 
 import { aiModelRouter } from './aiModel';
@@ -17,8 +16,8 @@ vi.mock('@/server/globalConfig', () => ({
 vi.mock('@/server/modules/KeyVaultsEncrypt', () => ({
   KeyVaultsGateKeeper: {
     initWithEnvKey: vi.fn().mockResolvedValue({
-      encrypt: vi.fn(),
       decrypt: vi.fn(),
+      encrypt: vi.fn(),
     }),
   },
 }));
@@ -148,15 +147,15 @@ describe('aiModelRouter', () => {
     const caller = aiModelRouter.createCaller(mockCtx);
 
     await caller.toggleModelEnabled({
+      enabled: true,
       id: 'model-1',
       providerId: 'provider-1',
-      enabled: true,
     });
 
     expect(mockToggle).toHaveBeenCalledWith({
+      enabled: true,
       id: 'model-1',
       providerId: 'provider-1',
-      enabled: true,
     });
   });
 
@@ -172,9 +171,9 @@ describe('aiModelRouter', () => {
     const caller = aiModelRouter.createCaller(mockCtx);
 
     await caller.batchToggleAiModels({
+      enabled: true,
       id: 'provider-1',
       models: ['model-1', 'model-2'],
-      enabled: true,
     });
 
     expect(mockBatchToggle).toHaveBeenCalledWith('provider-1', ['model-1', 'model-2'], true);

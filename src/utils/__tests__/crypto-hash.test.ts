@@ -159,8 +159,8 @@ describe('Crypto Hash Utils', () => {
 
       expect(result).toEqual({
         email: 'a'.repeat(64),
-        phone_number: 'a'.repeat(64),
         external_id: 'a'.repeat(64),
+        phone_number: 'a'.repeat(64),
       });
     });
 
@@ -174,8 +174,8 @@ describe('Crypto Hash Utils', () => {
       const result = await hashUserPII(userData);
 
       expect(result).toEqual({
-        phone_number: 'a'.repeat(64),
         external_id: 'a'.repeat(64),
+        phone_number: 'a'.repeat(64),
       });
       expect(console.warn).toHaveBeenCalledWith('Failed to hash email:', expect.any(Error));
     });

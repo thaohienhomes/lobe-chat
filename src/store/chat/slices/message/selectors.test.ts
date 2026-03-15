@@ -22,26 +22,26 @@ const initialStore = initialState as ChatStore;
 
 const mockMessages = [
   {
-    id: 'msg1',
     content: 'Hello World',
+    id: 'msg1',
     role: 'user',
   },
   {
-    id: 'msg2',
     content: 'Goodbye World',
+    id: 'msg2',
     role: 'user',
   },
   {
-    id: 'msg3',
     content: 'Function Message',
+    id: 'msg3',
     role: 'tool',
     tools: [
       {
-        arguments: ['arg1', 'arg2'],
-        identifier: 'func1',
         apiName: 'ttt',
-        type: 'pluginType',
+        arguments: ['arg1', 'arg2'],
         id: 'abc',
+        identifier: 'func1',
+        type: 'pluginType',
       },
     ],
   },
@@ -49,69 +49,69 @@ const mockMessages = [
 
 const mockReasoningMessages = [
   {
-    id: 'msg1',
     content: 'Hello World',
+    id: 'msg1',
     role: 'user',
   },
   {
-    id: 'msg2',
     content: 'Goodbye World',
+    id: 'msg2',
     role: 'user',
   },
   {
-    id: 'msg3',
     content: 'Content Message',
-    role: 'assistant',
+    id: 'msg3',
     reasoning: {
       content: 'Reasoning Content',
     },
+    role: 'assistant',
   },
 ] as ChatMessage[];
 
 const mockedChats = [
   {
-    id: 'msg1',
     content: 'Hello World',
-    role: 'user',
+    id: 'msg1',
     meta: {
       avatar: '😀',
     },
+    role: 'user',
   },
   {
-    id: 'msg2',
     content: 'Goodbye World',
-    role: 'user',
+    id: 'msg2',
     meta: {
       avatar: '😀',
     },
+    role: 'user',
   },
   {
-    id: 'msg3',
     content: 'Function Message',
-    role: 'tool',
+    id: 'msg3',
     meta: {
       avatar: DEFAULT_INBOX_AVATAR,
       backgroundColor: 'rgba(0,0,0,0)',
       description: 'inbox.desc',
       title: 'inbox.title',
     },
+    role: 'tool',
     tools: [
       {
-        arguments: ['arg1', 'arg2'],
-        identifier: 'func1',
         apiName: 'ttt',
-        type: 'pluginType',
+        arguments: ['arg1', 'arg2'],
         id: 'abc',
+        identifier: 'func1',
+        type: 'pluginType',
       },
     ],
   },
 ] as ChatMessage[];
 
 const mockChatStore = {
+  activeId: 'abc',
   messagesMap: {
     [messageMapKey('abc')]: mockMessages,
   },
-  activeId: 'abc',
 } as ChatStore;
 
 beforeAll(() => {
@@ -131,10 +131,10 @@ describe('chatSelectors', () => {
 
     it('should return the message object with the matching id', () => {
       const state = merge(initialStore, {
+        activeId: 'abc',
         messagesMap: {
           [messageMapKey('abc')]: mockMessages,
         },
-        activeId: 'abc',
       });
       const message = chatSelectors.getMessageById('msg1')(state);
       expect(message).toEqual(mockedChats[0]);
@@ -159,22 +159,22 @@ describe('chatSelectors', () => {
 
     it('should return the message object with the matching tool_call_id', () => {
       const toolMessage = {
-        id: 'msg3',
         content: 'Function Message',
-        role: 'tool',
-        tool_call_id: 'ttt',
+        id: 'msg3',
         plugin: {
+          apiName: 'ttt',
           arguments: 'arg1',
           identifier: 'func1',
-          apiName: 'ttt',
           type: 'default',
         },
+        role: 'tool',
+        tool_call_id: 'ttt',
       } as ChatMessage;
       const state = merge(initialStore, {
+        activeId: 'abc',
         messagesMap: {
           [messageMapKey('abc')]: [...mockMessages, toolMessage],
         },
-        activeId: 'abc',
       });
       const message = chatSelectors.getMessageByToolCallId('ttt')(state);
       expect(message).toMatchObject(toolMessage);
@@ -184,10 +184,10 @@ describe('chatSelectors', () => {
   describe('currentChatsWithHistoryConfig', () => {
     it('should slice the messages according to the current agent config', () => {
       const state = merge(initialStore, {
+        activeId: 'abc',
         messagesMap: {
           [messageMapKey('abc')]: mockMessages,
         },
-        activeId: 'abc',
       });
 
       const chats = chatSelectors.mainAIChatsWithHistoryConfig(state);
@@ -196,10 +196,10 @@ describe('chatSelectors', () => {
     });
     it('should slice the messages according to config, assuming historyCount is mocked to 2', async () => {
       const state = merge(initialStore, {
+        activeId: 'abc',
         messagesMap: {
           [messageMapKey('abc')]: mockMessages,
         },
-        activeId: 'abc',
       });
       act(() => {
         useAgentStore.setState({
@@ -207,8 +207,8 @@ describe('chatSelectors', () => {
           agentMap: {
             inbox: {
               chatConfig: {
-                historyCount: 2,
                 enableHistoryCount: true,
+                historyCount: 2,
               },
               model: 'abc',
             } as LobeAgentConfig,
@@ -221,29 +221,29 @@ describe('chatSelectors', () => {
       expect(chats).toHaveLength(2);
       expect(chats).toEqual([
         {
-          id: 'msg2',
           content: 'Goodbye World',
-          role: 'user',
+          id: 'msg2',
           meta: {
             avatar: '😀',
           },
+          role: 'user',
         },
         {
-          id: 'msg3',
           content: 'Function Message',
-          role: 'tool',
+          id: 'msg3',
           meta: {
             avatar: DEFAULT_INBOX_AVATAR,
             backgroundColor: 'rgba(0,0,0,0)',
             description: 'inbox.desc',
             title: 'inbox.title',
           },
+          role: 'tool',
           tools: [
             {
               apiName: 'ttt',
               arguments: ['arg1', 'arg2'],
-              identifier: 'func1',
               id: 'abc',
+              identifier: 'func1',
               type: 'pluginType',
             },
           ],
@@ -255,10 +255,10 @@ describe('chatSelectors', () => {
   describe('mainDisplayChats', () => {
     it('should return existing messages except tool message', () => {
       const state = merge(initialStore, {
+        activeId: 'someActiveId',
         messagesMap: {
           [messageMapKey('someActiveId')]: mockMessages,
         },
-        activeId: 'someActiveId',
       });
       const chats = chatSelectors.mainDisplayChats(state);
       expect(chats).toEqual(mockedChats.slice(0, 2));
@@ -269,10 +269,10 @@ describe('chatSelectors', () => {
     it('should concatenate the contents of all messages returned by currentChatsWithHistoryConfig', () => {
       // Prepare a state with a few messages
       const state = merge(initialStore, {
+        activeId: 'active-session',
         messagesMap: {
           [messageMapKey('active-session')]: mockMessages,
         },
-        activeId: 'active-session',
       });
 
       // Assume that the currentChatsWithHistoryConfig will return the last two messages
@@ -294,10 +294,10 @@ describe('chatSelectors', () => {
     it('should return the reasoning content of the latest message', () => {
       // Prepare a state with a few messages
       const state = merge(initialStore, {
+        activeId: 'active-session',
         messagesMap: {
           [messageMapKey('active-session')]: mockReasoningMessages,
         },
-        activeId: 'active-session',
       });
 
       const expectedString = mockReasoningMessages.at(-1)?.reasoning?.content;
@@ -342,10 +342,10 @@ describe('chatSelectors', () => {
   describe('currentToolMessages', () => {
     it('should return only tool messages', () => {
       const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi' },
-        { id: '3', role: 'tool', content: 'Tool message 1' },
-        { id: '4', role: 'user', content: 'Query' },
+        { content: 'Hello', id: '1', role: 'user' },
+        { content: 'Hi', id: '2', role: 'assistant' },
+        { content: 'Tool message 1', id: '3', role: 'tool' },
+        { content: 'Query', id: '4', role: 'user' },
         { id: '5', role: 'tool', tools: [] },
       ] as ChatMessage[];
       const state: Partial<ChatStore> = {
@@ -361,8 +361,8 @@ describe('chatSelectors', () => {
 
     it('should return an empty array when no tool messages exist', () => {
       const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi' },
+        { content: 'Hello', id: '1', role: 'user' },
+        { content: 'Hi', id: '2', role: 'assistant' },
       ] as ChatMessage[];
       const state: Partial<ChatStore> = {
         activeId: 'test-id',

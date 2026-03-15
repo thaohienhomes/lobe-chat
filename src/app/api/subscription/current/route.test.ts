@@ -67,11 +67,11 @@ describe('GET /api/subscription/current', () => {
 
   describe('Subscription prioritization', () => {
     const createMockSubscription = (overrides = {}) => ({
-      id: 'sub_123',
       billingCycle: 'monthly',
       cancelAtPeriodEnd: false,
       currentPeriodEnd: new Date('2025-12-31'),
       currentPeriodStart: new Date('2024-12-31'),
+      id: 'sub_123',
       planId: 'free',
       status: 'active',
       userId: 'user_123',
@@ -94,14 +94,14 @@ describe('GET /api/subscription/current', () => {
 
     it('should prioritize lifetime subscription over free subscription', async () => {
       const freeSubscription = createMockSubscription({
+        currentPeriodStart: new Date('2024-01-01'),
         id: 'sub_free',
         planId: 'free',
-        currentPeriodStart: new Date('2024-01-01'),
       });
       const lifetimeSubscription = createMockSubscription({
+        currentPeriodStart: new Date('2024-06-01'),
         id: 'sub_lifetime',
         planId: 'lifetime',
-        currentPeriodStart: new Date('2024-06-01'),
       });
 
       // Order should not matter - lifetime should be prioritized
@@ -179,13 +179,13 @@ describe('GET /api/subscription/current', () => {
     it('should prefer more recent subscription when priorities are equal', async () => {
       await setupMockDB([
         createMockSubscription({
-          id: 'sub_old',
           currentPeriodStart: new Date('2024-01-01'),
+          id: 'sub_old',
           planId: 'vn_basic',
         }),
         createMockSubscription({
-          id: 'sub_new',
           currentPeriodStart: new Date('2024-12-01'),
+          id: 'sub_new',
           planId: 'vn_pro',
         }),
       ]);
@@ -217,11 +217,11 @@ describe('GET /api/subscription/current', () => {
 
   describe('Response format', () => {
     const createMockSubscription = (overrides = {}) => ({
-      id: 'sub_123',
       billingCycle: 'yearly',
       cancelAtPeriodEnd: true,
       currentPeriodEnd: new Date('2025-12-31T23:59:59Z'),
       currentPeriodStart: new Date('2024-12-31T00:00:00Z'),
+      id: 'sub_123',
       planId: 'lifetime',
       status: 'active',
       userId: 'user_123',
@@ -295,11 +295,11 @@ describe('GET /api/subscription/current', () => {
     };
 
     const createSub = (planId: string, start = new Date()) => ({
-      id: `sub_${planId}`,
       billingCycle: 'monthly',
       cancelAtPeriodEnd: false,
       currentPeriodEnd: new Date('2025-12-31'),
       currentPeriodStart: start,
+      id: `sub_${planId}`,
       planId,
       status: 'active',
       userId: 'user_123',

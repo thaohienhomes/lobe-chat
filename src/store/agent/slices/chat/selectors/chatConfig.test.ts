@@ -13,10 +13,10 @@ const createMockState = (
   config?: Partial<LobeAgentConfig>,
 ): AgentStoreState =>
   merge(initialState, {
+    activeId: 'agent1',
     agentMap: {
       agent1: merge(DEFAULT_AGENT_CONFIG, { ...config, chatConfig }),
     },
-    activeId: 'agent1',
   }) as AgentStoreState;
 
 describe('agentChatConfigSelectors', () => {
@@ -41,7 +41,7 @@ describe('agentChatConfigSelectors', () => {
 
     it('should return false value when enable context caching with claude models', () => {
       const state = createMockState(
-        { enableHistoryCount: true, disableContextCaching: false },
+        { disableContextCaching: false, enableHistoryCount: true },
         { model: 'claude-3-7-sonnet-20250219' },
       );
 
@@ -50,7 +50,7 @@ describe('agentChatConfigSelectors', () => {
 
     it('should return true value when enable context caching with other models', () => {
       const state = createMockState(
-        { enableHistoryCount: true, disableContextCaching: false },
+        { disableContextCaching: false, enableHistoryCount: true },
         { model: 'gpt-4o-min' },
       );
 
@@ -59,7 +59,7 @@ describe('agentChatConfigSelectors', () => {
 
     it('should return false when enable search with claude 3.7 models', () => {
       const state = createMockState(
-        { enableHistoryCount: true, disableContextCaching: true, searchMode: 'auto' },
+        { disableContextCaching: true, enableHistoryCount: true, searchMode: 'auto' },
         { model: 'claude-3-7-sonnet-20250219' },
       );
 
@@ -68,7 +68,7 @@ describe('agentChatConfigSelectors', () => {
 
     it('should return true when disable search with claude 3.7 models', () => {
       const state = createMockState(
-        { enableHistoryCount: true, disableContextCaching: true, searchMode: 'off' },
+        { disableContextCaching: true, enableHistoryCount: true, searchMode: 'off' },
         { model: 'claude-3-7-sonnet-20250219' },
       );
 
@@ -77,7 +77,7 @@ describe('agentChatConfigSelectors', () => {
 
     it('should return true when enable search with claude 3.5 models', () => {
       const state = createMockState(
-        { enableHistoryCount: true, disableContextCaching: true, searchMode: 'auto' },
+        { disableContextCaching: true, enableHistoryCount: true, searchMode: 'auto' },
         { model: 'claude-3-5-sonnet-latest' },
       );
 
@@ -174,7 +174,7 @@ describe('agentChatConfigSelectors', () => {
     });
 
     it('should return the effort value when defined', () => {
-      const state = createMockState({ memory: { enabled: true, effort: 'high' } });
+      const state = createMockState({ memory: { effort: 'high', enabled: true } });
       expect(agentChatConfigSelectors.memoryEffort(state)).toBe('high');
     });
 
@@ -191,7 +191,7 @@ describe('agentChatConfigSelectors', () => {
     });
 
     it('should return the full memory config when defined', () => {
-      const memory = { enabled: true, effort: 'high' as const };
+      const memory = { effort: 'high' as const, enabled: true };
       const state = createMockState({ memory });
       expect(agentChatConfigSelectors.memoryConfig(state)).toEqual(memory);
     });

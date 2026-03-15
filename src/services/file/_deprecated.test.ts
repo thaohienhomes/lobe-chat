@@ -2,9 +2,7 @@ import { Mock, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FileModel } from '@/database/_deprecated/models/file';
 import { DB_File } from '@/database/_deprecated/schemas/files';
-import { fileEnv } from '@/envs/file';
 import { clientS3Storage } from '@/services/file/ClientS3';
-import { serverConfigSelectors } from '@/store/serverConfig/selectors';
 import { createServerConfigStore } from '@/store/serverConfig/store';
 
 import { ClientService } from './_deprecated';
@@ -17,10 +15,10 @@ beforeAll(() => {
 // Mocks for the FileModel
 vi.mock('@/database/_deprecated/models/file', () => ({
   FileModel: {
+    clear: vi.fn(),
     create: vi.fn(),
     delete: vi.fn(),
     findById: vi.fn(),
-    clear: vi.fn(),
   },
 }));
 
@@ -47,11 +45,11 @@ beforeEach(() => {
 describe('FileService', () => {
   it('createFile should save the file to the database', async () => {
     const localFile = {
-      name: 'test',
       fileType: 'image/png',
-      url: 'client-s3://123',
-      size: 1,
       hash: '123',
+      name: 'test',
+      size: 1,
+      url: 'client-s3://123',
     };
 
     await clientS3Storage.putObject(
@@ -80,12 +78,12 @@ describe('FileService', () => {
     it('should retrieve and convert local file info to FilePreview', async () => {
       const fileId = '1';
       const fileData = {
-        name: 'test',
+        createdAt: 1,
         data: new ArrayBuffer(1),
         fileType: 'image/png',
+        name: 'test',
         saveMode: 'local',
         size: 1,
-        createdAt: 1,
         updatedAt: 2,
       } as DB_File;
 
@@ -99,11 +97,11 @@ describe('FileService', () => {
       expect(result).toEqual({
         createdAt: new Date(1),
         id: '1',
+        name: 'test',
         size: 1,
         type: 'image/png',
-        name: 'test',
-        url: 'blob:test',
         updatedAt: new Date(2),
+        url: 'blob:test',
       });
     });
 

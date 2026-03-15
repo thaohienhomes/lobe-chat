@@ -16,34 +16,34 @@ vi.mock('zustand/traditional');
 // Mock topicService 和 messageService
 vi.mock('@/services/topic', () => ({
   topicService: {
-    removeTopics: vi.fn(),
-    removeAllTopic: vi.fn(),
-    removeTopic: vi.fn(),
+    batchRemoveTopics: vi.fn(),
     cloneTopic: vi.fn(),
     createTopic: vi.fn(),
+    getTopics: vi.fn(),
+    removeAllTopic: vi.fn(),
+    removeTopic: vi.fn(),
+    removeTopics: vi.fn(),
+    searchTopics: vi.fn(),
+    updateTopic: vi.fn(),
     updateTopicFavorite: vi.fn(),
     updateTopicTitle: vi.fn(),
-    updateTopic: vi.fn(),
-    batchRemoveTopics: vi.fn(),
-    getTopics: vi.fn(),
-    searchTopics: vi.fn(),
   },
 }));
 
 vi.mock('@/services/message', () => ({
   messageService: {
+    getMessages: vi.fn(),
     removeMessages: vi.fn(),
     removeMessagesByAssistant: vi.fn(),
-    getMessages: vi.fn(),
   },
 }));
 
 vi.mock('@/components/AntdStaticMethods', () => ({
   message: {
+    destroy: vi.fn(),
+    error: vi.fn(),
     loading: vi.fn(),
     success: vi.fn(),
-    error: vi.fn(),
-    destroy: vi.fn(),
   },
 }));
 
@@ -106,10 +106,10 @@ describe('topic action', () => {
       const { result } = renderHook(() => useChatStore());
       act(() => {
         useChatStore.setState({
+          activeId: 'session',
           messagesMap: {
             [messageMapKey('session')]: [],
           },
-          activeId: 'session',
         });
       });
 
@@ -126,10 +126,10 @@ describe('topic action', () => {
       const messages = [{ id: 'message1' }, { id: 'message2' }] as ChatMessage[];
       act(() => {
         useChatStore.setState({
+          activeId: 'session-id',
           messagesMap: {
             [messageMapKey('session-id')]: messages,
           },
-          activeId: 'session-id',
         });
       });
 
@@ -141,8 +141,8 @@ describe('topic action', () => {
 
       expect(createTopicSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionId: 'session-id',
           messages: messages.map((m) => m.id),
+          sessionId: 'session-id',
         }),
       );
       expect(topicId).toEqual('new-topic-id');
@@ -389,9 +389,9 @@ describe('topic action', () => {
           activeId: 'abc',
           topicMaps: {
             abc: [
-              { id: 'topic-1', favorite: false },
-              { id: 'topic-2', favorite: true },
-              { id: 'topic-3', favorite: false },
+              { favorite: false, id: 'topic-1' },
+              { favorite: true, id: 'topic-2' },
+              { favorite: false, id: 'topic-3' },
             ] as ChatTopic[],
           },
         });
@@ -428,11 +428,11 @@ describe('topic action', () => {
   describe('summaryTopicTitle', () => {
     it('should auto-summarize the topic title and update it', async () => {
       const topicId = 'topic-1';
-      const messages = [{ id: 'message-1', content: 'Hello' }] as ChatMessage[];
+      const messages = [{ content: 'Hello', id: 'message-1' }] as ChatMessage[];
       const topics = [{ id: 'topic-1', title: 'Test Topic' }] as ChatTopic[];
       const { result } = renderHook(() => useChatStore());
       await act(async () => {
-        useChatStore.setState({ topicMaps: { test: topics }, activeId: 'test' });
+        useChatStore.setState({ activeId: 'test', topicMaps: { test: topics } });
       });
 
       // Mock the `updateTopicTitleInSummary` and `refreshTopic` for spying
@@ -486,8 +486,8 @@ describe('topic action', () => {
       });
 
       expect(createTopicSpy).toHaveBeenCalledWith({
-        sessionId: activeId,
         messages: messages.map((m) => m.id),
+        sessionId: activeId,
         title: 'defaultTitle',
       });
       expect(refreshTopicSpy).toHaveBeenCalled();
@@ -522,7 +522,7 @@ describe('topic action', () => {
       const { result } = renderHook(() => useChatStore());
       const topicId = 'topic-1';
       const activeId = 'test-session-id';
-      const messages = [{ id: 'message-1', content: 'Hello' }] as ChatMessage[];
+      const messages = [{ content: 'Hello', id: 'message-1' }] as ChatMessage[];
 
       await act(async () => {
         useChatStore.setState({ activeId });

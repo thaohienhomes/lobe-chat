@@ -28,7 +28,7 @@ describe('modelProviderSelectors', () => {
         settings: {
           languageModel: {
             perplexity: {
-              customModelCards: [{ id: 'custom-model', displayName: 'Custom Model' }],
+              customModelCards: [{ displayName: 'Custom Model', id: 'custom-model' }],
             },
           },
         },
@@ -37,8 +37,8 @@ describe('modelProviderSelectors', () => {
       const modelCards = modelProviderSelectors.getModelCardsById('perplexity')(s);
 
       expect(modelCards).toContainEqual({
-        id: 'custom-model',
         displayName: 'Custom Model',
+        id: 'custom-model',
         isCustom: true,
       });
     });
@@ -115,7 +115,7 @@ describe('modelProviderSelectors', () => {
         useUserStore.getState(),
       );
 
-      expect(model1Tokens).toEqual(16385);
+      expect(model1Tokens).toEqual(16_385);
     });
 
     it('should return 0 for a model without a specified token count', () => {

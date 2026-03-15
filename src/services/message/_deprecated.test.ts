@@ -5,7 +5,6 @@ import { CreateMessageParams, MessageModel } from '@/database/_deprecated/models
 import {
   ChatMessage,
   ChatMessageError,
-  ChatPluginPayload,
   ChatTTS,
   ChatTranslate,
 } from '@/types/message';
@@ -18,19 +17,19 @@ const messageService = new ClientService();
 vi.mock('@/database/_deprecated/models/message', () => {
   return {
     MessageModel: {
-      create: vi.fn(),
       batchCreate: vi.fn(),
-      count: vi.fn(),
-      query: vi.fn(),
-      delete: vi.fn(),
+      batchDelete: vi.fn(),
+      batchUpdate: vi.fn(),
       bulkDelete: vi.fn(),
+      clearTable: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      query: vi.fn(),
+      queryAll: vi.fn(),
       queryBySessionId: vi.fn(),
       update: vi.fn(),
       updatePlugin: vi.fn(),
-      batchDelete: vi.fn(),
-      clearTable: vi.fn(),
-      batchUpdate: vi.fn(),
-      queryAll: vi.fn(),
       updatePluginState: vi.fn(),
     },
   };
@@ -40,12 +39,12 @@ describe('MessageClientService', () => {
   // Mock data
   const mockMessageId = 'mock-message-id';
   const mockMessage = {
-    id: mockMessageId,
     content: 'Mock message content',
-    sessionId: 'mock-session-id',
     createdAt: 100,
-    updatedAt: 100,
+    id: mockMessageId,
     role: 'user',
+    sessionId: 'mock-session-id',
+    updatedAt: 100,
     // ... other properties
   } as ChatMessage;
   const mockMessages = [mockMessage];
@@ -210,8 +209,8 @@ describe('MessageClientService', () => {
     it('should update the error field of a message', async () => {
       // Setup
       const newError = {
-        type: 'InvalidProviderAPIKey',
         message: 'Error occurred',
+        type: 'InvalidProviderAPIKey',
       } as ChatMessageError;
       (MessageModel.update as Mock).mockResolvedValue({ ...mockMessage, error: newError });
 

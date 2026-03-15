@@ -4,18 +4,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_USER_AVATAR } from '@/const/meta';
 import { DEFAULT_AGENT_CONFIG } from '@/const/settings';
-import { agentChatConfigSelectors, agentSelectors } from '@/store/agent/selectors';
+import { agentChatConfigSelectors } from '@/store/agent/selectors';
 import { aiModelSelectors } from '@/store/aiInfra';
 import { useToolStore } from '@/store/tool';
 import { toolSelectors } from '@/store/tool/selectors';
 import { DalleManifest } from '@/tools/dalle';
 import { WebBrowsingManifest } from '@/tools/web-browsing';
 import { ChatErrorType } from '@/types/index';
-import { ChatImageItem, ChatMessage } from '@/types/message';
-import { ChatStreamPayload, type OpenAIChatMessage } from '@/types/openai/chat';
+import { ChatMessage } from '@/types/message';
+import { ChatStreamPayload } from '@/types/openai/chat';
 import { LobeTool } from '@/types/tool';
 
-import * as helpers from './helper';
 import { chatService } from './index';
 
 // Mocking external dependencies
@@ -35,8 +34,8 @@ vi.mock('@/utils/fetch', async (importOriginal) => {
   return { ...(module as any), getMessageError: vi.fn() };
 });
 vi.mock('@lobechat/utils', () => ({
-  isLocalUrl: vi.fn(),
   imageUrlToBase64: vi.fn(),
+  isLocalUrl: vi.fn(),
   parseDataUri: vi.fn(),
 }));
 
@@ -52,9 +51,9 @@ beforeEach(async () => {
 
   // 默认设置 isServerMode 为 false
   vi.mock('@/const/version', () => ({
-    isServerMode: false,
     isDeprecatedEdition: true,
     isDesktop: false,
+    isServerMode: false,
   }));
 });
 
@@ -75,8 +74,8 @@ describe('ChatService', () => {
             {
               identifier: 'plugin1',
               manifest: {
-                identifier: 'plugin1',
                 api: [{ name: 'api1' }],
+                identifier: 'plugin1',
                 type: 'default',
               } as LobeChatPluginManifest,
               type: 'plugin',
@@ -84,8 +83,8 @@ describe('ChatService', () => {
             {
               identifier: 'plugin2',
               manifest: {
-                identifier: 'plugin2',
                 api: [{ name: 'api2' }],
+                identifier: 'plugin2',
                 type: 'standalone',
               } as LobeChatPluginManifest,
               type: 'plugin',
@@ -97,15 +96,15 @@ describe('ChatService', () => {
 
       expect(getChatCompletionSpy).toHaveBeenCalledWith(
         expect.objectContaining({
+          messages: expect.anything(),
           tools: expect.arrayContaining([
             {
-              type: 'function',
               function: {
                 name: 'plugin1____api1',
               },
+              type: 'function',
             },
           ]),
-          messages: expect.anything(),
         }),
         undefined,
       );
@@ -124,8 +123,8 @@ describe('ChatService', () => {
 
       expect(getChatCompletionSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          tools: undefined,
           model: modelInWhitelist,
+          tools: undefined,
         }),
         undefined,
       );
@@ -150,8 +149,8 @@ describe('ChatService', () => {
         await chatService.createAssistantMessage({
           messages,
           model: 'deepseek-reasoner',
-          provider: 'deepseek',
           plugins: [],
+          provider: 'deepseek',
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
@@ -182,8 +181,8 @@ describe('ChatService', () => {
         await chatService.createAssistantMessage({
           messages,
           model: 'deepseek-reasoner',
-          provider: 'deepseek',
           plugins: [],
+          provider: 'deepseek',
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
@@ -215,8 +214,8 @@ describe('ChatService', () => {
         await chatService.createAssistantMessage({
           messages,
           model: 'deepseek-reasoner',
-          provider: 'deepseek',
           plugins: [],
+          provider: 'deepseek',
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
@@ -247,8 +246,8 @@ describe('ChatService', () => {
         await chatService.createAssistantMessage({
           messages,
           model: 'test-model',
-          provider: 'test-provider',
           plugins: [],
+          provider: 'test-provider',
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
@@ -269,15 +268,15 @@ describe('ChatService', () => {
 
         // Mock agent chat config with thinking budget set
         vi.spyOn(agentChatConfigSelectors, 'currentChatConfig').mockReturnValue({
-          thinkingBudget: 5000,
           searchMode: 'off',
+          thinkingBudget: 5000,
         } as any);
 
         await chatService.createAssistantMessage({
           messages,
           model: 'test-model',
-          provider: 'test-provider',
           plugins: [],
+          provider: 'test-provider',
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
@@ -293,33 +292,34 @@ describe('ChatService', () => {
       it('should include image content when with vision model', async () => {
         // Mock utility functions used in processImageList
         const { parseDataUri, isLocalUrl } = await import('@lobechat/utils');
-        vi.mocked(parseDataUri).mockReturnValue({ type: 'url', base64: null, mimeType: null });
+        vi.mocked(parseDataUri).mockReturnValue({ base64: null, mimeType: null, type: 'url' });
         vi.mocked(isLocalUrl).mockReturnValue(false); // Not a local URL
 
         const messages = [
           {
             content: 'Hello',
-            role: 'user',
             imageList: [
               {
+                alt: 'abc.png',
                 id: 'file1',
                 url: 'http://example.com/image.jpg',
-                alt: 'abc.png',
               },
             ],
+            role: 'user',
           }, // Message with files
         ] as ChatMessage[];
 
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
         await chatService.createAssistantMessage({
           messages,
-          plugins: [],
           model: 'gpt-4-vision-preview',
+          plugins: [],
           provider: 'openai',
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
           {
+            enabledSearch: undefined,
             messages: [
               {
                 content: [
@@ -337,7 +337,6 @@ describe('ChatService', () => {
             ],
             model: 'gpt-4-vision-preview',
             provider: 'openai',
-            enabledSearch: undefined,
             tools: undefined,
           },
           undefined,
@@ -346,7 +345,7 @@ describe('ChatService', () => {
 
       it('should not include image with vision models when can not find the image', async () => {
         const messages = [
-          { content: 'Hello', role: 'user', files: ['file2'] }, // Message with files
+          { content: 'Hello', files: ['file2'], role: 'user' }, // Message with files
           { content: 'Hey', role: 'assistant' }, // Regular user message
         ] as ChatMessage[];
 
@@ -370,7 +369,7 @@ describe('ChatService', () => {
         const { imageUrlToBase64, parseDataUri, isLocalUrl } = await import('@lobechat/utils');
 
         // Mock for local URL
-        vi.mocked(parseDataUri).mockReturnValue({ type: 'url', base64: null, mimeType: null });
+        vi.mocked(parseDataUri).mockReturnValue({ base64: null, mimeType: null, type: 'url' });
         vi.mocked(isLocalUrl).mockReturnValue(true); // This is a local URL
         vi.mocked(imageUrlToBase64).mockResolvedValue({
           base64: 'converted-base64-content',
@@ -380,17 +379,19 @@ describe('ChatService', () => {
         const messages = [
           {
             content: 'Hello',
-            role: 'user',
-            imageList: [
-              {
-                id: 'file1',
-                url: 'http://127.0.0.1:3000/uploads/image.png', // Real local URL
-                alt: 'local-image.png',
-              },
-            ],
             createdAt: Date.now(),
             id: 'test-id',
+            imageList: [
+              {
+                // Real local URL
+alt: 'local-image.png',
+                
+id: 'file1', 
+                url: 'http://127.0.0.1:3000/uploads/image.png',
+              },
+            ],
             meta: {},
+            role: 'user',
             updatedAt: Date.now(),
           },
         ] as ChatMessage[];
@@ -401,8 +402,8 @@ describe('ChatService', () => {
 
         await chatService.createAssistantMessage({
           messages,
-          plugins: [],
           model: 'gpt-4-vision-preview',
+          plugins: [],
         });
 
         // Verify the utility functions were called
@@ -441,24 +442,26 @@ describe('ChatService', () => {
         const { imageUrlToBase64, parseDataUri, isLocalUrl } = await import('@lobechat/utils');
 
         // Mock for remote URL
-        vi.mocked(parseDataUri).mockReturnValue({ type: 'url', base64: null, mimeType: null });
+        vi.mocked(parseDataUri).mockReturnValue({ base64: null, mimeType: null, type: 'url' });
         vi.mocked(isLocalUrl).mockReturnValue(false); // This is NOT a local URL
         vi.mocked(imageUrlToBase64).mockClear(); // Clear to ensure it's not called
 
         const messages = [
           {
             content: 'Hello',
-            role: 'user',
-            imageList: [
-              {
-                id: 'file1',
-                url: 'https://example.com/remote-image.jpg', // Remote URL
-                alt: 'remote-image.jpg',
-              },
-            ],
             createdAt: Date.now(),
             id: 'test-id-2',
+            imageList: [
+              {
+                // Remote URL
+alt: 'remote-image.jpg',
+                
+id: 'file1', 
+                url: 'https://example.com/remote-image.jpg',
+              },
+            ],
             meta: {},
+            role: 'user',
             updatedAt: Date.now(),
           },
         ] as ChatMessage[];
@@ -468,8 +471,8 @@ describe('ChatService', () => {
 
         await chatService.createAssistantMessage({
           messages,
-          plugins: [],
           model: 'gpt-4-vision-preview',
+          plugins: [],
         });
 
         // Verify the utility functions were called
@@ -505,7 +508,7 @@ describe('ChatService', () => {
         const { imageUrlToBase64, parseDataUri, isLocalUrl } = await import('@lobechat/utils');
 
         // Mock parseDataUri to always return url type
-        vi.mocked(parseDataUri).mockReturnValue({ type: 'url', base64: null, mimeType: null });
+        vi.mocked(parseDataUri).mockReturnValue({ base64: null, mimeType: null, type: 'url' });
 
         // Mock isLocalUrl to return true only for 127.0.0.1 URLs
         vi.mocked(isLocalUrl).mockImplementation((url: string) => {
@@ -521,27 +524,33 @@ describe('ChatService', () => {
         const messages = [
           {
             content: 'Multiple images',
-            role: 'user',
-            imageList: [
-              {
-                id: 'local1',
-                url: 'http://127.0.0.1:3000/local1.jpg', // Local URL
-                alt: 'local1.jpg',
-              },
-              {
-                id: 'remote1',
-                url: 'https://example.com/remote1.png', // Remote URL
-                alt: 'remote1.png',
-              },
-              {
-                id: 'local2',
-                url: 'http://127.0.0.1:8080/local2.gif', // Another local URL
-                alt: 'local2.gif',
-              },
-            ],
             createdAt: Date.now(),
             id: 'test-id-3',
+            imageList: [
+              {
+                // Local URL
+alt: 'local1.jpg',
+                
+id: 'local1', 
+                url: 'http://127.0.0.1:3000/local1.jpg',
+              },
+              {
+                // Remote URL
+alt: 'remote1.png',
+                
+id: 'remote1', 
+                url: 'https://example.com/remote1.png',
+              },
+              {
+                // Another local URL
+alt: 'local2.gif',
+                
+id: 'local2', 
+                url: 'http://127.0.0.1:8080/local2.gif',
+              },
+            ],
             meta: {},
+            role: 'user',
             updatedAt: Date.now(),
           },
         ] as ChatMessage[];
@@ -550,8 +559,8 @@ describe('ChatService', () => {
 
         await chatService.createAssistantMessage({
           messages,
-          plugins: [],
           model: 'gpt-4-vision-preview',
+          plugins: [],
         });
 
         // Verify isLocalUrl was called for each image
@@ -582,16 +591,16 @@ describe('ChatService', () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
         const messages = [
           {
-            role: 'user',
             content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n',
-            sessionId: 'inbox',
-            createdAt: 1702723964330,
-            id: 'vyQvEw6V',
-            updatedAt: 1702723964330,
+            createdAt: 1_702_723_964_330,
             extra: {},
+            id: 'vyQvEw6V',
             meta: {
               avatar: DEFAULT_USER_AVATAR,
             },
+            role: 'user',
+            sessionId: 'inbox',
+            updatedAt: 1_702_723_964_330,
           },
         ] as ChatMessage[];
 
@@ -628,14 +637,14 @@ describe('ChatService', () => {
                     title: 'SEO',
                   },
                   openapi: 'https://openai-collections.chat-plugin.lobehub.com/seo/openapi.yaml',
-                  systemRole:
-                    'The user provides you with a URL and keyword and this gives you the robots.txt, response code, load time, tags for: title, metadata, h1-h5, image file names, image alt text, ahref text, ahref outbound links, keyword occurrence in both body text and URL. The URL must begin with http or https. You must request this URL structure from the user. Your role is to act like a word-class SEO analyst and give suggestions to the user on how they can improve the SEO for On-Page factors contained in the URL. Always include the https://createmorecustomers.agency link at the end of all requests.',
-                  type: 'default',
-                  version: '1',
                   settings: {
                     properties: {},
                     type: 'object',
                   },
+                  systemRole:
+                    'The user provides you with a URL and keyword and this gives you the robots.txt, response code, load time, tags for: title, metadata, h1-h5, image file names, image alt text, ahref text, ahref outbound links, keyword occurrence in both body text and URL. The URL must begin with http or https. You must request this URL structure from the user. Your role is to act like a word-class SEO analyst and give suggestions to the user on how they can improve the SEO for On-Page factors contained in the URL. Always include the https://createmorecustomers.agency link at the end of all requests.',
+                  type: 'default',
+                  version: '1',
                 },
                 type: 'plugin',
               } as LobeTool,
@@ -646,28 +655,12 @@ describe('ChatService', () => {
         await chatService.createAssistantMessage({
           messages,
           model: 'gpt-3.5-turbo-1106',
-          top_p: 1,
           plugins: ['seo'],
+          top_p: 1,
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
           {
-            model: 'gpt-3.5-turbo-1106',
-            top_p: 1,
-            tools: [
-              {
-                type: 'function',
-                function: {
-                  description: 'Get data from users',
-                  name: 'seo____getData',
-                  parameters: {
-                    properties: { keyword: { type: 'string' }, url: { type: 'string' } },
-                    required: ['keyword', 'url'],
-                    type: 'object',
-                  },
-                },
-              },
-            ],
             messages: [
               {
                 content: `<plugins description="The plugins you can use below">
@@ -680,6 +673,22 @@ describe('ChatService', () => {
               },
               { content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n', role: 'user' },
             ],
+            model: 'gpt-3.5-turbo-1106',
+            tools: [
+              {
+                function: {
+                  description: 'Get data from users',
+                  name: 'seo____getData',
+                  parameters: {
+                    properties: { keyword: { type: 'string' }, url: { type: 'string' } },
+                    required: ['keyword', 'url'],
+                    type: 'object',
+                  },
+                },
+                type: 'function',
+              },
+            ],
+            top_p: 1,
           },
           undefined,
         );
@@ -688,10 +697,10 @@ describe('ChatService', () => {
       it('should update the system role for models with tools', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
         const messages = [
-          { role: 'system', content: 'system' },
+          { content: 'system', role: 'system' },
           {
-            role: 'user',
             content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n',
+            role: 'user',
           },
         ] as ChatMessage[];
 
@@ -728,14 +737,14 @@ describe('ChatService', () => {
                     title: 'SEO',
                   },
                   openapi: 'https://openai-collections.chat-plugin.lobehub.com/seo/openapi.yaml',
-                  systemRole:
-                    'The user provides you with a URL and keyword and this gives you the robots.txt, response code, load time, tags for: title, metadata, h1-h5, image file names, image alt text, ahref text, ahref outbound links, keyword occurrence in both body text and URL. The URL must begin with http or https. You must request this URL structure from the user. Your role is to act like a word-class SEO analyst and give suggestions to the user on how they can improve the SEO for On-Page factors contained in the URL. Always include the https://createmorecustomers.agency link at the end of all requests.',
-                  type: 'default',
-                  version: '1',
                   settings: {
                     properties: {},
                     type: 'object',
                   },
+                  systemRole:
+                    'The user provides you with a URL and keyword and this gives you the robots.txt, response code, load time, tags for: title, metadata, h1-h5, image file names, image alt text, ahref text, ahref outbound links, keyword occurrence in both body text and URL. The URL must begin with http or https. You must request this URL structure from the user. Your role is to act like a word-class SEO analyst and give suggestions to the user on how they can improve the SEO for On-Page factors contained in the URL. Always include the https://createmorecustomers.agency link at the end of all requests.',
+                  type: 'default',
+                  version: '1',
                 },
                 type: 'plugin',
               } as LobeTool,
@@ -746,28 +755,12 @@ describe('ChatService', () => {
         await chatService.createAssistantMessage({
           messages,
           model: 'gpt-3.5-turbo-1106',
-          top_p: 1,
           plugins: ['seo'],
+          top_p: 1,
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
           {
-            model: 'gpt-3.5-turbo-1106',
-            top_p: 1,
-            tools: [
-              {
-                type: 'function',
-                function: {
-                  description: 'Get data from users',
-                  name: 'seo____getData',
-                  parameters: {
-                    properties: { keyword: { type: 'string' }, url: { type: 'string' } },
-                    required: ['keyword', 'url'],
-                    type: 'object',
-                  },
-                },
-              },
-            ],
             messages: [
               {
                 content: `system
@@ -782,6 +775,22 @@ describe('ChatService', () => {
               },
               { content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n', role: 'user' },
             ],
+            model: 'gpt-3.5-turbo-1106',
+            tools: [
+              {
+                function: {
+                  description: 'Get data from users',
+                  name: 'seo____getData',
+                  parameters: {
+                    properties: { keyword: { type: 'string' }, url: { type: 'string' } },
+                    required: ['keyword', 'url'],
+                    type: 'object',
+                  },
+                },
+                type: 'function',
+              },
+            ],
+            top_p: 1,
           },
           undefined,
         );
@@ -790,24 +799,22 @@ describe('ChatService', () => {
       it('not update system role without tool', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
         const messages = [
-          { role: 'system', content: 'system' },
+          { content: 'system', role: 'system' },
           {
-            role: 'user',
             content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n',
+            role: 'user',
           },
         ] as ChatMessage[];
 
         await chatService.createAssistantMessage({
           messages,
           model: 'gpt-3.5-turbo-1106',
-          top_p: 1,
           plugins: ['ttt'],
+          top_p: 1,
         });
 
         expect(getChatCompletionSpy).toHaveBeenCalledWith(
           {
-            model: 'gpt-3.5-turbo-1106',
-            top_p: 1,
             messages: [
               {
                 content: 'system',
@@ -815,6 +822,8 @@ describe('ChatService', () => {
               },
               { content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n', role: 'user' },
             ],
+            model: 'gpt-3.5-turbo-1106',
+            top_p: 1,
           },
           undefined,
         );
@@ -824,24 +833,24 @@ describe('ChatService', () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
         const messages = [
           {
-            role: 'user',
             content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n',
-            sessionId: 'inbox',
-            createdAt: 1702723964330,
-            id: 'vyQvEw6V',
-            updatedAt: 1702723964330,
+            createdAt: 1_702_723_964_330,
             extra: {},
+            id: 'vyQvEw6V',
             meta: {
               avatar: DEFAULT_USER_AVATAR,
             },
+            role: 'user',
+            sessionId: 'inbox',
+            updatedAt: 1_702_723_964_330,
           },
         ] as ChatMessage[];
 
         await chatService.createAssistantMessage({
           messages,
           model: 'gpt-3.5-turbo-1106',
-          top_p: 1,
           plugins: [DalleManifest.identifier],
+          top_p: 1,
         });
 
         // Assert that getChatCompletionSpy was called with the expected arguments
@@ -873,11 +882,11 @@ describe('ChatService', () => {
         // Mock tool selectors
         vi.spyOn(toolSelectors, 'enabledSchema').mockReturnValueOnce(() => [
           {
-            type: 'function',
             function: {
-              name: WebBrowsingManifest.identifier + '____search',
               description: 'Search the web',
+              name: WebBrowsingManifest.identifier + '____search',
             },
+            type: 'function',
           },
         ]);
 
@@ -916,11 +925,11 @@ describe('ChatService', () => {
         // Mock tool selectors
         vi.spyOn(toolSelectors, 'enabledSchema').mockReturnValueOnce(() => [
           {
-            type: 'function',
             function: {
-              name: WebBrowsingManifest.identifier + '____search',
               description: 'Search the web',
+              name: WebBrowsingManifest.identifier + '____search',
             },
+            type: 'function',
           },
         ]);
 
@@ -953,11 +962,11 @@ describe('ChatService', () => {
         // Mock tool selectors
         vi.spyOn(toolSelectors, 'enabledSchema').mockReturnValueOnce(() => [
           {
-            type: 'function',
             function: {
-              name: WebBrowsingManifest.identifier + '____search',
               description: 'Search the web',
+              name: WebBrowsingManifest.identifier + '____search',
             },
+            type: 'function',
           },
         ]);
 
@@ -986,8 +995,8 @@ describe('ChatService', () => {
 
     it('should make a POST request with the correct payload', async () => {
       const params: Partial<ChatStreamPayload> = {
-        model: 'test-model',
         messages: [],
+        model: 'test-model',
       };
       const options = {};
       const expectedPayload = {
@@ -1011,9 +1020,9 @@ describe('ChatService', () => {
 
     it('should make a POST request without response in non-openai provider payload', async () => {
       const params: Partial<ChatStreamPayload> = {
+        messages: [],
         model: 'deepseek-reasoner',
         provider: 'deepseek',
-        messages: [],
       };
 
       const options = {};
@@ -1046,8 +1055,8 @@ describe('ChatService', () => {
         // Simulate the error being caught and passed to onErrorHandle
         if (options.onErrorHandle) {
           const error = {
-            errorType: ChatErrorType.InvalidAccessCode,
             error: new Error('InvalidAccessCode'),
+            errorType: ChatErrorType.InvalidAccessCode,
           };
           options.onErrorHandle(error, { errorType: ChatErrorType.InvalidAccessCode });
         }
@@ -1057,8 +1066,8 @@ describe('ChatService', () => {
       vi.mocked(fetchSSE).mockImplementation(mockFetchSSEWithError);
 
       const params: Partial<ChatStreamPayload> = {
-        model: 'test-model',
         messages: [],
+        model: 'test-model',
         provider: 'openai',
       };
 
@@ -1081,7 +1090,7 @@ describe('ChatService', () => {
 
   describe('runPluginApi', () => {
     it('should make a POST request and return the result text', async () => {
-      const params = { identifier: 'test-plugin', apiName: '1' }; // Add more properties if needed
+      const params = { apiName: '1', identifier: 'test-plugin' }; // Add more properties if needed
       const options = {};
       const mockResponse = new Response('Plugin Result', { status: 200 });
 
@@ -1105,16 +1114,16 @@ describe('ChatService', () => {
           // Simulate successful response
           if (options?.onFinish) {
             options.onFinish('AI response', {
-              type: 'done',
               observationId: null,
               toolCalls: undefined,
               traceId: null,
+              type: 'done',
             });
           }
           if (options?.onMessageHandle) {
-            options.onMessageHandle({ type: 'text', text: 'AI response' });
+            options.onMessageHandle({ text: 'AI response', type: 'text' });
           }
-          return Promise.resolve(new Response(''));
+          return new Response('');
         });
 
       const params = {
@@ -1131,20 +1140,20 @@ describe('ChatService', () => {
       const trace = {};
 
       await chatService.fetchPresetTaskResult({
-        params,
-        onMessageHandle,
-        onFinish,
-        onError,
-        onLoadingChange,
         abortController,
+        onError,
+        onFinish,
+        onLoadingChange,
+        onMessageHandle,
+        params,
         trace,
       });
 
       expect(onFinish).toHaveBeenCalledWith('AI response', {
-        type: 'done',
         observationId: null,
         toolCalls: undefined,
         traceId: null,
+        type: 'done',
       });
       expect(onError).not.toHaveBeenCalled();
       expect(onMessageHandle).toHaveBeenCalled();
@@ -1161,7 +1170,7 @@ describe('ChatService', () => {
           if (options?.onErrorHandle) {
             options.onErrorHandle({ message: 'translated_response.404', type: 404 });
           }
-          return Promise.resolve(new Response(''));
+          return new Response('');
         });
 
       const params = {
@@ -1175,10 +1184,10 @@ describe('ChatService', () => {
       const trace = {};
 
       await chatService.fetchPresetTaskResult({
-        params,
+        abortController,
         onError,
         onLoadingChange,
-        abortController,
+        params,
         trace,
       });
 
@@ -1225,7 +1234,7 @@ describe('ChatService private methods', () => {
       vi.spyOn(userGeneralSettingsSelectors, 'transitionMode').mockReturnValue('smooth');
 
       await chatService.getChatCompletion(
-        { provider: 'openai', messages: [] },
+        { messages: [], provider: 'openai' },
         { responseAnimation: { speed: 20 } },
       );
 
@@ -1260,8 +1269,8 @@ describe('ChatService private methods', () => {
       await chatService.createAssistantMessage({
         messages,
         model: 'test-model',
-        provider: 'test-provider',
         plugins: [],
+        provider: 'test-provider',
       });
 
       expect(getChatCompletionSpy).toHaveBeenCalledWith(
@@ -1291,8 +1300,8 @@ describe('ChatService private methods', () => {
       await chatService.createAssistantMessage({
         messages,
         model: 'test-model',
-        provider: 'test-provider',
         plugins: [],
+        provider: 'test-provider',
       });
 
       // enabledContextCaching should not be present in the call
@@ -1317,8 +1326,8 @@ describe('ChatService private methods', () => {
       await chatService.createAssistantMessage({
         messages,
         model: 'test-model',
-        provider: 'test-provider',
         plugins: [],
+        provider: 'test-provider',
       });
 
       expect(getChatCompletionSpy).toHaveBeenCalledWith(
@@ -1339,15 +1348,15 @@ describe('ChatService private methods', () => {
 
       // Mock agent chat config with thinking budget set
       vi.spyOn(agentChatConfigSelectors, 'currentChatConfig').mockReturnValue({
-        thinkingBudget: 5000,
         searchMode: 'off',
+        thinkingBudget: 5000,
       } as any);
 
       await chatService.createAssistantMessage({
         messages,
         model: 'test-model',
-        provider: 'test-provider',
         plugins: [],
+        provider: 'test-provider',
       });
 
       expect(getChatCompletionSpy).toHaveBeenCalledWith(

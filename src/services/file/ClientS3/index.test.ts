@@ -6,9 +6,9 @@ import { BrowserS3Storage } from './index';
 // Mock idb-keyval
 vi.mock('idb-keyval', () => ({
   createStore: vi.fn(),
-  set: vi.fn(),
-  get: vi.fn(),
   del: vi.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
 }));
 
 let storage: BrowserS3Storage;

@@ -5,6 +5,8 @@ import { pino } from '@/libs/logger';
 import { createLambdaContext } from '@/libs/trpc/lambda/context';
 import { lambdaRouter } from '@/server/routers/lambda';
 
+export const preferredRegion = ['sin1', 'hnd1'];
+
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
     /**

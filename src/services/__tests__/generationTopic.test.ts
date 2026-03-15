@@ -8,11 +8,11 @@ import { ServerService } from '../generationTopic';
 vi.mock('@/libs/trpc/client', () => ({
   lambdaClient: {
     generationTopic: {
-      getAllGenerationTopics: { query: vi.fn() },
       createTopic: { mutate: vi.fn() },
+      deleteTopic: { mutate: vi.fn() },
+      getAllGenerationTopics: { query: vi.fn() },
       updateTopic: { mutate: vi.fn() },
       updateTopicCover: { mutate: vi.fn() },
-      deleteTopic: { mutate: vi.fn() },
     },
   },
 }));
@@ -38,8 +38,8 @@ describe('GenerationTopic ServerService', () => {
   it('updateTopic should call lambdaClient with correct params', async () => {
     const id = 'test-topic-id';
     const data: UpdateTopicValue = {
-      title: 'Updated Topic',
       coverUrl: 'https://example.com/cover.jpg',
+      title: 'Updated Topic',
     };
 
     await service.updateTopic(id, data);
@@ -57,8 +57,8 @@ describe('GenerationTopic ServerService', () => {
     await service.updateTopicCover(id, coverUrl);
 
     expect(lambdaClient.generationTopic.updateTopicCover.mutate).toBeCalledWith({
-      id,
       coverUrl,
+      id,
     });
   });
 

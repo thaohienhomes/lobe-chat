@@ -10,9 +10,9 @@ import { ClientService } from './_deprecated';
 vi.mock('@/database/_deprecated/models/user', () => ({
   UserModel: {
     getUser: vi.fn(),
-    updateSettings: vi.fn(),
     resetSettings: vi.fn(),
     updateAvatar: vi.fn(),
+    updateSettings: vi.fn(),
   },
 }));
 
@@ -44,10 +44,10 @@ describe('ClientService', () => {
 
     expect(userState).toEqual({
       avatar: mockUser.avatar,
-      isOnboard: true,
       canEnablePWAGuide: false,
-      hasConversation: false,
       canEnableTrace: false,
+      hasConversation: false,
+      isOnboard: true,
       preference: mockPreference,
       settings: mockUser.settings,
       userId: mockUser.uuid,

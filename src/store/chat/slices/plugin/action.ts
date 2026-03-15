@@ -173,7 +173,12 @@ export const chatPlugin: StateCreator<
     // postToolCalling
     // @ts-ignore
     const { [payload.apiName]: action } = get();
-    if (!action) return;
+
+    // If no post-processing action exists in the chat store,
+    // return data so triggerToolCalls can trigger a follow-up AI message.
+    // This is essential for multi-step tools like Visualizer where
+    // visualizer_read_me → AI → show_widget requires the chain to continue.
+    if (!action) return data;
 
     let content;
 
@@ -183,9 +188,10 @@ export const chatPlugin: StateCreator<
       /* empty block */
     }
 
-    if (!content) return;
+    if (!content) return data;
 
-    return await action(id, content);
+    const result = await action(id, content);
+    return result ?? data;
   },
 
   invokeDefaultTypePlugin: async (id, payload) => {

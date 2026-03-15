@@ -20,13 +20,13 @@ describe('generationRouter', () => {
   describe('getGenerationStatus', () => {
     it('should return generation status when task is successful', async () => {
       const mockGeneration = {
-        id: 'gen-1',
         asset: { url: 'https://example.com/image.jpg' },
+        id: 'gen-1',
       };
       const mockAsyncTask = {
+        error: null,
         id: 'task-1',
         status: AsyncTaskStatus.Success,
-        error: null,
       };
       const mockCheckTimeoutTasks = vi.fn().mockResolvedValue(undefined);
       const mockFindById = vi.fn().mockResolvedValue(mockAsyncTask);
@@ -49,8 +49,8 @@ describe('generationRouter', () => {
       const caller = generationRouter.createCaller(mockCtx);
 
       const result = await caller.getGenerationStatus({
-        generationId: 'gen-1',
         asyncTaskId: 'task-1',
+        generationId: 'gen-1',
       });
 
       expect(result.status).toBe(AsyncTaskStatus.Success);
@@ -64,9 +64,9 @@ describe('generationRouter', () => {
     it('should return error when task failed', async () => {
       const mockError = { code: 'GENERATION_ERROR', message: 'Generation failed' };
       const mockAsyncTask = {
+        error: mockError,
         id: 'task-1',
         status: AsyncTaskStatus.Error,
-        error: mockError,
       };
       const mockCheckTimeoutTasks = vi.fn().mockResolvedValue(undefined);
       const mockFindById = vi.fn().mockResolvedValue(mockAsyncTask);
@@ -82,8 +82,8 @@ describe('generationRouter', () => {
       const caller = generationRouter.createCaller(mockCtx);
 
       const result = await caller.getGenerationStatus({
-        generationId: 'gen-1',
         asyncTaskId: 'task-1',
+        generationId: 'gen-1',
       });
 
       expect(result.status).toBe(AsyncTaskStatus.Error);
@@ -93,9 +93,9 @@ describe('generationRouter', () => {
 
     it('should return pending status when task is running', async () => {
       const mockAsyncTask = {
+        error: null,
         id: 'task-1',
         status: AsyncTaskStatus.Pending,
-        error: null,
       };
       const mockCheckTimeoutTasks = vi.fn().mockResolvedValue(undefined);
       const mockFindById = vi.fn().mockResolvedValue(mockAsyncTask);
@@ -111,8 +111,8 @@ describe('generationRouter', () => {
       const caller = generationRouter.createCaller(mockCtx);
 
       const result = await caller.getGenerationStatus({
-        generationId: 'gen-1',
         asyncTaskId: 'task-1',
+        generationId: 'gen-1',
       });
 
       expect(result.status).toBe(AsyncTaskStatus.Pending);
@@ -136,17 +136,17 @@ describe('generationRouter', () => {
 
       await expect(
         caller.getGenerationStatus({
-          generationId: 'gen-1',
           asyncTaskId: 'task-1',
+          generationId: 'gen-1',
         }),
       ).rejects.toThrow(TRPCError);
     });
 
     it('should throw error when generation not found for successful task', async () => {
       const mockAsyncTask = {
+        error: null,
         id: 'task-1',
         status: AsyncTaskStatus.Success,
-        error: null,
       };
       const mockCheckTimeoutTasks = vi.fn().mockResolvedValue(undefined);
       const mockFindById = vi.fn().mockResolvedValue(mockAsyncTask);
@@ -170,8 +170,8 @@ describe('generationRouter', () => {
 
       await expect(
         caller.getGenerationStatus({
-          generationId: 'gen-1',
           asyncTaskId: 'task-1',
+          generationId: 'gen-1',
         }),
       ).rejects.toThrow(TRPCError);
     });
@@ -180,8 +180,8 @@ describe('generationRouter', () => {
   describe('deleteGeneration', () => {
     it('should delete generation with thumbnail', async () => {
       const mockDeletedGeneration = {
-        id: 'gen-1',
         asset: { thumbnailUrl: 'thumb-key' },
+        id: 'gen-1',
       };
       const mockDelete = vi.fn().mockResolvedValue(mockDeletedGeneration);
       const mockDeleteFile = vi.fn().mockResolvedValue(true);
@@ -210,8 +210,8 @@ describe('generationRouter', () => {
 
     it('should delete generation without thumbnail', async () => {
       const mockDeletedGeneration = {
-        id: 'gen-1',
         asset: { url: 'main-url' },
+        id: 'gen-1',
       };
       const mockDelete = vi.fn().mockResolvedValue(mockDeletedGeneration);
       const mockDeleteFile = vi.fn().mockResolvedValue(true);

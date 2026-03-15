@@ -11,8 +11,8 @@ import { SearchContent, SearchQuery, UniformSearchResponse } from '@/types/tool/
 // Mock services
 vi.mock('@/services/search', () => ({
   searchService: {
-    search: vi.fn(),
     crawlPages: vi.fn(),
+    search: vi.fn(),
   },
 }));
 
@@ -28,34 +28,34 @@ describe('search actions', () => {
     useChatStore.setState({
       activeId: 'session-id',
       activeTopicId: 'topic-id',
-      searchLoading: {},
+      internal_addToolToAssistantMessage: vi.fn(),
+      internal_createMessage: vi.fn(),
       internal_updateMessageContent: vi.fn(),
       internal_updateMessagePluginError: vi.fn(),
+      openToolUI: vi.fn(),
+      searchLoading: {},
       updatePluginArguments: vi.fn(),
       updatePluginState: vi.fn(),
-      internal_createMessage: vi.fn(),
-      internal_addToolToAssistantMessage: vi.fn(),
-      openToolUI: vi.fn(),
     });
   });
 
   describe('search', () => {
     it('should handle successful search', async () => {
       const mockResponse: UniformSearchResponse = {
+        costTime: 1,
+        query: 'test',
+        resultNumbers: 1,
         results: [
           {
-            title: 'Test Result',
-            content: 'Test Content',
-            url: 'https://test.com',
             category: 'general',
+            content: 'Test Content',
             engines: ['google'],
             parsedUrl: 'test.com',
             score: 1,
+            title: 'Test Result',
+            url: 'https://test.com',
           },
         ],
-        costTime: 1,
-        resultNumbers: 1,
-        query: 'test',
       };
 
       (searchService.search as Mock).mockResolvedValue(mockResponse);
@@ -65,8 +65,8 @@ describe('search actions', () => {
 
       const messageId = 'test-message-id';
       const query: SearchQuery = {
-        searchEngines: ['google'],
         query: 'test query',
+        searchEngines: ['google'],
       };
 
       await act(async () => {
@@ -75,9 +75,9 @@ describe('search actions', () => {
 
       const expectedContent: SearchContent[] = [
         {
+          content: 'Test Content',
           title: 'Test Result',
           url: 'https://test.com',
-          content: 'Test Content',
         },
       ];
 
@@ -93,27 +93,27 @@ describe('search actions', () => {
 
     it('should handle empty search results and retry with default engine', async () => {
       const emptyResponse: UniformSearchResponse = {
-        results: [],
         costTime: 1,
-        resultNumbers: 0,
         query: 'test',
+        resultNumbers: 0,
+        results: [],
       };
 
       const retryResponse: UniformSearchResponse = {
+        costTime: 1,
+        query: 'test',
+        resultNumbers: 1,
         results: [
           {
-            title: 'Retry Result',
-            content: 'Retry Content',
-            url: 'https://retry.com',
             category: 'general',
+            content: 'Retry Content',
             engines: ['google'],
             parsedUrl: 'retry.com',
             score: 1,
+            title: 'Retry Result',
+            url: 'https://retry.com',
           },
         ],
-        costTime: 1,
-        resultNumbers: 1,
-        query: 'test',
       };
 
       (searchService.search as Mock)
@@ -126,9 +126,9 @@ describe('search actions', () => {
 
       const messageId = 'test-message-id';
       const query: SearchQuery = {
+        query: 'test query',
         searchEngines: ['custom-engine'],
         searchTimeRange: 'year',
-        query: 'test query',
       };
 
       await act(async () => {
@@ -184,11 +184,11 @@ describe('search actions', () => {
       const mockResponse = {
         results: [
           {
+            crawler: 'naive',
             data: {
               content: longContent,
               title: 'Test Page',
             },
-            crawler: 'naive',
             originalUrl: 'https://test.com',
           },
         ],
@@ -268,20 +268,20 @@ describe('search actions', () => {
       const messageId = 'test-message-id';
       const parentId = 'parent-message-id';
       const mockMessage: Partial<ChatMessage> = {
-        id: messageId,
-        parentId,
         content: 'test content',
+        createdAt: Date.now(),
+        id: messageId,
+        meta: {},
+        parentId,
         plugin: {
-          identifier: 'search',
-          arguments: '{}',
           apiName: 'search',
+          arguments: '{}',
+          identifier: 'search',
           type: 'default',
         },
         pluginState: {},
         role: 'assistant',
-        createdAt: Date.now(),
         updatedAt: Date.now(),
-        meta: {},
       };
 
       vi.spyOn(chatSelectors, 'getMessageById').mockImplementation(

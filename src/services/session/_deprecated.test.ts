@@ -13,21 +13,21 @@ const sessionService = new ClientService();
 vi.mock('@/database/_deprecated/models/session', () => {
   return {
     SessionModel: {
-      create: vi.fn(),
-      query: vi.fn(),
-      delete: vi.fn(),
-      clearTable: vi.fn(),
-      update: vi.fn(),
-      count: vi.fn(),
       batchCreate: vi.fn(),
+      clearTable: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      duplicate: vi.fn(),
       findById: vi.fn(),
       isEmpty: vi.fn(),
-      queryByKeyword: vi.fn(),
-      updateConfig: vi.fn(),
+      query: vi.fn(),
       queryByGroupIds: vi.fn(),
-      updatePinned: vi.fn(),
-      duplicate: vi.fn(),
+      queryByKeyword: vi.fn(),
       queryWithGroups: vi.fn(),
+      update: vi.fn(),
+      updateConfig: vi.fn(),
+      updatePinned: vi.fn(),
     },
   };
 });
@@ -36,17 +36,17 @@ vi.mock('@/database/_deprecated/models/session', () => {
 vi.mock('@/database/_deprecated/models/sessionGroup', () => {
   return {
     SessionGroupModel: {
-      create: vi.fn(),
-      query: vi.fn(),
-      delete: vi.fn(),
-      clear: vi.fn(),
-      update: vi.fn(),
       batchCreate: vi.fn(),
+      clear: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
       isEmpty: vi.fn(),
-      updateOrder: vi.fn(),
-      queryByKeyword: vi.fn(),
-      updateConfig: vi.fn(),
+      query: vi.fn(),
       queryByGroupIds: vi.fn(),
+      queryByKeyword: vi.fn(),
+      update: vi.fn(),
+      updateConfig: vi.fn(),
+      updateOrder: vi.fn(),
     },
   };
 });
@@ -55,8 +55,8 @@ describe('SessionService', () => {
   const mockSessionId = 'mock-session-id';
   const mockSession = {
     id: mockSessionId,
-    type: 'agent',
     meta: { title: 'Mock Session' },
+    type: 'agent',
   } as LobeAgentSession;
   const mockSessions = [mockSession];
 

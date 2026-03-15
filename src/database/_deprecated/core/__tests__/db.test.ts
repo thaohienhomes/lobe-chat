@@ -24,13 +24,13 @@ describe('LocalDB', () => {
 
   it('should allow adding a file', async () => {
     const file: DBModel<DB_File> = {
+      createdAt: Date.now(),
+      data: new ArrayBuffer(3),
+      fileType: 'plain/text',
       id: 'file1',
       name: 'testfile.txt',
-      data: new ArrayBuffer(3),
       saveMode: 'local',
-      fileType: 'plain/text',
       size: 3,
-      createdAt: Date.now(),
       updatedAt: Date.now(),
     };
 
@@ -41,13 +41,13 @@ describe('LocalDB', () => {
 
   it('should allow updating a file', async () => {
     const file: DBModel<DB_File> = {
+      createdAt: Date.now(),
+      data: new ArrayBuffer(3),
+      fileType: 'plain/text',
       id: 'file1',
       name: 'testfile.txt',
-      data: new ArrayBuffer(3),
       saveMode: 'local',
-      fileType: 'plain/text',
       size: 3,
-      createdAt: Date.now(),
       updatedAt: Date.now(),
     };
     await db.files.add(file);
@@ -61,14 +61,14 @@ describe('LocalDB', () => {
 
   it('should allow deleting a file', async () => {
     const file: DBModel<DB_File> = {
+      createdAt: Date.now(),
+      data: new ArrayBuffer(3),
+      fileType: 'plain/text',
       id: 'file1',
       name: 'testfile.txt',
-      data: new ArrayBuffer(3),
       saveMode: 'local',
-      fileType: 'plain/text',
       size: 3,
       updatedAt: Date.now(),
-      createdAt: Date.now(),
     };
     await db.files.add(file);
 

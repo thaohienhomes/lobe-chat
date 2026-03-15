@@ -6,6 +6,8 @@ import { LocalSystemManifest } from './local-system';
 import LocalFilesRender from './local-system/Render';
 import { ScientificSkillsManifest } from './scientific-skills';
 import ScientificSkillsRender from './scientific-skills/Render';
+import { VisualizerManifest } from './visualizer';
+import VisualizerRender from './visualizer/Render';
 import { WebBrowsingManifest } from './web-browsing';
 import WebBrowsing from './web-browsing/Render';
 
@@ -13,5 +15,6 @@ export const BuiltinToolsRenders: Record<string, BuiltinRender> = {
   [DalleManifest.identifier]: DalleRender as BuiltinRender,
   [LocalSystemManifest.identifier]: LocalFilesRender as BuiltinRender,
   [ScientificSkillsManifest.identifier]: ScientificSkillsRender as BuiltinRender,
+  [VisualizerManifest.identifier]: VisualizerRender as BuiltinRender,
   [WebBrowsingManifest.identifier]: WebBrowsing as BuiltinRender,
 };

@@ -1,5 +1,5 @@
 import { eq, inArray } from 'drizzle-orm';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { clientDB, initializeDB } from '@/database/client/db';
 import mockImportData from '@/database/repositories/dataImporter/deprecated/__tests__/fixtures/messages.json';
@@ -35,11 +35,11 @@ describe('ImporterService', () => {
   describe('import sessionGroups', () => {
     it('should import session groups and return correct result', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         sessionGroups: [
-          { id: 'group1', name: 'Group 1', createdAt: 1715186011586, updatedAt: 1715186015053 },
-          { id: 'group2', name: 'Group 2', createdAt: 1715186011586, updatedAt: 1715186015053 },
+          { createdAt: 1_715_186_011_586, id: 'group1', name: 'Group 1', updatedAt: 1_715_186_015_053 },
+          { createdAt: 1_715_186_011_586, id: 'group2', name: 'Group 2', updatedAt: 1_715_186_015_053 },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -66,11 +66,11 @@ describe('ImporterService', () => {
         .execute();
 
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         sessionGroups: [
-          { id: 'group1', name: 'Group 1', createdAt: 1715186011586, updatedAt: 1715186015053 },
-          { id: 'group2', name: 'Group 2', createdAt: 1715186011586, updatedAt: 1715186015053 },
+          { createdAt: 1_715_186_011_586, id: 'group1', name: 'Group 1', updatedAt: 1_715_186_015_053 },
+          { createdAt: 1_715_186_011_586, id: 'group2', name: 'Group 2', updatedAt: 1_715_186_015_053 },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -89,43 +89,43 @@ describe('ImporterService', () => {
   describe('import sessions', () => {
     it('should import sessions and return correct result', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
           {
-            id: 'session2',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session2',
             meta: {
               title: 'Session 2',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -158,43 +158,43 @@ describe('ImporterService', () => {
       await clientDB.insert(sessions).values({ clientId: 'session1', userId }).execute();
 
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
           {
-            id: 'session2',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session2',
             meta: {
               title: 'Session 2',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -211,67 +211,67 @@ describe('ImporterService', () => {
 
     it('should associate imported sessions with session groups', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         sessionGroups: [
-          { id: 'group1', name: 'Group 1', createdAt: 1715186011586, updatedAt: 1715186015053 },
-          { id: 'group2', name: 'Group 2', createdAt: 1715186011586, updatedAt: 1715186015053 },
+          { createdAt: 1_715_186_011_586, id: 'group1', name: 'Group 1', updatedAt: 1_715_186_015_053 },
+          { createdAt: 1_715_186_011_586, id: 'group2', name: 'Group 2', updatedAt: 1_715_186_015_053 },
         ],
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
-            group: 'group1',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            group: 'group1',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
           {
-            id: 'session2',
-            group: 'group2',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            group: 'group2',
+            id: 'session2',
             meta: {
               title: 'Session 2',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
           {
-            id: 'session3',
-            group: 'group4',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            group: 'group4',
+            id: 'session3',
             meta: {
               title: 'Session 3',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -304,43 +304,43 @@ describe('ImporterService', () => {
 
     it('should create agents and associate them with imported sessions', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'Test Agent 1',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
           {
-            id: 'session2',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'def',
               chatConfig: {} as any,
+              model: 'def',
+              openingQuestions: [],
               params: {},
               systemRole: 'Test Agent 2',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session2',
             meta: {
               title: 'Session 2',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       await service.importData(data);
@@ -389,21 +389,21 @@ describe('ImporterService', () => {
       await service.importData({
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'Test Agent 1',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
         version: CURRENT_CONFIG_VERSION,
@@ -413,21 +413,21 @@ describe('ImporterService', () => {
       await service.importData({
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'Test Agent 1',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
         version: CURRENT_CONFIG_VERSION,
@@ -444,59 +444,59 @@ describe('ImporterService', () => {
   describe('import topics', () => {
     it('should import topics and return correct result', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
-        topics: [
-          {
-            id: 'topic1',
-            title: 'Topic 1',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
-            sessionId: 'session1',
-          },
-          {
-            id: 'topic2',
-            title: 'Topic 2',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
-            sessionId: 'session2',
-          },
-        ],
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
           {
-            id: 'session2',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session2',
             meta: {
               title: 'Session 2',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
+        topics: [
+          {
+            createdAt: 1_715_186_011_586,
+            id: 'topic1',
+            sessionId: 'session1',
+            title: 'Topic 1',
+            updatedAt: 1_715_186_015_053,
+          },
+          {
+            createdAt: 1_715_186_011_586,
+            id: 'topic2',
+            sessionId: 'session2',
+            title: 'Topic 2',
+            updatedAt: 1_715_186_015_053,
+          },
+        ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -523,11 +523,11 @@ describe('ImporterService', () => {
         .execute();
 
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         topics: [
-          { id: 'topic1', title: 'Topic 1', createdAt: 1715186011586, updatedAt: 1715186015053 },
-          { id: 'topic2', title: 'Topic 2', createdAt: 1715186011586, updatedAt: 1715186015053 },
+          { createdAt: 1_715_186_011_586, id: 'topic1', title: 'Topic 1', updatedAt: 1_715_186_015_053 },
+          { createdAt: 1_715_186_011_586, id: 'topic2', title: 'Topic 2', updatedAt: 1_715_186_015_053 },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -544,36 +544,36 @@ describe('ImporterService', () => {
 
     it('should associate imported topics with sessions', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
         topics: [
           {
+            createdAt: 1_715_186_011_586,
             id: 'topic1',
-            title: 'Topic 1',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
             sessionId: 'session1',
+            title: 'Topic 1',
+            updatedAt: 1_715_186_015_053,
           },
-          { id: 'topic2', title: 'Topic 2', createdAt: 1715186011586, updatedAt: 1715186015053 },
+          { createdAt: 1_715_186_011_586, id: 'topic2', title: 'Topic 2', updatedAt: 1_715_186_015_053 },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       await service.importData(data);
@@ -599,56 +599,56 @@ describe('ImporterService', () => {
   describe('import messages', () => {
     it('should import messages and return correct result', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         messages: [
           {
-            id: 'msg1',
             content: 'Message 1',
+            createdAt: 1_715_186_011_586,
+            id: 'msg1',
             role: 'user',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
             sessionId: 'session1',
             topicId: 'topic1',
+            updatedAt: 1_715_186_015_053,
           },
           {
-            id: 'msg2',
             content: 'Message 2',
+            createdAt: 1_715_186_011_586,
+            id: 'msg2',
+            parentId: 'msg1',
             role: 'assistant',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
             sessionId: 'session1',
             topicId: 'topic1',
-            parentId: 'msg1',
+            updatedAt: 1_715_186_015_053,
           },
         ],
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
         topics: [
           {
+            createdAt: 1_715_186_011_586,
             id: 'topic1',
-            title: 'Topic 1',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
             sessionId: 'session1',
+            title: 'Topic 1',
+            updatedAt: 1_715_186_015_053,
           },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -680,23 +680,23 @@ describe('ImporterService', () => {
         .execute();
 
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         messages: [
           {
-            id: 'msg1',
             content: 'Message 1',
+            createdAt: 1_715_186_011_586,
+            id: 'msg1',
             role: 'user',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
+            updatedAt: 1_715_186_015_053,
           },
           {
-            id: 'msg2',
             content: 'Message 2',
+            createdAt: 1_715_186_011_586,
+            id: 'msg2',
             role: 'assistant',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
+            updatedAt: 1_715_186_015_053,
           },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       let result: ImportResults;
@@ -713,63 +713,63 @@ describe('ImporterService', () => {
 
     it('should associate imported messages with sessions and topics', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
+        messages: [
+          {
+            content: 'Message 1',
+            createdAt: 1_715_186_011_586,
+            id: 'msg1',
+            role: 'user',
+            sessionId: 'session1',
+            topicId: 'topic1',
+            updatedAt: 1_715_186_015_053,
+          },
+          {
+            content: 'Message 2',
+            createdAt: 1_715_186_011_586,
+            id: 'msg2',
+            parentId: 'msg1',
+            role: 'assistant',
+            sessionId: 'session1',
+            topicId: 'topic1',
+            updatedAt: 1_715_186_015_053,
+          },
+          {
+            content: 'Message 3',
+            createdAt: 1_715_186_011_586,
+            id: 'msg3',
+            role: 'user',
+            updatedAt: 1_715_186_015_053,
+          },
+        ],
         sessions: [
           {
-            id: 'session1',
-            createdAt: '2022-05-14T18:18:10.494Z',
-            updatedAt: '2023-01-01',
-            type: 'agent',
             config: {
-              model: 'abc',
               chatConfig: {} as any,
+              model: 'abc',
+              openingQuestions: [],
               params: {},
               systemRole: 'abc',
               tts: {} as any,
-              openingQuestions: [],
             },
+            createdAt: '2022-05-14T18:18:10.494Z',
+            id: 'session1',
             meta: {
               title: 'Session 1',
             },
+            type: 'agent',
+            updatedAt: '2023-01-01',
           },
         ],
         topics: [
           {
+            createdAt: 1_715_186_011_586,
             id: 'topic1',
+            sessionId: 'session1',
             title: 'Topic 1',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
-            sessionId: 'session1',
+            updatedAt: 1_715_186_015_053,
           },
         ],
-        messages: [
-          {
-            id: 'msg1',
-            content: 'Message 1',
-            role: 'user',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
-            sessionId: 'session1',
-            topicId: 'topic1',
-          },
-          {
-            id: 'msg2',
-            content: 'Message 2',
-            role: 'assistant',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
-            sessionId: 'session1',
-            topicId: 'topic1',
-            parentId: 'msg1',
-          },
-          {
-            id: 'msg3',
-            content: 'Message 3',
-            role: 'user',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
-          },
-        ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       await service.importData(data);
@@ -802,24 +802,24 @@ describe('ImporterService', () => {
 
     it('should set parentId for messages', async () => {
       const data: ImporterEntryData = {
-        version: CURRENT_CONFIG_VERSION,
         messages: [
           {
-            id: 'msg1',
             content: 'Message 1',
+            createdAt: 1_715_186_011_586,
+            id: 'msg1',
             role: 'user',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
+            updatedAt: 1_715_186_015_053,
           },
           {
-            id: 'msg2',
             content: 'Message 2',
-            role: 'assistant',
-            createdAt: 1715186011586,
-            updatedAt: 1715186015053,
+            createdAt: 1_715_186_011_586,
+            id: 'msg2',
             parentId: 'msg1',
+            role: 'assistant',
+            updatedAt: 1_715_186_015_053,
           },
         ],
+        version: CURRENT_CONFIG_VERSION,
       };
 
       await service.importData(data);
@@ -843,25 +843,19 @@ describe('ImporterService', () => {
         {
           messages: [
             {
-              role: 'user',
               content: 'hello',
+              createdAt: 1_714_236_590_340,
+              extra: {},
               files: [],
+              id: 'DCG1G1EH',
+              role: 'user',
               sessionId: 'inbox',
               topicId: '2wcF8yaS',
-              createdAt: 1714236590340,
-              id: 'DCG1G1EH',
-              updatedAt: 1714236590340,
-              extra: {},
+              updatedAt: 1_714_236_590_340,
             },
             {
-              role: 'assistant',
               content: '...',
-              parentId: 'DCG1G1EH',
-              sessionId: 'inbox',
-              topicId: '2wcF8yaS',
-              createdAt: 1714236590441,
-              id: 'gY41w5vQ',
-              updatedAt: 1714236590518,
+              createdAt: 1_714_236_590_441,
               error: {
                 body: {
                   error: {
@@ -876,48 +870,62 @@ describe('ImporterService', () => {
                 type: 'OllamaBizError',
               },
               extra: { fromModel: 'mixtral', fromProvider: 'ollama' },
-            },
-            {
-              role: 'user',
-              content: 'hello',
-              files: [],
-              sessionId: 'a5fefc88-f6c1-44fb-9e98-3d366b1ed589',
-              topicId: 'v38snJ0A',
-              createdAt: 1717080410895,
-              id: 'qOIxEGEB',
-              updatedAt: 1717080410895,
-              extra: {},
-            },
-            {
+              id: 'gY41w5vQ',
+              parentId: 'DCG1G1EH',
               role: 'assistant',
-              content: '...',
-              parentId: 'qOIxEGEB',
+              sessionId: 'inbox',
+              topicId: '2wcF8yaS',
+              updatedAt: 1_714_236_590_518,
+            },
+            {
+              content: 'hello',
+              createdAt: 1_717_080_410_895,
+              extra: {},
+              files: [],
+              id: 'qOIxEGEB',
+              role: 'user',
               sessionId: 'a5fefc88-f6c1-44fb-9e98-3d366b1ed589',
               topicId: 'v38snJ0A',
-              createdAt: 1717080410970,
-              id: 'w28FcqY5',
-              updatedAt: 1717080411485,
+              updatedAt: 1_717_080_410_895,
+            },
+            {
+              content: '...',
+              createdAt: 1_717_080_410_970,
               error: {
                 body: { error: { errorType: 'NoOpenAIAPIKey' }, provider: 'openai' },
                 message: 'OpenAI API Key is empty, please add a custom OpenAI API Key',
                 type: 'NoOpenAIAPIKey',
               },
               extra: { fromModel: 'gpt-3.5-turbo', fromProvider: 'openai' },
+              id: 'w28FcqY5',
+              parentId: 'qOIxEGEB',
+              role: 'assistant',
+              sessionId: 'a5fefc88-f6c1-44fb-9e98-3d366b1ed589',
+              topicId: 'v38snJ0A',
+              updatedAt: 1_717_080_411_485,
             },
           ],
           sessionGroups: [
             {
+              createdAt: 1_706_114_744_425,
+              id: 'XlUbvOvL',
               name: 'Writter',
               sort: 0,
-              createdAt: 1706114744425,
-              id: 'XlUbvOvL',
-              updatedAt: 1706114747468,
+              updatedAt: 1_706_114_747_468,
             },
           ],
           sessions: [
             {
               config: {
+                chatConfig: {
+                  autoCreateTopicThreshold: 2,
+                  displayMode: 'chat',
+                  enableAutoCreateTopic: true,
+                  historyCount: 1,
+                },
                 model: 'gpt-3.5-turbo',
+                openingMessage: 'Hello, I am [LobeChat](https://github.com/lobehub/lobe-chat).',
+                openingQuestions: ['Question 1', 'Question 2'],
                 params: {
                   frequency_penalty: 0,
                   presence_penalty: 0,
@@ -933,16 +941,10 @@ describe('ImporterService', () => {
                   ttsService: 'openai',
                   voice: { openai: 'alloy' },
                 },
-                chatConfig: {
-                  autoCreateTopicThreshold: 2,
-                  displayMode: 'chat',
-                  enableAutoCreateTopic: true,
-                  historyCount: 1,
-                },
-                openingQuestions: ['Question 1', 'Question 2'],
-                openingMessage: 'Hello, I am [LobeChat](https://github.com/lobehub/lobe-chat).',
               },
+              createdAt: '2024-01-24T16:43:12.164Z',
               group: 'XlUbvOvL',
+              id: 'a5fefc88-f6c1-44fb-9e98-3d366b1ed589',
               meta: {
                 avatar: '📝',
                 description:
@@ -956,27 +958,25 @@ describe('ImporterService', () => {
                 ],
                 title: 'LobeChat Technical Documentation Expert',
               },
-              type: 'agent',
-              createdAt: '2024-01-24T16:43:12.164Z',
-              id: 'a5fefc88-f6c1-44fb-9e98-3d366b1ed589',
-              updatedAt: '2024-01-24T16:46:15.226Z',
               pinned: false,
+              type: 'agent',
+              updatedAt: '2024-01-24T16:46:15.226Z',
             },
           ],
           topics: [
             {
-              title: 'Default Topic',
-              sessionId: 'inbox',
-              createdAt: 1714236590531,
+              createdAt: 1_714_236_590_531,
               id: '2wcF8yaS',
-              updatedAt: 1714236590531,
+              sessionId: 'inbox',
+              title: 'Default Topic',
+              updatedAt: 1_714_236_590_531,
             },
             {
-              title: 'Default Topic',
-              sessionId: 'a5fefc88-f6c1-44fb-9e98-3d366b1ed589',
-              createdAt: 1717080410825,
+              createdAt: 1_717_080_410_825,
               id: 'v38snJ0A',
-              updatedAt: 1717080410825,
+              sessionId: 'a5fefc88-f6c1-44fb-9e98-3d366b1ed589',
+              title: 'Default Topic',
+              updatedAt: 1_717_080_410_825,
             },
           ],
           version: mockImportData.version,
@@ -985,10 +985,10 @@ describe('ImporterService', () => {
       );
 
       expect(result!).toEqual({
+        messages: { added: 4, errors: 0, skips: 0 },
         sessionGroups: { added: 1, errors: 0, skips: 0 },
         sessions: { added: 1, errors: 0, skips: 0 },
         topics: { added: 2, errors: 0, skips: 0 },
-        messages: { added: 4, errors: 0, skips: 0 },
       });
     });
 
@@ -1005,10 +1005,10 @@ describe('ImporterService', () => {
       );
 
       expect(result!).toEqual({
+        messages: { added: 32, errors: 0, skips: 0 },
         sessionGroups: { added: 2, errors: 0, skips: 0 },
         sessions: { added: 15, errors: 0, skips: 0 },
         topics: { added: 4, errors: 0, skips: 0 },
-        messages: { added: 32, errors: 0, skips: 0 },
       });
     });
   });

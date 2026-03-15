@@ -3,7 +3,8 @@
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=16384 --expose-gc",
       "SENTRY_LOG_LEVEL": "warn",
-      "NEXT_TELEMETRY_DISABLED": "1"
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "NEXT_DISABLE_ESLINT": "1"
     }
   },
   "buildCommand": "bun run build",

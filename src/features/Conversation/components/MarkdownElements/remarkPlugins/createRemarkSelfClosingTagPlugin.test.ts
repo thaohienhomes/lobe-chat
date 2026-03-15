@@ -37,9 +37,9 @@ describe('createRemarkSelfClosingTagPlugin', () => {
     const node = tree.children[0];
     expect(node.type).toBe(tagName);
     expect(node.data?.hProperties).toEqual({
+      isDirectory: true,
       name: 'docs',
       path: '/path/to/docs',
-      isDirectory: true,
     });
     expect(node.data?.hName).toBe(tagName);
   });
@@ -91,9 +91,9 @@ describe('createRemarkSelfClosingTagPlugin', () => {
     const tagNode2 = paragraphChildren[3];
     expect(tagNode2.type).toBe(tagName);
     expect(tagNode2.data?.hProperties).toEqual({
+      isDirectory: true,
       name: 'b.txt',
       path: 'b',
-      isDirectory: true,
     });
     expect(tagNode2.data?.hName).toBe(tagName);
   });
@@ -150,7 +150,7 @@ describe('createRemarkSelfClosingTagPlugin', () => {
 
     const tagNode = paragraphChildren[1];
     expect(tagNode.type).toBe(otherTagName);
-    expect(tagNode.data?.hProperties).toEqual({ id: '123', value: 'abc', active: true });
+    expect(tagNode.data?.hProperties).toEqual({ active: true, id: '123', value: 'abc' });
     expect(tagNode.data?.hName).toBe(otherTagName);
   });
 

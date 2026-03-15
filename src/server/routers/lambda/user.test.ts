@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { enableClerk } from '@/const/auth';
 import { MessageModel } from '@/database/models/message';
 import { SessionModel } from '@/database/models/session';
 import { UserModel, UserNotFoundError } from '@/database/models/user';
@@ -49,7 +48,7 @@ describe('userRouter', () => {
 
   describe('getUserRegistrationDuration', () => {
     it('should return registration duration', async () => {
-      const mockDuration = { duration: 100, createdAt: '2023-01-01', updatedAt: '2023-01-02' };
+      const mockDuration = { createdAt: '2023-01-01', duration: 100, updatedAt: '2023-01-02' };
       vi.mocked(UserModel).mockImplementation(
         () =>
           ({
@@ -70,8 +69,8 @@ describe('userRouter', () => {
         {
           provider: 'google',
           providerAccountId: '123',
-          userId: 'user-1',
           type: 'oauth',
+          userId: 'user-1',
         },
       ];
       vi.mocked(UserModel).mockImplementation(
@@ -121,24 +120,24 @@ describe('userRouter', () => {
       const result = await userRouter.createCaller({ ...mockCtx }).getUserState();
 
       expect(result).toEqual({
+        canEnablePWAGuide: true,
+        canEnableTrace: true,
+        hasConversation: true,
         isOnboard: true,
         preference: { telemetry: true },
         settings: {},
-        hasConversation: true,
-        canEnablePWAGuide: true,
-        canEnableTrace: true,
         userId: mockUserId,
       });
     });
 
     it('should create new user when user not found (clerk enabled)', async () => {
       const mockClerkUser = {
-        id: mockUserId,
         createdAt: new Date(),
-        emailAddresses: [{ id: 'email-1', emailAddress: 'test@example.com' }],
+        emailAddresses: [{ emailAddress: 'test@example.com', id: 'email-1' }],
         firstName: 'Test',
-        lastName: 'User',
+        id: mockUserId,
         imageUrl: 'avatar.jpg',
+        lastName: 'User',
         phoneNumbers: [],
         primaryEmailAddressId: 'email-1',
         primaryPhoneNumberId: null,
@@ -186,12 +185,12 @@ describe('userRouter', () => {
       const result = await userRouter.createCaller({ ...mockCtx } as any).getUserState();
 
       expect(result).toEqual({
+        canEnablePWAGuide: false,
+        canEnableTrace: false,
+        hasConversation: false,
         isOnboard: true,
         preference: { telemetry: null },
         settings: {},
-        hasConversation: false,
-        canEnablePWAGuide: false,
-        canEnableTrace: false,
         userId: mockUserId,
       });
     });
@@ -220,10 +219,10 @@ describe('userRouter', () => {
       };
 
       const mockAccount = {
-        userId: mockUserId,
         provider: 'google',
         providerAccountId: '123',
         type: 'oauth',
+        userId: mockUserId,
       };
 
       vi.mocked(NextAuthUserService).mockReturnValue({
@@ -256,8 +255,8 @@ describe('userRouter', () => {
   describe('updateSettings', () => {
     it('should update settings with encrypted key vaults', async () => {
       const mockSettings = {
-        keyVaults: { openai: { key: 'test-key' } },
         general: { language: 'en-US' },
+        keyVaults: { openai: { key: 'test-key' } },
       };
 
       const mockEncryptedVaults = 'encrypted-data';

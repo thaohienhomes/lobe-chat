@@ -108,6 +108,15 @@ class ChatService {
       pluginIds.push(WebBrowsingManifest.identifier);
     }
 
+    // Auto-enable Visualizer tool when feature flag is on
+    // This ensures the AI receives the show_widget tool definition and system prompt
+    if (
+      process.env.NEXT_PUBLIC_VISUALIZER_ENABLED === 'true' &&
+      !pluginIds.includes('pho-visualizer')
+    ) {
+      pluginIds.push('pho-visualizer');
+    }
+
     // ============  1. preprocess messages   ============ //
 
     const agentStoreState = getAgentStoreState();

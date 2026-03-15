@@ -7,29 +7,29 @@ import { ServerService } from './server';
 
 vi.mock('@/libs/trpc/client', () => ({
   lambdaClient: {
-    session: {
-      createSession: { mutate: vi.fn() },
-      batchCreateSessions: { mutate: vi.fn() },
-      cloneSession: { mutate: vi.fn() },
-      getGroupedSessions: { query: vi.fn() },
-      countSessions: { query: vi.fn() },
-      rankSessions: { query: vi.fn() },
-      updateSession: { mutate: vi.fn() },
-      updateSessionConfig: { mutate: vi.fn() },
-      updateSessionChatConfig: { mutate: vi.fn() },
-      getSessions: { query: vi.fn() },
-      searchSessions: { query: vi.fn() },
-      removeSession: { mutate: vi.fn() },
-      removeAllSessions: { mutate: vi.fn() },
-    },
     agent: {
       getAgentConfig: { query: vi.fn() },
+    },
+    session: {
+      batchCreateSessions: { mutate: vi.fn() },
+      cloneSession: { mutate: vi.fn() },
+      countSessions: { query: vi.fn() },
+      createSession: { mutate: vi.fn() },
+      getGroupedSessions: { query: vi.fn() },
+      getSessions: { query: vi.fn() },
+      rankSessions: { query: vi.fn() },
+      removeAllSessions: { mutate: vi.fn() },
+      removeSession: { mutate: vi.fn() },
+      searchSessions: { query: vi.fn() },
+      updateSession: { mutate: vi.fn() },
+      updateSessionChatConfig: { mutate: vi.fn() },
+      updateSessionConfig: { mutate: vi.fn() },
     },
     sessionGroup: {
       createSessionGroup: { mutate: vi.fn() },
       getSessionGroup: { query: vi.fn() },
-      removeSessionGroup: { mutate: vi.fn() },
       removeAllSessionGroups: { mutate: vi.fn() },
+      removeSessionGroup: { mutate: vi.fn() },
       updateSessionGroup: { mutate: vi.fn() },
       updateSessionGroupOrder: { mutate: vi.fn() },
     },
@@ -53,9 +53,6 @@ describe('ServerService', () => {
   it('createSession should call lambdaClient with correct params', async () => {
     const mockData = {
       config: {
-        model: 'gpt-3.5',
-        params: {},
-        systemRole: '',
         chatConfig: {
           autoCreateTopicThreshold: 2,
           compressThreshold: 10,
@@ -67,6 +64,11 @@ describe('ServerService', () => {
           temperature: 0.7,
           title: 'test',
         },
+        model: 'gpt-3.5',
+        openingMessage: 'Hello, I am [LobeChat](https://github.com/lobehub/lobe-chat).',
+        openingQuestions: ['Question 1', 'Question 2'],
+        params: {},
+        systemRole: '',
         tts: {
           showAllLocaleVoice: false,
           sttLocale: 'auto',
@@ -74,12 +76,10 @@ describe('ServerService', () => {
           voice: {
             model: 'tts-1',
             name: 'alloy',
-            type: 'tts',
             openai: 'voice-id',
+            type: 'tts',
           },
         },
-        openingQuestions: ['Question 1', 'Question 2'],
-        openingMessage: 'Hello, I am [LobeChat](https://github.com/lobehub/lobe-chat).',
       },
       group: 'testGroup',
       meta: { description: 'test' },
@@ -90,7 +90,7 @@ describe('ServerService', () => {
 
     expect(lambdaClient.session.createSession.mutate).toBeCalledWith({
       config: { ...mockData.config, description: 'test' },
-      session: { title: 'Test Session', groupId: 'testGroup' },
+      session: { groupId: 'testGroup', title: 'Test Session' },
       type: LobeSessionType.Agent,
     });
   });
@@ -98,12 +98,7 @@ describe('ServerService', () => {
   it('batchCreateSessions should call lambdaClient', async () => {
     const mockSessions = [
       {
-        id: '1',
-        title: 'Test',
         config: {
-          model: 'gpt-3.5',
-          params: {},
-          systemRole: '',
           chatConfig: {
             autoCreateTopicThreshold: 2,
             compressThreshold: 10,
@@ -115,6 +110,9 @@ describe('ServerService', () => {
             temperature: 0.7,
             title: 'test',
           },
+          model: 'gpt-3.5',
+          params: {},
+          systemRole: '',
           tts: {
             showAllLocaleVoice: false,
             sttLocale: 'auto',
@@ -122,14 +120,16 @@ describe('ServerService', () => {
             voice: {
               model: 'tts-1',
               name: 'alloy',
-              type: 'tts',
               openai: 'voice-id',
+              type: 'tts',
             },
           },
         },
         createdAt: new Date(),
+        id: '1',
         meta: { description: 'test' },
         model: 'gpt-3.5',
+        title: 'Test',
         type: LobeSessionType.Agent,
         updatedAt: new Date(),
       },
@@ -166,8 +166,8 @@ describe('ServerService', () => {
   it('updateSession should call lambdaClient with correct params', async () => {
     const mockData = {
       group: 'default',
-      pinned: true,
       meta: { description: 'bar' },
+      pinned: true,
       updatedAt: new Date(),
     };
 
@@ -176,9 +176,9 @@ describe('ServerService', () => {
     expect(lambdaClient.session.updateSession.mutate).toBeCalledWith({
       id: '123',
       value: {
+        description: 'bar',
         groupId: null,
         pinned: true,
-        description: 'bar',
         updatedAt: mockData.updatedAt,
       },
     });
@@ -196,8 +196,8 @@ describe('ServerService', () => {
     expect(lambdaClient.session.updateSessionConfig.mutate).toBeCalledWith(
       { id: '123', value: config },
       {
-        signal,
         context: { showNotification: false },
+        signal,
       },
     );
   });

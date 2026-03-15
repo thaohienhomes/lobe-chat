@@ -1,5 +1,4 @@
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ClerkAuth } from './index';

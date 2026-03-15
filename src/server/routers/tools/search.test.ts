@@ -23,13 +23,13 @@ vi.mock('@/server/services/search/impls/searxng/client');
 
 describe('searchRouter', () => {
   const mockContext = {
+    authorizationHeader: 'Bearer mock-token',
+    jwtPayload: { userId: '1' },
     req: {
       headers: {
         authorization: 'Bearer mock-token',
       },
     },
-    authorizationHeader: 'Bearer mock-token',
-    jwtPayload: { userId: '1' },
   };
 
   beforeEach(() => {
@@ -43,8 +43,8 @@ describe('searchRouter', () => {
       const caller = searchRouter.createCaller(mockContext as any);
 
       const result = await caller.crawlPages({
-        urls: ['http://test1.com', 'http://test2.com'],
         impls: ['naive'],
+        urls: ['http://test1.com', 'http://test2.com'],
       });
 
       expect(result.results).toHaveLength(2);
@@ -84,9 +84,9 @@ describe('searchRouter', () => {
       const mockSearchResult = {
         results: [
           {
+            content: 'Test content',
             title: 'Test Result',
             url: 'http://test.com',
-            content: 'Test content',
           },
         ],
       };
@@ -108,10 +108,10 @@ describe('searchRouter', () => {
         query: 'test query',
         results: [
           {
-            title: 'Test Result',
-            parsedUrl: 'test.com',
-            url: 'http://test.com',
             content: 'Test content',
+            parsedUrl: 'test.com',
+            title: 'Test Result',
+            url: 'http://test.com',
           },
         ],
       });
@@ -121,9 +121,9 @@ describe('searchRouter', () => {
       const mockSearchResult = {
         results: [
           {
+            content: 'Test content',
             title: 'Test Result',
             url: 'http://test.com',
-            content: 'Test content',
           },
         ],
       };
@@ -142,10 +142,10 @@ describe('searchRouter', () => {
         query: 'test query',
         results: [
           {
-            title: 'Test Result',
-            parsedUrl: 'test.com',
-            url: 'http://test.com',
             content: 'Test content',
+            parsedUrl: 'test.com',
+            title: 'Test Result',
+            url: 'http://test.com',
           },
         ],
       });

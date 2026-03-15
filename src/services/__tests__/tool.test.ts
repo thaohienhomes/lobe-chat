@@ -1,7 +1,5 @@
-import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { edgeClient } from '@/libs/trpc/client';
-import { globalHelpers } from '@/store/global/helpers';
 
 import { toolService } from '../tool';
 import openAPIV3 from './openai/OpenAPI_V3.json';
@@ -38,9 +36,8 @@ describe('ToolService', () => {
         $schema: '../node_modules/@lobehub/chat-plugin-sdk/schema.json',
         api: [
           {
-            url: 'https://realtime-weather.chat-plugin.lobehub.com/api/v1',
-            name: 'fetchCurrentWeather',
             description: '获取当前天气情况',
+            name: 'fetchCurrentWeather',
             parameters: {
               properties: {
                 city: {
@@ -51,6 +48,7 @@ describe('ToolService', () => {
               required: ['city'],
               type: 'object',
             },
+            url: 'https://realtime-weather.chat-plugin.lobehub.com/api/v1',
           },
         ],
         author: 'LobeHub',
@@ -59,13 +57,13 @@ describe('ToolService', () => {
         identifier: 'realtime-weather',
         meta: {
           avatar: '🌈',
+          description: 'Get realtime weather information',
           tags: ['weather', 'realtime'],
           title: 'Realtime Weather',
-          description: 'Get realtime weather information',
         },
         ui: {
-          url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
           height: 310,
+          url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
         },
         version: '1',
       };
@@ -73,8 +71,8 @@ describe('ToolService', () => {
       global.fetch = vi.fn(() =>
         Promise.resolve({
           headers: new Headers({ 'content-type': 'application/json' }),
-          ok: true,
           json: () => Promise.resolve(fakeManifest),
+          ok: true,
         }),
       ) as any;
 
@@ -98,8 +96,8 @@ describe('ToolService', () => {
       global.fetch = vi.fn(() =>
         Promise.resolve({
           headers: new Headers({ 'content-type': 'application/json' }),
-          ok: true,
           json: () => Promise.resolve(fakeManifest),
+          ok: true,
         }),
       ) as any;
 
@@ -127,9 +125,9 @@ describe('ToolService', () => {
       const manifestUrl = 'http://fake-url.com/manifest.json';
       global.fetch = vi.fn(() =>
         Promise.resolve({
-          ok: false,
           headers: new Headers({ 'content-type': 'application/json' }),
           json: () => Promise.resolve(fakeManifest),
+          ok: false,
         }),
       ) as any;
 
@@ -148,29 +146,29 @@ describe('ToolService', () => {
         const fakeManifest = {
           $schema: '../node_modules/@lobehub/chat-plugin-sdk/schema.json',
           api: [],
-          openapi: openapiUrl,
           author: 'LobeHub',
           createAt: '2023-08-12',
           homepage: 'https://github.com/lobehub/chat-plugin-realtime-weather',
           identifier: 'realtime-weather',
           meta: {
             avatar: '🌈',
+            description: 'Get realtime weather information',
             tags: ['weather', 'realtime'],
             title: 'Realtime Weather',
-            description: 'Get realtime weather information',
           },
+          openapi: openapiUrl,
           ui: {
-            url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
             height: 310,
+            url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
           },
           version: '1',
         };
 
         global.fetch = vi.fn((url) =>
           Promise.resolve({
-            ok: true,
             headers: new Headers({ 'content-type': 'application/json' }),
             json: () => Promise.resolve(url === openapiUrl ? openAPIV3 : fakeManifest),
+            ok: true,
           }),
         ) as any;
 
@@ -185,29 +183,29 @@ describe('ToolService', () => {
         const fakeManifest = {
           $schema: '../node_modules/@lobehub/chat-plugin-sdk/schema.json',
           api: [],
-          openapi: openapiUrl,
           author: 'LobeHub',
           createAt: '2023-08-12',
           homepage: 'https://github.com/lobehub/chat-plugin-realtime-weather',
           identifier: 'realtime-weather',
           meta: {
             avatar: '🌈',
+            description: 'Get realtime weather information',
             tags: ['weather', 'realtime'],
             title: 'Realtime Weather',
-            description: 'Get realtime weather information',
           },
+          openapi: openapiUrl,
           ui: {
-            url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
             height: 310,
+            url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
           },
           version: '1',
         };
 
         global.fetch = vi.fn((url) =>
           Promise.resolve({
-            ok: true,
             headers: new Headers({ 'content-type': 'application/json' }),
             json: () => Promise.resolve(url === openapiUrl ? [] : fakeManifest),
+            ok: true,
           }),
         ) as any;
 

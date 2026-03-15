@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix  */
 import { relations } from 'drizzle-orm';
-import { pgTable, primaryKey, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import { index, pgTable, primaryKey, text, uuid, varchar } from 'drizzle-orm/pg-core';
 
 import { createdAt } from './_helpers';
 import { agents, agentsFiles, agentsKnowledgeBases } from './agent';
@@ -30,6 +30,8 @@ export const agentsToSessions = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.agentId, t.sessionId] }),
+    sessionIdIdx: index('agents_to_sessions_session_id_idx').on(t.sessionId),
+    userIdIdx: index('agents_to_sessions_user_id_idx').on(t.userId),
   }),
 );
 
@@ -48,6 +50,8 @@ export const filesToSessions = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.fileId, t.sessionId] }),
+    sessionIdIdx: index('files_to_sessions_session_id_idx').on(t.sessionId),
+    userIdIdx: index('files_to_sessions_user_id_idx').on(t.userId),
   }),
 );
 
@@ -63,6 +67,8 @@ export const fileChunks = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.fileId, t.chunkId] }),
+    fileIdIdx: index('file_chunks_file_id_idx').on(t.fileId),
+    userIdIdx: index('file_chunks_user_id_idx').on(t.userId),
   }),
 );
 export type NewFileChunkItem = typeof fileChunks.$inferInsert;

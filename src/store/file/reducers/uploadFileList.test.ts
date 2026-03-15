@@ -6,10 +6,10 @@ import { uploadFileListReducer } from './uploadFileList';
 
 // 创建测试用的文件项
 const createMockFile = (id: string): UploadFileItem => ({
-  id,
   file: new File(['test'], 'test.txt'),
+  id,
   status: 'pending',
-  uploadState: { speed: 2, restTime: 2, progress: 10 },
+  uploadState: { progress: 10, restTime: 2, speed: 2 },
 });
 
 describe('uploadFileListReducer', () => {
@@ -19,8 +19,8 @@ describe('uploadFileListReducer', () => {
       const newFile = createMockFile('2');
 
       const result = uploadFileListReducer(initialState, {
-        type: 'addFile',
         file: newFile,
+        type: 'addFile',
       });
 
       expect(result).toHaveLength(2);
@@ -32,9 +32,9 @@ describe('uploadFileListReducer', () => {
       const newFile = createMockFile('2');
 
       const result = uploadFileListReducer(initialState, {
-        type: 'addFile',
-        file: newFile,
         atStart: true,
+        file: newFile,
+        type: 'addFile',
       });
 
       expect(result).toHaveLength(2);
@@ -48,8 +48,8 @@ describe('uploadFileListReducer', () => {
       const newFiles = [createMockFile('2'), createMockFile('3')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'addFiles',
         files: newFiles,
+        type: 'addFiles',
       });
 
       expect(result).toHaveLength(3);
@@ -61,9 +61,9 @@ describe('uploadFileListReducer', () => {
       const newFiles = [createMockFile('2'), createMockFile('3')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'addFiles',
-        files: newFiles,
         atStart: true,
+        files: newFiles,
+        type: 'addFiles',
       });
 
       expect(result).toHaveLength(3);
@@ -77,8 +77,8 @@ describe('uploadFileListReducer', () => {
       const updateValue = { name: 'updated.txt' } as File;
 
       const result = uploadFileListReducer(initialState, {
-        type: 'updateFile',
         id: '1',
+        type: 'updateFile',
         value: { file: updateValue },
       });
 
@@ -89,8 +89,8 @@ describe('uploadFileListReducer', () => {
       const initialState: UploadFileItem[] = [createMockFile('1')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'updateFile',
         id: 'non-existent',
+        type: 'updateFile',
         value: { file: { name: 'updated.txt' } as File },
       });
 
@@ -103,9 +103,9 @@ describe('uploadFileListReducer', () => {
       const initialState: UploadFileItem[] = [createMockFile('1')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'updateFileStatus',
         id: '1',
         status: 'success',
+        type: 'updateFileStatus',
       });
 
       expect(result[0].status).toBe('success');
@@ -117,8 +117,8 @@ describe('uploadFileListReducer', () => {
       const initialState: UploadFileItem[] = [createMockFile('1')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'updateFileUploadState',
         id: '1',
+        type: 'updateFileUploadState',
         uploadState: { progress: 12, restTime: 12, speed: 12 },
       });
 
@@ -135,8 +135,8 @@ describe('uploadFileListReducer', () => {
       const initialState: UploadFileItem[] = [createMockFile('1'), createMockFile('2')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'removeFile',
         id: '1',
+        type: 'removeFile',
       });
 
       expect(result).toHaveLength(1);
@@ -147,8 +147,8 @@ describe('uploadFileListReducer', () => {
       const initialState: UploadFileItem[] = [createMockFile('1')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'removeFile',
         id: 'non-existent',
+        type: 'removeFile',
       });
 
       expect(result).toEqual(initialState);
@@ -164,8 +164,8 @@ describe('uploadFileListReducer', () => {
       ];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'removeFiles',
         ids: ['1', '2'],
+        type: 'removeFiles',
       });
 
       expect(result).toHaveLength(1);
@@ -176,8 +176,8 @@ describe('uploadFileListReducer', () => {
       const initialState: UploadFileItem[] = [createMockFile('1')];
 
       const result = uploadFileListReducer(initialState, {
-        type: 'removeFiles',
         ids: ['non-existent'],
+        type: 'removeFiles',
       });
 
       expect(result).toEqual(initialState);

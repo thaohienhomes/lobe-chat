@@ -63,9 +63,10 @@ const btnPrimary = {
     color: '#FFFFFF',
 };
 
-export default async function AdminUserDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = await params;
     const db = await getServerDB();
-    const userId = params.id;
+    const userId = resolvedParams.id;
 
     const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     if (!user) return notFound();

@@ -61,9 +61,9 @@ describe('useTikTokTracking', () => {
     it('should call trackViewContent with all parameters', () => {
       const { result } = renderHook(() => useTikTokTracking());
       
-      result.current.trackContentView('premium', 'Premium Plan', 129000);
+      result.current.trackContentView('premium', 'Premium Plan', 129_000);
       
-      expect(tikTokEvents.trackViewContent).toHaveBeenCalledWith('premium', 'Premium Plan', 129000);
+      expect(tikTokEvents.trackViewContent).toHaveBeenCalledWith('premium', 'Premium Plan', 129_000);
     });
 
     it('should call trackViewContent without value', () => {

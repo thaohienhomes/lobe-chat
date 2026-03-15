@@ -14,15 +14,15 @@ vi.mock('@/config/db', () => ({
 
 vi.mock('../impls', () => ({
   createFileServiceModule: () => ({
-    deleteFile: vi.fn(),
-    deleteFiles: vi.fn(),
-    getFileContent: vi.fn(),
-    getFileByteArray: vi.fn(),
     createPreSignedUrl: vi.fn(),
     createPreSignedUrlForPreview: vi.fn(),
-    uploadContent: vi.fn(),
+    deleteFile: vi.fn(),
+    deleteFiles: vi.fn(),
+    getFileByteArray: vi.fn(),
+    getFileContent: vi.fn(),
     getFullFileUrl: vi.fn(),
     getKeyFromFullUrl: vi.fn(),
+    uploadContent: vi.fn(),
     uploadMedia: vi.fn(),
   }),
 }));
@@ -45,12 +45,12 @@ describe('FileService', () => {
 
   beforeEach(() => {
     mockFileModel = {
-      findById: vi.fn(),
       delete: vi.fn(),
+      findById: vi.fn(),
     };
     mockTempManager = {
-      writeTempFile: vi.fn(),
       cleanup: vi.fn(),
+      writeTempFile: vi.fn(),
     };
     vi.mocked(FileModel).mockImplementation(() => mockFileModel);
     vi.mocked(TempFileManager).mockImplementation(() => mockTempManager);

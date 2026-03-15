@@ -54,6 +54,10 @@ git merge feat/my-feature
 git push origin main
 ```
 
+#### QUAN TRỌNG: Visualizer Feature Branch
+
+**KHÔNG BAO GIỜ push trực tiếp lên main.** Tất cả code mới commit vào branch hiện tại (`feat/visualizer`). Khi cần deploy staging, push lên origin branch hiện tại — Vercel sẽ tạo Preview deployment tự động.
+
 #### Other Git Rules
 
 - use rebase for git pull (when pulling into a feature branch)
@@ -142,6 +146,65 @@ Some useful rules of this project. Read them when needed.
 - `desktop-controller-tests.mdc` - Controller unit testing guide
 
 ---
+
+## Skills System — Mandatory for All Agents
+
+All AI agents (Claude Code CLI, Antigravity, Cursor, Copilot, etc.) **MUST** use installed skills for specialized tasks. Skills are located in:
+
+- `.claude/skills/` — Claude Code CLI skills (46 skills)
+- `.agents/skills/` — Cross-agent skills (37 skills)
+- `.agent/skills/` — Custom project skills
+
+### Workflow: Task → Skill Lookup → Execute
+
+1. **Before starting any specialized task**, check if a relevant skill exists
+2. **Read the SKILL.md** first — follow its instructions exactly
+3. **If no skill exists**, use one of:
+   - `find-skills` skill — discover community skills via `npx skills search`
+   - `skill-creator` skill — create a custom skill for the task
+4. **After using a skill**, verify results match the skill's quality checklist
+
+### Task-to-Skill Mapping
+
+| Task Category | Skills to Use |
+|---|---|
+| **UI/UX Design** | `ui-ux-pro-max`, `frontend-design`, `canvas-design`, `theme-factory` |
+| **Debugging** | `systematic-debugging`, `webapp-testing` |
+| **Testing** | `test-driven-development`, `webapp-testing`, `verification-before-completion` |
+| **Planning** | `writing-plans`, `executing-plans`, `brainstorming` |
+| **Code Review** | `requesting-code-review`, `receiving-code-review` |
+| **Database** | `postgresql-table-design`, `sql-optimization-patterns` |
+| **SEO/Marketing** | `seo-audit`, `programmatic-seo`, `content-strategy`, `copywriting` |
+| **Documents** | `docx`, `pdf`, `pptx`, `xlsx`, `doc-coauthoring` |
+| **MCP Servers** | `mcp-builder` |
+| **Next.js** | `next-best-practices`, `vercel-react-best-practices` |
+| **Parallel Work** | `dispatching-parallel-agents`, `subagent-driven-development` |
+| **API Integration** | `claude-api`, `ai-sdk` |
+| **Git Workflow** | `finishing-a-development-branch`, `using-git-worktrees` |
+
+### Browser Testing with agent-browser
+
+Use `agent-browser` CLI for web automation and UI testing:
+
+```bash
+agent-browser open <url>           # Navigate
+agent-browser snapshot -i          # Get interactive elements with refs
+agent-browser click @e1            # Click by ref
+agent-browser fill @e2 "text"      # Fill by ref
+agent-browser screenshot           # Capture screenshot
+agent-browser close                # Close
+```
+
+### Creating Custom Skills
+
+When no existing skill covers a domain, create one:
+
+```bash
+npx skills create my-skill-name    # or use skill-creator skill
+```
+
+Place in `.claude/skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`).
+
 
 ## Product Requirements Documents
 

@@ -7,9 +7,10 @@ import { ToolStoreState, initialState } from './initialState';
 import { BuiltinToolAction, createBuiltinToolSlice } from './slices/builtin';
 import { CustomPluginAction, createCustomPluginSlice } from './slices/customPlugin';
 import { PluginMCPStoreAction, createMCPPluginStoreSlice } from './slices/mcpStore';
-import { PluginAction, createPluginSlice } from './slices/plugin';
 import { PluginStoreAction, createPluginStoreSlice } from './slices/oldStore';
+import { PluginAction, createPluginSlice } from './slices/plugin';
 import { ScientificToolAction, createScientificToolSlice } from './slices/scientific';
+import { VisualizerToolAction, createVisualizerToolSlice } from './slices/visualizer';
 
 //  ===============  聚合 createStoreFn ============ //
 
@@ -19,7 +20,8 @@ export type ToolStore = ToolStoreState &
   PluginStoreAction &
   BuiltinToolAction &
   PluginMCPStoreAction &
-  ScientificToolAction;
+  ScientificToolAction &
+  VisualizerToolAction;
 
 const createStore: StateCreator<ToolStore, [['zustand/devtools', never]]> = (...parameters) => ({
   ...initialState,
@@ -29,6 +31,7 @@ const createStore: StateCreator<ToolStore, [['zustand/devtools', never]]> = (...
   ...createBuiltinToolSlice(...parameters),
   ...createMCPPluginStoreSlice(...parameters),
   ...createScientificToolSlice(...parameters),
+  ...createVisualizerToolSlice(...parameters),
 });
 
 //  ===============  实装 useStore ============ //

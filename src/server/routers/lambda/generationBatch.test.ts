@@ -11,8 +11,8 @@ vi.mock('@/server/services/file');
 
 describe('generationBatchRouter', () => {
   const mockCtx = {
-    userId: 'test-user',
     serverDB: {} as any,
+    userId: 'test-user',
   };
 
   beforeEach(() => {
@@ -22,19 +22,19 @@ describe('generationBatchRouter', () => {
   it('should get generation batches by topic id', async () => {
     const mockBatches = [
       {
-        id: 'batch-1',
-        topicId: 'topic-1',
-        prompt: 'Test prompt',
         generations: [
-          { id: 'gen-1', batchId: 'batch-1' },
-          { id: 'gen-2', batchId: 'batch-1' },
+          { batchId: 'batch-1', id: 'gen-1' },
+          { batchId: 'batch-1', id: 'gen-2' },
         ],
+        id: 'batch-1',
+        prompt: 'Test prompt',
+        topicId: 'topic-1',
       },
       {
+        generations: [{ batchId: 'batch-2', id: 'gen-3' }],
         id: 'batch-2',
-        topicId: 'topic-1',
         prompt: 'Another prompt',
-        generations: [{ id: 'gen-3', batchId: 'batch-2' }],
+        topicId: 'topic-1',
       },
     ];
 
@@ -57,19 +57,19 @@ describe('generationBatchRouter', () => {
   it('should delete generation batch without thumbnails', async () => {
     const mockBatchId = 'batch-123';
     const mockDeletedBatch: GenerationBatchItem = {
-      id: mockBatchId,
-      userId: 'test-user',
+      config: null,
       generationTopicId: 'topic-1',
-      provider: 'test-provider',
+      accessedAt: new Date(),
+      height: 1024,
+      createdAt: new Date(),
+      id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',
-      width: 1024,
-      height: 1024,
+      provider: 'test-provider',
       ratio: null,
-      config: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
+      width: 1024,
     };
 
     const mockDelete = vi.fn().mockResolvedValue({
@@ -104,19 +104,19 @@ describe('generationBatchRouter', () => {
     const mockBatchId = 'batch-123';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg', 'thumb3.jpg'];
     const mockDeletedBatch: GenerationBatchItem = {
-      id: mockBatchId,
-      userId: 'test-user',
+      config: null,
       generationTopicId: 'topic-1',
-      provider: 'test-provider',
+      accessedAt: new Date(),
+      height: 1024,
+      createdAt: new Date(),
+      id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',
-      width: 1024,
-      height: 1024,
+      provider: 'test-provider',
       ratio: null,
-      config: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
+      width: 1024,
     };
 
     const mockDelete = vi.fn().mockResolvedValue({
@@ -151,19 +151,19 @@ describe('generationBatchRouter', () => {
     const mockBatchId = 'batch-123';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg'];
     const mockDeletedBatch: GenerationBatchItem = {
-      id: mockBatchId,
-      userId: 'test-user',
+      config: null,
       generationTopicId: 'topic-1',
-      provider: 'test-provider',
+      accessedAt: new Date(),
+      height: 1024,
+      createdAt: new Date(),
+      id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',
-      width: 1024,
-      height: 1024,
+      provider: 'test-provider',
       ratio: null,
-      config: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
+      width: 1024,
     };
 
     const mockDelete = vi.fn().mockResolvedValue({
@@ -237,19 +237,19 @@ describe('generationBatchRouter', () => {
     // 模拟包含大量缩略图的批次
     const mockThumbnailUrls = Array.from({ length: 50 }, (_, i) => `thumb${i + 1}.jpg`);
     const mockDeletedBatch: GenerationBatchItem = {
-      id: mockBatchId,
-      userId: 'test-user',
+      config: null,
       generationTopicId: 'topic-1',
-      provider: 'test-provider',
+      accessedAt: new Date(),
+      height: 1024,
+      createdAt: new Date(),
+      id: mockBatchId,
       model: 'test-model',
       prompt: 'Batch with many generations',
-      width: 1024,
-      height: 1024,
+      provider: 'test-provider',
       ratio: null,
-      config: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
+      width: 1024,
     };
 
     const mockDelete = vi.fn().mockResolvedValue({
@@ -319,19 +319,19 @@ describe('generationBatchRouter', () => {
     const mockBatchId = 'batch-123';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg', 'thumb3.jpg'];
     const mockDeletedBatch: GenerationBatchItem = {
-      id: mockBatchId,
-      userId: 'test-user',
+      config: null,
       generationTopicId: 'topic-1',
-      provider: 'test-provider',
+      accessedAt: new Date(),
+      height: 1024,
+      createdAt: new Date(),
+      id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',
-      width: 1024,
-      height: 1024,
+      provider: 'test-provider',
       ratio: null,
-      config: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
+      width: 1024,
     };
 
     const mockDelete = vi.fn().mockResolvedValue({

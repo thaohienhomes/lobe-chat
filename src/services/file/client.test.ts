@@ -13,8 +13,8 @@ const userId = 'file-user';
 const fileService = new ClientService(userId);
 
 const mockFile = {
-  name: 'mock.png',
   fileType: 'image/png',
+  name: 'mock.png',
   size: 1,
   url: '',
 };
@@ -34,11 +34,11 @@ describe('FileService', () => {
   describe('createFile', () => {
     it('createFile should save the file to the database', async () => {
       const localFile: UploadFileParams = {
-        name: 'test',
         fileType: 'image/png',
-        url: '',
-        size: 1,
         hash: '123',
+        name: 'test',
+        size: 1,
+        url: '',
       };
 
       await clientS3Storage.putObject(
@@ -53,11 +53,11 @@ describe('FileService', () => {
 
     it('should throw error when file is not found in storage during base64 conversion', async () => {
       const localFile: UploadFileParams = {
-        name: 'test',
         fileType: 'image/png',
-        url: '',
-        size: 1,
         hash: 'non-existing-hash',
+        name: 'test',
+        size: 1,
+        url: '',
       };
 
       // 不调用 clientS3Storage.putObject，模拟文件不存在的情况
@@ -86,10 +86,10 @@ describe('FileService', () => {
       const fileId = 'rwlijweled';
       const file = {
         fileType: 'image/png',
-        size: 1,
-        name: 'test.png',
-        url: 'idb://12312/abc.png',
         hashId: '123tttt',
+        name: 'test.png',
+        size: 1,
+        url: 'idb://12312/abc.png',
       };
 
       await clientDB.insert(globalFiles).values({ ...file, creator: userId });
@@ -99,8 +99,8 @@ describe('FileService', () => {
         userId,
         ...file,
         createdAt: new Date(1),
-        updatedAt: new Date(2),
         fileHash: file.hashId,
+        updatedAt: new Date(2),
       });
 
       await clientS3Storage.putObject(
@@ -113,9 +113,9 @@ describe('FileService', () => {
       expect(result).toMatchObject({
         createdAt: new Date(1),
         id: 'rwlijweled',
+        name: 'test.png',
         size: 1,
         type: 'image/png',
-        name: 'test.png',
         updatedAt: new Date(2),
       });
     });
@@ -173,8 +173,8 @@ describe('FileService', () => {
       const hash = 'existing-hash';
       await clientDB.insert(globalFiles).values({
         ...mockFile,
-        hashId: hash,
         creator: userId,
+        hashId: hash,
       });
       await clientDB.insert(files).values({
         id: '1',

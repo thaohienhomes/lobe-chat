@@ -46,10 +46,10 @@ describe('createCommonSlice', () => {
 
   describe('useInitUserState', () => {
     const mockServerConfig = {
+      aiProvider: {},
       defaultAgent: 'agent1',
       languageModel: 'model1',
       telemetry: {},
-      aiProvider: {},
     } as GlobalServerConfig;
 
     it('should not fetch user state if user is not login', async () => {
@@ -75,7 +75,7 @@ describe('createCommonSlice', () => {
 
     it('should fetch user state correctly when user is login', async () => {
       const mockUserState: UserInitializationState = {
-        userId: 'user-id',
+        email: 'test@example.com',
         isOnboard: true,
         preference: {
           telemetry: true,
@@ -83,7 +83,7 @@ describe('createCommonSlice', () => {
         settings: {
           general: { fontSize: 14 },
         },
-        email: 'test@example.com',
+        userId: 'user-id',
       };
 
       vi.spyOn(userService, 'getUserState').mockResolvedValueOnce(mockUserState);
@@ -111,12 +111,12 @@ describe('createCommonSlice', () => {
 
     it('should call switch language when language is auto', async () => {
       const mockUserState: UserInitializationState = {
-        userId: 'user-id',
         isOnboard: true,
         preference: {
           telemetry: true,
         },
         settings: {},
+        userId: 'user-id',
       };
 
       vi.spyOn(userService, 'getUserState').mockResolvedValueOnce(mockUserState);
@@ -131,12 +131,12 @@ describe('createCommonSlice', () => {
 
     it('should fetch use server config correctly', async () => {
       const mockUserState: UserInitializationState = {
-        userId: 'user-id',
         isOnboard: true,
         preference: {
           telemetry: true,
         },
         settings: {},
+        userId: 'user-id',
       };
       vi.spyOn(userService, 'getUserState').mockResolvedValueOnce(mockUserState);
 
@@ -150,17 +150,17 @@ describe('createCommonSlice', () => {
 
       const savedPreference: UserPreference = {
         ...DEFAULT_PREFERENCE,
+        guide: { moveSettingsToAvatar: true, topic: false },
         hideSyncAlert: true,
-        guide: { topic: false, moveSettingsToAvatar: true },
       };
 
       const mockUserState: UserInitializationState = {
-        userId: 'user-id',
         isOnboard: true,
         preference: savedPreference,
         settings: {
           general: { fontSize: 14 },
         },
+        userId: 'user-id',
       };
       vi.spyOn(userService, 'getUserState').mockResolvedValueOnce(mockUserState);
 
@@ -179,11 +179,11 @@ describe('createCommonSlice', () => {
     it('should handle the case when user state have avatar', async () => {
       const { result } = renderHook(() => useUserStore());
       const mockUserState: UserInitializationState = {
-        userId: 'user-id',
+        avatar: 'abc',
         isOnboard: true,
         preference: undefined as any,
         settings: null as any,
-        avatar: 'abc',
+        userId: 'user-id',
       };
 
       vi.spyOn(userService, 'getUserState').mockResolvedValueOnce(mockUserState);
@@ -205,12 +205,12 @@ describe('createCommonSlice', () => {
       const { result } = renderHook(() => useUserStore());
 
       const mockUserState: UserInitializationState = {
-        userId: 'user-id',
         isOnboard: true,
         preference: {} as any,
         settings: {
           general: { fontSize: 12 },
         },
+        userId: 'user-id',
       };
 
       vi.spyOn(userService, 'getUserState').mockResolvedValueOnce(mockUserState);

@@ -4,31 +4,44 @@ import { aiProviderSelectors } from '../selectors';
 
 describe('aiProviderSelectors', () => {
   const mockState: any = {
-    aiProviderList: [
-      { id: 'provider1', enabled: true, sort: 1 },
-      { id: 'provider2', enabled: false, sort: 2 },
-      { id: 'provider3', enabled: true, sort: 0 },
-    ],
-    aiProviderDetail: {
+    activeAiProvider: 'provider1',
+    // Required by AIProviderStoreState
+activeProviderModelList: [],
+    
+aiModelLoadingIds: [],
+    
+aiProviderConfigUpdatingIds: ['updating-provider'],
+    
+aiProviderDetail: {
       id: 'provider1',
       keyVaults: {
-        baseURL: 'https://api.example.com',
         apiKey: 'test-key',
+        baseURL: 'https://api.example.com',
       },
     },
+    
+aiProviderList: [
+      { enabled: true, id: 'provider1', sort: 1 },
+      { enabled: false, id: 'provider2', sort: 2 },
+      { enabled: true, id: 'provider3', sort: 0 },
+    ],
+    
     aiProviderLoadingIds: ['loading-provider'],
-    aiProviderConfigUpdatingIds: ['updating-provider'],
-    activeAiProvider: 'provider1',
     aiProviderRuntimeConfig: {
+      ollama: {
+        fetchOnClient: true,
+        keyVaults: {},
+        settings: {},
+      },
       provider1: {
+        fetchOnClient: true,
         keyVaults: {
-          baseURL: 'https://api.example.com',
           apiKey: 'test-key',
+          baseURL: 'https://api.example.com',
         },
         settings: {
           searchMode: 'internal',
         },
-        fetchOnClient: true,
       },
       provider2: {
         keyVaults: {
@@ -36,28 +49,20 @@ describe('aiProviderSelectors', () => {
         },
         settings: {},
       },
-      ollama: {
-        keyVaults: {},
-        settings: {},
-        fetchOnClient: true,
-      },
     },
-    // Required by AIProviderStoreState
-    activeProviderModelList: [],
     initAiProviderList: [],
-    providerSearchKeyword: '',
-    aiModelLoadingIds: [],
     modelFetchingStatus: {},
     modelRuntimeConfig: {},
     modelSearchKeyword: '',
+    providerSearchKeyword: '',
   };
 
   describe('enabledAiProviderList', () => {
     it('should return enabled providers sorted by sort', () => {
       const result = aiProviderSelectors.enabledAiProviderList(mockState);
       expect(result).toEqual([
-        { id: 'provider3', enabled: true, sort: 0 },
-        { id: 'provider1', enabled: true, sort: 1 },
+        { enabled: true, id: 'provider3', sort: 0 },
+        { enabled: true, id: 'provider1', sort: 1 },
       ]);
     });
   });
@@ -65,7 +70,7 @@ describe('aiProviderSelectors', () => {
   describe('disabledAiProviderList', () => {
     it('should return disabled providers', () => {
       const result = aiProviderSelectors.disabledAiProviderList(mockState);
-      expect(result).toEqual([{ id: 'provider2', enabled: false, sort: 2 }]);
+      expect(result).toEqual([{ enabled: false, id: 'provider2', sort: 2 }]);
     });
   });
 

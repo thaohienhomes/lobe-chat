@@ -14,9 +14,9 @@ vi.mock('node:fs', async (importOriginal) => ({
 
 vi.mock('@/server/modules/ElectronIPCClient', () => ({
   electronIpcClient: {
-    getFilePathById: vi.fn(),
-    deleteFiles: vi.fn(),
     createFile: vi.fn(),
+    deleteFiles: vi.fn(),
+    getFilePathById: vi.fn(),
   },
 }));
 
@@ -350,13 +350,13 @@ describe('DesktopLocalFileImpl', () => {
       const testKey = 'desktop://images/test.jpg';
       const testBuffer = Buffer.from('fake image data');
       const mockResult = {
-        success: true,
         metadata: {
-          path: testKey,
-          filename: 'test.jpg',
-          dirname: 'desktop://images',
           date: new Date().toISOString(),
+          dirname: 'desktop://images',
+          filename: 'test.jpg',
+          path: testKey,
         },
+        success: true,
       };
 
       vi.mocked(electronIpcClient.createFile).mockResolvedValueOnce(mockResult);
@@ -380,13 +380,13 @@ describe('DesktopLocalFileImpl', () => {
       const testKey = 'desktop://images/test.png';
       const testBuffer = Buffer.from('fake png data');
       const mockResult = {
-        success: true,
         metadata: {
-          path: testKey,
-          filename: 'test.png',
-          dirname: 'desktop://images',
           date: new Date().toISOString(),
+          dirname: 'desktop://images',
+          filename: 'test.png',
+          path: testKey,
         },
+        success: true,
       };
 
       vi.mocked(electronIpcClient.createFile).mockResolvedValueOnce(mockResult);
@@ -409,14 +409,14 @@ describe('DesktopLocalFileImpl', () => {
       const testKey = 'desktop://images/test.jpg';
       const testBuffer = Buffer.from('fake image data');
       const mockResult = {
-        success: false,
-        metadata: {
-          path: testKey,
-          filename: 'test.jpg',
-          dirname: 'desktop://images',
-          date: new Date().toISOString(),
-        },
         error: 'Upload failed',
+        metadata: {
+          date: new Date().toISOString(),
+          dirname: 'desktop://images',
+          filename: 'test.jpg',
+          path: testKey,
+        },
+        success: false,
       };
 
       vi.mocked(electronIpcClient.createFile).mockResolvedValueOnce(mockResult);

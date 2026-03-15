@@ -40,8 +40,8 @@ describe('createBuiltinToolSlice', () => {
 
       const params = {
         prompts: ['test prompt'],
-        size: '512x512',
         quality: 'standard',
+        size: '512x512',
         style: 'vivid',
       };
 
@@ -72,8 +72,8 @@ describe('createBuiltinToolSlice', () => {
 
       const data = result.current.text2image({
         prompts: ['prompt1', 'prompt2'],
-        size: '1024x1024',
         quality: 'standard',
+        size: '1024x1024',
         style: 'vivid',
       });
 

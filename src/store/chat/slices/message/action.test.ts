@@ -20,14 +20,14 @@ vi.mock('zustand/traditional');
 // Mock service
 vi.mock('@/services/message', () => ({
   messageService: {
-    getMessages: vi.fn(),
-    updateMessageError: vi.fn(),
-    removeMessage: vi.fn(),
-    removeMessagesByAssistant: vi.fn(),
-    removeMessages: vi.fn(() => Promise.resolve()),
     createMessage: vi.fn(() => Promise.resolve('new-message-id')),
-    updateMessage: vi.fn(),
+    getMessages: vi.fn(),
     removeAllMessages: vi.fn(() => Promise.resolve()),
+    removeMessage: vi.fn(),
+    removeMessages: vi.fn(() => Promise.resolve()),
+    removeMessagesByAssistant: vi.fn(),
+    updateMessage: vi.fn(),
+    updateMessageError: vi.fn(),
   },
 }));
 vi.mock('@/services/topic', () => ({
@@ -42,10 +42,10 @@ const realRefreshMessages = useChatStore.getState().refreshMessages;
 const mockState = {
   activeId: 'session-id',
   activeTopicId: 'topic-id',
+  internal_coreProcessMessage: vi.fn(),
   messages: [],
   refreshMessages: vi.fn(),
   refreshTopic: vi.fn(),
-  internal_coreProcessMessage: vi.fn(),
   saveToTopic: vi.fn(),
 };
 
@@ -138,8 +138,8 @@ describe('chatMessage actions', () => {
           messagesMap: {
             [messageMapKey('session-id')]: [
               { id: messageId, tools: [{ id: 'tool1' }, { id: 'tool2' }] } as ChatMessage,
-              { id: '2', tool_call_id: 'tool1', role: 'tool' } as ChatMessage,
-              { id: '3', tool_call_id: 'tool2', role: 'tool' } as ChatMessage,
+              { id: '2', role: 'tool', tool_call_id: 'tool1' } as ChatMessage,
+              { id: '3', role: 'tool', tool_call_id: 'tool2' } as ChatMessage,
             ],
           },
         });
@@ -201,8 +201,8 @@ describe('chatMessage actions', () => {
                 role: 'assistant',
                 tools: [{ id: 'tool1' }, { id: 'tool2' }],
               } as ChatMessage,
-              { id: '2', parentId: messageId, tool_call_id: 'tool1', role: 'tool' } as ChatMessage,
-              { id: '3', tool_call_id: 'tool2', role: 'tool' } as ChatMessage,
+              { id: '2', parentId: messageId, role: 'tool', tool_call_id: 'tool1' } as ChatMessage,
+              { id: '3', role: 'tool', tool_call_id: 'tool2' } as ChatMessage,
             ],
           },
         });
@@ -462,7 +462,7 @@ describe('chatMessage actions', () => {
     it('should fetch messages for given session and topic ids', async () => {
       const sessionId = 'session-id';
       const topicId = 'topic-id';
-      const messages = [{ id: 'message-id', content: 'Hello' }];
+      const messages = [{ content: 'Hello', id: 'message-id' }];
 
       // 设置模拟返回值
       (messageService.getMessages as Mock).mockResolvedValue(messages);

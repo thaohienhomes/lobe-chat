@@ -15,9 +15,9 @@ describe('TopicModel', () => {
   beforeEach(() => {
     // Set up topic data with the correct structure
     topicData = {
+      favorite: false,
       sessionId: currentSessionId,
       title: 'Test Topic',
-      favorite: false,
     };
   });
 
@@ -36,9 +36,9 @@ describe('TopicModel', () => {
 
       expect(topicInDb).toEqual(
         expect.objectContaining({
-          title: topicData.title,
           favorite: topicData.favorite ? 1 : 0,
           sessionId: topicData.sessionId,
+          title: topicData.title,
         }),
       );
     });
@@ -54,9 +54,9 @@ describe('TopicModel', () => {
       const topicInDb = await TopicModel.findById(result.id);
       expect(topicInDb).toEqual(
         expect.objectContaining({
-          title: favoriteTopicData.title,
           favorite: 1,
           sessionId: favoriteTopicData.sessionId,
+          title: favoriteTopicData.title,
         }),
       );
     });
@@ -109,9 +109,9 @@ describe('TopicModel', () => {
         const topicInDb = await TopicModel.findById(result);
         expect(topicInDb).toEqual(
           expect.objectContaining({
-            title: topicData.title,
             favorite: topicData.favorite ? 1 : 0,
             sessionId: topicData.sessionId,
+            title: topicData.title,
           }),
         );
       }
@@ -139,7 +139,7 @@ describe('TopicModel', () => {
     // Create multiple topics to test the query method
     await TopicModel.batchCreate([topicData, topicData]);
 
-    const queryParams: QueryTopicParams = { pageSize: 1, current: 0, sessionId: 'session1' };
+    const queryParams: QueryTopicParams = { current: 0, pageSize: 1, sessionId: 'session1' };
     const queriedTopics = await TopicModel.query(queryParams);
 
     expect(queriedTopics).toHaveLength(1);
@@ -228,9 +228,9 @@ describe('TopicModel', () => {
     const createdTopic = await TopicModel.create(topicData);
     const messageData: CreateMessageParams = {
       content: 'Test Message',
-      topicId: createdTopic.id,
-      sessionId: topicData.sessionId,
       role: 'user',
+      sessionId: topicData.sessionId,
+      topicId: createdTopic.id,
     };
     await MessageModel.create(messageData);
 
@@ -256,15 +256,15 @@ describe('TopicModel', () => {
 
     const messageData1: CreateMessageParams = {
       content: 'Test Message 1',
-      topicId: createdTopic1.id,
-      sessionId: topicData.sessionId,
       role: 'user',
+      sessionId: topicData.sessionId,
+      topicId: createdTopic1.id,
     };
     const messageData2: CreateMessageParams = {
       content: 'Test Message 2',
-      topicId: createdTopic2.id,
-      sessionId: topicData.sessionId,
       role: 'user',
+      sessionId: topicData.sessionId,
+      topicId: createdTopic2.id,
     };
     await MessageModel.create(messageData1);
     await MessageModel.create(messageData2);
@@ -298,9 +298,9 @@ describe('TopicModel', () => {
     beforeEach(async () => {
       // 创建一个原始主题
       const { id } = await TopicModel.create({
-        title: 'Original Topic',
-        sessionId: 'session1',
         favorite: false,
+        sessionId: 'session1',
+        title: 'Original Topic',
       });
       originalTopic = await TopicModel.findById(id);
 
@@ -309,9 +309,9 @@ describe('TopicModel', () => {
         ['Message 1', 'Message 2'].map((text) =>
           MessageModel.create({
             content: text,
-            topicId: originalTopic.id,
-            sessionId: originalTopic.sessionId!,
             role: 'user',
+            sessionId: originalTopic.sessionId!,
+            topicId: originalTopic.id,
           }),
         ),
       );
@@ -358,9 +358,9 @@ describe('TopicModel', () => {
       // 验证复制的主题是否保留了原始主题的属性
       expect(duplicatedTopic).toBeDefined();
       expect(duplicatedTopic).toMatchObject({
-        title: originalTopic.title,
         favorite: originalTopic.favorite,
         sessionId: originalTopic.sessionId,
+        title: originalTopic.title,
       });
       // 确保生成了新的 ID
       expect(duplicatedTopic.id).not.toBe(originalTopic.id);
@@ -370,10 +370,10 @@ describe('TopicModel', () => {
       // 创建一个子消息关联到其中一个原始消息
       const { id } = await MessageModel.create({
         content: 'Child Message',
-        topicId: originalTopic.id,
         parentId: originalMessages[0].id,
-        sessionId: originalTopic.sessionId!,
         role: 'user',
+        sessionId: originalTopic.sessionId!,
+        topicId: originalTopic.id,
       });
       const childMessage = await MessageModel.findById(id);
 

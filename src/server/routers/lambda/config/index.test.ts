@@ -105,8 +105,8 @@ describe('configRouter', () => {
 
           expect(result).toContainEqual({
             displayName: 'model1',
-            id: 'model1',
             enabled: true,
+            id: 'model1',
           });
           expect(result).toContainEqual({
             displayName: 'model2',

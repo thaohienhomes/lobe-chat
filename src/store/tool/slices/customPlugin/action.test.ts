@@ -12,9 +12,9 @@ beforeEach(() => {
 });
 vi.mock('@/services/plugin', () => ({
   pluginService: {
-    updatePlugin: vi.fn(),
     createCustomPlugin: vi.fn(),
     uninstallPlugin: vi.fn(),
+    updatePlugin: vi.fn(),
     updatePluginManifest: vi.fn(),
   },
 }));
@@ -51,11 +51,11 @@ describe('useToolStore:customPlugin', () => {
   describe('saveToCustomPluginList', () => {
     it('should add a plugin to the custom plugin list and reset newCustomPlugin', async () => {
       const newPlugin = {
-        type: 'customPlugin',
         manifest: {
           identifier: 'plugin2',
           meta: { title: 'New Plugin' },
         },
+        type: 'customPlugin',
       } as LobeToolCustomPlugin;
       act(() => {
         useToolStore.setState({
@@ -78,12 +78,12 @@ describe('useToolStore:customPlugin', () => {
     it('should update a specific plugin in the custom plugin list and reinstall the plugin', async () => {
       const pluginId = 'test-plugin';
       const old = {
-        type: 'customPlugin',
         identifier: pluginId,
         manifest: {
           identifier: pluginId,
-          meta: { title: 'Old Plugin', avatar: '🍎' },
+          meta: { avatar: '🍎', title: 'Old Plugin' },
         },
+        type: 'customPlugin',
       } as LobeToolCustomPlugin;
 
       act(() => {
@@ -95,12 +95,12 @@ describe('useToolStore:customPlugin', () => {
       const { result } = renderHook(() => useToolStore());
 
       const updatedPlugin = {
-        type: 'customPlugin',
+        identifier: pluginId,
         manifest: {
           identifier: pluginId,
-          meta: { title: 'Updated Plugin', avatar: '🥒' },
+          meta: { avatar: '🥒', title: 'Updated Plugin' },
         },
-        identifier: pluginId,
+        type: 'customPlugin',
       } as LobeToolCustomPlugin;
 
       await act(async () => {
@@ -114,11 +114,11 @@ describe('useToolStore:customPlugin', () => {
   describe('updateNewCustomPlugin', () => {
     it('should update the newCustomPlugin state with the provided values', () => {
       const initialNewCustomPlugin = {
-        type: 'customPlugin',
         manifest: {
           identifier: 'plugin3',
           meta: { title: 'Initial Plugin' },
         },
+        type: 'customPlugin',
       } as LobeToolCustomPlugin;
       const updates = { meta: { title: 'Updated Name' } } as Partial<LobeToolCustomPlugin>;
       const expectedNewCustomPlugin = { ...initialNewCustomPlugin, ...updates };

@@ -127,8 +127,8 @@ describe('imageRouter', () => {
 
       it('should not throw for strings that contain but do not start with http', () => {
         const config = {
-          imageUrl: 'some-prefix-https://example.com',
           description: 'This text contains http:// but is not a URL',
+          imageUrl: 'some-prefix-https://example.com',
         };
 
         expect(() => validateNoUrlsInConfig(config)).not.toThrow();

@@ -8,31 +8,31 @@ import { sessionGroupsReducer } from './reducer';
 describe('sessionGroupsReducer', () => {
   const initialState: SessionGroupItem[] = [
     {
+      createdAt: new Date(),
       id: nanoid(),
       name: 'Group 1',
-      createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
+      createdAt: new Date(),
       id: nanoid(),
       name: 'Group 2',
-      createdAt: new Date(),
-      updatedAt: new Date(),
       sort: 1,
+      updatedAt: new Date(),
     },
   ];
 
   it('should add a new session group item', () => {
     const newItem: SessionGroupItem = {
+      createdAt: new Date(),
       id: nanoid(),
       name: 'New Group',
-      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     const result = sessionGroupsReducer(initialState, {
-      type: 'addSessionGroupItem',
       item: newItem,
+      type: 'addSessionGroupItem',
     });
 
     expect(result).toHaveLength(3);
@@ -43,8 +43,8 @@ describe('sessionGroupsReducer', () => {
     const itemToDelete = initialState[0].id;
 
     const result = sessionGroupsReducer(initialState, {
-      type: 'deleteSessionGroupItem',
       id: itemToDelete,
+      type: 'deleteSessionGroupItem',
     });
 
     expect(result).toHaveLength(1);
@@ -56,9 +56,9 @@ describe('sessionGroupsReducer', () => {
     const updatedItem = { name: 'Updated Group' };
 
     const result = sessionGroupsReducer(initialState, {
-      type: 'updateSessionGroupItem',
       id: itemToUpdate,
       item: updatedItem,
+      type: 'updateSessionGroupItem',
     });
 
     expect(result).toHaveLength(2);
@@ -71,7 +71,7 @@ describe('sessionGroupsReducer', () => {
       { id: initialState[0].id, sort: 1 },
     ];
 
-    const result = sessionGroupsReducer(initialState, { type: 'updateSessionGroupOrder', sortMap });
+    const result = sessionGroupsReducer(initialState, { sortMap, type: 'updateSessionGroupOrder' });
 
     expect(result).toHaveLength(2);
     expect(result[0].id).toBe(initialState[1].id);

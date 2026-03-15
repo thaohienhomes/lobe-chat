@@ -2,7 +2,6 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { message } from '@/components/AntdStaticMethods';
-import { SESSION_CHAT_URL } from '@/const/url';
 import { sessionService } from '@/services/session';
 import { useSessionStore } from '@/store/session';
 import { LobeSessionType } from '@/types/session';
@@ -12,26 +11,26 @@ import { sessionSelectors } from './selectors';
 // Mock sessionService 和其他依赖项
 vi.mock('@/services/session', () => ({
   sessionService: {
-    removeAllSessions: vi.fn(),
-    createSession: vi.fn(),
     cloneSession: vi.fn(),
-    updateSessionGroup: vi.fn(),
-    removeSession: vi.fn(),
+    createSession: vi.fn(),
     getAllSessions: vi.fn(),
-    updateSession: vi.fn(),
-    updateSessionMeta: vi.fn(),
-    updateSessionGroupId: vi.fn(),
+    removeAllSessions: vi.fn(),
+    removeSession: vi.fn(),
     searchSessions: vi.fn(),
+    updateSession: vi.fn(),
+    updateSessionGroup: vi.fn(),
+    updateSessionGroupId: vi.fn(),
+    updateSessionMeta: vi.fn(),
     updateSessionPinned: vi.fn(),
   },
 }));
 
 vi.mock('@/components/AntdStaticMethods', () => ({
   message: {
+    destroy: vi.fn(),
+    error: vi.fn(),
     loading: vi.fn(),
     success: vi.fn(),
-    error: vi.fn(),
-    destroy: vi.fn(),
   },
 }));
 

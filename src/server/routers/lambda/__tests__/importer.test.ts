@@ -1,8 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DataImporterRepos } from '@/database/repositories/dataImporter';
-import { FileService } from '@/server/services/file';
 import { ImportResultData } from '@/types/importer';
 
 import { importerRouter } from '../importer';
@@ -21,15 +19,15 @@ vi.mock('@/database/repositories/dataImporter', () => ({
 
 vi.mock('@/server/services/file', () => ({
   FileService: vi.fn().mockImplementation(() => ({
-    getFileContent: mockGetFileContent,
     deleteFile: mockDeleteFile,
+    getFileContent: mockGetFileContent,
   })),
 }));
 
 describe('importerRouter', () => {
   const mockFileContent = JSON.stringify({
-    version: 1,
     messages: [],
+    version: 1,
   });
 
   const mockPgData = {
@@ -39,17 +37,17 @@ describe('importerRouter', () => {
   };
 
   const mockImportResult: ImportResultData = {
-    success: true,
     results: { messages: { added: 1, errors: 0, skips: 0 } },
+    success: true,
   };
 
   const mockImportErrorResult: ImportResultData = {
-    success: false,
     error: {
-      message: 'Import failed',
       details: 'Error details',
+      message: 'Import failed',
     },
     results: {},
+    success: false,
   };
 
   beforeEach(() => {
@@ -63,8 +61,8 @@ describe('importerRouter', () => {
   });
 
   const ctx = {
-    userId: 'user-1',
     serverDB: {} as any,
+    userId: 'user-1',
   };
 
   describe('importByFile', () => {
@@ -113,8 +111,8 @@ describe('importerRouter', () => {
 
       const postData = {
         data: {
-          version: 1,
           messages: [],
+          version: 1,
         },
       };
 
@@ -131,8 +129,8 @@ describe('importerRouter', () => {
 
       const result = await caller.importByPost({
         data: {
-          version: 1,
           messages: [],
+          version: 1,
         },
       });
 

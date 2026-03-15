@@ -1,55 +1,55 @@
-import { LobeChatPluginManifest, LobeChatPluginMeta } from '@lobehub/chat-plugin-sdk';
+import { LobeChatPluginManifest } from '@lobehub/chat-plugin-sdk';
 import { describe, expect, it } from 'vitest';
 
-import { initialState } from '../initialState';
-import { ToolStoreState } from '../initialState';
+import { initialState , ToolStoreState } from '../initialState';
+
 import { toolSelectors } from './tool';
 
 const mockState = {
   ...initialState,
+  builtinTools: [
+    {
+      identifier: 'builtin-1',
+      manifest: {
+        api: [{ name: 'builtin-api-1' }],
+        identifier: 'builtin-1',
+        meta: { description: 'Builtin 1 description', title: 'Builtin 1' },
+      } as LobeChatPluginManifest,
+      type: 'builtin',
+    },
+  ],
   installedPlugins: [
     {
       identifier: 'plugin-1',
       manifest: {
-        identifier: 'plugin-1',
         api: [{ name: 'api-1' }],
-        meta: { title: 'Plugin 1', description: 'Plugin 1 description' },
+        identifier: 'plugin-1',
+        meta: { description: 'Plugin 1 description', title: 'Plugin 1' },
       } as LobeChatPluginManifest,
       type: 'plugin',
     },
     {
       identifier: 'plugin-2',
       manifest: {
-        identifier: 'plugin-2',
         api: [{ name: 'api-2' }],
+        identifier: 'plugin-2',
       } as LobeChatPluginManifest,
       type: 'plugin',
     },
     {
       identifier: 'plugin-3',
       manifest: {
-        identifier: 'plugin-3',
         api: [
           {
-            name: 'api-3',
-            url: 'bac',
             description: '123123',
-            parameters: { type: 'object', properties: { a: { type: 'string' } } },
+            name: 'api-3',
+            parameters: { properties: { a: { type: 'string' } }, type: 'object' },
+            url: 'bac',
           },
         ],
+        identifier: 'plugin-3',
       },
       type: 'customPlugin',
-    },
-  ],
-  builtinTools: [
-    {
-      type: 'builtin',
-      identifier: 'builtin-1',
-      manifest: {
-        identifier: 'builtin-1',
-        api: [{ name: 'builtin-api-1' }],
-        meta: { title: 'Builtin 1', description: 'Builtin 1 description' },
-      } as LobeChatPluginManifest,
     },
   ],
   pluginInstallLoading: {
@@ -64,16 +64,16 @@ describe('toolSelectors', () => {
       const result = toolSelectors.enabledSchema(['plugin-1', 'plugin-2'])(mockState);
       expect(result).toEqual([
         {
-          type: 'function',
           function: {
             name: 'plugin-1____api-1',
           },
+          type: 'function',
         },
         {
-          type: 'function',
           function: {
             name: 'plugin-2____api-2',
           },
+          type: 'function',
         },
       ]);
     });
@@ -86,8 +86,8 @@ describe('toolSelectors', () => {
           {
             identifier: 'plugin-4',
             manifest: {
-              identifier: 'plugin-4',
               api: [{ name: 'api-4' }],
+              identifier: 'plugin-4',
               type: 'standalone',
             },
             type: 'plugin',
@@ -96,10 +96,10 @@ describe('toolSelectors', () => {
       } as ToolStoreState);
       expect(result).toEqual([
         {
-          type: 'function',
           function: {
             name: 'plugin-4____api-4____standalone',
           },
+          type: 'function',
         },
       ]);
     });
@@ -112,8 +112,8 @@ describe('toolSelectors', () => {
           {
             identifier: 'long-long-plugin-with-id',
             manifest: {
-              identifier: 'long-long-plugin-with-id',
               api: [{ name: 'long-long-manifest-long-long-apiName' }],
+              identifier: 'long-long-plugin-with-id',
             },
             type: 'plugin',
           },
@@ -121,10 +121,10 @@ describe('toolSelectors', () => {
       } as ToolStoreState);
       expect(result).toEqual([
         {
-          type: 'function',
           function: {
             name: 'long-long-plugin-with-id____MD5HASH_396eae4c671da3fb',
           },
+          type: 'function',
         },
       ]);
     });
@@ -176,22 +176,22 @@ describe('toolSelectors', () => {
       const result = toolSelectors.metaList()(mockState);
       expect(result).toEqual([
         {
-          type: 'builtin',
           author: 'LobeHub',
           identifier: 'builtin-1',
-          meta: { title: 'Builtin 1', description: 'Builtin 1 description' },
+          meta: { description: 'Builtin 1 description', title: 'Builtin 1' },
+          type: 'builtin',
         },
         {
-          identifier: 'plugin-1',
-          type: 'plugin',
-          meta: { title: 'Plugin 1', description: 'Plugin 1 description' },
-          title: 'Plugin 1',
           description: 'Plugin 1 description',
+          identifier: 'plugin-1',
+          meta: { description: 'Plugin 1 description', title: 'Plugin 1' },
+          title: 'Plugin 1',
+          type: 'plugin',
         },
         {
-          type: 'plugin',
           identifier: 'plugin-2',
           meta: undefined,
+          type: 'plugin',
         },
         {
           identifier: 'plugin-3',
@@ -202,7 +202,7 @@ describe('toolSelectors', () => {
 
     it('should return the correct metadata by identifier', () => {
       const result = toolSelectors.getMetaById('plugin-1')(mockState);
-      expect(result).toEqual({ title: 'Plugin 1', description: 'Plugin 1 description' });
+      expect(result).toEqual({ description: 'Plugin 1 description', title: 'Plugin 1' });
     });
 
     it('should return undefined for non-existent identifier', () => {
@@ -215,9 +215,9 @@ describe('toolSelectors', () => {
     it('should return the correct manifest by identifier', () => {
       const result = toolSelectors.getManifestById('plugin-1')(mockState);
       expect(result).toEqual({
-        identifier: 'plugin-1',
         api: [{ name: 'api-1' }],
-        meta: { title: 'Plugin 1', description: 'Plugin 1 description' },
+        identifier: 'plugin-1',
+        meta: { description: 'Plugin 1 description', title: 'Plugin 1' },
       });
     });
 

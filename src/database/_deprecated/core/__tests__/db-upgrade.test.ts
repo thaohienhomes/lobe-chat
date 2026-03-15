@@ -22,8 +22,8 @@ describe('LocalDB migration', () => {
     dbV3.version(3).stores(dbSchemaV3);
     await dbV3.open();
     await dbV3.table('sessions').bulkAdd([
-      { id: 's1', group: 'pinned' },
-      { id: 's2', group: 'default' },
+      { group: 'pinned', id: 's1' },
+      { group: 'default', id: 's2' },
     ]);
     dbV3.close();
 
@@ -34,8 +34,8 @@ describe('LocalDB migration', () => {
     // 验证迁移后的数据
     const updatedSession1 = await dbV4.sessions.get('s1');
     const updatedSession2 = await dbV4.sessions.get('s2');
-    expect(updatedSession1).toEqual({ id: 's1', pinned: 1, group: 'default' });
-    expect(updatedSession2).toEqual({ id: 's2', pinned: 0, group: 'default' });
+    expect(updatedSession1).toEqual({ group: 'default', id: 's1', pinned: 1 });
+    expect(updatedSession2).toEqual({ group: 'default', id: 's2', pinned: 0 });
 
     dbV4.close();
   });

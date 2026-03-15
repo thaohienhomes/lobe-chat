@@ -8,17 +8,17 @@ import { ServerService } from './server';
 vi.mock('@/libs/trpc/client', () => ({
   lambdaClient: {
     aiModel: {
-      createAiModel: { mutate: vi.fn() },
-      getAiProviderModelList: { query: vi.fn() },
-      getAiModelById: { query: vi.fn() },
-      toggleModelEnabled: { mutate: vi.fn() },
-      updateAiModel: { mutate: vi.fn() },
-      batchUpdateAiModels: { mutate: vi.fn() },
       batchToggleAiModels: { mutate: vi.fn() },
+      batchUpdateAiModels: { mutate: vi.fn() },
       clearModelsByProvider: { mutate: vi.fn() },
       clearRemoteModels: { mutate: vi.fn() },
-      updateAiModelOrder: { mutate: vi.fn() },
+      createAiModel: { mutate: vi.fn() },
+      getAiModelById: { query: vi.fn() },
+      getAiProviderModelList: { query: vi.fn() },
       removeAiModel: { mutate: vi.fn() },
+      toggleModelEnabled: { mutate: vi.fn() },
+      updateAiModel: { mutate: vi.fn() },
+      updateAiModelOrder: { mutate: vi.fn() },
     },
   },
 }));
@@ -28,9 +28,9 @@ describe('ServerService', () => {
 
   it('should create AI model', async () => {
     const params = {
+      displayName: 'Test Model',
       id: 'test-id',
       providerId: 'test-provider',
-      displayName: 'Test Model',
     };
     await service.createAiModel(params);
     expect(vi.mocked(lambdaClient.aiModel.createAiModel.mutate)).toHaveBeenCalledWith(params);
@@ -51,7 +51,7 @@ describe('ServerService', () => {
   });
 
   it('should toggle model enabled', async () => {
-    const params = { id: '123', providerId: 'test', enabled: true };
+    const params = { enabled: true, id: '123', providerId: 'test' };
     await service.toggleModelEnabled(params);
     expect(vi.mocked(lambdaClient.aiModel.toggleModelEnabled.mutate)).toHaveBeenCalledWith(params);
   });
@@ -69,8 +69,8 @@ describe('ServerService', () => {
   it('should batch update AI models', async () => {
     const models: AiProviderModelListItem[] = [
       {
-        id: '123',
         enabled: true,
+        id: '123',
         type: 'chat',
       },
     ];
@@ -85,9 +85,9 @@ describe('ServerService', () => {
     const models = ['123', '456'];
     await service.batchToggleAiModels('provider1', models, true);
     expect(vi.mocked(lambdaClient.aiModel.batchToggleAiModels.mutate)).toHaveBeenCalledWith({
+      enabled: true,
       id: 'provider1',
       models,
-      enabled: true,
     });
   });
 

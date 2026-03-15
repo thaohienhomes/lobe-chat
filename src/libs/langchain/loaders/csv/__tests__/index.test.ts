@@ -7,7 +7,7 @@ import { CsVLoader } from '../index';
 
 describe('CSVLoader', () => {
   it('should run', async () => {
-    const content = fs.readFileSync(join(__dirname, `./demo.csv`), 'utf-8');
+    const content = fs.readFileSync(join(__dirname, `./demo.csv`), 'utf8');
 
     const fileBlob = new Blob([Buffer.from(content)]);
 

@@ -1,21 +1,20 @@
 import { nanoid } from 'nanoid';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { LobeAgentConfig } from '@/types/agent';
-import { LobeAgentSession, LobeSessions } from '@/types/session';
+import { LobeSessions } from '@/types/session';
 
 import { SessionDispatch, sessionsReducer } from './reducers';
 
 describe('sessionsReducer', () => {
   const mockSession = {
-    id: nanoid(),
     config: {
       model: 'gpt-3.5-turbo',
     } as any,
+    id: nanoid(),
     meta: {
-      title: 'Test Agent',
-      description: 'A test agent',
       avatar: '',
+      description: 'A test agent',
+      title: 'Test Agent',
     },
   } as any;
 

@@ -1,4 +1,3 @@
-import debug from 'debug';
 import { sha256 } from 'js-sha256';
 import mime from 'mime';
 import { nanoid } from 'nanoid';
@@ -48,9 +47,9 @@ describe('GenerationService', () => {
     // Setup mime.getExtension with consistent behavior
     vi.mocked(mime.getExtension).mockImplementation((mimeType) => {
       const extensions = {
-        'image/png': 'png',
-        'image/jpeg': 'jpg',
         'image/gif': 'gif',
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
         'image/unknown': null,
       };
       return extensions[mimeType as keyof typeof extensions] || 'png';
@@ -119,12 +118,12 @@ describe('GenerationService', () => {
         );
 
         mockFetch.mockResolvedValueOnce({
-          ok: true,
-          status: 200,
+          arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
           headers: {
             get: vi.fn().mockReturnValue('image/jpeg'),
           },
-          arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
+          ok: true,
+          status: 200,
         });
 
         const result = await fetchImageFromUrl('https://example.com/image.jpg');
@@ -143,12 +142,12 @@ describe('GenerationService', () => {
         );
 
         mockFetch.mockResolvedValueOnce({
-          ok: true,
-          status: 200,
+          arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
           headers: {
             get: vi.fn().mockReturnValue(null), // No content-type header
           },
-          arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
+          ok: true,
+          status: 200,
         });
 
         const result = await fetchImageFromUrl('https://example.com/image.jpg');
@@ -216,12 +215,12 @@ describe('GenerationService', () => {
         );
 
         mockFetch.mockResolvedValueOnce({
-          ok: true,
-          status: 200,
+          arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
           headers: {
             get: vi.fn().mockReturnValue('image/png'),
           },
-          arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
+          ok: true,
+          status: 200,
         });
 
         const result = await fetchImageFromUrl('http://example.com/image.png');
@@ -266,16 +265,16 @@ describe('GenerationService', () => {
       const dataUri = `data:image/png;base64,${base64Data}`;
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'png', width: 800, height: 600 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'png', height: 600, width: 800 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 512,
         thumbnailHeight: 384,
+        thumbnailWidth: 512,
       });
 
       const result = await service.transformImageForGeneration(dataUri);
@@ -308,25 +307,25 @@ describe('GenerationService', () => {
         mockOriginalBuffer.byteOffset + mockOriginalBuffer.byteLength,
       );
       mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
+        arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
         headers: {
           get: vi.fn().mockReturnValue('image/jpeg'),
         },
-        arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
+        ok: true,
+        status: 200,
       });
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'jpeg', width: 1024, height: 768 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'jpeg', height: 768, width: 1024 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 512,
         thumbnailHeight: 384,
+        thumbnailWidth: 512,
       });
 
       const result = await service.transformImageForGeneration(url);
@@ -344,16 +343,16 @@ describe('GenerationService', () => {
       const dataUri = `data:image/png;base64,${base64Data}`;
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'png', width: 256, height: 256 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'png', height: 256, width: 256 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: false,
-        thumbnailWidth: 256,
         thumbnailHeight: 256,
+        thumbnailWidth: 256,
       });
 
       const result = await service.transformImageForGeneration(dataUri);
@@ -371,7 +370,7 @@ describe('GenerationService', () => {
       const dataUri = 'data:image/png;base64,invalid-data';
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'png', width: null, height: null }),
+        metadata: vi.fn().mockResolvedValue({ format: 'png', height: null, width: null }),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
 
@@ -385,16 +384,16 @@ describe('GenerationService', () => {
       vi.mocked(mime.getExtension).mockReturnValue(null);
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'unknown', width: 100, height: 100 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'unknown', height: 100, width: 100 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: false,
-        thumbnailWidth: 100,
         thumbnailHeight: 100,
+        thumbnailWidth: 100,
       });
 
       await expect(service.transformImageForGeneration(dataUri)).rejects.toThrow(
@@ -412,25 +411,25 @@ describe('GenerationService', () => {
         mockOriginalBuffer.byteOffset + mockOriginalBuffer.byteLength,
       );
       mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
+        arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
         headers: {
           get: vi.fn().mockReturnValue('image/jpeg'),
         },
-        arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
+        ok: true,
+        status: 200,
       });
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'jpeg', width: 100, height: 100 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'jpeg', height: 100, width: 100 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: false,
-        thumbnailWidth: 100,
         thumbnailHeight: 100,
+        thumbnailWidth: 100,
       });
 
       await expect(service.transformImageForGeneration(url)).rejects.toThrow(
@@ -457,16 +456,16 @@ describe('GenerationService', () => {
       const dataUri = `data:image/png;base64,${base64Data}`;
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'png', width: 800, height: 600 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'png', height: 600, width: 800 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockRejectedValue(new Error('Sharp processing failed')),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 512,
         thumbnailHeight: 384,
+        thumbnailWidth: 512,
       });
 
       await expect(service.transformImageForGeneration(dataUri)).rejects.toThrow(
@@ -480,16 +479,16 @@ describe('GenerationService', () => {
       const dataUri = `data:image/png;base64,${base64Data}`;
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'png', width: 1024, height: 768 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'png', height: 768, width: 1024 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 400,
         thumbnailHeight: 300,
+        thumbnailWidth: 400,
       });
 
       await service.transformImageForGeneration(dataUri);
@@ -508,16 +507,16 @@ describe('GenerationService', () => {
       const dataUri = `data:image/png;base64,${base64Data}`;
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'png', width: 1920, height: 1080 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'png', height: 1080, width: 1920 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 512,
         thumbnailHeight: 288,
+        thumbnailWidth: 512,
       });
 
       const result = await service.transformImageForGeneration(dataUri);
@@ -541,16 +540,16 @@ describe('GenerationService', () => {
       const dataUri = `data:image/png;base64,${base64Data}`;
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ format: 'png', width: 800, height: 600 }),
+        metadata: vi.fn().mockResolvedValue({ format: 'png', height: 600, width: 800 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockThumbnailBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 512,
         thumbnailHeight: 384,
+        thumbnailWidth: 512,
       });
 
       await service.transformImageForGeneration(dataUri);
@@ -727,16 +726,16 @@ describe('GenerationService', () => {
       const dataUri = `data:image/jpeg;base64,${base64Data}`;
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ width: 512, height: 384 }),
+        metadata: vi.fn().mockResolvedValue({ height: 384, width: 512 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockCoverBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 256,
         thumbnailHeight: 192,
+        thumbnailWidth: 256,
       });
 
       mockFileService.uploadMedia.mockResolvedValueOnce({
@@ -763,25 +762,25 @@ describe('GenerationService', () => {
         mockBuffer.byteOffset + mockBuffer.byteLength,
       );
       mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
+        arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
         headers: {
           get: vi.fn().mockReturnValue('image/jpeg'),
         },
-        arrayBuffer: vi.fn().mockResolvedValue(mockArrayBuffer),
+        ok: true,
+        status: 200,
       });
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ width: 800, height: 600 }),
+        metadata: vi.fn().mockResolvedValue({ height: 600, width: 800 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockCoverBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 256,
         thumbnailHeight: 192,
+        thumbnailWidth: 256,
       });
 
       mockFileService.uploadMedia.mockResolvedValueOnce({
@@ -797,7 +796,7 @@ describe('GenerationService', () => {
       const dataUri = 'data:image/png;base64,invalid-data';
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ width: null, height: null }),
+        metadata: vi.fn().mockResolvedValue({ height: null, width: null }),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
 
@@ -810,16 +809,16 @@ describe('GenerationService', () => {
       const dataUri = 'data:image/jpeg;base64,some-data';
 
       const mockSharp = {
-        metadata: vi.fn().mockResolvedValue({ width: 1024, height: 768 }),
+        metadata: vi.fn().mockResolvedValue({ height: 768, width: 1024 }),
         resize: vi.fn().mockReturnThis(),
-        webp: vi.fn().mockReturnThis(),
         toBuffer: vi.fn().mockResolvedValue(mockCoverBuffer),
+        webp: vi.fn().mockReturnThis(),
       };
       vi.mocked(sharp).mockReturnValue(mockSharp as any);
       vi.mocked(calculateThumbnailDimensions).mockReturnValue({
         shouldResize: true,
-        thumbnailWidth: 256,
         thumbnailHeight: 192,
+        thumbnailWidth: 256,
       });
 
       mockFileService.uploadMedia.mockResolvedValueOnce({

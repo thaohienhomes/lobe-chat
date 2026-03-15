@@ -15,7 +15,7 @@ describe('useOnPluginSettingsUpdate', () => {
   it('calls the callback when a PluginChannel updatePluginSettings message is received', () => {
     renderHook(() => useOnPluginSettingsUpdate(mockCallback));
 
-    const testSettings = { theme: 'dark', notifications: true };
+    const testSettings = { notifications: true, theme: 'dark' };
     const event = new MessageEvent('message', {
       data: { type: PluginChannel.updatePluginSettings, value: testSettings },
     });

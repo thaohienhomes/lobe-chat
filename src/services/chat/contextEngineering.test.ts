@@ -8,9 +8,9 @@ import * as helpers from './helper';
 vi.mock('@/utils/client/parserPlaceholder', () => ({
   VARIABLE_GENERATORS: {
     date: () => '2023-12-25',
+    random: () => '12345',
     time: () => '14:30:45',
     username: () => 'TestUser',
-    random: () => '12345',
   },
 }));
 
@@ -21,11 +21,11 @@ vi.mock('@lobechat/const', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...(actual as any),
+    isDeprecatedEdition: false,
+    isDesktop: false,
     get isServerMode() {
       return isServerMode;
     },
-    isDeprecatedEdition: false,
-    isDesktop: false,
   };
 });
 
@@ -44,30 +44,30 @@ describe('contextEngineering', () => {
       const messages = [
         {
           content: 'Hello',
-          role: 'user',
-          imageList: [
-            {
-              id: 'imagecx1',
-              url: 'http://example.com/xxx0asd-dsd.png',
-              alt: 'ttt.png',
-            },
-          ],
           fileList: [
             {
               fileType: 'plain/txt',
-              size: 100000,
               id: 'file1',
-              url: 'http://abc.com/abc.txt',
               name: 'abc.png',
+              size: 100_000,
+              url: 'http://abc.com/abc.txt',
             },
             {
               id: 'file_oKMve9qySLMI',
               name: '2402.16667v1.pdf',
+              size: 11_256_078,
               type: 'application/pdf',
-              size: 11256078,
               url: 'https://xxx.com/ppp/480497/5826c2b8-fde0-4de1-a54b-a224d5e3d898.pdf',
             },
           ],
+          imageList: [
+            {
+              alt: 'ttt.png',
+              id: 'imagecx1',
+              url: 'http://example.com/xxx0asd-dsd.png',
+            },
+          ],
+          role: 'user',
         }, // Message with files
         { content: 'Hey', role: 'assistant' }, // Regular user message
       ] as ChatMessage[];
@@ -128,21 +128,21 @@ describe('contextEngineering', () => {
       const messages = [
         {
           content: 'Hello',
-          role: 'user',
           imageList: [
             {
+              alt: 'abc.png',
               id: 'file1',
               url: 'http://example.com/image.jpg',
-              alt: 'abc.png',
             },
           ],
+          role: 'user',
         }, // Message with files
         { content: 'Hey', role: 'assistant' }, // Regular user message
       ] as ChatMessage[];
       const output = await contextEngineering({
         messages,
-        provider: 'openai',
         model: 'gpt-4-vision-preview',
+        provider: 'openai',
       });
 
       expect(output).toEqual([
@@ -213,12 +213,12 @@ describe('contextEngineering', () => {
   it('should handle assistant messages with reasoning correctly', async () => {
     const messages = [
       {
-        role: 'assistant',
         content: 'The answer is 42.',
         reasoning: {
           content: 'I need to calculate the answer to life, universe, and everything.',
           signature: 'thinking_process',
         },
+        role: 'assistant',
       },
     ] as ChatMessage[];
 
@@ -250,20 +250,20 @@ describe('contextEngineering', () => {
     // Don't mock INBOX_GUIDE_SYSTEMROLE, use the real one
     const messages: ChatMessage[] = [
       {
-        role: 'user',
         content: 'Hello, this is my first question',
         createdAt: Date.now(),
         id: 'test-welcome',
         meta: {},
+        role: 'user',
         updatedAt: Date.now(),
       },
     ];
 
     const result = await contextEngineering({
+      isWelcomeQuestion: true,
       messages,
       model: 'gpt-4',
       provider: 'openai',
-      isWelcomeQuestion: true,
       sessionId: 'inbox',
     });
 
@@ -281,19 +281,19 @@ describe('contextEngineering', () => {
 
     const messages: ChatMessage[] = [
       {
-        role: 'user',
         content: 'Continue our discussion',
         createdAt: Date.now(),
         id: 'test-history',
         meta: {},
+        role: 'user',
         updatedAt: Date.now(),
       },
     ];
 
     const result = await contextEngineering({
+      historySummary,
       messages,
       model: 'gpt-4',
-      historySummary,
       provider: 'openai',
     });
 
@@ -310,12 +310,12 @@ describe('contextEngineering', () => {
 
       const messages: ChatMessage[] = [
         {
-          role: 'assistant',
           content: 'Here is an image.',
-          imageList: [{ id: 'img1', url: 'http://example.com/image.png', alt: 'test.png' }],
           createdAt: Date.now(),
           id: 'test-id',
+          imageList: [{ alt: 'test.png', id: 'img1', url: 'http://example.com/image.png' }],
           meta: {},
+          role: 'assistant',
           updatedAt: Date.now(),
         },
       ];
@@ -337,12 +337,12 @@ describe('contextEngineering', () => {
 
       const messages: ChatMessage[] = [
         {
-          role: 'assistant',
           content: '',
-          imageList: [{ id: 'img1', url: 'http://example.com/image.png', alt: 'test.png' }],
           createdAt: Date.now(),
           id: 'test-id-2',
+          imageList: [{ alt: 'test.png', id: 'img1', url: 'http://example.com/image.png' }],
           meta: {},
+          role: 'assistant',
           updatedAt: Date.now(),
         },
       ];
@@ -364,20 +364,20 @@ describe('contextEngineering', () => {
 
     const messages: ChatMessage[] = [
       {
-        role: 'assistant',
         content: 'I have a tool call.',
-        tools: [
-          {
-            id: 'tool_123',
-            type: 'default',
-            apiName: 'testApi',
-            arguments: '{}',
-            identifier: 'test-plugin',
-          },
-        ],
         createdAt: Date.now(),
         id: 'test-id-3',
         meta: {},
+        role: 'assistant',
+        tools: [
+          {
+            apiName: 'testApi',
+            arguments: '{}',
+            id: 'tool_123',
+            identifier: 'test-plugin',
+            type: 'default',
+          },
+        ],
         updatedAt: Date.now(),
       },
     ];
@@ -396,19 +396,19 @@ describe('contextEngineering', () => {
     it('should process placeholder variables in string content', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Hello {{username}}, today is {{date}} and the time is {{time}}',
           createdAt: Date.now(),
           id: 'test-placeholder-1',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
         {
-          role: 'assistant',
           content: 'Hi there! Your random number is {{random}}',
           createdAt: Date.now(),
           id: 'test-placeholder-2',
           meta: {},
+          role: 'assistant',
           updatedAt: Date.now(),
         },
       ];
@@ -428,20 +428,20 @@ describe('contextEngineering', () => {
     it('should process placeholder variables in array content', async () => {
       const messages = [
         {
-          role: 'user',
           content: [
             {
-              type: 'text',
               text: 'Hello {{username}}, today is {{date}}',
+              type: 'text',
             },
             {
-              type: 'image_url',
               image_url: { url: 'data:image/png;base64,abc123' },
+              type: 'image_url',
             },
           ],
           createdAt: Date.now(),
           id: 'test-placeholder-array',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ] as any;
@@ -461,11 +461,11 @@ describe('contextEngineering', () => {
     it('should handle missing placeholder variables gracefully', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Hello {{username}}, missing: {{missing_var}}',
           createdAt: Date.now(),
           id: 'test-placeholder-missing',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
@@ -482,11 +482,11 @@ describe('contextEngineering', () => {
     it('should not modify messages without placeholder variables', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Hello there, no variables here',
           createdAt: Date.now(),
           id: 'test-no-placeholders',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
@@ -506,18 +506,18 @@ describe('contextEngineering', () => {
 
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Hello {{username}}, check this image from {{date}}',
-          imageList: [
-            {
-              id: 'img1',
-              url: 'http://example.com/test.jpg',
-              alt: 'test image',
-            },
-          ],
           createdAt: Date.now(),
           id: 'test-combined',
+          imageList: [
+            {
+              alt: 'test image',
+              id: 'img1',
+              url: 'http://example.com/test.jpg',
+            },
+          ],
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
@@ -549,53 +549,53 @@ describe('contextEngineering', () => {
     it('should truncate message history when enabled', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Message 1',
           createdAt: Date.now(),
           id: 'test-1',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
         {
-          role: 'assistant',
           content: 'Response 1',
           createdAt: Date.now(),
           id: 'test-2',
           meta: {},
+          role: 'assistant',
           updatedAt: Date.now(),
         },
         {
-          role: 'user',
           content: 'Message 2',
           createdAt: Date.now(),
           id: 'test-3',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
         {
-          role: 'assistant',
           content: 'Response 2',
           createdAt: Date.now(),
           id: 'test-4',
           meta: {},
+          role: 'assistant',
           updatedAt: Date.now(),
         },
         {
-          role: 'user',
           content: 'Latest message',
           createdAt: Date.now(),
           id: 'test-5',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
 
       const result = await contextEngineering({
+        enableHistoryCount: true,
+        historyCount: 4,
         messages,
         model: 'gpt-4',
-        provider: 'openai',
-        enableHistoryCount: true,
-        historyCount: 4, // Should keep last 2 messages
+        provider: 'openai', // Should keep last 2 messages
       });
 
       // Should only keep the last 2 messages
@@ -611,28 +611,28 @@ describe('contextEngineering', () => {
     it('should apply input template to user messages', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Original user input',
           createdAt: Date.now(),
           id: 'test-template',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
         {
-          role: 'assistant',
           content: 'Assistant response',
           createdAt: Date.now(),
           id: 'test-assistant',
           meta: {},
+          role: 'assistant',
           updatedAt: Date.now(),
         },
       ];
 
       const result = await contextEngineering({
+        inputTemplate: 'Template: {{text}} - End',
         messages,
         model: 'gpt-4',
         provider: 'openai',
-        inputTemplate: 'Template: {{text}} - End',
       });
 
       // Should apply template to user message only
@@ -642,8 +642,8 @@ describe('contextEngineering', () => {
           role: 'user',
         },
         {
-          role: 'assistant',
           content: 'Assistant response',
+          role: 'assistant',
         },
       ]);
       expect(result[1].content).toBe('Assistant response'); // Unchanged
@@ -652,11 +652,11 @@ describe('contextEngineering', () => {
     it('should inject system role at the beginning', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'User message',
           createdAt: Date.now(),
           id: 'test-user',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
@@ -678,39 +678,39 @@ describe('contextEngineering', () => {
     it('should combine all preprocessing steps correctly', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Old message 1',
           createdAt: Date.now(),
           id: 'test-old-1',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
         {
-          role: 'assistant',
           content: 'Old response',
           createdAt: Date.now(),
           id: 'test-old-2',
           meta: {},
+          role: 'assistant',
           updatedAt: Date.now(),
         },
         {
-          role: 'user',
           content: 'Recent input with {{username}}',
           createdAt: Date.now(),
           id: 'test-recent',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
 
       const result = await contextEngineering({
+        enableHistoryCount: true,
+        historyCount: 2,
+        inputTemplate: 'Processed: {{text}}',
         messages,
         model: 'gpt-4',
         provider: 'openai',
-        systemRole: 'System instructions.',
-        inputTemplate: 'Processed: {{text}}',
-        enableHistoryCount: true,
-        historyCount: 2, // Should keep last 1 message
+        systemRole: 'System instructions.', // Should keep last 1 message
       });
 
       // System role should be first
@@ -720,8 +720,8 @@ describe('contextEngineering', () => {
           role: 'system',
         },
         {
-          role: 'assistant',
           content: 'Old response',
+          role: 'assistant',
         },
         {
           content: 'Processed: Recent input with TestUser',
@@ -733,11 +733,11 @@ describe('contextEngineering', () => {
     it('should skip preprocessing when no configuration is provided', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Simple message',
           createdAt: Date.now(),
           id: 'test-simple',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
@@ -760,38 +760,38 @@ describe('contextEngineering', () => {
     it('should handle history truncation with system role injection correctly', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'Message 1',
           createdAt: Date.now(),
           id: 'test-1',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
         {
-          role: 'user',
           content: 'Message 2',
           createdAt: Date.now(),
           id: 'test-2',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
         {
-          role: 'user',
           content: 'Message 3',
           createdAt: Date.now(),
           id: 'test-3',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
 
       const result = await contextEngineering({
+        enableHistoryCount: true,
+        historyCount: 1,
         messages,
         model: 'gpt-4',
         provider: 'openai',
-        systemRole: 'System role here.',
-        enableHistoryCount: true,
-        historyCount: 1, // Should keep only 1 message
+        systemRole: 'System role here.', // Should keep only 1 message
       });
 
       // Should have system role + 1 truncated message
@@ -810,21 +810,21 @@ describe('contextEngineering', () => {
     it('should handle input template compilation errors gracefully', async () => {
       const messages: ChatMessage[] = [
         {
-          role: 'user',
           content: 'User message',
           createdAt: Date.now(),
           id: 'test-error',
           meta: {},
+          role: 'user',
           updatedAt: Date.now(),
         },
       ];
 
       // This should not throw an error, but handle it gracefully
       const result = await contextEngineering({
+        inputTemplate: '<%- invalid javascript syntax %>',
         messages,
         model: 'gpt-4',
         provider: 'openai',
-        inputTemplate: '<%- invalid javascript syntax %>',
       });
 
       // Should keep original message when template fails

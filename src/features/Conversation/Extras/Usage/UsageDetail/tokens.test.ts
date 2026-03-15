@@ -10,11 +10,11 @@ describe('getDetailsToken', () => {
   const mockModelCard: LobeDefaultAiModelListItem = {
     pricing: {
       units: [
-        { name: 'textInput', unit: 'millionTokens', strategy: 'fixed', rate: 0.01 },
-        { name: 'textOutput', unit: 'millionTokens', strategy: 'fixed', rate: 0.02 },
-        { name: 'textInput_cacheRead', unit: 'millionTokens', strategy: 'fixed', rate: 0.005 },
-        { name: 'audioInput', unit: 'millionTokens', strategy: 'fixed', rate: 0.03 },
-        { name: 'audioOutput', unit: 'millionTokens', strategy: 'fixed', rate: 0.04 },
+        { name: 'textInput', rate: 0.01, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 0.02, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput_cacheRead', rate: 0.005, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'audioInput', rate: 0.03, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'audioOutput', rate: 0.04, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
   } as LobeDefaultAiModelListItem;
@@ -65,8 +65,8 @@ describe('getDetailsToken', () => {
 
   it('should handle cachedTokens correctly', () => {
     const usage = {
-      totalInputTokens: 200,
       cachedTokens: 50,
+      totalInputTokens: 200,
     } as ModelTokensUsage;
 
     const result = getDetailsToken(usage, mockModelCard);
@@ -196,10 +196,10 @@ describe('getDetailsToken', () => {
 
   it('should handle totalTokens correctly', () => {
     const usage = {
-      totalTokens: 500,
-      totalInputTokens: 200,
       inputCachedTokens: 50,
       outputTokens: 300,
+      totalInputTokens: 200,
+      totalTokens: 500,
     } as ModelTokensUsage;
 
     const result = getDetailsToken(usage, mockModelCard);
@@ -233,39 +233,39 @@ describe('getDetailsToken', () => {
 
   it('should handle complex scenario with all token types', () => {
     const usage: ModelTokensUsage = {
-      totalTokens: 1000,
-      totalInputTokens: 400,
-      inputTextTokens: 300,
       inputAudioTokens: 50,
-      inputCitationTokens: 50,
       inputCachedTokens: 100,
-      totalOutputTokens: 600,
+      inputCitationTokens: 50,
+      inputTextTokens: 300,
       outputAudioTokens: 100,
       outputReasoningTokens: 200,
+      totalInputTokens: 400,
+      totalOutputTokens: 600,
+      totalTokens: 1000,
     };
 
     const result = getDetailsToken(usage, mockModelCard);
 
     expect(result).toMatchObject({
-      inputCached: {
-        credit: 1, // 100 * 0.005 = 0.5, rounded to 1
-        token: 100,
+      inputAudio: {
+        credit: 2, // 50 * 0.03 = 1.5, rounded to 2
+        token: 50,
       },
       inputCacheMiss: {
         credit: 3, // (400 - 100) * 0.01 = 3
         token: 300,
       },
-      inputText: {
-        credit: 3, // 300 * 0.01 = 3
-        token: 300,
-      },
-      inputAudio: {
-        credit: 2, // 50 * 0.03 = 1.5, rounded to 2
-        token: 50,
+      inputCached: {
+        credit: 1, // 100 * 0.005 = 0.5, rounded to 1
+        token: 100,
       },
       inputCitation: {
         credit: 1, // 50 * 0.01 = 0.5, rounded to 1
         token: 50,
+      },
+      inputText: {
+        credit: 3, // 300 * 0.01 = 3
+        token: 300,
       },
       outputAudio: {
         credit: 4, // 100 * 0.04 = 4

@@ -40,9 +40,9 @@ describe('userProfileSelectors', () => {
       isDesktop = false;
 
       const store: UserStore = {
+        enableAuth: () => false,
         isSignedIn: false,
         user: null,
-        enableAuth: () => false,
       } as unknown as UserStore;
 
       expect(userProfileSelectors.displayUserName(store)).toBe(BRANDING_NAME);
@@ -53,9 +53,9 @@ describe('userProfileSelectors', () => {
       isDesktop = true;
 
       const store: UserStore = {
+        enableAuth: () => false,
         isSignedIn: false,
         user: { username: 'johndoe' },
-        enableAuth: () => false,
       } as unknown as UserStore;
 
       expect(userProfileSelectors.displayUserName(store)).toBe('johndoe');
@@ -63,9 +63,9 @@ describe('userProfileSelectors', () => {
 
     it('should return user username when signed in', () => {
       const store: UserStore = {
+        enableAuth: () => true,
         isSignedIn: true,
         user: { username: 'johndoe' },
-        enableAuth: () => true,
       } as UserStore;
 
       expect(userProfileSelectors.displayUserName(store)).toBe('johndoe');
@@ -73,9 +73,9 @@ describe('userProfileSelectors', () => {
 
     it('should return email when signed in but username is not existed in UserStore', () => {
       const store: UserStore = {
+        enableAuth: () => true,
         isSignedIn: true,
         user: { email: 'demo@lobehub.com' },
-        enableAuth: () => true,
       } as UserStore;
 
       expect(userProfileSelectors.displayUserName(store)).toBe('demo@lobehub.com');
@@ -134,9 +134,9 @@ describe('userProfileSelectors', () => {
       isDesktop = false;
 
       const store: UserStore = {
+        enableAuth: () => false,
         isSignedIn: false,
         user: null,
-        enableAuth: () => false,
       } as unknown as UserStore;
 
       expect(userProfileSelectors.nickName(store)).toBe('userPanel.defaultNickname');
@@ -148,9 +148,9 @@ describe('userProfileSelectors', () => {
       isDesktop = true;
 
       const store: UserStore = {
+        enableAuth: () => false,
         isSignedIn: false,
         user: { fullName: 'John Doe' },
-        enableAuth: () => false,
       } as unknown as UserStore;
 
       expect(userProfileSelectors.nickName(store)).toBe('John Doe');
@@ -160,9 +160,9 @@ describe('userProfileSelectors', () => {
       enableAuth = true;
 
       const store: UserStore = {
+        enableAuth: () => true,
         isSignedIn: true,
         user: { fullName: 'John Doe' },
-        enableAuth: () => true,
       } as UserStore;
 
       expect(userProfileSelectors.nickName(store)).toBe('John Doe');
@@ -170,9 +170,9 @@ describe('userProfileSelectors', () => {
 
     it('should return user username when fullName is not available', () => {
       const store: UserStore = {
+        enableAuth: () => true,
         isSignedIn: true,
         user: { username: 'johndoe' },
-        enableAuth: () => true,
       } as UserStore;
 
       expect(userProfileSelectors.nickName(store)).toBe('johndoe');
@@ -198,9 +198,9 @@ describe('userProfileSelectors', () => {
       isDesktop = false;
 
       const store: UserStore = {
+        enableAuth: () => false,
         isSignedIn: false,
         user: null,
-        enableAuth: () => false,
       } as unknown as UserStore;
 
       expect(userProfileSelectors.username(store)).toBe(BRANDING_NAME);
@@ -211,9 +211,9 @@ describe('userProfileSelectors', () => {
       isDesktop = true;
 
       const store: UserStore = {
+        enableAuth: () => false,
         isSignedIn: false,
         user: { username: 'johndoe' },
-        enableAuth: () => false,
       } as unknown as UserStore;
 
       expect(userProfileSelectors.username(store)).toBe('johndoe');
@@ -221,9 +221,9 @@ describe('userProfileSelectors', () => {
 
     it('should return user username when signed in', () => {
       const store: UserStore = {
+        enableAuth: () => true,
         isSignedIn: true,
         user: { username: 'johndoe' },
-        enableAuth: () => true,
       } as UserStore;
 
       expect(userProfileSelectors.username(store)).toBe('johndoe');
@@ -247,8 +247,8 @@ describe('authSelectors', () => {
       enableAuth = false;
 
       const store: UserStore = {
-        isSignedIn: false,
         enableAuth: () => false,
+        isSignedIn: false,
       } as UserStore;
 
       expect(authSelectors.isLogin(store)).toBe(true);
@@ -256,8 +256,8 @@ describe('authSelectors', () => {
 
     it('should return true when signed in', () => {
       const store: UserStore = {
-        isSignedIn: true,
         enableAuth: () => true,
+        isSignedIn: true,
       } as UserStore;
 
       expect(authSelectors.isLogin(store)).toBe(true);
@@ -265,8 +265,8 @@ describe('authSelectors', () => {
 
     it('should return false when not signed in and auth is enabled', () => {
       const store: UserStore = {
-        isSignedIn: false,
         enableAuth: () => true,
+        isSignedIn: false,
       } as UserStore;
 
       expect(authSelectors.isLogin(store)).toBe(false);

@@ -5,14 +5,14 @@ import { FeatureFlagsSchema, mapFeatureFlagsEnvToState } from './schema';
 describe('FeatureFlagsSchema', () => {
   it('should validate correct feature flags', () => {
     const result = FeatureFlagsSchema.safeParse({
-      webrtc_sync: true,
+      ai_image: true,
+      create_session: true,
+      dalle: true,
+      edit_agent: false,
       language_model_settings: false,
       openai_api_key: true,
       openai_proxy_url: false,
-      create_session: true,
-      edit_agent: false,
-      dalle: true,
-      ai_image: true,
+      webrtc_sync: true,
     });
 
     expect(result.success).toBe(true);
@@ -30,27 +30,27 @@ describe('FeatureFlagsSchema', () => {
 describe('mapFeatureFlagsEnvToState', () => {
   it('should correctly map feature flags to state', () => {
     const config = {
-      webrtc_sync: true,
+      ai_image: true,
+      check_updates: true,
+      create_session: true,
+      dalle: true,
+      edit_agent: false,
       language_model_settings: false,
       openai_api_key: true,
       openai_proxy_url: false,
-      create_session: true,
-      edit_agent: false,
-      dalle: true,
-      ai_image: true,
-      check_updates: true,
+      webrtc_sync: true,
       welcome_suggest: true,
     };
 
     const expectedState = {
+      enableCheckUpdates: true,
       isAgentEditable: false,
+      showAiImage: true,
       showCreateSession: true,
+      showDalle: true,
       showLLM: false,
       showOpenAIApiKey: true,
       showOpenAIProxyUrl: false,
-      showDalle: true,
-      showAiImage: true,
-      enableCheckUpdates: true,
       showWelcomeSuggest: true,
     };
 

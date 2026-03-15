@@ -19,8 +19,8 @@ vi.mock('@/utils/env', () => ({
 vi.mock('pwa-install-handler', () => ({
   pwaInstallHandler: {
     addListener: vi.fn(),
-    removeListener: vi.fn(),
     getEvent: vi.fn(),
+    removeListener: vi.fn(),
   },
 }));
 
@@ -30,7 +30,7 @@ describe('usePWAInstall', () => {
   });
 
   it('should return canInstall as false when in PWA', () => {
-    vi.mocked(usePlatform).mockReturnValue({ isSupportInstallPWA: true, isPWA: true } as any);
+    vi.mocked(usePlatform).mockReturnValue({ isPWA: true, isSupportInstallPWA: true } as any);
 
     const { result } = renderHook(() => usePWAInstall());
 
@@ -39,7 +39,7 @@ describe('usePWAInstall', () => {
 
   it('should return canInstall based on canInstall state when support PWA', () => {
     document.body.innerHTML = `<div id="${PWA_INSTALL_ID}"></div>`;
-    vi.mocked(usePlatform).mockReturnValue({ isSupportInstallPWA: true, isPWA: false } as any);
+    vi.mocked(usePlatform).mockReturnValue({ isPWA: false, isSupportInstallPWA: true } as any);
 
     const { result, rerender } = renderHook(() => usePWAInstall());
 
@@ -55,7 +55,7 @@ describe('usePWAInstall', () => {
   });
 
   it('should return canInstall as false when not support PWA', () => {
-    vi.mocked(usePlatform).mockReturnValue({ isSupportInstallPWA: false, isPWA: false } as any);
+    vi.mocked(usePlatform).mockReturnValue({ isPWA: false, isSupportInstallPWA: false } as any);
 
     const { result } = renderHook(() => usePWAInstall());
 

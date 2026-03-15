@@ -43,8 +43,8 @@ describe('MessageModel', () => {
     it('should create with tts', async () => {
       const result = await MessageModel.create({
         content: 'abc',
-        role: 'assistant',
         extra: { translate: { content: 'avc', from: 'a', to: 'f' } },
+        role: 'assistant',
         sessionId: 'a',
       });
 
@@ -55,8 +55,8 @@ describe('MessageModel', () => {
         expect.objectContaining({
           content: 'abc',
           role: 'assistant',
-          translate: { content: 'avc', from: 'a', to: 'f' },
           sessionId: 'a',
+          translate: { content: 'avc', from: 'a', to: 'f' },
         }),
       );
     });
@@ -91,8 +91,8 @@ describe('MessageModel', () => {
       await MessageModel.batchCreate([messageData, messageData] as ChatMessage[]);
 
       const queriedMessages = await MessageModel.query({
-        pageSize: 1,
         current: 0,
+        pageSize: 1,
         sessionId: messageData.sessionId,
         topicId: messageData.topicId,
       });
@@ -124,50 +124,50 @@ describe('MessageModel', () => {
     it('should should have correct order', async () => {
       const data: ChatMessage[] = [
         {
-          role: 'user',
           content: '1',
-          createdAt: 1697120044345,
+          createdAt: 1_697_120_044_345,
+          extra: {},
           id: 'NQ7RscYx',
-          updatedAt: 1697120181827,
-          extra: {},
           meta: {},
-          sessionId: '1',
-        },
-        {
-          role: 'assistant',
-          content: '2',
-          parentId: 'NQ7RscYx',
-          createdAt: 1697120130973,
-          id: '9tDAumEx',
-          updatedAt: 1697120181827,
-          meta: {},
-          extra: {
-            fromModel: 'gpt-3.5-turbo-16k',
-          },
-          sessionId: '1',
-        },
-        {
-          role: 'assistant',
-          content: '3',
-          parentId: 'tOMH7c5R',
-          meta: {},
-          createdAt: 1697120163272,
-          id: '5Ie5hClg',
-          updatedAt: 1697120181827,
-          extra: {
-            fromModel: 'gpt-3.5-turbo-16k',
-          },
-          sessionId: '1',
-        },
-        {
           role: 'user',
-          content: '4',
-          meta: {},
-          createdAt: 1697120163272,
-          id: 'tOMH7c5R',
-          updatedAt: 1697120181827,
-          extra: {},
           sessionId: '1',
+          updatedAt: 1_697_120_181_827,
+        },
+        {
+          content: '2',
+          createdAt: 1_697_120_130_973,
+          extra: {
+            fromModel: 'gpt-3.5-turbo-16k',
+          },
+          id: '9tDAumEx',
+          meta: {},
+          parentId: 'NQ7RscYx',
+          role: 'assistant',
+          sessionId: '1',
+          updatedAt: 1_697_120_181_827,
+        },
+        {
+          content: '3',
+          createdAt: 1_697_120_163_272,
+          extra: {
+            fromModel: 'gpt-3.5-turbo-16k',
+          },
+          id: '5Ie5hClg',
+          meta: {},
+          parentId: 'tOMH7c5R',
+          role: 'assistant',
+          sessionId: '1',
+          updatedAt: 1_697_120_181_827,
+        },
+        {
+          content: '4',
+          createdAt: 1_697_120_163_272,
+          extra: {},
+          id: 'tOMH7c5R',
+          meta: {},
+          role: 'user',
+          sessionId: '1',
+          updatedAt: 1_697_120_181_827,
         },
       ];
 
@@ -177,50 +177,50 @@ describe('MessageModel', () => {
 
       expect(queriedMessages).toEqual([
         {
-          role: 'user',
           content: '1',
-          createdAt: 1697120044345,
+          createdAt: 1_697_120_044_345,
+          extra: {},
           id: 'NQ7RscYx',
-          updatedAt: 1697120181827,
-          sessionId: '1',
-          extra: {},
           meta: {},
-        },
-        {
-          role: 'assistant',
-          content: '2',
-          parentId: 'NQ7RscYx',
-          createdAt: 1697120130973,
-          id: '9tDAumEx',
-          sessionId: '1',
-          updatedAt: 1697120181827,
-          meta: {},
-          extra: {
-            fromModel: 'gpt-3.5-turbo-16k',
-          },
-        },
-        {
           role: 'user',
-          content: '4',
           sessionId: '1',
-          createdAt: 1697120163272,
-          id: 'tOMH7c5R',
-          updatedAt: 1697120181827,
-          meta: {},
-          extra: {},
+          updatedAt: 1_697_120_181_827,
         },
         {
-          role: 'assistant',
-          content: '3',
-          parentId: 'tOMH7c5R',
-          meta: {},
-          createdAt: 1697120163272,
-          sessionId: '1',
-          id: '5Ie5hClg',
-          updatedAt: 1697120181827,
+          content: '2',
+          createdAt: 1_697_120_130_973,
           extra: {
             fromModel: 'gpt-3.5-turbo-16k',
           },
+          id: '9tDAumEx',
+          meta: {},
+          parentId: 'NQ7RscYx',
+          role: 'assistant',
+          sessionId: '1',
+          updatedAt: 1_697_120_181_827,
+        },
+        {
+          content: '4',
+          createdAt: 1_697_120_163_272,
+          extra: {},
+          id: 'tOMH7c5R',
+          meta: {},
+          role: 'user',
+          sessionId: '1',
+          updatedAt: 1_697_120_181_827,
+        },
+        {
+          content: '3',
+          createdAt: 1_697_120_163_272,
+          extra: {
+            fromModel: 'gpt-3.5-turbo-16k',
+          },
+          id: '5Ie5hClg',
+          meta: {},
+          parentId: 'tOMH7c5R',
+          role: 'assistant',
+          sessionId: '1',
+          updatedAt: 1_697_120_181_827,
         },
       ]);
     });
@@ -233,8 +233,8 @@ describe('MessageModel', () => {
 
       expect(messageInDb).toEqual(
         expect.objectContaining({
-          id: createdMessage.id,
           content: messageData.content,
+          id: createdMessage.id,
         }),
       );
     });
@@ -277,8 +277,8 @@ describe('MessageModel', () => {
     it('should update a role and plugins', async () => {
       const createdMessage = await MessageModel.create(messageData);
       const updateData = {
+        plugin: { apiName: 'a', arguments: 'abc', identifier: 'b' },
         role: 'tool' as const,
-        plugin: { apiName: 'a', identifier: 'b', arguments: 'abc' },
       };
 
       await MessageModel.update(createdMessage.id, updateData);
@@ -351,9 +351,9 @@ describe('MessageModel', () => {
 
       const childMessageData: CreateMessageParams = {
         content: 'Child message content',
+        parentId: parentMessage.id,
         role: 'user',
         sessionId: 'session1',
-        parentId: parentMessage.id,
       };
 
       await MessageModel.create(childMessageData);
@@ -407,9 +407,9 @@ describe('MessageModel', () => {
   describe('updatePlugin', () => {
     it('should update plugin', async () => {
       const value = {
-        identifier: 'testValue',
-        arguments: 'abc',
         apiName: 'abc',
+        arguments: 'abc',
+        identifier: 'testValue',
       };
       const createdMessage = await MessageModel.create(messageData);
       await MessageModel.updatePlugin(createdMessage.id, value);

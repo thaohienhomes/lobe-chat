@@ -1,13 +1,11 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { mutate } from 'swr';
-import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { LOADING_FLAT } from '@/const/message';
 import { chatService } from '@/services/chat';
 import { generationTopicService } from '@/services/generationTopic';
 import { useImageStore } from '@/store/image';
-import { useUserStore } from '@/store/user';
 import { ImageGenerationTopic } from '@/types/generation';
 
 // Mock services and dependencies

@@ -13,8 +13,8 @@ vi.mock('@/server/services/generation');
 
 describe('generationTopicRouter', () => {
   const mockCtx = {
-    userId: 'test-user',
     serverDB: {} as any,
+    userId: 'test-user',
   };
 
   beforeEach(() => {
@@ -24,13 +24,13 @@ describe('generationTopicRouter', () => {
   it('should create a new topic', async () => {
     const mockTopicId = 'topic-123';
     const mockCreatedTopic = {
+      accessedAt: new Date(),
+      coverUrl: null,
+      createdAt: new Date(),
       id: mockTopicId,
       title: '',
-      userId: 'test-user',
-      coverUrl: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockCreate = vi.fn().mockResolvedValue(mockCreatedTopic);
@@ -51,22 +51,22 @@ describe('generationTopicRouter', () => {
   it('should get all generation topics', async () => {
     const mockTopics: GenerationTopicItem[] = [
       {
+        accessedAt: new Date(),
+        coverUrl: 'cover-url-1',
+        createdAt: new Date(),
         id: 'topic-1',
         title: 'Test Topic 1',
-        userId: 'test-user',
-        coverUrl: 'cover-url-1',
-        accessedAt: new Date(),
-        createdAt: new Date(),
         updatedAt: new Date(),
+        userId: 'test-user',
       },
       {
+        accessedAt: new Date(),
+        coverUrl: null,
+        createdAt: new Date(),
         id: 'topic-2',
         title: 'Test Topic 2',
-        userId: 'test-user',
-        coverUrl: null,
-        accessedAt: new Date(),
-        createdAt: new Date(),
         updatedAt: new Date(),
+        userId: 'test-user',
       },
     ];
 
@@ -88,16 +88,16 @@ describe('generationTopicRouter', () => {
   it('should update a topic', async () => {
     const mockTopicId = 'topic-123';
     const mockUpdateValue = {
-      title: 'Updated Title',
       coverUrl: 'updated-cover-url',
+      title: 'Updated Title',
     };
     const mockUpdatedTopic = {
       id: mockTopicId,
       ...mockUpdateValue,
-      userId: 'test-user',
       accessedAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockUpdate = vi.fn().mockResolvedValue(mockUpdatedTopic);
@@ -123,13 +123,13 @@ describe('generationTopicRouter', () => {
     const mockCoverUrl = 'https://example.com/cover.jpg';
     const mockNewCoverKey = 'generations/covers/new-cover-key.webp';
     const mockUpdatedTopic = {
+      accessedAt: new Date(),
+      coverUrl: mockNewCoverKey,
+      createdAt: new Date(),
       id: mockTopicId,
       title: 'Test Topic',
-      userId: 'test-user',
-      coverUrl: mockNewCoverKey,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockCreateCoverFromUrl = vi.fn().mockResolvedValue(mockNewCoverKey);
@@ -151,8 +151,8 @@ describe('generationTopicRouter', () => {
 
     const caller = generationTopicRouter.createCaller(mockCtx);
     const result = await caller.updateTopicCover({
-      id: mockTopicId,
       coverUrl: mockCoverUrl,
+      id: mockTopicId,
     });
 
     expect(result).toEqual(mockUpdatedTopic);
@@ -163,13 +163,13 @@ describe('generationTopicRouter', () => {
   it('should delete a topic without cover', async () => {
     const mockTopicId = 'topic-123';
     const mockDeletedTopic = {
+      accessedAt: new Date(),
+      coverUrl: null,
+      createdAt: new Date(),
       id: mockTopicId,
       title: 'Deleted Topic',
-      userId: 'test-user',
-      coverUrl: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     // 修复 Mock 返回结构以匹配新的实现
@@ -205,13 +205,13 @@ describe('generationTopicRouter', () => {
     const mockTopicId = 'topic-123';
     const mockCoverUrl = 'generations/covers/cover-key.webp';
     const mockDeletedTopic = {
+      accessedAt: new Date(),
+      coverUrl: mockCoverUrl,
+      createdAt: new Date(),
       id: mockTopicId,
       title: 'Deleted Topic',
-      userId: 'test-user',
-      coverUrl: mockCoverUrl,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     // 修复 Mock 返回结构以匹配新的实现
@@ -247,13 +247,13 @@ describe('generationTopicRouter', () => {
     const mockTopicId = 'topic-123';
     const mockCoverUrl = 'generations/covers/cover-key.webp';
     const mockDeletedTopic = {
+      accessedAt: new Date(),
+      coverUrl: mockCoverUrl,
+      createdAt: new Date(),
       id: mockTopicId,
       title: 'Deleted Topic',
-      userId: 'test-user',
-      coverUrl: mockCoverUrl,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockDelete = vi.fn().mockResolvedValue({
@@ -296,13 +296,13 @@ describe('generationTopicRouter', () => {
     const mockCoverUrl = 'generations/covers/cover-key.webp';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg', 'thumb3.jpg'];
     const mockDeletedTopic = {
+      accessedAt: new Date(),
+      coverUrl: mockCoverUrl,
+      createdAt: new Date(),
       id: mockTopicId,
       title: 'Deleted Topic with Multiple Files',
-      userId: 'test-user',
-      coverUrl: mockCoverUrl,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockDelete = vi.fn().mockResolvedValue({
@@ -338,13 +338,13 @@ describe('generationTopicRouter', () => {
     const mockCoverUrl = 'generations/covers/cover-key.webp';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg'];
     const mockDeletedTopic = {
+      accessedAt: new Date(),
+      coverUrl: mockCoverUrl,
+      createdAt: new Date(),
       id: mockTopicId,
       title: 'Deleted Topic',
-      userId: 'test-user',
-      coverUrl: mockCoverUrl,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockDelete = vi.fn().mockResolvedValue({
@@ -421,13 +421,13 @@ describe('generationTopicRouter', () => {
       title: 'Only Title Updated',
     };
     const mockUpdatedTopic = {
+      accessedAt: new Date(),
+      coverUrl: null,
+      createdAt: new Date(),
       id: mockTopicId,
       title: 'Only Title Updated',
-      userId: 'test-user',
-      coverUrl: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockUpdate = vi.fn().mockResolvedValue(mockUpdatedTopic);
@@ -451,17 +451,17 @@ describe('generationTopicRouter', () => {
   it('should handle null values in update', async () => {
     const mockTopicId = 'topic-123';
     const mockUpdateValue = {
-      title: null,
       coverUrl: null,
+      title: null,
     };
     const mockUpdatedTopic = {
+      accessedAt: new Date(),
+      coverUrl: null,
+      createdAt: new Date(),
       id: mockTopicId,
       title: null,
-      userId: 'test-user',
-      coverUrl: null,
-      accessedAt: new Date(),
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'test-user',
     };
 
     const mockUpdate = vi.fn().mockResolvedValue(mockUpdatedTopic);

@@ -8,9 +8,9 @@ describe('UserModel', () => {
   beforeEach(() => {
     // Set up user data with the correct structure
     userData = {
-      uuid: 'user1',
-      settings: {},
       avatar: 'avatar.png',
+      settings: {},
+      uuid: 'user1',
     };
   });
 
@@ -28,9 +28,9 @@ describe('UserModel', () => {
 
     expect(userInDb).toEqual(
       expect.objectContaining({
-        uuid: userData.uuid,
-        settings: userData.settings,
         avatar: userData.avatar,
+        settings: userData.settings,
+        uuid: userData.uuid,
       }),
     );
   });

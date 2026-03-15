@@ -20,11 +20,11 @@ vi.mock('zustand/traditional');
 // Mock messageService
 vi.mock('@/services/message', () => ({
   messageService: {
+    createMessage: vi.fn(),
     updateMessage: vi.fn(),
     updateMessageError: vi.fn(),
-    updateMessagePluginState: vi.fn(),
     updateMessagePluginArguments: vi.fn(),
-    createMessage: vi.fn(),
+    updateMessagePluginState: vi.fn(),
   },
 }));
 
@@ -37,9 +37,9 @@ describe('ChatPluginAction', () => {
     it('should summarize plugin content', async () => {
       const messageId = 'message-id';
       const toolMessage = {
+        content: 'Tool content to summarize',
         id: messageId,
         role: 'tool',
-        content: 'Tool content to summarize',
       } as ChatMessage;
 
       const internal_coreProcessMessageMock = vi.fn();
@@ -47,8 +47,8 @@ describe('ChatPluginAction', () => {
       act(() => {
         useChatStore.setState({
           activeId: 'session-id',
-          messagesMap: { [messageMapKey('session-id')]: [toolMessage] },
           internal_coreProcessMessage: internal_coreProcessMessageMock,
+          messagesMap: { [messageMapKey('session-id')]: [toolMessage] },
         });
       });
 
@@ -61,20 +61,20 @@ describe('ChatPluginAction', () => {
       expect(internal_coreProcessMessageMock).toHaveBeenCalledWith(
         [
           {
-            role: 'assistant',
             content: '作为一名总结专家，请结合以上系统提示词，将以下内容进行总结：',
+            role: 'assistant',
           },
           {
             ...toolMessage,
+            content: toolMessage.content,
             meta: {
               avatar: DEFAULT_INBOX_AVATAR,
               backgroundColor: 'rgba(0,0,0,0)',
               description: undefined,
               title: undefined,
             },
-            content: toolMessage.content,
-            role: 'assistant',
             name: undefined,
+            role: 'assistant',
             tool_call_id: undefined,
           },
         ],
@@ -85,9 +85,9 @@ describe('ChatPluginAction', () => {
     it('should not summarize non-tool messages', async () => {
       const messageId = 'message-id';
       const nonToolMessage = {
+        content: 'User message',
         id: messageId,
         role: 'user',
-        content: 'User message',
       } as ChatMessage;
 
       const internal_coreProcessMessageMock = vi.fn();
@@ -95,8 +95,8 @@ describe('ChatPluginAction', () => {
       act(() => {
         useChatStore.setState({
           activeId: 'session-id',
-          messagesMap: { [messageMapKey('session-id')]: [nonToolMessage] },
           internal_coreProcessMessage: internal_coreProcessMessageMock,
+          messagesMap: { [messageMapKey('session-id')]: [nonToolMessage] },
         });
       });
 
@@ -153,8 +153,8 @@ describe('ChatPluginAction', () => {
 
       // 设置初始状态
       const initialState = {
-        messages: [],
         internal_coreProcessMessage: vi.fn(),
+        messages: [],
         refreshMessages: vi.fn(),
       };
       useChatStore.setState(initialState);
@@ -188,9 +188,9 @@ describe('ChatPluginAction', () => {
 
       // 设置初始状态
       const initialState = {
-        messages: [],
         coreProcessMessage: vi.fn(),
         internal_coreProcessMessage: vi.fn(),
+        messages: [],
         refreshMessages: vi.fn(),
       };
       useChatStore.setState(initialState);
@@ -293,37 +293,37 @@ describe('ChatPluginAction', () => {
     it('should trigger tool calls for the assistant message', async () => {
       const assistantId = 'assistant-id';
       const message = {
+        content: 'Assistant message',
         id: assistantId,
         role: 'assistant',
-        content: 'Assistant message',
         tools: [
           {
-            id: 'tool1',
-            type: 'standalone',
-            identifier: 'plugin1',
             apiName: 'api1',
             arguments: '{}',
+            id: 'tool1',
+            identifier: 'plugin1',
+            type: 'standalone',
           },
           {
-            id: 'tool2',
-            type: 'markdown',
-            identifier: 'plugin2',
             apiName: 'api2',
             arguments: '{}',
+            id: 'tool2',
+            identifier: 'plugin2',
+            type: 'markdown',
           },
           {
-            id: 'tool3',
-            type: 'builtin',
-            identifier: 'builtin1',
             apiName: 'api3',
             arguments: '{}',
+            id: 'tool3',
+            identifier: 'builtin1',
+            type: 'builtin',
           },
           {
-            id: 'tool4',
-            type: 'default',
-            identifier: 'plugin3',
             apiName: 'api4',
             arguments: '{}',
+            id: 'tool4',
+            identifier: 'plugin3',
+            type: 'default',
           },
         ],
       } as ChatMessage;
@@ -338,17 +338,17 @@ describe('ChatPluginAction', () => {
 
       act(() => {
         useChatStore.setState({
+          activeId: 'session-id',
+          activeTopicId: 'topic-id',
+          internal_createMessage: internal_createMessageMock,
+          invokeBuiltinTool: invokeBuiltinToolMock,
+          invokeDefaultTypePlugin: invokeDefaultTypePluginMock,
+          invokeMarkdownTypePlugin: invokeMarkdownTypePluginMock,
+          invokeStandaloneTypePlugin: invokeStandaloneTypePluginMock,
           messagesMap: {
             [messageMapKey('session-id', 'topic-id')]: [message],
           },
-          invokeStandaloneTypePlugin: invokeStandaloneTypePluginMock,
-          invokeMarkdownTypePlugin: invokeMarkdownTypePluginMock,
-          invokeBuiltinTool: invokeBuiltinToolMock,
-          invokeDefaultTypePlugin: invokeDefaultTypePluginMock,
           triggerAIMessage: triggerAIMessageMock,
-          internal_createMessage: internal_createMessageMock,
-          activeId: 'session-id',
-          activeTopicId: 'topic-id',
         });
       });
 
@@ -394,30 +394,30 @@ describe('ChatPluginAction', () => {
     it('should not trigger AI message if no default type tool calls', async () => {
       const assistantId = 'assistant-id';
       const message = {
+        content: 'Assistant message',
         id: assistantId,
         role: 'assistant',
-        content: 'Assistant message',
         tools: [
           {
-            id: 'tool1',
-            type: 'standalone',
-            identifier: 'plugin1',
             apiName: 'api1',
             arguments: '{}',
+            id: 'tool1',
+            identifier: 'plugin1',
+            type: 'standalone',
           },
           {
-            id: 'tool2',
-            type: 'markdown',
-            identifier: 'plugin2',
             apiName: 'api2',
             arguments: '{}',
+            id: 'tool2',
+            identifier: 'plugin2',
+            type: 'markdown',
           },
           {
-            id: 'tool3',
-            type: 'builtin',
-            identifier: 'builtin1',
             apiName: 'api3',
             arguments: '{}',
+            id: 'tool3',
+            identifier: 'builtin1',
+            type: 'builtin',
           },
         ],
       } as ChatMessage;
@@ -430,16 +430,16 @@ describe('ChatPluginAction', () => {
 
       act(() => {
         useChatStore.setState({
-          invokeStandaloneTypePlugin: invokeStandaloneTypePluginMock,
-          invokeMarkdownTypePlugin: invokeMarkdownTypePluginMock,
-          invokeBuiltinTool: invokeBuiltinToolMock,
-          triggerAIMessage: triggerAIMessageMock,
-          internal_createMessage: internal_createMessageMock,
           activeId: 'session-id',
+          activeTopicId: 'topic-id',
+          internal_createMessage: internal_createMessageMock,
+          invokeBuiltinTool: invokeBuiltinToolMock,
+          invokeMarkdownTypePlugin: invokeMarkdownTypePluginMock,
+          invokeStandaloneTypePlugin: invokeStandaloneTypePluginMock,
           messagesMap: {
             [messageMapKey('session-id', 'topic-id')]: [message],
           },
-          activeTopicId: 'topic-id',
+          triggerAIMessage: triggerAIMessageMock,
         });
       });
 
@@ -499,9 +499,9 @@ describe('ChatPluginAction', () => {
 
       // 设置初始状态并模拟 refreshMessages 方法
       const initialState = {
-        refreshMessages: vi.fn(),
         activeId: 'session-id',
         activeTopicId: 'topic-id',
+        refreshMessages: vi.fn(),
       };
       useChatStore.setState(initialState);
 
@@ -534,9 +534,9 @@ describe('ChatPluginAction', () => {
 
       // 设置初始状态并模拟 refreshMessages 方法
       const initialState = {
-        refreshMessages: vi.fn(),
         activeId: 'session-id',
         activeTopicId: 'topic-id',
+        refreshMessages: vi.fn(),
       };
       useChatStore.setState(initialState);
 
@@ -632,14 +632,14 @@ describe('ChatPluginAction', () => {
 
       act(() => {
         useToolStore.setState({
-          transformApiArgumentsToAiState: vi.fn().mockResolvedValue(toolResponse),
           text2image: vi.fn(),
+          transformApiArgumentsToAiState: vi.fn().mockResolvedValue(toolResponse),
         });
 
         useChatStore.setState({
           internal_togglePluginApiCalling: vi.fn(),
-          text2image: vi.fn(),
           internal_updateMessageContent: vi.fn(),
+          text2image: vi.fn(),
         });
       });
       const { result } = renderHook(() => useChatStore());
@@ -696,8 +696,8 @@ describe('ChatPluginAction', () => {
         internal_togglePluginApiCalling: vi.fn(),
         internal_updateMessageContent: vi.fn(),
         internal_updatePluginError: vi.fn(),
-        text2image: vi.fn(),
         refreshMessages: vi.fn(),
+        text2image: vi.fn(),
       });
 
       const { result } = renderHook(() => useChatStore());
@@ -707,14 +707,14 @@ describe('ChatPluginAction', () => {
       });
 
       expect(result.current.internal_updatePluginError).toHaveBeenCalledWith('message-id', {
-        type: 'PluginFailToTransformArguments',
         body: {
-          message: expect.any(String),
-          stack: undefined,
           arguments: args,
+          message: expect.any(String),
           schema: undefined,
+          stack: undefined,
         },
         message: expect.any(String),
+        type: 'PluginFailToTransformArguments',
       });
       // Verify that loading was toggled correctly
       expect(result.current.internal_togglePluginApiCalling).toHaveBeenNthCalledWith(
@@ -742,9 +742,9 @@ describe('ChatPluginAction', () => {
     it('should invoke a markdown type plugin', async () => {
       const payload = {
         apiName: 'markdownApi',
+        arguments: JSON.stringify({ key: 'value' }),
         identifier: 'abc',
         type: 'markdown',
-        arguments: JSON.stringify({ key: 'value' }),
       } as ChatToolPayload;
       const messageId = 'message-id';
 
@@ -777,10 +777,10 @@ describe('ChatPluginAction', () => {
         useToolStore.setState({
           validatePluginSettings: vi
             .fn()
-            .mockResolvedValue({ valid: false, errors: ['Invalid setting'] }),
+            .mockResolvedValue({ errors: ['Invalid setting'], valid: false }),
         });
 
-        useChatStore.setState({ refreshMessages: vi.fn(), invokeStandaloneTypePlugin });
+        useChatStore.setState({ invokeStandaloneTypePlugin, refreshMessages: vi.fn() });
       });
 
       const { result } = renderHook(() => useChatStore());
@@ -808,15 +808,15 @@ describe('ChatPluginAction', () => {
     it('should re-invoke a tool message', async () => {
       const messageId = 'message-id';
       const message = {
-        id: messageId,
-        role: 'tool',
         content: 'Original content',
+        id: messageId,
         plugin: {
-          type: 'default',
-          identifier: 'plugin-id',
           apiName: 'api-name',
           arguments: '{}',
+          identifier: 'plugin-id',
+          type: 'default',
         },
+        role: 'tool',
         tool_call_id: 'tool-id',
       } as ChatMessage;
 
@@ -824,9 +824,9 @@ describe('ChatPluginAction', () => {
       act(() => {
         useChatStore.setState({
           activeId: 'session-id',
-          messagesMap: { [messageMapKey('session-id')]: [message] },
           internal_invokeDifferentTypePlugin: internal_invokeDifferentTypePluginMock,
           internal_updateMessageError: vi.fn(),
+          messagesMap: { [messageMapKey('session-id')]: [message] },
         });
       });
 
@@ -845,17 +845,17 @@ describe('ChatPluginAction', () => {
     it('should clear error content when re-invoking', async () => {
       const messageId = 'message-id';
       const message = {
-        id: messageId,
-        role: 'tool',
         content: 'Original content',
+        id: messageId,
         plugin: {
-          type: 'default',
-          identifier: 'plugin-id',
           apiName: 'api-name',
           arguments: '{}',
+          identifier: 'plugin-id',
+          type: 'default',
         },
-        tool_call_id: 'tool-id',
         pluginError: { message: 'Previous error', type: 'ProviderBizError' },
+        role: 'tool',
+        tool_call_id: 'tool-id',
       } as ChatMessage;
 
       const internal_updateMessageErrorMock = vi.fn();
@@ -863,9 +863,9 @@ describe('ChatPluginAction', () => {
       act(() => {
         useChatStore.setState({
           activeId: 'session-id',
-          messagesMap: { [messageMapKey('session-id')]: [message] },
           internal_invokeDifferentTypePlugin: vi.fn(),
           internal_updateMessagePluginError: internal_updateMessageErrorMock,
+          messagesMap: { [messageMapKey('session-id')]: [message] },
         });
       });
 
@@ -888,19 +888,19 @@ describe('ChatPluginAction', () => {
       const newArguments = { newKey: 'newValue' };
 
       const toolMessage = {
-        id: messageId,
-        role: 'tool',
         content: 'Tool content',
-        plugin: { identifier: identifier, arguments: '{"oldKey":"oldValue"}' },
-        tool_call_id: toolCallId,
+        id: messageId,
         parentId,
+        plugin: { arguments: '{"oldKey":"oldValue"}', identifier: identifier },
+        role: 'tool',
+        tool_call_id: toolCallId,
       } as ChatMessage;
 
       const assistantMessage = {
+        content: 'Assistant content',
         id: parentId,
         role: 'assistant',
-        content: 'Assistant content',
-        tools: [{ identifier: identifier, arguments: '{"oldKey":"oldValue"}', id: toolCallId }],
+        tools: [{ arguments: '{"oldKey":"oldValue"}', id: toolCallId, identifier: identifier }],
       } as ChatMessage;
 
       act(() => {
@@ -934,11 +934,11 @@ describe('ChatPluginAction', () => {
     it('should call plugin API and update message content', async () => {
       const messageId = 'message-id';
       const payload: ChatToolPayload = {
-        id: 'tool-id',
-        type: 'default',
-        identifier: 'plugin-id',
         apiName: 'api-name',
         arguments: '{}',
+        id: 'tool-id',
+        identifier: 'plugin-id',
+        type: 'default',
       };
       const apiResponse = 'API response';
 
@@ -972,11 +972,11 @@ describe('ChatPluginAction', () => {
     it('should handle API call errors', async () => {
       const messageId = 'message-id';
       const payload: ChatToolPayload = {
-        id: 'tool-id',
-        type: 'default',
-        identifier: 'plugin-id',
         apiName: 'api-name',
         arguments: '{}',
+        id: 'tool-id',
+        identifier: 'plugin-id',
+        type: 'default',
       };
       const error = new Error('API call failed');
 
@@ -1004,19 +1004,19 @@ describe('ChatPluginAction', () => {
     it('should transform tool calls correctly', () => {
       const toolCalls: MessageToolCall[] = [
         {
-          id: 'tool1',
           function: {
-            name: ['plugin1', 'api1', 'default'].join(PLUGIN_SCHEMA_SEPARATOR),
             arguments: '{}',
+            name: ['plugin1', 'api1', 'default'].join(PLUGIN_SCHEMA_SEPARATOR),
           },
+          id: 'tool1',
           type: 'function',
         },
         {
-          id: 'tool2',
           function: {
-            name: ['plugin2', 'api2', 'markdown'].join(PLUGIN_SCHEMA_SEPARATOR),
             arguments: '{}',
+            name: ['plugin2', 'api2', 'markdown'].join(PLUGIN_SCHEMA_SEPARATOR),
           },
+          id: 'tool2',
           type: 'function',
         },
       ];
@@ -1027,18 +1027,18 @@ describe('ChatPluginAction', () => {
 
       expect(transformed).toEqual([
         {
+          apiName: 'api1',
+          arguments: '{}',
           id: 'tool1',
           identifier: 'plugin1',
-          apiName: 'api1',
           type: 'default',
-          arguments: '{}',
         },
         {
+          apiName: 'api2',
+          arguments: '{}',
           id: 'tool2',
           identifier: 'plugin2',
-          apiName: 'api2',
           type: 'markdown',
-          arguments: '{}',
         },
       ]);
     });
@@ -1048,13 +1048,13 @@ describe('ChatPluginAction', () => {
       const md5Hash = genToolCallShortMD5Hash(apiName);
       const toolCalls: MessageToolCall[] = [
         {
-          id: 'tool1',
           function: {
+            arguments: '{}',
             name: ['plugin1', PLUGIN_SCHEMA_API_MD5_PREFIX + md5Hash, 'default'].join(
               PLUGIN_SCHEMA_SEPARATOR,
             ),
-            arguments: '{}',
           },
+          id: 'tool1',
           type: 'function',
         },
       ];
@@ -1063,19 +1063,19 @@ describe('ChatPluginAction', () => {
         useToolStore.setState({
           installedPlugins: [
             {
-              type: 'plugin',
               identifier: 'plugin1',
               manifest: {
-                identifier: 'plugin1',
                 api: [
                   {
-                    name: apiName,
-                    parameters: { type: 'object', properties: {} },
                     description: 'abc',
+                    name: apiName,
+                    parameters: { properties: {}, type: 'object' },
                   },
                 ],
+                identifier: 'plugin1',
                 type: 'default',
               } as any,
+              type: 'plugin',
             },
           ],
         });
@@ -1125,10 +1125,10 @@ describe('ChatPluginAction', () => {
       );
 
       const assistantMessage = {
+        content: 'Assistant content',
         id: messageId,
         role: 'assistant',
-        content: 'Assistant content',
-        tools: [{ identifier: identifier, arguments: '{"oldKey":"oldValue"}', id: toolCallId }],
+        tools: [{ arguments: '{"oldKey":"oldValue"}', id: toolCallId, identifier: identifier }],
       } as ChatMessage;
 
       act(() => {
@@ -1141,10 +1141,10 @@ describe('ChatPluginAction', () => {
 
       await act(async () => {
         await result.current.internal_addToolToAssistantMessage(messageId, {
-          identifier,
+          apiName: 'test',
           arguments: '{"oldKey":"oldValue"}',
           id: 'newId',
-          apiName: 'test',
+          identifier,
           type: 'default',
         });
       });

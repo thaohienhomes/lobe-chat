@@ -3,7 +3,6 @@ import qs from 'query-string';
 import { describe, expect, it, vi } from 'vitest';
 
 import { BRANDING_LOGO_URL } from '@/const/branding';
-import { getCanonicalUrl } from '@/server/utils/url';
 
 import { Manifest, manifestModule } from './manifest';
 
@@ -24,9 +23,9 @@ describe('Manifest', () => {
       const input = {
         color: '#FF0000',
         description: 'Test description',
-        name: 'Test App',
-        id: 'test-app',
         icons: [{ purpose: 'any' as const, sizes: '192x192', url: 'icon.png' }],
+        id: 'test-app',
+        name: 'Test App',
         screenshots: [{ form_factor: 'wide' as const, url: 'screenshot.png' }],
       };
 
@@ -35,14 +34,14 @@ describe('Manifest', () => {
       expect(result).toMatchObject({
         background_color: input.color,
         description: input.description,
-        name: input.name,
-        id: input.id,
         icons: expect.arrayContaining([
           expect.objectContaining({
             purpose: 'any',
             sizes: '192x192',
           }),
         ]),
+        id: input.id,
+        name: input.name,
         screenshots: expect.arrayContaining([
           expect.objectContaining({
             form_factor: 'wide',
@@ -55,9 +54,9 @@ describe('Manifest', () => {
     it('should use default color if not provided', () => {
       const input = {
         description: 'Test description',
-        name: 'Test App',
-        id: 'test-app',
         icons: [],
+        id: 'test-app',
+        name: 'Test App',
         screenshots: [],
       };
 
@@ -79,7 +78,7 @@ describe('Manifest', () => {
       expect(result).toEqual({
         cache_busting_mode: 'query',
         immutable: 'true',
-        max_age: 31536000,
+        max_age: 31_536_000,
         src: qs.stringifyUrl({ query: { v: version }, url: BRANDING_LOGO_URL || url }),
       });
     });
@@ -97,10 +96,10 @@ describe('Manifest', () => {
   describe('_getIcon', () => {
     it('should return correct icon object', () => {
       const icon = {
+        purpose: 'maskable' as const,
+        sizes: '64x64',
         url: 'https://example.com/icon.png',
         version: 3,
-        sizes: '64x64',
-        purpose: 'maskable' as const,
       };
 
       // @ts-ignore - Accessing private method for testing
@@ -137,8 +136,8 @@ describe('Manifest', () => {
     it('should return correct screenshot object for narrow form factor', () => {
       const screenshot = {
         form_factor: 'narrow' as const,
-        url: 'https://example.com/screenshot.png',
         sizes: '320x569',
+        url: 'https://example.com/screenshot.png',
       };
 
       // @ts-ignore - Accessing private method for testing
@@ -148,7 +147,7 @@ describe('Manifest', () => {
         cache_busting_mode: 'query',
         form_factor: 'narrow',
         immutable: 'true',
-        max_age: 31536000,
+        max_age: 31_536_000,
         sizes: '1280x676',
         src: 'https://example.com/logo.png?v=1',
         type: 'image/png',

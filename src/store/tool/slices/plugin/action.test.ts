@@ -1,4 +1,3 @@
-import { LobeChatPluginMeta } from '@lobehub/chat-plugin-sdk';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -11,8 +10,8 @@ import { useToolStore } from '../../store';
 
 vi.mock('@/services/plugin', () => ({
   pluginService: {
-    updatePluginSettings: vi.fn(),
     removeAllPlugins: vi.fn(),
+    updatePluginSettings: vi.fn(),
   },
 }));
 
@@ -26,8 +25,8 @@ describe('useToolStore:plugin', () => {
     it('should not perform any operations if the plugin list is empty', async () => {
       const installPluginsMock = vi.fn();
       useToolStore.setState({
-        loadPluginStore: vi.fn(),
         installPlugins: installPluginsMock,
+        loadPluginStore: vi.fn(),
       });
 
       const { result } = renderHook(() => useToolStore());
@@ -44,8 +43,8 @@ describe('useToolStore:plugin', () => {
       const loadPluginStoreMock = vi.fn();
       const installPluginsMock = vi.fn();
       useToolStore.setState({
-        loadPluginStore: loadPluginStoreMock,
         installPlugins: installPluginsMock,
+        loadPluginStore: loadPluginStoreMock,
       });
 
       const { result } = renderHook(() => useToolStore());
@@ -63,9 +62,9 @@ describe('useToolStore:plugin', () => {
       const loadPluginStoreMock = vi.fn();
       const installPluginsMock = vi.fn();
       useToolStore.setState({
-        loadPluginStore: loadPluginStoreMock,
         installPlugins: installPluginsMock,
         installedPlugins: [{ identifier: 'abc' }] as LobeTool[],
+        loadPluginStore: loadPluginStoreMock,
         oldPluginItems: [{ identifier: 'abc' }] as DiscoverPluginItem[],
       });
 
@@ -146,13 +145,13 @@ describe('useToolStore:plugin', () => {
     const testPluginSettings = { abc: 'valid-string' };
 
     const testPlugin = {
-      type: 'plugin',
       identifier: testPluginId,
       manifest: {
         identifier: testPluginId,
         settings: testSchema,
       },
       settings: testPluginSettings,
+      type: 'plugin',
     } as unknown as LobeTool;
 
     it('should validate settings against the schema and return valid result', async () => {
@@ -166,7 +165,7 @@ describe('useToolStore:plugin', () => {
 
       const validationResult = await result.current.validatePluginSettings(testPluginId);
 
-      expect(validationResult).toEqual({ valid: true, errors: [] });
+      expect(validationResult).toEqual({ errors: [], valid: true });
     });
 
     it('should return invalid result if settings do not match the schema', async () => {

@@ -1,6 +1,5 @@
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 import { TempFileManager } from '../tempFileManager';
@@ -9,10 +8,10 @@ import { TempFileManager } from '../tempFileManager';
 vi.mock('node:fs');
 vi.mock('node:os');
 vi.mock('node:path', () => ({
-  join: (...args: string[]) => args.join('/'),
   default: {
     join: (...args: string[]) => args.join('/'),
   },
+  join: (...args: string[]) => args.join('/'),
 }));
 
 describe('TempFileManager', () => {

@@ -15,11 +15,11 @@ const pluginService = new ClientService();
 
 vi.mock('@/database/_deprecated/models/plugin', () => ({
   PluginModel: {
-    getList: vi.fn(),
+    clear: vi.fn(),
     create: vi.fn(),
     delete: vi.fn(),
+    getList: vi.fn(),
     update: vi.fn(),
-    clear: vi.fn(),
   },
 }));
 

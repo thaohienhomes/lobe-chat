@@ -10,17 +10,11 @@ describe('settingsSelectors', () => {
       const s = {
         settings: {
           avatar: 'avatar.jpg',
-          fontSize: 14,
-          language: 'en-US',
-          neutralColor: 'sand',
-          password: 'password123',
-          primaryColor: 'blue',
-          themeMode: 'light',
           defaultAgent: {
             config: {
-              systemRole: '',
               model: 'gpt-3.5-turbo',
               params: {},
+              systemRole: '',
               tts: {
                 showAllLocaleVoice: false,
                 sttLocale: 'auto',
@@ -35,6 +29,19 @@ describe('settingsSelectors', () => {
               description: 'Default agent for testing',
             },
           },
+          fontSize: 14,
+          language: 'en-US',
+          languageModel: {
+            openAI: {
+              OPENAI_API_KEY: 'openai-api-key',
+              endpoint: 'https://openai-endpoint.com',
+              models: ['gpt-3.5-turbo'],
+            },
+          },
+          neutralColor: 'sand',
+          password: 'password123',
+          primaryColor: 'blue',
+          themeMode: 'light',
           tts: {
             openAI: {
               sttModel: 'whisper-1',
@@ -42,13 +49,6 @@ describe('settingsSelectors', () => {
             },
             sttAutoStop: true,
             sttServer: 'openai',
-          },
-          languageModel: {
-            openAI: {
-              OPENAI_API_KEY: 'openai-api-key',
-              endpoint: 'https://openai-endpoint.com',
-              models: ['gpt-3.5-turbo'],
-            },
           },
         },
       } as unknown as UserStore;
@@ -65,8 +65,8 @@ describe('settingsSelectors', () => {
         settings: {
           defaultAgent: {
             config: {
-              systemRole: 'user',
               model: 'gpt-3.5-turbo',
+              systemRole: 'user',
             },
             meta: {
               avatar: 'agent-avatar.jpg',
@@ -106,10 +106,10 @@ describe('settingsSelectors', () => {
       const s = {
         settings: {
           tts: {
-            sttAutoStop: false,
             openAI: {
               sttModel: 'whisper-2',
             },
+            sttAutoStop: false,
           },
         },
       } as unknown as UserStore;
@@ -198,11 +198,11 @@ describe('settingsSelectors', () => {
         settings: {
           defaultAgent: {
             config: {
-              systemRole: 'custom role',
               model: 'gpt-4',
               params: {
                 temperature: 0.7,
               },
+              systemRole: 'custom role',
             },
           },
         },

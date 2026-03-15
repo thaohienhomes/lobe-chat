@@ -7,11 +7,15 @@ describe('MCPClient', () => {
   describe('Stdio Transport', () => {
     let mcpClient: MCPClient;
     const stdioConnection = {
-      id: 'mcp-hello-world',
-      name: 'Stdio SDK Test Connection',
-      type: 'stdio' as const,
-      command: 'npx', // Use node to run the compiled mock server
-      args: ['mcp-hello-world@1.1.2'], // Use the path to the compiled JS file
+      // Use node to run the compiled mock server
+args: ['mcp-hello-world@1.1.2'],
+      
+command: 'npx',
+      
+id: 'mcp-hello-world',
+      
+name: 'Stdio SDK Test Connection', 
+      type: 'stdio' as const, // Use the path to the compiled JS file
     };
 
     beforeEach(async () => {
@@ -21,7 +25,7 @@ describe('MCPClient', () => {
       await mcpClient.initialize();
       // Add a small delay to allow the server process to fully start (optional, but can help)
       await new Promise((resolve) => setTimeout(resolve, 100));
-    }, 30000);
+    }, 30_000);
 
     afterEach(async () => {
       // Assume SDK client/transport handles process termination gracefully
@@ -47,7 +51,7 @@ describe('MCPClient', () => {
       const toolArgs = { message: 'hello stdio' };
       // Expect the result format defined in mock-sdk-server.ts
       const expectedResult = {
-        content: [{ type: 'text', text: 'You said: hello stdio' }],
+        content: [{ text: 'You said: hello stdio', type: 'text' }],
       };
 
       const result = await mcpClient.callTool(toolName, toolArgs);
@@ -60,7 +64,7 @@ describe('MCPClient', () => {
 
       const result = await mcpClient.callTool(toolName, toolArgs);
       expect(result).toEqual({
-        content: [{ type: 'text', text: 'The sum is: 12' }],
+        content: [{ text: 'The sum is: 12', type: 'text' }],
       });
     });
   });

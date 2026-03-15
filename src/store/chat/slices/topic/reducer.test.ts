@@ -1,4 +1,3 @@
-import { produce } from 'immer';
 import { expect } from 'vitest';
 
 import { ChatTopic } from '@/types/topic';
@@ -17,8 +16,8 @@ describe('topicReducer', () => {
       const payload: ChatTopicDispatch = {
         type: 'addTopic',
         value: {
-          title: 'Test Topic',
           sessionId: '',
+          title: 'Test Topic',
         },
       };
 
@@ -31,17 +30,17 @@ describe('topicReducer', () => {
   describe('updateTopic', () => {
     it('should update the ChatTopic object in state', () => {
       const topic: ChatTopic = {
+        createdAt: Date.now(),
         id: '1',
         title: 'Test Topic',
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
       state.push(topic);
 
       const payload: ChatTopicDispatch = {
-        type: 'updateTopic',
         id: '1',
+        type: 'updateTopic',
         value: { title: 'Updated Topic' },
       };
 
@@ -52,17 +51,17 @@ describe('topicReducer', () => {
 
     it('should update the ChatTopic object with correct properties', () => {
       const topic: ChatTopic = {
+        createdAt: Date.now() - 1,
         id: '1',
         title: 'Test Topic',
-        createdAt: Date.now() - 1,
         updatedAt: Date.now() - 1, // 设定比当前时间前面一点
       };
 
       state.push(topic);
 
       const payload: ChatTopicDispatch = {
-        type: 'updateTopic',
         id: '1',
+        type: 'updateTopic',
         value: { title: 'Updated Topic' },
       };
 
@@ -75,17 +74,17 @@ describe('topicReducer', () => {
   describe('deleteTopic', () => {
     it('should delete the specified ChatTopic object from state', () => {
       const topic: ChatTopic = {
+        createdAt: Date.now(),
         id: '1',
         title: 'Test Topic',
-        createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
       state.push(topic);
 
       const payload: ChatTopicDispatch = {
-        type: 'deleteTopic',
         id: '1',
+        type: 'deleteTopic',
       };
 
       const newState = topicReducer(state, payload);
@@ -111,8 +110,8 @@ describe('topicReducer', () => {
       const payload: ChatTopicDispatch = {
         type: 'addTopic',
         value: {
-          title: 'Test Topic',
           sessionId: '1',
+          title: 'Test Topic',
         },
       };
 
@@ -125,9 +124,9 @@ describe('topicReducer', () => {
       const payload: ChatTopicDispatch = {
         type: 'addTopic',
         value: {
-          title: 'Test Topic',
-
           sessionId: '123',
+
+          title: 'Test Topic',
         },
       };
 

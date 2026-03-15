@@ -6,7 +6,10 @@ import { DalleManifest } from './dalle';
 import { LocalSystemManifest } from './local-system';
 import { ScientificSkillsManifest } from './scientific-skills';
 import { SlidesManifest } from './slides';
+import { VisualizerManifest } from './visualizer';
 import { WebBrowsingManifest } from './web-browsing';
+
+const isVisualizerEnabled = process.env.NEXT_PUBLIC_VISUALIZER_ENABLED === 'true';
 
 export const builtinTools: LobeBuiltinTool[] = [
   {
@@ -41,4 +44,13 @@ export const builtinTools: LobeBuiltinTool[] = [
     manifest: ScientificSkillsManifest,
     type: 'builtin',
   },
+  ...(isVisualizerEnabled
+    ? [
+        {
+          identifier: VisualizerManifest.identifier,
+          manifest: VisualizerManifest,
+          type: 'builtin' as const,
+        },
+      ]
+    : []),
 ];

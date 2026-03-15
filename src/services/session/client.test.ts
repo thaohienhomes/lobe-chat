@@ -1,11 +1,10 @@
 import { eq, not } from 'drizzle-orm';
-import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { INBOX_SESSION_ID } from '@/const/session';
 import { clientDB, initializeDB } from '@/database/client/db';
 import {
   NewSession,
-  SessionItem,
   agents,
   agentsToSessions,
   sessionGroups,
@@ -13,7 +12,7 @@ import {
   users,
 } from '@/database/schemas';
 import { LobeAgentChatConfig, LobeAgentConfig } from '@/types/agent';
-import { LobeAgentSession, LobeSessionType, SessionGroups } from '@/types/session';
+import { LobeAgentSession, LobeSessionType } from '@/types/session';
 
 import { ClientService } from './client';
 
@@ -51,8 +50,8 @@ afterEach(async () => {
 describe('SessionService', () => {
   const mockSession = {
     id: mockSessionId,
-    type: 'agent',
     meta: { title: 'Mock Session' },
+    type: 'agent',
   } as LobeAgentSession;
 
   describe('createSession', () => {
@@ -175,7 +174,7 @@ describe('SessionService', () => {
   describe('searchSessions', () => {
     it('should return sessions that match the keyword', async () => {
       // Setup
-      await clientDB.insert(agents).values({ userId, id: 'agent-1', title: 'Session Name' });
+      await clientDB.insert(agents).values({ id: 'agent-1', title: 'Session Name', userId });
       await clientDB
         .insert(agentsToSessions)
         .values({ agentId: 'agent-1', sessionId: mockSessionId, userId });
@@ -200,7 +199,7 @@ describe('SessionService', () => {
         userId,
       };
       await clientDB.insert(sessions).values([session]);
-      await clientDB.insert(agents).values({ userId, id: 'agent-1' });
+      await clientDB.insert(agents).values({ id: 'agent-1', userId });
       await clientDB
         .insert(agentsToSessions)
         .values({ agentId: 'agent-1', sessionId: 'duplicated-session-id', userId });

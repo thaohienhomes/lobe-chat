@@ -32,8 +32,14 @@ export class DocumentModel {
     return this.db.delete(documents).where(eq(documents.userId, this.userId));
   };
 
-  query = async () => {
+  query = async (params?: { current?: number; pageSize?: number }) => {
+    const pageSize = params?.pageSize ?? 100;
+    const current = params?.current ?? 0;
+    const offset = current * pageSize;
+
     return this.db.query.documents.findMany({
+      limit: pageSize,
+      offset,
       orderBy: [desc(documents.updatedAt)],
       where: eq(documents.userId, this.userId),
     });

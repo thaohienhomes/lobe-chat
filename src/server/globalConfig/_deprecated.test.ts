@@ -27,11 +27,11 @@ vi.mock('@/config/modelProviders', () => ({
 // Mock LLM config
 vi.mock('@/envs/llm', () => ({
   getLLMConfig: () => ({
-    ENABLED_AZURE_OPENAI: true,
-    ENABLED_AWS_BEDROCK: true,
-    ENABLED_OLLAMA: true,
-    AZURE_MODEL_LIST: 'azureModels',
     AWS_BEDROCK_MODEL_LIST: 'bedrockModels',
+    AZURE_MODEL_LIST: 'azureModels',
+    ENABLED_AWS_BEDROCK: true,
+    ENABLED_AZURE_OPENAI: true,
+    ENABLED_OLLAMA: true,
     OLLAMA_MODEL_LIST: 'ollamaModels',
     OLLAMA_PROXY_URL: '',
   }),

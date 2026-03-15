@@ -149,7 +149,7 @@ const AppTheme = memo<AppThemeProps>(
           config={{
             aAs: Link,
             imgAs: Image,
-            imgUnoptimized: true,
+            imgUnoptimized: false,
             proxy: globalCDN ? 'unpkg' : undefined,
           }}
         >

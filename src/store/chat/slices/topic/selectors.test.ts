@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { describe, expect, it } from 'vitest';
 
 import { ChatStore } from '@/store/chat';
@@ -16,7 +15,7 @@ const initialStore = initialState as ChatStore;
 
 const topicMaps = {
   test: [
-    { id: 'topic1', name: 'Topic 1', favorite: true },
+    { favorite: true, id: 'topic1', name: 'Topic 1' },
     { id: 'topic2', name: 'Topic 2' },
   ],
 };
@@ -29,7 +28,7 @@ describe('topicSelectors', () => {
     });
 
     it('should return all current topics from the store', () => {
-      const state = merge(initialStore, { topicMaps, activeId: 'test' });
+      const state = merge(initialStore, { activeId: 'test', topicMaps });
 
       const topics = topicSelectors.currentTopics(state);
       expect(topics).toEqual(topicMaps.test);
@@ -43,7 +42,7 @@ describe('topicSelectors', () => {
     });
 
     it('should return the number of current topics', () => {
-      const state = merge(initialStore, { topicMaps, activeId: 'test' });
+      const state = merge(initialStore, { activeId: 'test', topicMaps });
       const length = topicSelectors.currentTopicLength(state);
       expect(length).toBe(topicMaps.test.length);
     });
@@ -56,7 +55,7 @@ describe('topicSelectors', () => {
     });
 
     it('should return the current active topic', () => {
-      const state = merge(initialStore, { topicMaps, activeId: 'test', activeTopicId: 'topic1' });
+      const state = merge(initialStore, { activeId: 'test', activeTopicId: 'topic1', topicMaps });
       const topic = topicSelectors.currentActiveTopic(state);
       expect(topic).toEqual(topicMaps.test[0]);
     });
@@ -64,7 +63,7 @@ describe('topicSelectors', () => {
 
   describe('currentUnFavTopics', () => {
     it('should return all unfavorited topics', () => {
-      const state = merge(initialStore, { topicMaps, activeId: 'test' });
+      const state = merge(initialStore, { activeId: 'test', topicMaps });
       const topics = topicSelectors.currentUnFavTopics(state);
       expect(topics).toEqual([topicMaps.test[1]]);
     });
@@ -72,7 +71,7 @@ describe('topicSelectors', () => {
 
   describe('displayTopics', () => {
     it('should return current topics if not searching', () => {
-      const state = merge(initialStore, { topicMaps, activeId: 'test' });
+      const state = merge(initialStore, { activeId: 'test', topicMaps });
       const topics = topicSelectors.displayTopics(state);
       expect(topics).toEqual(topicMaps.test);
     });
@@ -89,13 +88,13 @@ describe('topicSelectors', () => {
 
   describe('getTopicById', () => {
     it('should return undefined if topic is not found', () => {
-      const state = merge(initialStore, { topicMaps, activeId: 'test' });
+      const state = merge(initialStore, { activeId: 'test', topicMaps });
       const topic = topicSelectors.getTopicById('notfound')(state);
       expect(topic).toBeUndefined();
     });
 
     it('should return the topic with the given id', () => {
-      const state = merge(initialStore, { topicMaps, activeId: 'test' });
+      const state = merge(initialStore, { activeId: 'test', topicMaps });
       const topic = topicSelectors.getTopicById('topic1')(state);
       expect(topic).toEqual(topicMaps.test[0]);
     });
@@ -110,13 +109,13 @@ describe('topicSelectors', () => {
 
     it('should return grouped topics by time when no favorites exist', () => {
       const topics = [
-        { id: 'topic1', name: 'Topic 1', favorite: false, createAt: '2023-01-01' },
-        { id: 'topic2', name: 'Topic 2', favorite: false, createAt: '2023-01-01' },
+        { createAt: '2023-01-01', favorite: false, id: 'topic1', name: 'Topic 1' },
+        { createAt: '2023-01-01', favorite: false, id: 'topic2', name: 'Topic 2' },
       ];
 
       const state = merge(initialStore, {
-        topicMaps: { test: topics },
         activeId: 'test',
+        topicMaps: { test: topics },
       });
 
       const grouped = topicSelectors.groupedTopicsSelector(state);
@@ -126,14 +125,14 @@ describe('topicSelectors', () => {
 
     it('should separate favorite and unfavorite topics into different groups', () => {
       const topics = [
-        { id: 'topic1', name: 'Topic 1', favorite: true, createAt: '2023-01-01' },
-        { id: 'topic2', name: 'Topic 2', favorite: false, createAt: '2023-01-01' },
-        { id: 'topic3', name: 'Topic 3', favorite: true, createAt: '2023-01-01' },
+        { createAt: '2023-01-01', favorite: true, id: 'topic1', name: 'Topic 1' },
+        { createAt: '2023-01-01', favorite: false, id: 'topic2', name: 'Topic 2' },
+        { createAt: '2023-01-01', favorite: true, id: 'topic3', name: 'Topic 3' },
       ];
 
       const state = merge(initialStore, {
-        topicMaps: { test: topics },
         activeId: 'test',
+        topicMaps: { test: topics },
       });
 
       const grouped = topicSelectors.groupedTopicsSelector(state);
@@ -142,9 +141,11 @@ describe('topicSelectors', () => {
 
       // Check favorite group
       expect(grouped[0]).toEqual({
-        id: 'favorite',
-        title: 'favorite', // This matches the mocked t function return
-        children: topics.filter((t) => t.favorite),
+        // This matches the mocked t function return
+children: topics.filter((t) => t.favorite),
+        
+id: 'favorite', 
+        title: 'favorite',
       });
 
       // Check unfavorite group
@@ -153,13 +154,13 @@ describe('topicSelectors', () => {
 
     it('should only create time-based groups when there are no favorites', () => {
       const topics = [
-        { id: 'topic1', name: 'Topic 1', favorite: false, createAt: '2023-01-01' },
-        { id: 'topic2', name: 'Topic 2', favorite: false, createAt: '2023-02-01' },
+        { createAt: '2023-01-01', favorite: false, id: 'topic1', name: 'Topic 1' },
+        { createAt: '2023-02-01', favorite: false, id: 'topic2', name: 'Topic 2' },
       ];
 
       const state = merge(initialStore, {
-        topicMaps: { test: topics },
         activeId: 'test',
+        topicMaps: { test: topics },
       });
 
       const grouped = topicSelectors.groupedTopicsSelector(state);

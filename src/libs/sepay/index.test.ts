@@ -30,13 +30,13 @@ describe('SepayPaymentGateway', () => {
     global.fetch = mockFetch;
     gateway = new SepayPaymentGateway({
       apiUrl: 'https://api.sepay.vn',
-      merchantId: 'test_merchant_id',
-      secretKey: 'test_secret_key',
-      returnUrl: 'https://pho.chat/payment/success',
       cancelUrl: 'https://pho.chat/payment/cancel',
-      notifyUrl: 'https://pho.chat/api/payment/sepay/webhook',
-      creditCardEnabled: true,
       creditCardApiKey: 'test_cc_api_key',
+      creditCardEnabled: true,
+      merchantId: 'test_merchant_id',
+      notifyUrl: 'https://pho.chat/api/payment/sepay/webhook',
+      returnUrl: 'https://pho.chat/payment/success',
+      secretKey: 'test_secret_key',
     });
   });
 
@@ -56,11 +56,11 @@ describe('SepayPaymentGateway', () => {
   describe('verifyWebhookSignature', () => {
     it('should reject invalid webhook signature', () => {
       const webhookData = {
-        orderId: 'PHO_QR_123456',
-        amount: 100000,
+        amount: 100_000,
         currency: 'VND',
-        status: 'success' as const,
+        orderId: 'PHO_QR_123456',
         signature: 'invalid_signature_hash',
+        status: 'success' as const,
         timestamp: new Date().toISOString(),
         transactionId: 'TXN_123456',
       };
@@ -73,17 +73,17 @@ describe('SepayPaymentGateway', () => {
   describe('createPayment', () => {
     it('should create bank transfer payment successfully', async () => {
       mockFetch.mockResolvedValue({
-        ok: true,
         json: async () => ({
-          success: true,
+          message: 'Payment created successfully',
           orderId: 'PHO_QR_123456',
           qrCodeUrl: 'https://api.sepay.vn/qr/PHO_QR_123456',
-          message: 'Payment created successfully',
+          success: true,
         }),
+        ok: true,
       });
 
       const result = await gateway.createPayment({
-        amount: 100000,
+        amount: 100_000,
         currency: 'VND',
         description: 'Premium subscription',
         orderId: 'PHO_QR_123456',
@@ -142,22 +142,22 @@ describe('SepayPaymentGateway', () => {
       process.env.SEPAY_MERCHANT_ID = 'test_merchant_id';
 
       mockFetch.mockResolvedValue({
-        ok: true,
         json: async () => ({
-          status: 200,
           messages: { success: true },
+          status: 200,
           transactions: [
             {
+              amount_in: 100_000,
               id: 'TXN_123456',
-              amount_in: 100000,
               transaction_content: 'Payment for PHO_QR_123456',
               transaction_date: new Date().toISOString(),
             },
           ],
         }),
+        ok: true,
       });
 
-      const result = await gateway.queryPaymentStatus('PHO_QR_123456', 100000);
+      const result = await gateway.queryPaymentStatus('PHO_QR_123456', 100_000);
 
       expect(result.success).toBe(true);
       expect(result.transactionId).toBe('TXN_123456');
@@ -174,11 +174,11 @@ describe('SepayPaymentGateway', () => {
       process.env.SEPAY_MERCHANT_ID = 'test_merchant_id';
 
       mockFetch.mockResolvedValue({
-        ok: false,
         json: async () => ({
-          success: false,
           error: 'Payment not found',
+          success: false,
         }),
+        ok: false,
       });
 
       const result = await gateway.queryPaymentStatus('PHO_QR_NONEXISTENT');

@@ -8,11 +8,11 @@ import { chatPortalSelectors } from './selectors';
 describe('chatDockSelectors', () => {
   const createState = (overrides?: Partial<ChatStoreState>) => {
     const state = {
-      showPortal: false,
-      portalToolMessage: undefined,
-      messagesMap: {},
       activeId: 'test-id',
       activeTopicId: undefined,
+      messagesMap: {},
+      portalToolMessage: undefined,
+      showPortal: false,
       ...overrides,
     } as ChatStoreState;
 
@@ -84,7 +84,7 @@ describe('chatDockSelectors', () => {
     });
 
     it('should return true when portalFile is set', () => {
-      const state = createState({ portalFile: { fileId: 'file-id', chunkText: 'chunk' } });
+      const state = createState({ portalFile: { chunkText: 'chunk', fileId: 'file-id' } });
       expect(chatPortalSelectors.showFilePreview(state)).toBe(true);
     });
   });
@@ -95,7 +95,7 @@ describe('chatDockSelectors', () => {
     });
 
     it('should return the fileId when portalFile is set', () => {
-      const state = createState({ portalFile: { fileId: 'file-id', chunkText: 'chunk' } });
+      const state = createState({ portalFile: { chunkText: 'chunk', fileId: 'file-id' } });
       expect(chatPortalSelectors.previewFileId(state)).toBe('file-id');
     });
   });
@@ -112,13 +112,13 @@ describe('chatDockSelectors', () => {
         messagesMap: {
           'test-id_null': [
             {
-              id: 'test-id',
               content: messageContent,
               createdAt: Date.now(),
-              updatedAt: Date.now(),
-              role: 'user',
+              id: 'test-id',
               meta: {},
+              role: 'user',
               sessionId: 'test-id',
+              updatedAt: Date.now(),
             } as ChatMessage,
           ],
         },
@@ -133,13 +133,13 @@ describe('chatDockSelectors', () => {
         messagesMap: {
           'test-id_null': [
             {
-              id: 'test-id',
               content: 'No artifact tag here',
               createdAt: Date.now(),
-              updatedAt: Date.now(),
-              role: 'user',
+              id: 'test-id',
               meta: {},
+              role: 'user',
               sessionId: 'test-id',
+              updatedAt: Date.now(),
             } as ChatMessage,
           ],
         },
@@ -153,13 +153,13 @@ describe('chatDockSelectors', () => {
         messagesMap: {
           'test-id_null': [
             {
-              id: 'test-id',
               content: `<lobeArtifact type="text">${artifactContent}</lobeArtifact>`,
               createdAt: Date.now(),
-              updatedAt: Date.now(),
-              role: 'user',
+              id: 'test-id',
               meta: {},
+              role: 'user',
               sessionId: 'test-id',
+              updatedAt: Date.now(),
             } as ChatMessage,
           ],
         },
@@ -181,17 +181,17 @@ describe('chatDockSelectors', () => {
         messagesMap: {
           'test-id_null': [
             {
-              id: 'test-id',
               content: `<lobeArtifact type="text/html">
 \`\`\`html
 ${htmlContent}
 \`\`\`
 </lobeArtifact>`,
               createdAt: Date.now(),
-              updatedAt: Date.now(),
-              role: 'user',
+              id: 'test-id',
               meta: {},
+              role: 'user',
               sessionId: 'test-id',
+              updatedAt: Date.now(),
             } as ChatMessage,
           ],
         },
@@ -206,13 +206,13 @@ ${htmlContent}
         messagesMap: {
           'test-id_null': [
             {
-              id: 'test-id',
               content: '<lobeArtifact type="text">Test content',
               createdAt: Date.now(),
-              updatedAt: Date.now(),
-              role: 'user',
+              id: 'test-id',
               meta: {},
+              role: 'user',
               sessionId: 'test-id',
+              updatedAt: Date.now(),
             } as ChatMessage,
           ],
         },
@@ -225,13 +225,13 @@ ${htmlContent}
         messagesMap: {
           'test-id_null': [
             {
-              id: 'test-id',
               content: '<lobeArtifact type="text">Test content</lobeArtifact>',
               createdAt: Date.now(),
-              updatedAt: Date.now(),
-              role: 'user',
+              id: 'test-id',
               meta: {},
+              role: 'user',
               sessionId: 'test-id',
+              updatedAt: Date.now(),
             } as ChatMessage,
           ],
         },
@@ -244,13 +244,13 @@ ${htmlContent}
         messagesMap: {
           'test-id_null': [
             {
-              id: 'test-id',
               content: 'No artifact tag here',
               createdAt: Date.now(),
-              updatedAt: Date.now(),
-              role: 'user',
+              id: 'test-id',
               meta: {},
+              role: 'user',
               sessionId: 'test-id',
+              updatedAt: Date.now(),
             } as ChatMessage,
           ],
         },

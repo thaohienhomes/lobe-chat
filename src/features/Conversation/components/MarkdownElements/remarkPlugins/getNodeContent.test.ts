@@ -1,4 +1,3 @@
-import { toMarkdown } from 'mdast-util-to-markdown';
 import { Parent } from 'unist';
 import { expect } from 'vitest';
 
@@ -8,381 +7,381 @@ describe('treeNodeToString', () => {
   it('with latex', () => {
     const nodes = [
       {
-        type: 'paragraph',
         children: [
           {
-            type: 'text',
-            value: '设正向数列 ',
             position: {
-              start: {
-                line: 3,
-                column: 1,
-                offset: 9,
-              },
               end: {
-                line: 3,
                 column: 7,
+                line: 3,
                 offset: 15,
               },
+              start: {
+                column: 1,
+                line: 3,
+                offset: 9,
+              },
             },
+            type: 'text',
+            value: '设正向数列 ',
           },
           {
-            type: 'inlineMath',
-            value: '{ a_n }',
             data: {
-              hName: 'code',
-              hProperties: {
-                className: ['language-math', 'math-inline'],
-              },
               hChildren: [
                 {
                   type: 'text',
                   value: '{ a_n }',
                 },
               ],
-            },
-            position: {
-              start: {
-                line: 3,
-                column: 7,
-                offset: 15,
-              },
-              end: {
-                line: 3,
-                column: 18,
-                offset: 26,
-              },
-            },
-          },
-          {
-            type: 'text',
-            value: ' 的首项为 ',
-            position: {
-              start: {
-                line: 3,
-                column: 18,
-                offset: 26,
-              },
-              end: {
-                line: 3,
-                column: 24,
-                offset: 32,
-              },
-            },
-          },
-          {
-            type: 'inlineMath',
-            value: '4',
-            data: {
               hName: 'code',
               hProperties: {
                 className: ['language-math', 'math-inline'],
               },
+            },
+            position: {
+              end: {
+                column: 18,
+                line: 3,
+                offset: 26,
+              },
+              start: {
+                column: 7,
+                line: 3,
+                offset: 15,
+              },
+            },
+            type: 'inlineMath',
+            value: '{ a_n }',
+          },
+          {
+            position: {
+              end: {
+                column: 24,
+                line: 3,
+                offset: 32,
+              },
+              start: {
+                column: 18,
+                line: 3,
+                offset: 26,
+              },
+            },
+            type: 'text',
+            value: ' 的首项为 ',
+          },
+          {
+            data: {
               hChildren: [
                 {
                   type: 'text',
                   value: '4',
                 },
               ],
-            },
-            position: {
-              start: {
-                line: 3,
-                column: 24,
-                offset: 32,
-              },
-              end: {
-                line: 3,
-                column: 29,
-                offset: 37,
-              },
-            },
-          },
-          {
-            type: 'text',
-            value: ' ，满足 ',
-            position: {
-              start: {
-                line: 3,
-                column: 29,
-                offset: 37,
-              },
-              end: {
-                line: 3,
-                column: 34,
-                offset: 42,
-              },
-            },
-          },
-          {
-            type: 'inlineMath',
-            value: 'a^2_n = a_{n+1} + 3na_n - 3',
-            data: {
               hName: 'code',
               hProperties: {
                 className: ['language-math', 'math-inline'],
               },
+            },
+            position: {
+              end: {
+                column: 29,
+                line: 3,
+                offset: 37,
+              },
+              start: {
+                column: 24,
+                line: 3,
+                offset: 32,
+              },
+            },
+            type: 'inlineMath',
+            value: '4',
+          },
+          {
+            position: {
+              end: {
+                column: 34,
+                line: 3,
+                offset: 42,
+              },
+              start: {
+                column: 29,
+                line: 3,
+                offset: 37,
+              },
+            },
+            type: 'text',
+            value: ' ，满足 ',
+          },
+          {
+            data: {
               hChildren: [
                 {
                   type: 'text',
                   value: 'a^2_n = a_{n+1} + 3na_n - 3',
                 },
               ],
+              hName: 'code',
+              hProperties: {
+                className: ['language-math', 'math-inline'],
+              },
             },
             position: {
-              start: {
+              end: {
+                column: 65,
                 line: 3,
+                offset: 73,
+              },
+              start: {
                 column: 34,
+                line: 3,
                 offset: 42,
               },
-              end: {
-                line: 3,
-                column: 65,
-                offset: 73,
-              },
             },
+            type: 'inlineMath',
+            value: 'a^2_n = a_{n+1} + 3na_n - 3',
           },
           {
-            type: 'text',
-            value: '.',
             position: {
-              start: {
-                line: 3,
-                column: 65,
-                offset: 73,
-              },
               end: {
-                line: 3,
                 column: 66,
+                line: 3,
                 offset: 74,
               },
+              start: {
+                column: 65,
+                line: 3,
+                offset: 73,
+              },
             },
+            type: 'text',
+            value: '.',
           },
         ],
         position: {
-          start: {
-            line: 3,
-            column: 1,
-            offset: 9,
-          },
           end: {
-            line: 3,
             column: 66,
+            line: 3,
             offset: 74,
           },
+          start: {
+            column: 1,
+            line: 3,
+            offset: 9,
+          },
         },
+        type: 'paragraph',
       },
       {
-        type: 'list',
-        ordered: true,
-        start: 1,
-        spread: false,
         children: [
           {
-            type: 'listItem',
-            spread: false,
             checked: null,
             children: [
               {
-                type: 'paragraph',
                 children: [
                   {
-                    type: 'text',
-                    value: '求 ',
                     position: {
-                      start: {
-                        line: 5,
-                        column: 5,
-                        offset: 80,
-                      },
                       end: {
                         line: 5,
                         column: 7,
                         offset: 82,
                       },
+                      start: {
+                        line: 5,
+                        column: 5,
+                        offset: 80,
+                      },
                     },
+                    type: 'text',
+                    value: '求 ',
                   },
                   {
-                    type: 'inlineMath',
-                    value: 'a_2',
                     data: {
                       hName: 'code',
-                      hProperties: {
-                        className: ['language-math', 'math-inline'],
-                      },
                       hChildren: [
                         {
                           type: 'text',
                           value: 'a_2',
                         },
                       ],
+                      hProperties: {
+                        className: ['language-math', 'math-inline'],
+                      },
                     },
                     position: {
+                      end: {
+                        line: 5,
+                        column: 14,
+                        offset: 89,
+                      },
                       start: {
                         line: 5,
                         column: 7,
                         offset: 82,
                       },
-                      end: {
-                        line: 5,
-                        column: 14,
-                        offset: 89,
-                      },
                     },
+                    type: 'inlineMath',
+                    value: 'a_2',
                   },
                   {
-                    type: 'text',
-                    value: ' 和 ',
                     position: {
-                      start: {
-                        line: 5,
-                        column: 14,
-                        offset: 89,
-                      },
                       end: {
                         line: 5,
                         column: 17,
                         offset: 92,
                       },
+                      start: {
+                        line: 5,
+                        column: 14,
+                        offset: 89,
+                      },
                     },
+                    type: 'text',
+                    value: ' 和 ',
                   },
                   {
-                    type: 'inlineMath',
-                    value: 'a_3',
                     data: {
                       hName: 'code',
-                      hProperties: {
-                        className: ['language-math', 'math-inline'],
-                      },
                       hChildren: [
                         {
                           type: 'text',
                           value: 'a_3',
                         },
                       ],
+                      hProperties: {
+                        className: ['language-math', 'math-inline'],
+                      },
                     },
                     position: {
+                      end: {
+                        line: 5,
+                        column: 24,
+                        offset: 99,
+                      },
                       start: {
                         line: 5,
                         column: 17,
                         offset: 92,
                       },
-                      end: {
-                        line: 5,
-                        column: 24,
-                        offset: 99,
-                      },
                     },
+                    type: 'inlineMath',
+                    value: 'a_3',
                   },
                   {
-                    type: 'text',
-                    value: '，根据前三项的规律猜想该数列的通项公式',
                     position: {
-                      start: {
-                        line: 5,
-                        column: 24,
-                        offset: 99,
-                      },
                       end: {
                         line: 5,
                         column: 43,
                         offset: 118,
                       },
+                      start: {
+                        line: 5,
+                        column: 24,
+                        offset: 99,
+                      },
                     },
+                    type: 'text',
+                    value: '，根据前三项的规律猜想该数列的通项公式',
                   },
                 ],
                 position: {
-                  start: {
-                    line: 5,
-                    column: 5,
-                    offset: 80,
-                  },
                   end: {
-                    line: 5,
                     column: 43,
+                    line: 5,
                     offset: 118,
                   },
+                  start: {
+                    column: 5,
+                    line: 5,
+                    offset: 80,
+                  },
                 },
+                type: 'paragraph',
               },
             ],
             position: {
-              start: {
-                line: 5,
-                column: 2,
-                offset: 77,
-              },
               end: {
-                line: 5,
                 column: 43,
+                line: 5,
                 offset: 118,
               },
+              start: {
+                column: 2,
+                line: 5,
+                offset: 77,
+              },
             },
+            spread: false,
+            type: 'listItem',
           },
           {
-            type: 'listItem',
-            spread: false,
             checked: null,
             children: [
               {
-                type: 'paragraph',
                 children: [
                   {
-                    type: 'text',
-                    value: '用数学归纳法证明你的猜想。',
                     position: {
-                      start: {
-                        line: 6,
-                        column: 5,
-                        offset: 123,
-                      },
                       end: {
                         line: 6,
                         column: 18,
                         offset: 136,
                       },
+                      start: {
+                        line: 6,
+                        column: 5,
+                        offset: 123,
+                      },
                     },
+                    type: 'text',
+                    value: '用数学归纳法证明你的猜想。',
                   },
                 ],
                 position: {
-                  start: {
-                    line: 6,
-                    column: 5,
-                    offset: 123,
-                  },
                   end: {
-                    line: 6,
                     column: 18,
+                    line: 6,
                     offset: 136,
                   },
+                  start: {
+                    column: 5,
+                    line: 6,
+                    offset: 123,
+                  },
                 },
+                type: 'paragraph',
               },
             ],
             position: {
-              start: {
-                line: 6,
-                column: 2,
-                offset: 120,
-              },
               end: {
-                line: 6,
                 column: 18,
+                line: 6,
                 offset: 136,
               },
+              start: {
+                column: 2,
+                line: 6,
+                offset: 120,
+              },
             },
+            spread: false,
+            type: 'listItem',
           },
         ],
+        ordered: true,
         position: {
-          start: {
-            line: 5,
-            column: 2,
-            offset: 77,
-          },
           end: {
-            line: 6,
             column: 18,
+            line: 6,
             offset: 136,
           },
+          start: {
+            column: 2,
+            line: 5,
+            offset: 77,
+          },
         },
+        spread: false,
+        start: 1,
+        type: 'list',
       },
     ];
 
@@ -398,56 +397,56 @@ describe('treeNodeToString', () => {
     it('with url', () => {
       const nodes = [
         {
-          type: 'paragraph',
           children: [
             {
-              type: 'link',
-              title: null,
-              url: 'citation-1',
               children: [
                 {
-                  type: 'text',
-                  value: '#citation-1',
                   position: {
-                    start: {
-                      line: 5,
-                      column: 26,
-                      offset: 78,
-                    },
                     end: {
-                      line: 5,
                       column: 37,
+                      line: 5,
                       offset: 89,
                     },
+                    start: {
+                      column: 26,
+                      line: 5,
+                      offset: 78,
+                    },
                   },
+                  type: 'text',
+                  value: '#citation-1',
                 },
               ],
               position: {
-                start: {
-                  line: 5,
-                  column: 25,
-                  offset: 77,
-                },
                 end: {
-                  line: 5,
                   column: 50,
+                  line: 5,
                   offset: 102,
                 },
+                start: {
+                  column: 25,
+                  line: 5,
+                  offset: 77,
+                },
               },
+              title: null,
+              type: 'link',
+              url: 'citation-1',
             },
           ],
           position: {
-            start: {
-              line: 5,
-              column: 1,
-              offset: 53,
-            },
             end: {
-              line: 5,
               column: 220,
+              line: 5,
               offset: 272,
             },
+            start: {
+              column: 1,
+              line: 5,
+              offset: 53,
+            },
           },
+          type: 'paragraph',
         },
       ];
 
@@ -459,39 +458,39 @@ describe('treeNodeToString', () => {
     it('handle error case', () => {
       const nodes = [
         {
-          type: 'paragraph',
           children: [
             {
-              type: 'link',
-              title: null,
-              url: 'citation-1',
               children: [],
               position: {
-                start: {
-                  line: 5,
-                  column: 25,
-                  offset: 77,
-                },
                 end: {
-                  line: 5,
                   column: 50,
+                  line: 5,
                   offset: 102,
                 },
+                start: {
+                  column: 25,
+                  line: 5,
+                  offset: 77,
+                },
               },
+              title: null,
+              type: 'link',
+              url: 'citation-1',
             },
           ],
           position: {
-            start: {
-              line: 5,
-              column: 1,
-              offset: 53,
-            },
             end: {
-              line: 5,
               column: 220,
+              line: 5,
               offset: 272,
             },
+            start: {
+              column: 1,
+              line: 5,
+              offset: 53,
+            },
           },
+          type: 'paragraph',
         },
       ];
 

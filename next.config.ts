@@ -32,6 +32,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 
   experimental: {
     optimizePackageImports: [
@@ -339,13 +342,12 @@ const nextConfig: NextConfig = {
         '@shikijs/themes',
         '@shikijs/engine-oniguruma',
         'pdf-parse',
+        // epub2 depends on native 'zipfile' module which can't be bundled by webpack
+        'epub2',
       ]
-    : ['@xmldom/xmldom'],
+    : ['@xmldom/xmldom', 'epub2'],
   transpilePackages: ['pdfjs-dist', 'mermaid'],
 
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 
   // Generate hidden source maps for PostHog error tracking (no sourceMappingURL in JS files)
   ...(uploadSourceMaps ? { productionBrowserSourceMaps: true } : {}),
@@ -381,17 +383,40 @@ const nextConfig: NextConfig = {
 
     config.resolve.alias.canvas = false;
 
-    // Fix SWR react-server export stripping useSWR/mutate
-    // SWR v2's react-server entry only exports SWRConfig + unstable_serialize,
-    // which causes "does not contain a default export" errors during build.
-    // Force all SWR imports to resolve to the full client entry.
-    const path = require('node:path');
-    config.resolve.alias['swr$'] = path.resolve(__dirname, 'node_modules/swr/dist/index/index.mjs');
-
-    // Strip `node:` prefix from imports so resolve.fallback can handle them
-    // pptxgenjs ESM bundle uses `node:https`, `node:fs` etc. which cause
-    // UnhandledSchemeError in webpack client builds
+    const path = require('path');
     const webpack = require('webpack');
+
+    // Fix SWR react-server export condition stripping useSWR/mutate
+    //
+    // Problem: SWR v2's package.json "react-server" export condition resolves to
+    // react-server.mjs containing only SWRConfig + unstable_serialize — NOT useSWR
+    // or mutate. Next.js RSC compilation uses this condition, causing build errors.
+    //
+    // Solution: Custom resolve plugin that hooks into the 'result' stage (AFTER full
+    // resolution including package.json exports). When the resolved path ends with
+    // react-server.mjs from SWR, we swap it to the full client entry (index.mjs).
+    config.resolve.plugins = config.resolve.plugins || [];
+    config.resolve.plugins.push({
+      apply(resolver: any) {
+        resolver.getHook('result').tapAsync('SwrReactServerFix', (request: any, resolveContext: any, callback: any) => {
+          const resolvedPath = request.path;
+          if (
+            resolvedPath &&
+            /[/\\]swr[/\\]dist[/\\](index|_internal|infinite)[/\\]react-server\.mjs$/.test(resolvedPath)
+          ) {
+            const newPath = resolvedPath.replace('react-server.mjs', 'index.mjs');
+            const newRequest = { ...request, path: newPath };
+            return callback(null, newRequest);
+          }
+          return callback(null, request);
+        });
+      },
+    });
+
+    // pptxgenjs ESM bundle uses dynamic import('node:fs'), import('node:https')
+    // which cause UnhandledSchemeError in webpack client builds.
+    // NormalModuleReplacementPlugin handles static require/import but NOT dynamic import().
+    // We must also alias node:-prefixed modules so webpack resolves them to false.
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: any) => {
         resource.request = resource.request.replace(/^node:/, '');

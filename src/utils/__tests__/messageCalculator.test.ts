@@ -4,7 +4,7 @@
  * Tests all message calculation functions to ensure accuracy
  * and consistency with pricing model.
  */
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   PLAN_BUDGETS,
@@ -22,7 +22,7 @@ describe('Message Calculator', () => {
       const cost = calculateCostPerMessage('gpt-4o-mini');
       // 100 input tokens * $0.00015/1K + 300 output tokens * $0.0006/1K
       // = 0.1 * 0.00015 + 0.3 * 0.0006 = 0.000015 + 0.00018 = 0.000195
-      expect(cost).toBeCloseTo(0.000195, 6);
+      expect(cost).toBeCloseTo(0.000_195, 6);
     });
 
     it('should calculate correct cost for Claude 3.5 Sonnet', () => {
@@ -36,7 +36,7 @@ describe('Message Calculator', () => {
       const cost = calculateCostPerMessage('gemini-1.5-flash');
       // 100 input tokens * $0.000075/1K + 300 output tokens * $0.0003/1K
       // = 0.1 * 0.000075 + 0.3 * 0.0003 = 0.0000075 + 0.00009 = 0.0000975
-      expect(cost).toBeCloseTo(0.0000975, 7);
+      expect(cost).toBeCloseTo(0.000_097_5, 7);
     });
 
     it('should return 0 for unknown model', () => {
@@ -168,29 +168,29 @@ describe('Message Calculator', () => {
       expect(formatMessageCount(1000)).toBe('1.0K');
       expect(formatMessageCount(1500)).toBe('1.5K');
       expect(formatMessageCount(8256)).toBe('8.3K');
-      expect(formatMessageCount(54769)).toBe('54.8K');
+      expect(formatMessageCount(54_769)).toBe('54.8K');
     });
 
     it('should format millions correctly', () => {
-      expect(formatMessageCount(1000000)).toBe('1.0M');
-      expect(formatMessageCount(1500000)).toBe('1.5M');
+      expect(formatMessageCount(1_000_000)).toBe('1.0M');
+      expect(formatMessageCount(1_500_000)).toBe('1.5M');
     });
 
     it('should handle edge cases', () => {
       expect(formatMessageCount(0)).toBe('0');
       expect(formatMessageCount(1)).toBe('1');
-      expect(formatMessageCount(999999)).toBe('1000.0K');
+      expect(formatMessageCount(999_999)).toBe('1000.0K');
     });
   });
 
   describe('generateFeatureText', () => {
     it('should generate correct feature text', () => {
       const messageCalc = {
+        category: 'tier1' as const,
+        costPerMessage: 0.000_195,
+        messageCount: 8256,
         model: 'gpt-4o-mini',
         modelName: 'GPT-4o mini',
-        messageCount: 8256,
-        costPerMessage: 0.000195,
-        category: 'tier1' as const,
         tier: 1,
       };
 
@@ -200,11 +200,11 @@ describe('Message Calculator', () => {
 
     it('should handle different models correctly', () => {
       const messageCalc = {
+        category: 'tier2' as const,
+        costPerMessage: 0.0048,
+        messageCount: 3008,
         model: 'claude-3-sonnet',
         modelName: 'Claude 3.5 Sonnet',
-        messageCount: 3008,
-        costPerMessage: 0.0048,
-        category: 'tier2' as const,
         tier: 2,
       };
 

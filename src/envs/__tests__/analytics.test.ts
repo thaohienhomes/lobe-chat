@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { analyticsEnv, getAnalyticsConfig } from '../analytics';
+import { getAnalyticsConfig } from '../analytics';
 
 beforeEach(() => {
   // 在每个测试用例之前,清除所有的 console.warn mock
@@ -27,24 +27,24 @@ describe('getAnalyticsConfig', () => {
     const config = getAnalyticsConfig();
 
     expect(config).toEqual({
-      ENABLED_PLAUSIBLE_ANALYTICS: true,
-      PLAUSIBLE_DOMAIN: 'example.com',
-      PLAUSIBLE_SCRIPT_BASE_URL: 'https://plausible.io',
-      ENABLED_POSTHOG_ANALYTICS: true,
-      POSTHOG_KEY: 'posthog_key',
-      POSTHOG_HOST: 'https://app.posthog.com',
       DEBUG_POSTHOG_ANALYTICS: false,
+      ENABLED_CLARITY_ANALYTICS: true,
+      ENABLED_PLAUSIBLE_ANALYTICS: true,
+      CLARITY_PROJECT_ID: 'clarity_id',
+      ENABLED_POSTHOG_ANALYTICS: true,
+      DEBUG_VERCEL_ANALYTICS: false,
       ENABLED_UMAMI_ANALYTICS: true,
+      ENABLE_GOOGLE_ANALYTICS: true,
+      PLAUSIBLE_DOMAIN: 'example.com',
+      ENABLED_TIKTOK_PIXEL: true,
+      PLAUSIBLE_SCRIPT_BASE_URL: 'https://plausible.io',
+      ENABLE_VERCEL_ANALYTICS: true,
+      POSTHOG_HOST: 'https://app.posthog.com',
+      GOOGLE_ANALYTICS_MEASUREMENT_ID: 'ga_id',
+      POSTHOG_KEY: 'posthog_key',
+      TIKTOK_PIXEL_ID: 'tiktok_pixel_id',
       UMAMI_SCRIPT_URL: 'https://analytics.umami.is/script.js',
       UMAMI_WEBSITE_ID: 'umami_id',
-      ENABLED_CLARITY_ANALYTICS: true,
-      CLARITY_PROJECT_ID: 'clarity_id',
-      ENABLE_VERCEL_ANALYTICS: true,
-      DEBUG_VERCEL_ANALYTICS: false,
-      ENABLE_GOOGLE_ANALYTICS: true,
-      GOOGLE_ANALYTICS_MEASUREMENT_ID: 'ga_id',
-      ENABLED_TIKTOK_PIXEL: true,
-      TIKTOK_PIXEL_ID: 'tiktok_pixel_id',
     });
   });
 });

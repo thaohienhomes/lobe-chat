@@ -5,11 +5,8 @@ import rehypePlugin from './rehypePlugin';
 describe('rehypePlugin', () => {
   it('should transform <lobeArtifact> tags with attributes', () => {
     const tree = {
-      type: 'root',
       children: [
         {
-          type: 'element',
-          tagName: 'p',
           children: [
             {
               type: 'raw',
@@ -18,24 +15,27 @@ describe('rehypePlugin', () => {
             { type: 'text', value: 'Artifact content' },
             { type: 'raw', value: '</lobeArtifact>' },
           ],
+          tagName: 'p',
+          type: 'element',
         },
       ],
+      type: 'root',
     };
 
     const expectedTree = {
-      type: 'root',
       children: [
         {
-          type: 'element',
-          tagName: 'lobeArtifact',
+          children: [{ type: 'text', value: 'Artifact content' }],
           properties: {
             identifier: 'test-id',
-            type: 'image/svg+xml',
             title: 'Test Title',
+            type: 'image/svg+xml',
           },
-          children: [{ type: 'text', value: 'Artifact content' }],
+          tagName: 'lobeArtifact',
+          type: 'element',
         },
       ],
+      type: 'root',
     };
 
     const plugin = rehypePlugin();
@@ -46,25 +46,22 @@ describe('rehypePlugin', () => {
 
   it('should handle mixed content with thinking tags and plain text', () => {
     const tree = {
-      type: 'root',
       children: [
         {
-          type: 'element',
-          tagName: 'p',
           children: [{ type: 'text', value: 'Initial plain text paragraph' }],
+          tagName: 'p',
+          type: 'element',
         },
         {
-          type: 'element',
-          tagName: 'p',
           children: [
             { type: 'raw', value: '<lobeThinking>' },
             { type: 'text', value: 'AI is thinking...' },
             { type: 'raw', value: '</lobeThinking>' },
           ],
+          tagName: 'p',
+          type: 'element',
         },
         {
-          type: 'element',
-          tagName: 'p',
           children: [
             {
               type: 'raw',
@@ -73,48 +70,51 @@ describe('rehypePlugin', () => {
             { type: 'text', value: 'Artifact content' },
             { type: 'raw', value: '</lobeArtifact>' },
           ],
+          tagName: 'p',
+          type: 'element',
         },
         {
-          type: 'element',
-          tagName: 'p',
           children: [{ type: 'text', value: 'Final plain text paragraph' }],
+          tagName: 'p',
+          type: 'element',
         },
       ],
+      type: 'root',
     };
 
     const expectedTree = {
-      type: 'root',
       children: [
         {
-          type: 'element',
-          tagName: 'p',
           children: [{ type: 'text', value: 'Initial plain text paragraph' }],
+          tagName: 'p',
+          type: 'element',
         },
         {
-          type: 'element',
-          tagName: 'p',
           children: [
             { type: 'raw', value: '<lobeThinking>' },
             { type: 'text', value: 'AI is thinking...' },
             { type: 'raw', value: '</lobeThinking>' },
           ],
+          tagName: 'p',
+          type: 'element',
         },
         {
-          type: 'element',
-          tagName: 'lobeArtifact',
+          children: [{ type: 'text', value: 'Artifact content' }],
           properties: {
             identifier: 'test-id',
-            type: 'image/svg+xml',
             title: 'Test Title',
+            type: 'image/svg+xml',
           },
-          children: [{ type: 'text', value: 'Artifact content' }],
+          tagName: 'lobeArtifact',
+          type: 'element',
         },
         {
-          type: 'element',
-          tagName: 'p',
           children: [{ type: 'text', value: 'Final plain text paragraph' }],
+          tagName: 'p',
+          type: 'element',
         },
       ],
+      type: 'root',
     };
 
     const plugin = rehypePlugin();

@@ -13,10 +13,10 @@ import {
 describe('getImageDimensions', () => {
   // Mock base generation object
   const baseGeneration: Generation = {
-    id: 'test-gen-id',
-    seed: 12345,
-    createdAt: new Date(),
     asyncTaskId: null,
+    createdAt: new Date(),
+    id: 'test-gen-id',
+    seed: 12_345,
     task: {
       id: 'task-id',
       status: 'success' as any,
@@ -28,17 +28,17 @@ describe('getImageDimensions', () => {
       const generation: Generation = {
         ...baseGeneration,
         asset: {
+          height: 1080,
           type: 'image',
           width: 1920,
-          height: 1080,
         },
       };
 
       const result = getImageDimensions(generation);
       expect(result).toEqual({
-        width: 1920,
-        height: 1080,
         aspectRatio: '1920 / 1080',
+        height: 1080,
+        width: 1920,
       });
     });
 
@@ -46,33 +46,33 @@ describe('getImageDimensions', () => {
       const generation: Generation = {
         ...baseGeneration,
         asset: {
+          height: 600,
           type: 'image',
           width: 800,
-          height: 600,
         },
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
-        width: 1024,
-        height: 1024,
         config: {
+          height: 512,
           prompt: 'test',
           width: 512,
-          height: 512,
         },
         createdAt: new Date(),
         generations: [],
+        height: 1024,
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
+        width: 1024,
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: 800,
-        height: 600,
         aspectRatio: '800 / 600',
+        height: 600,
+        width: 800,
       });
     });
   });
@@ -85,24 +85,24 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
         config: {
+          height: 768,
           prompt: 'test',
           width: 1024,
-          height: 768,
         },
         createdAt: new Date(),
         generations: [],
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: 1024,
-        height: 768,
         aspectRatio: '1024 / 768',
+        height: 768,
+        width: 1024,
       });
     });
   });
@@ -115,21 +115,21 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
-        width: 1280,
-        height: 720,
         createdAt: new Date(),
         generations: [],
+        height: 720,
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
+        width: 1280,
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: 1280,
-        height: 720,
         aspectRatio: '1280 / 720',
+        height: 720,
+        width: 1280,
       });
     });
   });
@@ -142,23 +142,23 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
         config: {
           prompt: 'test',
           size: '1920x1080',
         },
         createdAt: new Date(),
         generations: [],
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: 1920,
-        height: 1080,
         aspectRatio: '1920 / 1080',
+        height: 1080,
+        width: 1920,
       });
     });
 
@@ -169,24 +169,24 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
         config: {
+          aspectRatio: '16:9',
           prompt: 'test',
           size: 'auto',
-          aspectRatio: '16:9',
         },
         createdAt: new Date(),
         generations: [],
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: null,
-        height: null,
         aspectRatio: '16 / 9',
+        height: null,
+        width: null,
       });
     });
   });
@@ -199,23 +199,23 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
         config: {
-          prompt: 'test',
           aspectRatio: '16:9',
+          prompt: 'test',
         },
         createdAt: new Date(),
         generations: [],
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: null,
-        height: null,
         aspectRatio: '16 / 9',
+        height: null,
+        width: null,
       });
     });
 
@@ -234,16 +234,16 @@ describe('getImageDimensions', () => {
         };
 
         const generationBatch: GenerationBatch = {
-          id: 'batch-id',
-          provider: 'test',
-          model: 'test-model',
-          prompt: 'test prompt',
           config: {
-            prompt: 'test',
             aspectRatio,
+            prompt: 'test',
           },
           createdAt: new Date(),
           generations: [],
+          id: 'batch-id',
+          model: 'test-model',
+          prompt: 'test prompt',
+          provider: 'test',
         };
 
         const result = getImageDimensions(generation, generationBatch);
@@ -261,9 +261,9 @@ describe('getImageDimensions', () => {
 
       const result = getImageDimensions(generation);
       expect(result).toEqual({
-        width: null,
-        height: null,
         aspectRatio: null,
+        height: null,
+        width: null,
       });
     });
 
@@ -278,24 +278,24 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
         config: {
+          height: 768,
           prompt: 'test',
           width: 1024,
-          height: 768,
         },
         createdAt: new Date(),
         generations: [],
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: 1024,
-        height: 768,
         aspectRatio: '1024 / 768',
+        height: 768,
+        width: 1024,
       });
     });
 
@@ -306,23 +306,23 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
         config: {
           prompt: 'test',
           size: 'invalid-format',
         },
         createdAt: new Date(),
         generations: [],
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: null,
-        height: null,
         aspectRatio: null,
+        height: null,
+        width: null,
       });
     });
 
@@ -333,23 +333,23 @@ describe('getImageDimensions', () => {
       };
 
       const generationBatch: GenerationBatch = {
-        id: 'batch-id',
-        provider: 'test',
-        model: 'test-model',
-        prompt: 'test prompt',
         config: {
-          prompt: 'test',
           aspectRatio: 'invalid-format',
+          prompt: 'test',
         },
         createdAt: new Date(),
         generations: [],
+        id: 'batch-id',
+        model: 'test-model',
+        prompt: 'test prompt',
+        provider: 'test',
       };
 
       const result = getImageDimensions(generation, generationBatch);
       expect(result).toEqual({
-        width: null,
-        height: null,
         aspectRatio: null,
+        height: null,
+        width: null,
       });
     });
 
@@ -357,17 +357,17 @@ describe('getImageDimensions', () => {
       const generation: Generation = {
         ...baseGeneration,
         asset: {
+          height: 0,
           type: 'image',
           width: 0,
-          height: 0,
         },
       };
 
       const result = getImageDimensions(generation);
       expect(result).toEqual({
-        width: null,
-        height: null,
         aspectRatio: null,
+        height: null,
+        width: null,
       });
     });
   });
@@ -375,22 +375,22 @@ describe('getImageDimensions', () => {
 
 describe('getAspectRatio (isolated unit testing)', () => {
   const mockGeneration: Generation = {
-    id: 'test-gen-id',
-    seed: 12345,
-    createdAt: new Date(),
     asyncTaskId: null,
+    createdAt: new Date(),
+    id: 'test-gen-id',
+    seed: 12_345,
     task: {
       id: 'task-id',
       status: 'success' as any,
     },
   };
   const mockGenerationBatch: GenerationBatch = {
-    id: 'test-batch-id',
-    provider: 'test-provider',
-    model: 'test-model',
-    prompt: 'test prompt',
     createdAt: new Date(),
     generations: [],
+    id: 'test-batch-id',
+    model: 'test-model',
+    prompt: 'test prompt',
+    provider: 'test-provider',
   };
 
   beforeEach(() => {
@@ -402,9 +402,9 @@ describe('getAspectRatio (isolated unit testing)', () => {
     const mockGen: Generation = {
       ...mockGeneration,
       asset: {
+        height: 1080,
         type: 'image',
         width: 1920,
-        height: 1080,
       },
     };
 
@@ -419,16 +419,16 @@ describe('getAspectRatio (isolated unit testing)', () => {
 
   it('should work with different aspectRatio sources', () => {
     const mockBatch: GenerationBatch = {
-      id: 'test-batch',
-      provider: 'test-provider',
-      model: 'test-model',
-      prompt: 'test prompt',
+      config: {
+        aspectRatio: '16:9',
+        prompt: 'test prompt',
+      },
       createdAt: new Date(),
       generations: [],
-      config: {
-        prompt: 'test prompt',
-        aspectRatio: '16:9',
-      },
+      id: 'test-batch',
+      model: 'test-model',
+      prompt: 'test prompt',
+      provider: 'test-provider',
     };
 
     const result = getAspectRatio(mockGeneration, mockBatch);
@@ -438,22 +438,22 @@ describe('getAspectRatio (isolated unit testing)', () => {
 
 describe('getThumbnailMaxWidth (isolated unit testing)', () => {
   const mockGeneration: Generation = {
-    id: 'test-gen-id',
-    seed: 12345,
-    createdAt: new Date(),
     asyncTaskId: null,
+    createdAt: new Date(),
+    id: 'test-gen-id',
+    seed: 12_345,
     task: {
       id: 'task-id',
       status: 'success' as any,
     },
   };
   const mockGenerationBatch: GenerationBatch = {
-    id: 'test-batch-id',
-    provider: 'test-provider',
-    model: 'test-model',
-    prompt: 'test prompt',
     createdAt: new Date(),
     generations: [],
+    id: 'test-batch-id',
+    model: 'test-model',
+    prompt: 'test prompt',
+    provider: 'test-provider',
   };
 
   // Mock window.innerHeight for tests
@@ -462,10 +462,10 @@ describe('getThumbnailMaxWidth (isolated unit testing)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(global, 'window', {
-      writable: true,
       value: {
         innerHeight: 800,
       },
+      writable: true,
     });
   });
 
@@ -500,9 +500,9 @@ describe('getThumbnailMaxWidth (isolated unit testing)', () => {
     const mockGen: Generation = {
       ...mockGeneration,
       asset: {
+        height: 200,
         type: 'image',
         width: 300,
-        height: 200,
       },
     };
 
@@ -519,9 +519,9 @@ describe('getThumbnailMaxWidth (isolated unit testing)', () => {
     const mockGen: Generation = {
       ...mockGeneration,
       asset: {
+        height: 200,
         type: 'image',
         width: 600,
-        height: 200,
       },
     };
 
@@ -538,9 +538,9 @@ describe('getThumbnailMaxWidth (isolated unit testing)', () => {
     const mockGen: Generation = {
       ...mockGeneration,
       asset: {
+        height: 400,
         type: 'image',
         width: 200,
-        height: 400,
       },
     };
 
@@ -555,18 +555,18 @@ describe('getThumbnailMaxWidth (isolated unit testing)', () => {
 
   it('should handle different window.innerHeight values', () => {
     Object.defineProperty(global, 'window', {
-      writable: true,
       value: {
         innerHeight: 600,
       },
+      writable: true,
     });
 
     const mockGen: Generation = {
       ...mockGeneration,
       asset: {
+        height: 200,
         type: 'image',
         width: 400,
-        height: 200,
       },
     };
 
@@ -583,9 +583,9 @@ describe('getThumbnailMaxWidth (isolated unit testing)', () => {
     const mockGen: Generation = {
       ...mockGeneration,
       asset: {
+        height: 1000,
         type: 'image',
         width: 512,
-        height: 1000,
       },
     };
 

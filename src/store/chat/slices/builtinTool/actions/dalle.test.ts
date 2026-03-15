@@ -1,8 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { fileService } from '@/services/file';
-import { ClientService } from '@/services/file/_deprecated';
 import { messageService } from '@/services/message';
 import { imageGenerationService } from '@/services/textToImage';
 import { uploadService } from '@/services/upload';
@@ -19,14 +17,14 @@ describe('chatToolSlice - dalle', () => {
       const { result } = renderHook(() => useChatStore());
 
       const initialMessageContent = JSON.stringify([
-        { prompt: 'test prompt', previewUrl: 'old-url', imageId: 'old-id' },
+        { imageId: 'old-id', previewUrl: 'old-url', prompt: 'test prompt' },
       ]);
 
       vi.spyOn(chatSelectors, 'getMessageById').mockImplementationOnce(
         (id) => () =>
           ({
-            id,
             content: initialMessageContent,
+            id,
           }) as ChatMessage,
       );
 
@@ -46,10 +44,10 @@ describe('chatToolSlice - dalle', () => {
       // Mock the new uploadWithProgress method from useFileStore
       vi.spyOn(useFileStore, 'getState').mockReturnValue({
         uploadWithProgress: vi.fn().mockResolvedValue({
+          dimensions: { height: 512, width: 512 },
+          filename: 'file.png',
           id: mockId,
           url: '',
-          dimensions: { width: 512, height: 512 },
-          filename: 'file.png',
         }),
       } as any);
 
@@ -73,7 +71,7 @@ describe('chatToolSlice - dalle', () => {
       const { result } = renderHook(() => useChatStore());
       const messageId = 'message-id';
       const initialMessageContent = JSON.stringify([
-        { prompt: 'test prompt', previewUrl: 'old-url', imageId: 'old-id' },
+        { imageId: 'old-id', previewUrl: 'old-url', prompt: 'test prompt' },
       ]);
       const updateFunction = (draft: any) => {
         draft[0].previewUrl = 'new-url';
@@ -85,8 +83,8 @@ describe('chatToolSlice - dalle', () => {
       vi.spyOn(chatSelectors, 'getMessageById').mockImplementationOnce(
         (id) => () =>
           ({
-            id,
             content: initialMessageContent,
+            id,
           }) as ChatMessage,
       );
       vi.spyOn(messageService, 'updateMessage').mockResolvedValueOnce(undefined);
@@ -98,7 +96,7 @@ describe('chatToolSlice - dalle', () => {
       // 验证 internal_updateMessageContent 是否被正确调用以更新内容
       expect(result.current.internal_updateMessageContent).toHaveBeenCalledWith(
         messageId,
-        JSON.stringify([{ prompt: 'test prompt', previewUrl: 'new-url', imageId: 'new-id' }]),
+        JSON.stringify([{ imageId: 'new-id', previewUrl: 'new-url', prompt: 'test prompt' }]),
       );
     });
   });

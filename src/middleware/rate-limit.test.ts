@@ -1,5 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { paymentRateLimiter, checkPaymentRateLimit, getClientIp } from './rate-limit';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { paymentRateLimiter, checkPaymentRateLimit, getClientIp , DailyTierRateLimiter, chatDailyRateLimiter } from './rate-limit';
+
+// ── DailyTierRateLimiter Tests ──────────────────────────────
+// Tests run in-memory fallback mode (no UPSTASH env vars in test)
+
+
 
 describe('Rate Limiting Middleware', () => {
   beforeEach(() => {
@@ -254,11 +259,6 @@ describe('Rate Limiting Middleware', () => {
     });
   });
 });
-
-// ── DailyTierRateLimiter Tests ──────────────────────────────
-// Tests run in-memory fallback mode (no UPSTASH env vars in test)
-
-import { DailyTierRateLimiter, chatDailyRateLimiter } from './rate-limit';
 
 describe('DailyTierRateLimiter', () => {
   let limiter: DailyTierRateLimiter;

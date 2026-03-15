@@ -101,11 +101,11 @@ describe('useDragUpload', () => {
       value: {
         items: [
           {
-            kind: 'file',
             getAsFile: () => mockFile,
+            kind: 'file',
             webkitGetAsEntry: () => ({
-              isFile: true,
               file: (cb: (file: File) => void) => cb(mockFile),
+              isFile: true,
             }),
           },
         ],
@@ -129,8 +129,8 @@ describe('useDragUpload', () => {
       value: {
         items: [
           {
-            kind: 'file',
             getAsFile: () => mockFile,
+            kind: 'file',
             webkitGetAsEntry: () => null,
           },
         ],
@@ -153,11 +153,11 @@ describe('useDragUpload', () => {
       value: {
         items: [
           {
-            kind: 'file',
             getAsFile: () => mockImageFile,
+            kind: 'file',
             webkitGetAsEntry: () => ({
-              isFile: true,
               file: (cb: (file: File) => void) => cb(mockImageFile),
+              isFile: true,
             }),
           },
         ],
@@ -181,8 +181,8 @@ describe('useDragUpload', () => {
       value: {
         items: [
           {
-            kind: 'file',
             getAsFile: () => mockImageFile,
+            kind: 'file',
             webkitGetAsEntry: () => null,
           },
         ],
@@ -207,11 +207,11 @@ describe('useDragUpload', () => {
       value: {
         items: [
           {
-            kind: 'file',
             getAsFile: () => mockImageFile,
+            kind: 'file',
             webkitGetAsEntry: () => ({
-              isFile: true,
               file: (cb: (file: File) => void) => cb(mockImageFile),
+              isFile: true,
             }),
           },
         ],
@@ -232,7 +232,7 @@ describe('getContainer', () => {
   it('should return the dragging root element', () => {
     const rootElement = document.createElement('div');
     rootElement.id = 'dragging-root';
-    document.body.appendChild(rootElement);
+    document.body.append(rootElement);
 
     const container = getContainer();
     expect(container).not.toBeNull();

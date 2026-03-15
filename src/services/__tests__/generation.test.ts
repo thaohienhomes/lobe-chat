@@ -7,8 +7,8 @@ import { generationService } from '../generation';
 vi.mock('@/libs/trpc/client', () => ({
   lambdaClient: {
     generation: {
-      getGenerationStatus: { query: vi.fn() },
       deleteGeneration: { mutate: vi.fn() },
+      getGenerationStatus: { query: vi.fn() },
     },
   },
 }));
@@ -25,8 +25,8 @@ describe('GenerationService', () => {
     await generationService.getGenerationStatus(generationId, asyncTaskId);
 
     expect(lambdaClient.generation.getGenerationStatus.query).toBeCalledWith({
-      generationId,
       asyncTaskId,
+      generationId,
     });
   });
 

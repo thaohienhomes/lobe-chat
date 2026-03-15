@@ -32,9 +32,8 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
     vi.mocked(auth).mockResolvedValue({ userId: null } as any);
 
     const request = new Request('http://localhost/api/payment/sepay/create-credit-card', {
-      method: 'POST',
       body: JSON.stringify({
-        amount: 100000,
+        amount: 100_000,
         billingCycle: 'monthly',
         cardCvv: '123',
         cardExpiryMonth: '12',
@@ -44,6 +43,7 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
         currency: 'VND',
         planId: 'premium',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -57,13 +57,13 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user123' } as any);
 
     const request = new Request('http://localhost/api/payment/sepay/create-credit-card', {
-      method: 'POST',
       body: JSON.stringify({
-        amount: 100000,
+        amount: 100_000,
         billingCycle: 'monthly',
         // Missing card fields
         planId: 'premium',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -77,7 +77,6 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user123' } as any);
 
     const request = new Request('http://localhost/api/payment/sepay/create-credit-card', {
-      method: 'POST',
       body: JSON.stringify({
         amount: 500,
         billingCycle: 'monthly',
@@ -89,6 +88,7 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
         currency: 'VND',
         planId: 'premium',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -104,17 +104,16 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
 
     const { sepayGateway } = await import('@/libs/sepay');
     vi.mocked(sepayGateway.createCreditCardPayment).mockResolvedValue({
-      success: true,
-      orderId: 'PHO_CC_123456',
-      transactionId: 'TXN_123456',
-      paymentUrl: 'https://payment.sepay.vn/pay/PHO_CC_123456',
       message: 'Payment created successfully',
+      orderId: 'PHO_CC_123456',
+      paymentUrl: 'https://payment.sepay.vn/pay/PHO_CC_123456',
+      success: true,
+      transactionId: 'TXN_123456',
     });
 
     const request = new Request('http://localhost/api/payment/sepay/create-credit-card', {
-      method: 'POST',
       body: JSON.stringify({
-        amount: 100000,
+        amount: 100_000,
         billingCycle: 'monthly',
         cardCvv: '123',
         cardExpiryMonth: '12',
@@ -129,6 +128,7 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
         },
         planId: 'premium',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -145,16 +145,15 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
 
     const { sepayGateway } = await import('@/libs/sepay');
     vi.mocked(sepayGateway.createCreditCardPayment).mockResolvedValue({
-      success: false,
       error: 'Invalid card number',
       message: 'Payment creation failed',
       orderId: '',
+      success: false,
     });
 
     const request = new Request('http://localhost/api/payment/sepay/create-credit-card', {
-      method: 'POST',
       body: JSON.stringify({
-        amount: 100000,
+        amount: 100_000,
         billingCycle: 'monthly',
         cardCvv: '123',
         cardExpiryMonth: '12',
@@ -164,6 +163,7 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
         currency: 'VND',
         planId: 'premium',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -182,9 +182,8 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
     );
 
     const request = new Request('http://localhost/api/payment/sepay/create-credit-card', {
-      method: 'POST',
       body: JSON.stringify({
-        amount: 100000,
+        amount: 100_000,
         billingCycle: 'monthly',
         cardCvv: '123',
         cardExpiryMonth: '12',
@@ -194,6 +193,7 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
         currency: 'VND',
         planId: 'premium',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -209,17 +209,16 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
 
     const { sepayGateway } = await import('@/libs/sepay');
     vi.mocked(sepayGateway.createCreditCardPayment).mockResolvedValue({
-      success: true,
-      orderId: 'PHO_CC_123456',
-      transactionId: 'TXN_123456',
-      paymentUrl: 'https://payment.sepay.vn/pay/PHO_CC_123456',
       message: 'Payment created successfully',
+      orderId: 'PHO_CC_123456',
+      paymentUrl: 'https://payment.sepay.vn/pay/PHO_CC_123456',
+      success: true,
+      transactionId: 'TXN_123456',
     });
 
     const request = new Request('http://localhost/api/payment/sepay/create-credit-card', {
-      method: 'POST',
       body: JSON.stringify({
-        amount: 100000,
+        amount: 100_000,
         billingCycle: 'monthly',
         cardCvv: '123',
         cardExpiryMonth: '12',
@@ -229,12 +228,13 @@ describe('POST /api/payment/sepay/create-credit-card', () => {
         currency: 'VND',
         planId: 'premium',
       }),
+      method: 'POST',
     });
 
     await POST(request as any);
 
     expect(billingService.createPaymentRecord).toHaveBeenCalledWith({
-      amountVnd: 100000,
+      amountVnd: 100_000,
       billingCycle: 'monthly',
       currency: 'VND',
       orderId: expect.stringContaining('PHO_CC_'),

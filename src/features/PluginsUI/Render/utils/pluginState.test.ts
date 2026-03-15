@@ -21,7 +21,7 @@ describe('useOnPluginStateUpdate', () => {
     const testKey = 'testKey';
     const testValue = 'testValue';
     const event = new MessageEvent('message', {
-      data: { type: PluginChannel.updatePluginState, key: testKey, value: testValue },
+      data: { key: testKey, type: PluginChannel.updatePluginState, value: testValue },
     });
 
     window.dispatchEvent(event);
@@ -33,7 +33,7 @@ describe('useOnPluginStateUpdate', () => {
     renderHook(() => useOnPluginStateUpdate(mockCallback));
 
     const event = new MessageEvent('message', {
-      data: { type: 'nonPluginMessage', key: 'key', value: 'value' },
+      data: { key: 'key', type: 'nonPluginMessage', value: 'value' },
     });
 
     window.dispatchEvent(event);

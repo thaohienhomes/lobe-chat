@@ -162,6 +162,12 @@ export const useStyles = createStyles(
           overflow: hidden;
           max-width: 100%;
 
+          /* Expand message bubble to full width when it contains a Visualizer */
+          &:has([data-visualizer]) {
+            width: 100%;
+            overflow: visible;
+          }
+
           ${responsive.mobile} {
             width: 100%;
           }
@@ -175,6 +181,12 @@ export const useStyles = createStyles(
           max-width: 100%;
           margin-block-start: ${time ? -16 : 0}px;
 
+          /* Allow full width when containing a Visualizer */
+          &:has([data-visualizer]) {
+            width: 100%;
+            overflow: visible;
+          }
+
           ${responsive.mobile} {
             overflow-x: auto;
           }
@@ -186,6 +198,12 @@ export const useStyles = createStyles(
           position: relative;
           overflow: hidden;
           max-width: 100%;
+
+          /* Allow full width when containing a Visualizer */
+          &:has([data-visualizer]) {
+            width: 100%;
+            overflow: visible;
+          }
 
           ${responsive.mobile} {
             flex-direction: column !important;

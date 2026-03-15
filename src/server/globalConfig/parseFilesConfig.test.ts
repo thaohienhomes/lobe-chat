@@ -7,9 +7,9 @@ describe('parseFilesConfig', () => {
     const envStr =
       'embedding_model=openai/embedding-text-3-small,reranker_model=cohere/rerank-english-v3.0,query_mode=full_text';
     const expected = {
-      embeddingModel: { provider: 'openai', model: 'embedding-text-3-small' },
-      rerankerModel: { provider: 'cohere', model: 'rerank-english-v3.0' },
+      embeddingModel: { model: 'embedding-text-3-small', provider: 'openai' },
       queryMode: 'full_text',
+      rerankerModel: { model: 'rerank-english-v3.0', provider: 'cohere' },
     };
     expect(parseFilesConfig(envStr)).toEqual(expected);
   });
@@ -18,7 +18,7 @@ describe('parseFilesConfig', () => {
   it('parses embeddings configuration correctly', () => {
     const envStr = 'embedding_model=openai/embedding-text-3-large';
     const expected = {
-      embeddingModel: { provider: 'openai', model: 'embedding-text-3-large' },
+      embeddingModel: { model: 'embedding-text-3-large', provider: 'openai' },
     };
     expect(parseFilesConfig(envStr)).toEqual(expected);
   });
@@ -26,7 +26,7 @@ describe('parseFilesConfig', () => {
   it('parses rerank configuration correctly', () => {
     const envStr = 'reranker_model=cohere/rerank-english-v3.0';
     const expected = {
-      rerankerModel: { provider: 'cohere', model: 'rerank-english-v3.0' },
+      rerankerModel: { model: 'rerank-english-v3.0', provider: 'cohere' },
     };
     expect(parseFilesConfig(envStr)).toEqual(expected);
   });
@@ -43,7 +43,7 @@ describe('parseFilesConfig', () => {
     const envStr = 'reranker_model=cohere/rerank-english-v3.0,query_mode=full_text';
     const expected = {
       queryMode: 'full_text',
-      rerankerModel: { provider: 'cohere', model: 'rerank-english-v3.0' },
+      rerankerModel: { model: 'rerank-english-v3.0', provider: 'cohere' },
     };
     expect(parseFilesConfig(envStr)).toEqual(expected);
   });
@@ -51,8 +51,8 @@ describe('parseFilesConfig', () => {
   it('parses queryMode embeddings configuration correctly', () => {
     const envStr = 'embedding_model=openai/embedding-text-3-small,query_mode=full_text';
     const expected = {
+      embeddingModel: { model: 'embedding-text-3-small', provider: 'openai' },
       queryMode: 'full_text',
-      embeddingModel: { provider: 'openai', model: 'embedding-text-3-small' },
     };
     expect(parseFilesConfig(envStr)).toEqual(expected);
   });
@@ -61,8 +61,8 @@ describe('parseFilesConfig', () => {
     const envStr =
       'reranker_model=cohere/rerank-english-v3.0,embedding_model=openai/embedding-text-3-small';
     const expected = {
-      embeddingModel: { provider: 'openai', model: 'embedding-text-3-small' },
-      rerankerModel: { provider: 'cohere', model: 'rerank-english-v3.0' },
+      embeddingModel: { model: 'embedding-text-3-small', provider: 'openai' },
+      rerankerModel: { model: 'rerank-english-v3.0', provider: 'cohere' },
     };
     expect(parseFilesConfig(envStr)).toEqual(expected);
   });

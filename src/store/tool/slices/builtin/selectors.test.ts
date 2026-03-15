@@ -45,7 +45,7 @@ describe('builtinToolSelectors', () => {
       const state = {
         ...initialState,
         builtinTools: [
-          { identifier: 'tool-1', hidden: true, manifest: { meta: { title: 'Tool 1' } } },
+          { hidden: true, identifier: 'tool-1', manifest: { meta: { title: 'Tool 1' } } },
           { identifier: DalleManifest.identifier, manifest: { meta: { title: 'Dalle' } } },
         ],
       } as ToolStoreState;

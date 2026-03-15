@@ -9,8 +9,8 @@ describe('PluginModel', () => {
   beforeEach(() => {
     // 设置正确结构的插件数据
     pluginData = {
-      identifier: 'test-plugin',
       id: 'test-plugin',
+      identifier: 'test-plugin',
       manifest: {},
       type: 'plugin',
     };

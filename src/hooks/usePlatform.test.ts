@@ -9,9 +9,9 @@ import { usePlatform } from './usePlatform';
 vi.mock('@/utils/platform', () => ({
   getBrowser: vi.fn(),
   getPlatform: vi.fn(),
+  isArc: vi.fn(),
   isInStandaloneMode: vi.fn(),
   isSonomaOrLaterSafari: vi.fn(),
-  isArc: vi.fn(),
 }));
 
 describe('usePlatform', () => {
@@ -26,6 +26,7 @@ describe('usePlatform', () => {
 
     expect(result.current).toEqual({
       isApple: true,
+      isArc: false,
       isChrome: true,
       isChromium: true,
       isEdge: false,
@@ -34,7 +35,6 @@ describe('usePlatform', () => {
       isMacOS: true,
       isPWA: false,
       isSafari: false,
-      isArc: false,
       isSonomaOrLaterSafari: false,
       isSupportInstallPWA: true,
     });
@@ -51,10 +51,10 @@ describe('usePlatform', () => {
 
     expect(result.current).toEqual({
       isApple: true,
+      isArc: false,
       isChrome: false,
       isChromium: false,
       isEdge: false,
-      isArc: false,
       isFirefox: false,
       isIOS: true,
       isMacOS: false,
@@ -76,13 +76,13 @@ describe('usePlatform', () => {
 
     expect(result.current).toEqual({
       isApple: false,
+      isArc: false,
       isChrome: false,
       isChromium: true,
       isEdge: true,
       isFirefox: false,
       isIOS: false,
       isMacOS: false,
-      isArc: false,
       isPWA: false,
       isSafari: false,
       isSonomaOrLaterSafari: false,
@@ -101,13 +101,13 @@ describe('usePlatform', () => {
 
     expect(result.current).toEqual({
       isApple: false,
+      isArc: false,
       isChrome: false,
       isChromium: false,
       isEdge: false,
       isFirefox: true,
       isIOS: false,
       isMacOS: false,
-      isArc: false,
       isPWA: false,
       isSafari: false,
       isSonomaOrLaterSafari: false,
@@ -126,13 +126,13 @@ describe('usePlatform', () => {
 
     expect(result.current).toEqual({
       isApple: true,
+      isArc: true,
       isChrome: true,
       isChromium: true,
       isEdge: false,
       isFirefox: false,
       isIOS: false,
       isMacOS: true,
-      isArc: true,
       isPWA: false,
       isSafari: false,
       isSonomaOrLaterSafari: false,

@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { S3StaticFileImpl } from './s3';
 
 const config = {
+  S3_BUCKET: 'my-bucket',
   S3_ENABLE_PATH_STYLE: false,
   S3_PUBLIC_DOMAIN: 'https://example.com',
-  S3_BUCKET: 'my-bucket',
   S3_SET_ACL: true,
 };
 
@@ -19,14 +19,14 @@ vi.mock('@/envs/file', () => ({
 // 模拟 S3 类
 vi.mock('@/server/modules/S3', () => ({
   S3: vi.fn().mockImplementation(() => ({
+    createPreSignedUrl: vi.fn().mockResolvedValue('https://upload.example.com/test.jpg'),
     createPreSignedUrlForPreview: vi
       .fn()
       .mockResolvedValue('https://presigned.example.com/test.jpg'),
-    getFileContent: vi.fn().mockResolvedValue('file content'),
-    getFileByteArray: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
     deleteFile: vi.fn().mockResolvedValue({}),
     deleteFiles: vi.fn().mockResolvedValue({}),
-    createPreSignedUrl: vi.fn().mockResolvedValue('https://upload.example.com/test.jpg'),
+    getFileByteArray: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
+    getFileContent: vi.fn().mockResolvedValue('file content'),
     uploadContent: vi.fn().mockResolvedValue({}),
     uploadMedia: vi.fn().mockResolvedValue({}),
   })),

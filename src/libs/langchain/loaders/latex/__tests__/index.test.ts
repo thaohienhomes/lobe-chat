@@ -7,7 +7,7 @@ import { LatexLoader } from '../index';
 
 describe('LatexLoader', () => {
   it('should run', async () => {
-    const content = fs.readFileSync(join(__dirname, `./demo.tex`), 'utf-8');
+    const content = fs.readFileSync(join(__dirname, `./demo.tex`), 'utf8');
 
     const data = await LatexLoader(content);
 
