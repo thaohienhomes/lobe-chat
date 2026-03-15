@@ -8,14 +8,14 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { generateCompleteHTML, type ShellThemeVars } from './shellHTML';
+import { generateCompleteHTML, generateStreamingShell, type ShellThemeVars } from './shellHTML';
 import LoadingOverlay from './LoadingOverlay';
 
 const MIN_HEIGHT = 100;
 const DEFAULT_HEIGHT = 200;
 const MAX_CHART_HEIGHT = 600;
 const HEIGHT_TIMEOUT_MS = 10_000;
-const STREAMING_DEBOUNCE_MS = 200;
+const STREAMING_DEBOUNCE_MS = 150;
 
 /** Convert a snake_case or lowercase title to Title Case */
 const toTitleCase = (s: string): string =>
@@ -187,12 +187,29 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     // ── Debounce widgetCode during streaming ──────────────────────────────────
     const debouncedCode = useDebouncedValue(widgetCode, STREAMING_DEBOUNCE_MS, isStreaming);
 
-    // ── Build srcdoc: strip scripts while streaming ──────────────────────────
+    // ── Streaming shell: loaded once, content updated via postMessage ────────
+    // During streaming: load the morphdom shell once → send updateContent messages
+    // After streaming: keep the shell (finalized via postMessage) — no iframe reload
+    // Only use generateCompleteHTML for widgets that mount as already-complete
+    const streamingShell = useMemo(() => {
+      return generateStreamingShell(theme);
+    }, []); // stable shell - theme updates are sent via postMessage
+
+    // Track if this widget went through a streaming phase.
+    // Once streaming starts, we keep the shell for the entire lifecycle
+    // to avoid an iframe reload that races with finalizeContent postMessage.
+    const wasStreamingRef = useRef(false);
+    if (isStreaming) wasStreamingRef.current = true;
+
+    // Calculate the srcdoc:
+    // - No code yet: empty
+    // - Went through streaming (active or completed): use streaming shell
+    // - Mounted as already-complete (no streaming phase): use generateCompleteHTML
     const srcdoc = useMemo(() => {
       if (!debouncedCode) return '';
-      const code = isStreaming ? stripScripts(debouncedCode) : debouncedCode;
-      return generateCompleteHTML(theme, code);
-    }, [theme, debouncedCode, isStreaming]);
+      if (isStreaming || wasStreamingRef.current) return streamingShell;
+      return generateCompleteHTML(theme, debouncedCode);
+    }, [theme, debouncedCode, isStreaming, streamingShell]);
 
     // Show loading overlay until iframe reports a resize (content rendered)
     const showLoading = !iframeReady && !isComplete;
@@ -261,6 +278,28 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     const postToIframe = useCallback((msg: Record<string, unknown>) => {
       iframeRef.current?.contentWindow?.postMessage(msg, '*');
     }, []);
+
+    // ── Morphdom streaming: send content updates via postMessage ──────────────
+    const prevDebouncedCodeRef = useRef<string>('');
+    useEffect(() => {
+      if (!isStreaming || !debouncedCode) return;
+      if (prevDebouncedCodeRef.current === debouncedCode) return;
+      prevDebouncedCodeRef.current = debouncedCode;
+
+      // Strip scripts during streaming (they'll be executed on finalize)
+      const code = stripScripts(debouncedCode);
+      postToIframe({ type: 'updateContent', html: code });
+    }, [isStreaming, debouncedCode, postToIframe]);
+
+    // ── Finalize: when streaming completes, send full code with scripts ───────
+    const prevIsCompleteRef = useRef(isComplete);
+    useEffect(() => {
+      if (isComplete && !prevIsCompleteRef.current && widgetCode) {
+        // Send finalizeContent — morphdom does final diff + scripts re-execute
+        postToIframe({ type: 'finalizeContent', html: widgetCode });
+      }
+      prevIsCompleteRef.current = isComplete;
+    }, [isComplete, widgetCode, postToIframe]);
 
     const prevThemeRef = useRef(theme);
     useEffect(() => {

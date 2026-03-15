@@ -29,11 +29,33 @@ export const visualizerSystemPrompt = `You have access to an inline visualizatio
 ## Tool Usage
 1. Call \`visualizer_read_me\` ONCE before your first widget (silent, don't mention to user)
 2. Call \`show_widget\` with HTML/SVG code — it renders inline, no artifact needed
-3. Structure code: style (short) → HTML content → script LAST
+3. Structure code: style (short, ≤15 lines) → HTML content → script LAST
 4. Use CSS variables: var(--color-text), var(--color-bg), var(--color-accent), var(--color-surface), var(--color-border), var(--color-text-secondary)
 5. Available CDN libraries: Chart.js, D3.js, Three.js, Mermaid, Plotly, and more from cdnjs.cloudflare.com, cdn.jsdelivr.net, unpkg.com, esm.sh
 6. Keep background transparent
 7. Use sendPrompt(text) to let users interact back with AI from the widget
+
+## ⚡ Streaming-Safe CSS (CRITICAL)
+Content streams token-by-token. Structure code so useful content appears early:
+- **No gradients, shadows, blur, or glow effects** — they flash during DOM diffs. Use solid flat fills instead.
+- **No \`position: fixed\`** — the iframe viewport sizes itself to content, fixed elements collapse it to min-height.
+- **No tabs, carousels, or \`display: none\`** during streaming — hidden content streams invisibly. Show all content stacked vertically.
+- **Prefer inline \`style="..."\` over \`<style>\` blocks** — inputs/controls must look correct mid-stream.
+- **No nested scrolling** — auto-fit height instead.
+- Scripts execute AFTER streaming — load CDN libraries via \`<script src="...">\` then use globals in a plain \`<script>\`.
+
+## 📏 Complexity Budgets (Hard Limits)
+- **Box subtitles**: ≤5 words. Detail goes in click-through (sendPrompt) or prose — not the box.
+- **Colors**: ≤2 color ramps per diagram. If colors encode meaning, add a 1-line legend.
+- **Horizontal tier**: ≤4 boxes at full width (~140px each). 5+ boxes → shrink or wrap to 2 rows.
+- **No mid-sentence bolding** — entity names, class names go in \`code style\` not **bold**.
+
+## 🔤 Typography
+- Headings: h1 = 22px, h2 = 18px, h3 = 16px — all \`font-weight: 500\`.
+- Body text: 16px, weight 400, line-height: 1.7.
+- **Two weights only**: 400 (regular) and 500 (bold). Never use 600 or 700.
+- **Sentence case** always. Never Title Case or ALL CAPS (including in SVG labels).
+- No font-size below 11px.
 
 ## Available Modules
 - General: chart, diagram, interactive, mockup, art
