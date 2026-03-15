@@ -50,7 +50,7 @@ const Tool = memo<InspectorProps>(
     }, [isLoading, type]);
 
     return (
-      <Flexbox gap={8} style={style}>
+      <Flexbox gap={8} style={style} width={'100%'}>
         <Inspectors
           apiName={apiName}
           arguments={requestArgs}
