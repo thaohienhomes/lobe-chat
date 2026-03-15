@@ -21,8 +21,13 @@ const useStyles = createStyles(({ css, token }) => ({
   container: css`
     position: relative;
     overflow: hidden;
-    width: 100%;
+
+    /* Break out of the parent message bubble constraint */
+    width: calc(100% + 32px);
+    max-width: 680px;
+    margin-inline: -16px;
     margin-bottom: 8px;
+
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: 12px;

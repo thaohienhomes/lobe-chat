@@ -55,6 +55,57 @@ export function generateCompleteHTML(theme: ShellThemeVars, widgetCode: string):
       overflow: hidden;
       line-height: 1.5;
     }
+
+    /* ── Dark-mode overrides ─────────────────────────────────────────────
+     * AI-generated widget code may use hardcoded colors that blend with
+     * dark backgrounds. These overrides ensure readability in ALL cases.
+     * ────────────────────────────────────────────────────────────────── */
+
+    /* Ensure SVG text and axis labels use theme text color */
+    svg text, svg .tick text, svg .label {
+      fill: var(--color-text) !important;
+    }
+    /* Grid lines, axes, and chart borders in SVG */
+    svg line, svg .grid line, svg .domain, svg .axis line, svg .axis path {
+      stroke: var(--color-border) !important;
+    }
+    /* Radar chart and polar grids */
+    svg circle.grid, svg polygon.grid, svg .gridline {
+      stroke: var(--color-border) !important;
+      fill: none !important;
+    }
+
+    /* Table styling for dark mode */
+    table { border-color: var(--color-border); }
+    th, td {
+      border-color: var(--color-border) !important;
+      color: var(--color-text);
+    }
+    th { background: var(--color-surface) !important; }
+
+    /* Ensure input/select elements are readable */
+    input, select, textarea, button {
+      color: var(--color-text);
+      background: var(--color-surface);
+      border-color: var(--color-border);
+    }
+
+    /* Progress bars / tracks */
+    progress { accent-color: var(--color-accent); }
+    .progress-track, [class*="track"], [class*="bg-gray"] {
+      background: var(--color-surface) !important;
+    }
+
+    /* Links */
+    a { color: var(--color-accent); }
+
+    /* Headings and strong text inherit theme color */
+    h1, h2, h3, h4, h5, h6, strong, b {
+      color: var(--color-text);
+    }
+
+    /* Canvas-based charts: ensure container has correct bg */
+    canvas { display: block; }
   </style>
 </head>
 <body>
