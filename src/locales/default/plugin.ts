@@ -474,6 +474,25 @@ export default {
       show_widget: 'Visualizer',
       visualizer_read_me: 'Reading guidelines',
     },
+    error: {
+      renderFailed: 'Widget Failed to Render',
+      retry: 'Retry',
+      tooLarge: 'Widget Too Large',
+      tooLargeDesc: 'Widget code is {{size}}KB, exceeding the {{limit}}KB limit.',
+      unexpected: 'An unexpected error occurred',
+    },
+    streaming: {
+      generating: 'Generating…',
+    },
     title: 'Visualizer',
+    toolbar: {
+      actions: 'Actions',
+      copyCode: 'Copy Code',
+      copyFailed: 'Failed to copy',
+      copySuccess: 'Copied code to clipboard',
+      download: 'Download',
+      downloadSuccess: 'Downloaded as .{{ext}}',
+    },
+    widgetLimit: 'Maximum {{max}} visualizations per message',
   },
 };

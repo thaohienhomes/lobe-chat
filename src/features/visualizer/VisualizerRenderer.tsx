@@ -5,6 +5,7 @@ import { Dropdown, type MenuProps, message } from 'antd';
 import { createStyles } from 'antd-style';
 import { CopyIcon, DownloadIcon, MoreHorizontalIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { generateCompleteHTML, type ShellThemeVars } from './shellHTML';
@@ -58,12 +59,21 @@ const useStyles = createStyles(({ css, token }) => ({
     border-radius: 12px;
     box-shadow: 0 2px 8px ${token.colorBgTextHover};
     transition: border-color 0.3s ease;
+
+    @media (max-width: 768px) {
+      border-radius: 8px;
+      margin-bottom: 4px;
+    }
   `,
   iframe: css`
     display: block;
     width: 100%;
     border: none;
     border-radius: 0 0 12px 12px;
+
+    @media (max-width: 768px) {
+      border-radius: 0 0 8px 8px;
+    }
   `,
   iframeWrapper: css`
     overflow-y: auto;
@@ -84,6 +94,10 @@ const useStyles = createStyles(({ css, token }) => ({
       &:hover {
         background: ${token.colorBorder};
       }
+    }
+
+    @media (max-width: 768px) {
+      max-height: 400px;
     }
   `,
   streaming: css`
@@ -121,6 +135,12 @@ const useStyles = createStyles(({ css, token }) => ({
     color: ${token.colorTextSecondary};
     background: ${token.colorFillQuaternary};
     border-block-end: 1px solid ${token.colorBorderSecondary};
+
+    @media (max-width: 768px) {
+      padding-block: 4px;
+      padding-inline: 8px;
+      font-size: 11px;
+    }
   `,
   toolbarTrigger: css`
     margin-inline-start: auto;
@@ -159,6 +179,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     onSendPrompt,
   }) => {
     const { styles, cx } = useStyles();
+    const { t } = useTranslation('plugin');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [iframeHeight, setIframeHeight] = useState(DEFAULT_HEIGHT);
     const [iframeReady, setIframeReady] = useState(false);
@@ -226,7 +247,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
-            void message.success(`Downloaded as .${ext}`);
+            void message.success(t('visualizer.toolbar.downloadSuccess', { ext }));
             break;
           }
         }
@@ -261,10 +282,10 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     // ── Toolbar handlers ─────────────────────────────────────────────────────
     const handleCopyCode = useCallback(() => {
       navigator.clipboard.writeText(widgetCode).then(
-        () => void message.success('Copied code to clipboard'),
-        () => void message.error('Failed to copy'),
+        () => void message.success(t('visualizer.toolbar.copySuccess')),
+        () => void message.error(t('visualizer.toolbar.copyFailed')),
       );
-    }, [widgetCode]);
+    }, [widgetCode, t]);
 
     const handleDownload = useCallback(() => {
       postToIframe({ type: 'exportContent', title });
@@ -275,17 +296,17 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
         {
           icon: <Icon icon={CopyIcon} size={'small'} />,
           key: 'copy',
-          label: 'Copy Code',
+          label: t('visualizer.toolbar.copyCode'),
           onClick: handleCopyCode,
         },
         {
           icon: <Icon icon={DownloadIcon} size={'small'} />,
           key: 'download',
-          label: 'Download',
+          label: t('visualizer.toolbar.download'),
           onClick: handleDownload,
         },
       ],
-      [handleCopyCode, handleDownload],
+      [handleCopyCode, handleDownload, t],
     );
 
     if (!srcdoc) return null;
@@ -298,7 +319,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
             <span>{toTitleCase(title)}</span>
             {isStreaming && (
               <span className={styles.streamingBadge} style={{ marginLeft: 'auto' }}>
-                ● Generating…
+                ● {t('visualizer.streaming.generating')}
               </span>
             )}
             {!isStreaming && (
@@ -307,7 +328,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
                   className={styles.toolbarTrigger}
                   icon={MoreHorizontalIcon}
                   size={'small'}
-                  title="Actions"
+                  title={t('visualizer.toolbar.actions')}
                 />
               </Dropdown>
             )}

@@ -466,5 +466,31 @@
     "title": "插件商店"
   },
   "unknownError": "未知错误",
-  "unknownPlugin": "未知插件"
+  "unknownPlugin": "未知插件",
+  "visualizer": {
+    "apiName": {
+      "show_widget": "Visualizer",
+      "visualizer_read_me": "Đang đọc hướng dẫn"
+    },
+    "error": {
+      "renderFailed": "Widget không thể hiển thị",
+      "retry": "Thử lại",
+      "tooLarge": "Widget quá lớn",
+      "tooLargeDesc": "Mã widget {{size}}KB, vượt quá giới hạn {{limit}}KB.",
+      "unexpected": "Đã xảy ra lỗi không mong muốn"
+    },
+    "streaming": {
+      "generating": "Đang tạo…"
+    },
+    "title": "Visualizer",
+    "toolbar": {
+      "actions": "Tùy chọn",
+      "copyCode": "Sao chép mã",
+      "copyFailed": "Sao chép thất bại",
+      "copySuccess": "Đã sao chép mã vào clipboard",
+      "download": "Tải xuống",
+      "downloadSuccess": "Đã tải xuống dạng .{{ext}}"
+    },
+    "widgetLimit": "Tối đa {{max}} biểu đồ mỗi tin nhắn"
+  }
 }

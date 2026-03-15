@@ -3,6 +3,7 @@
 import { Highlighter } from '@lobehub/ui';
 import { Result } from 'antd';
 import { memo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { VisualizerRenderer } from '@/features/visualizer';
 import VisualizerErrorBoundary from '@/features/visualizer/VisualizerErrorBoundary';
@@ -11,6 +12,11 @@ import { useChatStore } from '@/store/chat';
 
 /** Maximum widget code size in bytes (500KB) */
 const MAX_WIDGET_CODE_SIZE = 500 * 1024;
+/** Maximum widgets rendered per message */
+const MAX_WIDGETS_PER_MESSAGE = 3;
+
+/** Track widget count per message to enforce limit */
+const widgetCountByMessage = new Map<string, number>();
 
 interface VisualizerWidgetProps {
   isStreaming?: boolean;
@@ -33,6 +39,7 @@ interface VisualizerWidgetProps {
 const VisualizerWidget = memo<VisualizerWidgetProps>(
   ({ widgetCode, title, loadingMessages, messageId, isStreaming = false }) => {
     const theme = useVisualizerTheme();
+    const { t } = useTranslation('plugin');
 
     const handleSendPrompt = useCallback(
       (text: string) => {
@@ -55,8 +62,11 @@ const VisualizerWidget = memo<VisualizerWidgetProps>(
         <div style={{ padding: 16 }}>
           <Result
             status="warning"
-            subTitle={`Widget code is ${(widgetCode.length / 1024).toFixed(0)}KB, exceeding the ${MAX_WIDGET_CODE_SIZE / 1024}KB limit.`}
-            title="Widget Too Large"
+            subTitle={t('visualizer.error.tooLargeDesc', {
+              limit: MAX_WIDGET_CODE_SIZE / 1024,
+              size: (widgetCode.length / 1024).toFixed(0),
+            })}
+            title={t('visualizer.error.tooLarge')}
           />
           <Highlighter language="html" style={{ maxHeight: 200, overflow: 'auto' }}>
             {widgetCode.slice(0, 1000) + '\n\n... (truncated)'}
@@ -64,6 +74,17 @@ const VisualizerWidget = memo<VisualizerWidgetProps>(
         </div>
       );
     }
+
+    // Enforce max widgets per message
+    const currentCount = widgetCountByMessage.get(messageId) || 0;
+    if (currentCount >= MAX_WIDGETS_PER_MESSAGE) {
+      return (
+        <div style={{ color: 'var(--color-text-secondary)', fontSize: 12, padding: '8px 12px' }}>
+          {t('visualizer.widgetLimit', { max: MAX_WIDGETS_PER_MESSAGE })}
+        </div>
+      );
+    }
+    widgetCountByMessage.set(messageId, currentCount + 1);
 
     return (
       <VisualizerErrorBoundary fallbackCode={widgetCode}>
