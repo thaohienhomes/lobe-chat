@@ -19,7 +19,8 @@ import { RouteVariants } from '@/utils/server/routeVariants';
 import GridLayout from './features/GridLayout';
 import Post from './features/Post';
 
-export const dynamic = 'force-dynamic';
+// ISR with 1-hour revalidation — changelog content changes infrequently
+export const revalidate = 3600;
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);

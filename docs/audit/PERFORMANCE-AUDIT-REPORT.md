@@ -713,6 +713,32 @@ done
 
 ---
 
+## Implementation Status
+
+### Quick Wins — ALL IMPLEMENTED
+| # | Fix | Status |
+|---|-----|--------|
+| 1 | `force-dynamic` → `revalidate=300` on 5 discover pages | DONE |
+| 2 | `imgUnoptimized: false` in AppTheme | DONE |
+| 3 | SWR `dedupingInterval: 500` | DONE |
+| 4 | UAParser → lightweight regex in middleware | DONE |
+| 5 | `preferredRegion: ['sin1', 'hnd1']` on tRPC lambda | DONE |
+| 6 | Fix stale closure `[id, toggleMessageEditing]` in ChatItem | DONE |
+| 7 | `useMemo` on markdown processing in ChatItem | DONE |
+
+### Medium-term Fixes — PARTIALLY IMPLEMENTED
+| # | Fix | Status |
+|---|-----|--------|
+| 1 | DB indexes on junction tables (6 indexes on 3 tables) | DONE |
+| 2 | Neon connection pool config (max:20, timeouts) | DONE |
+| 3 | Portal sub-features lazy loading (7 Body components) | DONE |
+| 4 | Changelog pages ISR (3 pages, revalidate=3600) | DONE |
+| 5 | Reduce `/chat` HTML size | TODO |
+| 6 | Render discover sections independently | TODO |
+| 7 | Split StoreInitialization | TODO |
+
+---
+
 ## Appendix: Configuration Summary
 
 | Config | Value | Impact |

@@ -35,7 +35,12 @@ If you don't have it, please run \`openssl rand -base64 32\` to create one.
   }
 
   if (serverDBEnv.DATABASE_DRIVER === 'node') {
-    const client = new NodePool({ connectionString });
+    const client = new NodePool({
+      connectionString,
+      connectionTimeoutMillis: 5000,
+      idleTimeoutMillis: 30_000,
+      max: 20,
+    });
     return nodeDrizzle(client, { schema });
   }
 
@@ -44,6 +49,11 @@ If you don't have it, please run \`openssl rand -base64 32\` to create one.
     neonConfig.webSocketConstructor = ws;
   }
 
-  const client = new NeonPool({ connectionString });
+  const client = new NeonPool({
+    connectionString,
+    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 30_000,
+    max: 20,
+  });
   return neonDrizzle(client, { schema });
 };

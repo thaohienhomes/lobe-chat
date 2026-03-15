@@ -10,7 +10,8 @@ import Post from './features/Post';
 import { UpdateChangelogStatusWrapper as UpdateChangelogStatus } from './features/UpdateChangelogStatusWrapper';
 import Loading from './loading';
 
-export const dynamic = 'force-dynamic';
+// ISR with 1-hour revalidation — changelog content changes infrequently
+export const revalidate = 3600;
 
 const Page = async (props: DynamicLayoutProps) => {
   const hideDocs = serverFeatureFlags().hideDocs;
