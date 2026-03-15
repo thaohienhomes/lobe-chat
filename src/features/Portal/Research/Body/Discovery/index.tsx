@@ -184,7 +184,13 @@ const DiscoveryPhase = memo(() => {
     const [yearFrom, setYearFrom] = useState<number>(2000);
     const [yearTo, setYearTo] = useState<number>(currentYear);
     const [minCitations, setMinCitations] = useState<number>(0);
-    const [studyType, setStudyType] = useState<string>('');
+    const studyTypeFilter = useResearchStore((s) => s.studyTypeFilter);
+    const setStudyTypeFilter = useResearchStore((s) => s.setStudyTypeFilter);
+    const [studyType, setStudyTypeLocal] = useState<string>(studyTypeFilter);
+    const setStudyType = (v: string) => {
+        setStudyTypeLocal(v);
+        setStudyTypeFilter(v);
+    };
 
     // Active filter count badge
     const activeFilters = [

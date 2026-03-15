@@ -47,6 +47,27 @@ export type ArticleType =
   | 'umbrella-review'
   | 'rapid-review';
 
+// Serializable analysis results for injection into Writing phase
+export interface ForestPlotResults {
+  entries: { author: string; lower: number; measure: string; point: number; upper: number; weight: number; year: number }[];
+  measure: string;
+  pooled: { lower: number; point: number; upper: number } | null;
+  significance: string;
+}
+
+export interface MetaRegressionResults {
+  R2: number;
+  beta0: number;
+  beta1: number;
+  covariate: string;
+  n: number;
+  p: number;
+  seBeta1: number;
+  significant: boolean;
+  tStat: number;
+  tau2: number;
+}
+
 export interface ScreeningEntry {
     decision: ScreeningDecision;
     paperId: string;
@@ -68,6 +89,10 @@ interface ResearchState {
 
     // Article type (determines tabs, AI prompts, export formats)
     articleType: ArticleType;
+
+    // Analysis results (persisted for injection into Writing AI prompts)
+    forestPlotResults: ForestPlotResults | null;
+    metaRegressionResults: MetaRegressionResults | null;
 
     addPaper: (paper: PaperResult) => void;
     addPapers: (papers: PaperResult[]) => void;
@@ -109,8 +134,13 @@ interface ResearchState {
 
     setActivePhase: (phase: ResearchPhase) => void;
     setArticleType: (type: ArticleType) => void;
+    setForestPlotResults: (results: ForestPlotResults | null) => void;
+    setMetaRegressionResults: (results: MetaRegressionResults | null) => void;
     // Discovery Actions
     setSearchQuery: (query: string) => void;
+    // Study type filter from Discovery (auto-mapped to articleType)
+    setStudyTypeFilter: (filter: string) => void;
+    studyTypeFilter: string;
     toggleSource: (source: SearchSource) => void;
     totalResults: number;
 
@@ -130,6 +160,8 @@ const initialState = {
     activePhase: 'discovery' as ResearchPhase,
     articleType: 'systematic-review' as ArticleType,
     currentPage: 1,
+    forestPlotResults: null as ForestPlotResults | null,
+    metaRegressionResults: null as MetaRegressionResults | null,
     hasMore: true,
     isLoadingMore: false,
     isSearching: false,
@@ -140,6 +172,7 @@ const initialState = {
     searchError: null as string | null,
     searchQuery: '',
     selectedSources: ['PubMed', 'OpenAlex', 'ArXiv', 'ClinicalTrials.gov'] as SearchSource[],
+    studyTypeFilter: '',
     totalResults: 0,
 };
 
@@ -556,7 +589,25 @@ export const useResearchStore = create<ResearchState>()(
 
                 setActivePhase: (phase) => set({ activePhase: phase }, false, 'setActivePhase'),
                 setArticleType: (type) => set({ articleType: type }, false, 'setArticleType'),
+                setForestPlotResults: (results) => set({ forestPlotResults: results }, false, 'setForestPlotResults'),
+                setMetaRegressionResults: (results) => set({ metaRegressionResults: results }, false, 'setMetaRegressionResults'),
                 setSearchQuery: (query) => set({ searchQuery: query }, false, 'setSearchQuery'),
+                setStudyTypeFilter: (filter) => {
+                    // Auto-map Discovery study type filter to article type
+                    const mapping: Record<string, ArticleType> = {
+                        cohort: 'systematic-review',
+                        cr: 'systematic-review',
+                        cross: 'systematic-review',
+                        meta: 'meta-analysis',
+                        rct: 'systematic-review',
+                        sr: 'systematic-review',
+                    };
+                    const mapped = filter ? mapping[filter] : undefined;
+                    set({
+                        studyTypeFilter: filter,
+                        ...(mapped ? { articleType: mapped } : {}),
+                    }, false, 'setStudyTypeFilter');
+                },
 
                 toggleSource: (source) => {
                     const { selectedSources } = get();
@@ -575,12 +626,15 @@ export const useResearchStore = create<ResearchState>()(
                 partialize: (state) => ({
                     activePhase: state.activePhase,
                     articleType: state.articleType,
+                    forestPlotResults: state.forestPlotResults,
+                    metaRegressionResults: state.metaRegressionResults,
                     papers: state.papers,
                     pico: state.pico,
                     screeningCriteria: state.screeningCriteria,
                     screeningDecisions: state.screeningDecisions,
                     searchQuery: state.searchQuery,
                     selectedSources: state.selectedSources,
+                    studyTypeFilter: state.studyTypeFilter,
                     totalResults: state.totalResults,
                 }),
             },

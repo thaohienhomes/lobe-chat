@@ -18,8 +18,10 @@ import { Button, Tag } from '@lobehub/ui';
 import { Select } from 'antd';
 import { createStyles } from 'antd-style';
 import { Copy, Plus, Trash2, TrendingUp } from 'lucide-react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
+
+import { useResearchStore } from '@/store/research';
 
 const useStyles = createStyles(({ css, token }) => ({
     card: css`padding:12px 14px;background:${token.colorFillQuaternary};border:1px solid ${token.colorBorderSecondary};border-radius:${token.borderRadiusLG}px;`,
@@ -190,6 +192,27 @@ const MetaRegression = memo(() => {
     const [copied, setCopied] = useState(false);
 
     const reg = useMemo(() => metaRegression(studies), [studies]);
+
+    // ── Sync results to store for Writing phase injection ──────────────
+    const setMetaRegressionResults = useResearchStore((s) => s.setMetaRegressionResults);
+    useEffect(() => {
+        if (!reg) {
+            setMetaRegressionResults(null);
+            return;
+        }
+        setMetaRegressionResults({
+            R2: reg.R2,
+            beta0: reg.beta0,
+            beta1: reg.beta1,
+            covariate: covLabel,
+            n: reg.n,
+            p: reg.p,
+            seBeta1: reg.seBeta1,
+            significant: reg.p < 0.05,
+            tStat: reg.tStat,
+            tau2: reg.tau2,
+        });
+    }, [reg, covLabel, setMetaRegressionResults]);
 
     const updateStudy = (id: string, key: keyof MRStudy, val: string | number) => {
         setStudies((prev) => prev.map((s) => s.id === id ? { ...s, [key]: val } : s));

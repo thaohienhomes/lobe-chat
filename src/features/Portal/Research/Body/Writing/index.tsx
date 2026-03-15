@@ -7,7 +7,7 @@ import { Copy, FileText, Loader2, Sparkles } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { type ArticleType, useResearchStore } from '@/store/research';
+import { type ArticleType, type ForestPlotResults, type MetaRegressionResults, useResearchStore } from '@/store/research';
 
 // ── Article type label map ─────────────────────────────────────────────────
 const ARTICLE_TYPE_LABELS: Record<ArticleType, string> = {
@@ -120,6 +120,7 @@ const aiWriteSection = async (
     existingContent: string,
     articleType: ArticleType,
     context: {
+        analysisContext: string;
         pico: { comparison: string; intervention: string; outcome: string; population: string } | null;
         query: string;
         refs: string;
@@ -140,6 +141,7 @@ const aiWriteSection = async (
         picoText,
         existingContent ? `\nExisting draft (improve this):\n${existingContent}` : '',
         context.refs ? `\nKey references:\n${context.refs}` : '',
+        context.analysisContext ? `\n${context.analysisContext}` : '',
         '\nRespond in English. Academic register. Use markdown formatting.',
     ].join('\n');
 
@@ -267,6 +269,8 @@ const WritingPhase = memo(() => {
     const searchQuery = useResearchStore((s) => s.searchQuery);
     const setActivePhase = useResearchStore((s) => s.setActivePhase);
     const articleType = useResearchStore((s) => s.articleType);
+    const forestPlotResults = useResearchStore((s) => s.forestPlotResults);
+    const metaRegressionResults = useResearchStore((s) => s.metaRegressionResults);
     const typeLabel = ARTICLE_TYPE_LABELS[articleType];
 
     const includedPapers = papers.filter((p) => screeningDecisions[p.id]?.decision === 'included');
@@ -324,15 +328,53 @@ const WritingPhase = memo(() => {
         const refsText = includedPapers.slice(0, 8).map((p) =>
             `- ${p.authors} (${p.year}). ${p.title}`,
         ).join('\n');
+
+        // Build analysis context from persisted results
+        const analysisLines: string[] = [];
+        if (forestPlotResults) {
+            analysisLines.push(
+                'FOREST PLOT / META-ANALYSIS RESULTS (from the Analysis phase):',
+                `- Effect measure: ${forestPlotResults.measure}`,
+                `- ${forestPlotResults.entries.length} studies included in quantitative synthesis`,
+            );
+            if (forestPlotResults.pooled) {
+                analysisLines.push(
+                    `- Pooled estimate: ${forestPlotResults.measure} = ${forestPlotResults.pooled.point.toFixed(2)} [95% CI: ${forestPlotResults.pooled.lower.toFixed(2)}\u2013${forestPlotResults.pooled.upper.toFixed(2)}]`,
+                    `- Interpretation: ${forestPlotResults.significance}`,
+                );
+            }
+            // Individual study data table
+            analysisLines.push('', 'Individual study effects:');
+            for (const e of forestPlotResults.entries) {
+                analysisLines.push(`  - ${e.author} (${e.year}): ${forestPlotResults.measure} = ${e.point.toFixed(2)} [${e.lower.toFixed(2)}\u2013${e.upper.toFixed(2)}], weight = ${(e.weight * 100).toFixed(1)}%`);
+            }
+        }
+        if (metaRegressionResults) {
+            analysisLines.push(
+                '',
+                'META-REGRESSION RESULTS (from the Analysis phase):',
+                `- Covariate assessed: ${metaRegressionResults.covariate}`,
+                `- \u03B2\u2081 = ${metaRegressionResults.beta1.toFixed(4)} (SE ${metaRegressionResults.seBeta1.toFixed(4)})`,
+                `- t = ${metaRegressionResults.tStat.toFixed(3)}, p = ${metaRegressionResults.p.toFixed(4)}`,
+                `- R\u00B2 = ${(metaRegressionResults.R2 * 100).toFixed(1)}% of heterogeneity explained`,
+                `- \u03C4\u00B2 = ${metaRegressionResults.tau2.toFixed(4)}`,
+                `- Number of studies: ${metaRegressionResults.n}`,
+                `- ${metaRegressionResults.significant ? 'SIGNIFICANT moderator \u2014 this covariate significantly explains heterogeneity' : 'Not a significant moderator (p \u2265 0.05)'}`,
+            );
+        }
+        const analysisContext = analysisLines.length > 0
+            ? `IMPORTANT: Use the following ACTUAL quantitative results in your writing. Reference specific numbers.\n${analysisLines.join('\n')}`
+            : '';
+
         try {
             const result = await aiWriteSection(sectionKey, sectionLabel, existingContent, articleType, {
-                pico, query: searchQuery, refs: refsText,
+                analysisContext, pico, query: searchQuery, refs: refsText,
             });
             updateSection(sectionKey, result);
         } finally {
             setAiGenerating((prev) => ({ ...prev, [sectionKey]: false }));
         }
-    }, [includedPapers, pico, searchQuery, articleType]);
+    }, [includedPapers, pico, searchQuery, articleType, forestPlotResults, metaRegressionResults]);
 
     const totalWords = sections.reduce((sum, s) => sum + (s.content ? s.content.split(/\s+/).filter(Boolean).length : 0), 0);
     const completedSections = sections.filter((s) => s.content.trim().length > 0).length;

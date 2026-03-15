@@ -19,7 +19,7 @@ import { Button, Tag } from '@lobehub/ui';
 import { Input, Select } from 'antd';
 import { createStyles } from 'antd-style'
 import { Copy, Download, Plus, Trash2 } from 'lucide-react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { useResearchStore } from '@/store/research';
@@ -411,6 +411,39 @@ const ForestPlot = memo(() => {
     }, []);
 
     const pool = pooledEstimate(entries);
+
+    // ── Sync results to store for Writing phase injection ──────────────
+    const setForestPlotResults = useResearchStore((s) => s.setForestPlotResults);
+    useEffect(() => {
+        if (entries.length === 0) {
+            setForestPlotResults(null);
+            return;
+        }
+        const p = pooledEstimate(entries);
+        const nv = nullValue(measure);
+        const isRatio = isRatioMeasure(measure);
+        let significance = 'Insufficient data';
+        if (p) {
+            if (isRatio) {
+                significance = p.lower > 1 ? 'Statistically significant (favours intervention)'
+                    : p.upper < 1 ? 'Statistically significant (favours control)'
+                    : 'Not significant (CI crosses 1.0)';
+            } else {
+                significance = p.lower > 0 ? 'Statistically significant (favours intervention)'
+                    : p.upper < 0 ? 'Statistically significant (favours control)'
+                    : 'Not significant (CI crosses 0)';
+            }
+        }
+        setForestPlotResults({
+            entries: entries.map((e) => ({
+                author: e.author, lower: e.lower, measure: e.measure,
+                point: e.point, upper: e.upper, weight: e.weight, year: e.year,
+            })),
+            measure,
+            pooled: p,
+            significance,
+        });
+    }, [entries, measure, setForestPlotResults]);
 
     const downloadSVG = useCallback(() => {
         const svgEl = document.querySelector('#forest-svg-container svg');
