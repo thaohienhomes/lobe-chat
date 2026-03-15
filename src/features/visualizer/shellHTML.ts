@@ -107,17 +107,33 @@ export function generateShellHTML(theme: ShellThemeVars): string {
 
     // Execute script tags after streaming completes
     // innerHTML-inserted scripts are inert — cloning forces execution
+    // Scripts are loaded SEQUENTIALLY to avoid race conditions:
+    // external CDN scripts (Chart.js, D3, etc.) must finish loading
+    // before inline scripts that depend on them can execute.
     window._runScripts = function() {
-      document.querySelectorAll('#root script').forEach(function(old) {
+      var scripts = Array.from(document.querySelectorAll('#root script'));
+      var idx = 0;
+
+      function next() {
+        if (idx >= scripts.length) return;
+        var old = scripts[idx++];
         var s = document.createElement('script');
         Array.from(old.attributes).forEach(function(attr) {
           s.setAttribute(attr.name, attr.value);
         });
-        if (!old.src) {
+        if (old.src) {
+          // External script — wait for it to load before continuing
+          s.onload = next;
+          s.onerror = next; // continue even on error
+        } else {
           s.textContent = old.textContent;
         }
         old.parentNode.replaceChild(s, old);
-      });
+        // If inline (no src), proceed immediately
+        if (!old.src) next();
+      }
+
+      next();
     };
 
     // Bridge: send a chat message from widget to parent
