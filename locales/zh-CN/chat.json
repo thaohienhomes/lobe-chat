@@ -184,7 +184,11 @@
   "roleAndArchive": "角色与记录",
   "search": {
     "grounding": {
+      "academicTitle": "来源 (学术)",
+      "finished": "已完成",
       "searchQueries": "搜索关键词",
+      "searching": "搜索中",
+      "sourcesFound": "找到 {{count}} 个来源",
       "title": "已搜索到 {{count}} 个结果"
     },
     "mode": {

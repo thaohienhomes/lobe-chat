@@ -166,7 +166,11 @@
   "roleAndArchive": "Role and Archive",
   "search": {
     "grounding": {
+      "academicTitle": "Sources (Academic)",
+      "finished": "Finished",
       "searchQueries": "Search Keywords",
+      "searching": "Searching",
+      "sourcesFound": "{{count}} sources found",
       "title": "Found {{count}} results"
     },
     "mode": {
