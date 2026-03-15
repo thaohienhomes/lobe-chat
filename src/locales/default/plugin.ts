@@ -469,4 +469,11 @@ export default {
   },
   unknownError: '未知错误',
   unknownPlugin: '未知插件',
+  visualizer: {
+    apiName: {
+      show_widget: 'Visualizer',
+      visualizer_read_me: 'Reading guidelines',
+    },
+    title: 'Visualizer',
+  },
 };

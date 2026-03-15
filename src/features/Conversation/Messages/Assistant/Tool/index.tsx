@@ -6,6 +6,7 @@ import { Flexbox } from 'react-layout-kit';
 import AnimatedCollapsed from '@/components/AnimatedCollapsed';
 import { useChatStore } from '@/store/chat';
 import { chatSelectors } from '@/store/chat/selectors';
+import { VisualizerApiNames, VisualizerManifest } from '@/tools/visualizer';
 
 import Inspectors from './Inspector';
 import Render from './Render';
@@ -48,6 +49,39 @@ const Tool = memo<InspectorProps>(
         setShowDetail(true);
       }
     }, [isLoading, type]);
+
+    // --- Visualizer-specific logic (AFTER all hooks to satisfy Rules of Hooks) ---
+
+    const isVisualizerReadMe =
+      identifier === VisualizerManifest.identifier &&
+      apiName === VisualizerApiNames.visualizerReadMe;
+
+    const isVisualizerWidget =
+      identifier === VisualizerManifest.identifier &&
+      apiName === VisualizerApiNames.showWidget;
+
+    // Task 1: Hide visualizer_read_me completely — zero UI footprint
+    if (isVisualizerReadMe) {
+      return null;
+    }
+
+    // Task 2b: When visualizer widget is done loading, show only the chart without Inspector
+    if (isVisualizerWidget && !isLoading && showDetail) {
+      return (
+        <Flexbox gap={8} style={style} width={'100%'}>
+          <Render
+            apiName={apiName}
+            identifier={identifier}
+            messageId={messageId}
+            requestArgs={requestArgs}
+            setShowPluginRender={setShowPluginRender}
+            showPluginRender={showPluginRender}
+            toolCallId={id}
+            toolIndex={index}
+          />
+        </Flexbox>
+      );
+    }
 
     return (
       <Flexbox gap={8} style={style} width={'100%'}>

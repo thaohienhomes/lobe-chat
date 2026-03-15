@@ -1,7 +1,7 @@
 import { Icon } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import isEqual from 'fast-deep-equal';
-import { Globe, Laptop } from 'lucide-react';
+import { BarChart3, Globe, Laptop } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
@@ -14,6 +14,7 @@ import { pluginHelpers, useToolStore } from '@/store/tool';
 import { toolSelectors } from '@/store/tool/selectors';
 import { shinyTextStylish } from '@/styles/loading';
 import { LocalSystemManifest } from '@/tools/local-system';
+import { VisualizerManifest } from '@/tools/visualizer';
 import { WebBrowsingManifest } from '@/tools/web-browsing';
 
 import BuiltinPluginTitle from './BuiltinPluginTitle';
@@ -69,6 +70,12 @@ const ToolTitle = memo<ToolTitleProps>(({ identifier, messageId, index, apiName,
         icon: <Icon icon={Laptop} size={13} />,
         id: LocalSystemManifest.identifier,
         title: t('localSystem.title'),
+      },
+      {
+        apiName: t(`visualizer.apiName.${apiName}`, apiName),
+        icon: <Icon icon={BarChart3} size={13} />,
+        id: VisualizerManifest.identifier,
+        title: t('visualizer.title', 'Visualizer'),
       },
     ],
     [],

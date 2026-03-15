@@ -20,6 +20,12 @@ export const visualizerSystemPrompt = `You have access to an inline visualizatio
 - Full applications → \`<lobeArtifact>\` (side panel) — do NOT also call show_widget
 - User explicitly asks for Artifact/file → \`<lobeArtifact>\` only
 
+## Response Flow
+1. Write your analysis, key findings, and explanation text FIRST
+2. Call show_widget as the FINAL action in your response
+3. Do NOT write additional text after calling show_widget — the chart should be the closing element
+4. The user will see: [your text analysis] → [chart visualization] — this creates a seamless reading flow
+
 ## Tool Usage
 1. Call \`visualizer_read_me\` ONCE before your first widget (silent, don't mention to user)
 2. Call \`show_widget\` with HTML/SVG code — it renders inline, no artifact needed
