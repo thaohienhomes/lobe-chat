@@ -15,19 +15,30 @@ const useStyles = createStyles(({ css, token }) => ({
   container: css`
     position: relative;
     overflow: hidden;
+    min-width: 480px;
+    max-width: 720px;
+    margin-inline: -24px;
+    background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px ${token.colorBgTextHover};
   `,
   iframe: css`
     display: block;
     width: 100%;
     border: none;
+    border-radius: 0 0 12px 12px;
   `,
   titleBar: css`
-    padding-block: 4px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding-block: 6px;
     padding-inline: 12px;
     font-size: 12px;
-    color: ${token.colorTextQuaternary};
+    font-weight: 500;
+    color: ${token.colorTextSecondary};
+    background: ${token.colorFillQuaternary};
     border-block-end: 1px solid ${token.colorBorderSecondary};
   `,
 }));
@@ -143,8 +154,13 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     if (!srcdoc) return null;
 
     return (
-      <Flexbox className={styles.container} width="100%">
-        {title && <div className={styles.titleBar}>{title.replaceAll('_', ' ')}</div>}
+      <Flexbox className={styles.container}>
+        {title && (
+          <div className={styles.titleBar}>
+            <span>📊</span>
+            <span>{title.replaceAll('_', ' ')}</span>
+          </div>
+        )}
         <div style={{ minHeight: MIN_HEIGHT, position: 'relative' }}>
           {showLoading && <LoadingOverlay messages={loadingMessages} />}
           <iframe
