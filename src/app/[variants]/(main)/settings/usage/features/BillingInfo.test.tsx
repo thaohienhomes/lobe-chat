@@ -15,41 +15,48 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
  */
 const PLAN_PRICING: Record<string, { displayName: string; monthlyPoints: number; price: number }> =
   {
-    // Free Plan (default for new users)
-    free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-
+    
     // Lifetime Founding Member Plans (all variations)
-    founding_member: {
+founding_member: {
       displayName: 'Lifetime Founding Member',
       monthlyPoints: 2_000_000,
       price: 0,
     },
+
+    
+    // Free Plan (default for new users)
+free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
     gl_lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
+    // Global Plans (USD via Polar.sh)
+gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
+    
+gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
+    
+gl_starter: { displayName: 'Starter', monthlyPoints: 200_000, price: 0 },
+
+    
     lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
     lifetime_founding_member: {
       displayName: 'Lifetime Founding Member',
       monthlyPoints: 2_000_000,
       price: 0,
     },
+    // Legacy mappings (for backward compatibility)
+premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+
+    
+    starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
+    ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
+    // Vietnam Plans
+vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
+
+    
+    vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
     vn_lifetime: {
       displayName: 'Thành Viên Sáng Lập (Trọn Đời)',
       monthlyPoints: 2_000_000,
       price: 0,
     },
-
-    // Global Plans (USD via Polar.sh)
-    gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
-    gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
-    gl_starter: { displayName: 'Starter', monthlyPoints: 200_000, price: 0 },
-
-    // Legacy mappings (for backward compatibility)
-    premium: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
-    starter: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
-    ultimate: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
-
-    // Vietnam Plans
-    vn_basic: { displayName: 'Phở Tái', monthlyPoints: 300_000, price: 69_000 },
-    vn_free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
     vn_pro: { displayName: 'Phở Đặc Biệt', monthlyPoints: 2_000_000, price: 199_000 },
     vn_team: { displayName: 'Lẩu Phở (Team)', monthlyPoints: 0, price: 149_000 },
   };

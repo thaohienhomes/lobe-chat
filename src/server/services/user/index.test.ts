@@ -35,10 +35,10 @@ vi.mock('@/database/models/user', () => {
 
 vi.mock('@/libs/logger', () => ({
   pino: {
-    info: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
     debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   },
 }));
 
@@ -54,16 +54,16 @@ const mockDB = {} as LobeChatDatabase;
 
 // Mock user data
 const mockUserJSON: UserJSON = {
+  created_at: '2023-01-01T00:00:00Z',
+  email_addresses: [{ email_address: 'test@example.com', id: 'email-1' }],
+  first_name: 'Test',
   id: mockUserId,
-  email_addresses: [{ id: 'email-1', email_address: 'test@example.com' }],
+  image_url: 'https://example.com/avatar.jpg',
+  last_name: 'User',
   phone_numbers: [{ id: 'phone-1', phone_number: '+1234567890' }],
   primary_email_address_id: 'email-1',
   primary_phone_number_id: 'phone-1',
-  image_url: 'https://example.com/avatar.jpg',
-  first_name: 'Test',
-  last_name: 'User',
   username: 'testuser',
-  created_at: '2023-01-01T00:00:00Z',
 } as unknown as UserJSON;
 
 beforeEach(() => {
@@ -83,14 +83,14 @@ describe('UserService', () => {
       expect(UserModel.createUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          id: mockUserId,
-          email: 'test@example.com',
-          phone: '+1234567890',
-          firstName: 'Test',
-          lastName: 'User',
-          username: 'testuser',
           avatar: 'https://example.com/avatar.jpg',
           clerkCreatedAt: new Date('2023-01-01T00:00:00Z'),
+          email: 'test@example.com',
+          firstName: 'Test',
+          id: mockUserId,
+          lastName: 'User',
+          phone: '+1234567890',
+          username: 'testuser',
         }),
       );
       expect(AgentService).toHaveBeenCalledWith(expect.anything(), mockUserId);
@@ -121,8 +121,8 @@ describe('UserService', () => {
 
       const userWithoutPrimaryPhone = {
         ...mockUserJSON,
-        primary_phone_number_id: null,
         phone_numbers: [{ id: 'phone-1', phone_number: '+1234567890' }],
+        primary_phone_number_id: null,
       } as UserJSON;
 
       await service.createUser(mockUserId, userWithoutPrimaryPhone);
@@ -165,13 +165,13 @@ describe('UserService', () => {
       expect(pino.info).toHaveBeenCalledWith('updating user due to clerk webhook');
       expect(mockUpdateUser).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: mockUserId,
-          email: 'test@example.com',
-          phone: '+1234567890',
-          firstName: 'Test',
-          lastName: 'User',
-          username: 'testuser',
           avatar: 'https://example.com/avatar.jpg',
+          email: 'test@example.com',
+          firstName: 'Test',
+          id: mockUserId,
+          lastName: 'User',
+          phone: '+1234567890',
+          username: 'testuser',
         }),
       );
       expect(result).toEqual({
@@ -201,10 +201,10 @@ describe('UserService', () => {
 
       const userWithoutPrimaryContacts = {
         ...mockUserJSON,
+        email_addresses: [{ email_address: 'test@example.com', id: 'email-1' }],
+        phone_numbers: [{ id: 'phone-1', phone_number: '+1234567890' }],
         primary_email_address_id: null,
         primary_phone_number_id: null,
-        email_addresses: [{ id: 'email-1', email_address: 'test@example.com' }],
-        phone_numbers: [{ id: 'phone-1', phone_number: '+1234567890' }],
       } as UserJSON;
 
       await service.updateUser(mockUserId, userWithoutPrimaryContacts);

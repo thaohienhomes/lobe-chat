@@ -6,7 +6,6 @@ import { useUserStore } from '@/store/user';
 import {
   GlobalLLMProviderKey,
   UserKeyVaults,
-  UserModelProviderConfig,
 } from '@/types/user/settings';
 
 import { getProviderAuthPayload } from '../_auth';
@@ -81,12 +80,12 @@ describe('getProviderAuthPayload', () => {
 
     const payload = getProviderAuthPayload(ModelProvider.Bedrock, mockBedrockConfig);
     expect(payload).toEqual({
+      accessKeyId: mockBedrockConfig.accessKeyId,
+      accessKeySecret: mockBedrockConfig.secretAccessKey,
       apiKey: mockBedrockConfig.secretAccessKey + mockBedrockConfig.accessKeyId,
       awsAccessKeyId: mockBedrockConfig.accessKeyId,
       awsRegion: mockBedrockConfig.region,
       awsSecretAccessKey: mockBedrockConfig.secretAccessKey,
-      accessKeyId: mockBedrockConfig.accessKeyId,
-      accessKeySecret: mockBedrockConfig.secretAccessKey,
       awsSessionToken: undefined,
       region: mockBedrockConfig.region,
       sessionToken: undefined,
@@ -104,8 +103,8 @@ describe('getProviderAuthPayload', () => {
     const payload = getProviderAuthPayload(ModelProvider.Azure, mockAzureConfig);
     expect(payload).toEqual({
       apiKey: mockAzureConfig.apiKey,
-      azureApiVersion: mockAzureConfig.apiVersion,
       apiVersion: mockAzureConfig.apiVersion,
+      azureApiVersion: mockAzureConfig.apiVersion,
       baseURL: mockAzureConfig.endpoint,
     });
   });
@@ -124,9 +123,9 @@ describe('getProviderAuthPayload', () => {
     // 假设的 OpenAI 配置
     const mockOpenAIConfig = {
       apiKey: 'openai-api-key',
+      azureApiVersion: 'openai-azure-api-version',
       baseURL: 'openai-endpoint',
       useAzure: true,
-      azureApiVersion: 'openai-azure-api-version',
     };
 
     const payload = getProviderAuthPayload(ModelProvider.OpenAI, mockOpenAIConfig);

@@ -10,13 +10,13 @@ const createChatModel = (
   providerId: string,
   overrides: Partial<EnabledAiModel> = {},
 ): EnabledAiModel => ({
-  id,
-  providerId,
-  type: 'chat',
-  abilities: { functionCall: true, files: true } satisfies ModelAbilities,
+  abilities: { files: true, functionCall: true } satisfies ModelAbilities,
   contextWindowTokens: 8192,
   displayName: `${id} model`,
   enabled: true,
+  id,
+  providerId,
+  type: 'chat',
   ...overrides,
 });
 
@@ -25,30 +25,30 @@ const createImageModel = (
   providerId: string,
   overrides: Partial<EnabledAiModel> = {},
 ): EnabledAiModel => ({
-  id,
-  providerId,
-  type: 'image',
   abilities: {} satisfies ModelAbilities,
   displayName: `${id} model`,
   enabled: true,
+  id,
+  providerId,
+  type: 'image',
   ...overrides,
 });
 
 // Core test data
 const mockChatModels = [
   createChatModel('gpt-4', 'openai', {
+    abilities: { files: true, functionCall: true } satisfies ModelAbilities,
     displayName: 'GPT-4',
-    abilities: { functionCall: true, files: true } satisfies ModelAbilities,
   }),
   createChatModel('gpt-3.5-turbo', 'openai', {
-    displayName: 'GPT-3.5 Turbo',
     abilities: { functionCall: true } satisfies ModelAbilities,
     contextWindowTokens: 4096,
+    displayName: 'GPT-3.5 Turbo',
   }),
   createChatModel('claude-3-opus', 'anthropic', {
+    abilities: { files: true, functionCall: false } satisfies ModelAbilities,
+    contextWindowTokens: 200_000,
     displayName: 'Claude 3 Opus',
-    abilities: { functionCall: false, files: true } satisfies ModelAbilities,
-    contextWindowTokens: 200000,
   }),
 ];
 
@@ -80,7 +80,7 @@ describe('getModelListByType', () => {
       const result = await getModelListByType(allModels, 'openai', 'chat');
 
       expect(result[0]).toEqual({
-        abilities: { functionCall: true, files: true },
+        abilities: { files: true, functionCall: true },
         contextWindowTokens: 8192,
         displayName: 'GPT-4',
         id: 'gpt-4',
@@ -113,12 +113,12 @@ describe('getModelListByType', () => {
     it('should remove duplicate model IDs', async () => {
       const duplicateModels = [
         createChatModel('gpt-4', 'openai', {
-          displayName: 'GPT-4 Version 1',
           abilities: { functionCall: true } satisfies ModelAbilities,
+          displayName: 'GPT-4 Version 1',
         }),
         createChatModel('gpt-4', 'openai', {
-          displayName: 'GPT-4 Version 2',
           abilities: { functionCall: false } satisfies ModelAbilities,
+          displayName: 'GPT-4 Version 2',
         }),
       ];
 
@@ -143,9 +143,9 @@ describe('getModelListByType', () => {
 
     it('should handle missing optional properties', async () => {
       const modelWithMissingProps = createChatModel('test-model', 'test', {
-        displayName: undefined,
         abilities: undefined,
         contextWindowTokens: undefined,
+        displayName: undefined,
       });
 
       const result = await getModelListByType([modelWithMissingProps], 'test', 'chat');
@@ -157,26 +157,26 @@ describe('getModelListByType', () => {
 
     it('should preserve complex model properties', async () => {
       const complexModel = createChatModel('complex-model', 'test', {
-        displayName: 'Complex Model with All Properties',
         abilities: {
-          functionCall: true,
           files: true,
+          functionCall: true,
           vision: false,
         } satisfies ModelAbilities,
-        contextWindowTokens: 128000,
+        contextWindowTokens: 128_000,
+        displayName: 'Complex Model with All Properties',
       });
 
       const result = await getModelListByType([complexModel], 'test', 'chat');
 
       expect(result[0]).toEqual({
-        id: 'complex-model',
-        displayName: 'Complex Model with All Properties',
         abilities: {
-          functionCall: true,
           files: true,
+          functionCall: true,
           vision: false,
         },
-        contextWindowTokens: 128000,
+        contextWindowTokens: 128_000,
+        displayName: 'Complex Model with All Properties',
+        id: 'complex-model',
       });
     });
   });
@@ -205,18 +205,18 @@ describe('getModelListByType', () => {
       ];
 
       vi.spyOn(runtimeModule, 'getModelPropertyWithFallback').mockResolvedValue({
+        height: { default: 512, max: 2048, min: 256 },
         prompt: { default: '' },
-        width: { default: 512, min: 256, max: 2048 },
-        height: { default: 512, min: 256, max: 2048 },
+        width: { default: 512, max: 2048, min: 256 },
       });
 
       const result = await getModelListByType(imageModelsWithoutParams, 'stability', 'image');
 
       expect(result).toHaveLength(1);
       expect(result[0].parameters).toEqual({
+        height: { default: 512, max: 2048, min: 256 },
         prompt: { default: '' },
-        width: { default: 512, min: 256, max: 2048 },
-        height: { default: 512, min: 256, max: 2048 },
+        width: { default: 512, max: 2048, min: 256 },
       });
 
       expect(runtimeModule.getModelPropertyWithFallback).toHaveBeenCalledWith(
@@ -244,9 +244,9 @@ describe('getModelListByType', () => {
     it('should handle large-scale concurrent model processing', async () => {
       const manyModels = Array.from({ length: 10 }, (_, i) =>
         createChatModel(`model-${i}`, 'test-provider', {
-          displayName: `Model ${i}`,
           abilities: { functionCall: i % 2 === 0 } satisfies ModelAbilities,
           contextWindowTokens: 4096 + i * 1000,
+          displayName: `Model ${i}`,
         }),
       );
 

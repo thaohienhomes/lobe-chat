@@ -123,14 +123,14 @@ describe('formatPoints', () => {
   // formatPoints uses toFixed(0) for K, so 1500 -> "2K" (rounded)
   it('should format points with K suffix for thousands', () => {
     expect(formatPoints(2000)).toBe('2K');
-    expect(formatPoints(50000)).toBe('50K');
-    expect(formatPoints(150000)).toBe('150K');
+    expect(formatPoints(50_000)).toBe('50K');
+    expect(formatPoints(150_000)).toBe('150K');
   });
 
   // formatPoints uses toFixed(1) for M
   it('should format points with M suffix for millions', () => {
-    expect(formatPoints(2000000)).toBe('2.0M');
-    expect(formatPoints(1500000)).toBe('1.5M');
+    expect(formatPoints(2_000_000)).toBe('2.0M');
+    expect(formatPoints(1_500_000)).toBe('1.5M');
   });
 
   it('should not use suffix for small numbers', () => {

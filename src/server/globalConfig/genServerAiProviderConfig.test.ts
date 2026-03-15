@@ -13,9 +13,9 @@ vi.mock('model-bank', async (importOriginal) => {
 
 vi.mock('@/envs/llm', () => ({
   getLLMConfig: vi.fn(() => ({
-    ENABLED_OPENAI: true,
-    ENABLED_ANTHROPIC: false,
     ENABLED_AI21: false,
+    ENABLED_ANTHROPIC: false,
+    ENABLED_OPENAI: true,
   })),
 }));
 
@@ -61,11 +61,11 @@ describe('genServerAiProvidersConfig', () => {
 
   it('should use custom enabled settings from specificConfig', async () => {
     const specificConfig = {
-      openai: {
-        enabled: false,
-      },
       anthropic: {
         enabled: true,
+      },
+      openai: {
+        enabled: false,
       },
     };
 
@@ -85,9 +85,9 @@ describe('genServerAiProvidersConfig', () => {
     // Mock the LLM config to include our custom key
     const { getLLMConfig } = vi.mocked(await import('@/envs/llm'));
     getLLMConfig.mockReturnValue({
-      ENABLED_OPENAI: true,
-      ENABLED_ANTHROPIC: false,
       CUSTOM_OPENAI_ENABLED: true,
+      ENABLED_ANTHROPIC: false,
+      ENABLED_OPENAI: true,
     } as any);
 
     const result = await genServerAiProvidersConfig(specificConfig);

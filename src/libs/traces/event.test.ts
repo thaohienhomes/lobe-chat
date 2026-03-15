@@ -76,9 +76,9 @@ describe('TraceEventClient', () => {
       (client as any).scoreObservation = scoreObservationSpy;
 
       const params = {
-        traceId: 'trace123',
-        observationId: 'obs456',
         content: 'test content',
+        observationId: 'obs456',
+        traceId: 'trace123',
       };
 
       await client.copyMessage(params as any);

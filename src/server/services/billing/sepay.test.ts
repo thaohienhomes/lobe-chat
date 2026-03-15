@@ -23,14 +23,14 @@ describe('Billing Service - Sepay', () => {
     const { getServerDB } = await import('@/database/server');
 
     mockDb = {
-      insert: vi.fn().mockReturnThis(),
-      values: vi.fn().mockResolvedValue(undefined),
-      update: vi.fn().mockReturnThis(),
-      set: vi.fn().mockReturnThis(),
-      where: vi.fn().mockResolvedValue(undefined),
-      select: vi.fn().mockReturnThis(),
       from: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
       limit: vi.fn().mockResolvedValue([]),
+      select: vi.fn().mockReturnThis(),
+      set: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      values: vi.fn().mockResolvedValue(undefined),
+      where: vi.fn().mockResolvedValue(undefined),
     };
     vi.mocked(getServerDB).mockResolvedValue(mockDb);
   });
@@ -38,12 +38,12 @@ describe('Billing Service - Sepay', () => {
   describe('createPaymentRecord', () => {
     it('should create a payment record successfully', async () => {
       const params = {
-        orderId: 'PHO_QR_123456',
-        userId: 'user_123',
-        planId: 'premium',
+        amountVnd: 100_000,
         billingCycle: 'monthly' as const,
-        amountVnd: 100000,
         currency: 'VND',
+        orderId: 'PHO_QR_123456',
+        planId: 'premium',
+        userId: 'user_123',
       };
 
       await createPaymentRecord(params);
@@ -52,8 +52,8 @@ describe('Billing Service - Sepay', () => {
       expect(mockDb.values).toHaveBeenCalledWith(
         expect.objectContaining({
           orderId: params.orderId,
-          userId: params.userId,
           planId: params.planId,
+          userId: params.userId,
         }),
       );
     });
@@ -62,12 +62,12 @@ describe('Billing Service - Sepay', () => {
       mockDb.values.mockRejectedValue(new Error('Database error'));
 
       const params = {
-        orderId: 'PHO_QR_123456',
-        userId: 'user_123',
-        planId: 'premium',
+        amountVnd: 100_000,
         billingCycle: 'monthly' as const,
-        amountVnd: 100000,
         currency: 'VND',
+        orderId: 'PHO_QR_123456',
+        planId: 'premium',
+        userId: 'user_123',
       };
 
       await expect(createPaymentRecord(params)).rejects.toThrow('Failed to create payment record');
@@ -114,9 +114,9 @@ describe('Billing Service - Sepay', () => {
       mockDb.limit.mockResolvedValue([]);
 
       await activateUserSubscription({
-        userId: 'user_123',
-        planId: 'premium',
         billingCycle: 'monthly',
+        planId: 'premium',
+        userId: 'user_123',
       });
 
       expect(mockDb.insert).toHaveBeenCalled();
@@ -126,9 +126,9 @@ describe('Billing Service - Sepay', () => {
       mockDb.limit.mockResolvedValue([{ id: 'sub_123' }]);
 
       await activateUserSubscription({
-        userId: 'user_123',
-        planId: 'premium',
         billingCycle: 'monthly',
+        planId: 'premium',
+        userId: 'user_123',
       });
 
       expect(mockDb.update).toHaveBeenCalled();
@@ -138,9 +138,9 @@ describe('Billing Service - Sepay', () => {
       mockDb.limit.mockResolvedValue([]);
 
       await activateUserSubscription({
-        userId: 'user_123',
-        planId: 'premium',
         billingCycle: 'monthly',
+        planId: 'premium',
+        userId: 'user_123',
       });
 
       const callArgs = mockDb.values.mock.calls[0][0];
@@ -157,9 +157,9 @@ describe('Billing Service - Sepay', () => {
       mockDb.limit.mockResolvedValue([]);
 
       await activateUserSubscription({
-        userId: 'user_123',
-        planId: 'premium',
         billingCycle: 'yearly',
+        planId: 'premium',
+        userId: 'user_123',
       });
 
       const callArgs = mockDb.values.mock.calls[0][0];
@@ -177,9 +177,9 @@ describe('Billing Service - Sepay', () => {
 
       await expect(
         activateUserSubscription({
-          userId: 'user_123',
-          planId: 'premium',
           billingCycle: 'monthly',
+          planId: 'premium',
+          userId: 'user_123',
         }),
       ).rejects.toThrow('Failed to activate subscription');
     });
@@ -190,8 +190,8 @@ describe('Billing Service - Sepay', () => {
       const mockPayment = {
         id: 'payment_123',
         orderId: 'PHO_QR_123456',
-        userId: 'user_123',
         status: 'success',
+        userId: 'user_123',
       };
       mockDb.limit.mockResolvedValue([mockPayment]);
 

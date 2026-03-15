@@ -35,7 +35,7 @@ describe('Customizations Configuration', () => {
 
     it('should have primary color', () => {
       expect(BRANDING_CONFIG.primaryColor).toBeDefined();
-      expect(BRANDING_CONFIG.primaryColor).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(BRANDING_CONFIG.primaryColor).toMatch(/^#[\da-f]{6}$/i);
     });
 
     it('should have social links object', () => {
@@ -199,10 +199,10 @@ describe('Customizations Configuration', () => {
 
     it('should have valid configuration structure', () => {
       const config = {
-        branding: BRANDING_CONFIG,
         auth: AUTH_CONFIG,
-        payment: PAYMENT_CONFIG,
+        branding: BRANDING_CONFIG,
         flags: FEATURE_FLAGS,
+        payment: PAYMENT_CONFIG,
       };
 
       expect(config).toBeDefined();

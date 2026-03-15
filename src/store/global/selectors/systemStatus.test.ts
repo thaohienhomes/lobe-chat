@@ -38,20 +38,20 @@ describe('systemStatusSelectors', () => {
   describe('basic selectors', () => {
     const s: GlobalState = merge(initialState, {
       status: {
-        showSystemRole: true,
-        mobileShowTopic: true,
-        mobileShowPortal: true,
-        showChatSideBar: true,
-        showSessionPanel: true,
-        showFilePanel: true,
         hidePWAInstaller: true,
-        isShowCredit: true,
-        zenMode: false,
-        sessionsWidth: 300,
-        portalWidth: 500,
         filePanelWidth: 400,
+        isShowCredit: true,
         inputHeight: 150,
+        mobileShowPortal: true,
+        mobileShowTopic: true,
+        portalWidth: 500,
+        sessionsWidth: 300,
+        showChatSideBar: true,
+        showFilePanel: true,
+        showSystemRole: true,
+        showSessionPanel: true,
         threadInputHeight: 100,
+        zenMode: false,
       },
     });
 
@@ -140,12 +140,12 @@ describe('systemStatusSelectors', () => {
       it('should return true when pglite is enabled but not ready', () => {
         const s: GlobalState = {
           ...initialState,
+          initClientDBStage: DatabaseLoadingState.Initializing,
           isStatusInit: true,
           status: {
             ...initialState.status,
             isEnablePglite: true,
           },
-          initClientDBStage: DatabaseLoadingState.Initializing,
         };
         expect(systemStatusSelectors.isPgliteNotInited(s)).toBe(true);
       });
@@ -153,12 +153,12 @@ describe('systemStatusSelectors', () => {
       it('should return false when pglite is ready', () => {
         const s: GlobalState = {
           ...initialState,
+          initClientDBStage: DatabaseLoadingState.Ready,
           isStatusInit: true,
           status: {
             ...initialState.status,
             isEnablePglite: true,
           },
-          initClientDBStage: DatabaseLoadingState.Ready,
         };
         expect(systemStatusSelectors.isPgliteNotInited(s)).toBe(false);
       });
@@ -166,12 +166,12 @@ describe('systemStatusSelectors', () => {
       it('should return false when pglite is not enabled', () => {
         const s: GlobalState = {
           ...initialState,
+          initClientDBStage: DatabaseLoadingState.Initializing,
           isStatusInit: true,
           status: {
             ...initialState.status,
             isEnablePglite: false,
           },
-          initClientDBStage: DatabaseLoadingState.Initializing,
         };
         expect(systemStatusSelectors.isPgliteNotInited(s)).toBe(false);
       });
@@ -181,12 +181,12 @@ describe('systemStatusSelectors', () => {
       it('should return true when pglite is enabled and ready', () => {
         const s: GlobalState = {
           ...initialState,
+          initClientDBStage: DatabaseLoadingState.Ready,
           isStatusInit: true,
           status: {
             ...initialState.status,
             isEnablePglite: true,
           },
-          initClientDBStage: DatabaseLoadingState.Ready,
         };
         expect(systemStatusSelectors.isPgliteInited(s)).toBe(true);
       });
@@ -194,12 +194,12 @@ describe('systemStatusSelectors', () => {
       it('should return false when not ready', () => {
         const s: GlobalState = {
           ...initialState,
+          initClientDBStage: DatabaseLoadingState.Initializing,
           isStatusInit: true,
           status: {
             ...initialState.status,
             isEnablePglite: true,
           },
-          initClientDBStage: DatabaseLoadingState.Initializing,
         };
         expect(systemStatusSelectors.isPgliteInited(s)).toBe(false);
       });

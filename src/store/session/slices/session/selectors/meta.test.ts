@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_AVATAR } from '@/const/meta';
-import { DEFAULT_AGENT_CONFIG, DEFAUTT_AGENT_TTS_CONFIG } from '@/const/settings';
+import { DEFAULT_AGENT_CONFIG } from '@/const/settings';
 import { SessionStore } from '@/store/session';
 import { MetaData } from '@/types/meta';
 import { LobeAgentSession, LobeSessionType } from '@/types/session';
@@ -16,21 +16,21 @@ const mockSessionStore = {
   activeId: '1',
   sessions: [
     {
-      id: '1',
       config: DEFAULT_AGENT_CONFIG,
+      id: '1',
       meta: {
-        title: 'title1',
         description: 'description1',
+        title: 'title1',
       },
       type: LobeSessionType.Agent,
     } as LobeAgentSession,
     {
+      config: DEFAULT_AGENT_CONFIG,
       id: '2',
       meta: {
-        title: 'title2',
         description: 'description2',
+        title: 'title2',
       },
-      config: DEFAULT_AGENT_CONFIG,
       type: LobeSessionType.Agent,
     } as LobeAgentSession,
   ],

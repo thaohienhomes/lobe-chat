@@ -10,10 +10,10 @@ afterEach(() => {
 
 vi.mock('@/components/AntdStaticMethods', () => ({
   message: {
+    destroy: vi.fn(),
+    error: vi.fn(),
     loading: vi.fn(),
     success: vi.fn(),
-    error: vi.fn(),
-    destroy: vi.fn(),
   },
 }));
 

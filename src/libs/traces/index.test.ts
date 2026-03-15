@@ -30,9 +30,9 @@ describe('TraceClient', () => {
 
     vi.spyOn(server, 'getLangfuseConfig').mockReturnValue({
       ENABLE_LANGFUSE: true,
+      LANGFUSE_HOST: 'host',
       LANGFUSE_PUBLIC_KEY: 'public-key',
       LANGFUSE_SECRET_KEY: 'secret-key',
-      LANGFUSE_HOST: 'host',
     } as any);
 
     const client = new TraceClient();
@@ -48,9 +48,9 @@ describe('TraceClient', () => {
     vi.spyOn(Langfuse.prototype, 'shutdownAsync').mockImplementation(mockShutdownAsync);
     vi.spyOn(server, 'getLangfuseConfig').mockReturnValue({
       ENABLE_LANGFUSE: true,
+      LANGFUSE_HOST: 'host',
       LANGFUSE_PUBLIC_KEY: 'public-key',
       LANGFUSE_SECRET_KEY: 'secret-key',
-      LANGFUSE_HOST: 'host',
     } as any);
 
     const client = new TraceClient();

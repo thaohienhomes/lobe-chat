@@ -21,25 +21,25 @@ describe('aiProviderRouter', () => {
   const mockDecrypt = vi.fn();
 
   const mockGateKeeper = {
-    encrypt: mockEncrypt,
     decrypt: mockDecrypt,
+    encrypt: mockEncrypt,
   };
 
   const mockProviderDetail: AiProviderDetailItem = {
+    description: 'Test Description',
+    enabled: true,
     id: mockProviderId,
     name: 'Test Provider',
-    enabled: true,
-    description: 'Test Description',
-    source: 'custom',
     settings: {},
+    source: 'custom',
   };
 
   const mockRuntimeState: AiProviderRuntimeState = {
     enabledAiModels: [],
     enabledAiProviders: [],
     enabledChatAiProviders: [],
-    runtimeConfig: {},
     enabledImageAiProviders: [],
+    runtimeConfig: {},
   };
 
   beforeEach(() => {
@@ -141,8 +141,8 @@ describe('aiProviderRouter', () => {
 
       const caller = aiProviderRouter.createCaller(createMockContext());
       await caller.toggleProviderEnabled({
-        id: mockProviderId,
         enabled: true,
+        id: mockProviderId,
       });
 
       expect(mockToggle).toHaveBeenCalledWith(mockProviderId, true);

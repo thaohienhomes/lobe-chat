@@ -26,36 +26,36 @@ process.env.MARKET_BASE_URL = 'http://localhost:8787/api';
 vi.mock('model-bank', () => ({
   LOBE_DEFAULT_MODEL_LIST: [
     {
-      id: 'gpt-4',
-      displayName: 'GPT-4',
-      description: 'OpenAI GPT-4 model',
-      providerId: 'openai',
-      contextWindowTokens: 8192,
       abilities: {
-        vision: true,
-        functionCall: true,
         files: true,
+        functionCall: true,
+        vision: true,
       },
+      contextWindowTokens: 8192,
+      description: 'OpenAI GPT-4 model',
+      displayName: 'GPT-4',
+      id: 'gpt-4',
       pricing: {
         input: 0.03,
         output: 0.06,
       },
+      providerId: 'openai',
       releasedAt: '2023-03-01T00:00:00Z',
     },
     {
-      id: 'claude-3-opus',
-      displayName: 'Claude 3 Opus',
-      description: 'Anthropic Claude 3 Opus model',
-      providerId: 'anthropic',
-      contextWindowTokens: 200000,
       abilities: {
-        vision: true,
         reasoning: true,
+        vision: true,
       },
+      contextWindowTokens: 200_000,
+      description: 'Anthropic Claude 3 Opus model',
+      displayName: 'Claude 3 Opus',
+      id: 'claude-3-opus',
       pricing: {
         input: 0.015,
         output: 0.075,
       },
+      providerId: 'anthropic',
       releasedAt: '2024-02-01T00:00:00Z',
     },
   ],
@@ -64,14 +64,14 @@ vi.mock('model-bank', () => ({
 vi.mock('@/config/modelProviders', () => ({
   DEFAULT_MODEL_PROVIDER_LIST: [
     {
+      description: 'OpenAI provider',
       id: 'openai',
       name: 'OpenAI',
-      description: 'OpenAI provider',
     },
     {
+      description: 'Anthropic provider',
       id: 'anthropic',
       name: 'Anthropic',
-      description: 'Anthropic provider',
     },
   ],
 }));
@@ -85,63 +85,69 @@ vi.mock('@/const/discover', () => ({
 // Mock data - moved after mocks to avoid hoisting issues
 const mockAssistantList = [
   {
-    identifier: 'assistant-1',
-    title: 'Test Assistant 1',
-    description: 'A test assistant',
     author: 'Test Author',
     category: 'productivity',
     createdAt: '2024-01-01T00:00:00Z',
+    description: 'A test assistant',
+    identifier: 'assistant-1',
     knowledgeCount: 5,
     pluginCount: 2,
-    tokenUsage: 1000,
     tags: ['test', 'assistant'],
+    title: 'Test Assistant 1',
+    tokenUsage: 1000,
   },
   {
-    identifier: 'assistant-2',
-    title: 'Test Assistant 2',
-    description: 'Another test assistant',
     author: 'Test Author 2',
-    category: 'productivity', // Changed to same category for related items test
-    createdAt: '2024-01-02T00:00:00Z',
+    category: 'productivity',
+    // Changed to same category for related items test
+createdAt: '2024-01-02T00:00:00Z',
+    
+description: 'Another test assistant',
+    
+identifier: 'assistant-2', 
     knowledgeCount: 3,
     pluginCount: 1,
-    tokenUsage: 500,
     tags: ['test', 'creative'],
+    title: 'Test Assistant 2',
+    tokenUsage: 500,
   },
   {
-    identifier: 'assistant-3',
-    title: 'Test Assistant 3',
-    description: 'A creative assistant',
     author: 'Test Author 3',
-    category: 'creativity', // Keep this for category filtering tests
-    createdAt: '2024-01-03T00:00:00Z',
+    category: 'creativity',
+    // Keep this for category filtering tests
+createdAt: '2024-01-03T00:00:00Z',
+    
+description: 'A creative assistant',
+    
+identifier: 'assistant-3', 
     knowledgeCount: 2,
     pluginCount: 0,
-    tokenUsage: 300,
     tags: ['test', 'creative'],
+    title: 'Test Assistant 3',
+    tokenUsage: 300,
   },
 ];
 
 const mockPluginList = [
   {
-    identifier: 'plugin-1',
-    title: 'Test Plugin 1',
-    description: 'A test plugin',
     author: 'Plugin Author',
     category: 'tools',
     createdAt: '2024-01-01T00:00:00Z',
-    tags: ['test', 'plugin'],
+    description: 'A test plugin',
+    identifier: 'plugin-1',
     manifest: 'https://example.com/plugin1/manifest.json',
+    tags: ['test', 'plugin'],
+    title: 'Test Plugin 1',
   },
   {
-    identifier: 'plugin-2',
-    title: 'Test Plugin 2',
-    description: 'Another test plugin',
     author: 'Plugin Author 2',
     category: 'utilities',
     createdAt: '2024-01-02T00:00:00Z',
-    tags: ['test', 'utility'],
+    description: 'Another test plugin',
+    identifier: 'plugin-2',
     manifest: 'https://example.com/plugin2/manifest.json',
+    tags: ['test', 'utility'],
+    title: 'Test Plugin 2',
   },
 ];
 
@@ -156,13 +162,13 @@ describe('DiscoverService', () => {
 
     // Setup AssistantStore mock
     mockAssistantStore = {
-      getAgentIndex: vi
-        .fn()
-        .mockResolvedValue(mockAssistantList.map((item) => ({ ...item, meta: {} }))),
       getAgent: vi.fn().mockImplementation((identifier) => {
         const agent = mockAssistantList.find((a) => a.identifier === identifier);
         return Promise.resolve(agent ? { ...agent, meta: {} } : null);
       }),
+      getAgentIndex: vi
+        .fn()
+        .mockResolvedValue(mockAssistantList.map((item) => ({ ...item, meta: {} }))),
     };
 
     // Setup PluginStore mock
@@ -184,18 +190,18 @@ describe('DiscoverService', () => {
           return Promise.resolve(plugin || null);
         }),
         getPluginList: vi.fn().mockResolvedValue({
-          items: mockPluginList,
-          totalCount: mockPluginList.length,
           currentPage: 1,
+          items: mockPluginList,
           pageSize: 20,
+          totalCount: mockPluginList.length,
           totalPages: 1,
         }),
+        getPluginManifest: vi.fn().mockResolvedValue({}),
         getPublishedIdentifiers: vi
           .fn()
           .mockResolvedValue(
             mockPluginList.map((p) => ({ identifier: p.identifier, lastModified: p.createdAt })),
           ),
-        getPluginManifest: vi.fn().mockResolvedValue({}),
       },
     };
 
@@ -213,9 +219,6 @@ describe('DiscoverService', () => {
 
         expect(result).toEqual({
           currentPage: 1,
-          pageSize: 20,
-          totalCount: 3,
-          totalPages: 1,
           items: expect.arrayContaining([
             expect.objectContaining({
               identifier: 'assistant-1',
@@ -230,6 +233,9 @@ describe('DiscoverService', () => {
               title: 'Test Assistant 3',
             }),
           ]),
+          pageSize: 20,
+          totalCount: 3,
+          totalPages: 1,
         });
       });
 
@@ -251,8 +257,8 @@ describe('DiscoverService', () => {
 
       it('should sort by creation date descending', async () => {
         const result = await service.getAssistantList({
-          sort: AssistantSorts.CreatedAt,
           order: 'desc',
+          sort: AssistantSorts.CreatedAt,
         });
 
         expect(result.items[0].identifier).toBe('assistant-3');
@@ -262,8 +268,8 @@ describe('DiscoverService', () => {
 
       it('should sort by title ascending', async () => {
         const result = await service.getAssistantList({
-          sort: AssistantSorts.Title,
           order: 'asc',
+          sort: AssistantSorts.Title,
         });
 
         // Note: The service has reversed logic for title sorting
@@ -290,8 +296,8 @@ describe('DiscoverService', () => {
         expect(result).toEqual(
           expect.objectContaining({
             identifier: 'assistant-1',
-            title: 'Test Assistant 1',
             related: expect.any(Array),
+            title: 'Test Assistant 1',
           }),
         );
         expect(result?.related).toHaveLength(1);
@@ -355,9 +361,6 @@ describe('DiscoverService', () => {
 
         expect(result).toEqual({
           currentPage: 1,
-          pageSize: 20,
-          totalCount: 2,
-          totalPages: 1,
           items: expect.arrayContaining([
             expect.objectContaining({
               identifier: 'plugin-1',
@@ -368,6 +371,9 @@ describe('DiscoverService', () => {
               title: 'Test Plugin 2',
             }),
           ]),
+          pageSize: 20,
+          totalCount: 2,
+          totalPages: 1,
         });
       });
 
@@ -380,8 +386,8 @@ describe('DiscoverService', () => {
 
       it('should sort by identifier', async () => {
         const result = await service.getPluginList({
-          sort: PluginSorts.Identifier,
           order: 'asc',
+          sort: PluginSorts.Identifier,
         });
 
         // Note: The service has reversed logic for identifier sorting
@@ -399,8 +405,8 @@ describe('DiscoverService', () => {
         expect(result).toEqual(
           expect.objectContaining({
             identifier: 'plugin-1',
-            title: 'Test Plugin 1',
             related: expect.any(Array),
+            title: 'Test Plugin 1',
           }),
         );
       });
@@ -431,7 +437,7 @@ describe('DiscoverService', () => {
 
     describe('getMcpDetail', () => {
       it('should return MCP detail with related items', async () => {
-        const mockMcp = { identifier: 'mcp-1', category: 'tools' };
+        const mockMcp = { category: 'tools', identifier: 'mcp-1' };
         mockMarket.plugins.getPluginDetail.mockResolvedValue(mockMcp);
 
         const result = await service.getMcpDetail({
@@ -457,13 +463,13 @@ describe('DiscoverService', () => {
           expect.arrayContaining([
             expect.objectContaining({
               identifier: 'openai',
-              name: 'OpenAI',
               modelCount: expect.any(Number),
+              name: 'OpenAI',
             }),
             expect.objectContaining({
               identifier: 'anthropic',
-              name: 'Anthropic',
               modelCount: expect.any(Number),
+              name: 'Anthropic',
             }),
           ]),
         );
@@ -478,8 +484,8 @@ describe('DiscoverService', () => {
 
       it('should sort by model count', async () => {
         const result = await service.getProviderList({
-          sort: ProviderSorts.ModelCount,
           order: 'desc',
+          sort: ProviderSorts.ModelCount,
         });
 
         expect(result.items).toHaveLength(2);
@@ -495,8 +501,8 @@ describe('DiscoverService', () => {
         expect(result).toEqual(
           expect.objectContaining({
             identifier: 'openai',
-            name: 'OpenAI',
             models: expect.any(Array),
+            name: 'OpenAI',
             related: expect.any(Array),
           }),
         );
@@ -512,8 +518,8 @@ describe('DiscoverService', () => {
         expect(result.items).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              identifier: expect.any(String),
               displayName: expect.any(String),
+              identifier: expect.any(String),
               providers: expect.any(Array),
             }),
           ]),
@@ -528,8 +534,8 @@ describe('DiscoverService', () => {
 
       it('should sort by context window tokens', async () => {
         const result = await service.getModelList({
-          sort: ModelSorts.ContextWindowTokens,
           order: 'desc',
+          sort: ModelSorts.ContextWindowTokens,
         });
 
         expect(result.items).toHaveLength(2);
@@ -550,8 +556,8 @@ describe('DiscoverService', () => {
 
         expect(result).toEqual(
           expect.objectContaining({
-            identifier: 'gpt-4',
             displayName: 'GPT-4',
+            identifier: 'gpt-4',
             providers: expect.any(Array),
             related: expect.any(Array),
           }),
@@ -579,9 +585,9 @@ describe('DiscoverService', () => {
     describe('calculateAbilitiesScore', () => {
       it('should calculate abilities score correctly', () => {
         const abilities = {
-          vision: true,
-          functionCall: true,
           files: false,
+          functionCall: true,
+          vision: true,
         };
 
         // Access private method for testing
@@ -599,25 +605,25 @@ describe('DiscoverService', () => {
       it('should select model with best abilities', () => {
         const models = [
           {
-            identifier: 'model-1',
             abilities: { vision: true },
             contextWindowTokens: 4000,
+            identifier: 'model-1',
           },
           {
-            identifier: 'model-1',
-            abilities: { vision: true, functionCall: true },
+            abilities: { functionCall: true, vision: true },
             contextWindowTokens: 8000,
+            identifier: 'model-1',
           },
         ];
 
         const result = (service as any).selectModelWithBestAbilities(models);
 
-        expect(result.abilities).toEqual({ vision: true, functionCall: true });
+        expect(result.abilities).toEqual({ functionCall: true, vision: true });
         expect(result.contextWindowTokens).toBe(8000);
       });
 
       it('should return single model if only one provided', () => {
-        const models = [{ identifier: 'model-1', abilities: {} }];
+        const models = [{ abilities: {}, identifier: 'model-1' }];
 
         const result = (service as any).selectModelWithBestAbilities(models);
 

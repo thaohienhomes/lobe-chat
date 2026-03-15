@@ -53,7 +53,7 @@ const makeCodeResult = (conceptId: string, track: 'artifact' | 'manim' = 'artifa
   code: `export default function Viz_${conceptId}() { return <div>Viz</div>; }`,
   conceptId,
   dependencies: ['react'],
-  estimatedRenderTime: 1.0,
+  estimatedRenderTime: 1,
   language: 'jsx',
   narrationScript: `Narration for ${conceptId}`,
   track,

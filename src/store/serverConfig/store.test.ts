@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_FEATURE_FLAGS } from '@/config/featureFlags';
 
@@ -23,22 +23,22 @@ describe('createServerConfigStore', () => {
 
     expect(store.getState()).toMatchObject({
       featureFlags: DEFAULT_FEATURE_FLAGS,
-      serverConfig: { telemetry: {}, aiProvider: {} },
+      serverConfig: { aiProvider: {}, telemetry: {} },
     });
   });
 
   it('should initialize store with custom initial state', () => {
     const initialState: Partial<ServerConfigStore> = {
       featureFlags: { edit_agent: false },
-      serverConfig: { telemetry: { langfuse: true }, aiProvider: {} },
+      serverConfig: { aiProvider: {}, telemetry: { langfuse: true } },
     };
 
     const store = initServerConfigStore(initialState);
 
     expect(store.getState().featureFlags.edit_agent).toBeFalsy();
     expect(store.getState().serverConfig).toEqual({
-      telemetry: { langfuse: true },
       aiProvider: {},
+      telemetry: { langfuse: true },
     });
   });
 

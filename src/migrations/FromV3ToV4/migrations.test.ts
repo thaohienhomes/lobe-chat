@@ -90,10 +90,10 @@ describe('MigrationV3ToV4', () => {
   describe('Edge Case', () => {
     it('should handle undefined settings or languageModel', () => {
       const data: MigrationData = {
-        version: 3,
         state: {
           // settings undefined
         },
+        version: 3,
       };
 
       const migratedData = versionController.migrate(data);
@@ -104,12 +104,12 @@ describe('MigrationV3ToV4', () => {
 
     it('should handle undefined languageModel', () => {
       const data: MigrationData = {
-        version: 3,
         state: {
           settings: {
             // languageModel undefined
           },
         },
+        version: 3,
       };
 
       const migratedData = versionController.migrate(data);
@@ -120,7 +120,6 @@ describe('MigrationV3ToV4', () => {
 
     it('should handle missing provider configurations', () => {
       const data: MigrationData = {
-        version: 3,
         state: {
           settings: {
             languageModel: {
@@ -131,6 +130,7 @@ describe('MigrationV3ToV4', () => {
             },
           },
         },
+        version: 3,
       };
 
       const migratedData = versionController.migrate(data);
@@ -143,7 +143,6 @@ describe('MigrationV3ToV4', () => {
 
     it('should success for invalid data format', () => {
       const data: MigrationData = {
-        version: 3,
         state: {
           settings: {
             languageModel: {
@@ -151,6 +150,7 @@ describe('MigrationV3ToV4', () => {
             },
           },
         },
+        version: 3,
       };
 
       const migratedData = versionController.migrate(data);
@@ -164,19 +164,19 @@ describe('MigrationV3ToV4', () => {
 
     it('should handle empty strings and empty objects', () => {
       const data: MigrationData = {
-        version: 3,
         state: {
           settings: {
             languageModel: {
               openAI: undefined,
               togetherai: {
                 apiKey: '',
-                endpoint: '',
                 customModelName: '',
+                endpoint: '',
               },
             },
           },
         },
+        version: 3,
       };
 
       const migratedData = versionController.migrate(data);

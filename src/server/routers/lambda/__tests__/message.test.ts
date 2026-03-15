@@ -29,30 +29,30 @@ describe('messageRouter', () => {
 
     const input = [
       {
-        id: '1',
-        role: 'user',
-        content: 'test',
-        sessionId: 'session1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
         agentId: 'agent1',
         clientId: 'client1',
-        parentId: null,
-        quotaId: null,
-        model: null,
-        provider: null,
-        topicId: null,
+        content: 'test',
+        createdAt: new Date(),
         error: null,
+        id: '1',
         favorite: false,
+        model: null,
         observationId: null,
-        reasoning: null,
+        parentId: null,
         pluginState: null,
-        translate: null,
-        tts: null,
+        role: 'user',
+        provider: null,
+        sessionId: 'session1',
+        quotaId: null,
+        updatedAt: new Date(),
+        reasoning: null,
         search: null,
         threadId: null,
         tools: null,
+        topicId: null,
         traceId: null,
+        translate: null,
+        tts: null,
         userId: 'user1',
       } as any,
     ];
@@ -136,8 +136,8 @@ describe('messageRouter', () => {
 
     const input = { sessionId: 'session1' };
     const ctx = {
-      messageModel: new MessageModel({} as any, 'user1'),
       fileService: new FileService({} as any, 'user1'),
+      messageModel: new MessageModel({} as any, 'user1'),
       userId: 'user1',
     };
 
@@ -223,7 +223,7 @@ describe('messageRouter', () => {
 
     const input = {
       id: 'msg1',
-      value: { ragQueryId: 'q1', fileChunks: [{ id: 'c1', similarity: 0.9 }] },
+      value: { fileChunks: [{ id: 'c1', similarity: 0.9 }], ragQueryId: 'q1' },
     } as {
       id: string;
       value: UpdateMessageRAGParams;
@@ -236,8 +236,8 @@ describe('messageRouter', () => {
     await ctx.messageModel.updateMessageRAG(input.id, input.value);
 
     expect(mockUpdateRAG).toHaveBeenCalledWith('msg1', {
-      ragQueryId: 'q1',
       fileChunks: [{ id: 'c1', similarity: 0.9 }],
+      ragQueryId: 'q1',
     });
   });
 });

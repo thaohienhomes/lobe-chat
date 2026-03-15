@@ -40,8 +40,8 @@ describe('useQueryRoute', () => {
   it('should replace entire query string when replace is true', () => {
     const { result } = renderHook(() =>
       useQueryRoute().push('/example', {
-        replace: true,
         query: { baz: 'qux' },
+        replace: true,
       }),
     );
 
@@ -51,9 +51,9 @@ describe('useQueryRoute', () => {
   it('should append hash to the URL', () => {
     const { result } = renderHook(() =>
       useQueryRoute().push('/example', {
-        replace: true,
-        query: { foo: 'bar' },
         hash: 'section1',
+        query: { foo: 'bar' },
+        replace: true,
       }),
     );
 
@@ -63,8 +63,8 @@ describe('useQueryRoute', () => {
   it('should handle scenarios when on server side', () => {
     const { result } = renderHook(() =>
       useQueryRoute().push('/example', {
-        query: { foo: 'bar' },
         hash: 'section1',
+        query: { foo: 'bar' },
       }),
     );
 
@@ -74,9 +74,9 @@ describe('useQueryRoute', () => {
   it('should handle cases with empty query and hash', () => {
     const { result } = renderHook(() =>
       useQueryRoute().replace('/example', {
-        replace: true,
-        query: {},
         hash: '',
+        query: {},
+        replace: true,
       }),
     );
 

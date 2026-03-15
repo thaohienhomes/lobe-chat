@@ -9,21 +9,21 @@ describe('currentSession', () => {
     activeId: '1',
     sessions: [
       {
-        id: '1',
         config: {
           model: 'gpt-3.5-turbo',
           params: {},
           systemRole: 'system-role',
         },
+        id: '1',
         type: LobeSessionType.Agent,
       } as LobeAgentSession,
       {
-        id: '2',
         config: {
           model: 'gpt-3.5-turbo',
           params: {},
           systemRole: 'system-role',
         },
+        id: '2',
         type: LobeSessionType.Agent,
       } as LobeAgentSession,
     ],
@@ -43,21 +43,21 @@ describe('currentSessionSafe', () => {
     activeId: '1',
     sessions: [
       {
-        id: '1',
         config: {
           model: 'gpt-3.5-turbo',
           params: {},
           systemRole: 'system-role',
         },
+        id: '1',
         type: LobeSessionType.Agent,
       } as LobeAgentSession,
       {
-        id: '2',
         config: {
           model: 'gpt-3.5-turbo',
           params: {},
           systemRole: 'system-role',
         },
+        id: '2',
         type: LobeSessionType.Agent,
       } as LobeAgentSession,
     ],
@@ -79,21 +79,21 @@ describe('getSessionById', () => {
     activeId: '1',
     sessions: [
       {
-        id: '1',
         config: {
           model: 'gpt-3.5-turbo',
           params: {},
           systemRole: 'system-role',
         },
+        id: '1',
         type: LobeSessionType.Agent,
       } as LobeAgentSession,
       {
-        id: '2',
         config: {
           model: 'gpt-3.5-turbo',
           params: {},
           systemRole: 'system-role',
         },
+        id: '2',
         type: LobeSessionType.Agent,
       } as LobeAgentSession,
     ],

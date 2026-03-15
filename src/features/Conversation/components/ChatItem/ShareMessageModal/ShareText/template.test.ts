@@ -9,47 +9,47 @@ describe('generateMarkdown', () => {
   // 创建测试用的消息数据
   const mockMessages = [
     {
-      id: '1',
       content: 'Hello',
+      createdAt: Date.now(),
+      id: '1',
       role: 'user',
-      createdAt: Date.now(),
     },
     {
-      id: '2',
       content: 'Hi there',
-      role: 'assistant',
       createdAt: Date.now(),
+      id: '2',
+      role: 'assistant',
     },
     {
-      id: '3',
       content: LOADING_FLAT,
-      role: 'assistant',
       createdAt: Date.now(),
+      id: '3',
+      role: 'assistant',
     },
     {
-      id: '4',
       content: '{"result": "tool data"}',
-      role: 'tool',
       createdAt: Date.now(),
+      id: '4',
+      role: 'tool',
       tool_call_id: 'tool1',
     },
     {
-      id: '5',
       content: 'Message with tools',
-      role: 'assistant',
       createdAt: Date.now(),
+      id: '5',
+      role: 'assistant',
       tools: [{ name: 'calculator', result: '42' }],
     },
   ] as ChatMessage[];
 
   const defaultParams = {
-    messages: mockMessages,
-    title: 'Chat Title',
     includeTool: false,
     includeUser: true,
-    withSystemRole: false,
-    withRole: false,
+    messages: mockMessages,
     systemRole: '',
+    title: 'Chat Title',
+    withRole: false,
+    withSystemRole: false,
   };
 
   it('should filter out loading messages', () => {
@@ -61,10 +61,10 @@ describe('generateMarkdown', () => {
   it('should handle messages with special characters', () => {
     const messagesWithSpecialChars = [
       {
-        id: '1',
         content: '**Bold** *Italic* `Code`',
-        role: 'user',
         createdAt: Date.now(),
+        id: '1',
+        role: 'user',
       },
     ] as ChatMessage[];
 

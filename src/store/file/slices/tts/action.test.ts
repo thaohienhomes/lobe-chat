@@ -17,7 +17,6 @@ vi.mock('swr', () => ({
 //  mock the arrayBuffer
 beforeAll(() => {
   Object.defineProperty(File.prototype, 'arrayBuffer', {
-    writable: true,
     value: function () {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -27,6 +26,7 @@ beforeAll(() => {
         reader.readAsArrayBuffer(this);
       });
     },
+    writable: true,
   });
 
   createServerConfigStore();
@@ -80,12 +80,12 @@ describe('TTSFileAction', () => {
   it('useFetchTTSFile should call useSWR and return file data', async () => {
     const fileId = 'tts-file-id';
     const fileData = {
+      base64Url: '',
+      fileType: 'audio/mp3',
       id: fileId,
       name: 'test',
-      url: 'blob:test',
-      fileType: 'audio/mp3',
-      base64Url: '',
       saveMode: 'local',
+      url: 'blob:test',
     };
 
     // Mock the fileService.getFile to resolve with fileData

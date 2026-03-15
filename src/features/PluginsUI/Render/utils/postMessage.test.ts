@@ -28,11 +28,11 @@ describe('plugin communication functions', () => {
     sendPayloadToPlugin(mockWindow as unknown as Window, props);
     expect(mockWindow.postMessage).toHaveBeenCalledWith(
       {
-        type: PluginChannel.initStandalonePlugin,
         payload: props.payload,
+        props: props.payload,
         settings: props.settings,
         state: props.state,
-        props: props.payload, // Note: This is due to the TODO in your code
+        type: PluginChannel.initStandalonePlugin, // Note: This is due to the TODO in your code
       },
       '*',
     );

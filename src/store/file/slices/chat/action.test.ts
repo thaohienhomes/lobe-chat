@@ -1,11 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
-import useSWR from 'swr';
-import { Mock, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { notification } from '@/components/AntdStaticMethods';
-import { DB_File } from '@/database/_deprecated/schemas/files';
-import { fileService } from '@/services/file';
-import { uploadService } from '@/services/upload';
 
 import { useFileStore as useStore } from '../../store';
 
@@ -26,7 +21,6 @@ vi.mock('swr', () => ({
 //  mock the arrayBuffer
 beforeAll(() => {
   Object.defineProperty(File.prototype, 'arrayBuffer', {
-    writable: true,
     value: function () {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -36,6 +30,7 @@ beforeAll(() => {
         reader.readAsArrayBuffer(this);
       });
     },
+    writable: true,
   });
 });
 

@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import type { PartialDeep } from 'type-fest';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { clientDB, initializeDB } from '@/database/client/db';
 import { userSettings, users } from '@/database/schemas';
@@ -26,10 +26,10 @@ beforeEach(async () => {
   await initializeDB();
   await clientDB.delete(users);
 
-  await clientDB.insert(users).values({ id: mockUser.uuid, avatar: 'avatar.png' });
+  await clientDB.insert(users).values({ avatar: 'avatar.png', id: mockUser.uuid });
   await clientDB
     .insert(userSettings)
-    .values({ id: mockUser.uuid, general: { themeMode: 'light' } });
+    .values({ general: { themeMode: 'light' }, id: mockUser.uuid });
 });
 
 describe('ClientService', () => {
@@ -42,10 +42,10 @@ describe('ClientService', () => {
 
     expect(userState).toMatchObject({
       avatar: mockUser.avatar,
-      isOnboard: true,
       canEnablePWAGuide: false,
-      hasConversation: false,
       canEnableTrace: false,
+      hasConversation: false,
+      isOnboard: true,
       preference: mockPreference,
       settings: { general: { themeMode: 'light' } },
       userId: mockUser.uuid,

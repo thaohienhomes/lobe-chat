@@ -9,47 +9,47 @@ function createCallerWithCtx(partialCtx: any = {}) {
   // All mocks are spies
   const fileModel = {
     checkHash: vi.fn().mockResolvedValue({ isExist: true }),
+    clear: vi.fn().mockResolvedValue({} as any),
     create: vi.fn().mockResolvedValue({ id: 'test-id' }),
-    findById: vi.fn().mockResolvedValue(undefined),
-    query: vi.fn().mockResolvedValue([]),
     delete: vi.fn().mockResolvedValue(undefined),
     deleteMany: vi.fn().mockResolvedValue([]),
-    clear: vi.fn().mockResolvedValue({} as any),
+    findById: vi.fn().mockResolvedValue(undefined),
+    query: vi.fn().mockResolvedValue([]),
   };
 
   const fileService = {
-    getFullFileUrl: vi.fn().mockResolvedValue('full-url'),
     deleteFile: vi.fn().mockResolvedValue(undefined),
     deleteFiles: vi.fn().mockResolvedValue(undefined),
+    getFullFileUrl: vi.fn().mockResolvedValue('full-url'),
   };
 
   const chunkModel = {
-    countByFileIds: vi.fn().mockResolvedValue([{ id: 'test-id', count: 5 }]),
     countByFileId: vi.fn().mockResolvedValue(5),
+    countByFileIds: vi.fn().mockResolvedValue([{ count: 5, id: 'test-id' }]),
   };
 
   const asyncTaskModel = {
+    delete: vi.fn(),
+    findById: vi.fn(),
     findByIds: vi.fn().mockResolvedValue([
       {
         id: 'test-task-id',
         status: AsyncTaskStatus.Success,
       },
     ]),
-    findById: vi.fn(),
-    delete: vi.fn(),
   };
 
   const ctx = {
-    serverDB: {} as any,
-    userId: 'test-user',
     asyncTaskModel,
     chunkModel,
     fileModel,
     fileService,
+    serverDB: {} as any,
+    userId: 'test-user',
     ...partialCtx,
   };
 
-  return { ctx, caller: fileRouter.createCaller(ctx) };
+  return { caller: fileRouter.createCaller(ctx), ctx };
 }
 
 vi.mock('@/config/db', () => ({
@@ -60,9 +60,9 @@ vi.mock('@/config/db', () => ({
 
 vi.mock('@/database/models/asyncTask', () => ({
   AsyncTaskModel: vi.fn(() => ({
+    delete: vi.fn(),
     findById: vi.fn(),
     findByIds: vi.fn(),
-    delete: vi.fn(),
   })),
 }));
 
@@ -76,20 +76,20 @@ vi.mock('@/database/models/chunk', () => ({
 vi.mock('@/database/models/file', () => ({
   FileModel: vi.fn(() => ({
     checkHash: vi.fn(),
+    clear: vi.fn(),
     create: vi.fn(),
     delete: vi.fn(),
     deleteMany: vi.fn(),
     findById: vi.fn(),
     query: vi.fn(),
-    clear: vi.fn(),
   })),
 }));
 
 vi.mock('@/server/services/file', () => ({
   FileService: vi.fn(() => ({
-    getFullFileUrl: vi.fn(),
     deleteFile: vi.fn(),
     deleteFiles: vi.fn(),
+    getFullFileUrl: vi.fn(),
   })),
 }));
 
@@ -102,20 +102,20 @@ describe('fileRouter', () => {
     vi.clearAllMocks();
 
     mockFile = {
-      id: 'test-id',
-      name: 'test.txt',
-      url: 'test-url',
-      createdAt: new Date(),
-      updatedAt: new Date(),
       accessedAt: new Date(),
-      userId: 'test-user',
-      size: 100,
-      fileType: 'text',
-      metadata: {},
+      createdAt: new Date(),
       fileHash: null,
-      clientId: null,
       chunkTaskId: null,
+      fileType: 'text',
+      clientId: null,
+      id: 'test-id',
       embeddingTaskId: null,
+      name: 'test.txt',
+      metadata: {},
+      size: 100,
+      updatedAt: new Date(),
+      url: 'test-url',
+      userId: 'test-user',
     };
 
     // Use actual context with default mocks
@@ -134,12 +134,12 @@ describe('fileRouter', () => {
       ctx.fileModel.checkHash.mockResolvedValue(undefined);
       await expect(
         caller.createFile({
-          hash: 'test-hash',
           fileType: 'text',
+          hash: 'test-hash',
+          metadata: {},
           name: 'test.txt',
           size: 100,
           url: 'test-url',
-          metadata: {},
         }),
       ).rejects.toThrow();
     });

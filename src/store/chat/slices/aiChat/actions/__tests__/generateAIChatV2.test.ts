@@ -30,8 +30,8 @@ vi.mock('@/const/version', async (importOriginal) => {
   const module = await importOriginal();
   return {
     ...(module as any),
-    isServerMode: true,
     isDesktop: false,
+    isServerMode: true,
   };
 });
 vi.mock('@/services/aiChat', () => ({
@@ -41,27 +41,27 @@ vi.mock('@/services/aiChat', () => ({
       const assistantId = 'assistant-message-id';
       const topicId = params.topicId ?? 'topic-id';
       return {
+        assistantMessageId: assistantId,
+        isCreatNewTopic: !params.topicId,
         messages: [
           {
+            content: params.newUserMessage?.content ?? '',
             id: userId,
             role: 'user',
-            content: params.newUserMessage?.content ?? '',
             sessionId: params.sessionId ?? 'session-id',
             topicId,
           } as any,
           {
+            content: LOADING_FLAT,
             id: assistantId,
             role: 'assistant',
-            content: LOADING_FLAT,
             sessionId: params.sessionId ?? 'session-id',
             topicId,
           } as any,
         ],
-        topics: [],
         topicId,
+        topics: [],
         userMessageId: userId,
-        assistantMessageId: assistantId,
-        isCreatNewTopic: !params.topicId,
       } as any;
     }),
   },
@@ -69,14 +69,14 @@ vi.mock('@/services/aiChat', () => ({
 // Mock service
 vi.mock('@/services/message', () => ({
   messageService: {
-    getMessages: vi.fn(),
-    updateMessageError: vi.fn(),
-    removeMessage: vi.fn(),
-    removeMessagesByAssistant: vi.fn(),
-    removeMessages: vi.fn(() => Promise.resolve()),
     createMessage: vi.fn(() => Promise.resolve('new-message-id')),
-    updateMessage: vi.fn(),
+    getMessages: vi.fn(),
     removeAllMessages: vi.fn(() => Promise.resolve()),
+    removeMessage: vi.fn(),
+    removeMessages: vi.fn(() => Promise.resolve()),
+    removeMessagesByAssistant: vi.fn(),
+    updateMessage: vi.fn(),
+    updateMessageError: vi.fn(),
   },
 }));
 vi.mock('@/services/topic', () => ({
@@ -111,16 +111,16 @@ const realCoreProcessMessage = useChatStore.getState().internal_execAgentRuntime
 const mockState = {
   activeId: 'session-id',
   activeTopicId: 'topic-id',
+  internal_execAgentRuntime: vi.fn(),
+  internal_retrieveChunks: vi.fn(),
+  internal_shouldUseRAG: () => false,
+  mainSendMessageOperations: {},
   messages: [],
   messagesMap: {},
-  mainSendMessageOperations: {},
   refreshMessages: vi.fn(),
   refreshTopic: vi.fn(),
-  internal_execAgentRuntime: vi.fn(),
   saveToTopic: vi.fn(),
   switchTopic: vi.fn(),
-  internal_shouldUseRAG: () => false,
-  internal_retrieveChunks: vi.fn(),
 } as any;
 
 beforeEach(() => {
@@ -173,7 +173,7 @@ describe('generateAIChatV2 actions', () => {
       const message = '';
 
       await act(async () => {
-        await result.current.sendMessage({ message, files: [] });
+        await result.current.sendMessage({ files: [], message });
       });
 
       expect(messageService.createMessage).not.toHaveBeenCalled();
@@ -190,7 +190,7 @@ describe('generateAIChatV2 actions', () => {
       (messageService.createMessage as Mock).mockResolvedValue('new-message-id');
 
       await act(async () => {
-        await result.current.sendMessage({ message, files });
+        await result.current.sendMessage({ files, message });
       });
 
       expect(aiChatService.sendMessageInServer).toHaveBeenCalledWith(
@@ -262,7 +262,7 @@ describe('generateAIChatV2 actions', () => {
       const { result } = renderHook(() => useChatStore());
 
       await act(async () => {
-        await result.current.sendMessage({ message: 'test', isWelcomeQuestion: true });
+        await result.current.sendMessage({ isWelcomeQuestion: true, message: 'test' });
       });
 
       expect(result.current.internal_execAgentRuntime).toHaveBeenCalledWith(
@@ -276,7 +276,7 @@ describe('generateAIChatV2 actions', () => {
       const { result } = renderHook(() => useChatStore());
 
       await act(async () => {
-        await result.current.sendMessage({ message: '', files: [{ id: 'file-1' }] as any });
+        await result.current.sendMessage({ files: [{ id: 'file-1' }] as any, message: '' });
       });
 
       expect(aiChatService.sendMessageInServer).toHaveBeenCalledWith(
@@ -300,7 +300,7 @@ describe('generateAIChatV2 actions', () => {
       const { result } = renderHook(() => useChatStore());
 
       await act(async () => {
-        await result.current.sendMessage({ message: 'test', files: [{ id: 'file-1' }] as any });
+        await result.current.sendMessage({ files: [{ id: 'file-1' }] as any, message: 'test' });
       });
 
       expect(aiChatService.sendMessageInServer).toHaveBeenCalledWith(
@@ -328,7 +328,7 @@ describe('generateAIChatV2 actions', () => {
 
       try {
         await result.current.sendMessage({ message: 'test' });
-      } catch (e) {}
+      } catch {}
 
       expect(result.current.internal_execAgentRuntime).not.toHaveBeenCalled();
     });
@@ -421,9 +421,9 @@ describe('generateAIChatV2 actions', () => {
 
       const { result } = renderHook(() => useChatStore());
       const userMessage = {
+        content: 'Hello, world!',
         id: 'user-message-id',
         role: 'user',
-        content: 'Hello, world!',
         sessionId: mockState.activeId,
         topicId: mockState.activeTopicId,
       } as ChatMessage;
@@ -436,9 +436,9 @@ describe('generateAIChatV2 actions', () => {
 
       await act(async () => {
         await result.current.internal_execAgentRuntime({
+          assistantMessageId: 'abc',
           messages,
           userMessageId: userMessage.id,
-          assistantMessageId: 'abc',
         });
       });
 
@@ -493,11 +493,11 @@ describe('generateAIChatV2 actions', () => {
       const message = 'Test message for new topic';
 
       vi.spyOn(aiChatService, 'sendMessageInServer').mockResolvedValueOnce({
-        isCreatNewTopic: true,
-        topicId: 'topic-id',
-        messages: [{}, {}] as any,
-        topics: [{}] as any,
         assistantMessageId: 'abc',
+        isCreatNewTopic: true,
+        messages: [{}, {}] as any,
+        topicId: 'topic-id',
+        topics: [{}] as any,
         userMessageId: 'user-',
       });
 
@@ -561,14 +561,14 @@ describe('generateAIChatV2 actions', () => {
         useChatStore.setState({
           activeId: 'session-1',
           activeTopicId: 'topic-1',
+          mainInputEditor: { setJSONState: mockSetJSONState } as any,
           mainSendMessageOperations: {
             [messageMapKey('session-1', 'topic-1')]: {
-              isLoading: true,
               abortController: { abort: mockAbort, signal: {} as any },
               inputEditorTempState: { content: 'saved content' },
+              isLoading: true,
             },
           },
-          mainInputEditor: { setJSONState: mockSetJSONState } as any,
         });
       });
 
@@ -591,8 +591,8 @@ describe('generateAIChatV2 actions', () => {
           activeId: 'session-1',
           mainSendMessageOperations: {
             [messageMapKey('session-1', 'topic-2')]: {
-              isLoading: true,
               abortController: { abort: mockAbort, signal: {} as any },
+              isLoading: true,
             },
           },
         });
@@ -630,8 +630,8 @@ describe('generateAIChatV2 actions', () => {
           activeTopicId: 'topic-1',
           mainSendMessageOperations: {
             [messageMapKey('session-1', 'topic-1')]: {
-              isLoading: false,
               inputSendErrorMsg: 'Some error',
+              isLoading: false,
             },
           },
         });
@@ -684,8 +684,8 @@ describe('generateAIChatV2 actions', () => {
       let abortController: AbortController | undefined;
       act(() => {
         result.current.internal_updateSendMessageOperation('test-key', {
-          isLoading: true,
           abortController: mockAbortController,
+          isLoading: true,
         });
 
         abortController = result.current.internal_toggleSendMessageOperation('test-key', false);
@@ -701,8 +701,8 @@ describe('generateAIChatV2 actions', () => {
       const mockAbortController = { abort: vi.fn() } as any;
 
       result.current.internal_updateSendMessageOperation('test-key', {
-        isLoading: true,
         abortController: mockAbortController,
+        isLoading: true,
       });
 
       result.current.internal_toggleSendMessageOperation('test-key', false, 'Test cancel reason');
@@ -732,16 +732,16 @@ describe('generateAIChatV2 actions', () => {
 
       act(() => {
         result.current.internal_updateSendMessageOperation('abc', {
-          isLoading: true,
           abortController: mockAbortController,
           inputSendErrorMsg: 'test error',
+          isLoading: true,
         });
       });
 
       expect(result.current.mainSendMessageOperations['abc']).toEqual({
-        isLoading: true,
         abortController: mockAbortController,
         inputSendErrorMsg: 'test error',
+        isLoading: true,
       });
     });
 
@@ -751,8 +751,8 @@ describe('generateAIChatV2 actions', () => {
 
       act(() => {
         result.current.internal_updateSendMessageOperation('test-key', {
-          isLoading: true,
           abortController: initialController,
+          isLoading: true,
         });
 
         // Only update error message
@@ -762,9 +762,9 @@ describe('generateAIChatV2 actions', () => {
       });
 
       expect(result.current.mainSendMessageOperations['test-key']).toEqual({
-        isLoading: true,
         abortController: initialController,
         inputSendErrorMsg: 'new error',
+        isLoading: true,
       });
     });
   });
@@ -779,14 +779,14 @@ describe('generateAIChatV2 actions', () => {
         useChatStore.setState({
           activeId: 'session-1',
           activeTopicId: 'topic-1',
+          mainInputEditor: { setJSONState: mockSetJSONState } as any,
           mainSendMessageOperations: {
             [messageMapKey('session-1', 'topic-1')]: {
-              isLoading: true,
               abortController: { abort: mockAbort, signal: {} as any },
               inputEditorTempState: { content: 'saved content' },
+              isLoading: true,
             },
           },
-          mainInputEditor: { setJSONState: mockSetJSONState } as any,
         });
       });
 
@@ -806,13 +806,13 @@ describe('generateAIChatV2 actions', () => {
         useChatStore.setState({
           activeId: 'session-1',
           activeTopicId: 'topic-1',
+          mainInputEditor: { setJSONState: mockSetJSONState } as any,
           mainSendMessageOperations: {
             [messageMapKey('session-1', 'topic-1')]: {
-              isLoading: true,
               abortController: { abort: mockAbort, signal: {} as any },
+              isLoading: true,
             },
           },
-          mainInputEditor: { setJSONState: mockSetJSONState } as any,
         });
         result.current.cancelSendMessageInServer();
       });

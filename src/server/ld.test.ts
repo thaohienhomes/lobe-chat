@@ -12,10 +12,10 @@ describe('Ld', () => {
   describe('generate', () => {
     it('should generate correct LD+JSON structure', () => {
       const result = ld.generate({
-        title: 'Test Title',
         description: 'Test Description',
-        url: 'https://example.com/test',
         locale: DEFAULT_LANG,
+        title: 'Test Title',
+        url: 'https://example.com/test',
       });
 
       expect(result['@context']).toBe('https://schema.org');
@@ -51,10 +51,10 @@ describe('Ld', () => {
   describe('genWebPage', () => {
     it('should generate correct webpage structure', () => {
       const webpage = ld.genWebPage({
-        title: 'Test Page',
         description: 'Test Description',
-        url: 'https://example.com/test',
         locale: DEFAULT_LANG,
+        title: 'Test Page',
+        url: 'https://example.com/test',
       });
 
       expect(webpage['@type']).toBe('WebPage');
@@ -87,12 +87,12 @@ describe('Ld', () => {
   describe('genArticle', () => {
     it('should generate correct article structure', () => {
       const article = ld.genArticle({
-        title: 'Test Article',
-        description: 'Test Description',
-        url: 'https://example.com/test',
         author: ['arvinxx'],
+        description: 'Test Description',
         identifier: 'test-id',
         locale: DEFAULT_LANG,
+        title: 'Test Article',
+        url: 'https://example.com/test',
       });
 
       expect(article['@type']).toBe('Article');

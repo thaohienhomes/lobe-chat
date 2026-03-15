@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Storyboard } from '../types/storyboard';
 import {
-  type ValidationResult,
   runQualityValidator,
   runValidationPipeline,
   validateWithRetry,
@@ -103,7 +102,7 @@ const makeGeneratedCode = (code: string) => ({
   code,
   conceptId: 'concept-1',
   dependencies: ['react', 'tailwindcss'],
-  estimatedRenderTime: 1.0,
+  estimatedRenderTime: 1,
   language: 'jsx' as const,
   narrationScript: 'The key insight is...',
   track: 'artifact' as const,

@@ -20,10 +20,10 @@ describe('SessionModel', () => {
   beforeEach(() => {
     // Set up session data with the correct structure
     sessionData = {
-      type: LobeSessionType.Agent,
+      config: DEFAULT_AGENT_CONFIG,
       group: 'testGroup',
       meta: {},
-      config: DEFAULT_AGENT_CONFIG,
+      type: LobeSessionType.Agent,
     };
   });
 
@@ -78,7 +78,7 @@ describe('SessionModel', () => {
       // Create multiple sessions to test the query method
       await SessionModel.batchCreate([sessionData, sessionData] as LobeAgentSession[]);
 
-      const queriedSessions = await SessionModel.query({ pageSize: 1, current: 0 });
+      const queriedSessions = await SessionModel.query({ current: 0, pageSize: 1 });
 
       expect(queriedSessions).toHaveLength(1);
     });
@@ -207,17 +207,17 @@ describe('SessionModel', () => {
       const { id: sessionId } = await SessionModel.create('agent', sessionData);
 
       const topicData = {
-        title: 'Test Topic',
-        sessionId: sessionId,
         favorite: false,
+        sessionId: sessionId,
+        title: 'Test Topic',
       };
       const createdTopic = await TopicModel.create(topicData);
 
       const messageData: CreateMessageParams = {
         content: 'Test Message',
+        role: 'user',
         sessionId: sessionId,
         topicId: createdTopic.id,
-        role: 'user',
       };
       await MessageModel.create(messageData);
 

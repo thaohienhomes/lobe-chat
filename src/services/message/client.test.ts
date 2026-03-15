@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { clientDB, initializeDB } from '@/database/client/db';
 import {
@@ -30,10 +30,10 @@ const topicId = 'topic-id';
 // Mock data
 const mockMessageId = 'mock-message-id';
 const mockMessage = {
-  id: mockMessageId,
   content: 'Mock message content',
-  sessionId,
+  id: mockMessageId,
   role: 'user',
+  sessionId,
 } as ChatMessage;
 
 const mockMessages = [mockMessage];
@@ -49,12 +49,12 @@ beforeEach(async () => {
     await trx.insert(sessions).values([{ id: sessionId, userId }]);
     await trx.insert(topics).values([{ id: topicId, sessionId, userId }]);
     await trx.insert(files).values({
-      id: 'f1',
-      userId: userId,
-      url: 'abc',
-      name: 'file-1',
       fileType: 'image/png',
+      id: 'f1',
+      name: 'file-1',
       size: 1000,
+      url: 'abc',
+      userId: userId,
     });
   });
 });
@@ -72,8 +72,8 @@ describe('MessageClientService', () => {
       // Setup
       const createParams: CreateMessageParams = {
         content: 'New message content',
-        sessionId,
         role: 'user',
+        sessionId,
       };
 
       // Execute
@@ -90,13 +90,13 @@ describe('MessageClientService', () => {
       await messageService.batchCreateMessages([
         {
           content: 'Mock message content',
-          sessionId,
           role: 'user',
+          sessionId,
         },
         {
           content: 'Mock message content',
-          sessionId,
           role: 'user',
+          sessionId,
         },
       ] as MessageItem[]);
       const count = await clientDB.$count(messages);
@@ -141,7 +141,7 @@ describe('MessageClientService', () => {
       // Setup
       await clientDB
         .insert(messages)
-        .values({ id: mockMessageId, sessionId, topicId, role: 'user', userId });
+        .values({ id: mockMessageId, role: 'user', sessionId, topicId, userId });
 
       // Execute
       const data = await messageService.getMessages(sessionId, topicId);
@@ -160,9 +160,9 @@ describe('MessageClientService', () => {
         { id: sessionId, userId },
       ]);
       await clientDB.insert(messages).values([
-        { sessionId, topicId, role: 'user', userId },
-        { sessionId, topicId, role: 'assistant', userId },
-        { sessionId: 'bbb', topicId, role: 'assistant', userId },
+        { role: 'user', sessionId, topicId, userId },
+        { role: 'assistant', sessionId, topicId, userId },
+        { role: 'assistant', sessionId: 'bbb', topicId, userId },
       ]);
 
       // Execute
@@ -183,9 +183,9 @@ describe('MessageClientService', () => {
         { id: sessionId, userId },
       ]);
       await clientDB.insert(messages).values([
-        { sessionId, topicId, role: 'user', userId },
-        { sessionId, topicId, role: 'assistant', userId },
-        { sessionId: 'bbb', topicId, role: 'assistant', userId },
+        { role: 'user', sessionId, topicId, userId },
+        { role: 'assistant', sessionId, topicId, userId },
+        { role: 'assistant', sessionId: 'bbb', topicId, userId },
       ]);
 
       // Execute
@@ -223,8 +223,8 @@ describe('MessageClientService', () => {
   describe('getAllMessages', () => {
     it('should retrieve all messages', async () => {
       await clientDB.insert(messages).values([
-        { sessionId, topicId, content: '1', role: 'user', userId },
-        { sessionId, topicId, content: '2', role: 'assistant', userId },
+        { content: '1', role: 'user', sessionId, topicId, userId },
+        { content: '2', role: 'assistant', sessionId, topicId, userId },
       ]);
 
       // Execute
@@ -232,8 +232,8 @@ describe('MessageClientService', () => {
 
       // Assert
       expect(data).toMatchObject([
-        { sessionId, topicId, content: '1', role: 'user', userId },
-        { sessionId, topicId, content: '2', role: 'assistant', userId },
+        { content: '1', role: 'user', sessionId, topicId, userId },
+        { content: '2', role: 'assistant', sessionId, topicId, userId },
       ]);
     });
   });
@@ -243,8 +243,8 @@ describe('MessageClientService', () => {
       // Setup
       await clientDB.insert(messages).values({ id: mockMessageId, role: 'user', userId });
       const newError = {
-        type: 'InvalidProviderAPIKey',
         message: 'Error occurred',
+        type: 'InvalidProviderAPIKey',
       } as ChatMessageError;
 
       // Execute
@@ -353,7 +353,7 @@ describe('MessageClientService', () => {
       // Setup
       await clientDB
         .insert(files)
-        .values({ id: 'file-abc', fileType: 'text', name: 'abc', url: 'abc', size: 100, userId });
+        .values({ fileType: 'text', id: 'file-abc', name: 'abc', size: 100, url: 'abc', userId });
       await clientDB.insert(messages).values({ id: mockMessageId, role: 'user', userId });
       const newTTS: ChatTTS = { contentMd5: 'abc', file: 'file-abc' };
 

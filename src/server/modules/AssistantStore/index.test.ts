@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EdgeConfig } from '@/server/modules/EdgeConfig';
 
@@ -91,17 +91,17 @@ describe('AssistantStore', () => {
   it('should filter agents by whitelist when EdgeConfig is enabled', async () => {
     const mockAgents = {
       agents: [
-        { identifier: 'agent1', meta: {}, author: '', createAt: '', createdAt: '', homepage: '' },
-        { identifier: 'agent2', meta: {}, author: '', createAt: '', createdAt: '', homepage: '' },
+        { author: '', createAt: '', createdAt: '', homepage: '', identifier: 'agent1', meta: {} },
+        { author: '', createAt: '', createdAt: '', homepage: '', identifier: 'agent2', meta: {} },
       ],
       schemaVersion: 1,
     };
 
     global.fetch = vi.fn().mockResolvedValue({
+      clone: () => ({ json: () => Promise.resolve({ ...mockAgents }) }),
+      json: () => Promise.resolve({ ...mockAgents }),
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ ...mockAgents }),
-      clone: () => ({ json: () => Promise.resolve({ ...mockAgents }) }),
     });
 
     // @ts-expect-error
@@ -109,8 +109,8 @@ describe('AssistantStore', () => {
 
     const store = new AssistantStore();
     (EdgeConfig as any).prototype.getAgentRestrictions.mockResolvedValue({
-      whitelist: ['agent1'],
       blacklist: undefined,
+      whitelist: ['agent1'],
     });
 
     const result = await store.getAgentIndex();
@@ -122,17 +122,17 @@ describe('AssistantStore', () => {
   it('should filter agents by blacklist when EdgeConfig is enabled and no whitelist', async () => {
     const mockAgents = {
       agents: [
-        { identifier: 'agent1', meta: {}, author: '', createAt: '', createdAt: '', homepage: '' },
-        { identifier: 'agent2', meta: {}, author: '', createAt: '', createdAt: '', homepage: '' },
+        { author: '', createAt: '', createdAt: '', homepage: '', identifier: 'agent1', meta: {} },
+        { author: '', createAt: '', createdAt: '', homepage: '', identifier: 'agent2', meta: {} },
       ],
       schemaVersion: 1,
     };
 
     global.fetch = vi.fn().mockResolvedValue({
+      clone: () => ({ json: () => Promise.resolve({ ...mockAgents }) }),
+      json: () => Promise.resolve({ ...mockAgents }),
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ ...mockAgents }),
-      clone: () => ({ json: () => Promise.resolve({ ...mockAgents }) }),
     });
 
     // @ts-expect-error
@@ -140,8 +140,8 @@ describe('AssistantStore', () => {
 
     const store = new AssistantStore();
     (EdgeConfig as any).prototype.getAgentRestrictions.mockResolvedValue({
-      whitelist: undefined,
       blacklist: ['agent2'],
+      whitelist: undefined,
     });
 
     const result = await store.getAgentIndex();
@@ -153,7 +153,7 @@ describe('AssistantStore', () => {
   it('should fallback to default language if fetch returns 404', async () => {
     const mockAgents = {
       agents: [
-        { identifier: 'agent1', meta: {}, author: '', createAt: '', createdAt: '', homepage: '' },
+        { author: '', createAt: '', createdAt: '', homepage: '', identifier: 'agent1', meta: {} },
       ],
       schemaVersion: 1,
     };
@@ -161,15 +161,15 @@ describe('AssistantStore', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce({
-        status: 404,
         ok: false,
+        status: 404,
         text: () => Promise.resolve('Not found'),
       })
       .mockResolvedValueOnce({
-        status: 200,
-        ok: true,
-        json: () => Promise.resolve({ ...mockAgents }),
         clone: () => ({ json: () => Promise.resolve({ ...mockAgents }) }),
+        json: () => Promise.resolve({ ...mockAgents }),
+        ok: true,
+        status: 200,
       });
 
     global.fetch = fetchMock as any;
@@ -180,7 +180,7 @@ describe('AssistantStore', () => {
     const store = new AssistantStore();
     const result = await store.getAgentIndex('zh-CN');
     expect(result).toEqual([
-      { identifier: 'agent1', meta: {}, author: '', createAt: '', createdAt: '', homepage: '' },
+      { author: '', createAt: '', createdAt: '', homepage: '', identifier: 'agent1', meta: {} },
     ]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });

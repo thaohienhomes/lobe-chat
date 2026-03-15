@@ -51,7 +51,7 @@ describe('useOnPluginFetchPluginState', () => {
 
     const testKey = 'testKey';
     const event = new MessageEvent('message', {
-      data: { type: PluginChannel.fetchPluginState, key: testKey },
+      data: { key: testKey, type: PluginChannel.fetchPluginState },
     });
 
     window.dispatchEvent(event);
@@ -67,7 +67,7 @@ describe('useOnPluginFillContent', () => {
 
     const testContent = 'testContent';
     const event = new MessageEvent('message', {
-      data: { type: PluginChannel.fillStandalonePluginContent, content: testContent },
+      data: { content: testContent, type: PluginChannel.fillStandalonePluginContent },
     });
 
     window.dispatchEvent(event);
@@ -81,7 +81,7 @@ describe('useOnPluginFillContent', () => {
 
     const testContent = { some: 'data' };
     const event = new MessageEvent('message', {
-      data: { type: PluginChannel.fillStandalonePluginContent, content: testContent },
+      data: { content: testContent, type: PluginChannel.fillStandalonePluginContent },
     });
 
     window.dispatchEvent(event);
@@ -112,7 +112,7 @@ describe('useOnPluginTriggerAIMessage', () => {
 
     const testId = 'testId';
     const event = new MessageEvent('message', {
-      data: { type: PluginChannel.triggerAIMessage, id: testId },
+      data: { id: testId, type: PluginChannel.triggerAIMessage },
     });
 
     window.dispatchEvent(event);
@@ -125,7 +125,7 @@ describe('useOnPluginTriggerAIMessage', () => {
     renderHook(() => useOnPluginTriggerAIMessage(mockCallback));
 
     const event = new MessageEvent('message', {
-      data: { type: 'otherMessageType', id: 'testId' },
+      data: { id: 'testId', type: 'otherMessageType' },
     });
 
     window.dispatchEvent(event);
@@ -141,7 +141,7 @@ describe('useOnPluginCreateAssistantMessage', () => {
 
     const testContent = 'testContent';
     const event = new MessageEvent('message', {
-      data: { type: PluginChannel.createAssistantMessage, content: testContent },
+      data: { content: testContent, type: PluginChannel.createAssistantMessage },
     });
 
     window.dispatchEvent(event);
@@ -154,7 +154,7 @@ describe('useOnPluginCreateAssistantMessage', () => {
     renderHook(() => useOnPluginCreateAssistantMessage(mockCallback));
 
     const event = new MessageEvent('message', {
-      data: { type: 'otherMessageType', content: 'testContent' },
+      data: { content: 'testContent', type: 'otherMessageType' },
     });
 
     window.dispatchEvent(event);

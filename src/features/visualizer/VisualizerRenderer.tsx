@@ -10,12 +10,36 @@ import LoadingOverlay from './LoadingOverlay';
 const MIN_HEIGHT = 100;
 const DEFAULT_HEIGHT = 200;
 const HEIGHT_TIMEOUT_MS = 10_000;
+const STREAMING_DEBOUNCE_MS = 200;
 
 /** Convert a snake_case or lowercase title to Title Case */
 const toTitleCase = (s: string): string =>
   s
     .replaceAll('_', ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
+
+/** Strip all <script>...</script> blocks (including inline) from HTML. */
+const stripScripts = (html: string): string =>
+  html.replace(/<script[\s\S]*?<\/script>/gi, '');
+
+/**
+ * Custom debounce hook: returns `value` with a delay when `enabled` is true.
+ * When `enabled` is false (streaming completed), immediately returns the value.
+ */
+const useDebouncedValue = <T,>(value: T, delayMs: number, enabled: boolean): T => {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    if (!enabled) {
+      setDebounced(value);
+      return;
+    }
+    const timer = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer);
+  }, [value, delayMs, enabled]);
+
+  return debounced;
+};
 
 const useStyles = createStyles(({ css, token }) => ({
   container: css`
@@ -29,12 +53,37 @@ const useStyles = createStyles(({ css, token }) => ({
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: 12px;
     box-shadow: 0 2px 8px ${token.colorBgTextHover};
+    transition: border-color 0.3s ease;
   `,
   iframe: css`
     display: block;
     width: 100%;
     border: none;
     border-radius: 0 0 12px 12px;
+  `,
+  streaming: css`
+    border-color: ${token.colorPrimary};
+    animation: streaming-pulse 2s ease-in-out infinite;
+
+    @keyframes streaming-pulse {
+      0%,
+      100% {
+        border-color: ${token.colorPrimary};
+        box-shadow: 0 0 0 0 ${token.colorPrimaryBg};
+      }
+      50% {
+        border-color: ${token.colorPrimaryBorderHover};
+        box-shadow: 0 0 8px 2px ${token.colorPrimaryBg};
+      }
+    }
+  `,
+  streamingBadge: css`
+    font-size: 10px;
+    font-weight: 600;
+    color: ${token.colorPrimary};
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.8;
   `,
   titleBar: css`
     display: flex;
@@ -64,31 +113,37 @@ export interface VisualizerRendererProps {
 /**
  * Renders the Visualizer widget inside a sandboxed iframe.
  *
- * Simple approach: embed widget code directly into srcdoc HTML.
- * No postMessage for content delivery, no morphdom, no timing issues.
- * Only uses postMessage for resize reporting, theme updates, and bridges.
+ * Streaming mode:
+ *  - Debounces widgetCode updates (200ms) to avoid iframe thrashing
+ *  - Strips <script> tags to prevent partial JS execution errors
+ *  - Shows streaming indicator (pulsing border + badge)
+ *  - Scripts execute only when isComplete=true (streaming finished)
  */
 const VisualizerRenderer = memo<VisualizerRendererProps>(
   ({
     widgetCode,
     title,
     loadingMessages,
-    isStreaming: _isStreaming,
+    isStreaming,
     isComplete,
     theme,
     onInteraction,
     onSendPrompt,
   }) => {
-    const { styles } = useStyles();
+    const { styles, cx } = useStyles();
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [iframeHeight, setIframeHeight] = useState(DEFAULT_HEIGHT);
     const [iframeReady, setIframeReady] = useState(false);
 
-    // Generate complete HTML with widget code embedded directly
+    // ── Debounce widgetCode during streaming ──────────────────────────────────
+    const debouncedCode = useDebouncedValue(widgetCode, STREAMING_DEBOUNCE_MS, isStreaming);
+
+    // ── Build srcdoc: strip scripts while streaming ──────────────────────────
     const srcdoc = useMemo(() => {
-      if (!widgetCode) return '';
-      return generateCompleteHTML(theme, widgetCode);
-    }, [theme, widgetCode]);
+      if (!debouncedCode) return '';
+      const code = isStreaming ? stripScripts(debouncedCode) : debouncedCode;
+      return generateCompleteHTML(theme, code);
+    }, [theme, debouncedCode, isStreaming]);
 
     // Show loading overlay until iframe reports a resize (content rendered)
     const showLoading = !iframeReady && !isComplete;
@@ -161,11 +216,16 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     if (!srcdoc) return null;
 
     return (
-      <Flexbox className={styles.container} data-visualizer>
+      <Flexbox className={cx(styles.container, isStreaming && styles.streaming)} data-visualizer>
         {title && (
           <div className={styles.titleBar}>
             <span>📊</span>
             <span>{toTitleCase(title)}</span>
+            {isStreaming && (
+              <span className={styles.streamingBadge} style={{ marginLeft: 'auto' }}>
+                ● Generating…
+              </span>
+            )}
           </div>
         )}
         <div style={{ minHeight: MIN_HEIGHT, position: 'relative' }}>
@@ -188,3 +248,4 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
 VisualizerRenderer.displayName = 'VisualizerRenderer';
 
 export default VisualizerRenderer;
+

@@ -8,7 +8,6 @@ import { FileModel } from '@/database/models/file';
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
 import { SessionModel } from '@/database/models/session';
 import { UserModel } from '@/database/models/user';
-import { serverDB } from '@/database/server';
 import { AgentService } from '@/server/services/agent';
 import { KnowledgeType } from '@/types/knowledgeBase';
 
@@ -85,12 +84,12 @@ describe('agentRouter', () => {
     vi.mocked(AgentService).mockImplementation(() => agentServiceMock);
 
     mockCtx = {
-      userId,
       agentModel: agentModelMock,
       agentService: agentServiceMock,
       fileModel: fileModelMock,
       knowledgeBaseModel: knowledgeBaseModelMock,
       sessionModel: sessionModelMock,
+      userId,
     };
   });
 
@@ -138,18 +137,18 @@ describe('agentRouter', () => {
   describe('getKnowledgeBasesAndFiles', () => {
     it('should return combined knowledge bases and files', async () => {
       const mockFiles = [
-        { id: 'file1', name: 'File 1', fileType: 'text' },
-        { id: 'file2', name: 'File 2', fileType: 'pdf' },
+        { fileType: 'text', id: 'file1', name: 'File 1' },
+        { fileType: 'pdf', id: 'file2', name: 'File 2' },
       ];
 
       const mockKnowledgeBases = [
-        { id: 'kb1', name: 'KB 1', description: 'desc 1', avatar: 'avatar1' },
-        { id: 'kb2', name: 'KB 2', description: 'desc 2', avatar: 'avatar2' },
+        { avatar: 'avatar1', description: 'desc 1', id: 'kb1', name: 'KB 1' },
+        { avatar: 'avatar2', description: 'desc 2', id: 'kb2', name: 'KB 2' },
       ];
 
       const mockKnowledge = {
-        files: [{ id: 'file1', enabled: true }],
-        knowledgeBases: [{ id: 'kb1', enabled: true }],
+        files: [{ enabled: true, id: 'file1' }],
+        knowledgeBases: [{ enabled: true, id: 'kb1' }],
       };
 
       fileModelMock.query.mockResolvedValue(mockFiles);
@@ -198,8 +197,8 @@ describe('agentRouter', () => {
     it('should create agent files', async () => {
       const mockInput = {
         agentId: 'agent1',
-        fileIds: ['file1', 'file2'],
         enabled: true,
+        fileIds: ['file1', 'file2'],
       };
 
       const caller = agentRouter.createCaller(mockCtx);
@@ -234,8 +233,8 @@ describe('agentRouter', () => {
     it('should toggle file', async () => {
       const mockInput = {
         agentId: 'agent1',
-        fileId: 'file1',
         enabled: true,
+        fileId: 'file1',
       };
 
       const caller = agentRouter.createCaller(mockCtx);
@@ -253,8 +252,8 @@ describe('agentRouter', () => {
     it('should create agent knowledge base', async () => {
       const mockInput = {
         agentId: 'agent1',
-        knowledgeBaseId: 'kb1',
         enabled: true,
+        knowledgeBaseId: 'kb1',
       };
 
       const caller = agentRouter.createCaller(mockCtx);
@@ -289,8 +288,8 @@ describe('agentRouter', () => {
     it('should toggle knowledge base', async () => {
       const mockInput = {
         agentId: 'agent1',
-        knowledgeBaseId: 'kb1',
         enabled: true,
+        knowledgeBaseId: 'kb1',
       };
 
       const caller = agentRouter.createCaller(mockCtx);

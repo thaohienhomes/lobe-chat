@@ -13,8 +13,8 @@ import { modelProviderSelectors } from './selectors';
 // Mock userService
 vi.mock('@/services/user', () => ({
   userService: {
-    updateUserSettings: vi.fn(),
     resetUserSettings: vi.fn(),
+    updateUserSettings: vi.fn(),
   },
 }));
 
@@ -43,7 +43,7 @@ describe('LLMSettingsSliceAction', () => {
     it('should return early when prevState does not exist', async () => {
       const { result } = renderHook(() => useUserStore());
       const provider = 'openai';
-      const payload: CustomModelCardDispatch = { type: 'add', modelCard: { id: 'test-id' } };
+      const payload: CustomModelCardDispatch = { modelCard: { id: 'test-id' }, type: 'add' };
 
       // Mock the selector to return undefined
       vi.spyOn(settingsSelectors, 'providerConfig').mockReturnValueOnce(() => undefined);
@@ -65,7 +65,7 @@ describe('LLMSettingsSliceAction', () => {
       act(() => {
         useUserStore.setState({
           serverLanguageModel: {
-            azure: { serverModelCards: [{ id: 'abc', deploymentName: 'abc' }] },
+            azure: { serverModelCards: [{ deploymentName: 'abc', id: 'abc' }] },
           },
         });
       });
@@ -76,7 +76,7 @@ describe('LLMSettingsSliceAction', () => {
 
       // Assert that setModelProviderConfig was not called
       const azure = result.current.defaultModelProviderList.find((m) => m.id === 'azure');
-      expect(azure?.chatModels).toEqual([{ id: 'abc', deploymentName: 'abc' }]);
+      expect(azure?.chatModels).toEqual([{ deploymentName: 'abc', id: 'abc' }]);
     });
 
     it('openai', async () => {
@@ -89,19 +89,19 @@ describe('LLMSettingsSliceAction', () => {
               enabledModels: ['gpt-4-0125-preview', 'gpt-4-turbo-2024-04-09'],
               serverModelCards: [
                 {
+                  contextWindowTokens: 128_000,
                   displayName: 'ChatGPT-4',
+                  enabled: true,
                   functionCall: true,
                   id: 'gpt-4-0125-preview',
-                  contextWindowTokens: 128000,
-                  enabled: true,
                 },
                 {
+                  contextWindowTokens: 128_000,
                   displayName: 'ChatGPT-4 Vision',
+                  enabled: true,
                   functionCall: true,
                   id: 'gpt-4-turbo-2024-04-09',
-                  contextWindowTokens: 128000,
                   vision: true,
-                  enabled: true,
                 },
               ],
             },
@@ -117,18 +117,18 @@ describe('LLMSettingsSliceAction', () => {
       const openai = result.current.defaultModelProviderList.find((m) => m.id === 'openai');
       expect(openai?.chatModels).toEqual([
         {
+          contextWindowTokens: 128_000,
           displayName: 'ChatGPT-4',
           enabled: true,
           functionCall: true,
           id: 'gpt-4-0125-preview',
-          contextWindowTokens: 128000,
         },
         {
+          contextWindowTokens: 128_000,
           displayName: 'ChatGPT-4 Vision',
           enabled: true,
           functionCall: true,
           id: 'gpt-4-turbo-2024-04-09',
-          contextWindowTokens: 128000,
           vision: true,
         },
       ]);
@@ -166,8 +166,8 @@ describe('LLMSettingsSliceAction', () => {
         useUserStore.setState({
           settings: {
             languageModel: {
-              perplexity: { enabled: true },
               azure: { enabled: false },
+              perplexity: { enabled: true },
             },
           },
         });

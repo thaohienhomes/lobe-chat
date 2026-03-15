@@ -9,38 +9,38 @@ describe('generateMessages', () => {
   // 创建一些测试用的消息数据
   const mockMessages = [
     {
-      id: '1',
       content: 'Hello',
+      createdAt: Date.now(),
+      id: '1',
       role: 'user',
-      createdAt: Date.now(),
     },
     {
-      id: '2',
       content: 'Hi there',
-      role: 'assistant',
       createdAt: Date.now(),
+      id: '2',
+      role: 'assistant',
     },
     {
-      id: '3',
       content: LOADING_FLAT,
-      role: 'assistant',
       createdAt: Date.now(),
+      id: '3',
+      role: 'assistant',
     },
     {
-      id: '4',
       content: 'Tool response',
-      role: 'tool',
       createdAt: Date.now(),
+      id: '4',
+      role: 'tool',
       tool_call_id: 'tool1',
     },
   ] as ChatMessage[];
 
   it('should filter out loading messages', () => {
     const result = generateMessages({
-      messages: mockMessages,
-      withSystemRole: false,
       includeTool: false,
+      messages: mockMessages,
       systemRole: '',
+      withSystemRole: false,
     });
 
     expect(result).toHaveLength(2);
@@ -50,10 +50,10 @@ describe('generateMessages', () => {
   it('should include system role when withSystemRole is true and systemRole is provided', () => {
     const systemRole = 'I am a helpful assistant';
     const result = generateMessages({
-      messages: mockMessages,
-      withSystemRole: true,
       includeTool: false,
+      messages: mockMessages,
       systemRole,
+      withSystemRole: true,
     });
 
     expect(result[0]).toEqual({
@@ -66,10 +66,10 @@ describe('generateMessages', () => {
   it('should not include system role when withSystemRole is false', () => {
     const systemRole = 'I am a helpful assistant';
     const result = generateMessages({
-      messages: mockMessages,
-      withSystemRole: false,
       includeTool: false,
+      messages: mockMessages,
       systemRole,
+      withSystemRole: false,
     });
 
     expect(result[0].role).not.toBe('system');
@@ -78,10 +78,10 @@ describe('generateMessages', () => {
 
   it('should include tool messages when includeTool is true', () => {
     const result = generateMessages({
-      messages: mockMessages,
-      withSystemRole: false,
       includeTool: true,
+      messages: mockMessages,
       systemRole: '',
+      withSystemRole: false,
     });
 
     expect(result).toHaveLength(3);
@@ -91,10 +91,10 @@ describe('generateMessages', () => {
 
   it('should exclude tool messages when includeTool is false', () => {
     const result = generateMessages({
-      messages: mockMessages,
-      withSystemRole: false,
       includeTool: false,
+      messages: mockMessages,
       systemRole: '',
+      withSystemRole: false,
     });
 
     expect(result).toHaveLength(2);
@@ -104,18 +104,18 @@ describe('generateMessages', () => {
   it('should trim message content', () => {
     const messagesWithSpaces = [
       {
-        id: '1',
         content: '  Hello  ',
-        role: 'user',
         createdAt: Date.now(),
+        id: '1',
+        role: 'user',
       },
     ] as ChatMessage[];
 
     const result = generateMessages({
-      messages: messagesWithSpaces,
-      withSystemRole: false,
       includeTool: false,
+      messages: messagesWithSpaces,
       systemRole: '',
+      withSystemRole: false,
     });
 
     expect(result[0].content).toBe('Hello');
@@ -123,10 +123,10 @@ describe('generateMessages', () => {
 
   it('should not include system role when systemRole is empty', () => {
     const result = generateMessages({
-      messages: mockMessages,
-      withSystemRole: true,
       includeTool: false,
+      messages: mockMessages,
       systemRole: '',
+      withSystemRole: true,
     });
 
     expect(result).toHaveLength(2);

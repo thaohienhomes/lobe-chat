@@ -8,23 +8,23 @@ describe('messagesReducer', () => {
   beforeEach(() => {
     initialState = [
       {
-        id: 'message1',
         content: 'Hello World',
-        createdAt: 1629264000000,
-        updatedAt: 1629264000000,
-        role: 'user',
+        createdAt: 1_629_264_000_000,
+        id: 'message1',
         meta: {},
+        role: 'user',
+        updatedAt: 1_629_264_000_000,
       },
       {
-        id: 'message2',
         content: 'How are you?',
-        createdAt: 1629264000000,
-        updatedAt: 1629264000000,
-        role: 'assistant',
+        createdAt: 1_629_264_000_000,
+        id: 'message2',
         meta: {},
+        role: 'assistant',
         tools: [
-          { identifier: 'tool1', apiName: 'calculator', id: 'abc', type: 'default', arguments: '' },
+          { apiName: 'calculator', arguments: '', id: 'abc', identifier: 'tool1', type: 'default' },
         ],
+        updatedAt: 1_629_264_000_000,
       },
     ];
   });
@@ -32,8 +32,8 @@ describe('messagesReducer', () => {
   describe('updateMessage', () => {
     it('should update the specified message with the provided value', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessage',
         id: 'message1',
+        type: 'updateMessage',
         value: { content: 'Updated Message' },
       };
 
@@ -47,8 +47,8 @@ describe('messagesReducer', () => {
 
     it('should not modify the state if the specified message does not exist', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessage',
         id: 'nonexistentMessage',
+        type: 'updateMessage',
         value: { content: 'Updated Message' },
       };
 
@@ -59,8 +59,8 @@ describe('messagesReducer', () => {
 
     it('should not modify the state if the specified message does not exist', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessage',
         id: 'nonexistentMessage',
+        type: 'updateMessage',
         value: { content: 'Updated Message' },
       };
 
@@ -84,9 +84,9 @@ describe('messagesReducer', () => {
   describe('updateMessageExtra', () => {
     it('should update the extra field of a message', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessageExtra',
         id: 'message1',
         key: 'testKey',
+        type: 'updateMessageExtra',
         value: 'testValue',
       };
 
@@ -99,22 +99,22 @@ describe('messagesReducer', () => {
 
     it('should update the extra field of a message if extra exist', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessageExtra',
         id: 'data',
         key: 'abc',
+        type: 'updateMessageExtra',
         value: '2',
       };
 
       const newState = messagesReducer(
         [
           {
-            id: 'data',
             content: 'Hello World',
-            createdAt: 1629264000000,
-            updatedAt: 1629264000000,
-            role: 'user',
-            meta: {},
+            createdAt: 1_629_264_000_000,
             extra: { abc: '1' },
+            id: 'data',
+            meta: {},
+            role: 'user',
+            updatedAt: 1_629_264_000_000,
           } as ChatMessage,
           ...initialState,
         ],
@@ -128,9 +128,9 @@ describe('messagesReducer', () => {
 
     it('should not modify state if message is not found', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessageExtra',
         id: 'nonexistent',
         key: 'testKey',
+        type: 'updateMessageExtra',
         value: 'testValue',
       };
 
@@ -142,9 +142,9 @@ describe('messagesReducer', () => {
   describe('updatePluginState', () => {
     it('should update the plugin state of a message', () => {
       const payload: MessageDispatch = {
-        type: 'updatePluginState',
         id: 'message1',
         key: 'pluginKey',
+        type: 'updatePluginState',
         value: 'pluginValue',
       };
 
@@ -157,9 +157,9 @@ describe('messagesReducer', () => {
 
     it('should not modify state if message is not found', () => {
       const payload: MessageDispatch = {
-        type: 'updatePluginState',
         id: 'nonexistent',
         key: 'pluginKey',
+        type: 'updatePluginState',
         value: 'pluginValue',
       };
 
@@ -176,9 +176,9 @@ describe('messagesReducer', () => {
       ];
 
       const payload: MessageDispatch = {
-        type: 'updatePluginState',
         id: 'message1',
         key: 'existingKey',
+        type: 'updatePluginState',
         value: 'existingValue',
       };
 
@@ -190,26 +190,26 @@ describe('messagesReducer', () => {
   describe('updateMessagePlugin', () => {
     it('should update the plugin of a tool message', () => {
       const toolMessage: ChatMessage = {
-        id: 'toolMessage',
-        role: 'tool',
         content: 'Tool content',
-        createdAt: 1629264000000,
-        updatedAt: 1629264000000,
+        createdAt: 1_629_264_000_000,
+        id: 'toolMessage',
         meta: {},
         plugin: {
-          identifier: 'tool1',
           apiName: 'calculator',
-          type: 'default',
           arguments: '',
+          identifier: 'tool1',
+          type: 'default',
         },
+        role: 'tool',
         tool_call_id: 'abc',
+        updatedAt: 1_629_264_000_000,
       };
 
       const state = [...initialState, toolMessage];
 
       const payload: MessageDispatch = {
-        type: 'updateMessagePlugin',
         id: 'toolMessage',
+        type: 'updateMessagePlugin',
         value: { identifier: 'newPlugin' },
       };
 
@@ -227,8 +227,8 @@ describe('messagesReducer', () => {
 
     it('should not modify state if message is not found or not a tool message', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessagePlugin',
-        id: 'message1', // This is a user message, not a tool message
+        id: 'message1',
+        type: 'updateMessagePlugin', // This is a user message, not a tool message
         value: { identifier: 'newPlugin' },
       };
 
@@ -240,9 +240,9 @@ describe('messagesReducer', () => {
   describe('updateMessageTools', () => {
     it('should update a specific tool in an assistant message', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessageTools',
         id: 'message2',
         tool_call_id: 'abc',
+        type: 'updateMessageTools',
         value: { apiName: 'updatedCalculator' },
       };
 
@@ -261,9 +261,10 @@ describe('messagesReducer', () => {
 
     it('should not modify state if message is not found or not an assistant message', () => {
       const payload: MessageDispatch = {
+        id: 'message1',
+        // This is a user message, not an assistant message
+tool_call_id: 'tool1', 
         type: 'updateMessageTools',
-        id: 'message1', // This is a user message, not an assistant message
-        tool_call_id: 'tool1',
         value: { identifier: 'updatedCalculator' },
       };
 
@@ -273,9 +274,9 @@ describe('messagesReducer', () => {
 
     it('should not modify state if tool is not found in the message', () => {
       const payload: MessageDispatch = {
-        type: 'updateMessageTools',
         id: 'message2',
         tool_call_id: 'nonexistentTool',
+        type: 'updateMessageTools',
         value: { identifier: 'updatedCalculator' },
       };
 
@@ -288,21 +289,21 @@ describe('messagesReducer', () => {
     it('should add a tool to the specified assistant message if it dont have tools', () => {
       const messageId = '1';
       const toolPayload: ChatToolPayload = {
-        id: 'tc_1',
-        type: 'default',
-        identifier: 'tool1',
         apiName: 'testFunction',
         arguments: '{"arg1": "value1"}',
+        id: 'tc_1',
+        identifier: 'tool1',
+        type: 'default',
       };
 
       const payload: MessageDispatch = {
-        type: 'addMessageTool',
         id: messageId,
+        type: 'addMessageTool',
         value: toolPayload,
       };
 
       const newState = messagesReducer(
-        [...initialState, { id: messageId, role: 'assistant', content: '' } as ChatMessage],
+        [...initialState, { content: '', id: messageId, role: 'assistant' } as ChatMessage],
         payload,
       );
       const updatedMessage = newState.find((m) => m.id === messageId);
@@ -316,21 +317,21 @@ describe('messagesReducer', () => {
     it('should add a tool to the specified assistant message', () => {
       const messageId = 'message2';
       const toolPayload: ChatToolPayload = {
-        id: 'tc_1',
-        type: 'default',
-        identifier: 'tool1',
         apiName: 'testFunction',
         arguments: '{"arg1": "value1"}',
+        id: 'tc_1',
+        identifier: 'tool1',
+        type: 'default',
       };
 
       const payload: MessageDispatch = {
-        type: 'addMessageTool',
         id: messageId,
+        type: 'addMessageTool',
         value: toolPayload,
       };
 
       const newState = messagesReducer(
-        [...initialState, { id: messageId, role: 'assistant', content: '' } as ChatMessage],
+        [...initialState, { content: '', id: messageId, role: 'assistant' } as ChatMessage],
         payload,
       );
       const updatedMessage = newState.find((m) => m.id === messageId);
@@ -342,16 +343,16 @@ describe('messagesReducer', () => {
 
     it('should not modify the state if the message is not found', () => {
       const toolPayload: ChatToolPayload = {
-        id: 'tc_1',
-        type: 'default',
-        identifier: 'tool1',
         apiName: 'testFunction',
         arguments: '{"arg1": "value1"}',
+        id: 'tc_1',
+        identifier: 'tool1',
+        type: 'default',
       };
 
       const payload: MessageDispatch = {
-        type: 'addMessageTool',
         id: 'nonexistentMessage',
+        type: 'addMessageTool',
         value: toolPayload,
       };
 
@@ -361,16 +362,16 @@ describe('messagesReducer', () => {
 
     it('should not add a tool if the message is not an assistant message', () => {
       const toolPayload: ChatToolPayload = {
-        id: 'tc_1',
-        type: 'default',
-        identifier: 'tool1',
         apiName: 'testFunction',
         arguments: '{"arg1": "value1"}',
+        id: 'tc_1',
+        identifier: 'tool1',
+        type: 'default',
       };
 
       const payload: MessageDispatch = {
-        type: 'addMessageTool',
-        id: 'message1', // This is a user message
+        id: 'message1',
+        type: 'addMessageTool', // This is a user message
         value: toolPayload,
       };
 
@@ -382,9 +383,9 @@ describe('messagesReducer', () => {
   describe('deleteMessageTool', () => {
     it('should delete the specified tool from the message', () => {
       const payload: MessageDispatch = {
-        type: 'deleteMessageTool',
         id: 'message2',
         tool_call_id: 'abc',
+        type: 'deleteMessageTool',
       };
 
       const newState = messagesReducer(initialState, payload);
@@ -397,9 +398,9 @@ describe('messagesReducer', () => {
 
     it('should not modify the state if the message is not found', () => {
       const payload: MessageDispatch = {
-        type: 'deleteMessageTool',
         id: 'nonexistentMessage',
         tool_call_id: 'tool1',
+        type: 'deleteMessageTool',
       };
 
       const newState = messagesReducer(initialState, payload);
@@ -408,9 +409,9 @@ describe('messagesReducer', () => {
 
     it('should not modify the state if the tool is not found', () => {
       const payload: MessageDispatch = {
-        type: 'deleteMessageTool',
         id: 'message1',
         tool_call_id: 'nonexistentTool',
+        type: 'deleteMessageTool',
       };
 
       const newState = messagesReducer(initialState, payload);
@@ -419,9 +420,10 @@ describe('messagesReducer', () => {
 
     it('should not delete a tool if the message is not an assistant message', () => {
       const payload: MessageDispatch = {
+        id: 'message1',
+        // This is a user message
+tool_call_id: 'tool1', 
         type: 'deleteMessageTool',
-        id: 'message1', // This is a user message
-        tool_call_id: 'tool1',
       };
 
       const newState = messagesReducer(initialState, payload);
@@ -432,8 +434,8 @@ describe('messagesReducer', () => {
   describe('createMessage', () => {
     it('should add a new message to the state', () => {
       const payload: MessageDispatch = {
-        type: 'createMessage',
         id: 'newMessage',
+        type: 'createMessage',
         value: {
           content: 'New message content',
           role: 'user',
@@ -457,8 +459,8 @@ describe('messagesReducer', () => {
   describe('deleteMessage', () => {
     it('should remove a message from the state', () => {
       const payload: MessageDispatch = {
-        type: 'deleteMessage',
         id: 'message1',
+        type: 'deleteMessage',
       };
 
       const newState = messagesReducer(initialState, payload);
@@ -469,8 +471,8 @@ describe('messagesReducer', () => {
 
     it('should not modify state if message to delete is not found', () => {
       const payload: MessageDispatch = {
-        type: 'deleteMessage',
         id: 'nonexistentMessage',
+        type: 'deleteMessage',
       };
 
       const newState = messagesReducer(initialState, payload);
@@ -481,8 +483,8 @@ describe('messagesReducer', () => {
   describe('deleteMessages', () => {
     it('should remove 2 messages from the state', () => {
       const payload: MessageDispatch = {
-        type: 'deleteMessages',
         ids: ['message1', 'message2'],
+        type: 'deleteMessages',
       };
 
       const newState = messagesReducer(initialState, payload);
@@ -494,8 +496,8 @@ describe('messagesReducer', () => {
 
     it('should not modify state if message to delete is not found', () => {
       const payload: MessageDispatch = {
-        type: 'deleteMessage',
         id: 'nonexistentMessage',
+        type: 'deleteMessage',
       };
 
       const newState = messagesReducer(initialState, payload);

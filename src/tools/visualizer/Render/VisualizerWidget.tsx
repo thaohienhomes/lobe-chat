@@ -7,6 +7,7 @@ import { useVisualizerTheme } from '@/features/visualizer/useVisualizerTheme';
 import { useChatStore } from '@/store/chat';
 
 interface VisualizerWidgetProps {
+  isStreaming?: boolean;
   loadingMessages: string[];
   messageId: string;
   title: string;
@@ -18,11 +19,11 @@ interface VisualizerWidgetProps {
  *
  * - Theme: derived from current antd tokens via useVisualizerTheme
  * - sendPrompt: forwards widget interaction to chat input
- * - isComplete: always true here because by the time BuiltinType renders,
- *   the tool call has already completed (streaming happens at tool call level)
+ * - isStreaming: when true, scripts are deferred and srcdoc updates are debounced
+ * - isComplete: inverse of isStreaming — scripts execute only when complete
  */
 const VisualizerWidget = memo<VisualizerWidgetProps>(
-  ({ widgetCode, title, loadingMessages, messageId }) => {
+  ({ widgetCode, title, loadingMessages, messageId, isStreaming = false }) => {
     const theme = useVisualizerTheme();
 
     const handleSendPrompt = useCallback(
@@ -42,8 +43,8 @@ const VisualizerWidget = memo<VisualizerWidgetProps>(
 
     return (
       <VisualizerRenderer
-        isComplete
-        isStreaming={false}
+        isComplete={!isStreaming}
+        isStreaming={isStreaming}
         loadingMessages={loadingMessages}
         onInteraction={handleInteraction}
         onSendPrompt={handleSendPrompt}
@@ -58,3 +59,4 @@ const VisualizerWidget = memo<VisualizerWidgetProps>(
 VisualizerWidget.displayName = 'VisualizerWidget';
 
 export default VisualizerWidget;
+

@@ -6,9 +6,9 @@ import { createIndexedDB } from './indexedDB';
 // Mock idb-keyval methods
 vi.mock('idb-keyval', () => ({
   createStore: vi.fn().mockImplementation(() => 'abc'),
+  delMany: vi.fn(),
   getMany: vi.fn(),
   setMany: vi.fn(),
-  delMany: vi.fn(),
 }));
 
 describe('createIndexedDB', () => {

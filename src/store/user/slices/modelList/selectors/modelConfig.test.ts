@@ -62,8 +62,8 @@ describe('modelConfigSelectors', () => {
         settings: {
           keyVaults: {
             azure: {
-              endpoint: 'endpoint',
               apiKey: 'apikey',
+              endpoint: 'endpoint',
             },
           },
         },
@@ -85,11 +85,11 @@ describe('modelConfigSelectors', () => {
     it('client fetch should enable if only endpoint provided', () => {
       const s = merge(initialSettingsState, {
         settings: {
-          languageModel: {
-            azure: { fetchOnClient: false },
-          },
           keyVaults: {
             azure: { endpoint: 'https://example.com' },
+          },
+          languageModel: {
+            azure: { fetchOnClient: false },
           },
         },
       } as UserSettingsState) as unknown as UserStore;
@@ -99,11 +99,11 @@ describe('modelConfigSelectors', () => {
     it('client fetch should control by user when a apikey or endpoint provided', () => {
       const s = merge(initialSettingsState, {
         settings: {
-          languageModel: {
-            azure: { fetchOnClient: true },
-          },
           keyVaults: {
             azure: { apiKey: 'some-key' },
+          },
+          languageModel: {
+            azure: { fetchOnClient: true },
           },
         },
       } as UserSettingsState) as unknown as UserStore;
@@ -116,13 +116,13 @@ describe('modelConfigSelectors', () => {
     it('client fecth should be disabled if provider is disable browser request', () => {
       const s = merge(initialSettingsState, {
         settings: {
-          languageModel: {
-            qwen: { fetchOnClient: true },
-          },
           keyVaults: {
             qwen: {
               apiKey: 'apikey',
             },
+          },
+          languageModel: {
+            qwen: { fetchOnClient: true },
           },
         },
       } as UserSettingsState) as unknown as UserStore;
@@ -137,8 +137,8 @@ describe('modelConfigSelectors', () => {
           languageModel: {
             perplexity: {
               customModelCards: [
-                { id: 'custom-model-1', displayName: 'Custom Model 1' },
-                { id: 'custom-model-2', displayName: 'Custom Model 2' },
+                { displayName: 'Custom Model 1', id: 'custom-model-1' },
+                { displayName: 'Custom Model 2', id: 'custom-model-2' },
               ],
             },
           },
@@ -150,7 +150,7 @@ describe('modelConfigSelectors', () => {
         provider: 'perplexity',
       })(s);
 
-      expect(customModelCard).toEqual({ id: 'custom-model-2', displayName: 'Custom Model 2' });
+      expect(customModelCard).toEqual({ displayName: 'Custom Model 2', id: 'custom-model-2' });
     });
 
     it('should return undefined if no custom model card is found with the given id and provider', () => {
@@ -158,7 +158,7 @@ describe('modelConfigSelectors', () => {
         settings: {
           languageModel: {
             perplexity: {
-              customModelCards: [{ id: 'custom-model-1', displayName: 'Custom Model 1' }],
+              customModelCards: [{ displayName: 'Custom Model 1', id: 'custom-model-1' }],
             },
           },
         },
@@ -176,27 +176,27 @@ describe('modelConfigSelectors', () => {
   describe('currentEditingCustomModelCard', () => {
     it('should return the custom model card that is currently being edited', () => {
       const s = merge(initialSettingsState, {
+        editingCustomCardModel: {
+          id: 'custom-model-2',
+          provider: 'perplexity',
+        },
         settings: {
           languageModel: {
             perplexity: {
               customModelCards: [
-                { id: 'custom-model-1', displayName: 'Custom Model 1' },
-                { id: 'custom-model-2', displayName: 'Custom Model 2' },
+                { displayName: 'Custom Model 1', id: 'custom-model-1' },
+                { displayName: 'Custom Model 2', id: 'custom-model-2' },
               ],
             },
           },
-        },
-        editingCustomCardModel: {
-          id: 'custom-model-2',
-          provider: 'perplexity',
         },
       } as UserState) as unknown as UserStore;
 
       const currentEditingModelCard = modelConfigSelectors.currentEditingCustomModelCard(s);
 
       expect(currentEditingModelCard).toEqual({
-        id: 'custom-model-2',
         displayName: 'Custom Model 2',
+        id: 'custom-model-2',
       });
     });
 
@@ -205,7 +205,7 @@ describe('modelConfigSelectors', () => {
         settings: {
           languageModel: {
             perplexity: {
-              customModelCards: [{ id: 'custom-model-1', displayName: 'Custom Model 1' }],
+              customModelCards: [{ displayName: 'Custom Model 1', id: 'custom-model-1' }],
             },
           },
         },

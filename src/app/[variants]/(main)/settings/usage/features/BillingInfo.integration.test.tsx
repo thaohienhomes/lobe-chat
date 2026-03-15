@@ -14,12 +14,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Plan pricing mapping (mirrors BillingInfo.tsx)
 const PLAN_PRICING: Record<string, { displayName: string; monthlyPoints: number; price: number }> =
   {
-    free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
     founding_member: {
       displayName: 'Lifetime Founding Member',
       monthlyPoints: 2_000_000,
       price: 0,
     },
+    free: { displayName: 'Phở Không Người Lái', monthlyPoints: 50_000, price: 0 },
     gl_lifetime: { displayName: 'Lifetime Founding Member', monthlyPoints: 2_000_000, price: 0 },
     gl_premium: { displayName: 'Premium', monthlyPoints: 2_000_000, price: 0 },
     gl_standard: { displayName: 'Standard', monthlyPoints: 500_000, price: 0 },
@@ -66,15 +66,15 @@ const getPlanInfo = (
 };
 
 // Subscription prioritization logic (mirrors route.ts)
-const prioritizeSubscriptions = (subscriptions: { planId: string; currentPeriodStart: Date }[]) => {
-  const FREE_PLAN_IDS = ['free', 'trial', 'starter'];
+const prioritizeSubscriptions = (subscriptions: { currentPeriodStart: Date, planId: string; }[]) => {
+  const FREE_PLAN_IDS = new Set(['free', 'trial', 'starter']);
   const LIFETIME_KEYWORDS = ['lifetime', 'founding'];
 
   return subscriptions.sort((a, b) => {
     const aIsLifetime = LIFETIME_KEYWORDS.some((kw) => a.planId.toLowerCase().includes(kw));
     const bIsLifetime = LIFETIME_KEYWORDS.some((kw) => b.planId.toLowerCase().includes(kw));
-    const aIsFree = FREE_PLAN_IDS.includes(a.planId.toLowerCase());
-    const bIsFree = FREE_PLAN_IDS.includes(b.planId.toLowerCase());
+    const aIsFree = FREE_PLAN_IDS.has(a.planId.toLowerCase());
+    const bIsFree = FREE_PLAN_IDS.has(b.planId.toLowerCase());
 
     if (aIsLifetime && !bIsLifetime) return -1;
     if (!aIsLifetime && bIsLifetime) return 1;
@@ -89,7 +89,7 @@ const prioritizeSubscriptions = (subscriptions: { planId: string; currentPeriodS
 
 // Simulates the complete flow
 const simulateBillingDisplay = (
-  dbSubscriptions: { planId: string; currentPeriodStart: Date }[],
+  dbSubscriptions: { currentPeriodStart: Date, planId: string; }[],
 ): { displayName: string; monthlyPoints: number } => {
   // Step 1: API prioritizes subscriptions (route.ts logic)
   const sortedSubscriptions = prioritizeSubscriptions(dbSubscriptions);
@@ -118,8 +118,8 @@ describe('BillingInfo Integration Tests', () => {
   describe('Complete flow: User with free + lifetime subscriptions', () => {
     it('should display Lifetime Founding Member when user has both free and lifetime', () => {
       const dbSubscriptions = [
-        { planId: 'free', currentPeriodStart: new Date('2024-01-01') },
-        { planId: 'lifetime', currentPeriodStart: new Date('2024-06-01') },
+        { currentPeriodStart: new Date('2024-01-01'), planId: 'free' },
+        { currentPeriodStart: new Date('2024-06-01'), planId: 'lifetime' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -131,8 +131,8 @@ describe('BillingInfo Integration Tests', () => {
     it('should display Lifetime when user has free first in DB order', () => {
       // Simulate DB returning free first (which was the bug scenario)
       const dbSubscriptions = [
-        { planId: 'free', currentPeriodStart: new Date('2024-12-01') }, // More recent
-        { planId: 'gl_lifetime', currentPeriodStart: new Date('2024-01-01') }, // Older but lifetime
+        { currentPeriodStart: new Date('2024-12-01'), planId: 'free' }, // More recent
+        { currentPeriodStart: new Date('2024-01-01'), planId: 'gl_lifetime' }, // Older but lifetime
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -141,9 +141,9 @@ describe('BillingInfo Integration Tests', () => {
 
     it('should display founding member correctly regardless of DB order', () => {
       const dbSubscriptions = [
-        { planId: 'starter', currentPeriodStart: new Date('2024-11-01') },
-        { planId: 'founding_member', currentPeriodStart: new Date('2024-01-01') },
-        { planId: 'trial', currentPeriodStart: new Date('2024-12-01') },
+        { currentPeriodStart: new Date('2024-11-01'), planId: 'starter' },
+        { currentPeriodStart: new Date('2024-01-01'), planId: 'founding_member' },
+        { currentPeriodStart: new Date('2024-12-01'), planId: 'trial' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -154,7 +154,7 @@ describe('BillingInfo Integration Tests', () => {
   describe('Complete flow: Unknown planId with keyword detection', () => {
     it('should display Lifetime for unknown planId containing "lifetime"', () => {
       const dbSubscriptions = [
-        { planId: 'special_lifetime_2024_promo', currentPeriodStart: new Date() },
+        { currentPeriodStart: new Date(), planId: 'special_lifetime_2024_promo' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -164,7 +164,7 @@ describe('BillingInfo Integration Tests', () => {
 
     it('should display Premium for unknown planId containing "premium"', () => {
       const dbSubscriptions = [
-        { planId: 'enterprise_premium_plus', currentPeriodStart: new Date() },
+        { currentPeriodStart: new Date(), planId: 'enterprise_premium_plus' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -172,7 +172,7 @@ describe('BillingInfo Integration Tests', () => {
     });
 
     it('should display Ultimate for unknown planId containing "ultimate"', () => {
-      const dbSubscriptions = [{ planId: 'super_ultimate_plan', currentPeriodStart: new Date() }];
+      const dbSubscriptions = [{ currentPeriodStart: new Date(), planId: 'super_ultimate_plan' }];
 
       const result = simulateBillingDisplay(dbSubscriptions);
       expect(result.displayName).toBe('Ultimate');
@@ -182,7 +182,7 @@ describe('BillingInfo Integration Tests', () => {
   describe('Complete flow: Completely unknown planId', () => {
     it('should fallback to free plan display with console warning', () => {
       const dbSubscriptions = [
-        { planId: 'completely_random_xyz_999', currentPeriodStart: new Date() },
+        { currentPeriodStart: new Date(), planId: 'completely_random_xyz_999' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -198,7 +198,7 @@ describe('BillingInfo Integration Tests', () => {
       // This is the exact scenario that was reported as a bug
       // User has a lifetime subscription but was seeing "Phở Không Người Lái"
       const dbSubscriptions = [
-        { planId: 'lifetime_founding_member', currentPeriodStart: new Date('2024-01-15') },
+        { currentPeriodStart: new Date('2024-01-15'), planId: 'lifetime_founding_member' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -212,10 +212,10 @@ describe('BillingInfo Integration Tests', () => {
     it('should prioritize lifetime even when mixed with other subscriptions', () => {
       // Complex scenario: user has multiple subscriptions from different sources
       const dbSubscriptions = [
-        { planId: 'free', currentPeriodStart: new Date('2024-01-01') },
-        { planId: 'vn_basic', currentPeriodStart: new Date('2024-03-01') },
-        { planId: 'gl_lifetime', currentPeriodStart: new Date('2024-02-01') },
-        { planId: 'starter', currentPeriodStart: new Date('2024-04-01') },
+        { currentPeriodStart: new Date('2024-01-01'), planId: 'free' },
+        { currentPeriodStart: new Date('2024-03-01'), planId: 'vn_basic' },
+        { currentPeriodStart: new Date('2024-02-01'), planId: 'gl_lifetime' },
+        { currentPeriodStart: new Date('2024-04-01'), planId: 'starter' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -225,14 +225,14 @@ describe('BillingInfo Integration Tests', () => {
 
   describe('Vietnam-specific plan displays', () => {
     it('should display Vietnamese name for vn_lifetime', () => {
-      const dbSubscriptions = [{ planId: 'vn_lifetime', currentPeriodStart: new Date() }];
+      const dbSubscriptions = [{ currentPeriodStart: new Date(), planId: 'vn_lifetime' }];
 
       const result = simulateBillingDisplay(dbSubscriptions);
       expect(result.displayName).toBe('Thành Viên Sáng Lập (Trọn Đời)');
     });
 
     it('should correctly display vn_pro plan', () => {
-      const dbSubscriptions = [{ planId: 'vn_pro', currentPeriodStart: new Date() }];
+      const dbSubscriptions = [{ currentPeriodStart: new Date(), planId: 'vn_pro' }];
 
       const result = simulateBillingDisplay(dbSubscriptions);
       expect(result.displayName).toBe('Phở Đặc Biệt');
@@ -241,8 +241,8 @@ describe('BillingInfo Integration Tests', () => {
 
     it('should prioritize vn_lifetime over vn_free', () => {
       const dbSubscriptions = [
-        { planId: 'vn_free', currentPeriodStart: new Date('2024-01-01') },
-        { planId: 'vn_lifetime', currentPeriodStart: new Date('2024-06-01') },
+        { currentPeriodStart: new Date('2024-01-01'), planId: 'vn_free' },
+        { currentPeriodStart: new Date('2024-06-01'), planId: 'vn_lifetime' },
       ];
 
       const result = simulateBillingDisplay(dbSubscriptions);
@@ -265,7 +265,7 @@ describe('BillingInfo Integration Tests', () => {
 
     for (const { planId, expected } of testCases) {
       it(`should display ${expected.toLocaleString()} points for ${planId}`, () => {
-        const dbSubscriptions = [{ planId, currentPeriodStart: new Date() }];
+        const dbSubscriptions = [{ currentPeriodStart: new Date(), planId }];
         const result = simulateBillingDisplay(dbSubscriptions);
         expect(result.monthlyPoints).toBe(expected);
       });

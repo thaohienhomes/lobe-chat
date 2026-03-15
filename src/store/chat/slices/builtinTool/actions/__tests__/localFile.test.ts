@@ -83,12 +83,12 @@ describe('localFileSlice', () => {
     it('should call listLocalFiles service and update state', async () => {
       const mockResult: LocalFileItem[] = [
         {
-          name: 'test.txt',
-          path: '/test.txt',
-          isDirectory: false,
           createdTime: new Date(),
+          isDirectory: false,
           lastAccessTime: new Date(),
           modifiedTime: new Date(),
+          name: 'test.txt',
+          path: '/test.txt',
           size: 100,
           type: 'file',
         },
@@ -105,8 +105,8 @@ describe('localFileSlice', () => {
     it('should handle successful move', async () => {
       const mockResults = [
         {
-          sourcePath: '/test.txt',
           destinationPath: '/target/test.txt',
+          sourcePath: '/test.txt',
           success: true,
         },
       ] as unknown as LocalMoveFilesResultItem[];
@@ -114,8 +114,8 @@ describe('localFileSlice', () => {
       vi.mocked(localFileService.moveLocalFiles).mockResolvedValue(mockResults);
 
       await store.moveLocalFiles('test-id', {
-        sourcePaths: ['/test.txt'],
         destinationDir: '/target',
+        sourcePaths: ['/test.txt'],
       } as any);
 
       expect(mockStore.internal_triggerLocalFileToolCalling).toBeCalled();
@@ -125,23 +125,23 @@ describe('localFileSlice', () => {
   describe('writeLocalFile', () => {
     it('should handle successful write', async () => {
       vi.mocked(localFileService.writeFile).mockResolvedValue({
-        success: true,
         newPath: '/test.txt',
+        success: true,
       });
 
-      await store.writeLocalFile('test-id', { path: '/test.txt', content: 'test' });
+      await store.writeLocalFile('test-id', { content: 'test', path: '/test.txt' });
 
       expect(mockStore.internal_triggerLocalFileToolCalling).toBeCalled();
     });
 
     it('should handle write error', async () => {
       vi.mocked(localFileService.writeFile).mockResolvedValue({
-        success: false,
         error: 'Write failed',
         newPath: '/test.txt',
+        success: false,
       });
 
-      await store.writeLocalFile('test-id', { path: '/test.txt', content: 'test' });
+      await store.writeLocalFile('test-id', { content: 'test', path: '/test.txt' });
 
       expect(mockStore.internal_triggerLocalFileToolCalling).toBeCalled();
     });
@@ -150,23 +150,23 @@ describe('localFileSlice', () => {
   describe('renameLocalFile', () => {
     it('should handle successful rename', async () => {
       vi.mocked(localFileService.renameLocalFile).mockResolvedValue({
-        success: true,
         newPath: '/new.txt',
+        success: true,
       });
 
-      await store.renameLocalFile('test-id', { path: '/test.txt', newName: 'new.txt' });
+      await store.renameLocalFile('test-id', { newName: 'new.txt', path: '/test.txt' });
 
       expect(mockStore.internal_triggerLocalFileToolCalling).toBeCalled();
     });
 
     it('should handle rename error', async () => {
       vi.mocked(localFileService.renameLocalFile).mockResolvedValue({
-        success: false,
         error: 'Rename failed',
         newPath: '/test.txt',
+        success: false,
       });
 
-      await store.renameLocalFile('test-id', { path: '/test.txt', newName: 'new.txt' });
+      await store.renameLocalFile('test-id', { newName: 'new.txt', path: '/test.txt' });
 
       expect(mockStore.internal_triggerLocalFileToolCalling).toBeCalled();
     });
@@ -177,8 +177,8 @@ describe('localFileSlice', () => {
       );
 
       await store.renameLocalFile('test-id', {
-        path: '/test.txt',
         newName: '../invalid.txt',
+        path: '/test.txt',
       });
 
       expect(mockStore.internal_triggerLocalFileToolCalling).toBeCalledWith(

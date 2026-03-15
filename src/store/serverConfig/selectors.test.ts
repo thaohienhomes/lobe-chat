@@ -9,36 +9,36 @@ describe('featureFlagsSelectors', () => {
   it('should return mapped feature flags from store', () => {
     const store = initServerConfigStore({
       featureFlags: {
-        language_model_settings: false,
         edit_agent: false,
+        language_model_settings: false,
       },
     });
 
     const result = featureFlagsSelectors(store.getState());
 
     expect(result).toEqual({
-      isAgentEditable: false,
-      showApiKeyManage: false,
-      enablePlugins: true,
-      showCreateSession: true,
-      showChangelog: true,
-      enableRAGEval: false,
-      showDalle: true,
-      showAiImage: true,
       enableKnowledgeBase: true,
-      showLLM: false,
-      showCloudPromotion: false,
-      showOpenAIApiKey: false,
+      enablePlugins: true,
+      enableRAGEval: false,
+      isAgentEditable: false,
       hideDocs: false,
+      showAiImage: true,
       hideGitHub: true,
-      showOpenAIProxyUrl: false,
+      showApiKeyManage: false,
       enableCheckUpdates: true,
-      showWelcomeSuggest: true,
+      showChangelog: true,
       enableClerkSignUp: true,
-      showProvider: false,
-      showMarket: true,
-      showPinList: false,
+      showCloudPromotion: false,
       enableSTT: true,
+      showCreateSession: true,
+      showDalle: true,
+      showLLM: false,
+      showMarket: true,
+      showOpenAIApiKey: false,
+      showOpenAIProxyUrl: false,
+      showPinList: false,
+      showProvider: false,
+      showWelcomeSuggest: true,
     });
   });
 });
@@ -48,9 +48,9 @@ describe('serverConfigSelectors', () => {
     it('should return enabledOAuthSSO value from store', () => {
       const store = initServerConfigStore({
         serverConfig: {
+          aiProvider: {},
           enabledOAuthSSO: true,
           telemetry: {},
-          aiProvider: {},
         },
       });
 
@@ -64,8 +64,8 @@ describe('serverConfigSelectors', () => {
     it('should return langfuse value from store when defined', () => {
       const store = initServerConfigStore({
         serverConfig: {
-          telemetry: { langfuse: true },
           aiProvider: {},
+          telemetry: { langfuse: true },
         },
       });
 
@@ -77,8 +77,8 @@ describe('serverConfigSelectors', () => {
     it('should return false when langfuse is not defined', () => {
       const store = initServerConfigStore({
         serverConfig: {
-          telemetry: {},
           aiProvider: {},
+          telemetry: {},
         },
       });
 

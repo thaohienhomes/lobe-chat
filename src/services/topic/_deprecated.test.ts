@@ -1,6 +1,5 @@
-import { Mock, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SessionModel } from '@/database/_deprecated/models/session';
 import { CreateTopicParams, TopicModel } from '@/database/_deprecated/models/topic';
 import { ChatTopic } from '@/types/topic';
 
@@ -11,18 +10,18 @@ const topicService = new ClientService();
 vi.mock('@/database/_deprecated/models/topic', () => {
   return {
     TopicModel: {
-      create: vi.fn(),
-      query: vi.fn(),
-      delete: vi.fn(),
-      count: vi.fn(),
-      batchDeleteBySessionId: vi.fn(),
-      batchDelete: vi.fn(),
-      clearTable: vi.fn(),
-      toggleFavorite: vi.fn(),
       batchCreate: vi.fn(),
-      update: vi.fn(),
+      batchDelete: vi.fn(),
+      batchDeleteBySessionId: vi.fn(),
+      clearTable: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      query: vi.fn(),
       queryAll: vi.fn(),
       queryByKeyword: vi.fn(),
+      toggleFavorite: vi.fn(),
+      update: vi.fn(),
     },
   };
 });
@@ -32,9 +31,9 @@ describe('TopicService', () => {
   const mockTopicId = 'mock-topic-id';
   const mockTopic: ChatTopic = {
     createdAt: 100,
-    updatedAt: 100,
     id: mockTopicId,
     title: 'Mock Topic',
+    updatedAt: 100,
   };
   const mockTopics = [mockTopic];
 
@@ -47,8 +46,8 @@ describe('TopicService', () => {
     it('should create a topic and return its id', async () => {
       // Setup
       const createParams: CreateTopicParams = {
-        title: 'New Topic',
         sessionId: '1',
+        title: 'New Topic',
       };
       (TopicModel.create as Mock).mockResolvedValue(mockTopic);
 
@@ -62,8 +61,8 @@ describe('TopicService', () => {
     it('should throw an error if topic creation fails', async () => {
       // Setup
       const createParams: CreateTopicParams = {
-        title: 'New Topic',
         sessionId: '1',
+        title: 'New Topic',
       };
 
       (TopicModel.create as Mock).mockResolvedValue(null);

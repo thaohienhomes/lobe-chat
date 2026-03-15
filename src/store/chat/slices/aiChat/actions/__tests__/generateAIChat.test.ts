@@ -5,7 +5,6 @@ import { LOADING_FLAT } from '@/const/message';
 import { DEFAULT_AGENT_CHAT_CONFIG, DEFAULT_AGENT_CONFIG } from '@/const/settings';
 import { chatService } from '@/services/chat';
 import { messageService } from '@/services/message';
-import { sessionService } from '@/services/session';
 import { topicService } from '@/services/topic';
 import { useAgentStore } from '@/store/agent';
 import { agentChatConfigSelectors, agentSelectors } from '@/store/agent/selectors';
@@ -26,14 +25,14 @@ vi.mock('zustand/traditional');
 // Mock service
 vi.mock('@/services/message', () => ({
   messageService: {
-    getMessages: vi.fn(),
-    updateMessageError: vi.fn(),
-    removeMessage: vi.fn(),
-    removeMessagesByAssistant: vi.fn(),
-    removeMessages: vi.fn(() => Promise.resolve()),
     createMessage: vi.fn(() => Promise.resolve('new-message-id')),
-    updateMessage: vi.fn(),
+    getMessages: vi.fn(),
     removeAllMessages: vi.fn(() => Promise.resolve()),
+    removeMessage: vi.fn(),
+    removeMessages: vi.fn(() => Promise.resolve()),
+    removeMessagesByAssistant: vi.fn(),
+    updateMessage: vi.fn(),
+    updateMessageError: vi.fn(),
   },
 }));
 vi.mock('@/services/topic', () => ({
@@ -68,10 +67,10 @@ const realCoreProcessMessage = useChatStore.getState().internal_coreProcessMessa
 const mockState = {
   activeId: 'session-id',
   activeTopicId: 'topic-id',
+  internal_coreProcessMessage: vi.fn(),
   messages: [],
   refreshMessages: vi.fn(),
   refreshTopic: vi.fn(),
-  internal_coreProcessMessage: vi.fn(),
   saveToTopic: vi.fn(),
 };
 
@@ -125,7 +124,7 @@ describe('chatMessage actions', () => {
       const message = '';
 
       await act(async () => {
-        await result.current.sendMessage({ message, files: [] });
+        await result.current.sendMessage({ files: [], message });
       });
 
       expect(messageService.createMessage).not.toHaveBeenCalled();
@@ -142,7 +141,7 @@ describe('chatMessage actions', () => {
       (messageService.createMessage as Mock).mockResolvedValue('new-message-id');
 
       await act(async () => {
-        await result.current.sendMessage({ message, files });
+        await result.current.sendMessage({ files, message });
       });
 
       expect(messageService.createMessage).toHaveBeenCalledWith({
@@ -178,8 +177,10 @@ describe('chatMessage actions', () => {
         await act(async () => {
           useChatStore.setState({
             ...mockState,
+            
+            activeTopicId: undefined,
             // Mock the currentChats selector to return a list that does not reach the threshold
-            messagesMap: {
+messagesMap: {
               [messageMapKey('session-id')]: Array.from(
                 { length: autoCreateTopicThreshold + 1 },
                 (_, i) => ({
@@ -187,7 +188,6 @@ describe('chatMessage actions', () => {
                 }),
               ) as any,
             },
-            activeTopicId: undefined,
             saveToTopic: saveToTopicMock,
             switchTopic: switchTopicMock,
           });
@@ -222,6 +222,8 @@ describe('chatMessage actions', () => {
           useChatStore.setState({
             ...mockState,
             activeId: 'session_id',
+            activeTopicId: undefined,
+            createTopic: createTopicMock,
             messagesMap: {
               [messageMapKey('session_id')]: Array.from(
                 { length: autoCreateTopicThreshold },
@@ -230,8 +232,6 @@ describe('chatMessage actions', () => {
                 }),
               ) as any,
             },
-            activeTopicId: undefined,
-            createTopic: createTopicMock,
             switchTopic: switchTopicMock,
           });
         });
@@ -252,19 +252,20 @@ describe('chatMessage actions', () => {
             agentMap: {
               abc: {
                 chatConfig: {
-                  enableAutoCreateTopic: false,
                   autoCreateTopicThreshold: 1,
+                  enableAutoCreateTopic: false,
                 },
               },
             },
           });
 
           useChatStore.setState({
+            
+            activeTopicId: 'inbox',
             // Mock the currentChats selector to return a list that does not reach the threshold
-            messagesMap: {
+messagesMap: {
               [messageMapKey('inbox')]: [{ id: '1' }, { id: '2' }] as ChatMessage[],
             },
-            activeTopicId: 'inbox',
           });
         });
 
@@ -298,6 +299,8 @@ describe('chatMessage actions', () => {
           useChatStore.setState({
             ...mockState,
             activeId: 'session_id',
+            activeTopicId: undefined,
+            createTopic: createTopicMock,
             messagesMap: {
               // Mock the currentChats selector to return a list that does not reach the threshold
               [messageMapKey('session_id')]: Array.from(
@@ -307,8 +310,6 @@ describe('chatMessage actions', () => {
                 }),
               ) as any,
             },
-            activeTopicId: undefined,
-            createTopic: createTopicMock,
             switchTopic: switchTopicMock,
           });
 
@@ -375,7 +376,7 @@ describe('chatMessage actions', () => {
       const { result } = renderHook(() => useChatStore());
 
       await act(async () => {
-        await result.current.sendMessage({ message: 'test', isWelcomeQuestion: true });
+        await result.current.sendMessage({ isWelcomeQuestion: true, message: 'test' });
       });
 
       expect(result.current.internal_coreProcessMessage).toHaveBeenCalledWith(
@@ -389,7 +390,7 @@ describe('chatMessage actions', () => {
       const { result } = renderHook(() => useChatStore());
 
       await act(async () => {
-        await result.current.sendMessage({ message: '', files: [{ id: 'file-1' }] as any });
+        await result.current.sendMessage({ files: [{ id: 'file-1' }] as any, message: '' });
       });
 
       expect(messageService.createMessage).toHaveBeenCalledWith({
@@ -405,7 +406,7 @@ describe('chatMessage actions', () => {
       const { result } = renderHook(() => useChatStore());
 
       await act(async () => {
-        await result.current.sendMessage({ message: 'test', files: [{ id: 'file-1' }] as any });
+        await result.current.sendMessage({ files: [{ id: 'file-1' }] as any, message: 'test' });
       });
 
       expect(messageService.createMessage).toHaveBeenCalledWith({
@@ -425,7 +426,7 @@ describe('chatMessage actions', () => {
 
       try {
         await result.current.sendMessage({ message: 'test' });
-      } catch (e) {}
+      } catch {}
 
       expect(result.current.internal_coreProcessMessage).not.toHaveBeenCalled();
     });
@@ -658,9 +659,9 @@ describe('chatMessage actions', () => {
 
       const { result } = renderHook(() => useChatStore());
       const userMessage = {
+        content: 'Hello, world!',
         id: 'user-message-id',
         role: 'user',
-        content: 'Hello, world!',
         sessionId: mockState.activeId,
         topicId: mockState.activeTopicId,
       } as ChatMessage;
@@ -682,10 +683,10 @@ describe('chatMessage actions', () => {
       // 验证是否创建了代表 AI 响应的消息
       expect(createMessageSpyOn).toHaveBeenCalledWith(
         expect.objectContaining({
-          role: 'assistant',
           content: LOADING_FLAT,
           fromModel: expect.anything(),
           parentId: userMessage.id,
+          role: 'assistant',
           sessionId: mockState.activeId,
           topicId: mockState.activeTopicId,
         }),
@@ -711,7 +712,7 @@ describe('chatMessage actions', () => {
           // Mock the currentChats selector to return a list that includes the message to be resent
           messagesMap: {
             [messageMapKey('session-id')]: [
-              { id: messageId, role: 'user', content: 'Resend this message' } as ChatMessage,
+              { content: 'Resend this message', id: messageId, role: 'user' } as ChatMessage,
             ],
           },
         });
@@ -760,7 +761,7 @@ describe('chatMessage actions', () => {
   describe('internal_fetchAIChatMessage', () => {
     it('should fetch AI chat message and return content', async () => {
       const { result } = renderHook(() => useChatStore());
-      const messages = [{ id: 'message-id', content: 'Hello', role: 'user' }] as ChatMessage[];
+      const messages = [{ content: 'Hello', id: 'message-id', role: 'user' }] as ChatMessage[];
       const assistantMessageId = 'assistant-message-id';
       const aiResponse = 'Hello, human!';
 
@@ -768,8 +769,8 @@ describe('chatMessage actions', () => {
 
       await act(async () => {
         const response = await result.current.internal_fetchAIChatMessage({
-          messages,
           messageId: assistantMessageId,
+          messages,
           model: 'gpt-4o-mini',
           provider: 'openai',
         });
@@ -779,7 +780,7 @@ describe('chatMessage actions', () => {
 
     it('should handle errors during AI response fetching', async () => {
       const { result } = renderHook(() => useChatStore());
-      const messages = [{ id: 'message-id', content: 'Hello', role: 'user' }] as ChatMessage[];
+      const messages = [{ content: 'Hello', id: 'message-id', role: 'user' }] as ChatMessage[];
       const assistantMessageId = 'assistant-message-id';
 
       // Mock fetch to reject with an error
@@ -789,11 +790,11 @@ describe('chatMessage actions', () => {
       await act(async () => {
         expect(
           await result.current.internal_fetchAIChatMessage({
+            messageId: assistantMessageId,
+            messages,
+
             model: 'gpt-4o-mini',
             provider: 'openai',
-
-            messages,
-            messageId: assistantMessageId,
           }),
         ).toEqual({
           content: '',
@@ -806,7 +807,7 @@ describe('chatMessage actions', () => {
       const messageId = 'message-id';
       const messages = [
         { id: 'msg-1', role: 'system' },
-        { id: messageId, role: 'user', meta: { avatar: '😀' } },
+        { id: messageId, meta: { avatar: '😀' }, role: 'user' },
         { id: 'msg-3', role: 'assistant' },
       ];
       act(() => {
@@ -833,8 +834,8 @@ describe('chatMessage actions', () => {
       const messageId = 'message-id';
       const messages = [
         { id: 'msg-1', role: 'system' },
-        { id: 'msg-2', role: 'user', meta: { avatar: '😀' } },
-        { id: messageId, role: 'assistant', parentId: 'msg-2' },
+        { id: 'msg-2', meta: { avatar: '😀' }, role: 'user' },
+        { id: messageId, parentId: 'msg-2', role: 'assistant' },
       ];
       useChatStore.setState({
         messagesMap: {

@@ -19,16 +19,16 @@ vi.mock('@/components/AntdStaticMethods', () => ({
 // Mock the pluginService.getToolList method
 vi.mock('@/services/plugin', () => ({
   pluginService: {
-    uninstallPlugin: vi.fn(),
     installPlugin: vi.fn(),
+    uninstallPlugin: vi.fn(),
   },
 }));
 
 vi.mock('@/services/tool', () => ({
   toolService: {
-    getToolManifest: vi.fn(),
-    getToolList: vi.fn(),
     getOldPluginList: vi.fn(),
+    getToolList: vi.fn(),
+    getToolManifest: vi.fn(),
   },
 }));
 
@@ -41,9 +41,8 @@ const pluginManifestMock = {
   $schema: '../node_modules/@lobehub/chat-plugin-sdk/schema.json',
   api: [
     {
-      url: 'https://realtime-weather.chat-plugin.lobehub.com/api/v1',
-      name: 'fetchCurrentWeather',
       description: '获取当前天气情况',
+      name: 'fetchCurrentWeather',
       parameters: {
         properties: {
           city: {
@@ -54,6 +53,7 @@ const pluginManifestMock = {
         required: ['city'],
         type: 'object',
       },
+      url: 'https://realtime-weather.chat-plugin.lobehub.com/api/v1',
     },
   ],
   author: 'LobeHub',
@@ -62,13 +62,13 @@ const pluginManifestMock = {
   identifier: 'realtime-weather',
   meta: {
     avatar: '🌈',
+    description: 'Get realtime weather information',
     tags: ['weather', 'realtime'],
     title: 'Realtime Weather',
-    description: 'Get realtime weather information',
   },
   ui: {
-    url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
     height: 310,
+    url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
   },
   version: '1',
 };
@@ -87,10 +87,10 @@ beforeEach(() => {
   useToolStore.setState({
     oldPluginItems: [
       {
-        identifier: 'plugin1',
-        title: 'plugin1',
         avatar: '🍏',
+        identifier: 'plugin1',
         manifest: 'https://abc.com/manifest.json',
+        title: 'plugin1',
       } as DiscoverPluginItem,
     ],
   });
@@ -131,7 +131,7 @@ describe('useToolStore:pluginStore', () => {
         await act(async () => {
           pluginList = await useToolStore.getState().loadPluginStore();
         });
-      } catch (e) {
+      } catch {
         errorOccurred = true;
       }
 
@@ -209,9 +209,8 @@ describe('useToolStore:pluginStore', () => {
         $schema: '../node_modules/@lobehub/chat-plugin-sdk/schema.json',
         api: [
           {
-            url: 'https://realtime-weather.chat-plugin.lobehub.com/api/v1',
-            name: 'fetchCurrentWeather',
             description: '获取当前天气情况',
+            name: 'fetchCurrentWeather',
             parameters: {
               properties: {
                 city: {
@@ -222,6 +221,7 @@ describe('useToolStore:pluginStore', () => {
               required: ['city'],
               type: 'object',
             },
+            url: 'https://realtime-weather.chat-plugin.lobehub.com/api/v1',
           },
         ],
         author: 'LobeHub',
@@ -230,13 +230,13 @@ describe('useToolStore:pluginStore', () => {
         identifier: 'realtime-weather',
         meta: {
           avatar: '🌈',
+          description: 'Get realtime weather information',
           tags: ['weather', 'realtime'],
           title: 'Realtime Weather',
-          description: 'Get realtime weather information',
         },
         ui: {
-          url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
           height: 310,
+          url: 'https://realtime-weather.chat-plugin.lobehub.com/iframe',
         },
         version: '1',
       };
@@ -252,8 +252,8 @@ describe('useToolStore:pluginStore', () => {
       expect(updateInstallLoadingStateMock).toHaveBeenCalledTimes(2);
       expect(pluginService.installPlugin).toHaveBeenCalledWith({
         identifier: 'plugin1',
-        type: 'plugin',
         manifest: pluginManifestMock,
+        type: 'plugin',
       });
 
       act(() => {
@@ -274,9 +274,9 @@ describe('useToolStore:pluginStore', () => {
       useToolStore.setState({
         oldPluginItems: [
           {
+            avatar: '🍏',
             identifier: 'plugin1',
             title: 'plugin1',
-            avatar: '🍏',
           } as DiscoverPluginItem,
         ],
       });
@@ -299,16 +299,16 @@ describe('useToolStore:pluginStore', () => {
         useToolStore.setState({
           oldPluginItems: [
             {
-              identifier: 'plugin1',
-              title: 'plugin1',
               avatar: '🍏',
+              identifier: 'plugin1',
               manifest: 'https://abc.com/manifest.json',
+              title: 'plugin1',
             } as DiscoverPluginItem,
             {
-              identifier: 'plugin2',
-              title: 'plugin2',
               avatar: '🍏',
+              identifier: 'plugin2',
               manifest: 'https://abc.com/manifest.json',
+              title: 'plugin2',
             } as DiscoverPluginItem,
           ],
         });
@@ -336,11 +336,11 @@ describe('useToolStore:pluginStore', () => {
           installedPlugins: [
             {
               identifier: pluginIdentifier,
-              type: 'plugin',
               manifest: {
                 identifier: pluginIdentifier,
                 meta: {},
               } as LobeChatPluginManifest,
+              type: 'plugin',
             },
           ],
         });

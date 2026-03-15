@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { mutate } from 'swr';
-import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { generationService } from '@/services/generation';
 import { generationBatchService } from '@/services/generationBatch';
@@ -112,7 +112,7 @@ describe('GenerationBatchAction', () => {
           generations: [
             {
               id: generationId,
-              seed: 12345,
+              seed: 12_345,
               createdAt: new Date(),
               asyncTaskId: null,
               task: {
@@ -159,7 +159,7 @@ describe('GenerationBatchAction', () => {
           generations: [
             {
               id: 'gen_1',
-              seed: 12345,
+              seed: 12_345,
               createdAt: new Date(),
               asyncTaskId: null,
               task: {
@@ -169,7 +169,7 @@ describe('GenerationBatchAction', () => {
             },
             {
               id: 'gen_2',
-              seed: 54321,
+              seed: 54_321,
               createdAt: new Date(),
               asyncTaskId: null,
               task: {
@@ -228,7 +228,7 @@ describe('GenerationBatchAction', () => {
           generations: [
             {
               id: generationId,
-              seed: 12345,
+              seed: 12_345,
               createdAt: new Date(),
               asyncTaskId: null,
               task: {

@@ -100,7 +100,7 @@ describe('translation', () => {
     }));
 
     const { t } = await translation('common', 'en-US');
-    expect(t('multiParam', { name: 'John', count: '5' })).toBe('Hello John, you have 5 messages');
+    expect(t('multiParam', { count: '5', name: 'John' })).toBe('Hello John, you have 5 messages');
   });
 
   it('should handle different namespaces', async () => {

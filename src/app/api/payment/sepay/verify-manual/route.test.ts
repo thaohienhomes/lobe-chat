@@ -13,9 +13,9 @@ vi.mock('@clerk/nextjs/server', () => ({
 
 // Mock billing service
 vi.mock('@/server/services/billing/sepay', () => ({
+  activateUserSubscription: vi.fn(),
   getPaymentByOrderId: vi.fn(),
   updatePaymentStatus: vi.fn(),
-  activateUserSubscription: vi.fn(),
 }));
 
 // Set env var before importing route
@@ -34,10 +34,10 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     vi.mocked(auth).mockResolvedValue({ userId: null } as any);
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
-      method: 'POST',
       body: JSON.stringify({
         orderId: 'PHO_QR_123456',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -50,8 +50,8 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
-      method: 'POST',
       body: JSON.stringify({ orderId: 'PHO_QR_123456' }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -65,10 +65,10 @@ describe('POST /api/payment/sepay/verify-manual', () => {
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue(undefined);
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
-      method: 'POST',
       body: JSON.stringify({
         orderId: 'PHO_QR_NONEXISTENT',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -81,22 +81,26 @@ describe('POST /api/payment/sepay/verify-manual', () => {
   it('should return 403 if payment does not belong to user', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
-      id: 'payment_123',
-      orderId: 'PHO_QR_123456',
-      userId: 'user_456', // Different user
-      planId: 'premium',
+      amountVnd: 100_000,
       billingCycle: 'monthly',
-      amountVnd: 100000,
+      
+createdAt: new Date(), 
+      
+id: 'payment_123',
+      
+orderId: 'PHO_QR_123456',
+      // Different user
+planId: 'premium',
       status: 'pending',
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'user_456',
     } as any);
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
-      method: 'POST',
       body: JSON.stringify({
         orderId: 'PHO_QR_123456',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -108,27 +112,27 @@ describe('POST /api/payment/sepay/verify-manual', () => {
   it('should return 403 when feature is disabled (success scenario)', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
+      amountVnd: 100_000,
+      billingCycle: 'monthly',
+      createdAt: new Date(),
       id: 'payment_123',
       orderId: 'PHO_QR_123456',
-      userId: 'user_123',
       planId: 'premium',
-      billingCycle: 'monthly',
-      amountVnd: 100000,
       status: 'pending',
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'user_123',
     } as any);
     vi.mocked(billingService.updatePaymentStatus).mockResolvedValue(undefined);
     vi.mocked(billingService.activateUserSubscription).mockResolvedValue(undefined);
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
-      method: 'POST',
       body: JSON.stringify({
+        amount: 100_000,
+        description: 'Manual verification',
         orderId: 'PHO_QR_123456',
         transactionId: 'TXN_123456',
-        amount: 100000,
-        description: 'Manual verification',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -141,23 +145,23 @@ describe('POST /api/payment/sepay/verify-manual', () => {
   it('should return 403 when feature is disabled (error scenario)', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
+      amountVnd: 100_000,
+      billingCycle: 'monthly',
+      createdAt: new Date(),
       id: 'payment_123',
       orderId: 'PHO_QR_123456',
-      userId: 'user_123',
       planId: 'premium',
-      billingCycle: 'monthly',
-      amountVnd: 100000,
       status: 'pending',
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'user_123',
     } as any);
     vi.mocked(billingService.updatePaymentStatus).mockRejectedValue(new Error('Database error'));
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
-      method: 'POST',
       body: JSON.stringify({
         orderId: 'PHO_QR_123456',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -170,25 +174,25 @@ describe('POST /api/payment/sepay/verify-manual', () => {
   it('should return 403 when feature is disabled (custom transaction ID scenario)', async () => {
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
+      amountVnd: 100_000,
+      billingCycle: 'monthly',
+      createdAt: new Date(),
       id: 'payment_123',
       orderId: 'PHO_QR_123456',
-      userId: 'user_123',
       planId: 'premium',
-      billingCycle: 'monthly',
-      amountVnd: 100000,
       status: 'pending',
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'user_123',
     } as any);
     vi.mocked(billingService.updatePaymentStatus).mockResolvedValue(undefined);
     vi.mocked(billingService.activateUserSubscription).mockResolvedValue(undefined);
 
     const request = new Request('http://localhost/api/payment/sepay/verify-manual', {
-      method: 'POST',
       body: JSON.stringify({
         orderId: 'PHO_QR_123456',
         transactionId: 'CUSTOM_TXN_123',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);

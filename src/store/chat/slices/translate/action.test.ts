@@ -1,5 +1,5 @@
-import { chainLangDetect } from '@lobechat/prompts';
-import { chainTranslate } from '@lobechat/prompts';
+import { chainLangDetect , chainTranslate } from '@lobechat/prompts';
+
 import { act, renderHook } from '@testing-library/react';
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,9 +12,9 @@ import { useChatStore } from '../../store';
 // Mock messageService 和 chatService
 vi.mock('@/services/message', () => ({
   messageService: {
+    updateMessage: vi.fn(),
     updateMessageTTS: vi.fn(),
     updateMessageTranslate: vi.fn(),
-    updateMessage: vi.fn(),
   },
 }));
 
@@ -66,14 +66,14 @@ describe('ChatEnhanceAction', () => {
           messagesMap: {
             [messageMapKey('session')]: [
               {
-                id: messageId,
                 content: messageContent,
                 createdAt: Date.now(),
-                updatedAt: Date.now(),
+                id: messageId,
+                meta: {},
                 role: 'user',
                 sessionId: 'test',
                 topicId: 'test',
-                meta: {},
+                updatedAt: Date.now(),
               },
             ],
           },

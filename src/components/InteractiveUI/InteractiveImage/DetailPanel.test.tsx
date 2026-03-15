@@ -85,7 +85,7 @@ describe('DetailPanel', () => {
       const dot = container.querySelector('span[style]') as HTMLSpanElement;
       expect(dot).toBeInTheDocument();
       // happy-dom may keep hex format instead of converting to rgb
-      expect(dot.style.backgroundColor).toMatch(/(#4ECDC4|rgb\(78, 205, 196\))/i);
+      expect(dot.style.backgroundColor).toMatch(/(#4ecdc4|rgb\(78, 205, 196\))/i);
     });
 
     it('should render backdrop when open', () => {

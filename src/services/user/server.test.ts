@@ -13,28 +13,28 @@ vi.mock('@/libs/trpc/client', () => ({
       getUserRegistrationDuration: {
         query: vi.fn(),
       },
-      getUserState: {
-        query: vi.fn(),
-      },
       getUserSSOProviders: {
         query: vi.fn(),
       },
-      unlinkSSOProvider: {
-        mutate: vi.fn(),
+      getUserState: {
+        query: vi.fn(),
       },
       makeUserOnboarded: {
         mutate: vi.fn(),
       },
-      updatePreference: {
+      resetSettings: {
+        mutate: vi.fn(),
+      },
+      unlinkSSOProvider: {
         mutate: vi.fn(),
       },
       updateGuide: {
         mutate: vi.fn(),
       },
-      updateSettings: {
+      updatePreference: {
         mutate: vi.fn(),
       },
-      resetSettings: {
+      updateSettings: {
         mutate: vi.fn(),
       },
     },
@@ -73,14 +73,14 @@ describe('ServerService', () => {
   it('should get user SSO providers', async () => {
     const mockProviders = [
       {
+        access_token: 'token',
+        expires_at: 123,
         provider: 'google',
         providerAccountId: '123',
-        userId: 'user1',
-        type: 'oauth' as const,
-        access_token: 'token',
-        token_type: 'bearer' as const,
-        expires_at: 123,
         scope: 'email profile',
+        token_type: 'bearer' as const,
+        type: 'oauth' as const,
+        userId: 'user1',
       },
     ];
     vi.mocked(lambdaClient.user.getUserSSOProviders.query).mockResolvedValue(mockProviders);

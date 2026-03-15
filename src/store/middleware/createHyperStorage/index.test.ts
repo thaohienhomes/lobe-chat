@@ -23,8 +23,8 @@ vi.mock('./urlStorage', () => ({
 
 vi.mock('./keyMapper', () => ({
   createKeyMapper: vi.fn().mockReturnValue({
-    mapStateKeyToStorageKey: vi.fn((k) => k),
     getStateKeyFromStorageKey: vi.fn((k) => k),
+    mapStateKeyToStorageKey: vi.fn((k) => k),
   }),
 }));
 
@@ -76,7 +76,7 @@ describe('createHyperStorage', () => {
     }));
 
     const storage = createHyperStorage({
-      localStorage: { mode: 'indexedDB', dbName: 'testDB', selectors: [] },
+      localStorage: { dbName: 'testDB', mode: 'indexedDB', selectors: [] },
     });
 
     await storage.setItem('key', { state: {}, version: 1 });
@@ -86,7 +86,7 @@ describe('createHyperStorage', () => {
 
   it('should use the provided dbName for indexedDB', async () => {
     const dbName = 'customDB';
-    createHyperStorage({ localStorage: { mode: 'indexedDB', dbName, selectors: [] } });
+    createHyperStorage({ localStorage: { dbName, mode: 'indexedDB', selectors: [] } });
 
     expect(vi.mocked(createIndexedDB)).toHaveBeenCalledWith(dbName);
   });
@@ -191,13 +191,13 @@ describe('createHyperStorage', () => {
 
         // Mock createKeyMapper to simulate state key mapping from URL storage keys
         vi.mocked(createKeyMapper).mockReturnValue({
-          mapStateKeyToStorageKey: vi.fn((k) => k),
           getStateKeyFromStorageKey: vi.fn((k) => (k === 'urlKey' ? 'mappedKey' : undefined)),
+          mapStateKeyToStorageKey: vi.fn((k) => k),
         });
 
         const storage = createHyperStorage({
-          url: { mode: 'hash', selectors: [] },
           localStorage: false,
+          url: { mode: 'hash', selectors: [] },
         });
         const item = await storage.getItem('key');
 
@@ -215,13 +215,13 @@ describe('createHyperStorage', () => {
 
         // Mock createKeyMapper to simulate state key mapping from URL storage keys
         vi.mocked(createKeyMapper).mockReturnValue({
-          mapStateKeyToStorageKey: vi.fn((k) => k),
-          getStateKeyFromStorageKey: vi.fn(() => undefined), // No key will be mapped
+          getStateKeyFromStorageKey: vi.fn(() => undefined),
+          mapStateKeyToStorageKey: vi.fn((k) => k), // No key will be mapped
         });
 
         const storage = createHyperStorage({
-          url: { mode: 'hash', selectors: [] },
           localStorage: false,
+          url: { mode: 'hash', selectors: [] },
         });
         const item = await storage.getItem('key');
 
@@ -284,8 +284,8 @@ describe('createHyperStorage', () => {
       }));
       // Mock createKeyMapper to simulate state key mapping from URL storage keys
       vi.mocked(createKeyMapper).mockReturnValue({
-        mapStateKeyToStorageKey: vi.fn((k) => k),
-        getStateKeyFromStorageKey: vi.fn((k) => k), // No key will be mapped
+        getStateKeyFromStorageKey: vi.fn((k) => k),
+        mapStateKeyToStorageKey: vi.fn((k) => k), // No key will be mapped
       });
 
       const storage = createHyperStorage({ url: { mode: 'hash', selectors: ['key'] } });

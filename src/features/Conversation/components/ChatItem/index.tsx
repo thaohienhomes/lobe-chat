@@ -161,10 +161,13 @@ const Item = memo<ChatListItemProps>(
     const error = useErrorContent(item?.error);
 
     // remove line breaks in artifact tag to make the ast transform easier
-    const message =
-      !editing && item?.role === 'assistant'
-        ? normalizeThinkTags(processWithArtifact(item?.content))
-        : item?.content;
+    const message = useMemo(
+      () =>
+        !editing && item?.role === 'assistant'
+          ? normalizeThinkTags(processWithArtifact(item?.content))
+          : item?.content,
+      [editing, item?.role, item?.content],
+    );
 
     // ======================= Performance Optimization ======================= //
     // these useMemo/useCallback are all for the performance optimization
@@ -283,9 +286,12 @@ const Item = memo<ChatListItemProps>(
       [t],
     );
 
-    const onEditingChange = useCallback((edit: boolean) => {
-      toggleMessageEditing(id, edit);
-    }, []);
+    const onEditingChange = useCallback(
+      (edit: boolean) => {
+        toggleMessageEditing(id, edit);
+      },
+      [id, toggleMessageEditing],
+    );
 
     const onContextMenu = useCallback(async () => {
       if (isDesktop && item) {

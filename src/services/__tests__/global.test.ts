@@ -15,8 +15,8 @@ vi.mock('@/libs/trpc/client', () => {
   return {
     lambdaClient: {
       config: {
-        getGlobalConfig: { query: vi.fn() },
         getDefaultAgentConfig: { query: vi.fn() },
+        getGlobalConfig: { query: vi.fn() },
       },
     },
   };

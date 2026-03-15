@@ -1,6 +1,6 @@
 import { LobeChatPluginManifest } from '@lobehub/chat-plugin-sdk';
 import { eq } from 'drizzle-orm';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { clientDB, initializeDB } from '@/database/client/db';
 import { userInstalledPlugins, users } from '@/database/schemas';

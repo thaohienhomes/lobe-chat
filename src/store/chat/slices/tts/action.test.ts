@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { messageService } from '@/services/message';
 
@@ -8,9 +8,9 @@ import { useChatStore } from '../../store';
 // Mock messageService 和 chatService
 vi.mock('@/services/message', () => ({
   messageService: {
+    updateMessage: vi.fn(),
     updateMessageTTS: vi.fn(),
     updateMessageTranslate: vi.fn(),
-    updateMessage: vi.fn(),
   },
 }));
 

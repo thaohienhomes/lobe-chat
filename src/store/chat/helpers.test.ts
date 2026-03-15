@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { LobeAgentChatConfig, LobeAgentConfig } from '@/types/agent';
+import { LobeAgentChatConfig } from '@/types/agent';
 import { ChatMessage } from '@/types/message';
 import { OpenAIChatMessage } from '@/types/openai/chat';
-import { encodeAsync } from '@/utils/tokenizer';
 import * as tokenizerObj from '@/utils/tokenizer';
 
 import { chatHelpers } from './helpers';
@@ -46,13 +45,13 @@ describe('chatHelpers', () => {
 
   describe('getMessageById', () => {
     const messages = [
-      { id: '1', content: 'Hello' },
-      { id: '2', content: 'World' },
+      { content: 'Hello', id: '1' },
+      { content: 'World', id: '2' },
     ] as ChatMessage[];
 
     it('finds a message by id', () => {
       const message = chatHelpers.getMessageById(messages, '1');
-      expect(message).toEqual({ id: '1', content: 'Hello' });
+      expect(message).toEqual({ content: 'Hello', id: '1' });
     });
 
     it('returns undefined for an invalid id', () => {
@@ -68,9 +67,9 @@ describe('chatHelpers', () => {
 
   describe('getSlicedMessages', () => {
     const messages = [
-      { id: '1', content: 'First' },
-      { id: '2', content: 'Second' },
-      { id: '3', content: 'Third' },
+      { content: 'First', id: '1' },
+      { content: 'Second', id: '2' },
+      { content: 'Third', id: '3' },
     ] as ChatMessage[];
 
     it('returns all messages if history is disabled', () => {
@@ -83,8 +82,8 @@ describe('chatHelpers', () => {
       const config = { enableHistoryCount: true, historyCount: 2 } as LobeAgentChatConfig;
       const slicedMessages = chatHelpers.getSlicedMessages(messages, config);
       expect(slicedMessages).toEqual([
-        { id: '2', content: 'Second' },
-        { id: '3', content: 'Third' },
+        { content: 'Second', id: '2' },
+        { content: 'Third', id: '3' },
       ]);
     });
 

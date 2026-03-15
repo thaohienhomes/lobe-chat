@@ -72,9 +72,9 @@ beforeEach(async () => {
 
   // 默认设置 isServerMode 为 false
   vi.mock('@/const/version', () => ({
-    isServerMode: false,
     isDeprecatedEdition: true,
     isDesktop: false,
+    isServerMode: false,
   }));
 
   // Reset all mocks
@@ -85,7 +85,7 @@ beforeEach(async () => {
   const { imageUrlToBase64 } = await import('@/utils/imageToBase64');
   const { parseDataUri } = await import('@lobechat/model-runtime');
 
-  vi.mocked(parseDataUri).mockReturnValue({ type: 'url', base64: null, mimeType: null });
+  vi.mocked(parseDataUri).mockReturnValue({ base64: null, mimeType: null, type: 'url' });
   vi.mocked(isLocalUrl).mockReturnValue(false);
   vi.mocked(imageUrlToBase64).mockResolvedValue({
     base64: 'mock-base64',
@@ -120,8 +120,8 @@ describe('ModelRuntimeOnClient', () => {
             keyVaults: {
               azure: {
                 apiKey: 'user-azure-key',
-                endpoint: 'user-azure-endpoint',
                 apiVersion: '2024-06-01',
+                endpoint: 'user-azure-endpoint',
               },
             },
           },

@@ -1,12 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock analytics environment
-vi.mock('@/envs/analytics', () => ({
-  analyticsEnv: {
-    TIKTOK_PIXEL_ID: 'test-pixel-id',
-  },
-}));
-
 import { analyticsEnv } from '@/envs/analytics';
 
 import {
@@ -21,11 +14,18 @@ import {
   trackSearch,
 } from '../tiktok-events';
 
+// Mock analytics environment
+vi.mock('@/envs/analytics', () => ({
+  analyticsEnv: {
+    TIKTOK_PIXEL_ID: 'test-pixel-id',
+  },
+}));
+
 // Mock window.ttq
 const mockTtq = {
-  track: vi.fn(),
   identify: vi.fn(),
   page: vi.fn(),
+  track: vi.fn(),
 };
 
 describe('TikTok Events Utils', () => {
@@ -43,8 +43,8 @@ describe('TikTok Events Utils', () => {
     });
 
     // Mock console methods
-    vi.spyOn(console, 'debug').mockImplementation(() => { });
-    vi.spyOn(console, 'error').mockImplementation(() => { });
+    vi.spyOn(console, 'debug').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -72,7 +72,7 @@ describe('TikTok Events Utils', () => {
 
   describe('trackTikTokEvent', () => {
     it('should track event when pixel is enabled', () => {
-      const eventParams = { value: 100, currency: 'VND' };
+      const eventParams = { currency: 'VND', value: 100 };
 
       trackTikTokEvent('Subscribe', eventParams);
 
@@ -133,8 +133,8 @@ describe('TikTok Events Utils', () => {
       expect(mockTtq.track).toHaveBeenCalledWith('CompleteRegistration', {
         contents: [{
           content_id: 'premium',
-          content_type: 'product',
           content_name: 'Premium Plan',
+          content_type: 'product',
         }],
         currency: 'VND',
       });
@@ -143,34 +143,34 @@ describe('TikTok Events Utils', () => {
 
   describe('trackSubscribe', () => {
     it('should track subscription with correct parameters', () => {
-      trackSubscribe('premium', 'Premium Plan', 129000, 'monthly');
+      trackSubscribe('premium', 'Premium Plan', 129_000, 'monthly');
 
       expect(mockTtq.track).toHaveBeenCalledWith('Subscribe', {
         contents: [{
           content_id: 'premium',
-          content_type: 'product',
           content_name: 'Premium Plan (monthly)',
-          price: 129000,
+          content_type: 'product',
+          price: 129_000,
         }],
-        value: 129000,
         currency: 'VND',
+        value: 129_000,
       });
     });
   });
 
   describe('trackViewContent', () => {
     it('should track content view with value', () => {
-      trackViewContent('premium', 'Premium Plan', 129000);
+      trackViewContent('premium', 'Premium Plan', 129_000);
 
       expect(mockTtq.track).toHaveBeenCalledWith('ViewContent', {
         contents: [{
           content_id: 'premium',
-          content_type: 'product',
           content_name: 'Premium Plan',
-          price: 129000,
+          content_type: 'product',
+          price: 129_000,
         }],
-        value: 129000,
         currency: 'VND',
+        value: 129_000,
       });
     });
 
@@ -180,12 +180,12 @@ describe('TikTok Events Utils', () => {
       expect(mockTtq.track).toHaveBeenCalledWith('ViewContent', {
         contents: [{
           content_id: 'premium',
-          content_type: 'product',
           content_name: 'Premium Plan',
+          content_type: 'product',
           price: undefined,
         }],
-        value: undefined,
         currency: 'VND',
+        value: undefined,
       });
     });
   });
@@ -217,8 +217,8 @@ describe('TikTok Events Utils', () => {
       expect(mockTtq.track).toHaveBeenCalledWith('AddPaymentInfo', {
         contents: [{
           content_id: 'premium',
-          content_type: 'product',
           content_name: 'Premium Plan',
+          content_type: 'product',
         }],
         currency: 'VND',
       });

@@ -77,7 +77,7 @@ describe('formatPrice utility', () => {
   // formatPrice takes (amount, region) not (amount, currency)
   it('should format VND prices correctly for vietnam region', () => {
     // Intl.NumberFormat output varies by locale, just check it contains the number
-    const result = formatPrice(69000, 'vietnam');
+    const result = formatPrice(69_000, 'vietnam');
     expect(result).toContain('69');
   });
 

@@ -7,8 +7,8 @@ import { generationBatchService } from '../generationBatch';
 vi.mock('@/libs/trpc/client', () => ({
   lambdaClient: {
     generationBatch: {
-      getGenerationBatches: { query: vi.fn() },
       deleteGenerationBatch: { mutate: vi.fn() },
+      getGenerationBatches: { query: vi.fn() },
     },
   },
 }));

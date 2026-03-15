@@ -17,50 +17,50 @@ describe('Metadata', () => {
       });
 
       expect(result).toMatchObject({
-        title: 'Test Title',
         description: expect.any(String),
         openGraph: expect.objectContaining({
-          title: `Test Title · ${BRANDING_NAME}`,
           description: expect.any(String),
-          images: [{ url: OG_URL, alt: `Test Title · ${BRANDING_NAME}` }],
-        }),
-        twitter: expect.objectContaining({
+          images: [{ alt: `Test Title · ${BRANDING_NAME}`, url: OG_URL }],
           title: `Test Title · ${BRANDING_NAME}`,
+        }),
+        title: 'Test Title',
+        twitter: expect.objectContaining({
           description: expect.any(String),
           images: [OG_URL],
+          title: `Test Title · ${BRANDING_NAME}`,
         }),
       });
     });
 
     it('should generate metadata with custom values', () => {
       const result = meta.generate({
-        title: 'Custom Title',
+        alternate: true,
         description: 'Custom description',
         image: 'https://custom-image.com',
-        url: 'https://example.com/custom',
-        type: 'article',
-        tags: ['tag1', 'tag2'],
         locale: 'fr-FR',
-        alternate: true,
+        tags: ['tag1', 'tag2'],
+        title: 'Custom Title',
+        type: 'article',
+        url: 'https://example.com/custom',
       });
 
       expect(result).toMatchObject({
-        title: 'Custom Title',
-        description: expect.stringContaining('Custom description'),
-        openGraph: expect.objectContaining({
-          title: `Custom Title · ${BRANDING_NAME}`,
-          description: 'Custom description',
-          images: [{ url: 'https://custom-image.com', alt: `Custom Title · ${BRANDING_NAME}` }],
-          type: 'article',
-          locale: 'fr-FR',
-        }),
-        twitter: expect.objectContaining({
-          title: `Custom Title · ${BRANDING_NAME}`,
-          description: 'Custom description',
-          images: ['https://custom-image.com'],
-        }),
         alternates: expect.objectContaining({
           languages: expect.any(Object),
+        }),
+        description: expect.stringContaining('Custom description'),
+        openGraph: expect.objectContaining({
+          description: 'Custom description',
+          images: [{ alt: `Custom Title · ${BRANDING_NAME}`, url: 'https://custom-image.com' }],
+          locale: 'fr-FR',
+          title: `Custom Title · ${BRANDING_NAME}`,
+          type: 'article',
+        }),
+        title: 'Custom Title',
+        twitter: expect.objectContaining({
+          description: 'Custom description',
+          images: ['https://custom-image.com'],
+          title: `Custom Title · ${BRANDING_NAME}`,
         }),
       });
     });
@@ -79,18 +79,18 @@ describe('Metadata', () => {
   describe('genTwitter', () => {
     it('should generate Twitter metadata correctly', () => {
       const result = (meta as any).genTwitter({
-        title: 'Twitter Title',
         description: 'Twitter description',
         image: 'https://twitter-image.com',
+        title: 'Twitter Title',
         url: 'https://example.com/twitter',
       });
 
       expect(result).toEqual({
         card: 'summary_large_image',
-        title: 'Twitter Title',
         description: 'Twitter description',
         images: ['https://twitter-image.com'],
         site: '@pho_chat',
+        title: 'Twitter Title',
         url: 'https://example.com/twitter',
       });
     });
@@ -99,23 +99,16 @@ describe('Metadata', () => {
   describe('genOpenGraph', () => {
     it('should generate OpenGraph metadata correctly', () => {
       const result = (meta as any).genOpenGraph({
-        title: 'OG Title',
+        alternate: true,
         description: 'OG description',
         image: 'https://og-image.com',
-        url: 'https://example.com/og',
         locale: 'es-ES',
+        title: 'OG Title',
         type: 'article',
-        alternate: true,
+        url: 'https://example.com/og',
       });
 
       expect(result).toMatchObject({
-        title: 'OG Title',
-        description: 'OG description',
-        images: [{ url: 'https://og-image.com', alt: 'OG Title' }],
-        locale: 'es-ES',
-        type: 'article',
-        url: 'https://example.com/og',
-        siteName: 'pho.chat',
         alternateLocale: expect.arrayContaining([
           'ar',
           'bg-BG',
@@ -132,6 +125,13 @@ describe('Metadata', () => {
           'zh-TW',
           'vi-VN',
         ]),
+        description: 'OG description',
+        images: [{ alt: 'OG Title', url: 'https://og-image.com' }],
+        locale: 'es-ES',
+        siteName: 'pho.chat',
+        title: 'OG Title',
+        type: 'article',
+        url: 'https://example.com/og',
       });
     });
   });

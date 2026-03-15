@@ -9,19 +9,19 @@ describe('parseMcpInput', () => {
       const input = JSON.stringify({
         mcpServers: {
           'sequential-thinking': {
-            command: 'npx',
             args: ['-y', '@modelcontextprotocol/server-sequential-thinking'],
+            command: 'npx',
           },
         },
       });
       const expected = {
-        status: 'success',
         identifier: 'sequential-thinking',
         mcpConfig: {
-          command: 'npx',
           args: ['-y', '@modelcontextprotocol/server-sequential-thinking'],
+          command: 'npx',
           type: 'stdio',
         },
+        status: 'success',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -35,12 +35,12 @@ describe('parseMcpInput', () => {
         },
       });
       const expected = {
-        status: 'success',
         identifier: 'some-http-service',
         mcpConfig: {
-          url: 'https://example.com/api',
           type: 'http',
+          url: 'https://example.com/api',
         },
+        status: 'success',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -54,12 +54,12 @@ describe('parseMcpInput', () => {
         },
       });
       const expected = {
-        status: 'success',
         identifier: '',
         mcpConfig: {
-          url: 'https://router.mcp.so/mcp/mdvp27m9tl2bxs',
           type: 'http',
+          url: 'https://router.mcp.so/mcp/mdvp27m9tl2bxs',
         },
+        status: 'success',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -67,8 +67,8 @@ describe('parseMcpInput', () => {
     it('should return error for empty mcpServers object', () => {
       const input = JSON.stringify({ mcpServers: {} });
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.EmptyMcpServers,
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -80,9 +80,9 @@ describe('parseMcpInput', () => {
         },
       });
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.InvalidMcpStructure,
         identifier: 'invalid-config',
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -94,9 +94,9 @@ describe('parseMcpInput', () => {
         },
       });
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.InvalidMcpStructure,
         identifier: 'not-an-object',
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -108,9 +108,9 @@ describe('parseMcpInput', () => {
         },
       });
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.InvalidMcpStructure,
         identifier: 'is-null',
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -121,18 +121,18 @@ describe('parseMcpInput', () => {
     it('should correctly parse valid stdio config', () => {
       const input = JSON.stringify({
         'flat-stdio-service': {
-          command: 'go',
           args: ['run', 'main.go'],
+          command: 'go',
         },
       });
       const expected = {
-        status: 'success',
         identifier: 'flat-stdio-service',
         mcpConfig: {
-          command: 'go',
           args: ['run', 'main.go'],
+          command: 'go',
           type: 'stdio',
         },
+        status: 'success',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -144,12 +144,12 @@ describe('parseMcpInput', () => {
         },
       });
       const expected = {
-        status: 'success',
         identifier: 'mcp-wolframalpha',
         mcpConfig: {
-          url: 'https://mcp.higress.ai/mcp-wolframalpha/abc',
           type: 'http',
+          url: 'https://mcp.higress.ai/mcp-wolframalpha/abc',
         },
+        status: 'success',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -159,9 +159,9 @@ describe('parseMcpInput', () => {
         'invalid-flat': {}, // Missing command/args or url
       });
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.InvalidMcpStructure,
         identifier: 'invalid-flat',
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -171,9 +171,9 @@ describe('parseMcpInput', () => {
         'flat-not-object': 'just a string',
       });
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.InvalidMcpStructure,
         identifier: 'flat-not-object',
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -183,9 +183,9 @@ describe('parseMcpInput', () => {
         'flat-is-null': null,
       });
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.InvalidMcpStructure,
         identifier: 'flat-is-null',
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -196,8 +196,8 @@ describe('parseMcpInput', () => {
         key2: { url: 'url2' },
       });
       const expected = {
-        status: 'error',
-        errorCode: McpParseErrorCode.InvalidJsonStructure, // Because it's not a single-key flat structure nor mcpServers/manifest
+        errorCode: McpParseErrorCode.InvalidJsonStructure,
+        status: 'error', // Because it's not a single-key flat structure nor mcpServers/manifest
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });
@@ -235,8 +235,8 @@ describe('parseMcpInput', () => {
       const input = JSON.stringify({});
       // Empty object is considered an invalid structure because it doesn't match any expected format
       const expected = {
-        status: 'error',
         errorCode: McpParseErrorCode.InvalidJsonStructure,
+        status: 'error',
       };
       expect(parseMcpInput(input)).toEqual(expected);
     });

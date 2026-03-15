@@ -3,7 +3,6 @@ import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { chatService } from '@/services/chat';
 import { ragService } from '@/services/rag';
-import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
 import { chatSelectors } from '@/store/chat/selectors';
 import { systemAgentSelectors } from '@/store/user/selectors';
@@ -238,8 +237,8 @@ describe('chatRAG actions', () => {
       vi.spyOn(chatSelectors, 'getMessageById').mockReturnValue(
         () =>
           ({
-            id: messageId,
             content,
+            id: messageId,
           }) as ChatMessage,
       );
 

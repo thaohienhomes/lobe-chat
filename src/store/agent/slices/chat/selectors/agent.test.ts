@@ -28,11 +28,11 @@ describe('agentSelectors', () => {
       const s = {
         agentMap: {
           inbox: {
-            systemRole: 'user',
             model: 'gpt-3.5-turbo',
             params: {
               temperature: 0.7,
             },
+            systemRole: 'user',
           },
         },
       } as unknown as AgentStore;

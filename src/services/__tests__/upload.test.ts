@@ -5,7 +5,7 @@ import { edgeClient } from '@/libs/trpc/client';
 import { API_ENDPOINTS } from '@/services/_url';
 import { clientS3Storage } from '@/services/file/ClientS3';
 
-import { UPLOAD_NETWORK_ERROR, uploadService } from '../upload';
+import { uploadService } from '../upload';
 
 // Mock dependencies
 vi.mock('@/libs/trpc/client', () => ({
@@ -35,21 +35,21 @@ describe('UploadService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock Date.now
-    vi.spyOn(Date, 'now').mockImplementation(() => 3600000); // 1 hour in milliseconds
+    vi.spyOn(Date, 'now').mockImplementation(() => 3_600_000); // 1 hour in milliseconds
   });
 
   describe('uploadWithProgress', () => {
     beforeEach(() => {
       // Mock XMLHttpRequest
       const xhrMock = {
-        upload: {
-          addEventListener: vi.fn(),
-        },
+        addEventListener: vi.fn(),
         open: vi.fn(),
         send: vi.fn(),
         setRequestHeader: vi.fn(),
-        addEventListener: vi.fn(),
         status: 200,
+        upload: {
+          addEventListener: vi.fn(),
+        },
       };
       global.XMLHttpRequest = vi.fn(() => xhrMock) as any;
 

@@ -5,8 +5,8 @@ import { BaseModel } from '../model';
 
 // Define a mock schema for testing
 const mockSchema = z.object({
-  name: z.string(),
   content: z.string(),
+  name: z.string(),
 });
 
 // Define a mock table name
@@ -33,8 +33,8 @@ describe('BaseModel', () => {
   describe('add method', () => {
     it('should add a valid record to the database', async () => {
       const validData = {
-        name: 'testfile.txt',
         content: 'Hello, World!',
+        name: 'testfile.txt',
       };
 
       const result = await baseModel['_addWithSync'](validData);
@@ -45,8 +45,9 @@ describe('BaseModel', () => {
 
     it('should throw an error and log to console when adding an invalid record', async () => {
       const invalidData = {
-        name: 123, // Invalid type, should be a string
-        content: 'Hello, World!',
+        // Invalid type, should be a string
+content: 'Hello, World!', 
+        name: 123,
       };
 
       await expect(baseModel['_addWithSync'](invalidData)).rejects.toThrow(TypeError);

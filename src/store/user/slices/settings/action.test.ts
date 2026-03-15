@@ -1,9 +1,8 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import type { PartialDeep } from 'type-fest';
 import { describe, expect, it, vi } from 'vitest';
-import { withSWR } from '~test-utils';
 
-import { DEFAULT_AGENT, DEFAULT_SETTINGS } from '@/const/settings';
+import { DEFAULT_SETTINGS } from '@/const/settings';
 import { userService } from '@/services/user';
 import { useUserStore } from '@/store/user';
 import { LobeAgentSettings } from '@/types/session';
@@ -15,8 +14,8 @@ vi.mock('zustand/traditional');
 // Mock userService
 vi.mock('@/services/user', () => ({
   userService: {
-    updateUserSettings: vi.fn(),
     resetUserSettings: vi.fn(),
+    updateUserSettings: vi.fn(),
   },
 }));
 
@@ -120,8 +119,8 @@ describe('SettingsAction', () => {
       // Perform the action
       await act(async () => {
         await result.current.updateSystemAgent('translation', {
-          provider: 'provider',
           model: 'testmodel',
+          provider: 'provider',
         });
       });
 

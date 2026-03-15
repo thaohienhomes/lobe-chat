@@ -13,7 +13,7 @@ import { useSessionStore } from '@/store/session';
 import TopActions, { TopActionProps } from './TopActions';
 
 beforeAll(() => {
-  initServerConfigStore({ featureFlags: { market: true, ai_image: true } });
+  initServerConfigStore({ featureFlags: { ai_image: true, market: true } });
 });
 
 beforeEach(() => {
@@ -21,7 +21,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  createServerConfigStore().setState({ featureFlags: { market: true, ai_image: true } });
+  createServerConfigStore().setState({ featureFlags: { ai_image: true, market: true } });
   cleanup();
 });
 
@@ -36,9 +36,9 @@ vi.mock('next/link', () => ({
 
 vi.mock('@lobehub/ui', () => ({
   ActionIcon: vi.fn(({ title }) => <div>{title}</div>),
-  combineKeys: vi.fn((keys) => keys.join('+')),
-  KeyMapEnum: { Alt: 'alt', Ctrl: 'ctrl', Shift: 'shift' },
   Hotkey: vi.fn(({ keys = [] }) => <div>{keys}</div>),
+  KeyMapEnum: { Alt: 'alt', Ctrl: 'ctrl', Shift: 'shift' },
+  combineKeys: vi.fn((keys) => keys.join('+')),
 }));
 
 vi.mock('react-i18next', () => ({

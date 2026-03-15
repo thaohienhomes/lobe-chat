@@ -18,8 +18,8 @@ describe('ChunkingRuleParser', () => {
       const result = ChunkingRuleParser.parse(input);
 
       expect(result).toEqual({
-        pdf: ['unstructured', 'default'],
         doc: ['doc2x', 'default'],
+        pdf: ['unstructured', 'default'],
         txt: ['default'],
       });
     });
@@ -29,8 +29,8 @@ describe('ChunkingRuleParser', () => {
       const result = ChunkingRuleParser.parse(input);
 
       expect(result).toEqual({
-        pdf: ['unstructured'],
         doc: ['doc2x'],
+        pdf: ['unstructured'],
       });
     });
 
@@ -55,8 +55,8 @@ describe('ChunkingRuleParser', () => {
       const result = ChunkingRuleParser.parse(input);
 
       expect(result).toEqual({
-        pdf: ['unstructured'],
         doc: ['doc2x'],
+        pdf: ['unstructured'],
       });
     });
 
@@ -65,8 +65,8 @@ describe('ChunkingRuleParser', () => {
       const result = ChunkingRuleParser.parse(input);
 
       expect(result).toEqual({
-        pdf: ['unstructured', 'default'],
         doc: ['doc2x'],
+        pdf: ['unstructured', 'default'],
       });
     });
 

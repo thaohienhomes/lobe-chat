@@ -74,7 +74,7 @@ describe('parseAgentConfig', () => {
     it('parses tts voice configuration correctly', () => {
       const envStr = 'tts.voice.openai=english-voice;tts.voice.microsoft=spanish-voice';
       const expected = {
-        tts: { voice: { openai: 'english-voice', microsoft: 'spanish-voice' } },
+        tts: { voice: { microsoft: 'spanish-voice', openai: 'english-voice' } },
       };
       expect(parseAgentConfig(envStr)).toEqual(expected);
     });

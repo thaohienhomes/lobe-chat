@@ -1,37 +1,38 @@
 import { describe, expect, it } from 'vitest';
 
 interface User {
-  name: string;
-  id: string;
-  type: 'normal-user' | 'admin' | 'super-admin';
-  displayName: string;
-  firstName: string;
-  lastName: string;
   avatar: string;
+  displayName: string;
   email: string;
   emailVerified: boolean;
+  firstName: string;
+  id: string;
+  lastName: string;
+  name: string;
+  type: 'normal-user' | 'admin' | 'super-admin';
 }
 
 interface UserDataUpdatedEvent {
-  user: string; // 用户名
-  action: 'update-user';
-  extendedUser: User; // 扩展用户信息
+  // 用户名
+  action: 'update-user'; 
+  extendedUser: User;
+  user: string; // 扩展用户信息
 }
 
 const userDataUpdatedEvent: UserDataUpdatedEvent = {
-  user: 'admin',
   action: 'update-user',
   extendedUser: {
-    name: 'admin',
-    id: '35edace3-00c6-41e1-895e-97c519b1d8cc',
-    type: 'normal-user',
-    displayName: 'Admin',
-    firstName: '',
-    lastName: '',
     avatar: 'https://cdn.casbin.org/img/casbin.svg',
+    displayName: 'Admin',
     email: 'admin@example.cn',
     emailVerified: false,
+    firstName: '',
+    id: '35edace3-00c6-41e1-895e-97c519b1d8cc',
+    lastName: '',
+    name: 'admin',
+    type: 'normal-user',
   },
+  user: 'admin',
 };
 
 const AUTH_CASDOOR_WEBHOOK_SECRET = 'casdoor-secret';
@@ -48,12 +49,12 @@ describe.skip('Test Casdoor Webhooks in Local dev', () => {
     const url = 'http://localhost:3010/api/webhooks/casdoor'; // 替换为目标URL
     const data = userDataUpdatedEvent;
     const response = await fetch(url, {
-      method: 'POST',
+      body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
         'casdoor-secret': AUTH_CASDOOR_WEBHOOK_SECRET,
       },
-      body: JSON.stringify(data),
+      method: 'POST',
     });
     expect(response.status).toBe(200); // 检查响应状态
   });

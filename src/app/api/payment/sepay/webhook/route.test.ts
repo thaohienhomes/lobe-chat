@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SepayPaymentGateway } from '@/libs/sepay';
 import * as billingService from '@/server/services/billing/sepay';
 
 import { POST } from './route';
 
 // Mock billing service
 vi.mock('@/server/services/billing/sepay', () => ({
-  updatePaymentStatus: vi.fn(),
   activateUserSubscription: vi.fn(),
   getPaymentByOrderId: vi.fn(),
+  updatePaymentStatus: vi.fn(),
 }));
 
 // Mock Sepay gateway
@@ -25,25 +24,25 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
   });
 
   const createWebhookPayload = (overrides = {}) => ({
-    orderId: 'PHO_QR_123456',
-    status: 'success',
-    amount: 100000,
+    amount: 100_000,
     currency: 'VND',
     description: 'Payment for premium subscription',
-    transactionId: 'TXN_123456',
-    timestamp: new Date().toISOString(),
+    orderId: 'PHO_QR_123456',
     signature: 'valid_signature_hash',
+    status: 'success',
+    timestamp: new Date().toISOString(),
+    transactionId: 'TXN_123456',
     ...overrides,
   });
 
   it('should return 400 if webhook payload is missing orderId', async () => {
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify({
+        amount: 100_000,
         status: 'success',
-        amount: 100000,
         transactionId: 'TXN_123456',
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -55,12 +54,12 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
 
   it('should return 400 if webhook payload is missing transactionId', async () => {
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify({
+        amount: 100_000,
         orderId: 'PHO_QR_123456',
         status: 'success',
-        amount: 100000,
       }),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -74,22 +73,22 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
     const { sepayGateway } = await import('@/libs/sepay');
     vi.mocked(sepayGateway.verifyWebhookSignature).mockReturnValue(false);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
+      amountVnd: 100_000,
+      billingCycle: 'monthly',
+      createdAt: new Date(),
       id: 'payment_123',
       orderId: 'PHO_QR_123456',
-      userId: 'user_123',
       planId: 'premium',
-      billingCycle: 'monthly',
-      amountVnd: 100000,
       status: 'pending',
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'user_123',
     } as any);
     vi.mocked(billingService.updatePaymentStatus).mockResolvedValue(undefined);
     vi.mocked(billingService.activateUserSubscription).mockResolvedValue(undefined);
 
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify(createWebhookPayload()),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -103,23 +102,23 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
     const { sepayGateway } = await import('@/libs/sepay');
     vi.mocked(sepayGateway.verifyWebhookSignature).mockReturnValue(true);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
+      amountVnd: 100_000,
+      billingCycle: 'monthly',
+      createdAt: new Date(),
       id: 'payment_123',
       orderId: 'PHO_QR_123456',
-      userId: 'user_123',
       planId: 'premium',
-      billingCycle: 'monthly',
-      amountVnd: 100000,
       status: 'pending',
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'user_123',
     } as any);
     vi.mocked(billingService.updatePaymentStatus).mockResolvedValue(undefined);
     vi.mocked(billingService.activateUserSubscription).mockResolvedValue(undefined);
 
     const payload = createWebhookPayload({ status: 'success' });
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify(payload),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -138,9 +137,9 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
 
     // Verify subscription was activated
     expect(billingService.activateUserSubscription).toHaveBeenCalledWith({
-      userId: 'user_123',
-      planId: 'premium',
       billingCycle: 'monthly',
+      planId: 'premium',
+      userId: 'user_123',
     });
   });
 
@@ -151,8 +150,8 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
 
     const payload = createWebhookPayload({ status: 'failed' });
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify(payload),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -177,8 +176,8 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
 
     const payload = createWebhookPayload();
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify(payload),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -195,8 +194,8 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
 
     const payload = createWebhookPayload({ status: 'success' });
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify(payload),
+      method: 'POST',
     });
 
     const response = await POST(request as any);
@@ -210,33 +209,33 @@ describe.skip('POST /api/payment/sepay/webhook', () => {
     const { sepayGateway } = await import('@/libs/sepay');
     vi.mocked(sepayGateway.verifyWebhookSignature).mockReturnValue(true);
     vi.mocked(billingService.getPaymentByOrderId).mockResolvedValue({
+      amountVnd: 100_000,
+      billingCycle: 'monthly',
+      createdAt: new Date(),
       id: 'payment_123',
       orderId: 'PHO_QR_123456',
-      userId: 'user_123',
       planId: 'premium',
-      billingCycle: 'monthly',
-      amountVnd: 100000,
       status: 'pending',
-      createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 'user_123',
     } as any);
     vi.mocked(billingService.updatePaymentStatus).mockResolvedValue(undefined);
     vi.mocked(billingService.activateUserSubscription).mockResolvedValue(undefined);
 
     // Webhook payload with snake_case field names (as Sepay might send)
     const payload = {
-      order_id: 'PHO_QR_123456',
-      status: 'success',
-      amount_in: 100000,
+      amount_in: 100_000,
       currency: 'VND',
-      transaction_id: 'TXN_123456',
-      timestamp: new Date().toISOString(),
+      order_id: 'PHO_QR_123456',
       signature: 'valid_signature_hash',
+      status: 'success',
+      timestamp: new Date().toISOString(),
+      transaction_id: 'TXN_123456',
     };
 
     const request = new Request('http://localhost/api/payment/sepay/webhook', {
-      method: 'POST',
       body: JSON.stringify(payload),
+      method: 'POST',
     });
 
     const response = await POST(request as any);

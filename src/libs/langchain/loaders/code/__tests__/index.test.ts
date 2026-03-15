@@ -16,15 +16,15 @@ helloWorld();`;
 
     expect(result).toEqual([
       {
+        metadata: { loc: { lines: { from: 1, to: 5 } } },
         pageContent:
           'function helloWorld() {\n  console.log("Hello, World!");\n}\n// Call the function\nhelloWorld();',
-        metadata: { loc: { lines: { from: 1, to: 5 } } },
       },
     ]);
   });
 
   it('split long', async () => {
-    const code = fs.readFileSync(join(__dirname, `./long.txt`), 'utf-8');
+    const code = fs.readFileSync(join(__dirname, `./long.txt`), 'utf8');
 
     const result = await CodeLoader(code, 'js');
 

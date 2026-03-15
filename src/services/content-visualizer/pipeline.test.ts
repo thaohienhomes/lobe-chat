@@ -5,7 +5,7 @@ import { runConceptAnalyzer } from './agents/concept-analyzer';
 import { runContentIngestion } from './agents/content-ingestion';
 import { runQualityValidator } from './agents/quality-validator';
 import { runVisualizationPlanner } from './agents/visualization-planner';
-import type { LlmCallFn, PipelineInput, PipelineOutput, PipelineStage } from './pipeline';
+import type { LlmCallFn, PipelineInput, PipelineStage } from './pipeline';
 import { runPipeline } from './pipeline';
 
 // ---------------------------------------------------------------------------
@@ -105,7 +105,7 @@ const mockValidationResults = [
       code: 'export default function Viz() { return <div>Viz</div>; }',
       conceptId: 'c1',
       dependencies: ['react'],
-      estimatedRenderTime: 1.0,
+      estimatedRenderTime: 1,
       language: 'jsx' as const,
       narrationScript: 'The key insight is...',
       track: 'artifact' as const,

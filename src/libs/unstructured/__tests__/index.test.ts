@@ -6,7 +6,6 @@ import { PartitionResponse } from 'unstructured-client/src/sdk/models/operations
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Unstructured } from '../index';
-import AutoWithChunkingOutput from './fixtures/table-parse/auto-partition-basic-output.json';
 import AutoWithChunkingRaw from './fixtures/table-parse/auto-partition-basic-raw.json';
 import AutoWithoutChunking from './fixtures/table-parse/auto-partition-raw.json';
 import FastWithoutChunkingRaw from './fixtures/table-parse/fast-partition-raw.json';
@@ -36,10 +35,10 @@ afterEach(() => {
 
 const mockPartitionResponse = (elements: any[]) =>
   ({
-    statusCode: 200,
+    contentType: 'application/json',
     elements,
     rawResponse: new Response(),
-    contentType: 'application/json',
+    statusCode: 200,
   }) as PartitionResponse;
 
 describe('Unstructured', () => {
@@ -112,9 +111,9 @@ describe('Unstructured', () => {
       );
 
       const result = await client.partition({
+        chunkingStrategy: ChunkingStrategy.Basic,
         fileContent: new Uint8Array(),
         filename: 'test.txt',
-        chunkingStrategy: ChunkingStrategy.Basic,
       });
 
       expect(result.compositeElements).toHaveLength(3);
@@ -128,24 +127,24 @@ describe('Unstructured', () => {
       vi.spyOn(UnstructuredClient.prototype.general, 'partition').mockResolvedValue(
         mockPartitionResponse([
           {
-            type: 'CompositeElement',
             element_id: '32855cf6-5605-4a8e-97a3-3ac0b509b725',
-            text: 'abc',
             metadata: {
+              filename: 'table-parse.pdf',
               filetype: 'application/pdf',
               languages: ['eng'],
-              page_number: 1,
               orig_elements: 'e==',
-              filename: 'table-parse.pdf',
+              page_number: 1,
             },
+            text: 'abc',
+            type: 'CompositeElement',
           },
         ]),
       );
       try {
         await client.partition({
+          chunkingStrategy: ChunkingStrategy.Basic,
           fileContent: new Uint8Array(),
           filename: 'test.txt',
-          chunkingStrategy: ChunkingStrategy.Basic,
         });
       } catch (e) {
         expect(e).toThrowError('unexpected end of file');

@@ -12,50 +12,50 @@ import {
 describe('customModelCardsReducer', () => {
   const initialState: ChatModelCard[] = [
     {
-      id: 'model1',
-      displayName: 'Model 1',
+      contextWindowTokens: 2048,
       description: 'A helpful assistant',
+      displayName: 'Model 1',
+      enabled: true,
       files: true,
       functionCall: false,
-      enabled: true,
+      id: 'model1',
       isCustom: true,
       legacy: false,
       maxOutput: 1000,
-      contextWindowTokens: 2048,
       vision: false,
     },
     {
-      id: 'model2',
-      displayName: 'Model 2',
+      contextWindowTokens: 1024,
       description: 'A friendly chatbot',
+      displayName: 'Model 2',
       files: false,
       functionCall: true,
+      id: 'model2',
       isCustom: true,
       legacy: true,
       maxOutput: 500,
-      contextWindowTokens: 1024,
       vision: true,
     },
   ];
 
   it('should add a new custom model card', () => {
     const newModelCard: ChatModelCard = {
-      id: 'model3',
-      displayName: 'Model 3',
+      contextWindowTokens: 4096,
       description: 'A versatile assistant',
+      displayName: 'Model 3',
+      enabled: true,
       files: true,
       functionCall: true,
-      enabled: true,
+      id: 'model3',
       isCustom: true,
       legacy: false,
       maxOutput: 2000,
-      contextWindowTokens: 4096,
       vision: false,
     };
 
     const action: AddCustomModelCard = {
-      type: 'add',
       modelCard: newModelCard,
+      type: 'add',
     };
 
     const newState = customModelCardsReducer(initialState, action);
@@ -66,22 +66,22 @@ describe('customModelCardsReducer', () => {
 
   it('should not add a duplicate custom model card', () => {
     const duplicateModelCard: ChatModelCard = {
-      id: 'model1',
-      displayName: 'Duplicate Model 1',
+      contextWindowTokens: 2048,
       description: 'A duplicate model',
+      displayName: 'Duplicate Model 1',
+      enabled: true,
       files: true,
       functionCall: false,
-      enabled: true,
+      id: 'model1',
       isCustom: true,
       legacy: false,
       maxOutput: 1000,
-      contextWindowTokens: 2048,
       vision: false,
     };
 
     const action: AddCustomModelCard = {
-      type: 'add',
       modelCard: duplicateModelCard,
+      type: 'add',
     };
 
     const newState = customModelCardsReducer(initialState, action);
@@ -91,8 +91,8 @@ describe('customModelCardsReducer', () => {
 
   it('should delete a custom model card', () => {
     const action: DeleteCustomModelCard = {
-      type: 'delete',
       id: 'model1',
+      type: 'delete',
     };
 
     const newState = customModelCardsReducer(initialState, action);
@@ -103,8 +103,8 @@ describe('customModelCardsReducer', () => {
 
   it('should update a custom model card', () => {
     const action: UpdateCustomModelCard = {
-      type: 'update',
       id: 'model1',
+      type: 'update',
       value: { displayName: 'Updated Model 1' },
     };
 
@@ -126,8 +126,8 @@ describe('customModelCardsReducer', () => {
 
   it('should return the original state if the model card is not found during update', () => {
     const action: UpdateCustomModelCard = {
-      type: 'update',
       id: 'nonexistent',
+      type: 'update',
       value: { displayName: 'Updated Nonexistent Model' },
     };
 
@@ -138,22 +138,22 @@ describe('customModelCardsReducer', () => {
 
   it('should return the original state if the model card ID is missing during add', () => {
     const newModelCard: ChatModelCard = {
-      id: '',
-      displayName: 'Model 4',
+      contextWindowTokens: 2048,
       description: 'A new model',
+      displayName: 'Model 4',
+      enabled: true,
       files: false,
       functionCall: false,
-      enabled: true,
+      id: '',
       isCustom: true,
       legacy: false,
       maxOutput: 1500,
-      contextWindowTokens: 2048,
       vision: false,
     };
 
     const action: AddCustomModelCard = {
-      type: 'add',
       modelCard: newModelCard,
+      type: 'add',
     };
 
     const newState = customModelCardsReducer(initialState, action);
@@ -167,8 +167,8 @@ describe('customModelCardsReducer', () => {
     };
 
     const action: AddCustomModelCard = {
-      type: 'add',
       modelCard: newModelCard,
+      type: 'add',
     };
 
     const newState = customModelCardsReducer(initialState, action);
@@ -178,22 +178,22 @@ describe('customModelCardsReducer', () => {
 
   it('should handle an undefined initial state', () => {
     const newModelCard: ChatModelCard = {
-      id: 'model4',
-      displayName: 'Model 4',
+      contextWindowTokens: 2048,
       description: 'A new model',
+      displayName: 'Model 4',
+      enabled: true,
       files: false,
       functionCall: false,
-      enabled: true,
+      id: 'model4',
       isCustom: true,
       legacy: false,
       maxOutput: 1500,
-      contextWindowTokens: 2048,
       vision: false,
     };
 
     const action: AddCustomModelCard = {
-      type: 'add',
       modelCard: newModelCard,
+      type: 'add',
     };
 
     const newState = customModelCardsReducer(undefined, action);

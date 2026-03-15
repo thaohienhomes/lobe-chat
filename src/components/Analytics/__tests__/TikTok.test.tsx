@@ -20,9 +20,9 @@ vi.mock('@/utils/tiktok-events', () => ({
 vi.mock('next/script', () => ({
   default: ({ children, id, dangerouslySetInnerHTML, ...props }: any) => (
     <script
-      id={id}
-      data-testid="mocked-script"
       data-script-content={dangerouslySetInnerHTML?.__html}
+      data-testid="mocked-script"
+      id={id}
       {...props}
     >
       {children}
@@ -32,9 +32,9 @@ vi.mock('next/script', () => ({
 
 describe('TikTok', () => {
   const mockTtq = {
-    track: vi.fn(),
     identify: vi.fn(),
     page: vi.fn(),
+    track: vi.fn(),
   };
 
   beforeEach(() => {

@@ -26,10 +26,10 @@ describe('MCPService', () => {
 
   describe('callTool', () => {
     const mockParams = {
+      args: ['--test'],
+      command: 'test-command',
       name: 'test-mcp',
       type: 'stdio' as const,
-      command: 'test-command',
-      args: ['--test'],
     };
 
     it('should return original data when content array is empty', async () => {
@@ -57,7 +57,7 @@ describe('MCPService', () => {
     it('should return parsed JSON when single element contains valid JSON', async () => {
       const jsonData = { message: 'Hello World', status: 'success' };
       mockClient.callTool.mockResolvedValue({
-        content: [{ type: 'text', text: JSON.stringify(jsonData) }],
+        content: [{ text: JSON.stringify(jsonData), type: 'text' }],
         isError: false,
       });
 
@@ -69,7 +69,7 @@ describe('MCPService', () => {
     it('should return plain text when single element contains non-JSON text', async () => {
       const textData = 'Hello World';
       mockClient.callTool.mockResolvedValue({
-        content: [{ type: 'text', text: textData }],
+        content: [{ text: textData, type: 'text' }],
         isError: false,
       });
 
@@ -79,7 +79,7 @@ describe('MCPService', () => {
     });
 
     it('should return original data when single element has no text', async () => {
-      const contentData = [{ type: 'text', text: '' }];
+      const contentData = [{ text: '', type: 'text' }];
       mockClient.callTool.mockResolvedValue({
         content: contentData,
         isError: false,
@@ -92,9 +92,9 @@ describe('MCPService', () => {
 
     it('should return complete array when content has multiple elements', async () => {
       const multipleContent = [
-        { type: 'text', text: 'First message' },
-        { type: 'text', text: 'Second message' },
-        { type: 'text', text: '{"json": "data"}' },
+        { text: 'First message', type: 'text' },
+        { text: 'Second message', type: 'text' },
+        { text: '{"json": "data"}', type: 'text' },
       ];
 
       mockClient.callTool.mockResolvedValue({
@@ -110,8 +110,8 @@ describe('MCPService', () => {
 
     it('should return complete array when content has two elements', async () => {
       const twoContent = [
-        { type: 'text', text: 'First message' },
-        { type: 'text', text: 'Second message' },
+        { text: 'First message', type: 'text' },
+        { text: 'Second message', type: 'text' },
       ];
 
       mockClient.callTool.mockResolvedValue({
@@ -126,7 +126,7 @@ describe('MCPService', () => {
 
     it('should return error result when isError is true', async () => {
       const errorResult = {
-        content: [{ type: 'text', text: 'Error occurred' }],
+        content: [{ text: 'Error occurred', type: 'text' }],
         isError: true,
       };
 
@@ -149,7 +149,7 @@ describe('MCPService', () => {
       const argsString = JSON.stringify(argsObject);
 
       mockClient.callTool.mockResolvedValue({
-        content: [{ type: 'text', text: 'result' }],
+        content: [{ text: 'result', type: 'text' }],
         isError: false,
       });
 
