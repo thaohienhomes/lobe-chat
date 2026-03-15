@@ -161,7 +161,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     if (!srcdoc) return null;
 
     return (
-      <Flexbox className={styles.container}>
+      <Flexbox className={styles.container} data-visualizer>
         {title && (
           <div className={styles.titleBar}>
             <span>📊</span>
