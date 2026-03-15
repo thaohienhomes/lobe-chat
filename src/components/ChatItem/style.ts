@@ -183,6 +183,7 @@ export const useStyles = createStyles(
 
           /* Allow full width when containing a Visualizer */
           &:has([data-visualizer]) {
+            width: 100%;
             overflow: visible;
           }
 
@@ -200,6 +201,7 @@ export const useStyles = createStyles(
 
           /* Allow full width when containing a Visualizer */
           &:has([data-visualizer]) {
+            width: 100%;
             overflow: visible;
           }
 
