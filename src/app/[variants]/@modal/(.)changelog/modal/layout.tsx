@@ -37,6 +37,3 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
 });
 
 export default Layout;
-
-// ISR with 1-hour revalidation — changelog content changes infrequently
-export const revalidate = 3600;
