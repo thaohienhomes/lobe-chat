@@ -4,7 +4,7 @@ import { createStyles } from 'antd-style';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { generateShellHTML, type ShellThemeVars } from './shellHTML';
+import { generateCompleteHTML, type ShellThemeVars } from './shellHTML';
 import LoadingOverlay from './LoadingOverlay';
 
 const MIN_HEIGHT = 100;
@@ -43,12 +43,18 @@ export interface VisualizerRendererProps {
   widgetCode: string;
 }
 
+/**
+ * Renders the Visualizer widget inside a sandboxed iframe.
+ *
+ * Simple approach: embed widget code directly into srcdoc HTML.
+ * No postMessage for content delivery, no morphdom, no timing issues.
+ * Only uses postMessage for resize reporting, theme updates, and bridges.
+ */
 const VisualizerRenderer = memo<VisualizerRendererProps>(
   ({
     widgetCode,
     title,
     loadingMessages,
-    // isStreaming is consumed by parent but kept in props interface for future use
     isStreaming: _isStreaming,
     isComplete,
     theme,
@@ -59,47 +65,34 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [iframeHeight, setIframeHeight] = useState(DEFAULT_HEIGHT);
     const [iframeReady, setIframeReady] = useState(false);
-    // Track whether the iframe shell JS has initialized and is ready to receive messages
-    const [shellReady, setShellReady] = useState(false);
-    const hasRunScriptsRef = useRef(false);
 
-    // Generate shell HTML once per theme (memoized)
-    const srcdoc = useMemo(() => generateShellHTML(theme), [theme]);
+    // Generate complete HTML with widget code embedded directly
+    const srcdoc = useMemo(() => {
+      if (!widgetCode) return '';
+      return generateCompleteHTML(theme, widgetCode);
+    }, [theme, widgetCode]);
 
-    // Show loading overlay until iframe has received first content and reported a resize
+    // Show loading overlay until iframe reports a resize (content rendered)
     const showLoading = !iframeReady && !isComplete;
 
     // ── Fallback height timeout ──────────────────────────────────────────────
     useEffect(() => {
       if (iframeReady) return;
-
       const timer = setTimeout(() => {
         setIframeHeight(400);
         setIframeReady(true);
       }, HEIGHT_TIMEOUT_MS);
-
       return () => clearTimeout(timer);
     }, [iframeReady]);
 
-    // ── postMessage to iframe helper ─────────────────────────────────────────
-    const postToIframe = useCallback((msg: Record<string, unknown>) => {
-      iframeRef.current?.contentWindow?.postMessage(msg, '*');
-    }, []);
-
-    // ── Handle messages FROM iframe ──────────────────────────────────────────
+    // ── Handle messages FROM iframe (resize, sendPrompt, widgetData) ─────────
     useEffect(() => {
       const handleMessage = (e: MessageEvent) => {
         if (e.source !== iframeRef.current?.contentWindow) return;
-
         const { type } = e.data || {};
         if (typeof type !== 'string') return;
 
         switch (type) {
-          case 'ready': {
-            // Shell JS is initialized and ready to receive messages
-            setShellReady(true);
-            break;
-          }
           case 'resize': {
             const h = Number(e.data.height);
             if (h > 0) {
@@ -125,31 +118,15 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
       return () => window.removeEventListener('message', handleMessage);
     }, [onSendPrompt, onInteraction]);
 
-    // ── When shell is ready AND we have code, send content ───────────────────
-    useEffect(() => {
-      if (!shellReady || !widgetCode) return;
+    // ── Theme updates via postMessage (for dynamic theme changes) ────────────
+    const postToIframe = useCallback((msg: Record<string, unknown>) => {
+      iframeRef.current?.contentWindow?.postMessage(msg, '*');
+    }, []);
 
-      postToIframe({ html: widgetCode, type: 'setContent' });
-    }, [shellReady, widgetCode, postToIframe]);
-
-    // ── When shell is ready AND streaming completes, execute scripts ─────────
-    useEffect(() => {
-      if (!shellReady || !isComplete || hasRunScriptsRef.current) return;
-
-      // Send final content + runScripts
-      if (widgetCode) {
-        postToIframe({ html: widgetCode, type: 'setContent' });
-      }
-      postToIframe({ type: 'runScripts' });
-      hasRunScriptsRef.current = true;
-    }, [shellReady, isComplete, widgetCode, postToIframe]);
-
-    // ── Theme updates without iframe reload ──────────────────────────────────
     const prevThemeRef = useRef(theme);
     useEffect(() => {
       if (prevThemeRef.current === theme) return;
       prevThemeRef.current = theme;
-
       postToIframe({
         type: 'updateTheme',
         vars: {
@@ -162,6 +139,8 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
         },
       });
     }, [theme, postToIframe]);
+
+    if (!srcdoc) return null;
 
     return (
       <Flexbox className={styles.container} width="100%">

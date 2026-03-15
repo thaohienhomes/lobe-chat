@@ -1,4 +1,4 @@
-import { CDN_ALLOWLIST, MORPHDOM_CDN_URL, STYLE_CDN_ALLOWLIST } from './constants';
+import { CDN_ALLOWLIST, STYLE_CDN_ALLOWLIST } from './constants';
 
 export interface ShellThemeVars {
   accent: string;
@@ -10,27 +10,16 @@ export interface ShellThemeVars {
 }
 
 /**
- * Generates the shell HTML that loads once inside the sandboxed iframe.
+ * Generates complete HTML with widget code embedded directly.
  *
- * Contains:
- * 1. CSP meta tag restricting script-src to CDN allowlist
- * 2. CSS reset + theme variables injected from parent
- * 3. _fadeIn keyframe animation for new DOM nodes
- * 4. morphdom loaded async from CDN for streaming DOM diff
- * 5. _setContent(html) — morphdom-based DOM diff with buffer
- * 6. _runScripts() — clone script tags to force execution
- * 7. ResizeObserver reporting content height to parent
- * 8. sendPrompt() / sendData() postMessage bridges
- * 9. message listener for setContent, runScripts, updateTheme
- *
- * Critical design decisions (from reverse-engineering Claude.ai):
- * - morphdom loaded async; _setContent buffers until ready
- * - onBeforeElUpdated: skip if isEqualNode (preserve unchanged DOM)
- * - onNodeAdded: apply _fadeIn animation to new elements
- * - _runScripts: clone script tags to force execution (innerHTML scripts are inert)
- * - ResizeObserver on <body> reports height changes to parent
+ * This is the simplest possible approach:
+ * - Widget code is embedded as-is inside the HTML body
+ * - Scripts execute naturally during HTML parsing (CDN scripts block-load
+ *   before inline scripts, so `new Chart(...)` works after `<script src="chart.js">`)
+ * - No postMessage for content delivery, no morphdom, no timing issues
+ * - Only uses postMessage for: resize reporting, theme updates, sendPrompt bridge
  */
-export function generateShellHTML(theme: ShellThemeVars): string {
+export function generateCompleteHTML(theme: ShellThemeVars, widgetCode: string): string {
   const scriptSrc = CDN_ALLOWLIST.join('\n      ');
   const styleSrc = STYLE_CDN_ALLOWLIST.join('\n      ');
 
@@ -66,82 +55,12 @@ export function generateShellHTML(theme: ShellThemeVars): string {
       overflow: hidden;
       line-height: 1.5;
     }
-    @keyframes _fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-
-  <script src="${MORPHDOM_CDN_URL}"
-    onload="window._morphReady=true;if(window._pending){window._setContent(window._pending);window._pending=null;}">
-  </script>
+  ${widgetCode}
 
   <script>
-    window._morphReady = false;
-    window._pending = null;
-    window._shouldRunScripts = false;
-
-    // Streaming DOM diff via morphdom
-    window._setContent = function(html) {
-      if (!window._morphReady) { window._pending = html; return; }
-      var root = document.getElementById('root');
-      if (!root) return;
-      var target = document.createElement('div');
-      target.id = 'root';
-      target.innerHTML = html;
-      morphdom(root, target, {
-        onBeforeElUpdated: function(from, to) {
-          if (from.isEqualNode(to)) return false;
-          return true;
-        },
-        onNodeAdded: function(node) {
-          if (node.nodeType === 1) {
-            node.style.animation = '_fadeIn 0.3s ease both';
-          }
-          return node;
-        }
-      });
-      // If runScripts was requested before content was ready, run now
-      if (window._shouldRunScripts) {
-        window._shouldRunScripts = false;
-        window._runScripts();
-      }
-    };
-
-    // Execute script tags after streaming completes
-    // innerHTML-inserted scripts are inert — cloning forces execution
-    // Scripts are loaded SEQUENTIALLY to avoid race conditions:
-    // external CDN scripts (Chart.js, D3, etc.) must finish loading
-    // before inline scripts that depend on them can execute.
-    window._runScripts = function() {
-      var scripts = Array.from(document.querySelectorAll('#root script'));
-      var idx = 0;
-
-      function next() {
-        if (idx >= scripts.length) return;
-        var old = scripts[idx++];
-        var s = document.createElement('script');
-        Array.from(old.attributes).forEach(function(attr) {
-          s.setAttribute(attr.name, attr.value);
-        });
-        if (old.src) {
-          // External script — wait for it to load before continuing
-          s.onload = next;
-          s.onerror = next; // continue even on error
-        } else {
-          s.textContent = old.textContent;
-        }
-        old.parentNode.replaceChild(s, old);
-        // If inline (no src), proceed immediately
-        if (!old.src) next();
-      }
-
-      next();
-    };
-
     // Bridge: send a chat message from widget to parent
     window.sendPrompt = function(text) {
       window.parent.postMessage({ type: 'sendPrompt', text: text }, '*');
@@ -158,51 +77,17 @@ export function generateShellHTML(theme: ShellThemeVars): string {
       window.parent.postMessage({ type: 'resize', height: height }, '*');
     }).observe(document.body);
 
-    // Listen for commands from parent
-    var _readyInterval = null;
+    // Listen for theme updates from parent
     window.addEventListener('message', function(e) {
       var data = e.data;
       if (!data || typeof data.type !== 'string') return;
-
-      // Stop ready polling once parent sends any command
-      if (_readyInterval) {
-        clearInterval(_readyInterval);
-        _readyInterval = null;
-      }
-
-      switch (data.type) {
-        case 'setContent':
-          window._setContent(data.html);
-          break;
-        case 'runScripts':
-          // If content hasn't been applied yet (morphdom still loading),
-          // defer script execution until _setContent completes
-          if (document.querySelectorAll('#root script').length > 0) {
-            window._runScripts();
-          } else {
-            window._shouldRunScripts = true;
-          }
-          break;
-        case 'updateTheme':
-          if (data.vars && typeof data.vars === 'object') {
-            Object.keys(data.vars).forEach(function(k) {
-              document.documentElement.style.setProperty(k, data.vars[k]);
-            });
-          }
-          break;
+      if (data.type === 'updateTheme' && data.vars && typeof data.vars === 'object') {
+        Object.keys(data.vars).forEach(function(k) {
+          document.documentElement.style.setProperty(k, data.vars[k]);
+        });
       }
     });
-
-    // Signal to parent that shell JS is ready — poll until parent acknowledges
-    // (React's useEffect attaches message listener AFTER iframe JS runs,
-    //  so a single 'ready' message gets lost)
-    _readyInterval = setInterval(function() {
-      window.parent.postMessage({ type: 'ready' }, '*');
-    }, 100);
-    // Also send immediately
-    window.parent.postMessage({ type: 'ready' }, '*');
   </script>
 </body>
 </html>`;
 }
-
