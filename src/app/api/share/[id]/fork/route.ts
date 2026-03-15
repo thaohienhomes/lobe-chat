@@ -2,6 +2,7 @@ import { getUserAuth } from '@lobechat/utils/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { SharedConversationModel } from '@/database/models/sharedConversation';
+import { SESSION_CHAT_URL } from '@/const/url';
 import { getServerDB } from '@/database/server';
 import { createCallerFactory } from '@/libs/trpc/lambda';
 import { lambdaRouter } from '@/server/routers/lambda';
@@ -56,9 +57,27 @@ export const POST = async (req: NextRequest, props: { params: Promise<{ id: stri
       type: 'agent',
     });
 
-    // TODO: Copy messages to new session
-    // This requires creating messages in the new session
-    // For now, we just create an empty session with the same config
+    // Copy messages to new session (preserving conversation history)
+    const sharedMessages = sharedConversation.messages || [];
+    if (sharedMessages.length > 0) {
+      for (const msg of sharedMessages) {
+        try {
+          await authedCaller.message.createMessage({
+            content: msg.content || '',
+            role: msg.role || 'user',
+            sessionId,
+            // Preserve model/provider metadata for assistant messages
+            ...(msg.role === 'assistant' && {
+              fromModel: sharedConversation.model,
+              fromProvider: sharedConversation.provider,
+            }),
+          });
+        } catch (msgError) {
+          // Log but don't fail the entire fork if a single message fails
+          console.warn('Failed to copy message during fork:', msgError);
+        }
+      }
+    }
 
     // Increment fork count
     await model.incrementForkCount(id);
@@ -66,6 +85,7 @@ export const POST = async (req: NextRequest, props: { params: Promise<{ id: stri
     return NextResponse.json({
       sessionId,
       success: true,
+      url: SESSION_CHAT_URL(sessionId, false),
     });
   } catch (error) {
     console.error('Error forking conversation:', error);
@@ -81,3 +101,4 @@ export const POST = async (req: NextRequest, props: { params: Promise<{ id: stri
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+

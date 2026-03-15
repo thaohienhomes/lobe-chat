@@ -39,8 +39,8 @@ const SharedConversationView = memo<SharedConversationViewProps>(
 
         const data = await response.json();
 
-        // Redirect to new session
-        router.push(`/chat?session=${data.sessionId}`);
+        // Redirect to new session using the URL from fork API
+        router.push(data.url || `/chat?session=${data.sessionId}`);
       } catch (error) {
         console.error('Error forking conversation:', error);
         message.error('Failed to fork conversation');
