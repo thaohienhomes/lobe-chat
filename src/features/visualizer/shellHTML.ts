@@ -159,9 +159,16 @@ export function generateShellHTML(theme: ShellThemeVars): string {
     }).observe(document.body);
 
     // Listen for commands from parent
+    var _readyInterval = null;
     window.addEventListener('message', function(e) {
       var data = e.data;
       if (!data || typeof data.type !== 'string') return;
+
+      // Stop ready polling once parent sends any command
+      if (_readyInterval) {
+        clearInterval(_readyInterval);
+        _readyInterval = null;
+      }
 
       switch (data.type) {
         case 'setContent':
@@ -186,9 +193,16 @@ export function generateShellHTML(theme: ShellThemeVars): string {
       }
     });
 
-    // Signal to parent that shell JS is initialized and ready for messages
+    // Signal to parent that shell JS is ready — poll until parent acknowledges
+    // (React's useEffect attaches message listener AFTER iframe JS runs,
+    //  so a single 'ready' message gets lost)
+    _readyInterval = setInterval(function() {
+      window.parent.postMessage({ type: 'ready' }, '*');
+    }, 100);
+    // Also send immediately
     window.parent.postMessage({ type: 'ready' }, '*');
   </script>
 </body>
 </html>`;
 }
+
