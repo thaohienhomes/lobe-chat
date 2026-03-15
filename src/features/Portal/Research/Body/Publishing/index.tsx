@@ -7,7 +7,7 @@ import { CheckCircle, Copy, Download, ExternalLink, FileText } from 'lucide-reac
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { type PaperResult, useResearchStore } from '@/store/research';
+import { type ArticleType, type PaperResult, useResearchStore } from '@/store/research';
 
 import PlagiarismChecker from './PlagiarismChecker';
 
@@ -152,6 +152,16 @@ const JOURNAL_TEMPLATES: Record<string, {
   },
 };
 
+// ── Article type label map ─────────────────────────────────────────────────
+const ARTICLE_TYPE_LABELS: Record<ArticleType, string> = {
+    'meta-analysis': 'Meta-analysis',
+    'narrative-review': 'Narrative Review',
+    'rapid-review': 'Rapid Review',
+    'scoping-review': 'Scoping Review',
+    'systematic-review': 'Systematic Review',
+    'umbrella-review': 'Umbrella Review',
+};
+
 // ===== Quarto .qmd Builder =====
 const buildQuartoQMD = (
   query: string,
@@ -160,10 +170,12 @@ const buildQuartoQMD = (
   excluded: PaperResult[],
   allPapers: PaperResult[],
   journalKey: string,
+  articleType: ArticleType,
 ): string => {
   const today = new Date().toISOString().split('T')[0];
   const jt = JOURNAL_TEMPLATES[journalKey] ?? JOURNAL_TEMPLATES.generic;
   const grade = assessGradeLevel(included);
+  const typeLabel = ARTICLE_TYPE_LABELS[articleType];
 
   // Build YAML frontmatter
   const formatLine = jt.format === 'html+pdf+docx'
@@ -174,7 +186,7 @@ const buildQuartoQMD = (
   const bibLine = `bibliography: references.bib\ncsl: vancouver.csl  # Download from https://citationstyles.org`;
 
   const yaml = `---
-title: "Systematic Review: ${query}"
+title: "${typeLabel}: ${query}"
 author:
   - name: "[Author Name]"
     affiliation: "[Institution]"
@@ -336,8 +348,10 @@ const buildStyledHTML = (
   allPapers: PaperResult[],
   included: PaperResult[],
   excluded: PaperResult[],
+  articleType: ArticleType,
 ): string => {
   const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  const typeLabel = ARTICLE_TYPE_LABELS[articleType];
   const pubmedCount = allPapers.filter((p) => p.source === 'PubMed').length;
   const oaCount = allPapers.filter((p) => p.source === 'OpenAlex').length;
   const years = included.map((p) => p.year).filter((y) => y > 0);
@@ -358,7 +372,7 @@ const buildStyledHTML = (
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Systematic Review: ${query}</title>
+<title>${typeLabel}: ${query}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -633,7 +647,7 @@ const buildStyledHTML = (
 </head>
 <body>
 
-<h1>Systematic Review: ${query}</h1>
+<h1>${typeLabel}: ${query}</h1>
 <p class="meta">Prepared using Phở Chat Research Mode &mdash; ${today}</p>
 
 <h2>Abstract</h2>
@@ -829,6 +843,8 @@ const PublishingPhase = memo(() => {
   const searchQuery = useResearchStore((s) => s.searchQuery);
   const pico = useResearchStore((s) => s.pico);
   const setActivePhase = useResearchStore((s) => s.setActivePhase);
+  const articleType = useResearchStore((s) => s.articleType);
+  const typeLabel = ARTICLE_TYPE_LABELS[articleType];
 
   const includedPapers = useMemo(
     () => papers.filter((p) => screeningDecisions[p.id]?.decision === 'included'),
@@ -842,7 +858,7 @@ const PublishingPhase = memo(() => {
   const markdownContent = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const parts = [
-      `# Systematic Review: ${searchQuery}`,
+      `# ${typeLabel}: ${searchQuery}`,
       `*${today}*`,
       '',
       `${pico ? `PICO — P: ${pico.population}, I: ${pico.intervention}, C: ${pico.comparison}, O: ${pico.outcome}` : ''}`,
@@ -851,8 +867,8 @@ const PublishingPhase = memo(() => {
   }, [searchQuery, pico]);
 
   const htmlDocument = useMemo(
-    () => buildStyledHTML(searchQuery, pico, papers, includedPapers, excludedPapers),
-    [searchQuery, pico, papers, includedPapers, excludedPapers],
+    () => buildStyledHTML(searchQuery, pico, papers, includedPapers, excludedPapers, articleType),
+    [searchQuery, pico, papers, includedPapers, excludedPapers, articleType],
   );
 
   const handleExport = useCallback((format: string) => {
@@ -936,8 +952,8 @@ const PublishingPhase = memo(() => {
       }
 
       case 'quarto_qmd': {
-        const qmd = buildQuartoQMD(searchQuery, pico, includedPapers, excludedPapers, papers, journalKey);
-        downloadFile(qmd, 'systematic-review.qmd', 'text/plain');
+        const qmd = buildQuartoQMD(searchQuery, pico, includedPapers, excludedPapers, papers, journalKey, articleType);
+        downloadFile(qmd, `${articleType}.qmd`, 'text/plain');
         setExported(format);
         setTimeout(() => setExported(null), 3000);
         break;

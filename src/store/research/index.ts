@@ -39,6 +39,14 @@ export type SearchSource = 'PubMed' | 'OpenAlex' | 'ArXiv' | 'ClinicalTrials.gov
 
 export type ScreeningDecision = 'included' | 'excluded' | 'pending';
 
+export type ArticleType =
+  | 'systematic-review'
+  | 'meta-analysis'
+  | 'scoping-review'
+  | 'narrative-review'
+  | 'umbrella-review'
+  | 'rapid-review';
+
 export interface ScreeningEntry {
     decision: ScreeningDecision;
     paperId: string;
@@ -57,6 +65,9 @@ export interface ScreeningCriteria {
 interface ResearchState {
     // Phase tracking
     activePhase: ResearchPhase;
+
+    // Article type (determines tabs, AI prompts, export formats)
+    articleType: ArticleType;
 
     addPaper: (paper: PaperResult) => void;
     addPapers: (papers: PaperResult[]) => void;
@@ -97,6 +108,7 @@ interface ResearchState {
     selectedSources: SearchSource[];
 
     setActivePhase: (phase: ResearchPhase) => void;
+    setArticleType: (type: ArticleType) => void;
     // Discovery Actions
     setSearchQuery: (query: string) => void;
     toggleSource: (source: SearchSource) => void;
@@ -116,6 +128,7 @@ const defaultCriteria: ScreeningCriteria = {
 
 const initialState = {
     activePhase: 'discovery' as ResearchPhase,
+    articleType: 'systematic-review' as ArticleType,
     currentPage: 1,
     hasMore: true,
     isLoadingMore: false,
@@ -542,6 +555,7 @@ export const useResearchStore = create<ResearchState>()(
                 },
 
                 setActivePhase: (phase) => set({ activePhase: phase }, false, 'setActivePhase'),
+                setArticleType: (type) => set({ articleType: type }, false, 'setArticleType'),
                 setSearchQuery: (query) => set({ searchQuery: query }, false, 'setSearchQuery'),
 
                 toggleSource: (source) => {
@@ -560,6 +574,7 @@ export const useResearchStore = create<ResearchState>()(
                 name: 'pho-research-store',
                 partialize: (state) => ({
                     activePhase: state.activePhase,
+                    articleType: state.articleType,
                     papers: state.papers,
                     pico: state.pico,
                     screeningCriteria: state.screeningCriteria,

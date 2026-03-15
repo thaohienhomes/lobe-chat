@@ -7,7 +7,7 @@ import { ChevronLeft } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { type PaperResult, useResearchStore } from '@/store/research';
+import { type ArticleType, type PaperResult, useResearchStore } from '@/store/research';
 
 import CitationNetwork from './CitationNetwork';
 import ConsortStrobe from './ConsortStrobe';
@@ -40,6 +40,58 @@ import KappaCalculator from './KappaCalculator';
 import MetaRegression from './MetaRegression';
 import RevManExport from './RevManExport';
 import ManuscriptReviewer from './ManuscriptReviewer';
+
+// ── Article Type Configuration ─────────────────────────────────────────────
+const ARTICLE_TYPE_CONFIG: Record<ArticleType, {
+    analysisTabs: string[];
+    description: string;
+    icon: string;
+    label: string;
+    subtitle: string;
+}> = {
+    'meta-analysis': {
+        analysisTabs: ['evidence', 'statadvisor', 'simulators', 'data', 'learning', 'kb', 'rob', 'forestplot', 'consort', 'doi', 'prospero', 'citationnet', 'impact', 'journals', 'timeline', 'power', 'peerreview', 'import', 'dedup', 'grade', 'nnt', 'subgroup', 'pubbias', 'extraction', 'aisummary', 'revman', 'airob', 'metareg', 'bibexport', 'kappa', 'manuscript-reviewer'],
+        description: 'PRISMA + quantitative pooling (forest plot, I², effect sizes)',
+        icon: '📊',
+        label: 'Meta-analysis',
+        subtitle: 'Phân tích tổng hợp',
+    },
+    'narrative-review': {
+        analysisTabs: ['evidence', 'data', 'learning', 'kb', 'doi', 'citationnet', 'impact', 'journals', 'timeline', 'peerreview', 'import', 'dedup', 'aisummary', 'bibexport', 'manuscript-reviewer'],
+        description: 'Expert opinion synthesis, no formal search protocol',
+        icon: '📝',
+        label: 'Narrative Review',
+        subtitle: 'Tổng quan tường thuật',
+    },
+    'rapid-review': {
+        analysisTabs: ['evidence', 'statadvisor', 'data', 'learning', 'kb', 'rob', 'doi', 'prospero', 'impact', 'journals', 'timeline', 'peerreview', 'import', 'dedup', 'grade', 'extraction', 'aisummary', 'bibexport', 'airob', 'manuscript-reviewer'],
+        description: 'Streamlined SR for time-constrained decisions',
+        icon: '⚡',
+        label: 'Rapid Review',
+        subtitle: 'Tổng quan nhanh',
+    },
+    'scoping-review': {
+        analysisTabs: ['evidence', 'data', 'learning', 'kb', 'doi', 'prospero', 'citationnet', 'impact', 'journals', 'timeline', 'peerreview', 'import', 'dedup', 'extraction', 'aisummary', 'bibexport', 'manuscript-reviewer'],
+        description: 'PRISMA-ScR, broader scope, mapping evidence gaps',
+        icon: '🗺️',
+        label: 'Scoping Review',
+        subtitle: 'Tổng quan phạm vi',
+    },
+    'systematic-review': {
+        analysisTabs: ['evidence', 'statadvisor', 'simulators', 'data', 'learning', 'kb', 'rob', 'consort', 'doi', 'prospero', 'citationnet', 'impact', 'journals', 'timeline', 'power', 'peerreview', 'import', 'dedup', 'grade', 'extraction', 'aisummary', 'revman', 'airob', 'bibexport', 'kappa', 'manuscript-reviewer'],
+        description: 'PRISMA guidelines, qualitative synthesis, no pooled statistics',
+        icon: '🔬',
+        label: 'Systematic Review',
+        subtitle: 'Tổng quan hệ thống',
+    },
+    'umbrella-review': {
+        analysisTabs: ['evidence', 'data', 'learning', 'kb', 'rob', 'doi', 'citationnet', 'impact', 'journals', 'timeline', 'peerreview', 'import', 'dedup', 'grade', 'pubbias', 'aisummary', 'bibexport', 'airob', 'manuscript-reviewer'],
+        description: 'Review of existing SRs/MAs, overlap assessment',
+        icon: '☂️',
+        label: 'Umbrella Review',
+        subtitle: 'Tổng quan ô',
+    },
+};
 
 // GRADE levels
 type GradeLevel = 'high' | 'moderate' | 'low' | 'very_low';
@@ -223,6 +275,10 @@ const AnalysisPhase = memo(() => {
     const papers = useResearchStore((s) => s.papers);
     const screeningDecisions = useResearchStore((s) => s.screeningDecisions);
     const setActivePhase = useResearchStore((s) => s.setActivePhase);
+    const articleType = useResearchStore((s) => s.articleType);
+    const setArticleType = useResearchStore((s) => s.setArticleType);
+
+    const typeConfig = ARTICLE_TYPE_CONFIG[articleType];
 
     const includedPapers = useMemo(
         () => papers.filter((p) => screeningDecisions[p.id]?.decision === 'included'),
@@ -272,6 +328,57 @@ const AnalysisPhase = memo(() => {
 
     return (
         <Flexbox className={styles.container} gap={0}>
+            {/* Article Type Selector */}
+            <div style={{
+                background: 'linear-gradient(135deg, rgba(22,119,255,0.06), rgba(114,46,209,0.06))',
+                border: '1px solid rgba(22,119,255,0.15)',
+                borderRadius: 12,
+                marginBottom: 12,
+                padding: '14px 16px',
+            }}>
+                <Flexbox gap={8}>
+                    <span style={{ fontSize: 13, fontWeight: 700 }}>📋 Chọn loại bài tổng quan</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {(Object.entries(ARTICLE_TYPE_CONFIG) as [ArticleType, typeof typeConfig][]).map(([key, cfg]) => (
+                            <button
+                                key={key}
+                                onClick={() => setArticleType(key)}
+                                style={{
+                                    alignItems: 'center',
+                                    background: articleType === key
+                                        ? 'linear-gradient(135deg, rgba(22,119,255,0.15), rgba(114,46,209,0.1))'
+                                        : 'rgba(0,0,0,0.02)',
+                                    border: articleType === key
+                                        ? '2px solid rgba(22,119,255,0.4)'
+                                        : '1px solid rgba(0,0,0,0.06)',
+                                    borderRadius: 8,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 2,
+                                    minWidth: 120,
+                                    padding: '8px 12px',
+                                    textAlign: 'left',
+                                    transition: 'all 0.2s',
+                                }}
+                                title={cfg.description}
+                                type="button"
+                            >
+                                <span style={{ fontSize: 13, fontWeight: 600 }}>
+                                    {cfg.icon} {cfg.label}
+                                </span>
+                                <span style={{ color: 'rgba(0,0,0,0.45)', fontSize: 10 }}>
+                                    {cfg.subtitle}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                    <span style={{ color: 'rgba(0,0,0,0.35)', fontSize: 11 }}>
+                        💡 {typeConfig.description}
+                    </span>
+                </Flexbox>
+            </div>
+
             <Tabs
                 defaultActiveKey="evidence"
                 items={[
@@ -544,7 +651,7 @@ const AnalysisPhase = memo(() => {
                         key: 'manuscript-reviewer',
                         label: '🤖 Manuscript Review',
                     },
-                ]}
+                ].filter((tab) => typeConfig.analysisTabs.includes(tab.key))}
                 size={'small'}
             />
         </Flexbox>
