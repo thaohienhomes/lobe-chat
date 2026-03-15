@@ -82,6 +82,7 @@ export function generateShellHTML(theme: ShellThemeVars): string {
   <script>
     window._morphReady = false;
     window._pending = null;
+    window._shouldRunScripts = false;
 
     // Streaming DOM diff via morphdom
     window._setContent = function(html) {
@@ -103,6 +104,11 @@ export function generateShellHTML(theme: ShellThemeVars): string {
           return node;
         }
       });
+      // If runScripts was requested before content was ready, run now
+      if (window._shouldRunScripts) {
+        window._shouldRunScripts = false;
+        window._runScripts();
+      }
     };
 
     // Execute script tags after streaming completes
@@ -162,7 +168,13 @@ export function generateShellHTML(theme: ShellThemeVars): string {
           window._setContent(data.html);
           break;
         case 'runScripts':
-          window._runScripts();
+          // If content hasn't been applied yet (morphdom still loading),
+          // defer script execution until _setContent completes
+          if (document.querySelectorAll('#root script').length > 0) {
+            window._runScripts();
+          } else {
+            window._shouldRunScripts = true;
+          }
           break;
         case 'updateTheme':
           if (data.vars && typeof data.vars === 'object') {
@@ -173,6 +185,9 @@ export function generateShellHTML(theme: ShellThemeVars): string {
           break;
       }
     });
+
+    // Signal to parent that shell JS is initialized and ready for messages
+    window.parent.postMessage({ type: 'ready' }, '*');
   </script>
 </body>
 </html>`;

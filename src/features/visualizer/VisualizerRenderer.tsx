@@ -59,7 +59,8 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [iframeHeight, setIframeHeight] = useState(DEFAULT_HEIGHT);
     const [iframeReady, setIframeReady] = useState(false);
-    const pendingCodeRef = useRef<string | null>(null);
+    // Track whether the iframe shell JS has initialized and is ready to receive messages
+    const [shellReady, setShellReady] = useState(false);
     const hasRunScriptsRef = useRef(false);
 
     // Generate shell HTML once per theme (memoized)
@@ -94,6 +95,11 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
         if (typeof type !== 'string') return;
 
         switch (type) {
+          case 'ready': {
+            // Shell JS is initialized and ready to receive messages
+            setShellReady(true);
+            break;
+          }
           case 'resize': {
             const h = Number(e.data.height);
             if (h > 0) {
@@ -119,31 +125,16 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
       return () => window.removeEventListener('message', handleMessage);
     }, [onSendPrompt, onInteraction]);
 
-    // ── On iframe load: flush any pending content ────────────────────────────
-    const handleIframeLoad = useCallback(() => {
-      if (pendingCodeRef.current) {
-        postToIframe({ html: pendingCodeRef.current, type: 'setContent' });
-        pendingCodeRef.current = null;
-      }
-    }, [postToIframe]);
-
-    // ── Send widgetCode to iframe on change (streaming updates) ──────────────
+    // ── When shell is ready AND we have code, send content ───────────────────
     useEffect(() => {
-      if (!widgetCode) return;
-
-      const iframe = iframeRef.current;
-      if (!iframe?.contentWindow) {
-        // iframe not mounted yet — buffer
-        pendingCodeRef.current = widgetCode;
-        return;
-      }
+      if (!shellReady || !widgetCode) return;
 
       postToIframe({ html: widgetCode, type: 'setContent' });
-    }, [widgetCode, postToIframe]);
+    }, [shellReady, widgetCode, postToIframe]);
 
-    // ── When streaming completes, execute scripts ────────────────────────────
+    // ── When shell is ready AND streaming completes, execute scripts ─────────
     useEffect(() => {
-      if (!isComplete || hasRunScriptsRef.current) return;
+      if (!shellReady || !isComplete || hasRunScriptsRef.current) return;
 
       // Send final content + runScripts
       if (widgetCode) {
@@ -151,7 +142,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
       }
       postToIframe({ type: 'runScripts' });
       hasRunScriptsRef.current = true;
-    }, [isComplete, widgetCode, postToIframe]);
+    }, [shellReady, isComplete, widgetCode, postToIframe]);
 
     // ── Theme updates without iframe reload ──────────────────────────────────
     const prevThemeRef = useRef(theme);
@@ -179,7 +170,6 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
           {showLoading && <LoadingOverlay messages={loadingMessages} />}
           <iframe
             className={styles.iframe}
-            onLoad={handleIframeLoad}
             ref={iframeRef}
             referrerPolicy="no-referrer"
             sandbox="allow-scripts"
