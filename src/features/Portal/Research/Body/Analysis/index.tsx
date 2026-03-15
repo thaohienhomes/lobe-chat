@@ -270,7 +270,7 @@ const GRADE_DOMAINS = [
 ];
 
 const AnalysisPhase = memo(() => {
-    const { styles } = useStyles();
+    const { styles, theme } = useStyles();
 
     const papers = useResearchStore((s) => s.papers);
     const screeningDecisions = useResearchStore((s) => s.screeningDecisions);
@@ -347,11 +347,12 @@ const AnalysisPhase = memo(() => {
                                     alignItems: 'center',
                                     background: articleType === key
                                         ? 'linear-gradient(135deg, rgba(22,119,255,0.15), rgba(114,46,209,0.1))'
-                                        : 'rgba(0,0,0,0.02)',
+                                        : theme.colorFillQuaternary,
                                     border: articleType === key
                                         ? '2px solid rgba(22,119,255,0.4)'
-                                        : '1px solid rgba(0,0,0,0.06)',
+                                        : `1px solid ${theme.colorBorderSecondary}`,
                                     borderRadius: 8,
+                                    color: theme.colorText,
                                     cursor: 'pointer',
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -367,13 +368,13 @@ const AnalysisPhase = memo(() => {
                                 <span style={{ fontSize: 13, fontWeight: 600 }}>
                                     {cfg.icon} {cfg.label}
                                 </span>
-                                <span style={{ color: 'rgba(0,0,0,0.45)', fontSize: 10 }}>
+                                <span style={{ color: theme.colorTextTertiary, fontSize: 10 }}>
                                     {cfg.subtitle}
                                 </span>
                             </button>
                         ))}
                     </div>
-                    <span style={{ color: 'rgba(0,0,0,0.35)', fontSize: 11 }}>
+                    <span style={{ color: theme.colorTextSecondary, fontSize: 11 }}>
                         💡 {typeConfig.description}
                     </span>
                 </Flexbox>
