@@ -97,7 +97,7 @@ export function generateCompleteHTML(theme: ShellThemeVars, widgetCode: string):
     }
 
     /* Active/selected buttons: force dark text on light (accent) backgrounds.
-     * AI-generated widget code often uses `color: #fff` for active buttons,
+     * AI-generated widget code often uses color:#fff for active buttons,
      * which is invisible when --color-accent is white/light. We override with
      * --color-bg (which is dark in dark mode) for maximum contrast. */
     button.active,
