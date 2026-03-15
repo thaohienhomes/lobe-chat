@@ -32,6 +32,18 @@ const Tool = memo<InspectorProps>(
     useEffect(() => {
       if (!type) return;
 
+      // Web-browsing search: auto-collapse after loading completes (Perplexity/Claude-style)
+      // Stays expanded during search so users see progress, then collapses into compact Inspector
+      if (identifier === 'web-browsing' || identifier === 'lobe-web-browsing') {
+        setTimeout(
+          () => {
+            setShowDetail(isLoading);
+          },
+          isLoading ? 1 : 1000,
+        );
+        return;
+      }
+
       // MCP tools: expand while loading, collapse 1.5s after completion
       if (type === 'mcp') {
         setTimeout(
@@ -48,7 +60,7 @@ const Tool = memo<InspectorProps>(
       if (type === 'builtin' && !isLoading) {
         setShowDetail(true);
       }
-    }, [isLoading, type]);
+    }, [isLoading, type, identifier]);
 
     // --- Visualizer-specific logic (AFTER all hooks to satisfy Rules of Hooks) ---
 

@@ -1,6 +1,9 @@
 'use client';
 
+import { ActionIcon, Icon } from '@lobehub/ui';
+import { Dropdown, type MenuProps, message } from 'antd';
 import { createStyles } from 'antd-style';
+import { CopyIcon, DownloadIcon, MoreHorizontalIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
@@ -9,6 +12,7 @@ import LoadingOverlay from './LoadingOverlay';
 
 const MIN_HEIGHT = 100;
 const DEFAULT_HEIGHT = 200;
+const MAX_CHART_HEIGHT = 600;
 const HEIGHT_TIMEOUT_MS = 10_000;
 const STREAMING_DEBOUNCE_MS = 200;
 
@@ -61,6 +65,27 @@ const useStyles = createStyles(({ css, token }) => ({
     border: none;
     border-radius: 0 0 12px 12px;
   `,
+  iframeWrapper: css`
+    overflow-y: auto;
+    max-height: ${MAX_CHART_HEIGHT}px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: ${token.colorBorderSecondary};
+      border-radius: 3px;
+
+      &:hover {
+        background: ${token.colorBorder};
+      }
+    }
+  `,
   streaming: css`
     border-color: ${token.colorPrimary};
     animation: streaming-pulse 2s ease-in-out infinite;
@@ -96,6 +121,9 @@ const useStyles = createStyles(({ css, token }) => ({
     color: ${token.colorTextSecondary};
     background: ${token.colorFillQuaternary};
     border-block-end: 1px solid ${token.colorBorderSecondary};
+  `,
+  toolbarTrigger: css`
+    margin-inline-start: auto;
   `,
 }));
 
@@ -158,7 +186,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
       return () => clearTimeout(timer);
     }, [iframeReady]);
 
-    // ── Handle messages FROM iframe (resize, sendPrompt, widgetData) ─────────
+    // ── Handle messages FROM iframe (resize, sendPrompt, widgetData, export) ──
     useEffect(() => {
       const handleMessage = (e: MessageEvent) => {
         if (e.source !== iframeRef.current?.contentWindow) return;
@@ -182,6 +210,23 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
           }
           case 'widgetData': {
             onInteraction?.(e.data.data);
+            break;
+          }
+          case 'exportedContent': {
+            // Trigger file download with exported content from iframe
+            const { format, content: exportContent, title: exportTitle } = e.data;
+            const ext = format === 'svg' ? 'svg' : 'html';
+            const mimeType = format === 'svg' ? 'image/svg+xml' : 'text/html';
+            const blob = new Blob([exportContent], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${exportTitle || 'visualization'}.${ext}`;
+            document.body.append(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            void message.success(`Downloaded as .${ext}`);
             break;
           }
         }
@@ -213,6 +258,36 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
       });
     }, [theme, postToIframe]);
 
+    // ── Toolbar handlers ─────────────────────────────────────────────────────
+    const handleCopyCode = useCallback(() => {
+      navigator.clipboard.writeText(widgetCode).then(
+        () => void message.success('Copied code to clipboard'),
+        () => void message.error('Failed to copy'),
+      );
+    }, [widgetCode]);
+
+    const handleDownload = useCallback(() => {
+      postToIframe({ type: 'exportContent', title });
+    }, [postToIframe, title]);
+
+    const toolbarMenuItems: MenuProps['items'] = useMemo(
+      () => [
+        {
+          icon: <Icon icon={CopyIcon} size={'small'} />,
+          key: 'copy',
+          label: 'Copy Code',
+          onClick: handleCopyCode,
+        },
+        {
+          icon: <Icon icon={DownloadIcon} size={'small'} />,
+          key: 'download',
+          label: 'Download',
+          onClick: handleDownload,
+        },
+      ],
+      [handleCopyCode, handleDownload],
+    );
+
     if (!srcdoc) return null;
 
     return (
@@ -226,9 +301,19 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
                 ● Generating…
               </span>
             )}
+            {!isStreaming && (
+              <Dropdown menu={{ items: toolbarMenuItems }} placement="bottomRight" trigger={['click']}>
+                <ActionIcon
+                  className={styles.toolbarTrigger}
+                  icon={MoreHorizontalIcon}
+                  size={'small'}
+                  title="Actions"
+                />
+              </Dropdown>
+            )}
           </div>
         )}
-        <div style={{ minHeight: MIN_HEIGHT, position: 'relative' }}>
+        <div className={styles.iframeWrapper} style={{ minHeight: MIN_HEIGHT, position: 'relative' }}>
           {showLoading && <LoadingOverlay messages={loadingMessages} />}
           <iframe
             className={styles.iframe}

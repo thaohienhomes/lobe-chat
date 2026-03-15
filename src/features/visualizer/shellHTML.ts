@@ -156,14 +156,36 @@ export function generateCompleteHTML(theme: ShellThemeVars, widgetCode: string):
       window.parent.postMessage({ type: 'resize', height: height }, '*');
     }).observe(document.body);
 
-    // Listen for theme updates from parent
+    // Listen for messages from parent (theme updates, export requests)
     window.addEventListener('message', function(e) {
       var data = e.data;
       if (!data || typeof data.type !== 'string') return;
+
+      // Theme update
       if (data.type === 'updateTheme' && data.vars && typeof data.vars === 'object') {
         Object.keys(data.vars).forEach(function(k) {
           document.documentElement.style.setProperty(k, data.vars[k]);
         });
+      }
+
+      // Export content (SVG preferred, fallback to HTML)
+      if (data.type === 'exportContent') {
+        var svg = document.querySelector('svg');
+        if (svg) {
+          window.parent.postMessage({
+            type: 'exportedContent',
+            format: 'svg',
+            content: svg.outerHTML,
+            title: data.title || 'visualization'
+          }, '*');
+        } else {
+          window.parent.postMessage({
+            type: 'exportedContent',
+            format: 'html',
+            content: document.body.innerHTML,
+            title: data.title || 'visualization'
+          }, '*');
+        }
       }
     });
   </script>
