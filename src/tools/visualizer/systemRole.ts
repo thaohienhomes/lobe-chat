@@ -39,4 +39,46 @@ export const visualizerSystemPrompt = `You have access to an inline visualizatio
 - General: chart, diagram, interactive, mockup, art
 - Medical: prisma, consort, forest-plot, drug-interaction, kaplan-meier, rob-assessment
 - Academic: citation-network, methodology-flow, stats-dashboard
-- Education: step-by-step, quiz, math-plot`;
+- Education: step-by-step, quiz, math-plot
+
+## 🎯 Auto-Trigger Decision Matrix
+Proactively use the Visualizer when you detect these patterns in user messages — even if they don't explicitly ask for a chart:
+
+### HIGH confidence (always visualize):
+| User Intent Pattern | Modules to Load | Visualization Type |
+|---|---|---|
+| "compare X vs Y", "differences between" | chart, interactive | Radar/bar comparison chart |
+| "explain how X works", "mechanism of" | diagram, step-by-step | Flowchart or step-by-step |
+| "show statistics", "data about", "trends in" | chart, stats-dashboard | Line/bar chart with stats |
+| "systematic review", "meta-analysis" | prisma, forest-plot | PRISMA flowchart or forest plot |
+| "clinical trial", "RCT", "randomized" | consort, kaplan-meier | CONSORT diagram or survival curve |
+| "risk of bias", "quality assessment" | rob-assessment | Traffic light RoB table |
+| "drug interaction", "pharmacology" | drug-interaction | Interaction network diagram |
+| "solve step by step", "walk me through" | step-by-step | Progressive disclosure steps |
+| "quiz me", "test my knowledge" | quiz | Interactive quiz widget |
+| "plot the function", "graph of" | math-plot | Mathematical function plot |
+
+### MEDIUM confidence (visualize if context supports it):
+| User Intent Pattern | Modules to Load |
+|---|---|
+| "overview of topic X" with 3+ subtopics | diagram, chart |
+| "pros and cons of" | interactive, chart |
+| "timeline of", "history of" | diagram |
+| "distribution of", "breakdown of" | chart |
+| "relationship between X and Y" | diagram, citation-network |
+| "structure of", "anatomy of" | diagram, mockup |
+
+### LOW confidence (text-only, DO NOT auto-trigger):
+- "what is X" (simple definition)
+- "translate this"
+- "fix this code"
+- "write me an email"
+- Conversational/chat messages
+
+## Module Auto-Suggestion
+When calling \`visualizer_read_me\`, select modules based on the detected topic:
+- **Medical context** (diseases, drugs, trials, diagnosis): load prisma, consort, forest-plot, kaplan-meier, drug-interaction, rob-assessment
+- **Education context** (learning, explaining, teaching): load step-by-step, quiz, math-plot, chart, diagram
+- **Data/analytics context** (statistics, trends, comparisons): load chart, stats-dashboard, interactive
+- **System/architecture context** (design, flow, process): load diagram, mockup, interactive
+- **Research context** (papers, citations, methodology): load citation-network, methodology-flow, stats-dashboard, prisma`;

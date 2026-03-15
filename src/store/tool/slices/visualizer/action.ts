@@ -7,8 +7,11 @@
  * - show_widget: Returns confirmation string. Actual rendering is handled client-side
  *   by the VisualizerRenderer component which reads the tool call arguments directly.
  * - visualizer_read_me: Returns design guidelines text for the LLM to follow.
+ *   Uses ModuleManager to provide rich, per-module content.
  */
 import { StateCreator } from 'zustand/vanilla';
+
+import { getModuleContent } from '@/features/visualizer/modules';
 
 import { ToolStore } from '../../store';
 
@@ -23,51 +26,6 @@ interface VisualizerReadMeParams {
   modules: string[];
 }
 
-const VISUALIZER_GUIDELINES = `# Visualizer Design Guidelines
-
-## General Rules
-- Keep background transparent (use CSS variables for theming)
-- Use CSS variables: var(--color-text), var(--color-bg), var(--color-accent), var(--color-surface), var(--color-border), var(--color-text-secondary)
-- Structure: <style> → HTML content → <script> (script LAST)
-- No DOCTYPE, html, head, or body tags
-- Use sendPrompt(text) for user interaction back to AI
-- Max code size: 500KB
-
-## CDN Libraries Available
-- Chart.js: https://cdn.jsdelivr.net/npm/chart.js
-- D3.js: https://cdn.jsdelivr.net/npm/d3
-- Three.js: https://cdn.jsdelivr.net/npm/three
-- Mermaid: https://cdn.jsdelivr.net/npm/mermaid
-- Plotly: https://cdn.jsdelivr.net/npm/plotly.js-dist-min
-- Any library from: cdnjs.cloudflare.com, cdn.jsdelivr.net, unpkg.com, esm.sh
-
-## Chart Module
-- Prefer Chart.js for standard charts (bar, line, pie, doughnut, radar)
-- Use responsive: true and maintainAspectRatio: false
-- Apply theme colors from CSS variables
-
-## Diagram Module
-- Use Mermaid for flowcharts, sequence diagrams, state diagrams
-- Or build custom SVG for more control
-- Keep text readable (min 12px)
-
-## Interactive Module
-- Add hover/click effects for engagement
-- Use sendPrompt() for drill-down interactions
-- Ensure touch-friendly targets (min 44px)
-
-## Medical Modules (prisma, consort, forest-plot, etc.)
-- Follow PRISMA 2020 / CONSORT standards
-- Use proper statistical notation
-- Include legends and axis labels
-
-## Education Modules (step-by-step, quiz, math-plot)
-- Progressive disclosure for step-by-step
-- Immediate feedback for quizzes
-- MathJax/KaTeX for math rendering
-
-Guidelines loaded for modules: `;
-
 function handleShowWidget(params: ShowWidgetParams) {
   // Must return valid JSON — BuiltinType checks isJSON and bails out otherwise.
   // The actual widget rendering uses `args` (tool arguments), not `content` (tool result).
@@ -75,9 +33,10 @@ function handleShowWidget(params: ShowWidgetParams) {
 }
 
 function handleVisualizerReadMe(params: VisualizerReadMeParams) {
-  // Return guidelines as JSON so BuiltinType's isJSON check passes
+  // Return rich per-module guidelines via ModuleManager
+  const guidelines = getModuleContent(params.modules);
   return JSON.stringify({
-    guidelines: VISUALIZER_GUIDELINES + params.modules.join(', '),
+    guidelines,
     modules: params.modules,
   });
 }
