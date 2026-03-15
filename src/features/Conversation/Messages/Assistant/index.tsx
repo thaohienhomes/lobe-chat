@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 import { ReactNode, memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
@@ -9,12 +10,14 @@ import { aiChatSelectors, chatSelectors } from '@/store/chat/selectors';
 import { ChatMessage } from '@/types/message';
 
 import { DefaultMessage } from '../Default';
-import BibliographySection from './BibliographySection';
-import FileChunks from './FileChunks';
-import IntentUnderstanding from './IntentUnderstanding';
-import Reasoning from './Reasoning';
-import SearchGrounding from './SearchGrounding';
 import Tool from './Tool';
+
+// Lazy-load non-critical sub-components to reduce initial JS bundle / TBT
+const BibliographySection = dynamic(() => import('./BibliographySection'));
+const FileChunks = dynamic(() => import('./FileChunks'));
+const IntentUnderstanding = dynamic(() => import('./IntentUnderstanding'));
+const Reasoning = dynamic(() => import('./Reasoning'));
+const SearchGrounding = dynamic(() => import('./SearchGrounding'));
 
 export const AssistantMessage = memo<
   ChatMessage & {

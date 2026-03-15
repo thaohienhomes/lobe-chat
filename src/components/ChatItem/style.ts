@@ -161,6 +161,7 @@ export const useStyles = createStyles(
           position: relative;
           overflow: hidden;
           max-width: 100%;
+          min-height: 32px; /* Reserve space to reduce CLS during content load */
 
           /* Expand message bubble to full width when it contains a Visualizer */
           &:has([data-visualizer]) {
