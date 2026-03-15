@@ -84,10 +84,38 @@ export function generateCompleteHTML(theme: ShellThemeVars, widgetCode: string):
     th { background: var(--color-surface) !important; }
 
     /* Ensure input/select elements are readable */
-    input, select, textarea, button {
+    input, select, textarea {
       color: var(--color-text);
       background: var(--color-surface);
       border-color: var(--color-border);
+    }
+
+    /* Default button styling for dark mode */
+    button {
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+
+    /* Active/selected buttons: force dark text on light (accent) backgrounds.
+     * AI-generated widget code often uses `color: #fff` for active buttons,
+     * which is invisible when --color-accent is white/light. We override with
+     * --color-bg (which is dark in dark mode) for maximum contrast. */
+    button.active,
+    button[aria-selected="true"],
+    button[data-active],
+    button[data-state="active"],
+    button.selected,
+    button.btn-primary,
+    .tab-btn.active,
+    .tab-button.active,
+    [role="tab"][aria-selected="true"],
+    [role="tab"].active {
+      color: var(--color-bg) !important;
+    }
+
+    /* Inactive/non-selected buttons: transparent bg so they blend with theme */
+    button:not(.active):not([aria-selected="true"]):not(.selected):not(.btn-primary):not([data-active]):not([data-state="active"]) {
+      background: transparent;
     }
 
     /* Progress bars / tracks */
