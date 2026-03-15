@@ -11,13 +11,18 @@ const MIN_HEIGHT = 100;
 const DEFAULT_HEIGHT = 200;
 const HEIGHT_TIMEOUT_MS = 10_000;
 
+/** Convert a snake_case or lowercase title to Title Case */
+const toTitleCase = (s: string): string =>
+  s
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
 const useStyles = createStyles(({ css, token }) => ({
   container: css`
     position: relative;
     overflow: hidden;
-    min-width: 480px;
-    max-width: 720px;
-    margin-inline: -24px;
+    width: 100%;
+    margin-bottom: 8px;
     background: ${token.colorBgContainer};
     border: 1px solid ${token.colorBorderSecondary};
     border-radius: 12px;
@@ -158,7 +163,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
         {title && (
           <div className={styles.titleBar}>
             <span>📊</span>
-            <span>{title.replaceAll('_', ' ')}</span>
+            <span>{toTitleCase(title)}</span>
           </div>
         )}
         <div style={{ minHeight: MIN_HEIGHT, position: 'relative' }}>

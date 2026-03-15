@@ -49,7 +49,7 @@ export function generateCompleteHTML(theme: ShellThemeVars, widgetCode: string):
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: transparent;
+      background: var(--color-bg);
       color: var(--color-text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       overflow: hidden;
