@@ -32,10 +32,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
   experimental: {
     optimizePackageImports: [
       'emoji-mart',
@@ -227,20 +223,22 @@ const nextConfig: NextConfig = {
   },
 
   // Image optimization – prefer WebP for smaller payloads
-  images: {
+images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31_536_000, // 1 year
   },
 
+  
   logging: {
     fetches: {
       fullUrl: true,
       hmrRefreshes: true,
     },
   },
+
   // Exclude unnecessary files from serverless function bundles to reduce size
-  // Moved from experimental to top-level in Next.js 15
-  outputFileTracingExcludes: {
+// Moved from experimental to top-level in Next.js 15
+outputFileTracingExcludes: {
     '*': [
       'node_modules/@swc/core-linux-x64-gnu',
       'node_modules/@swc/core-linux-x64-musl',
@@ -250,8 +248,9 @@ const nextConfig: NextConfig = {
       'node_modules/terser',
     ],
   },
+  
+  
   reactStrictMode: true,
-
   redirects: async () => [
     {
       destination: '/sitemap-index.xml',
@@ -335,10 +334,10 @@ const nextConfig: NextConfig = {
   ],
 
   // when external packages in dev mode with turbopack, this config will lead to bundle error
-  // For production we also externalize large server-only SDKs to keep individual
-  // Serverless Function bundles smaller (the packages are still present in
-  // node_modules at runtime on Vercel).
-  serverExternalPackages: isProd
+// For production we also externalize large server-only SDKs to keep individual
+// Serverless Function bundles smaller (the packages are still present in
+// node_modules at runtime on Vercel).
+serverExternalPackages: isProd
     ? [
         '@electric-sql/pglite',
         '@xmldom/xmldom',
@@ -355,8 +354,15 @@ const nextConfig: NextConfig = {
         'epub2',
       ]
     : ['@xmldom/xmldom', 'epub2'],
-  transpilePackages: ['pdfjs-dist'],
 
+  
+  
+  
+  
+  transpilePackages: ['pdfjs-dist'],
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 
   // Generate hidden source maps for PostHog error tracking (no sourceMappingURL in JS files)
   ...(uploadSourceMaps ? { productionBrowserSourceMaps: true } : {}),
@@ -390,23 +396,19 @@ const nextConfig: NextConfig = {
     // https://github.com/pinojs/pino/issues/688#issuecomment-637763276
     config.externals.push('pino-pretty');
 
+    const webpack = require('webpack');
+
     // Exclude mermaid from client bundle (~2.4MB savings)
     // @lobehub/ui's useMermaid hook does import('mermaid') which webpack pre-bundles
     // the entire mermaid + d3 + dagre dependency tree.
     // The hook handles null gracefully (falls back to raw content).
     // Mermaid diagrams are rendered via CDN in the visualizer iframe.
     if (!isServer) {
-      const webpack = require('webpack');
       const emptyMod = require.resolve('./auto/bundle/empty-module.js');
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(/^mermaid$/, emptyMod),
-      );
+      config.plugins.push(new webpack.NormalModuleReplacementPlugin(/^mermaid$/, emptyMod));
     }
 
     config.resolve.alias.canvas = false;
-
-    const path = require('path');
-    const webpack = require('webpack');
 
     // Fix SWR react-server export condition stripping useSWR/mutate
     //
@@ -420,18 +422,22 @@ const nextConfig: NextConfig = {
     config.resolve.plugins = config.resolve.plugins || [];
     config.resolve.plugins.push({
       apply(resolver: any) {
-        resolver.getHook('result').tapAsync('SwrReactServerFix', (request: any, resolveContext: any, callback: any) => {
-          const resolvedPath = request.path;
-          if (
-            resolvedPath &&
-            /[/\\]swr[/\\]dist[/\\](index|_internal|infinite)[/\\]react-server\.mjs$/.test(resolvedPath)
-          ) {
-            const newPath = resolvedPath.replace('react-server.mjs', 'index.mjs');
-            const newRequest = { ...request, path: newPath };
-            return callback(null, newRequest);
-          }
-          return callback(null, request);
-        });
+        resolver
+          .getHook('result')
+          .tapAsync('SwrReactServerFix', (request: any, resolveContext: any, callback: any) => {
+            const resolvedPath = request.path;
+            if (
+              resolvedPath &&
+              /[/\\]swr[/\\]dist[/\\](index|_internal|infinite)[/\\]react-server\.mjs$/.test(
+                resolvedPath,
+              )
+            ) {
+              const newPath = resolvedPath.replace('react-server.mjs', 'index.mjs');
+              const newRequest = { ...request, path: newPath };
+              return callback(null, newRequest);
+            }
+            return callback(null, request);
+          });
       },
     });
 
