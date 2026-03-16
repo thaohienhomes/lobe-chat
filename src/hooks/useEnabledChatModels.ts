@@ -13,7 +13,10 @@ import { PHO_AUTO_MODEL_ID } from '@/utils/autoRouter';
  * Remove entries once the launch period ends.
  */
 export const NEW_MODEL_IDS = new Set([
+  'openai/gpt-5.4',
   'openai/gpt-5.3-codex',
+  'nvidia/nemotron-3-super',
+  'xai/grok-4.20-beta',
   'xai/grok-4.2',
   'moonshot/kimi-k2.5',
   'kimi-k2.5',
@@ -100,6 +103,10 @@ export const MODEL_DESCRIPTIONS: Record<string, string> = {
 
   'openai/gpt-5.2': 'OpenAI · Flagship',
 
+  'openai/gpt-5.4': 'OpenAI · Mới nhất · 1M context',
+
+  'nvidia/nemotron-3-super': 'NVIDIA · 120B MoE · Nghiên cứu',
+
   'openai/o4-mini': 'OpenAI · Reasoning nhanh',
   // Phở Chat branded
   'pho-fast': 'Trả lời tức thì',
@@ -108,6 +115,7 @@ export const MODEL_DESCRIPTIONS: Record<string, string> = {
   'pho-vision': 'Phân tích hình ảnh',
   'xai/grok-3': 'xAI · Flagship',
   'xai/grok-3-mini': 'xAI · Reasoning nhanh',
+  'xai/grok-4.20-beta': 'xAI · Mới nhất · Agentic · 2M ctx',
 };
 
 interface TierModelChild {

@@ -472,6 +472,8 @@ const TIER2_MODELS = [
   'openai/gpt-4.1',
   'deepseek/deepseek-r1',
   'xai/grok-4',
+  'xai/grok-4.20-beta', // Grok 4.20 Beta — agentic, 2M ctx
+  'nvidia/nemotron-3-super', // Nemotron 3 Super — 120B MoE, 1M ctx
   'meta-llama/llama-4-70b-instruct',
   // Groq Tier 2 (via CF Gateway)
   'deepseek-r1-distill-llama-70b',
@@ -495,6 +497,8 @@ const TIER2_MODELS = [
   'claude-3-sonnet',
   'gemini-1.5-pro',
   'deepseek-reasoner',
+  'nemotron-3-super', // Legacy short ID
+  'grok-4.20-beta', // Legacy short ID
 ] as const;
 
 /** Tier 3: Premium models — available to Pro/Ultimate/Team/Lifetime plans */
@@ -507,6 +511,8 @@ const TIER3_MODELS = [
   'anthropic/claude-opus-4-20250514',
   'anthropic/claude-opus-4-6',
   'openai/o3-mini',
+  'openai/gpt-5.4', // GPT-5.4 — expensive, Tier 3 to limit usage
+  'gpt-5.4', // Legacy short ID
   // Legacy short IDs (for backward compat & tier lookup)
   'gemini-3-pro-preview',
   'gemini-3.1-pro-preview',
@@ -814,6 +820,16 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'deepseek-r1-distill-llama-70b', // Groq - DeepSeek R1 Distill
       'qwen-qwq-32b', // Groq - Qwen QwQ reasoning
       'meta-llama/llama-4-maverick-17b-128e-instruct', // Groq - Llama 4 Maverick (Scout moved to T1)
+      // ============================================
+      // NVIDIA (via Vercel AI Gateway)
+      // ============================================
+      'nvidia/nemotron-3-super', // Nemotron 3 Super - 120B MoE
+      'nemotron-3-super', // Legacy short ID
+      // ============================================
+      // xAI (via Vercel AI Gateway)
+      // ============================================
+      'xai/grok-4.20-beta', // Grok 4.20 Beta - agentic
+      'grok-4.20-beta', // Legacy short ID
     ],
     outputCostPer1M: 300,
     pointsPerMessage: 150,
@@ -843,6 +859,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'claude-opus-4-6', // Legacy short ID
       'google/gemini-3.1-pro-preview', // Vercel AI Gateway — Gemini 3.1 Pro
       'gemini-3.1-pro-preview', // Legacy short ID
+      'openai/gpt-5.4', // Vercel AI Gateway — GPT-5.4 (Tier 3)
+      'gpt-5.4', // Legacy short ID
       // ============================================
       // Legacy Tier 3 Models
       // ============================================

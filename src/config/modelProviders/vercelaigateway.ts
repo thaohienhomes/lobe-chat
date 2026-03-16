@@ -119,6 +119,17 @@ const VercelAIGateway: ModelProviderCard = {
     },
     // --- OpenAI Models ---
     {
+      contextWindowTokens: 1_000_000,
+      description:
+        'GPT-5.4 — Flagship mới nhất của OpenAI, giảm 33% hallucination, coding + reasoning vượt trội, 1M context',
+      displayName: 'GPT-5.4',
+      enabled: true,
+      functionCall: true,
+      id: 'openai/gpt-5.4',
+      maxOutput: 128_000,
+      vision: true,
+    },
+    {
       contextWindowTokens: 128_000,
       description:
         'GPT-5.3 Codex — Model coding flagship mới nhất của OpenAI, nhanh hơn 25%, tích hợp Codex + GPT-5 training stacks',
@@ -161,6 +172,17 @@ const VercelAIGateway: ModelProviderCard = {
     },
     // --- xAI Models ---
     {
+      contextWindowTokens: 2_000_000,
+      description:
+        'Grok 4.20 Beta — Model mới nhất của xAI, agentic tool calling, hallucination thấp, 2M context',
+      displayName: 'Grok 4.20 Beta',
+      enabled: true,
+      functionCall: true,
+      id: 'xai/grok-4.20-beta',
+      maxOutput: 32_000,
+      vision: true,
+    },
+    {
       contextWindowTokens: 128_000,
       description:
         'Grok 4.2 — Kiến trúc 4-agent (Harper, Benjamin, Lucas), giảm 65% hallucination, chuyên gia y khoa & kỹ thuật',
@@ -170,6 +192,17 @@ const VercelAIGateway: ModelProviderCard = {
       id: 'xai/grok-4.2',
       maxOutput: 16_384,
       vision: true,
+    },
+    // --- NVIDIA Models ---
+    {
+      contextWindowTokens: 1_000_000,
+      description:
+        'Nemotron 3 Super — 120B MoE (12B active), 1M context, tối ưu cho agentic AI & nghiên cứu khoa học',
+      displayName: 'Nemotron Super',
+      enabled: true,
+      functionCall: true,
+      id: 'nvidia/nemotron-3-super',
+      maxOutput: 16_384,
     },
     // --- Moonshot Models ---
     {
