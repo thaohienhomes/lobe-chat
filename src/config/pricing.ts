@@ -472,8 +472,8 @@ const TIER2_MODELS = [
   'openai/gpt-4.1',
   'deepseek/deepseek-r1',
   'xai/grok-4',
-  'xai/grok-4.20-beta', // Grok 4.20 Beta — agentic, 2M ctx
-  'nvidia/nemotron-3-super', // Nemotron 3 Super — 120B MoE, 1M ctx
+  'xai/grok-4-1', // Grok 4.1 — latest xAI model
+  'nvidia/llama-3.3-nemotron-super-49b-v1', // Nemotron Super 49B
   'meta-llama/llama-4-70b-instruct',
   // Groq Tier 2 (via CF Gateway)
   'deepseek-r1-distill-llama-70b',
@@ -497,8 +497,8 @@ const TIER2_MODELS = [
   'claude-3-sonnet',
   'gemini-1.5-pro',
   'deepseek-reasoner',
-  'nemotron-3-super', // Legacy short ID
-  'grok-4.20-beta', // Legacy short ID
+  'nemotron-super-49b', // Legacy short ID
+  'grok-4-1', // Legacy short ID
 ] as const;
 
 /** Tier 3: Premium models — available to Pro/Ultimate/Team/Lifetime plans */
@@ -823,13 +823,13 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       // NVIDIA (via Vercel AI Gateway)
       // ============================================
-      'nvidia/nemotron-3-super', // Nemotron 3 Super - 120B MoE
-      'nemotron-3-super', // Legacy short ID
+      'nvidia/llama-3.3-nemotron-super-49b-v1', // Nemotron Super 49B
+      'nemotron-super-49b', // Legacy short ID
       // ============================================
       // xAI (via Vercel AI Gateway)
       // ============================================
-      'xai/grok-4.20-beta', // Grok 4.20 Beta - agentic
-      'grok-4.20-beta', // Legacy short ID
+      'xai/grok-4-1', // Grok 4.1 — latest
+      'grok-4-1', // Legacy short ID
     ],
     outputCostPer1M: 300,
     pointsPerMessage: 150,

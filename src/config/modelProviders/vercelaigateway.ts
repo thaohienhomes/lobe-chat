@@ -172,13 +172,13 @@ const VercelAIGateway: ModelProviderCard = {
     },
     // --- xAI Models ---
     {
-      contextWindowTokens: 2_000_000,
+      contextWindowTokens: 131_072,
       description:
-        'Grok 4.20 Beta — Model mới nhất của xAI, agentic tool calling, hallucination thấp, 2M context',
-      displayName: 'Grok 4.20 Beta',
+        'Grok 4.1 — Model mới nhất của xAI, agentic tool calling, reasoning tốt nhất',
+      displayName: 'Grok 4.1',
       enabled: true,
       functionCall: true,
-      id: 'xai/grok-4.20-beta',
+      id: 'xai/grok-4-1',
       maxOutput: 32_000,
       vision: true,
     },
@@ -195,13 +195,13 @@ const VercelAIGateway: ModelProviderCard = {
     },
     // --- NVIDIA Models ---
     {
-      contextWindowTokens: 1_000_000,
+      contextWindowTokens: 131_072,
       description:
-        'Nemotron 3 Super — 120B MoE (12B active), 1M context, tối ưu cho agentic AI & nghiên cứu khoa học',
-      displayName: 'Nemotron Super',
+        'Nemotron Super 49B — NVIDIA, hiệu suất cao cho nghiên cứu & coding, dựa trên Llama 3.3',
+      displayName: 'Nemotron Super 49B',
       enabled: true,
       functionCall: true,
-      id: 'nvidia/nemotron-3-super',
+      id: 'nvidia/llama-3.3-nemotron-super-49b-v1',
       maxOutput: 16_384,
     },
     // --- Moonshot Models ---
