@@ -473,7 +473,7 @@ const TIER2_MODELS = [
   'deepseek/deepseek-r1',
   'xai/grok-4',
   'xai/grok-4-1', // Grok 4.1 — latest xAI model
-  'nvidia/llama-3.3-nemotron-super-49b-v1', // Nemotron Super 49B
+  'nvidia/nemotron-3-nano-30b-a3b', // Nemotron Nano 30B
   'meta-llama/llama-4-70b-instruct',
   // Groq Tier 2 (via CF Gateway)
   'deepseek-r1-distill-llama-70b',
@@ -497,7 +497,7 @@ const TIER2_MODELS = [
   'claude-3-sonnet',
   'gemini-1.5-pro',
   'deepseek-reasoner',
-  'nemotron-super-49b', // Legacy short ID
+  'nemotron-3-nano-30b-a3b', // Legacy short ID
   'grok-4-1', // Legacy short ID
 ] as const;
 
@@ -823,8 +823,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       // ============================================
       // NVIDIA (via Vercel AI Gateway)
       // ============================================
-      'nvidia/llama-3.3-nemotron-super-49b-v1', // Nemotron Super 49B
-      'nemotron-super-49b', // Legacy short ID
+      'nvidia/nemotron-3-nano-30b-a3b', // Nemotron Nano 30B
+      'nemotron-3-nano-30b-a3b', // Legacy short ID
       // ============================================
       // xAI (via Vercel AI Gateway)
       // ============================================

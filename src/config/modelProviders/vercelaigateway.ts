@@ -195,13 +195,13 @@ const VercelAIGateway: ModelProviderCard = {
     },
     // --- NVIDIA Models ---
     {
-      contextWindowTokens: 131_072,
+      contextWindowTokens: 262_144,
       description:
-        'Nemotron Super 49B — NVIDIA, hiệu suất cao cho nghiên cứu & coding, dựa trên Llama 3.3',
-      displayName: 'Nemotron Super 49B',
+        'Nemotron Nano 30B — NVIDIA, open reasoning model, MoE + Mamba, giá rẻ, 262K context',
+      displayName: 'Nemotron Nano 30B',
       enabled: true,
       functionCall: true,
-      id: 'nvidia/llama-3.3-nemotron-super-49b-v1',
+      id: 'nvidia/nemotron-3-nano-30b-a3b',
       maxOutput: 16_384,
     },
     // --- Moonshot Models ---

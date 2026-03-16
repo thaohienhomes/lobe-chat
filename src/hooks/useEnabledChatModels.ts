@@ -15,7 +15,7 @@ import { PHO_AUTO_MODEL_ID } from '@/utils/autoRouter';
 export const NEW_MODEL_IDS = new Set([
   'openai/gpt-5.4',
   'openai/gpt-5.3-codex',
-  'nvidia/llama-3.3-nemotron-super-49b-v1',
+  'nvidia/nemotron-3-nano-30b-a3b',
   'xai/grok-4-1',
   'xai/grok-4.2',
   'moonshot/kimi-k2.5',
@@ -105,7 +105,7 @@ export const MODEL_DESCRIPTIONS: Record<string, string> = {
 
   'openai/gpt-5.4': 'OpenAI · Mới nhất · 1M context',
 
-  'nvidia/llama-3.3-nemotron-super-49b-v1': 'NVIDIA · Nemotron Super 49B · Nghiên cứu',
+  'nvidia/nemotron-3-nano-30b-a3b': 'NVIDIA · Nemotron Nano 30B · Giá rẻ',
 
   'openai/o4-mini': 'OpenAI · Reasoning nhanh',
   // Phở Chat branded
