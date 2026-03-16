@@ -67,6 +67,20 @@ const nextConfig: NextConfig = {
       'i18next',
       'zod',
       'query-string',
+      // Round 2 — shiki ecosystem + antd internals
+      'shiki',
+      '@shikijs/core',
+      '@shikijs/transformers',
+      'rc-picker',
+      'rc-table',
+      'rc-tree',
+      'rc-select',
+      'rc-cascader',
+      'rc-field-form',
+      'rc-util',
+      'rc-menu',
+      '@ant-design/cssinjs',
+      '@ant-design/icons-svg',
     ],
     // oidc provider depend on constructor.name
     // but swc minification will remove the name
@@ -223,12 +237,11 @@ const nextConfig: NextConfig = {
   },
 
   // Image optimization – prefer WebP for smaller payloads
-images: {
+  images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31_536_000, // 1 year
   },
 
-  
   logging: {
     fetches: {
       fullUrl: true,
@@ -237,8 +250,8 @@ images: {
   },
 
   // Exclude unnecessary files from serverless function bundles to reduce size
-// Moved from experimental to top-level in Next.js 15
-outputFileTracingExcludes: {
+  // Moved from experimental to top-level in Next.js 15
+  outputFileTracingExcludes: {
     '*': [
       'node_modules/@swc/core-linux-x64-gnu',
       'node_modules/@swc/core-linux-x64-musl',
@@ -248,8 +261,7 @@ outputFileTracingExcludes: {
       'node_modules/terser',
     ],
   },
-  
-  
+
   reactStrictMode: true,
   redirects: async () => [
     {
@@ -334,10 +346,10 @@ outputFileTracingExcludes: {
   ],
 
   // when external packages in dev mode with turbopack, this config will lead to bundle error
-// For production we also externalize large server-only SDKs to keep individual
-// Serverless Function bundles smaller (the packages are still present in
-// node_modules at runtime on Vercel).
-serverExternalPackages: isProd
+  // For production we also externalize large server-only SDKs to keep individual
+  // Serverless Function bundles smaller (the packages are still present in
+  // node_modules at runtime on Vercel).
+  serverExternalPackages: isProd
     ? [
         '@electric-sql/pglite',
         '@xmldom/xmldom',
@@ -355,10 +367,6 @@ serverExternalPackages: isProd
       ]
     : ['@xmldom/xmldom', 'epub2'],
 
-  
-  
-  
-  
   transpilePackages: ['pdfjs-dist'],
   typescript: {
     ignoreBuildErrors: true,
