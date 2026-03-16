@@ -121,10 +121,48 @@ const isModelSupportFiles = (id: string, provider: string) => (s: AIProviderStor
   return model?.abilities?.files;
 };
 
-const isModelSupportVision = (id: string, provider: string) => (s: AIProviderStoreState) => {
-  const model = getEnabledModelById(id, provider)(s);
+// Phở Chat logical models that support vision (multimodal image input).
+// Keep in sync with src/config/modelProviders/phochat.ts
+const PHO_CHAT_VISION_MODELS = new Set(['pho-vision']);
 
-  return model?.abilities?.vision || false;
+const isModelSupportVision = (id: string, provider: string) => (s: AIProviderStoreState) => {
+  // 1. Check enabledAiModels (server-side data)
+  const enabledModel = getEnabledModelById(id, provider)(s);
+  if (enabledModel?.abilities?.vision) {
+    return true;
+  }
+
+  // 2. Check builtinAiModelList (static config from model-bank / phochat.ts)
+  const builtinModel = s.builtinAiModelList?.find(
+    (m) => m.id === id && (provider ? m.providerId === provider : true),
+  );
+  if (builtinModel?.abilities?.vision) {
+    return true;
+  }
+
+  // 3. Phở Chat logical models — check against explicit vision model set
+  const isPhochatProvider = !provider || provider === 'phochat';
+  if (isPhochatProvider && PHO_CHAT_VISION_MODELS.has(id)) {
+    return true;
+  }
+
+  // 4. Cross-provider search — find vision in ANY provider's data
+  const crossProviderMatch = s.enabledAiModels?.find((m) => m.id === id);
+  if (crossProviderMatch?.abilities?.vision) {
+    return true;
+  }
+  const crossProviderBuiltin = s.builtinAiModelList?.find((m) => m.id === id);
+  if (crossProviderBuiltin?.abilities?.vision) {
+    return true;
+  }
+
+  // 5. Vercel AI Gateway premium models — most support vision natively
+  // (Claude 3+, GPT-4+, Gemini Pro/Flash all have multimodal capabilities)
+  if (provider === 'vercelaigateway') {
+    return true;
+  }
+
+  return false;
 };
 
 const isModelSupportVideo = (id: string, provider: string) => (s: AIProviderStoreState) => {

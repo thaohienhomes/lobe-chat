@@ -303,6 +303,7 @@ export default {
       folderUpload: '上传文件夹',
       imageDisabled: '当前模型不支持视觉识别，请切换模型后使用',
       imageUpload: '上传图片',
+      imagesSkipped: '{{count}} 个图片/视频文件已跳过，当前模型不支持视觉识别。切换到 Phở Vision 即可使用。',
       tooltip: '上传',
     },
     clientMode: {

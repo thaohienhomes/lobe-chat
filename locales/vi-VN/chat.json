@@ -299,6 +299,7 @@
       "folderUpload": "Tải lên thư mục",
       "imageDisabled": "Mô hình hiện tại không hỗ trợ nhận diện hình ảnh, vui lòng chuyển đổi mô hình để sử dụng",
       "imageUpload": "Tải lên hình ảnh",
+      "imagesSkipped": "{{count}} file hình ảnh/video đã bị bỏ qua vì model hiện tại không hỗ trợ. Chuyển sang Phở Vision để sử dụng.",
       "tooltip": "Tải lên"
     },
     "clientMode": {
