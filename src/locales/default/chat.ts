@@ -257,7 +257,6 @@ export default {
     loading: '识别中...',
     prettifying: '润色中...',
   },
-  copyAll: '复制全部',
   thread: {
     divider: '子话题',
     threadMessageCount: '{{messageCount}} 条消息',

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
+import SSOCallbackWatchdog from './SSOCallbackWatchdog';
 import UserUpdater from './UserUpdater';
 import { useAppearance } from './useAppearance';
 
@@ -63,6 +64,7 @@ const Clerk = memo(({ children }: PropsWithChildren) => {
       signUpUrl={!enableClerkSignUp ? '/login' : '/signup'} // Redirect sign-up to sign-in if disabled
     >
       {children}
+      <SSOCallbackWatchdog />
       <UserUpdater />
     </ClerkProvider>
   );

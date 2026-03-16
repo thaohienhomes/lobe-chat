@@ -62,6 +62,15 @@ const nextConfig: NextConfig = {
       'nuqs',
       'superjson',
       '@trpc/client',
+      // Added for bundle optimization — Mar 2026
+      'date-fns',
+      'zustand',
+      'swr',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      'i18next',
+      'zod',
+      'query-string',
     ],
     // oidc provider depend on constructor.name
     // but swc minification will remove the name
@@ -346,7 +355,7 @@ const nextConfig: NextConfig = {
         'epub2',
       ]
     : ['@xmldom/xmldom', 'epub2'],
-  transpilePackages: ['pdfjs-dist', 'mermaid'],
+  transpilePackages: ['pdfjs-dist'],
 
 
   // Generate hidden source maps for PostHog error tracking (no sourceMappingURL in JS files)
@@ -380,6 +389,19 @@ const nextConfig: NextConfig = {
 
     // https://github.com/pinojs/pino/issues/688#issuecomment-637763276
     config.externals.push('pino-pretty');
+
+    // Exclude mermaid from client bundle (~2.4MB savings)
+    // @lobehub/ui's useMermaid hook does import('mermaid') which webpack pre-bundles
+    // the entire mermaid + d3 + dagre dependency tree.
+    // The hook handles null gracefully (falls back to raw content).
+    // Mermaid diagrams are rendered via CDN in the visualizer iframe.
+    if (!isServer) {
+      const webpack = require('webpack');
+      const emptyMod = require.resolve('./auto/bundle/empty-module.js');
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^mermaid$/, emptyMod),
+      );
+    }
 
     config.resolve.alias.canvas = false;
 

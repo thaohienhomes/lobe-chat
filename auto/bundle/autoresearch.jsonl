@@ -1,0 +1,2 @@
+{"js_bundle_kb":59045,"chunk_count":2006,"timestamp":"2026-03-16T12:45:09.2071134+07:00","change":"baseline","round":0,"total_bundle_kb":72558,"build_seconds":482.61}
+{"js_bundle_kb":56654,"chunk_count":1961,"timestamp":"2026-03-16T13:25:20.1909081+07:00","change":"alias mermaid=false + optimizePackageImports expansion","round":1,"total_bundle_kb":70167,"build_seconds":743}
