@@ -17,7 +17,7 @@ import type { ExtractedText } from './types';
 const VISION_MODELS = [
   { model: 'google/gemini-2.5-flash', provider: 'vercelaigateway' },
   { model: 'openai/gpt-5.2', provider: 'vercelaigateway' },
-  { model: 'anthropic/claude-sonnet-4-6', provider: 'vercelaigateway' },
+  { model: 'anthropic/claude-sonnet-4.6', provider: 'vercelaigateway' },
 ] as const;
 
 // ─── Prompt ─────────────────────────────────────────────────────────

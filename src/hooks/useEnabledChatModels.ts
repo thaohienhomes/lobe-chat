@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
 import PhoChatConfig from '@/config/modelProviders/phochat';
-import { getModelTier } from '@/config/pricing';
 import VercelAIGatewayConfig from '@/config/modelProviders/vercelaigateway';
+import { getModelTier } from '@/config/pricing';
 import { usePostHogFeatureFlags } from '@/hooks/usePostHogFeatureFlags';
 import { AiProviderSourceEnum, EnabledProviderWithModels } from '@/types/aiProvider';
 import { ModelProviderCard } from '@/types/llm';
@@ -21,8 +21,8 @@ export const NEW_MODEL_IDS = new Set([
   'moonshot/kimi-k2.5',
   'kimi-k2.5',
   'mercury-coder-small-2-2',
-  'anthropic/claude-opus-4-6',
-  'anthropic/claude-sonnet-4-6',
+  'anthropic/claude-opus-4.6',
+  'anthropic/claude-sonnet-4.6',
   'google/gemini-3.1-pro-preview',
 ]);
 
@@ -44,41 +44,20 @@ export const MODEL_DESCRIPTIONS: Record<string, string> = {
 
   'anthropic/claude-4-opus': 'Anthropic · Suy luận cao cấp',
 
-
-
-
-
   'anthropic/claude-4.5-sonnet': 'Anthropic · Sáng tạo',
-
-
-
-
 
   'anthropic/claude-haiku-3.5': 'Anthropic · Nhẹ & nhanh',
 
-
-
-
   // Premium models (vercelaigateway)
-  'anthropic/claude-opus-4-6-20250219': 'Anthropic · Mạnh nhất',
-
-
-
+  'anthropic/claude-opus-4.6': 'Anthropic · Mạnh nhất',
 
   'anthropic/claude-sonnet-4-20250514': 'Anthropic · Cân bằng',
 
-
-
-  'anthropic/claude-sonnet-4-6-20250219': 'Anthropic · Tốc độ + chất lượng',
-
-
+  'anthropic/claude-sonnet-4.6': 'Anthropic · Tốc độ + chất lượng',
 
   'deepseek/deepseek-chat': 'DeepSeek · Coding & Math',
 
-
-
   'deepseek/deepseek-reasoner': 'DeepSeek · Reasoning sâu',
-
 
   // Open models
   'gemma-3-27b-it': 'Google · Tool calling',
@@ -97,6 +76,8 @@ export const MODEL_DESCRIPTIONS: Record<string, string> = {
 
   'mercury-coder-small-2-2': 'AI nhanh nhất thế giới · Diffusion LLM',
 
+  'nvidia/nemotron-3-nano-30b-a3b': 'NVIDIA · Nemotron Nano 30B · Giá rẻ',
+
   'openai/gpt-4.1': 'OpenAI · Coding xuất sắc',
 
   'openai/gpt-4o': 'OpenAI · Đa năng',
@@ -104,8 +85,6 @@ export const MODEL_DESCRIPTIONS: Record<string, string> = {
   'openai/gpt-5.2': 'OpenAI · Flagship',
 
   'openai/gpt-5.4': 'OpenAI · Mới nhất · 1M context',
-
-  'nvidia/nemotron-3-nano-30b-a3b': 'NVIDIA · Nemotron Nano 30B · Giá rẻ',
 
   'openai/o4-mini': 'OpenAI · Reasoning nhanh',
   // Phở Chat branded
@@ -136,10 +115,7 @@ export interface TierGroup extends Omit<EnabledProviderWithModels, 'children'> {
 /**
  * Helper: convert a provider config into flat model list with provider tracking.
  */
-const flattenProvider = (
-  config: ModelProviderCard,
-  providerId: string,
-): TierModelChild[] => {
+const flattenProvider = (config: ModelProviderCard, providerId: string): TierModelChild[] => {
   return (config.chatModels || [])
     .filter((m) => m.enabled !== false)
     .map((model) => ({
@@ -178,7 +154,9 @@ export const useEnabledChatModels = (): TierGroup[] => {
 
     // Vercel AI Gateway models (if enabled)
     if (isFeatureEnabled('llm-provider-vercelaigateway')) {
-      allModels.push(...flattenProvider(VercelAIGatewayConfig as ModelProviderCard, 'vercelaigateway'));
+      allModels.push(
+        ...flattenProvider(VercelAIGatewayConfig as ModelProviderCard, 'vercelaigateway'),
+      );
     }
 
     // Group by tier
@@ -197,12 +175,14 @@ export const useEnabledChatModels = (): TierGroup[] => {
 
     // ✨ Phở Auto: always first, always available
     result.push({
-      children: [{
-        abilities: { functionCall: true, reasoning: true, vision: true },
-        displayName: 'Phở Auto ✨',
-        id: PHO_AUTO_MODEL_ID,
-        originProvider: 'phochat',
-      }],
+      children: [
+        {
+          abilities: { functionCall: true, reasoning: true, vision: true },
+          displayName: 'Phở Auto ✨',
+          id: PHO_AUTO_MODEL_ID,
+          originProvider: 'phochat',
+        },
+      ],
       id: 'tier-auto',
       name: '✨ Tự Động',
       source: AiProviderSourceEnum.Builtin,

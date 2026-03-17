@@ -488,7 +488,16 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
     // Use the ORIGINAL request model ID for failover lookup (not the remapped API-specific ID).
     // e.g. requestModel = 'mercury-coder-small-2-2' (logical ID in logicalModels map),
     //      data.model  = 'mercury-2' (already remapped to InceptionLabs API model name).
-    const priorityList = phoGatewayService.resolveProviderList(requestModel, activeProvider);
+    // Also try the remapped model ID (data.model) for provider-prefixed entries
+    // e.g. requestModel = 'claude-opus-4-6' won't match, but data.model = 'anthropic/claude-opus-4-6' will.
+    let priorityList = phoGatewayService.resolveProviderList(requestModel, activeProvider);
+    if (priorityList.length === 1 && data.model !== requestModel) {
+      const remappedList = phoGatewayService.resolveProviderList(data.model, activeProvider);
+      if (remappedList.length > 1) {
+        priorityList = remappedList;
+        console.log(`[Chat API] Failover resolved via remapped model ID: ${data.model}`);
+      }
+    }
 
     console.log(
       `[Chat API] Orchestration: Priority List for ${data.model} (${activeProvider}):`,
@@ -792,6 +801,23 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
       e as ChatCompletionErrorPayload;
 
     const error = errorContent || e;
+
+    // ── Enhanced Error Logging (raw details for debugging) ──
+    // Log structured error info BEFORE sanitization so we can diagnose
+    // provider-specific failures (e.g. Vercel AI Gateway → Anthropic errors)
+    const rawErrorInfo = {
+      errorType,
+      httpStatus: (e as any)?.status || (error as any)?.status || 'unknown',
+      model: requestModel,
+      provider,
+      rawMessage:
+        typeof error === 'object' && error !== null
+          ? (error as any).message || JSON.stringify(error).slice(0, 500)
+          : String(error).slice(0, 500),
+      timestamp: new Date().toISOString(),
+      userId: jwtPayload?.userId || 'anonymous',
+    };
+    console.error(`[Chat API] 🔍 RAW ERROR DETAILS:`, JSON.stringify(rawErrorInfo));
 
     const logMethod = AGENT_RUNTIME_ERROR_SET.has(errorType as string) ? 'warn' : 'error';
     // track the error at server side

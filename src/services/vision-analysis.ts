@@ -12,7 +12,6 @@
  *
  * Runs server-side only (uses initModelRuntimeWithUserPayload).
  */
-
 import type {
   ImageType,
   InteractiveRegions,
@@ -25,7 +24,7 @@ import type {
 /** Models in priority order — first available model wins */
 const VISION_MODELS = [
   { model: 'openai/gpt-5.2', provider: 'vercelaigateway' },
-  { model: 'anthropic/claude-sonnet-4-6', provider: 'vercelaigateway' },
+  { model: 'anthropic/claude-sonnet-4.6', provider: 'vercelaigateway' },
   { model: 'google/gemini-2.5-flash', provider: 'vercelaigateway' },
   { model: 'openai/gpt-4o', provider: 'vercelaigateway' },
 ] as const;
@@ -43,9 +42,7 @@ function buildSystemPrompt(options: VisionAnalysisOptions): string {
       ? 'All labels, context, details values, and follow_ups MUST be in Vietnamese.'
       : 'All labels, context, details values, and follow_ups MUST be in English.';
 
-  const imageTypeHint = options.imageTypeHint
-    ? `The image is a ${options.imageTypeHint}. `
-    : '';
+  const imageTypeHint = options.imageTypeHint ? `The image is a ${options.imageTypeHint}. ` : '';
 
   return `You are a Vision AI specialized in analyzing images and detecting interactive regions.
 
@@ -230,8 +227,6 @@ function parseResponse(raw: string): InteractiveRegions {
   };
 }
 
-
-
 // ─── Service ────────────────────────────────────────────────────────
 
 export const VisionAnalysisService = {
@@ -246,9 +241,7 @@ export const VisionAnalysisService = {
     imageUrl: string,
     options: VisionAnalysisOptions = {},
   ): Promise<VisionAnalysisResult> {
-    const { initModelRuntimeWithUserPayload } = await import(
-      '@/server/modules/ModelRuntime'
-    );
+    const { initModelRuntimeWithUserPayload } = await import('@/server/modules/ModelRuntime');
 
     for (const { model, provider } of VISION_MODELS) {
       try {
@@ -320,5 +313,3 @@ export const VisionAnalysisService = {
     }
   },
 };
-
-

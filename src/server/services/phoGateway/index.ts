@@ -6,10 +6,7 @@
  * redirect users to the successor model.
  */
 const MODEL_REDIRECTS: Record<string, string> = {
-
-
   'claude-3-5-sonnet-20240620': 'claude-sonnet-4-20250514',
-
 
   // Claude 3.5 Sonnet → Claude 4 Sonnet
   'claude-3-5-sonnet-20241022': 'claude-sonnet-4-20250514',
@@ -29,6 +26,32 @@ export interface LogicalModelConfig {
 
 class PhoGatewayService {
   private logicalModels: Record<string, LogicalModelConfig> = {
+    // ── Premium Anthropic Models — failover via Vercel AI Gateway ──
+    // NOTE: Vercel AI Gateway uses DOT format (claude-opus-4.6), NOT hyphen (claude-opus-4-6).
+    'anthropic/claude-opus-4-20250514': {
+      id: 'anthropic/claude-opus-4-20250514',
+      providers: [
+        { modelId: 'anthropic/claude-opus-4-20250514', provider: 'vercelaigateway' },
+        { modelId: 'anthropic/claude-opus-4.6', provider: 'vercelaigateway' }, // upgrade fallback
+        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+    'anthropic/claude-opus-4.6': {
+      id: 'anthropic/claude-opus-4.6',
+      providers: [
+        { modelId: 'anthropic/claude-opus-4.6', provider: 'vercelaigateway' },
+        { modelId: 'anthropic/claude-sonnet-4.6', provider: 'vercelaigateway' }, // downgrade fallback
+        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+    'anthropic/claude-sonnet-4.6': {
+      id: 'anthropic/claude-sonnet-4.6',
+      providers: [
+        { modelId: 'anthropic/claude-sonnet-4.6', provider: 'vercelaigateway' },
+        { modelId: 'anthropic/claude-sonnet-4-20250514', provider: 'vercelaigateway' }, // older version fallback
+        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
 
     // ── New Open Models (Tier 1/2) ─────────────────────────────────────────
     // These are exposed in the phochat picker via phochat.ts logical entries.
@@ -40,9 +63,6 @@ class PhoGatewayService {
       ],
     },
 
-
-
-
     'kimi-k2': {
       id: 'kimi-k2',
       providers: [
@@ -50,8 +70,6 @@ class PhoGatewayService {
         { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // fallback
       ],
     },
-
-
 
     // Legacy compatibility
     'llama-3.1-8b-instant': {
@@ -63,11 +81,6 @@ class PhoGatewayService {
       ],
     },
 
-
-
-
-
-
     'llama-4-scout-17b': {
       id: 'llama-4-scout-17b',
       providers: [
@@ -75,8 +88,6 @@ class PhoGatewayService {
         { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' }, // fallback
       ],
     },
-
-
 
     // InceptionLabs Mercury 2 — ultra-fast diffusion LLM (1000+ tok/s)
     // API model name: "mercury-2" (per https://docs.inceptionlabs.ai/get-started/models)
@@ -88,8 +99,6 @@ class PhoGatewayService {
       ],
     },
 
-
-
     'pho-fast': {
       id: 'pho-fast',
       providers: [
@@ -98,9 +107,6 @@ class PhoGatewayService {
         { modelId: 'google/gemini-2.0-flash', provider: 'vercelaigateway' },
       ],
     },
-
-
-
 
     'pho-pro': {
       id: 'pho-pro',
@@ -219,7 +225,35 @@ class PhoGatewayService {
       // e.g., gemini-2.5-flash → google/gemini-2.5-flash
       // For vertexai, remap to google/ prefix
       const gatewayPrefix = provider === 'vertexai' ? 'google' : provider;
-      const prefixedModelId = resolvedModelId.includes('/') ? resolvedModelId : `${gatewayPrefix}/${resolvedModelId}`;
+      let gatewayModelId = resolvedModelId;
+
+      // ── Vercel AI Gateway model ID translation ──
+      // Some providers use different model ID formats on the Gateway vs. their native API.
+      // e.g. Anthropic native API: 'claude-opus-4-6' → Gateway slug: 'claude-opus-4.6'
+      const GATEWAY_MODEL_TRANSLATION: Record<string, string> = {
+        'claude-opus-4-6': 'claude-opus-4.6',
+        'claude-opus-4-6-20250205': 'claude-opus-4.6',
+        'claude-sonnet-4-6': 'claude-sonnet-4.6',
+        'claude-sonnet-4-6-20250217': 'claude-sonnet-4.6',
+      };
+
+      if (GATEWAY_MODEL_TRANSLATION[gatewayModelId]) {
+        const translated = GATEWAY_MODEL_TRANSLATION[gatewayModelId];
+        console.log(
+          `[Gateway Translation] ${gatewayModelId} → ${translated} (Vercel AI Gateway slug)`,
+        );
+        gatewayModelId = translated;
+      }
+
+      const prefixedModelId = gatewayModelId.includes('/')
+        ? gatewayModelId
+        : `${gatewayPrefix}/${gatewayModelId}`;
+
+      // Check if the prefixed ID has a logical model entry for failover
+      if (this.logicalModels[prefixedModelId]) {
+        const primary = this.logicalModels[prefixedModelId].providers[0];
+        return { modelId: primary.modelId, provider: primary.provider };
+      }
 
       return { modelId: prefixedModelId, provider: 'vercelaigateway' };
     }

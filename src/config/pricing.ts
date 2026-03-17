@@ -464,7 +464,7 @@ const TIER2_MODELS = [
   'google/gemini-2.5-pro',
   'google/gemini-3-flash-preview',
   'anthropic/claude-sonnet-4.5',
-  'anthropic/claude-sonnet-4-6',
+  'anthropic/claude-sonnet-4.6',
   'anthropic/claude-haiku-4.5',
   'anthropic/claude-sonnet-4-20250514',
   'openai/gpt-5.2',
@@ -509,7 +509,7 @@ const TIER3_MODELS = [
   'google/gemini-3-pro-preview',
   'google/gemini-3.1-pro-preview',
   'anthropic/claude-opus-4-20250514',
-  'anthropic/claude-opus-4-6',
+  'anthropic/claude-opus-4.6',
   'openai/o3-mini',
   'openai/gpt-5.4', // GPT-5.4 — expensive, Tier 3 to limit usage
   'gpt-5.4', // Legacy short ID
@@ -794,8 +794,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'google/gemini-2.5-flash', // Vercel AI Gateway
       'google/gemini-2.5-pro', // Vercel AI Gateway
       'anthropic/claude-sonnet-4.5', // Vercel AI Gateway
-      'anthropic/claude-sonnet-4-6', // Vercel AI Gateway — Claude Sonnet 4.6
-      'claude-sonnet-4-6', // Legacy short ID
+      'anthropic/claude-sonnet-4.6', // Vercel AI Gateway — Claude Sonnet 4.6
+      'claude-sonnet-4.6', // Legacy short ID
       'anthropic/claude-sonnet-4-20250514', // Vercel AI Gateway — Claude 4 Sonnet
       'anthropic/claude-haiku-4.5', // Vercel AI Gateway
       'openai/gpt-5.2', // Vercel AI Gateway
@@ -855,8 +855,8 @@ export const MODEL_TIERS: Record<number, ModelTierConfig> = {
       'claude-3-opus',
       'anthropic/claude-3-opus',
       'anthropic/claude-opus-4-20250514', // Vercel AI Gateway — Claude 4 Opus
-      'anthropic/claude-opus-4-6', // Vercel AI Gateway — Claude Opus 4.6
-      'claude-opus-4-6', // Legacy short ID
+      'anthropic/claude-opus-4.6', // Vercel AI Gateway — Claude Opus 4.6
+      'claude-opus-4.6', // Legacy short ID
       'google/gemini-3.1-pro-preview', // Vercel AI Gateway — Gemini 3.1 Pro
       'gemini-3.1-pro-preview', // Legacy short ID
       'openai/gpt-5.4', // Vercel AI Gateway — GPT-5.4 (Tier 3)

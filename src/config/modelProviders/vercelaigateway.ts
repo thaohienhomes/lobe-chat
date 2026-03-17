@@ -15,7 +15,7 @@ const VercelAIGateway: ModelProviderCard = {
       displayName: 'Claude Opus 4.6',
       enabled: true,
       functionCall: true,
-      id: 'anthropic/claude-opus-4-6',
+      id: 'anthropic/claude-opus-4.6',
       maxOutput: 32_000,
       vision: true,
     },
@@ -25,7 +25,7 @@ const VercelAIGateway: ModelProviderCard = {
       displayName: 'Claude Sonnet 4.6',
       enabled: true,
       functionCall: true,
-      id: 'anthropic/claude-sonnet-4-6',
+      id: 'anthropic/claude-sonnet-4.6',
       maxOutput: 64_000,
       vision: true,
     },
@@ -173,8 +173,7 @@ const VercelAIGateway: ModelProviderCard = {
     // --- xAI Models ---
     {
       contextWindowTokens: 131_072,
-      description:
-        'Grok 4.1 — Model mới nhất của xAI, agentic tool calling, reasoning tốt nhất',
+      description: 'Grok 4.1 — Model mới nhất của xAI, agentic tool calling, reasoning tốt nhất',
       displayName: 'Grok 4.1',
       enabled: true,
       functionCall: true,
