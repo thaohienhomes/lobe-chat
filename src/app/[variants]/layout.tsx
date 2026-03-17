@@ -162,42 +162,8 @@ if(typeof window!=='undefined'){
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script crossOrigin="anonymous" src="https://unpkg.com/react-scan/dist/auto.global.js" />
         )}
-        {/* === Critical CSS — Instant visual feedback before JS/CSS-in-JS loads === */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-/* Critical layout — renders in <50ms, before any JS */
-html,body{margin:0;padding:0;height:100%;width:100%;overflow:hidden}
-body{background:${theme === 'dark' ? '#000' : '#f8f8f8'};color:${theme === 'dark' ? '#e0e0e0' : '#333'};font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-
-/* Loading screen — centered logo placeholder + pulse animation */
-#critical-loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity .3s ease}
-#critical-loading .logo{width:160px;height:40px;display:flex;align-items:center;justify-content:center;gap:8px}
-#critical-loading .logo-icon{width:32px;height:32px;border-radius:8px;background:${theme === 'dark' ? 'linear-gradient(135deg,#1a1a2e,#16213e)' : 'linear-gradient(135deg,#667eea,#764ba2)'}}
-#critical-loading .logo-text{font-size:20px;font-weight:700;letter-spacing:-.5px;color:${theme === 'dark' ? '#fff' : '#333'}}
-#critical-loading .progress{width:200px;height:3px;border-radius:2px;background:${theme === 'dark' ? '#222' : '#e0e0e0'};overflow:hidden}
-#critical-loading .progress-bar{width:30%;height:100%;border-radius:2px;background:${theme === 'dark' ? '#444' : '#999'};animation:loading-slide 1.5s ease-in-out infinite}
-#critical-loading .status{font-size:13px;color:${theme === 'dark' ? '#666' : '#999'};margin-top:4px}
-@keyframes loading-slide{0%{transform:translateX(-100%)}50%{transform:translateX(200%)}100%{transform:translateX(-100%)}}
-
-/* Hide critical loading once React app mounts */
-body.hydrated #critical-loading{opacity:0;pointer-events:none}
-`,
-          }}
-        />
       </head>
       <body>
-        {/* Pure HTML loading screen — visible before React hydrates */}
-        <div id="critical-loading">
-          <div className="logo">
-            <div className="logo-icon" />
-            <span className="logo-text">pho.chat</span>
-          </div>
-          <div className="progress">
-            <div className="progress-bar" />
-          </div>
-          <div className="status">Đang chuẩn bị...</div>
-        </div>
         <NuqsAdapter>
           <GlobalProvider
             appearance={theme}

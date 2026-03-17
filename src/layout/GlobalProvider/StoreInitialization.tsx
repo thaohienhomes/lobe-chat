@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createStoreUpdater } from 'zustand-utils';
 
@@ -26,17 +26,6 @@ import { useUserStore } from '@/store/user';
 const StoreInitialization = memo(() => {
   // prefetch error ns to avoid don't show error content correctly
   useTranslation('error');
-
-  // Dismiss critical loading screen when React hydrates
-  useEffect(() => {
-    document.body.classList.add('hydrated');
-    const el = document.getElementById('critical-loading');
-    if (el) {
-      // Remove from DOM after fade-out transition completes
-      const timer = setTimeout(() => el.remove(), 400);
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   const router = useRouter();
 
