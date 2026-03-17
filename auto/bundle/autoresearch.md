@@ -68,6 +68,7 @@ Outputs `METRIC name=number` lines. Cross-platform (works on Windows + Linux).
 ## What's Been Tried
 
 ### Round 1 (2026-03-16): Mermaid exclusion + optimizePackageImports
+
 - **Baseline**: js=59045, total=72558, chunks=2006
 - Removed `mermaid` from `transpilePackages` → minimal impact alone (-27 KB)
 - Added `resolve.alias['mermaid'] = false` → same minimal impact
@@ -77,6 +78,7 @@ Outputs `METRIC name=number` lines. Cross-platform (works on Windows + Linux).
 - Root cause: `@lobehub/ui`'s `useMermaid.js` does `import('mermaid')` at module load, pulling in entire mermaid + d3 + dagre tree
 
 ### Analysis findings
+
 - Top chunk (1.99MB) contains: highlight, monaco, antd, swagger, xlsx references (string content, not modules)
 - pdfjs-dist already behind `dynamic()` import in FileViewer
 - 55.2 MB in shared chunks vs 2.4 MB in app routes → most size is vendor code
@@ -92,3 +94,55 @@ Outputs `METRIC name=number` lines. Cross-platform (works on Windows + Linux).
 
 - **NormalModuleReplacementPlugin for mermaid**: -2391 KB (-4.1%), 45 chunks removed
 - **Technique**: Replace `import('mermaid')` with empty module stub at webpack resolution time
+
+### Round 2 (2026-03-16): Extended optimizePackageImports
+
+- Added 13 more packages: shiki, @shikijs/core, @shikijs/transformers, rc-picker, rc-table, rc-tree, rc-select, rc-cascader, rc-field-form, rc-util, rc-menu, @ant-design/cssinjs, @ant-design/icons-svg
+- **Result**: js=56617 (-37 KB, -0.07%) — diminishing returns
+- **Conclusion**: These packages are already adequately tree-shaken by webpack
+
+### Round 3 (2026-03-16): Deep analysis — hitting the floor
+
+- Route chunks: 2573 KB (4.5%) — well split already
+- Shared vendor: 54029 KB (95.5%) — fundamental limit
+- Main chat page: 13749 KB across 116 chunks
+- Markdown component imported 35+ times — pulls shiki (9.8MB) + emoji-mart (26.6MB)
+- 50+ dynamic() imports already exist
+- **Conclusion**: Further gains require architectural changes (upstream @lobehub/ui refactoring or CDN-loading vendor libs)
+
+### Round 4 (2026-03-16): emoji-mart NormalModuleReplacementPlugin
+
+- Excluded @emoji-mart/data, @emoji-mart/react, emoji-mart
+- **Result**: js=56044 (-610 KB, -1.1% from Round 1)
+- **Cumulative**: -3001 KB from baseline (-5.1%)
+- **Technique**: Same NormalModuleReplacementPlugin approach as mermaid
+
+### Round 5 (2026-03-16): pptxgenjs analysis — dead end
+
+- Added NormalModuleReplacementPlugin for pptxgenjs → **zero impact** (56044 → 56044)
+- Root cause: pptxgenjs is CDN-loaded in ResearchSlides.tsx and NOT actually bundled
+- The "pptx" strings matched in chunks are text references (prompt content, file type names), not bundled modules
+- Also tested string-matching for swagger, xlsx, katex → same issue (text references in minified strings)
+- **Conclusion**: String-matching unreliable for identifying actual bundled modules in minified chunks
+
+## Analysis Summary
+
+### Effective Optimizations (Confirmed)
+
+| Change               | JS Reduction          | Technique                     |
+| -------------------- | --------------------- | ----------------------------- |
+| Mermaid exclusion    | -2,391 KB             | NormalModuleReplacementPlugin |
+| emoji-mart exclusion | -610 KB               | NormalModuleReplacementPlugin |
+| **Total**            | **-3,001 KB (-5.1%)** |                               |
+
+### Cannot Be Excluded (UX-Critical)
+
+- **katex/rehype-katex**: Math rendering in chat messages (via @lobehub/ui's Markdown component)
+- **shiki**: Code syntax highlighting in chat messages
+- **antd**: Core UI framework
+
+### Optimization Ceiling
+
+- 95.5% of bundle is shared vendor code from @lobehub/ui and its dependencies
+- 50+ dynamic() imports already exist
+- Further gains require upstream @lobehub/ui tree-shaking improvements

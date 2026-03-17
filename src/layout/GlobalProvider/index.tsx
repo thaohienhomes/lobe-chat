@@ -11,6 +11,7 @@ import { getAntdLocale } from '@/utils/locale';
 
 import AntdV5MonkeyPatch from './AntdV5MonkeyPatch';
 import AppTheme from './AppTheme';
+import DeferredStoreInitialization from './DeferredStoreInitialization';
 import ImportSettings from './ImportSettings';
 import Locale from './Locale';
 import QueryProvider from './Query';
@@ -58,11 +59,16 @@ const GlobalLayout = async ({
             segmentVariants={variants}
             serverConfig={serverConfig}
           >
-            <QueryProvider>
-              {children}
-            </QueryProvider>
+            <QueryProvider>{children}</QueryProvider>
             <LobeAnalyticsProviderWrapper />
-            <Suspense><StoreInitialization /></Suspense>
+            {/* Phase 1: Critical stores — theme, layout, auth (sync, fast) */}
+            <Suspense>
+              <StoreInitialization />
+            </Suspense>
+            {/* Phase 2: Non-critical stores — agent, AI provider, user (deferred to idle) */}
+            <Suspense>
+              <DeferredStoreInitialization />
+            </Suspense>
             <PWARegister />
             <Suspense>
               <ImportSettings />

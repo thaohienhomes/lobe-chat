@@ -166,21 +166,21 @@ All AI agents (Claude Code CLI, Antigravity, Cursor, Copilot, etc.) **MUST** use
 
 ### Task-to-Skill Mapping
 
-| Task Category | Skills to Use |
-|---|---|
-| **UI/UX Design** | `ui-ux-pro-max`, `frontend-design`, `canvas-design`, `theme-factory` |
-| **Debugging** | `systematic-debugging`, `webapp-testing` |
-| **Testing** | `test-driven-development`, `webapp-testing`, `verification-before-completion` |
-| **Planning** | `writing-plans`, `executing-plans`, `brainstorming` |
-| **Code Review** | `requesting-code-review`, `receiving-code-review` |
-| **Database** | `postgresql-table-design`, `sql-optimization-patterns` |
-| **SEO/Marketing** | `seo-audit`, `programmatic-seo`, `content-strategy`, `copywriting` |
-| **Documents** | `docx`, `pdf`, `pptx`, `xlsx`, `doc-coauthoring` |
-| **MCP Servers** | `mcp-builder` |
-| **Next.js** | `next-best-practices`, `vercel-react-best-practices` |
-| **Parallel Work** | `dispatching-parallel-agents`, `subagent-driven-development` |
-| **API Integration** | `claude-api`, `ai-sdk` |
-| **Git Workflow** | `finishing-a-development-branch`, `using-git-worktrees` |
+| Task Category       | Skills to Use                                                                 |
+| ------------------- | ----------------------------------------------------------------------------- |
+| **UI/UX Design**    | `ui-ux-pro-max`, `frontend-design`, `canvas-design`, `theme-factory`          |
+| **Debugging**       | `systematic-debugging`, `webapp-testing`                                      |
+| **Testing**         | `test-driven-development`, `webapp-testing`, `verification-before-completion` |
+| **Planning**        | `writing-plans`, `executing-plans`, `brainstorming`                           |
+| **Code Review**     | `requesting-code-review`, `receiving-code-review`                             |
+| **Database**        | `postgresql-table-design`, `sql-optimization-patterns`                        |
+| **SEO/Marketing**   | `seo-audit`, `programmatic-seo`, `content-strategy`, `copywriting`            |
+| **Documents**       | `docx`, `pdf`, `pptx`, `xlsx`, `doc-coauthoring`                              |
+| **MCP Servers**     | `mcp-builder`                                                                 |
+| **Next.js**         | `next-best-practices`, `vercel-react-best-practices`                          |
+| **Parallel Work**   | `dispatching-parallel-agents`, `subagent-driven-development`                  |
+| **API Integration** | `claude-api`, `ai-sdk`                                                        |
+| **Git Workflow**    | `finishing-a-development-branch`, `using-git-worktrees`                       |
 
 ### Browser Testing with agent-browser
 
@@ -200,11 +200,26 @@ agent-browser close                # Close
 When no existing skill covers a domain, create one:
 
 ```bash
-npx skills create my-skill-name    # or use skill-creator skill
+npx skills create my-skill-name # or use skill-creator skill
 ```
 
 Place in `.claude/skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`).
 
+## Autoresearch Protocol
+
+Khi được yêu cầu chạy autoresearch:
+
+1. Đọc `.agents/skills/autoresearch/SKILL.md` cho full instructions
+2. Đọc `auto/<topic>/autoresearch.md` trong project (session context)
+3. Tạo branch `autoresearch/<topic>-<date>`
+4. Chạy `node auto/<topic>/measure.mjs` để lấy baseline
+5. Loop: brainstorm → implement → benchmark → checks → keep/revert → update docs
+6. Mỗi run ghi vào `auto/autoresearch.jsonl`
+7. Cập nhật `auto/<topic>/autoresearch.md` sau mỗi run (what worked, dead ends)
+8. KHÔNG dừng trừ khi user interrupt hoặc 20 runs liên tiếp không cải thiện
+9. Khi dừng: tạo summary trong autoresearch.md với top improvements
+
+**Available topics:** `bundle` (bundle size optimization)
 
 ## Product Requirements Documents
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, FluentEmoji } from '@lobehub/ui';
+import { Button } from '@lobehub/ui';
 import Link from 'next/link';
 import { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +62,9 @@ const ErrorCapture = memo<ErrorCaptureProps>(({ error, reset }) => {
       >
         ERROR
       </h1>
-      <FluentEmoji emoji={'🤧'} size={64} />
+      <span aria-label="sneezing" role="img" style={{ fontSize: 64, lineHeight: 1 }}>
+        🤧
+      </span>
       <h2 style={{ fontWeight: 'bold', marginTop: '1em', textAlign: 'center' }}>
         {t('error.title')}
       </h2>

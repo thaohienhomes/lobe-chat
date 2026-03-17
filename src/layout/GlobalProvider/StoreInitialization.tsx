@@ -1,72 +1,61 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createStoreUpdater } from 'zustand-utils';
 
-import { enableNextAuth } from '@/const/auth';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useAgentStore } from '@/store/agent';
-import { useAiInfraStore } from '@/store/aiInfra';
 import { useGlobalStore } from '@/store/global';
-import { systemStatusSelectors } from '@/store/global/selectors';
 import { useServerConfigStore } from '@/store/serverConfig';
 import { serverConfigSelectors } from '@/store/serverConfig/selectors';
 import { useUserStore } from '@/store/user';
-import { authSelectors } from '@/store/user/selectors';
 
+/**
+ * Phase 1: Critical Store Initialization
+ *
+ * Only initializes stores needed for the FIRST VISUAL RENDER:
+ * - System status (theme mode, language — from localStorage, very fast)
+ * - Server config (feature flags, default agent)
+ * - OAuth SSO providers (for auth UI)
+ * - Mobile detection + router (layout decisions)
+ *
+ * Non-critical stores (agent, AI provider, user state) are deferred
+ * to DeferredStoreInitialization to avoid blocking FCP/LCP.
+ */
 const StoreInitialization = memo(() => {
   // prefetch error ns to avoid don't show error content correctly
   useTranslation('error');
 
+  // Dismiss critical loading screen when React hydrates
+  useEffect(() => {
+    document.body.classList.add('hydrated');
+    const el = document.getElementById('critical-loading');
+    if (el) {
+      // Remove from DOM after fade-out transition completes
+      const timer = setTimeout(() => el.remove(), 400);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   const router = useRouter();
-  const [isLogin, isSignedIn, useInitUserState] = useUserStore((s) => [
-    authSelectors.isLogin(s),
-    s.isSignedIn,
-    s.useInitUserState,
-  ]);
 
-  const { serverConfig } = useServerConfigStore();
-
+  // init the system preference (fast — reads from localStorage)
   const useInitSystemStatus = useGlobalStore((s) => s.useInitSystemStatus);
-
-  const useInitAgentStore = useAgentStore((s) => s.useInitInboxAgentStore);
-  const useInitAiProviderKeyVaults = useAiInfraStore((s) => s.useFetchAiProviderRuntimeState);
-
-  // init the system preference
   useInitSystemStatus();
 
-  // fetch server config
+  // fetch server config (needed for feature flags, auth config)
   const useFetchServerConfig = useServerConfigStore((s) => s.useInitServerConfig);
   useFetchServerConfig();
 
-  // Update NextAuth status
+  // Update NextAuth status (needed for auth UI)
   const useUserStoreUpdater = createStoreUpdater(useUserStore);
   const oAuthSSOProviders = useServerConfigStore(serverConfigSelectors.oAuthSSOProviders);
   useUserStoreUpdater('oAuthSSOProviders', oAuthSSOProviders);
 
-  /**
-   * The store function of `isLogin` will both consider the values of `enableAuth` and `isSignedIn`.
-   * But during initialization, the value of `enableAuth` might be incorrect cause of the async fetch.
-   * So we need to use `isSignedIn` only to determine whether request for the default agent config and user state.
-   */
-  const isDBInited = useGlobalStore(systemStatusSelectors.isDBInited);
-  const isLoginOnInit = isDBInited && (enableNextAuth ? isSignedIn : isLogin);
-
-  // init inbox agent and default agent config
-  useInitAgentStore(isLoginOnInit, serverConfig.defaultAgent?.config);
-
-  // init user provider key vaults
-  useInitAiProviderKeyVaults(isLoginOnInit);
-
-  // init user state
-  useInitUserState(isLoginOnInit, serverConfig);
-
+  // Mobile detection + router (needed for layout decisions)
   const useStoreUpdater = createStoreUpdater(useGlobalStore);
-
   const mobile = useIsMobile();
-
   useStoreUpdater('isMobile', mobile);
   useStoreUpdater('router', router);
 

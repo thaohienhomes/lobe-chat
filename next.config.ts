@@ -413,7 +413,18 @@ const nextConfig: NextConfig = {
     // Mermaid diagrams are rendered via CDN in the visualizer iframe.
     if (!isServer) {
       const emptyMod = require.resolve('./auto/bundle/empty-module.js');
-      config.plugins.push(new webpack.NormalModuleReplacementPlugin(/^mermaid$/, emptyMod));
+
+      // Exclude heavy transitive deps from client bundle:
+      // 1. mermaid: @lobehub/ui's useMermaid hook does import('mermaid') pulling entire mermaid+d3+dagre.
+      //    The hook handles null gracefully. Mermaid diagrams rendered via CDN in visualizer iframe.
+      // 2. emoji-mart: @lobehub/ui's EmojiPicker statically imports @emoji-mart/data and @emoji-mart/react
+      //    but Phở Chat doesn't use EmojiPicker directly. Prevents ~500KB+ of emoji catalog data.
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^mermaid$/, emptyMod),
+        new webpack.NormalModuleReplacementPlugin(/^@emoji-mart\/data/, emptyMod),
+        new webpack.NormalModuleReplacementPlugin(/^@emoji-mart\/react/, emptyMod),
+        new webpack.NormalModuleReplacementPlugin(/^emoji-mart$/, emptyMod),
+      );
     }
 
     config.resolve.alias.canvas = false;
