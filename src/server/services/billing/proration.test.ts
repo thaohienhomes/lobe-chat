@@ -41,6 +41,23 @@ describe('proration utilities', () => {
         monthlyPoints: 2_000_000,
         yearly: 1_990_000,
       });
+
+      // New plans
+      expect(PLAN_PRICING.medical_beta).toEqual({
+        monthly: 83_000,
+        monthlyPoints: 1_000_000,
+        yearly: 999_000,
+      });
+      expect(PLAN_PRICING.vn_standard).toEqual({
+        monthly: 107_500,
+        monthlyPoints: 1_000_000,
+        yearly: 1_290_000,
+      });
+      expect(PLAN_PRICING.vn_ultra).toEqual({
+        monthly: 415_833,
+        monthlyPoints: 5_000_000,
+        yearly: 4_990_000,
+      });
     });
   });
 
@@ -55,8 +72,11 @@ describe('proration utilities', () => {
       // Vietnam Plans
       expect(PLAN_TIERS.vn_free).toBe(0);
       expect(PLAN_TIERS.vn_basic).toBe(1);
-      expect(PLAN_TIERS.vn_pro).toBe(2);
+      expect(PLAN_TIERS.medical_beta).toBe(2);
+      expect(PLAN_TIERS.vn_standard).toBe(2);
+      expect(PLAN_TIERS.vn_pro).toBe(3);
       expect(PLAN_TIERS.vn_team).toBe(3);
+      expect(PLAN_TIERS.vn_ultra).toBe(4);
     });
   });
 

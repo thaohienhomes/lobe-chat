@@ -46,9 +46,16 @@ interface PreviewResponse {
 
 const PLAN_NAMES: Record<string, string> = {
   free: 'Free',
+  medical_beta: 'Phở Medical Beta',
   premium: 'Premium',
   starter: 'Starter',
   ultimate: 'Ultimate',
+  vn_basic: 'Phở Tái (Basic)',
+  vn_free: 'Phở Không Người Lái (Free)',
+  vn_pro: 'Phở Đặc Biệt (Pro)',
+  vn_standard: 'Phở Bò Viên (Standard)',
+  vn_team: 'Lẩu Phở (Team)',
+  vn_ultra: 'Phở Siêu Đặc Biệt (Ultra)',
 };
 
 /**

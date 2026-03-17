@@ -24,10 +24,13 @@ const PLAN_PRICING = {
   starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
   ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
   // Vietnam Plans
+  medical_beta: { monthly: 83_000, monthlyPoints: 1_000_000, yearly: 999_000 },
   vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
   vn_free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
   vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
+  vn_standard: { monthly: 107_500, monthlyPoints: 1_000_000, yearly: 1_290_000 },
   vn_team: { monthly: 149_000, monthlyPoints: 0, yearly: 1_490_000 },
+  vn_ultra: { monthly: 415_833, monthlyPoints: 5_000_000, yearly: 4_990_000 },
 } as const;
 
 type PlanId = keyof typeof PLAN_PRICING;
@@ -36,8 +39,11 @@ type PlanId = keyof typeof PLAN_PRICING;
 const VALID_PLAN_IDS = new Set<PlanId>([
   'vn_free',
   'vn_basic',
+  'vn_standard',
   'vn_pro',
   'vn_team',
+  'vn_ultra',
+  'medical_beta',
   'starter',
   'premium',
   'ultimate',

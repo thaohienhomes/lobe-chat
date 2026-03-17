@@ -30,10 +30,13 @@ ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
 
   
   // Vietnam Plans
-vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
+  medical_beta: { monthly: 83_000, monthlyPoints: 1_000_000, yearly: 999_000 },
+  vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
   vn_free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
   vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
+  vn_standard: { monthly: 107_500, monthlyPoints: 1_000_000, yearly: 1_290_000 },
   vn_team: { monthly: 149_000, monthlyPoints: 0, yearly: 1_490_000 },
+  vn_ultra: { monthly: 415_833, monthlyPoints: 5_000_000, yearly: 4_990_000 },
 };
 
 /**
@@ -55,11 +58,14 @@ starter: 0,
 ultimate: 2,
 
   
-  // Vietnam Plans
-vn_basic: 1,
+  // Vietnam Plans (tier hierarchy: free=0 < basic=1 < medical_beta/standard=2 < pro/team=3 < ultra=4)
+  medical_beta: 2,
+  vn_basic: 1,
   vn_free: 0,
-  vn_pro: 2,
+  vn_pro: 3,
+  vn_standard: 2,
   vn_team: 3,
+  vn_ultra: 4,
 };
 
 /**
