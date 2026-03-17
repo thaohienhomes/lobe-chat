@@ -10,11 +10,11 @@
  * to avoid displaying different plans in different parts of the UI.
  */
 import { auth } from '@clerk/nextjs/server';
-import { and, eq, gte, sql } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { GLOBAL_PLANS, VN_PLANS } from '@/config/pricing';
-import { usageLogs, users } from '@/database/schemas';
+import { users } from '@/database/schemas';
 import { subscriptions } from '@/database/schemas/billing';
 import { getServerDB } from '@/database/server';
 
@@ -79,10 +79,14 @@ export async function GET() {
 
     const db = await getServerDB();
 
-    // Get user data
+    // Get user data including daily tier usage counters
+    // (same columns that atomicAcquireTierSlot() enforces against)
     const userResult = await db
       .select({
         currentPlanId: users.currentPlanId,
+        dailyTier2Usage: users.dailyTier2Usage,
+        dailyTier3Usage: users.dailyTier3Usage,
+        lastUsageDate: users.lastUsageDate,
         phoPointsBalance: users.phoPointsBalance,
         pointsResetDate: users.pointsResetDate,
         streakCount: users.streakCount,
@@ -122,19 +126,13 @@ export async function GET() {
     // Get plan config
     const plan = VN_PLANS[planId] || GLOBAL_PLANS[planId] || VN_PLANS.vn_free;
 
-    // Get today's usage from usageLogs
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const usageResult = await db
-      .select({
-        tier2Count: sql<number>`COALESCE(SUM(CASE WHEN ${usageLogs.modelTier} = 2 THEN 1 ELSE 0 END), 0)`,
-        tier3Count: sql<number>`COALESCE(SUM(CASE WHEN ${usageLogs.modelTier} = 3 THEN 1 ELSE 0 END), 0)`,
-      })
-      .from(usageLogs)
-      .where(and(eq(usageLogs.userId, userId), gte(usageLogs.createdAt, today)));
-
-    const usage = usageResult[0] || { tier2Count: 0, tier3Count: 0 };
+    // Read daily tier usage from users table — same source as
+    // atomicAcquireTierSlot() enforcement. This prevents counter mismatch
+    // that caused the UI to show different values from actual enforcement.
+    const lastDate = user.lastUsageDate ? new Date(user.lastUsageDate) : null;
+    const isToday = lastDate && lastDate.toDateString() === new Date().toDateString();
+    const tier2Count = isToday ? (user.dailyTier2Usage ?? 0) : 0;
+    const tier3Count = isToday ? (user.dailyTier3Usage ?? 0) : 0;
 
     // Adjust balance for plan upgrades where DB hasn't been updated yet
     const dbBalance = user.phoPointsBalance ?? 50_000;
@@ -144,9 +142,9 @@ export async function GET() {
 
     return NextResponse.json({
       currentPlanId: planId,
-      dailyTier2Count: Number(usage.tier2Count),
+      dailyTier2Count: tier2Count,
       dailyTier2Limit: plan.dailyTier2Limit ?? 0,
-      dailyTier3Count: Number(usage.tier3Count),
+      dailyTier3Count: tier3Count,
       dailyTier3Limit: plan.dailyTier3Limit ?? 0,
       phoPointsBalance: adjustedBalance,
       pointsResetDate: user.pointsResetDate?.toISOString() ?? null,

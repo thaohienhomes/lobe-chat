@@ -164,33 +164,34 @@ export async function processModelUsage(
           isFree = true;
         }
         newTier1Usage += 1;
-
         break;
       }
-      case 2: {
-        newTier2Usage += 1;
-
+      case 2:
+      case 3:
+        // Tier 2/3 counters are ONLY incremented by atomicAcquireTierSlot()
+        // in checkTierAccess(). Do NOT increment here to avoid double-counting.
+        // This was the root cause of the tier limit bypass bug.
         break;
-      }
-      case 3: {
-        newTier3Usage += 1;
-
-        break;
-      }
       // No default
     }
 
-    // 4. Update DB with all tier usage
+    // 4. Update DB — only update tier1 counter + credits.
+    //    Tier 2/3 counters are managed exclusively by atomicAcquireTierSlot().
+    //    On day-reset (isSameDay=false), reset tier 2/3 to 0.
+    const updatePayload: Record<string, any> = {
+      dailyTier1Usage: newTier1Usage,
+      lastUsageDate: now,
+      lifetimeSpent: sql`${users.lifetimeSpent} + ${finalCost}`,
+      phoPointsBalance: sql`GREATEST(0, ${users.phoPointsBalance} - ${finalCost})`,
+    };
+    if (!isSameDay) {
+      // New day: reset tier 2/3 counters (atomicAcquireTierSlot will set to 1 on first use)
+      updatePayload.dailyTier2Usage = 0;
+      updatePayload.dailyTier3Usage = 0;
+    }
     await db
       .update(users)
-      .set({
-        dailyTier1Usage: newTier1Usage,
-        dailyTier2Usage: newTier2Usage,
-        dailyTier3Usage: newTier3Usage,
-        lastUsageDate: now,
-        lifetimeSpent: sql`${users.lifetimeSpent} + ${finalCost}`,
-        phoPointsBalance: sql`GREATEST(0, ${users.phoPointsBalance} - ${finalCost})`,
-      })
+      .set(updatePayload)
       .where(eq(users.id, userId));
 
     if (process.env.NODE_ENV !== 'production') {
