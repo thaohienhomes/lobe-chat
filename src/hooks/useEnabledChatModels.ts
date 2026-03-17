@@ -16,8 +16,8 @@ export const NEW_MODEL_IDS = new Set([
   'openai/gpt-5.4',
   'openai/gpt-5.3-codex',
   'nvidia/nemotron-3-nano-30b-a3b',
-  'xai/grok-4-1',
-  'xai/grok-4.2',
+  // 'xai/grok-4-1', // Disabled: model ID needs verification on Vercel AI Gateway
+  // 'xai/grok-4.2',  // Disabled: model ID needs verification on Vercel AI Gateway
   'moonshot/kimi-k2.5',
   'kimi-k2.5',
   'mercury-coder-small-2-2',

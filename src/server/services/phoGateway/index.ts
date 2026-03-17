@@ -99,23 +99,11 @@ class PhoGatewayService {
       ],
     },
 
-    // ── xAI Models — failover via Vercel AI Gateway ──
-    'xai/grok-4-1': {
-      id: 'xai/grok-4-1',
-      providers: [
-        { modelId: 'xai/grok-4-1', provider: 'vercelaigateway' },
-        { modelId: 'xai/grok-4', provider: 'vercelaigateway' }, // downgrade fallback
-        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
-      ],
-    },
-    'xai/grok-4.2': {
-      id: 'xai/grok-4.2',
-      providers: [
-        { modelId: 'xai/grok-4.2', provider: 'vercelaigateway' },
-        { modelId: 'xai/grok-4-1', provider: 'vercelaigateway' }, // downgrade fallback
-        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
-      ],
-    },
+    // ── xAI Models — DISABLED: model IDs need verification from Vercel AI Gateway dashboard ──
+    // Known correct IDs: xai/grok-4.1-fast-reasoning, xai/grok-4.20-reasoning-beta
+    // Uncomment and fix IDs once confirmed:
+    // 'xai/grok-4-1': { ... },
+    // 'xai/grok-4.2': { ... },
 
     // ── OpenAI Premium Models — failover via Vercel AI Gateway ──
     'openai/gpt-5.4': {

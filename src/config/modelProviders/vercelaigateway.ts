@@ -171,11 +171,14 @@ const VercelAIGateway: ModelProviderCard = {
       maxOutput: 8192,
     },
     // --- xAI Models ---
+    // TODO: Verify correct model IDs from Vercel AI Gateway dashboard
+    // Known IDs: xai/grok-4.1-fast-reasoning, xai/grok-4.20-reasoning-beta
+    // Current IDs (grok-4-1, grok-4.2) do NOT exist on Gateway — disabled until confirmed
     {
       contextWindowTokens: 131_072,
       description: 'Grok 4.1 — Model mới nhất của xAI, agentic tool calling, reasoning tốt nhất',
       displayName: 'Grok 4.1',
-      enabled: true,
+      enabled: false,
       functionCall: true,
       id: 'xai/grok-4-1',
       maxOutput: 32_000,
@@ -186,7 +189,7 @@ const VercelAIGateway: ModelProviderCard = {
       description:
         'Grok 4.2 — Kiến trúc 4-agent (Harper, Benjamin, Lucas), giảm 65% hallucination, chuyên gia y khoa & kỹ thuật',
       displayName: 'Grok 4.2',
-      enabled: true,
+      enabled: false,
       functionCall: true,
       id: 'xai/grok-4.2',
       maxOutput: 16_384,
