@@ -99,6 +99,50 @@ class PhoGatewayService {
       ],
     },
 
+    // ── xAI Models — failover via Vercel AI Gateway ──
+    'xai/grok-4-1': {
+      id: 'xai/grok-4-1',
+      providers: [
+        { modelId: 'xai/grok-4-1', provider: 'vercelaigateway' },
+        { modelId: 'xai/grok-4', provider: 'vercelaigateway' }, // downgrade fallback
+        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+    'xai/grok-4.2': {
+      id: 'xai/grok-4.2',
+      providers: [
+        { modelId: 'xai/grok-4.2', provider: 'vercelaigateway' },
+        { modelId: 'xai/grok-4-1', provider: 'vercelaigateway' }, // downgrade fallback
+        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+
+    // ── OpenAI Premium Models — failover via Vercel AI Gateway ──
+    'openai/gpt-5.4': {
+      id: 'openai/gpt-5.4',
+      providers: [
+        { modelId: 'openai/gpt-5.4', provider: 'vercelaigateway' },
+        { modelId: 'openai/gpt-5.2', provider: 'vercelaigateway' }, // downgrade fallback
+        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+    'openai/gpt-5.2': {
+      id: 'openai/gpt-5.2',
+      providers: [
+        { modelId: 'openai/gpt-5.2', provider: 'vercelaigateway' },
+        { modelId: 'openai/gpt-4o', provider: 'vercelaigateway' }, // downgrade fallback
+        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+    'openai/gpt-5.3-codex': {
+      id: 'openai/gpt-5.3-codex',
+      providers: [
+        { modelId: 'openai/gpt-5.3-codex', provider: 'vercelaigateway' },
+        { modelId: 'openai/gpt-5.2', provider: 'vercelaigateway' }, // downgrade fallback
+        { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+
     'pho-fast': {
       id: 'pho-fast',
       providers: [
