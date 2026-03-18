@@ -2,7 +2,7 @@
 
 import { useTheme } from 'antd-style';
 import dynamic from 'next/dynamic';
-import { PropsWithChildren, Suspense, memo, useEffect, useState } from 'react';
+import { PropsWithChildren, memo, useEffect, useState } from 'react';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { Flexbox } from 'react-layout-kit';
 
@@ -17,7 +17,6 @@ import { authSelectors } from '@/store/user/slices/auth/selectors';
 import { HotkeyScopeEnum } from '@/types/hotkey';
 
 import DesktopLayoutContainer from './DesktopLayoutContainer';
-import RegisterHotkeys from './RegisterHotkeys';
 
 // Lazy-load components not needed for initial LCP paint
 // Reserve exact banner height while loading to prevent CLS
@@ -32,6 +31,8 @@ const OnboardingModal = dynamic(() => import('@/features/Onboarding/OnboardingMo
 const TitleBar = isDesktop ? dynamic(() => import('@/features/ElectronTitlebar')) : () => null;
 // SideBar for non-Electron desktop path — lazy-load its subcomponents
 const SideBar = dynamic(() => import('./SideBar'));
+// RegisterHotkeys has no visual output — lazy-load to defer hotkey hook imports
+const RegisterHotkeys = dynamic(() => import('./RegisterHotkeys'));
 
 const Layout = memo<PropsWithChildren>(({ children }) => {
   const { isPWA } = usePlatform();
@@ -87,9 +88,7 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
         )}
       </Flexbox>
       <HotkeyHelperPanel />
-      <Suspense>
-        <RegisterHotkeys />
-      </Suspense>
+      <RegisterHotkeys />
 
       {/* Onboarding Modal for first-time users */}
       <OnboardingModal onComplete={handleOnboardingComplete} open={showOnboarding} />

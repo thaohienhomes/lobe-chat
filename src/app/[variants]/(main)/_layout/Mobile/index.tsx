@@ -9,7 +9,9 @@ import { BANNER_HEIGHT } from '@/features/AlertBanner/const';
 import { useShowMobileWorkspace } from '@/hooks/useShowMobileWorkspace';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
-import NavBar from './NavBar';
+// Lazy-load NavBar — it's position:fixed (no CLS) and not the LCP element.
+// This defers parsing TabBar, createStyles, lucide icons from the critical path.
+const NavBar = dynamic(() => import('./NavBar'));
 
 // Reserve exact banner height while loading to prevent CLS (layout shift)
 const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'), {
