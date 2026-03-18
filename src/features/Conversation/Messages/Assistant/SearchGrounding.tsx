@@ -6,7 +6,6 @@ import { createStyles } from 'antd-style';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, ChevronDown, ChevronRight, Globe, Search } from 'lucide-react';
 import Image from 'next/image';
-import { rgba } from 'polished';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';

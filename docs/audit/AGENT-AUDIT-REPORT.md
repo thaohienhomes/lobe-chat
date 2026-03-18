@@ -799,4 +799,4 @@ packages/prompts/src/prompts/knowledgeBaseQA/         — Knowledge base QA prom
 
 ---
 
-_Báo cáo này được tạo tự động bởi Claude Code CLI. Vui lòng review thủ công trước khi thực hiện khuyến nghị._
+_Báo cáo này được tạo tự động bởi Claude Code CLI. Vui lòng reviok ew thủ công trước khi thực hiện khuyến nghị._

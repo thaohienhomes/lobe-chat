@@ -85,6 +85,51 @@ export const useSend = () => {
 
     if (chatSelectors.isAIGenerating(store)) return;
 
+    // Context window warning: warn when conversation is very long
+    const LONG_CONVERSATION_THRESHOLD = 200;
+    const messageCount = chatSelectors.activeBaseChats(store).length;
+    if (messageCount >= LONG_CONVERSATION_THRESHOLD) {
+      const warningKey = `__ctx_warn_${store.activeId}`;
+      const alreadyWarned =
+        typeof sessionStorage !== 'undefined' && sessionStorage.getItem(warningKey);
+
+      if (!alreadyWarned) {
+        // Dynamically import Modal to avoid bundling it in critical path
+        const { Modal } = await import('antd');
+        const shouldContinue = await new Promise<boolean>((resolve) => {
+          Modal.confirm({
+            cancelText: 'Tiếp tục',
+            content: `Cuộc hội thoại đã có ${messageCount} tin nhắn. Điều này có thể ảnh hưởng đến chất lượng và tốc độ phản hồi AI. Bạn có muốn tạo cuộc hội thoại mới?`,
+            okText: 'Tạo hội thoại mới',
+            onCancel: () => resolve(true), // Continue in current conversation
+            onOk: () => resolve(false), // Create new conversation
+            title: '⚠️ Cuộc hội thoại dài',
+          });
+        });
+
+        try {
+          sessionStorage.setItem(warningKey, '1');
+        } catch {
+          // Safari private browsing
+        }
+
+        analytics?.track({
+          name: 'long_conversation_warning_shown',
+          properties: {
+            chat_id: store.activeId,
+            continued: shouldContinue,
+            message_count: messageCount,
+          },
+        });
+
+        if (!shouldContinue) {
+          // User chose to create new conversation — navigate away
+          window.location.href = '/chat';
+          return;
+        }
+      }
+    }
+
     const inputMessage = store.inputMessage;
     // 发送时再取一次最新的文件列表，防止闭包拿到旧值
     const fileList = fileChatSelectors.chatUploadFileList(useFileStore.getState());

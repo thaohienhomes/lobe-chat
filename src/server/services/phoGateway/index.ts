@@ -99,21 +99,13 @@ class PhoGatewayService {
       ],
     },
 
-    // ── xAI Models — DISABLED: model IDs need verification from Vercel AI Gateway dashboard ──
-    // Known correct IDs: xai/grok-4.1-fast-reasoning, xai/grok-4.20-reasoning-beta
-    // Uncomment and fix IDs once confirmed:
-    // 'xai/grok-4-1': { ... },
-    // 'xai/grok-4.2': { ... },
+    
+    
+    
+    
+    
 
-    // ── OpenAI Premium Models — failover via Vercel AI Gateway ──
-    'openai/gpt-5.4': {
-      id: 'openai/gpt-5.4',
-      providers: [
-        { modelId: 'openai/gpt-5.4', provider: 'vercelaigateway' },
-        { modelId: 'openai/gpt-5.2', provider: 'vercelaigateway' }, // downgrade fallback
-        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
-      ],
-    },
+    
     'openai/gpt-5.2': {
       id: 'openai/gpt-5.2',
       providers: [
@@ -122,12 +114,32 @@ class PhoGatewayService {
         { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // cross-provider fallback
       ],
     },
-    'openai/gpt-5.3-codex': {
+    
+
+
+
+
+
+'openai/gpt-5.3-codex': {
       id: 'openai/gpt-5.3-codex',
       providers: [
         { modelId: 'openai/gpt-5.3-codex', provider: 'vercelaigateway' },
         { modelId: 'openai/gpt-5.2', provider: 'vercelaigateway' }, // downgrade fallback
         { modelId: 'google/gemini-2.5-flash', provider: 'vercelaigateway' }, // cross-provider fallback
+      ],
+    },
+    // ── xAI Models — DISABLED: model IDs need verification from Vercel AI Gateway dashboard ──
+// Known correct IDs: xai/grok-4.1-fast-reasoning, xai/grok-4.20-reasoning-beta
+// Uncomment and fix IDs once confirmed:
+// 'xai/grok-4-1': { ... },
+// 'xai/grok-4.2': { ... },
+// ── OpenAI Premium Models — failover via Vercel AI Gateway ──
+'openai/gpt-5.4': {
+      id: 'openai/gpt-5.4',
+      providers: [
+        { modelId: 'openai/gpt-5.4', provider: 'vercelaigateway' },
+        { modelId: 'openai/gpt-5.2', provider: 'vercelaigateway' }, // downgrade fallback
+        { modelId: 'google/gemini-2.5-pro', provider: 'vercelaigateway' }, // cross-provider fallback
       ],
     },
 

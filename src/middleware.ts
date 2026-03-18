@@ -109,7 +109,7 @@ const defaultMiddleware = (request: NextRequest) => {
 
   const ua = request.headers.get('user-agent') || '';
 
-  const isMobileUA = /Mobile|Android|iPhone|iPad|iPod|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua);
+  const isMobileUA = /mobile|android|iphone|ipad|ipod|webos|blackberry|opera mini|iemobile/i.test(ua);
   const device = { type: isMobileUA ? 'mobile' : undefined };
 
   logDefault('User preferences: %O', {

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
+import ClerkErrorBoundary from './ClerkErrorBoundary';
 import SSOCallbackWatchdog from './SSOCallbackWatchdog';
 import UserUpdater from './UserUpdater';
 import { useAppearance } from './useAppearance';
@@ -54,19 +55,21 @@ const Clerk = memo(({ children }: PropsWithChildren) => {
   );
 
   return (
-    <ClerkProvider
-      afterSignInUrl="/"
-      afterSignUpUrl="/"
-      allowedRedirectOrigins={allowedRedirectOrigins}
-      appearance={updatedAppearance}
-      localization={localization}
-      signInUrl="/login"
-      signUpUrl={!enableClerkSignUp ? '/login' : '/signup'} // Redirect sign-up to sign-in if disabled
-    >
-      {children}
-      <SSOCallbackWatchdog />
-      <UserUpdater />
-    </ClerkProvider>
+    <ClerkErrorBoundary>
+      <ClerkProvider
+        afterSignInUrl="/"
+        afterSignUpUrl="/"
+        allowedRedirectOrigins={allowedRedirectOrigins}
+        appearance={updatedAppearance}
+        localization={localization}
+        signInUrl="/login"
+        signUpUrl={!enableClerkSignUp ? '/login' : '/signup'} // Redirect sign-up to sign-in if disabled
+      >
+        {children}
+        <SSOCallbackWatchdog />
+        <UserUpdater />
+      </ClerkProvider>
+    </ClerkErrorBoundary>
   );
 });
 

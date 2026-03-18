@@ -57,11 +57,11 @@ describe('generationBatchRouter', () => {
   it('should delete generation batch without thumbnails', async () => {
     const mockBatchId = 'batch-123';
     const mockDeletedBatch: GenerationBatchItem = {
-      config: null,
-      generationTopicId: 'topic-1',
       accessedAt: new Date(),
-      height: 1024,
+      config: null,
       createdAt: new Date(),
+      generationTopicId: 'topic-1',
+      height: 1024,
       id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',
@@ -104,11 +104,11 @@ describe('generationBatchRouter', () => {
     const mockBatchId = 'batch-123';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg', 'thumb3.jpg'];
     const mockDeletedBatch: GenerationBatchItem = {
-      config: null,
-      generationTopicId: 'topic-1',
       accessedAt: new Date(),
-      height: 1024,
+      config: null,
       createdAt: new Date(),
+      generationTopicId: 'topic-1',
+      height: 1024,
       id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',
@@ -151,11 +151,11 @@ describe('generationBatchRouter', () => {
     const mockBatchId = 'batch-123';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg'];
     const mockDeletedBatch: GenerationBatchItem = {
-      config: null,
-      generationTopicId: 'topic-1',
       accessedAt: new Date(),
-      height: 1024,
+      config: null,
       createdAt: new Date(),
+      generationTopicId: 'topic-1',
+      height: 1024,
       id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',
@@ -237,11 +237,11 @@ describe('generationBatchRouter', () => {
     // 模拟包含大量缩略图的批次
     const mockThumbnailUrls = Array.from({ length: 50 }, (_, i) => `thumb${i + 1}.jpg`);
     const mockDeletedBatch: GenerationBatchItem = {
-      config: null,
-      generationTopicId: 'topic-1',
       accessedAt: new Date(),
-      height: 1024,
+      config: null,
       createdAt: new Date(),
+      generationTopicId: 'topic-1',
+      height: 1024,
       id: mockBatchId,
       model: 'test-model',
       prompt: 'Batch with many generations',
@@ -319,11 +319,11 @@ describe('generationBatchRouter', () => {
     const mockBatchId = 'batch-123';
     const mockThumbnailUrls = ['thumb1.jpg', 'thumb2.jpg', 'thumb3.jpg'];
     const mockDeletedBatch: GenerationBatchItem = {
-      config: null,
-      generationTopicId: 'topic-1',
       accessedAt: new Date(),
-      height: 1024,
+      config: null,
       createdAt: new Date(),
+      generationTopicId: 'topic-1',
+      height: 1024,
       id: mockBatchId,
       model: 'test-model',
       prompt: 'Test prompt',

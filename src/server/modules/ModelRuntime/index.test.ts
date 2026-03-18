@@ -29,19 +29,19 @@ import { initModelRuntimeWithUserPayload } from './index';
 vi.mock('@/envs/llm', () => ({
   getLLMConfig: vi.fn(() => ({
     
-    AWS_ACCESS_KEY_ID: 'test-aws-id',
+    ANTHROPIC_API_KEY: 'test-anthropic-key',
+    
+AWS_ACCESS_KEY_ID: 'test-aws-id',
+
     
 AWS_REGION: 'test-aws-region',
-
     
 AWS_SECRET_ACCESS_KEY: 'test-aws-secret',
-    
-AWS_SESSION_TOKEN: 'test-aws-session-token',
 
     
-AZURE_API_KEY: 'test-azure-key',
+AWS_SESSION_TOKEN: 'test-aws-session-token',
     
-ANTHROPIC_API_KEY: 'test-anthropic-key',
+AZURE_API_KEY: 'test-azure-key',
     
 AZURE_ENDPOINT: 'endpoint',
     
@@ -50,17 +50,20 @@ DEEPSEEK_API_KEY: 'test-deepseek-key',
 GOOGLE_API_KEY: 'test-google-key',
     
 MINIMAX_API_KEY: 'test-minimax-key',
+    
+MISTRAL_API_KEY: 'test-mistral-key',
+    
+MOONSHOT_API_KEY: 'test-moonshot-key',
+    
+OLLAMA_PROXY_URL: 'https://test-ollama-url.local',
     // 确保为每个provider提供必要的配置信息
 OPENAI_API_KEY: 'test-openai-key',
-    MISTRAL_API_KEY: 'test-mistral-key',
-    MOONSHOT_API_KEY: 'test-moonshot-key',
-    OLLAMA_PROXY_URL: 'https://test-ollama-url.local',
-    ZHIPU_API_KEY: 'test.zhipu-key',
     PERPLEXITY_API_KEY: 'test-perplexity-key',
     QINIU_API_KEY: 'test-qiniu-key',
     QWEN_API_KEY: 'test-qwen-key',
     STEPFUN_API_KEY: 'test-stepfun-key',
     TOGETHERAI_API_KEY: 'test-togetherai-key',
+    ZHIPU_API_KEY: 'test.zhipu-key',
   })),
 }));
 

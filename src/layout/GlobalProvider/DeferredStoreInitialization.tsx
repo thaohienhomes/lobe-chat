@@ -1,48 +1,11 @@
 'use client';
 
-import { memo, useEffect, useState } from 'react';
+import { Suspense, lazy, memo, useEffect, useState } from 'react';
 
-import { enableNextAuth } from '@/const/auth';
-import { useAgentStore } from '@/store/agent';
-import { useAiInfraStore } from '@/store/aiInfra';
-import { useGlobalStore } from '@/store/global';
-import { systemStatusSelectors } from '@/store/global/selectors';
-import { useServerConfigStore } from '@/store/serverConfig';
-import { useUserStore } from '@/store/user';
-import { authSelectors } from '@/store/user/selectors';
-
-/**
- * Inner component that actually initializes the deferred stores.
- * Only mounts after the browser signals idle time.
- */
-const DeferredStores = memo(() => {
-  const { serverConfig } = useServerConfigStore();
-
-  const [isLogin, isSignedIn, useInitUserState] = useUserStore((s) => [
-    authSelectors.isLogin(s),
-    s.isSignedIn,
-    s.useInitUserState,
-  ]);
-
-  const useInitAgentStore = useAgentStore((s) => s.useInitInboxAgentStore);
-  const useInitAiProviderKeyVaults = useAiInfraStore((s) => s.useFetchAiProviderRuntimeState);
-
-  const isDBInited = useGlobalStore(systemStatusSelectors.isDBInited);
-  const isLoginOnInit = isDBInited && (enableNextAuth ? isSignedIn : isLogin);
-
-  // init inbox agent and default agent config
-  useInitAgentStore(isLoginOnInit, serverConfig.defaultAgent?.config);
-
-  // init user provider key vaults (heavy — imports model-bank dynamically)
-  useInitAiProviderKeyVaults(isLoginOnInit);
-
-  // init user state
-  useInitUserState(isLoginOnInit, serverConfig);
-
-  return null;
-});
-
-DeferredStores.displayName = 'DeferredStores';
+// React.lazy creates a separate webpack chunk for DeferredStores and all its
+// store imports (agent, aiInfra, user, model-bank). This prevents ~200KB+ of
+// store code from being parsed/evaluated during the critical rendering path.
+const LazyDeferredStores = lazy(() => import('./DeferredStores'));
 
 /**
  * Phase 2: Deferred Store Initialization
@@ -84,7 +47,11 @@ const DeferredStoreInitialization = memo(() => {
 
   if (!shouldInit) return null;
 
-  return <DeferredStores />;
+  return (
+    <Suspense>
+      <LazyDeferredStores />
+    </Suspense>
+  );
 });
 
 DeferredStoreInitialization.displayName = 'DeferredStoreInitialization';

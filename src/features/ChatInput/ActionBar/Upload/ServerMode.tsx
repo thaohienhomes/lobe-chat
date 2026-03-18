@@ -68,7 +68,7 @@ const FileUpload = memo(() => {
               const skippedFiles = fileList.filter(
                 (f: UploadFile) => f.type?.startsWith('image') || f.type?.startsWith('video'),
               );
-              const isLastSkipped = file === skippedFiles[skippedFiles.length - 1];
+              const isLastSkipped = file === skippedFiles.at(-1);
               if (isLastSkipped && skippedFiles.length > 0) {
                 message.warning(
                   t('upload.action.imagesSkipped', { count: skippedFiles.length }),
@@ -110,7 +110,7 @@ const FileUpload = memo(() => {
               const skippedFiles = fileList.filter(
                 (f: UploadFile) => f.type?.startsWith('image') || f.type?.startsWith('video'),
               );
-              const isLastSkipped = file === skippedFiles[skippedFiles.length - 1];
+              const isLastSkipped = file === skippedFiles.at(-1);
               if (isLastSkipped && skippedFiles.length > 0) {
                 message.warning(
                   t('upload.action.imagesSkipped', { count: skippedFiles.length }),

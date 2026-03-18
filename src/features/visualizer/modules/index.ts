@@ -41,23 +41,41 @@ const MODULE_REGISTRY: Record<string, VisualizerModule> = {
   // General
   art: artModule,
   chart: chartModule,
-  diagram: diagramModule,
-  interactive: interactiveModule,
-  mockup: mockupModule,
-  // Medical
-  consort: consortModule,
-  'drug-interaction': drugInteractionModule,
-  'forest-plot': forestPlotModule,
-  'kaplan-meier': kaplanMeierModule,
-  prisma: prismaModule,
+  
+// Academic
+'citation-network': citationNetworkModule,
+  
+
+// Medical
+consort: consortModule,
+  
+
+diagram: diagramModule,
+  
+  
+'drug-interaction': drugInteractionModule,
+  
+'forest-plot': forestPlotModule,
+  
+interactive: interactiveModule,
+  
+'kaplan-meier': kaplanMeierModule,
+  
+// Education
+'math-plot': mathPlotModule,
+  
+
+'methodology-flow': methodologyFlowModule,
+  
+  
+mockup: mockupModule,
+  
+prisma: prismaModule,
+  
+quiz: quizModule,
+  
   'rob-assessment': robAssessmentModule,
-  // Academic
-  'citation-network': citationNetworkModule,
-  'methodology-flow': methodologyFlowModule,
   'stats-dashboard': statsDashboardModule,
-  // Education
-  'math-plot': mathPlotModule,
-  quiz: quizModule,
   'step-by-step': stepByStepModule,
 };
 

@@ -18,6 +18,19 @@ const ConfettiCelebration = dynamic(() => import('@/components/ConfettiCelebrati
 
 const { Title, Text } = Typography;
 
+// Trust signals for checkout page — improves conversion by reducing anxiety
+const TRUST_SIGNALS_VN = [
+  { icon: '🔒', text: 'Mã hóa SSL 256-bit · Thông tin được bảo mật' },
+  { icon: '✅', text: 'Hoàn tiền 100% trong 7 ngày nếu không hài lòng' },
+  { icon: '👥', text: '1.000+ người dùng tin tưởng Phở Chat' },
+];
+
+const TRUST_SIGNALS_EN = [
+  { icon: '🔒', text: '256-bit SSL encryption · Your data is secure' },
+  { icon: '✅', text: '100% money-back guarantee within 7 days' },
+  { icon: '👥', text: '1,000+ users trust Phở Chat' },
+];
+
 const useStyles = createStyles(({ css, token }) => ({
   backButton: css`
     margin-block-end: ${token.marginMD}px;
@@ -493,6 +506,27 @@ function CheckoutContent() {
       });
     }
   }, [planId, plan, user, form, router]);
+
+  // Track checkout abandonment: fire PostHog event when user leaves without completing
+  useEffect(() => {
+    if (!planId || !plan) return;
+
+    const handleBeforeUnload = () => {
+      if (!showSuccess && !loading) {
+        (window as any).posthog?.capture('checkout_abandoned', {
+          billing_cycle: billingCycle,
+          payment_method: paymentMethod,
+          plan_id: planId,
+          plan_name: plan.name,
+          time_on_page_ms: Date.now() - (window as any).__checkoutEnteredAt,
+        });
+      }
+    };
+
+    (window as any).__checkoutEnteredAt = Date.now();
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [planId, plan, showSuccess, loading, billingCycle, paymentMethod]);
 
   const handleBankTransferSubmit = async (values: any) => {
     if (!plan) return;
@@ -1197,6 +1231,26 @@ function CheckoutContent() {
                         </div>
                       )}
                     </div>
+
+                    {/* Trust Signals — reduces checkout anxiety */}
+                    {!isFreePlan && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {(isGlobalPlan ? TRUST_SIGNALS_EN : TRUST_SIGNALS_VN).map((signal, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              alignItems: 'center',
+                              display: 'flex',
+                              fontSize: 13,
+                              gap: 8,
+                            }}
+                          >
+                            <span>{signal.icon}</span>
+                            <Text type="secondary">{signal.text}</Text>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Security Note */}
                     <div className={styles.securityNote}>

@@ -1,0 +1,1137 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "28136b11-038e-40e7-ad72-171527eebdfe",
+        "data-toc-id": "28136b11-038e-40e7-ad72-171527eebdfe",
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Phân tích user nga.ntv@gmail.com – Sessions, Errors & AI Usage"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "9fdd9e6b-4670-4f56-966b-d261200bceb3",
+        "data-toc-id": "9fdd9e6b-4670-4f56-966b-d261200bceb3",
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Phân tích user: "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "mailto:nga.ntv@gmail.com"
+              }
+            }
+          ],
+          "text": "nga.ntv@gmail.com"
+        }
+      ]
+    },
+    {
+      "type": "blockquote",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Kỳ phân tích: 30 ngày gần nhất · Thời điểm: 2026-03-18"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "1ed05f10-a36a-4955-9bb6-215fb8325b26",
+        "data-toc-id": "1ed05f10-a36a-4955-9bb6-215fb8325b26",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "🤖 AI model usage"
+        }
+      ]
+    },
+    {
+      "type": "ph-query",
+      "attrs": {
+        "height": null,
+        "title": "AI model usage – nga.ntv",
+        "nodeId": "c43a27fd-ec03-4aea-ba23-7c2107b155a6",
+        "__init": null,
+        "children": null,
+        "query": "{\"kind\":\"DataVisualizationNode\",\"source\":{\"kind\":\"HogQLQuery\",\"query\":\"SELECT \\n    timestamp,\\n    properties.selected_model AS model,\\n    properties.message_length AS msg_len,\\n    properties.history_message_count AS history_count,\\n    properties.message_type AS msg_type,\\n    properties.current_topic AS topic,\\n    properties.chat_id AS chat_id\\nFROM events\\nWHERE event = 'send_message'\\n  AND person.properties.email = 'nga.ntv@gmail.com'\\n  AND timestamp >= now() - INTERVAL 30 DAY\\nORDER BY timestamp DESC\\nLIMIT 50\"}}",
+        "isDefaultFilterApplied": false,
+        "showSettings": false
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Nhận xét:"
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "User là "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "power user nghiêm túc"
+                },
+                {
+                  "type": "text",
+                  "text": " – đã gửi 50+ tin nhắn chỉ trong 30 ngày, hầu hết tập trung vào một topic duy nhất: "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "\"Chất lượng sống van tim\""
+                },
+                {
+                  "type": "text",
+                  "text": " (chủ đề y tế)."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "Model ưa dùng:"
+                },
+                {
+                  "type": "text",
+                  "text": " "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "anthropic/claude-opus-4.6"
+                },
+                {
+                  "type": "text",
+                  "text": " / "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "claude-opus-4-6"
+                },
+                {
+                  "type": "text",
+                  "text": " chiếm áp đảo (~90%). Một vài lần dùng "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "claude-sonnet-4.6"
+                },
+                {
+                  "type": "text",
+                  "text": ", "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "openai/gpt-5.4"
+                },
+                {
+                  "type": "text",
+                  "text": ", và "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "pho-pro"
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "History message count rất cao:"
+                },
+                {
+                  "type": "text",
+                  "text": " Cuộc hội thoại đã lên đến "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "387 tin"
+                },
+                {
+                  "type": "text",
+                  "text": " – đây là ngưỡng có thể gây vấn đề về context window và latency."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "Có 2 tin nhắn siêu dài:"
+                },
+                {
+                  "type": "text",
+                  "text": " msg_len = 15.056 và 6.995 ký tự (ngày 17/03). Đây là dấu hiệu user đang paste tài liệu y tế dài vào chat."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "Message types:"
+                },
+                {
+                  "type": "text",
+                  "text": " text, image, và file – user đang upload cả ảnh và tài liệu."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "9a97bfff-1e3c-4b57-a31f-b3a317e8e3e6",
+        "data-toc-id": "9a97bfff-1e3c-4b57-a31f-b3a317e8e3e6",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "⚡ Web Vitals – Hiệu năng tải trang"
+        }
+      ]
+    },
+    {
+      "type": "ph-query",
+      "attrs": {
+        "height": null,
+        "title": "Web Vitals theo ngày – nga.ntv",
+        "nodeId": "7b11f2bc-bd19-4ea4-af81-c173c32b99f8",
+        "__init": null,
+        "children": null,
+        "query": "{\"kind\":\"DataVisualizationNode\",\"source\":{\"kind\":\"HogQLQuery\",\"query\":\"SELECT\\n    toStartOfDay(timestamp) AS day,\\n    round(avg(properties.$web_vitals_LCP_value), 0) AS avg_LCP_ms,\\n    round(avg(properties.$web_vitals_FCP_value), 0) AS avg_FCP_ms,\\n    round(avg(properties.$web_vitals_INP_value), 0) AS avg_INP_ms,\\n    round(avg(properties.$web_vitals_CLS_value), 4) AS avg_CLS,\\n    count() AS samples\\nFROM events\\nWHERE event = '$web_vitals'\\n  AND person.properties.email = 'nga.ntv@gmail.com'\\n  AND timestamp >= now() - INTERVAL 30 DAY\\nGROUP BY day\\nORDER BY day DESC\\nLIMIT 30\"}}",
+        "isDefaultFilterApplied": false,
+        "showSettings": false
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Ngưỡng Google \"Good\":"
+        },
+        {
+          "type": "text",
+          "text": " LCP < 2.500ms · FCP < 1.800ms · INP < 200ms · CLS < 0.1"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Vấn đề nổi bật:"
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "🔴 "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "FCP ngày 17/03 là 13,9 giây"
+                },
+                {
+                  "type": "text",
+                  "text": " – nặng nhất từ trước đến nay. Trùng với ngày Clerk JS load error bùng phát (7 lần). Rất có thể Clerk script block rendering."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "🔴 "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "LCP không ngày nào đạt \"good\""
+                },
+                {
+                  "type": "text",
+                  "text": " – ổn định ở 3–9 giây. Hệ thống tải chậm toàn diện."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "🔴 "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "INP ngày 17/03 là 4.511ms"
+                },
+                {
+                  "type": "text",
+                  "text": " – UI phản hồi cực kỳ chậm, giải thích cho rage-click pattern trong session replays."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "🔴 "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "CLS luôn > 0.1"
+                },
+                {
+                  "type": "text",
+                  "text": " – layout shift xảy ra thường xuyên, có thể do ảnh/component load async không có placeholder."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "24770303-d8f2-4c99-bba9-b094b81f4a00",
+        "data-toc-id": "24770303-d8f2-4c99-bba9-b094b81f4a00",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "🐛 Client-side exceptions"
+        }
+      ]
+    },
+    {
+      "type": "ph-query",
+      "attrs": {
+        "height": null,
+        "title": "Exceptions – nga.ntv",
+        "nodeId": "2f9196ea-1420-4e5f-9d76-eff71a0b01fe",
+        "__init": null,
+        "children": null,
+        "query": "{\"kind\":\"DataVisualizationNode\",\"source\":{\"kind\":\"HogQLQuery\",\"query\":\"SELECT\\n    timestamp,\\n    properties.$exception_level AS level,\\n    properties.$exception_handled AS handled,\\n    properties.$current_url AS url,\\n    properties.$pathname AS path,\\n    properties.$exception_fingerprint AS fingerprint\\nFROM events\\nWHERE event = '$exception'\\n  AND person.properties.email = 'nga.ntv@gmail.com'\\n  AND timestamp >= now() - INTERVAL 30 DAY\\nORDER BY timestamp DESC\\nLIMIT 50\"}}",
+        "isDefaultFilterApplied": false,
+        "showSettings": false
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Tổng cộng: 11 exceptions · Tất cả "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            },
+            {
+              "type": "code"
+            }
+          ],
+          "text": "unhandled"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Hai loại fingerprint phân biệt rõ ràng – đều là "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Clerk JS load failure"
+        },
+        {
+          "type": "text",
+          "text": ":"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "38580ac6-af48-428a-b7a8-6dad3d2a43b6",
+        "data-toc-id": "38580ac6-af48-428a-b7a8-6dad3d2a43b6",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Lỗi 1 – Cụm mới (7 lần, ngày 17/03)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "/error_tracking?issueId=019cfc31-bbcd-7960-8a74-5661d488ffb8"
+              }
+            }
+          ],
+          "text": "Xem issue trong Error Tracking"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "language": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Clerk: Failed to load Clerk, failed to load script:\nhttps://clerk.pho.chat/npm/@clerk/clerk-js@5/dist/clerk.browser.js\ncode=\"failed_to_load_clerk_js\""
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "7 lần trong vòng "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "~3,5 tiếng"
+                },
+                {
+                  "type": "text",
+                  "text": " (14:28 → 17:53 ngày 17/03)."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Đây là "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "cụm lỗi mới nhất"
+                },
+                {
+                  "type": "text",
+                  "text": ", xảy ra mạnh nhất."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "6995b48c-6da4-4b57-adf0-5372024cc390",
+        "data-toc-id": "6995b48c-6da4-4b57-adf0-5372024cc390",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Lỗi 2 – Cụm cũ (4 lần, 07/03 → 15/03)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "/error_tracking?issueId=019cc5ab-752e-7cb1-914f-7bf124636a3e"
+              }
+            }
+          ],
+          "text": "Xem issue trong Error Tracking"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "language": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Clerk: Failed to load Clerk, failed to load script:\nhttps://clerk.pho.chat/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Xuất hiện rải rác 4 lần qua 3 sessions khác nhau."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Root cause:"
+        },
+        {
+          "type": "text",
+          "text": " Script "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "clerk.browser.js"
+        },
+        {
+          "type": "text",
+          "text": " được host trên "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "clerk.pho.chat"
+        },
+        {
+          "type": "text",
+          "text": " – khi CDN/proxy này không phản hồi hoặc timeout, Clerk load thất bại và gây unhandled exception, block cả auth và UI rendering."
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "2ea25099-1c2b-41a2-97e6-333d66448fb3",
+        "data-toc-id": "2ea25099-1c2b-41a2-97e6-333d66448fb3",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "📹 Session replay patterns"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Phân tích từ 20+ sessions trong 30 ngày:"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "e24d8642-f788-4815-944e-51099800bed9",
+        "data-toc-id": "e24d8642-f788-4815-944e-51099800bed9",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "🔴 Abandon checkout (critical)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "User vào "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "/subscription/checkout"
+        },
+        {
+          "type": "text",
+          "text": " nhưng thoát sau < 30 giây, không thanh toán."
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Session "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "019ca95a"
+                },
+                {
+                  "type": "text",
+                  "text": ": Submit checkout rồi thoát lúc 00:00:17"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Session "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "019cd35a"
+                },
+                {
+                  "type": "text",
+                  "text": ": Vào checkout lúc 01:29, click link chat để thoát lúc 01:46"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "Kết luận:"
+                },
+                {
+                  "type": "text",
+                  "text": " User có intent mua nhưng checkout flow có vấn đề hoặc thiếu trust signal."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "3b4b20cf-8db1-4a97-8d19-87f203444857",
+        "data-toc-id": "3b4b20cf-8db1-4a97-8d19-87f203444857",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "🔴 Rage-click trên nút close / sidebar (high frequency)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Close icon và sidebar link không phản hồi, kích hoạt rage-click."
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Gặp trong "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "ít nhất 6 sessions"
+                },
+                {
+                  "type": "text",
+                  "text": " (sessions 2, 6, 18, 20, 22, 23)."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Trùng với INP cao (4.511ms ngày 17/03) – UI render quá chậm."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "42b19789-74d6-4d23-bff1-1e1558d92a7c",
+        "data-toc-id": "42b19789-74d6-4d23-bff1-1e1558d92a7c",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "🟡 Bounce tại "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "/chat"
+        },
+        {
+          "type": "text",
+          "text": " (nhiều sessions)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "User load trang chat nhưng không tương tác gì – chỉ có "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "$pageview"
+        },
+        {
+          "type": "text",
+          "text": " rồi thoát."
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Gặp trong sessions 3, 4, 5, 8, 9, 11, 12."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "d81363a1-d908-4afc-a1fa-059a1de30108",
+        "data-toc-id": "d81363a1-d908-4afc-a1fa-059a1de30108",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "🟡 Signup button confusion"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "User click login/signup nhiều lần trước khi flow khởi động – thiếu feedback UI ngay lập tức."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "7d24ac9f-3f2d-4a60-a66c-66eea84570b5",
+        "data-toc-id": "7d24ac9f-3f2d-4a60-a66c-66eea84570b5",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "⚠️ ChunkLoadError (non-blocking nhưng dai dẳng)"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "ChunkLoadError"
+        },
+        {
+          "type": "text",
+          "text": " xuất hiện background trong sessions 6, 18, 23. User vẫn tiếp tục được nhưng có nguy cơ gặp UI không đầy đủ."
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "1306214d-1344-4eb1-abaa-fdeeb57fdd6d",
+        "data-toc-id": "1306214d-1344-4eb1-abaa-fdeeb57fdd6d",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "📋 Tóm tắt & đề xuất"
+        }
+      ]
+    }
+  ]
+}

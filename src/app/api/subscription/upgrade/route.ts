@@ -18,13 +18,18 @@ import { PLAN_TIERS, calculateProratedAmount } from '@/server/services/billing/p
  * Uses Phở Points system
  */
 const PLAN_PRICING = {
-  // per user
-  // Legacy mappings (for backward compatibility)
-  premium: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
-  starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
-  ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
+  
+  
   // Vietnam Plans
-  medical_beta: { monthly: 83_000, monthlyPoints: 1_000_000, yearly: 999_000 },
+medical_beta: { monthly: 83_000, monthlyPoints: 1_000_000, yearly: 999_000 },
+  
+// per user
+// Legacy mappings (for backward compatibility)
+premium: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
+  
+starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
+  
+  ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
   vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
   vn_free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
   vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },

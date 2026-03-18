@@ -18,19 +18,22 @@ free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
   
 
 
+// Vietnam Plans
+medical_beta: { monthly: 83_000, monthlyPoints: 1_000_000, yearly: 999_000 },
+  
+
+
+
 premium: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
   
 
 
-starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
-  
 
-
-ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 }, 
+starter: { monthly: 0, monthlyPoints: 50_000, yearly: 0 }, 
 
   
-  // Vietnam Plans
-  medical_beta: { monthly: 83_000, monthlyPoints: 1_000_000, yearly: 999_000 },
+  
+  ultimate: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
   vn_basic: { monthly: 69_000, monthlyPoints: 300_000, yearly: 690_000 },
   vn_free: { monthly: 0, monthlyPoints: 50_000, yearly: 0 },
   vn_pro: { monthly: 199_000, monthlyPoints: 2_000_000, yearly: 1_990_000 },
@@ -49,17 +52,20 @@ export const PLAN_TIERS: Record<string, number> = {
 free: 0,
   
 
+// Vietnam Plans (tier hierarchy: free=0 < basic=1 < medical_beta/standard=2 < pro/team=3 < ultra=4)
+medical_beta: 2,
+  
+
+
 premium: 1,
   
 
+
 starter: 0,
-  
-
-ultimate: 2,
 
   
-  // Vietnam Plans (tier hierarchy: free=0 < basic=1 < medical_beta/standard=2 < pro/team=3 < ultra=4)
-  medical_beta: 2,
+  
+  ultimate: 2,
   vn_basic: 1,
   vn_free: 0,
   vn_pro: 3,

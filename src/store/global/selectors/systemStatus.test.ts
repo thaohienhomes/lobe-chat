@@ -38,18 +38,18 @@ describe('systemStatusSelectors', () => {
   describe('basic selectors', () => {
     const s: GlobalState = merge(initialState, {
       status: {
-        hidePWAInstaller: true,
         filePanelWidth: 400,
-        isShowCredit: true,
+        hidePWAInstaller: true,
         inputHeight: 150,
+        isShowCredit: true,
         mobileShowPortal: true,
         mobileShowTopic: true,
         portalWidth: 500,
         sessionsWidth: 300,
         showChatSideBar: true,
         showFilePanel: true,
-        showSystemRole: true,
         showSessionPanel: true,
+        showSystemRole: true,
         threadInputHeight: 100,
         zenMode: false,
       },

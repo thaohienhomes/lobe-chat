@@ -167,11 +167,12 @@ export async function processModelUsage(
         break;
       }
       case 2:
-      case 3:
+      case 3: {
         // Tier 2/3 counters are ONLY incremented by atomicAcquireTierSlot()
         // in checkTierAccess(). Do NOT increment here to avoid double-counting.
         // This was the root cause of the tier limit bypass bug.
         break;
+      }
       // No default
     }
 

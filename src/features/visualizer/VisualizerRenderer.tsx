@@ -21,11 +21,11 @@ const STREAMING_DEBOUNCE_MS = 150;
 const toTitleCase = (s: string): string =>
   s
     .replaceAll('_', ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replaceAll(/\b\w/g, (c) => c.toUpperCase());
 
 /** Strip all <script>...</script> blocks (including inline) from HTML. */
 const stripScripts = (html: string): string =>
-  html.replace(/<script[\s\S]*?<\/script>/gi, '');
+  html.replaceAll(/<script[\S\s]*?<\/script>/gi, '');
 
 /**
  * Custom debounce hook: returns `value` with a delay when `enabled` is true.
@@ -288,7 +288,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
 
       // Strip scripts during streaming (they'll be executed on finalize)
       const code = stripScripts(debouncedCode);
-      postToIframe({ type: 'updateContent', html: code });
+      postToIframe({ html: code, type: 'updateContent' });
     }, [isStreaming, debouncedCode, postToIframe]);
 
     // ── Finalize: when streaming completes, send full code with scripts ───────
@@ -296,7 +296,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     useEffect(() => {
       if (isComplete && !prevIsCompleteRef.current && widgetCode) {
         // Send finalizeContent — morphdom does final diff + scripts re-execute
-        postToIframe({ type: 'finalizeContent', html: widgetCode });
+        postToIframe({ html: widgetCode, type: 'finalizeContent' });
       }
       prevIsCompleteRef.current = isComplete;
     }, [isComplete, widgetCode, postToIframe]);
@@ -327,7 +327,7 @@ const VisualizerRenderer = memo<VisualizerRendererProps>(
     }, [widgetCode, t]);
 
     const handleDownload = useCallback(() => {
-      postToIframe({ type: 'exportContent', title });
+      postToIframe({ title, type: 'exportContent' });
     }, [postToIframe, title]);
 
     const toolbarMenuItems: MenuProps['items'] = useMemo(

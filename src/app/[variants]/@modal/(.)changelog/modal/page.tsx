@@ -3,16 +3,16 @@ import { Suspense } from 'react';
 
 import { serverFeatureFlags } from '@/config/featureFlags';
 import { ChangelogService } from '@/server/services/changelog';
-
-// Intercepting route (modal overlay) — skip static generation to avoid
-// 60s build timeout from ChangelogService network calls on Vercel.
-export const dynamic = 'force-dynamic';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
 import Post from './features/Post';
 import { UpdateChangelogStatusWrapper as UpdateChangelogStatus } from './features/UpdateChangelogStatusWrapper';
 import Loading from './loading';
+
+// Intercepting route (modal overlay) — skip static generation to avoid
+// 60s build timeout from ChangelogService network calls on Vercel.
+export const dynamic = 'force-dynamic';
 
 const Page = async (props: DynamicLayoutProps) => {
   const hideDocs = serverFeatureFlags().hideDocs;

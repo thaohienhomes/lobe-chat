@@ -101,8 +101,8 @@ describe('MigrationV1ToV2', () => {
             K4AVcvGB: {
               content: '2',
               createAt: 1_692_891_912_699,
-              id: 'K4AVcvGB',
               extra: { fromModel: 'gpt-3.5-turbo' },
+              id: 'K4AVcvGB',
               meta: {},
               parentId: 'HD4krtKa',
               role: 'assistant',
@@ -121,8 +121,8 @@ describe('MigrationV1ToV2', () => {
             jF4p75eF: {
               content: '4',
               createAt: 1_693_043_755_952,
-              id: 'jF4p75eF',
               extra: { fromModel: 'gpt-3.5-turbo' },
+              id: 'jF4p75eF',
               meta: {},
               parentId: 'QaAUgIGC',
               role: 'assistant',

@@ -181,13 +181,13 @@ describe('treeNodeToString', () => {
                   {
                     position: {
                       end: {
-                        line: 5,
                         column: 7,
+                        line: 5,
                         offset: 82,
                       },
                       start: {
-                        line: 5,
                         column: 5,
+                        line: 5,
                         offset: 80,
                       },
                     },
@@ -196,26 +196,26 @@ describe('treeNodeToString', () => {
                   },
                   {
                     data: {
-                      hName: 'code',
                       hChildren: [
                         {
                           type: 'text',
                           value: 'a_2',
                         },
                       ],
+                      hName: 'code',
                       hProperties: {
                         className: ['language-math', 'math-inline'],
                       },
                     },
                     position: {
                       end: {
-                        line: 5,
                         column: 14,
+                        line: 5,
                         offset: 89,
                       },
                       start: {
-                        line: 5,
                         column: 7,
+                        line: 5,
                         offset: 82,
                       },
                     },
@@ -225,13 +225,13 @@ describe('treeNodeToString', () => {
                   {
                     position: {
                       end: {
-                        line: 5,
                         column: 17,
+                        line: 5,
                         offset: 92,
                       },
                       start: {
-                        line: 5,
                         column: 14,
+                        line: 5,
                         offset: 89,
                       },
                     },
@@ -240,26 +240,26 @@ describe('treeNodeToString', () => {
                   },
                   {
                     data: {
-                      hName: 'code',
                       hChildren: [
                         {
                           type: 'text',
                           value: 'a_3',
                         },
                       ],
+                      hName: 'code',
                       hProperties: {
                         className: ['language-math', 'math-inline'],
                       },
                     },
                     position: {
                       end: {
-                        line: 5,
                         column: 24,
+                        line: 5,
                         offset: 99,
                       },
                       start: {
-                        line: 5,
                         column: 17,
+                        line: 5,
                         offset: 92,
                       },
                     },
@@ -269,13 +269,13 @@ describe('treeNodeToString', () => {
                   {
                     position: {
                       end: {
-                        line: 5,
                         column: 43,
+                        line: 5,
                         offset: 118,
                       },
                       start: {
-                        line: 5,
                         column: 24,
+                        line: 5,
                         offset: 99,
                       },
                     },
@@ -321,13 +321,13 @@ describe('treeNodeToString', () => {
                   {
                     position: {
                       end: {
-                        line: 6,
                         column: 18,
+                        line: 6,
                         offset: 136,
                       },
                       start: {
-                        line: 6,
                         column: 5,
+                        line: 6,
                         offset: 123,
                       },
                     },

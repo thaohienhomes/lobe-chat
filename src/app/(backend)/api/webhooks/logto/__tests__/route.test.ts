@@ -16,8 +16,8 @@ interface UserDataUpdatedEvent {
     primaryEmail: string;
     primaryPhone: string | null;
     profile: Record<string, unknown>;
-    username: string;
     updatedAt: number;
+    username: string;
   };
   event: string;
   hookId: string;
@@ -35,20 +35,20 @@ interface UserDataUpdatedEvent {
 const userDataUpdatedEvent: UserDataUpdatedEvent = {
   createdAt: '2024-09-07T08:29:09.381Z',
   data: {
-    id: 'uid',
-    primaryEmail: 'user@example.com',
-    name: 'test',
-    username: 'test',
     avatar: null,
-    primaryPhone: null,
-    customData: {},
-    createdAt: 1725440405556,
-    identities: {},
-    lastSignInAt: 1_725_446_291_545,
-    profile: {},
+    createdAt: 1_725_440_405_556,
     applicationId: 'appid',
-    updatedAt: 1725697749337,
+    customData: {},
+    id: 'uid',
+    identities: {},
     isSuspended: false,
+    lastSignInAt: 1_725_446_291_545,
+    name: 'test',
+    primaryEmail: 'user@example.com',
+    primaryPhone: null,
+    profile: {},
+    updatedAt: 1_725_697_749_337,
+    username: 'test',
   },
   event: 'User.Data.Updated',
   hookId: 'hookId',
