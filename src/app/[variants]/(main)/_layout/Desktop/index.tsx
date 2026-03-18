@@ -32,7 +32,8 @@ const TitleBar = isDesktop ? dynamic(() => import('@/features/ElectronTitlebar')
 // SideBar for non-Electron desktop path — lazy-load its subcomponents
 const SideBar = dynamic(() => import('./SideBar'));
 // RegisterHotkeys has no visual output — lazy-load to defer hotkey hook imports
-const RegisterHotkeys = dynamic(() => import('./RegisterHotkeys'));
+// ssr: false required because it uses useSearchParams() via nuqs (usePinnedAgentState)
+const RegisterHotkeys = dynamic(() => import('./RegisterHotkeys'), { ssr: false });
 
 const Layout = memo<PropsWithChildren>(({ children }) => {
   const { isPWA } = usePlatform();

@@ -19,8 +19,20 @@ Target: Mobile ≥ 70, Desktop ≥ 70.
 ## Previous Optimizations (ALREADY DONE — DON'T REDO)
 - NormalModuleReplacementPlugin for mermaid (-2391KB) ✅
 - NormalModuleReplacementPlugin for emoji-mart (-610KB) ✅
-- DeferredStoreInitialization dynamic import was REVERTED — GlobalProvider is RSC, ssr:false not allowed
+- DeferredStoreInitialization: React.lazy() code-split into DeferredStores.tsx ✅ (commit 979a45b0cf)
+  - The `next/dynamic({ ssr: false })` in GlobalProvider RSC was reverted (fb01cd24ae)
+  - But the internal React.lazy split in DeferredStoreInitialization.tsx was KEPT
 - optimizePackageImports expanded — diminishing returns
+
+### Session 2026-03-18 Optimizations
+1. **SideBar lazy-loaded (Desktop)** — `dynamic(() => import('./SideBar'))` in both DesktopLayoutContainer + Desktop/index.tsx. Defers Avatar, TopActions, BottomActions, PinList, @lobehub/ui SideNav and store selectors from critical path.
+2. **TitleBar lazy-loaded (Electron only)** — `isDesktop ? dynamic(...) : () => null`. Avoids bundling electron store, UpdateModal, WinControl for 100% of web users.
+3. **BANNER_HEIGHT extracted to const.ts** — Previously, importing `BANNER_HEIGHT` from `CloudBanner.tsx` pulled in ahooks, react-fast-marquee, createStyles and the entire CloudBanner module into the main chunk. Now imports from `@/features/AlertBanner/const.ts`.
+4. **TITLE_BAR_HEIGHT imported from const.ts** — Same issue as BANNER_HEIGHT — importing from `@/features/ElectronTitlebar` pulled entire ElectronTitlebar module.
+5. **CloudBanner loading placeholder** — Added `loading: () => <div style={{ height: BANNER_HEIGHT }} />` to prevent CLS on both Desktop and Mobile when CloudBanner loads asynchronously.
+6. **useTranslation('error') moved to Phase 2** — Removed from StoreInitialization (Phase 1) to DeferredStores (Phase 2). Error translations are not needed for initial render.
+7. **NavBar lazy-loaded (Mobile)** — `dynamic(() => import('./NavBar'))`. NavBar is position:fixed so no CLS risk. Defers @lobehub/ui/mobile TabBar, createStyles, lucide-react icons.
+8. **RegisterHotkeys lazy-loaded (Desktop)** — Has no visual output, only registers keyboard handlers. Deferred from critical path.
 
 ## Architecture Context
 - Middleware does server-side URL rewrite (NOT client redirect): `/` → `/${variant}/`
