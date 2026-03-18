@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { ReactNode, Suspense } from 'react';
 
 import { LobeAnalyticsProviderWrapper } from '@/components/Analytics/LobeAnalyticsProviderWrapper';
@@ -12,17 +11,12 @@ import { getAntdLocale } from '@/utils/locale';
 
 import AntdV5MonkeyPatch from './AntdV5MonkeyPatch';
 import AppTheme from './AppTheme';
+import DeferredStoreInitialization from './DeferredStoreInitialization';
 import ImportSettings from './ImportSettings';
 import Locale from './Locale';
 import QueryProvider from './Query';
 import StoreInitialization from './StoreInitialization';
 import StyleRegistry from './StyleRegistry';
-
-// Phase 2 stores are non-critical — dynamic import creates separate chunk
-// reducing initial JS bundle and TBT (Total Blocking Time)
-const DeferredStoreInitialization = dynamic(() => import('./DeferredStoreInitialization'), {
-  ssr: false,
-});
 
 interface GlobalLayoutProps {
   appearance: string;
