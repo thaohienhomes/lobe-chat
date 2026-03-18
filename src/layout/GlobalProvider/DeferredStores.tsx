@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { enableNextAuth } from '@/const/auth';
 import { useAgentStore } from '@/store/agent';
@@ -20,6 +21,11 @@ import { authSelectors } from '@/store/user/selectors';
  * during initial page load.
  */
 const DeferredStores = memo(() => {
+  // Prefetch error namespace so error boundaries can display translated messages.
+  // Moved from Phase 1 (StoreInitialization) to Phase 2 since errors are uncommon
+  // and this avoids blocking the critical render path.
+  useTranslation('error');
+
   const { serverConfig } = useServerConfigStore();
 
   const [isLogin, isSignedIn, useInitUserState] = useUserStore((s) => [

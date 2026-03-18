@@ -7,8 +7,9 @@ import { HotkeysProvider } from 'react-hotkeys-hook';
 import { Flexbox } from 'react-layout-kit';
 
 import { isDesktop } from '@/const/version';
-import { BANNER_HEIGHT } from '@/features/AlertBanner/CloudBanner';
-import TitleBar, { TITLE_BAR_HEIGHT } from '@/features/ElectronTitlebar';
+// Import constants from dedicated const files to avoid pulling in full component modules
+import { BANNER_HEIGHT } from '@/features/AlertBanner/const';
+import { TITLE_BAR_HEIGHT } from '@/features/ElectronTitlebar/const';
 import { usePlatform } from '@/hooks/usePlatform';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { useUserStore } from '@/store/user';
@@ -17,14 +18,20 @@ import { HotkeyScopeEnum } from '@/types/hotkey';
 
 import DesktopLayoutContainer from './DesktopLayoutContainer';
 import RegisterHotkeys from './RegisterHotkeys';
-import SideBar from './SideBar';
 
-const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'));
+// Lazy-load components not needed for initial LCP paint
+// Reserve exact banner height while loading to prevent CLS
+const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'), {
+  loading: () => <div style={{ height: BANNER_HEIGHT }} />,
+});
 const HotkeyHelperPanel = dynamic(() => import('@/features/HotkeyHelperPanel'), { ssr: false });
 const OnboardingModal = dynamic(() => import('@/features/Onboarding/OnboardingModal'), {
   ssr: false,
 });
-
+// TitleBar only renders in Electron desktop — lazy-load to avoid bundling electron store
+const TitleBar = isDesktop ? dynamic(() => import('@/features/ElectronTitlebar')) : () => null;
+// SideBar for non-Electron desktop path — lazy-load its subcomponents
+const SideBar = dynamic(() => import('./SideBar'));
 
 const Layout = memo<PropsWithChildren>(({ children }) => {
   const { isPWA } = usePlatform();
@@ -37,8 +44,6 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
   const isLogin = useUserStore(authSelectors.isLogin);
   const isUserStateInit = useUserStore((s) => s.isUserStateInit);
   const isOnboard = useUserStore((s) => s.isOnboard);
-
-
 
   useEffect(() => {
     // Show onboarding only for logged-in users who haven't completed onboarding
@@ -88,7 +93,6 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
 
       {/* Onboarding Modal for first-time users */}
       <OnboardingModal onComplete={handleOnboardingComplete} open={showOnboarding} />
-
     </HotkeysProvider>
   );
 });

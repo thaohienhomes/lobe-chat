@@ -1,9 +1,13 @@
 import { useTheme } from 'antd-style';
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { PropsWithChildren, memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import SideBar from './SideBar';
+// Lazy-load SideBar — it's not part of the LCP element (the main content area is).
+// This defers parsing/evaluating SideBar + its subcomponents (Avatar, TopActions,
+// BottomActions, PinList) and their dependencies (@lobehub/ui SideNav, store selectors).
+const SideBar = dynamic(() => import('./SideBar'));
 
 const DesktopLayoutContainer = memo<PropsWithChildren>(({ children }) => {
   const theme = useTheme();

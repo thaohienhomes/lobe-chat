@@ -5,12 +5,16 @@ import { usePathname } from 'next/navigation';
 import { PropsWithChildren, memo } from 'react';
 
 import { withSuspense } from '@/components/withSuspense';
+import { BANNER_HEIGHT } from '@/features/AlertBanner/const';
 import { useShowMobileWorkspace } from '@/hooks/useShowMobileWorkspace';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
 import NavBar from './NavBar';
 
-const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'));
+// Reserve exact banner height while loading to prevent CLS (layout shift)
+const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'), {
+  loading: () => <div style={{ height: BANNER_HEIGHT }} />,
+});
 const MOBILE_NAV_ROUTES = new Set([
   '/chat',
   '/discover',

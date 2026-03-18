@@ -14,7 +14,9 @@ import { LOBE_CHAT_CLOUD } from '@/const/branding';
 import { OFFICIAL_URL, UTM_SOURCE } from '@/const/url';
 import { isOnServerSide } from '@/utils/env';
 
-export const BANNER_HEIGHT = 40;
+import { BANNER_HEIGHT } from './const';
+
+
 
 const useStyles = createStyles(({ css, token, stylish, cx, isDarkMode }) => ({
   background: cx(
@@ -89,3 +91,5 @@ const CloudBanner = memo<{ mobile?: boolean }>(({ mobile }) => {
 });
 
 export default CloudBanner;
+
+export {BANNER_HEIGHT} from './const';

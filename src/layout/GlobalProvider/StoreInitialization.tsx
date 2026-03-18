@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { createStoreUpdater } from 'zustand-utils';
 
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -24,9 +23,6 @@ import { useUserStore } from '@/store/user';
  * to DeferredStoreInitialization to avoid blocking FCP/LCP.
  */
 const StoreInitialization = memo(() => {
-  // prefetch error ns to avoid don't show error content correctly
-  useTranslation('error');
-
   const router = useRouter();
 
   // init the system preference (fast — reads from localStorage)
