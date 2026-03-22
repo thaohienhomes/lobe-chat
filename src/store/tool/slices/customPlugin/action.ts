@@ -80,10 +80,15 @@ export const createCustomPluginSlice: StateCreator<
       const meta = pluginSelectors.getPluginMetaById(id)(get());
       const name = pluginHelpers.getPluginTitle(meta);
 
-      notification.error({
-        description: t(`error.${err.message}`, { error: err.cause, ns: 'plugin' }),
-        message: t('error.reinstallError', { name, ns: 'plugin' }),
-      });
+      // Don't show notification for auth errors — handled at app level, prevents notification spam
+      const isAuthError =
+        err.message === 'UNAUTHORIZED' || (err as any)?.data?.code === 'UNAUTHORIZED';
+      if (!isAuthError) {
+        notification.error({
+          description: t(`error.${err.message}`, { error: err.cause, ns: 'plugin' }),
+          message: t('error.reinstallError', { name, ns: 'plugin' }),
+        });
+      }
     }
   },
   uninstallCustomPlugin: async (id) => {

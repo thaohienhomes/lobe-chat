@@ -107,10 +107,15 @@ export const createPluginStoreSlice: StateCreator<
 
       updateInstallLoadingState(name, undefined);
 
-      notification.error({
-        description: t(`error.${err.message}`, { ns: 'plugin' }),
-        message: t('error.installError', { name: plugin.title, ns: 'plugin' }),
-      });
+      // Don't show notification for auth errors — handled at app level, prevents notification spam
+      const isAuthError =
+        err.message === 'UNAUTHORIZED' || (err as any)?.data?.code === 'UNAUTHORIZED';
+      if (!isAuthError) {
+        notification.error({
+          description: t(`error.${err.message}`, { ns: 'plugin' }),
+          message: t('error.installError', { name: plugin.title, ns: 'plugin' }),
+        });
+      }
     }
   },
   installPlugin: async (name, type = 'plugin') => {
@@ -155,10 +160,15 @@ export const createPluginStoreSlice: StateCreator<
 
       updateInstallLoadingState(name, undefined);
 
-      notification.error({
-        description: t(`error.${err.message}`, { ns: 'plugin' }),
-        message: t('error.installError', { name: plugin.title || name, ns: 'plugin' }),
-      });
+      // Don't show notification for auth errors — handled at app level, prevents notification spam
+      const isAuthError =
+        err.message === 'UNAUTHORIZED' || (err as any)?.data?.code === 'UNAUTHORIZED';
+      if (!isAuthError) {
+        notification.error({
+          description: t(`error.${err.message}`, { ns: 'plugin' }),
+          message: t('error.installError', { name: plugin.title || name, ns: 'plugin' }),
+        });
+      }
     }
   },
   installPlugins: async (plugins) => {

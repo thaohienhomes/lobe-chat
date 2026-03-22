@@ -226,6 +226,7 @@ export default {
     updateSuccess: '插件设置更新成功',
   },
   error: {
+    UNAUTHORIZED: '用户未登录，请先登录后再试',
     fetchError: '请求该 manifest 链接失败，请确保链接的有效性，并检查链接是否允许跨域访问',
     installError: '插件 {{name}} 安装失败',
     manifestInvalid: 'manifest 不符合规范，校验结果: \n\n {{error}}',

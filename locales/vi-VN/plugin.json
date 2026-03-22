@@ -225,6 +225,7 @@
     "updateSuccess": "Cập nhật cấu hình plugin thành công"
   },
   "error": {
+    "UNAUTHORIZED": "Người dùng chưa đăng nhập, vui lòng đăng nhập trước",
     "fetchError": "Yêu cầu lấy liên kết manifest thất bại, vui lòng đảm bảo liên kết hợp lệ và cho phép truy cập chéo",
     "installError": "Cài đặt plugin {{name}} thất bại",
     "manifestInvalid": "Manifest không hợp lệ, kết quả kiểm tra: \n\n {{error}}",
